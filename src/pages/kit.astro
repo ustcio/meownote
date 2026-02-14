@@ -5,200 +5,198 @@ import Navigation from '../components/Navigation.astro';
 
 <Layout title="Kit - Meow Note">
   <Navigation />
-  <div class="page active" id="page-kit">
-    <main class="kit-main-content">
-      <div class="kit-page-header">
-        <div class="page-badge">Utility Toolkit</div>
-        <h1><span>Super</span> <span class="gradient">Kit</span></h1>
-        <p>专业工具集 · 28款实用工具助力您的日常工作</p>
-      </div>
+  <main class="kit-main-content">
+    <div class="kit-page-header">
+      <div class="page-badge">Utility Toolkit</div>
+      <h1><span>Super</span> <span class="gradient">Kit</span></h1>
+      <p>专业工具集 · 28款实用工具助力您的日常工作</p>
+    </div>
 
-      <div class="kit-layout">
-        <!-- 左侧分类导航 -->
-        <aside class="kit-sidebar">
-          <div class="kit-sidebar-title">工具分类</div>
-          <ul class="kit-category-list">
-            <li class="kit-category-item">
-              <button class="kit-category-btn active" data-category="all" onclick="filterKitCategory('all')">
-                <span class="kit-category-icon">📦</span>
-                <span>全部工具</span>
-                <span class="kit-category-count">28</span>
-              </button>
-            </li>
-            <li class="kit-category-item">
-              <button class="kit-category-btn" data-category="network" onclick="filterKitCategory('network')">
-                <span class="kit-category-icon">🌐</span>
-                <span>网络工具</span>
-                <span class="kit-category-count">7</span>
-              </button>
-            </li>
-            <li class="kit-category-item">
-              <button class="kit-category-btn" data-category="security" onclick="filterKitCategory('security')">
-                <span class="kit-category-icon">🔒</span>
-                <span>安全工具</span>
-                <span class="kit-category-count">3</span>
-              </button>
-            </li>
-            <li class="kit-category-item">
-              <button class="kit-category-btn" data-category="finance" onclick="filterKitCategory('finance')">
-                <span class="kit-category-icon">💰</span>
-                <span>金融理财</span>
-                <span class="kit-category-count">3</span>
-              </button>
-            </li>
-            <li class="kit-category-item">
-              <button class="kit-category-btn" data-category="converter" onclick="filterKitCategory('converter')">
-                <span class="kit-category-icon">🔄</span>
-                <span>转换工具</span>
-                <span class="kit-category-count">5</span>
-              </button>
-            </li>
-            <li class="kit-category-item">
-              <button class="kit-category-btn" data-category="generator" onclick="filterKitCategory('generator')">
-                <span class="kit-category-icon">⚡</span>
-                <span>生成工具</span>
-                <span class="kit-category-count">4</span>
-              </button>
-            </li>
-            <li class="kit-category-item">
-              <button class="kit-category-btn" data-category="calculator" onclick="filterKitCategory('calculator')">
-                <span class="kit-category-icon">🔢</span>
-                <span>计算工具</span>
-                <span class="kit-category-count">4</span>
-              </button>
-            </li>
-            <li class="kit-category-item">
-              <button class="kit-category-btn" data-category="fun" onclick="filterKitCategory('fun')">
-                <span class="kit-category-icon">🎮</span>
-                <span>趣味工具</span>
-                <span class="kit-category-count">2</span>
-              </button>
-            </li>
-          </ul>
-        </aside>
-
-        <!-- 右侧工具区域 -->
-        <div class="kit-main">
-          <div class="kit-tools-grid" id="kit-tools-grid">
-        <!-- 1. Speed Test -->
-        <div class="kit-tool-window" data-category="network">
-          <div class="kit-tool-header">
-            <div class="kit-tool-header-left">
-              <div class="kit-tool-dots">
-                <div class="kit-tool-dot red"></div>
-                <div class="kit-tool-dot yellow"></div>
-                <div class="kit-tool-dot green"></div>
-              </div>
-              <div class="kit-tool-title">
-                <div class="kit-tool-icon cyan">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polyline>
-                  </svg>
-                </div>
-                <span>网速测试</span>
-              </div>
-            </div>
-            <span class="kit-status-badge success" id="speed-status" style="display: none;">完成</span>
-          </div>
-          <div class="kit-tool-body">
-            <div class="kit-speed-gauge">
-              <div class="kit-gauge-item">
-                <div class="kit-gauge-circle" id="download-gauge">
-                  <span class="kit-gauge-value" id="download-speed">--</span>
-                </div>
-                <div class="kit-gauge-label">下载速度</div>
-                <div class="kit-gauge-unit">Mbps</div>
-              </div>
-              <div class="kit-gauge-item">
-                <div class="kit-gauge-circle purple" id="upload-gauge">
-                  <span class="kit-gauge-value" id="upload-speed">--</span>
-                </div>
-                <div class="kit-gauge-label">上传速度</div>
-                <div class="kit-gauge-unit">Mbps</div>
-              </div>
-              <div class="kit-gauge-item">
-                <div class="kit-gauge-circle green" id="ping-gauge">
-                  <span class="kit-gauge-value" id="ping-value">--</span>
-                </div>
-                <div class="kit-gauge-label">延迟</div>
-                <div class="kit-gauge-unit">ms</div>
-              </div>
-            </div>
-            <button class="kit-btn kit-btn-primary" id="speed-test-btn" onclick="runSpeedTest()" style="width: 100%;">
-              开始测速
+    <div class="kit-layout">
+      <!-- 左侧分类导航 -->
+      <aside class="kit-sidebar">
+        <div class="kit-sidebar-title">工具分类</div>
+        <ul class="kit-category-list">
+          <li class="kit-category-item">
+            <button class="kit-category-btn active" data-category="all" onclick="filterKitCategory('all')">
+              <span class="kit-category-icon">📦</span>
+              <span>全部工具</span>
+              <span class="kit-category-count">28</span>
             </button>
-          </div>
-        </div>
+          </li>
+          <li class="kit-category-item">
+            <button class="kit-category-btn" data-category="network" onclick="filterKitCategory('network')">
+              <span class="kit-category-icon">🌐</span>
+              <span>网络工具</span>
+              <span class="kit-category-count">7</span>
+            </button>
+          </li>
+          <li class="kit-category-item">
+            <button class="kit-category-btn" data-category="security" onclick="filterKitCategory('security')">
+              <span class="kit-category-icon">🔒</span>
+              <span>安全工具</span>
+              <span class="kit-category-count">3</span>
+            </button>
+          </li>
+          <li class="kit-category-item">
+            <button class="kit-category-btn" data-category="finance" onclick="filterKitCategory('finance')">
+              <span class="kit-category-icon">💰</span>
+              <span>金融理财</span>
+              <span class="kit-category-count">3</span>
+            </button>
+          </li>
+          <li class="kit-category-item">
+            <button class="kit-category-btn" data-category="converter" onclick="filterKitCategory('converter')">
+              <span class="kit-category-icon">🔄</span>
+              <span>转换工具</span>
+              <span class="kit-category-count">5</span>
+            </button>
+          </li>
+          <li class="kit-category-item">
+            <button class="kit-category-btn" data-category="generator" onclick="filterKitCategory('generator')">
+              <span class="kit-category-icon">⚡</span>
+              <span>生成工具</span>
+              <span class="kit-category-count">4</span>
+            </button>
+          </li>
+          <li class="kit-category-item">
+            <button class="kit-category-btn" data-category="calculator" onclick="filterKitCategory('calculator')">
+              <span class="kit-category-icon">🔢</span>
+              <span>计算工具</span>
+              <span class="kit-category-count">4</span>
+            </button>
+          </li>
+          <li class="kit-category-item">
+            <button class="kit-category-btn" data-category="fun" onclick="filterKitCategory('fun')">
+              <span class="kit-category-icon">🎮</span>
+              <span>趣味工具</span>
+              <span class="kit-category-count">2</span>
+            </button>
+          </li>
+        </ul>
+      </aside>
 
-        <!-- 2. Ping Test -->
-        <div class="kit-tool-window" data-category="network">
-          <div class="kit-tool-header">
-            <div class="kit-tool-header-left">
-              <div class="kit-tool-dots">
-                <div class="kit-tool-dot red"></div>
-                <div class="kit-tool-dot yellow"></div>
-                <div class="kit-tool-dot green"></div>
+      <!-- 右侧工具区域 -->
+      <div class="kit-main">
+        <div class="kit-tools-grid" id="kit-tools-grid">
+          <!-- 1. Speed Test -->
+          <div class="kit-tool-window" data-category="network">
+            <div class="kit-tool-header">
+              <div class="kit-tool-header-left">
+                <div class="kit-tool-dots">
+                  <div class="kit-tool-dot red"></div>
+                  <div class="kit-tool-dot yellow"></div>
+                  <div class="kit-tool-dot green"></div>
+                </div>
+                <div class="kit-tool-title">
+                  <div class="kit-tool-icon cyan">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polyline>
+                    </svg>
+                  </div>
+                  <span>网速测试</span>
+                </div>
               </div>
-              <div class="kit-tool-title">
-                <div class="kit-tool-icon green">📡</div>
-                Ping 测试
+              <span class="kit-status-badge success" id="speed-status" style="display: none;">完成</span>
+            </div>
+            <div class="kit-tool-body">
+              <div class="kit-speed-gauge">
+                <div class="kit-gauge-item">
+                  <div class="kit-gauge-circle" id="download-gauge">
+                    <span class="kit-gauge-value" id="download-speed">--</span>
+                  </div>
+                  <div class="kit-gauge-label">下载速度</div>
+                  <div class="kit-gauge-unit">Mbps</div>
+                </div>
+                <div class="kit-gauge-item">
+                  <div class="kit-gauge-circle purple" id="upload-gauge">
+                    <span class="kit-gauge-value" id="upload-speed">--</span>
+                  </div>
+                  <div class="kit-gauge-label">上传速度</div>
+                  <div class="kit-gauge-unit">Mbps</div>
+                </div>
+                <div class="kit-gauge-item">
+                  <div class="kit-gauge-circle green" id="ping-gauge">
+                    <span class="kit-gauge-value" id="ping-value">--</span>
+                  </div>
+                  <div class="kit-gauge-label">延迟</div>
+                  <div class="kit-gauge-unit">ms</div>
+                </div>
               </div>
+              <button class="kit-btn kit-btn-primary" id="speed-test-btn" onclick="runSpeedTest()" style="width: 100%;">
+                开始测速
+              </button>
             </div>
           </div>
-          <div class="kit-tool-body">
-            <div class="kit-input-group">
-              <label>目标主机</label>
-              <div class="kit-input-row">
-                <input type="text" class="kit-input-field" id="ping-host" placeholder="例如: google.com">
-                <button class="kit-btn kit-btn-primary" onclick="runPingTest()">Ping</button>
-              </div>
-            </div>
-            <div class="kit-result-box" id="ping-results">
-              <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
-                输入主机名或IP地址开始测试
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- 3. IPv4/IPv6 Detection -->
-        <div class="kit-tool-window" data-category="network">
-          <div class="kit-tool-header">
-            <div class="kit-tool-header-left">
-              <div class="kit-tool-dots">
-                <div class="kit-tool-dot red"></div>
-                <div class="kit-tool-dot yellow"></div>
-                <div class="kit-tool-dot green"></div>
+          <!-- 2. Ping Test -->
+          <div class="kit-tool-window" data-category="network">
+            <div class="kit-tool-header">
+              <div class="kit-tool-header-left">
+                <div class="kit-tool-dots">
+                  <div class="kit-tool-dot red"></div>
+                  <div class="kit-tool-dot yellow"></div>
+                  <div class="kit-tool-dot green"></div>
+                </div>
+                <div class="kit-tool-title">
+                  <div class="kit-tool-icon green">📡</div>
+                  Ping 测试
+                </div>
               </div>
-              <div class="kit-tool-title">
-                <div class="kit-tool-icon purple">🌐</div>
-                IPv4/IPv6 检测
+            </div>
+            <div class="kit-tool-body">
+              <div class="kit-input-group">
+                <label>目标主机</label>
+                <div class="kit-input-row">
+                  <input type="text" class="kit-input-field" id="ping-host" placeholder="例如: google.com">
+                  <button class="kit-btn kit-btn-primary" onclick="runPingTest()">Ping</button>
+                </div>
+              </div>
+              <div class="kit-result-box" id="ping-results">
+                <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                  输入主机名或IP地址开始测试
+                </div>
               </div>
             </div>
           </div>
-          <div class="kit-tool-body">
-            <button class="kit-btn kit-btn-primary" onclick="detectIPKit()" style="width: 100%; margin-bottom: 1rem;">检测我的 IP</button>
-            <div class="kit-result-box" id="ip-results-kit">
-              <div class="kit-result-item">
-                <span class="kit-result-label">IPv4 地址</span>
-                <span class="kit-result-value" id="ipv4-addr">--</span>
+
+          <!-- 3. IPv4/IPv6 Detection -->
+          <div class="kit-tool-window" data-category="network">
+            <div class="kit-tool-header">
+              <div class="kit-tool-header-left">
+                <div class="kit-tool-dots">
+                  <div class="kit-tool-dot red"></div>
+                  <div class="kit-tool-dot yellow"></div>
+                  <div class="kit-tool-dot green"></div>
+                </div>
+                <div class="kit-tool-title">
+                  <div class="kit-tool-icon purple">🌐</div>
+                  IPv4/IPv6 检测
+                </div>
               </div>
-              <div class="kit-result-item">
-                <span class="kit-result-label">IPv6 地址</span>
-                <span class="kit-result-value" id="ipv6-addr">--</span>
-              </div>
-              <div class="kit-result-item">
-                <span class="kit-result-label">IPv6 支持</span>
-                <span class="kit-result-value" id="ipv6-support">--</span>
+            </div>
+            <div class="kit-tool-body">
+              <button class="kit-btn kit-btn-primary" onclick="detectIPKit()" style="width: 100%; margin-bottom: 1rem;">检测我的 IP</button>
+              <div class="kit-result-box" id="ip-results-kit">
+                <div class="kit-result-item">
+                  <span class="kit-result-label">IPv4 地址</span>
+                  <span class="kit-result-value" id="ipv4-addr">--</span>
+                </div>
+                <div class="kit-result-item">
+                  <span class="kit-result-label">IPv6 地址</span>
+                  <span class="kit-result-value" id="ipv6-addr">--</span>
+                </div>
+                <div class="kit-result-item">
+                  <span class="kit-result-label">IPv6 支持</span>
+                  <span class="kit-result-value" id="ipv6-support">--</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-        </div>
-      </div>
-    </main>
-  </div>
+    </div>
+  </main>
 </Layout>
 
 <style>
@@ -578,104 +576,11 @@ import Navigation from '../components/Navigation.astro';
 </style>
 
 <script>
-  // Simple kit functionality
-  function filterKitCategory(category: string) {
-    // Remove active class from all buttons
-    document.querySelectorAll('.kit-category-btn').forEach(btn => {
-      btn.classList.remove('active');
-    });
-
-    // Add active class to selected button
-    const selectedBtn = document.querySelector(`.kit-category-btn[data-category="${category}"]`);
-    if (selectedBtn) {
-      selectedBtn.classList.add('active');
-    }
-
-    // Filter tools
-    const tools = document.querySelectorAll('.kit-tool-window');
-    tools.forEach(tool => {
-      if (category === 'all' || tool.getAttribute('data-category') === category) {
-        (tool as HTMLElement).style.display = 'block';
-      } else {
-        (tool as HTMLElement).style.display = 'none';
-      }
-    });
-  }
-
-  function runSpeedTest() {
-    // Simulate speed test
-    const downloadSpeed = document.getElementById('download-speed');
-    const uploadSpeed = document.getElementById('upload-speed');
-    const pingValue = document.getElementById('ping-value');
-    const speedStatus = document.getElementById('speed-status');
-
-    // Show loading
-    if (downloadSpeed) downloadSpeed.textContent = '...';
-    if (uploadSpeed) uploadSpeed.textContent = '...';
-    if (pingValue) pingValue.textContent = '...';
-    if (speedStatus) speedStatus.style.display = 'none';
-
-    // Simulate test completion
-    setTimeout(() => {
-      if (downloadSpeed) downloadSpeed.textContent = (Math.random() * 100 + 50).toFixed(2);
-      if (uploadSpeed) uploadSpeed.textContent = (Math.random() * 50 + 20).toFixed(2);
-      if (pingValue) pingValue.textContent = (Math.random() * 50 + 10).toFixed(2);
-      if (speedStatus) speedStatus.style.display = 'inline-block';
-    }, 2000);
-  }
-
-  function runPingTest() {
-    const hostInput = document.getElementById('ping-host') as HTMLInputElement;
-    const results = document.getElementById('ping-results');
-
-    if (!hostInput || !results) return;
-
-    const host = hostInput.value;
-
-    if (!host) {
-      results.innerHTML = `
-        <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
-          请输入主机名或IP地址
-        </div>
-      `;
-      return;
-    }
-
-    // Simulate ping test
-    results.innerHTML = `
-      <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
-        Pinging ${host}...
-      </div>
-    `;
-
-    // Simulate test completion
-    setTimeout(() => {
-      if (results) {
-        results.innerHTML = `
-          <div style="padding: 1rem;">
-            <p>Pinging ${host} [192.168.1.1] with 32 bytes of data:</p>
-            <p>Reply from 192.168.1.1: bytes=32 time=10ms TTL=64</p>
-            <p>Reply from 192.168.1.1: bytes=32 time=12ms TTL=64</p>
-            <p>Reply from 192.168.1.1: bytes=32 time=9ms TTL=64</p>
-            <p>Reply from 192.168.1.1: bytes=32 time=11ms TTL=64</p>
-            <p style="margin-top: 1rem;">Ping statistics for 192.168.1.1:</p>
-            <p>Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),</p>
-            <p>Approximate round trip times in milli-seconds:</p>
-            <p>Minimum = 9ms, Maximum = 12ms, Average = 10.5ms</p>
-          </div>
-        `;
-      }
-    }, 1500);
-  }
-
-  function detectIPKit() {
-    const ipv4Addr = document.getElementById('ipv4-addr');
-    const ipv6Addr = document.getElementById('ipv6-addr');
-    const ipv6Support = document.getElementById('ipv6-support');
-
-    // Simulate IP detection
-    if (ipv4Addr) ipv4Addr.textContent = '192.168.1.1';
-    if (ipv6Addr) ipv6Addr.textContent = '2001:0db8:85a3:0000:0000:8a2e:0370:7334';
-    if (ipv6Support) ipv6Support.textContent = '支持';
-  }
+  // Kit functionality is handled by global JavaScript in main.js
+  // This script ensures proper initialization
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Kit page loaded');
+    // Initialize with all tools visible
+    filterKitCategory('all');
+  });
 </script>

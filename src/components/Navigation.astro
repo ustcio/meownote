@@ -25,7 +25,7 @@ const { logo = "/logo.mp4" } = Astro.props;
       </ul>
       
       <div class="nav-actions">
-        <button class="theme-toggle" onclick="toggleTheme()">
+        <button class="theme-toggle" onclick="alert('Theme switching coming soon')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
@@ -40,36 +40,21 @@ const { logo = "/logo.mp4" } = Astro.props;
         </button>
         
         <div class="lang-switcher">
-          <button class="lang-btn" onclick="toggleLangDropdown()">
+          <button class="lang-btn" onclick="document.getElementById('lang-dropdown').classList.toggle('show')">
             <span id="current-lang">EN</span>
           </button>
           <div class="lang-dropdown" id="lang-dropdown">
-            <div class="lang-option active" onclick="switchLang('en')">English</div>
-            <div class="lang-option" onclick="switchLang('zh')">中文</div>
+            <div class="lang-option active" onclick="alert('Language switching coming soon')">English</div>
+            <div class="lang-option" onclick="alert('Language switching coming soon')">中文</div>
           </div>
         </div>
         
         <div id="auth-buttons" style="display: flex; gap: 1rem;">
-          <button class="nav-login" onclick="openModal('login')">Log In</button>
-          <button class="nav-cta" onclick="openModal('signup')">Get Started</button>
+          <button class="nav-login" onclick="event.preventDefault(); alert('Login functionality coming soon')">Log In</button>
+          <button class="nav-cta" onclick="event.preventDefault(); alert('Signup functionality coming soon')">Get Started</button>
         </div>
         
-        <div class="user-menu" id="user-menu" style="display: none;">
-          <div class="user-avatar" onclick="toggleUserDropdown()">
-            <span id="user-initial">U</span>
-          </div>
-          <div class="user-dropdown" id="user-dropdown">
-            <div class="user-info">
-              <div id="user-name-display">User</div>
-              <div class="user-email" id="user-email-display">user@example.com</div>
-            </div>
-            <a class="user-dropdown-item" onclick="showPage('profile')">Profile</a>
-            <a class="user-dropdown-item" onclick="showPage('settings')">Settings</a>
-            <a class="user-dropdown-item" onclick="logout()">Logout</a>
-          </div>
-        </div>
-        
-        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <button class="mobile-menu-btn" onclick="document.getElementById('mobile-nav').classList.toggle('show')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -81,12 +66,12 @@ const { logo = "/logo.mp4" } = Astro.props;
   </div>
   
   <div class="mobile-nav" id="mobile-nav">
-    <a href="/" onclick="showPage('home')">Home</a>
-    <a href="/research" onclick="showPage('research')">Research</a>
-    <a href="/chatbot" onclick="showPage('chatbot')">ChatBot</a>
-    <a href="/kit" onclick="showPage('kit')">Kit</a>
-    <a href="/about" onclick="showPage('about')">About</a>
-    <a onclick="openModal('login')">Log In</a>
+    <a href="/">Home</a>
+    <a href="/research">Research</a>
+    <a href="/chatbot">ChatBot</a>
+    <a href="/kit">Kit</a>
+    <a href="/about">About</a>
+    <a href="#" onclick="event.preventDefault(); alert('Login functionality coming soon')">Log In</a>
   </div>
 </nav>
 

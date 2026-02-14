@@ -5,7 +5,6 @@ import Navigation from '../components/Navigation.astro';
 
 <Layout title="ChatBot - Meow Note">
   <Navigation />
-  <div class="page active" id="page-chatbot">
     <section class="chatbot-hero">
       <h1>AI <span class="gradient">ChatBot</span></h1>
       <p>Experience the power of advanced AI. Ask anything and get intelligent responses powered by Qwen.</p>
@@ -83,7 +82,6 @@ import Navigation from '../components/Navigation.astro';
         </div>
       </div>
     </div>
-  </div>
 </Layout>
 
 <style>
@@ -399,115 +397,9 @@ import Navigation from '../components/Navigation.astro';
 </style>
 
 <script>
-  // Simple chatbot functionality
-  function toggleAISelector(type: string) {
-    const dropdown = document.getElementById(`${type}-ai-dropdown`);
-    if (dropdown) {
-      dropdown.classList.toggle('show');
-    }
-  }
-
-  function selectAI(type: string, ai: string) {
-    const options = document.querySelectorAll(`.ai-option[data-ai="${ai}"]`);
-    options.forEach(option => {
-      option.classList.add('active');
-    });
-
-    // Remove active class from other options
-    document.querySelectorAll('.ai-option:not([data-ai="${ai}"])').forEach(option => {
-      option.classList.remove('active');
-    });
-
-    // Update selected AI in UI
-    const aiName = document.getElementById(`${type}-ai-name`);
-    const aiIcon = document.getElementById(`${type}-ai-icon`);
-    
-    if (ai === 'doubao-pro' && aiName && aiIcon) {
-      aiName.textContent = '豆包 2.0 Pro';
-      aiIcon.textContent = '⚡';
-    } else if (ai === 'qwen' && aiName && aiIcon) {
-      aiName.textContent = 'Qwen';
-      aiIcon.textContent = '🔮';
-    } else if (ai === 'doubao-code' && aiName && aiIcon) {
-      aiName.textContent = '豆包 2.0 Code';
-      aiIcon.textContent = '⌨️';
-    }
-
-    // Close dropdown
-    const dropdown = document.getElementById(`${type}-ai-dropdown`);
-    if (dropdown) {
-      dropdown.classList.remove('show');
-    }
-  }
-
-  function handleChatKeypress(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      sendChatMessage();
-    }
-  }
-
-  function sendChatMessage() {
-    const input = document.getElementById('chatbot-input') as HTMLInputElement;
-    if (!input) return;
-    
-    const message = input.value.trim();
-    
-    if (message) {
-      // Add user message
-      const messagesContainer = document.getElementById('chatbot-messages');
-      if (messagesContainer) {
-        messagesContainer.innerHTML += `
-          <div class="chatbot-message">
-            <div class="chatbot-avatar">
-              <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: flex; justify-content: center; align-items: center; color: white; font-weight: 600;">
-                U
-              </div>
-            </div>
-            <div class="chatbot-bubble">
-              <p>${message}</p>
-            </div>
-          </div>
-        `;
-        
-        // Clear input
-        input.value = '';
-        
-        // Scroll to bottom
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        
-        // Simulate AI response
-        setTimeout(() => {
-          if (messagesContainer) {
-            messagesContainer.innerHTML += `
-              <div class="chatbot-message">
-                <div class="chatbot-avatar">
-                  <div class="cb-face cb-face-front"></div>
-                  <div class="cb-face cb-face-top"></div>
-                  <div class="cb-face cb-face-right"></div>
-                </div>
-                <div class="chatbot-bubble">
-                  <p>Thank you for your message. I'm an AI assistant designed to help you with various tasks. How can I assist you further today?</p>
-                </div>
-              </div>
-            `;
-            
-            // Scroll to bottom
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-          }
-        }, 1000);
-      }
-    }
-  }
-
-  // Close dropdown when clicking outside
-  document.addEventListener('click', (e) => {
-    if (e.target) {
-      const target = e.target as HTMLElement;
-      if (!target.closest('.ai-selector')) {
-        document.querySelectorAll('.ai-selector-dropdown').forEach(dropdown => {
-          dropdown.classList.remove('show');
-        });
-      }
-    }
+  // Chatbot functionality is handled by global JavaScript in main.js
+  // This script ensures proper initialization
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Chatbot page loaded');
   });
 </script>
