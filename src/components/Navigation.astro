@@ -1,0 +1,103 @@
+---
+interface Props {
+  logo?: string;
+}
+
+const { logo = "/logo.mp4" } = Astro.props;
+---
+
+<nav>
+  <div class="nav-container">
+    <div class="nav-glass-container">
+      <div class="logo">
+        <video class="logo-video" autoplay loop muted playsinline preload="auto" poster="/favicon-32x32.png">
+          <source src={logo} type="video/mp4">
+        </video>
+        <span>Meow Note</span>
+      </div>
+      
+      <ul class="nav-links">
+        <li><a href="/" class="active">Home</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/research">Research</a></li>
+        <li><a href="/kit">Kit</a></li>
+      </ul>
+      
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <span class="theme-icon">🌙</span>
+        </button>
+        <button class="nav-login">Login</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<style>
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 1rem 2rem;
+  }
+  
+  .nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .nav-glass-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: rgba(10, 10, 11, 0.4);
+    backdrop-filter: blur(60px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 0%, #2997ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .logo-video {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    object-fit: cover;
+  }
+  
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+  
+  .nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  
+  .nav-links a:hover,
+  .nav-links a.active {
+    color: var(--text-primary);
+  }
+  
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+</style>

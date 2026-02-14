@@ -1,0 +1,100 @@
+---
+interface Props {
+  title?: string;
+  subtitle?: string;
+}
+
+const { title = "Meow Note", subtitle = "Your AI-Powered Notebook" } = Astro.props;
+---
+
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span>✨ AI-Powered</span>
+    </div>
+    <h1>{title}</h1>
+    <p class="hero-subtitle">{subtitle}</p>
+    <div class="hero-actions">
+      <button class="hero-cta">Get Started</button>
+      <button class="hero-secondary">Learn More</button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 6rem 2rem;
+  }
+  
+  .hero-content {
+    max-width: 800px;
+  }
+  
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+    margin-bottom: 2rem;
+  }
+  
+  h1 {
+    font-size: 4rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 0%, #2997ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+  }
+  
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+  
+  .hero-cta {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .hero-cta:hover {
+    transform: scale(1.05);
+  }
+  
+  .hero-secondary {
+    padding: 1rem 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .hero-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+</style>
