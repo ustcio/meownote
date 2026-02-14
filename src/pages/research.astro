@@ -1,0 +1,259 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+---
+
+<Layout title="Research - Meow Note">
+  <Navigation />
+  <div class="page active" id="page-research">
+    <section class="research-hero">
+      <h1>Research</h1>
+      <p>Advancing the frontier of AI capabilities and safety</p>
+    </section>
+
+    <section class="research-section">
+      <div class="section-header" style="text-align: left; margin-bottom: 2rem;">
+        <h2>Recent Publications</h2>
+      </div>
+      <div class="papers-list">
+        <div class="paper-card">
+          <div class="paper-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
+          <div class="paper-content">
+            <h3>Scaling Laws for Neural Language Models</h3>
+            <div class="paper-meta">
+              <span>March 2024</span>
+              <span>•</span>
+              <span>Chen et al.</span>
+            </div>
+            <p>We investigate the scaling properties of language model performance on downstream tasks. Our findings reveal predictable relationships between compute, data, and model performance.</p>
+            <div class="paper-tags">
+              <span class="paper-tag">Language Models</span>
+              <span class="paper-tag">Scaling Laws</span>
+              <span class="paper-tag">Training</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="paper-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
+          <div class="paper-content">
+            <h3>Constitutional AI: Harmlessness from AI Feedback</h3>
+            <div class="paper-meta">
+              <span>January 2024</span>
+              <span>•</span>
+              <span>Park et al.</span>
+            </div>
+            <p>We propose a method for training harmless AI assistants without human labels for harms, using a set of principles to guide the AI's behavior during training.</p>
+            <div class="paper-tags">
+              <span class="paper-tag">AI Safety</span>
+              <span class="paper-tag">Alignment</span>
+              <span class="paper-tag">RLHF</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="paper-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
+          <div class="paper-content">
+            <h3>Efficient Training of Large Transformers</h3>
+            <div class="paper-meta">
+              <span>November 2023</span>
+              <span>•</span>
+              <span>Wong et al.</span>
+            </div>
+            <p>We present techniques for reducing the computational requirements of training large transformer models by up to 40% without sacrificing performance.</p>
+            <div class="paper-tags">
+              <span class="paper-tag">Efficiency</span>
+              <span class="paper-tag">Transformers</span>
+              <span class="paper-tag">Optimization</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="paper-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
+          <div class="paper-content">
+            <h3>Interpretability in Deep Neural Networks</h3>
+            <div class="paper-meta">
+              <span>September 2023</span>
+              <span>•</span>
+              <span>Miller et al.</span>
+            </div>
+            <p>New methods for understanding what neural networks learn, including visualization techniques and mechanistic interpretability approaches.</p>
+            <div class="paper-tags">
+              <span class="paper-tag">Interpretability</span>
+              <span class="paper-tag">Visualization</span>
+              <span class="paper-tag">Safety</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .research-hero {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 6rem 2rem;
+  }
+
+  .research-hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #fff 0%, #2997ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .research-hero p {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+  }
+
+  .research-section {
+    padding: 6rem 2rem;
+  }
+
+  .section-header h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff 0%, #2997ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .papers-list {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .paper-card {
+    display: flex;
+    gap: 2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    transition: all 0.4s ease;
+  }
+
+  .paper-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .paper-icon {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
+    border-radius: 12px;
+    color: white;
+  }
+
+  .paper-content {
+    flex: 1;
+  }
+
+  .paper-content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  }
+
+  .paper-meta {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .paper-meta span {
+    margin-right: 0.5rem;
+  }
+
+  .paper-content p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .paper-tags {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .paper-tag {
+    padding: 0.35rem 0.75rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 768px) {
+    .paper-card {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+
+    .research-hero h1 {
+      font-size: 2.5rem;
+    }
+
+    .section-header h2 {
+      font-size: 2rem;
+    }
+
+    .paper-content h3 {
+      font-size: 1.25rem;
+    }
+  }
+</style>

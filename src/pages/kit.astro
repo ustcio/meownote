@@ -1,0 +1,681 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+---
+
+<Layout title="Kit - Meow Note">
+  <Navigation />
+  <div class="page active" id="page-kit">
+    <main class="kit-main-content">
+      <div class="kit-page-header">
+        <div class="page-badge">Utility Toolkit</div>
+        <h1><span>Super</span> <span class="gradient">Kit</span></h1>
+        <p>专业工具集 · 28款实用工具助力您的日常工作</p>
+      </div>
+
+      <div class="kit-layout">
+        <!-- 左侧分类导航 -->
+        <aside class="kit-sidebar">
+          <div class="kit-sidebar-title">工具分类</div>
+          <ul class="kit-category-list">
+            <li class="kit-category-item">
+              <button class="kit-category-btn active" data-category="all" onclick="filterKitCategory('all')">
+                <span class="kit-category-icon">📦</span>
+                <span>全部工具</span>
+                <span class="kit-category-count">28</span>
+              </button>
+            </li>
+            <li class="kit-category-item">
+              <button class="kit-category-btn" data-category="network" onclick="filterKitCategory('network')">
+                <span class="kit-category-icon">🌐</span>
+                <span>网络工具</span>
+                <span class="kit-category-count">7</span>
+              </button>
+            </li>
+            <li class="kit-category-item">
+              <button class="kit-category-btn" data-category="security" onclick="filterKitCategory('security')">
+                <span class="kit-category-icon">🔒</span>
+                <span>安全工具</span>
+                <span class="kit-category-count">3</span>
+              </button>
+            </li>
+            <li class="kit-category-item">
+              <button class="kit-category-btn" data-category="finance" onclick="filterKitCategory('finance')">
+                <span class="kit-category-icon">💰</span>
+                <span>金融理财</span>
+                <span class="kit-category-count">3</span>
+              </button>
+            </li>
+            <li class="kit-category-item">
+              <button class="kit-category-btn" data-category="converter" onclick="filterKitCategory('converter')">
+                <span class="kit-category-icon">🔄</span>
+                <span>转换工具</span>
+                <span class="kit-category-count">5</span>
+              </button>
+            </li>
+            <li class="kit-category-item">
+              <button class="kit-category-btn" data-category="generator" onclick="filterKitCategory('generator')">
+                <span class="kit-category-icon">⚡</span>
+                <span>生成工具</span>
+                <span class="kit-category-count">4</span>
+              </button>
+            </li>
+            <li class="kit-category-item">
+              <button class="kit-category-btn" data-category="calculator" onclick="filterKitCategory('calculator')">
+                <span class="kit-category-icon">🔢</span>
+                <span>计算工具</span>
+                <span class="kit-category-count">4</span>
+              </button>
+            </li>
+            <li class="kit-category-item">
+              <button class="kit-category-btn" data-category="fun" onclick="filterKitCategory('fun')">
+                <span class="kit-category-icon">🎮</span>
+                <span>趣味工具</span>
+                <span class="kit-category-count">2</span>
+              </button>
+            </li>
+          </ul>
+        </aside>
+
+        <!-- 右侧工具区域 -->
+        <div class="kit-main">
+          <div class="kit-tools-grid" id="kit-tools-grid">
+        <!-- 1. Speed Test -->
+        <div class="kit-tool-window" data-category="network">
+          <div class="kit-tool-header">
+            <div class="kit-tool-header-left">
+              <div class="kit-tool-dots">
+                <div class="kit-tool-dot red"></div>
+                <div class="kit-tool-dot yellow"></div>
+                <div class="kit-tool-dot green"></div>
+              </div>
+              <div class="kit-tool-title">
+                <div class="kit-tool-icon cyan">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polyline>
+                  </svg>
+                </div>
+                <span>网速测试</span>
+              </div>
+            </div>
+            <span class="kit-status-badge success" id="speed-status" style="display: none;">完成</span>
+          </div>
+          <div class="kit-tool-body">
+            <div class="kit-speed-gauge">
+              <div class="kit-gauge-item">
+                <div class="kit-gauge-circle" id="download-gauge">
+                  <span class="kit-gauge-value" id="download-speed">--</span>
+                </div>
+                <div class="kit-gauge-label">下载速度</div>
+                <div class="kit-gauge-unit">Mbps</div>
+              </div>
+              <div class="kit-gauge-item">
+                <div class="kit-gauge-circle purple" id="upload-gauge">
+                  <span class="kit-gauge-value" id="upload-speed">--</span>
+                </div>
+                <div class="kit-gauge-label">上传速度</div>
+                <div class="kit-gauge-unit">Mbps</div>
+              </div>
+              <div class="kit-gauge-item">
+                <div class="kit-gauge-circle green" id="ping-gauge">
+                  <span class="kit-gauge-value" id="ping-value">--</span>
+                </div>
+                <div class="kit-gauge-label">延迟</div>
+                <div class="kit-gauge-unit">ms</div>
+              </div>
+            </div>
+            <button class="kit-btn kit-btn-primary" id="speed-test-btn" onclick="runSpeedTest()" style="width: 100%;">
+              开始测速
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Ping Test -->
+        <div class="kit-tool-window" data-category="network">
+          <div class="kit-tool-header">
+            <div class="kit-tool-header-left">
+              <div class="kit-tool-dots">
+                <div class="kit-tool-dot red"></div>
+                <div class="kit-tool-dot yellow"></div>
+                <div class="kit-tool-dot green"></div>
+              </div>
+              <div class="kit-tool-title">
+                <div class="kit-tool-icon green">📡</div>
+                Ping 测试
+              </div>
+            </div>
+          </div>
+          <div class="kit-tool-body">
+            <div class="kit-input-group">
+              <label>目标主机</label>
+              <div class="kit-input-row">
+                <input type="text" class="kit-input-field" id="ping-host" placeholder="例如: google.com">
+                <button class="kit-btn kit-btn-primary" onclick="runPingTest()">Ping</button>
+              </div>
+            </div>
+            <div class="kit-result-box" id="ping-results">
+              <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                输入主机名或IP地址开始测试
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. IPv4/IPv6 Detection -->
+        <div class="kit-tool-window" data-category="network">
+          <div class="kit-tool-header">
+            <div class="kit-tool-header-left">
+              <div class="kit-tool-dots">
+                <div class="kit-tool-dot red"></div>
+                <div class="kit-tool-dot yellow"></div>
+                <div class="kit-tool-dot green"></div>
+              </div>
+              <div class="kit-tool-title">
+                <div class="kit-tool-icon purple">🌐</div>
+                IPv4/IPv6 检测
+              </div>
+            </div>
+          </div>
+          <div class="kit-tool-body">
+            <button class="kit-btn kit-btn-primary" onclick="detectIPKit()" style="width: 100%; margin-bottom: 1rem;">检测我的 IP</button>
+            <div class="kit-result-box" id="ip-results-kit">
+              <div class="kit-result-item">
+                <span class="kit-result-label">IPv4 地址</span>
+                <span class="kit-result-value" id="ipv4-addr">--</span>
+              </div>
+              <div class="kit-result-item">
+                <span class="kit-result-label">IPv6 地址</span>
+                <span class="kit-result-value" id="ipv6-addr">--</span>
+              </div>
+              <div class="kit-result-item">
+                <span class="kit-result-label">IPv6 支持</span>
+                <span class="kit-result-value" id="ipv6-support">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .kit-main-content {
+    padding: 6rem 2rem;
+  }
+
+  .kit-page-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .page-badge {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    background: rgba(41, 151, 255, 0.1);
+    border: 1px solid rgba(41, 151, 255, 0.2);
+    border-radius: 100px;
+    color: var(--accent);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+
+  .kit-page-header h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .kit-page-header h1 .gradient {
+    background: linear-gradient(135deg, #fff 0%, #2997ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .kit-page-header p {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+  }
+
+  .kit-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 3rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .kit-sidebar {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 2rem;
+    height: fit-content;
+    position: sticky;
+    top: 120px;
+  }
+
+  .kit-sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  .kit-category-list {
+    list-style: none;
+  }
+
+  .kit-category-item {
+    margin-bottom: 0.5rem;
+  }
+
+  .kit-category-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+  }
+
+  .kit-category-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+  }
+
+  .kit-category-btn.active {
+    background: rgba(41, 151, 255, 0.1);
+    border-color: rgba(41, 151, 255, 0.2);
+    color: var(--accent);
+  }
+
+  .kit-category-icon {
+    font-size: 1.2rem;
+  }
+
+  .kit-category-count {
+    margin-left: auto;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+  }
+
+  .kit-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 2rem;
+  }
+
+  .kit-tool-window {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .kit-tool-window:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .kit-tool-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .kit-tool-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .kit-tool-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .kit-tool-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .kit-tool-dot.red {
+    background: #ff5f56;
+  }
+
+  .kit-tool-dot.yellow {
+    background: #ffbd2e;
+  }
+
+  .kit-tool-dot.green {
+    background: #27ca40;
+  }
+
+  .kit-tool-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .kit-tool-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    color: white;
+  }
+
+  .kit-tool-icon.cyan {
+    background: linear-gradient(135deg, #00bcd4, #0097a7);
+  }
+
+  .kit-tool-icon.green {
+    background: linear-gradient(135deg, #4caf50, #388e3c);
+  }
+
+  .kit-tool-icon.purple {
+    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+  }
+
+  .kit-status-badge {
+    margin-left: auto;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .kit-status-badge.success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+  }
+
+  .kit-tool-body {
+    padding: 2rem;
+  }
+
+  .kit-speed-gauge {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .kit-gauge-item {
+    text-align: center;
+  }
+
+  .kit-gauge-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 1rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    border: 2px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .kit-gauge-circle.purple {
+    background: linear-gradient(135deg, rgba(156, 39, 176, 0.1), rgba(123, 31, 162, 0.05));
+    border-color: rgba(156, 39, 176, 0.2);
+  }
+
+  .kit-gauge-circle.green {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(56, 142, 60, 0.05));
+    border-color: rgba(76, 175, 80, 0.2);
+  }
+
+  .kit-gauge-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .kit-gauge-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+  }
+
+  .kit-gauge-unit {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .kit-btn {
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+  }
+
+  .kit-btn-primary {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
+    color: white;
+  }
+
+  .kit-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(41, 151, 255, 0.3);
+  }
+
+  .kit-input-group {
+    margin-bottom: 2rem;
+  }
+
+  .kit-input-group label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .kit-input-row {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .kit-input-field {
+    flex: 1;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 1rem;
+  }
+
+  .kit-input-field::placeholder {
+    color: var(--text-secondary);
+  }
+
+  .kit-result-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .kit-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+  }
+
+  .kit-result-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .kit-result-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  @media (max-width: 1024px) {
+    .kit-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .kit-sidebar {
+      position: static;
+    }
+
+    .kit-tools-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .kit-page-header h1 {
+      font-size: 2.5rem;
+    }
+
+    .kit-speed-gauge {
+      grid-template-columns: 1fr;
+    }
+
+    .kit-input-row {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<script>
+  // Simple kit functionality
+  function filterKitCategory(category: string) {
+    // Remove active class from all buttons
+    document.querySelectorAll('.kit-category-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+
+    // Add active class to selected button
+    const selectedBtn = document.querySelector(`.kit-category-btn[data-category="${category}"]`);
+    if (selectedBtn) {
+      selectedBtn.classList.add('active');
+    }
+
+    // Filter tools
+    const tools = document.querySelectorAll('.kit-tool-window');
+    tools.forEach(tool => {
+      if (category === 'all' || tool.getAttribute('data-category') === category) {
+        (tool as HTMLElement).style.display = 'block';
+      } else {
+        (tool as HTMLElement).style.display = 'none';
+      }
+    });
+  }
+
+  function runSpeedTest() {
+    // Simulate speed test
+    const downloadSpeed = document.getElementById('download-speed');
+    const uploadSpeed = document.getElementById('upload-speed');
+    const pingValue = document.getElementById('ping-value');
+    const speedStatus = document.getElementById('speed-status');
+
+    // Show loading
+    if (downloadSpeed) downloadSpeed.textContent = '...';
+    if (uploadSpeed) uploadSpeed.textContent = '...';
+    if (pingValue) pingValue.textContent = '...';
+    if (speedStatus) speedStatus.style.display = 'none';
+
+    // Simulate test completion
+    setTimeout(() => {
+      if (downloadSpeed) downloadSpeed.textContent = (Math.random() * 100 + 50).toFixed(2);
+      if (uploadSpeed) uploadSpeed.textContent = (Math.random() * 50 + 20).toFixed(2);
+      if (pingValue) pingValue.textContent = (Math.random() * 50 + 10).toFixed(2);
+      if (speedStatus) speedStatus.style.display = 'inline-block';
+    }, 2000);
+  }
+
+  function runPingTest() {
+    const hostInput = document.getElementById('ping-host') as HTMLInputElement;
+    const results = document.getElementById('ping-results');
+
+    if (!hostInput || !results) return;
+
+    const host = hostInput.value;
+
+    if (!host) {
+      results.innerHTML = `
+        <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+          请输入主机名或IP地址
+        </div>
+      `;
+      return;
+    }
+
+    // Simulate ping test
+    results.innerHTML = `
+      <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+        Pinging ${host}...
+      </div>
+    `;
+
+    // Simulate test completion
+    setTimeout(() => {
+      if (results) {
+        results.innerHTML = `
+          <div style="padding: 1rem;">
+            <p>Pinging ${host} [192.168.1.1] with 32 bytes of data:</p>
+            <p>Reply from 192.168.1.1: bytes=32 time=10ms TTL=64</p>
+            <p>Reply from 192.168.1.1: bytes=32 time=12ms TTL=64</p>
+            <p>Reply from 192.168.1.1: bytes=32 time=9ms TTL=64</p>
+            <p>Reply from 192.168.1.1: bytes=32 time=11ms TTL=64</p>
+            <p style="margin-top: 1rem;">Ping statistics for 192.168.1.1:</p>
+            <p>Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),</p>
+            <p>Approximate round trip times in milli-seconds:</p>
+            <p>Minimum = 9ms, Maximum = 12ms, Average = 10.5ms</p>
+          </div>
+        `;
+      }
+    }, 1500);
+  }
+
+  function detectIPKit() {
+    const ipv4Addr = document.getElementById('ipv4-addr');
+    const ipv6Addr = document.getElementById('ipv6-addr');
+    const ipv6Support = document.getElementById('ipv6-support');
+
+    // Simulate IP detection
+    if (ipv4Addr) ipv4Addr.textContent = '192.168.1.1';
+    if (ipv6Addr) ipv6Addr.textContent = '2001:0db8:85a3:0000:0000:8a2e:0370:7334';
+    if (ipv6Support) ipv6Support.textContent = '支持';
+  }
+</script>

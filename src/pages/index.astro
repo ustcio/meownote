@@ -1,15 +1,194 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
-import Hero from '../components/Hero.astro';
-import Features from '../components/Features.astro';
 ---
 
 <Layout title="Meow Note">
   <Navigation />
   
   <main>
-    <Hero />
-    <Features />
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-badge">
+        <span>Artificial Intelligence</span>
+      </div>
+      <h1><span>Build the future with</span> <span class="gradient">AGI.</span></h1>
+      <p>Powerful AI tools and intelligent assistants for developers and creators. The next era of computing is here.</p>
+      <div class="hero-buttons">
+        <button class="btn-primary" onclick="openModal('signup')">
+          Get Started
+        </button>
+        <button class="btn-secondary" onclick="window.location.href='/chatbot'">
+          Try ChatBot
+        </button>
+      </div>
+    </section>
+
+    <!-- Core Features -->
+    <section class="features">
+      <div class="section-header">
+        <h2>Core Features</h2>
+        <p>Built for the future of AI interaction</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polyline>
+            </svg>
+          </div>
+          <h3>Lightning Fast</h3>
+          <p>Sub-100ms response times with our globally optimized infrastructure.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 16v-4"></path>
+              <path d="M12 8h.01"></path>
+            </svg>
+          </div>
+          <h3>Intelligent</h3>
+          <p>Advanced AI models that understand context and reasoning deeply.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <h3>Secure</h3>
+          <p>Enterprise-grade security with end-to-end encryption.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <h3>Developer Tools</h3>
+          <p>Comprehensive APIs and SDKs for seamless integration.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <h3>ChatBot</h3>
+          <p>Intelligent assistant that helps you accomplish anything.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </div>
+          <h3>Super Kit</h3>
+          <p>26 professional tools to supercharge your workflow.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI Assistant Demo -->
+    <section class="demo">
+      <div class="demo-container">
+        <div class="section-header">
+          <h2>AI Assistant</h2>
+          <p>Experience intelligent conversation</p>
+        </div>
+        <div class="demo-window">
+          <div class="demo-header">
+            <div class="demo-dot red"></div>
+            <div class="demo-dot yellow"></div>
+            <div class="demo-dot green"></div>
+            <!-- AI Selector -->
+            <div class="ai-selector" id="demo-ai-selector">
+              <button class="ai-selector-btn" onclick="toggleAISelector('demo')">
+                <span class="ai-selector-icon" id="demo-ai-icon">⚡</span>
+                <span class="ai-selector-name" id="demo-ai-name">豆包 2.0 Pro</span>
+                <svg class="ai-selector-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <div class="ai-selector-dropdown" id="demo-ai-dropdown">
+                <div class="ai-option active" data-ai="doubao-pro" onclick="selectAI('demo', 'doubao-pro')">
+                  <span class="ai-option-icon">⚡</span>
+                  <div class="ai-option-info">
+                    <span class="ai-option-name">豆包 2.0 Pro</span>
+                    <span class="ai-option-desc">豆包 2.0 Pro · 火山引擎</span>
+                  </div>
+                  <span class="ai-option-check">✓</span>
+                </div>
+                <div class="ai-option" data-ai="qwen" onclick="selectAI('demo', 'qwen')">
+                  <span class="ai-option-icon">🔮</span>
+                  <div class="ai-option-info">
+                    <span class="ai-option-name">Qwen</span>
+                    <span class="ai-option-desc">通义千问 · 阿里云</span>
+                  </div>
+                  <span class="ai-option-check">✓</span>
+                </div>
+                <div class="ai-option" data-ai="doubao-code" onclick="selectAI('demo', 'doubao-code')">
+                  <span class="ai-option-icon">⌨️</span>
+                  <div class="ai-option-info">
+                    <span class="ai-option-name">豆包 2.0 Code</span>
+                    <span class="ai-option-desc">豆包 2.0 Code · 火山引擎</span>
+                  </div>
+                  <span class="ai-option-check">✓</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="demo-chat" id="demo-chat">
+            <div class="chat-message">
+              <div class="chat-avatar">
+                <div class="c-face c-face-front"></div>
+                <div class="c-face c-face-top"></div>
+                <div class="c-face c-face-right"></div>
+              </div>
+              <div class="chat-bubble">
+                <p>Hello! I'm AGI Era's AI assistant. I can help you with coding, analysis, creative writing, and much more. What would you like to explore?</p>
+              </div>
+            </div>
+          </div>
+          <div class="demo-input">
+            <input type="text" placeholder="Type your message..." id="demo-input-field" onkeypress="handleDemoInput(event)">
+            <button onclick="sendDemoMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visitor Activity Graph -->
+    <section class="visitor-activity">
+      <div class="visitor-activity-container">
+        <div class="visitor-activity-header">
+          <span class="visitor-activity-title">
+            <video class="logo-video" autoplay loop muted playsinline preload="auto" poster="/favicon-32x32.png">
+              <source src="/logo.mp4" type="video/mp4">
+            </video>
+            Meow Note
+          </span>
+          <span class="visitor-activity-subtitle">Visitor activity in the last year</span>
+        </div>
+        <div class="visitor-activity-wrapper">
+          <div class="visitor-activity-months" id="visitor-months"></div>
+          <div class="visitor-activity-graph" id="visitor-graph"></div>
+        </div>
+        <div class="visitor-activity-legend">
+          <span>Less</span>
+          <div class="legend-cells">
+            <span class="legend-cell" data-level="0"></span>
+            <span class="legend-cell" data-level="1"></span>
+            <span class="legend-cell" data-level="2"></span>
+            <span class="legend-cell" data-level="3"></span>
+            <span class="legend-cell" data-level="4"></span>
+          </div>
+          <span>More</span>
+        </div>
+      </div>
+    </section>
   </main>
 </Layout>

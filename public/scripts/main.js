@@ -1,6 +1,5 @@
         // ==================== 语言与主题系统 ====================
         let currentLang = localStorage.getItem('lang') || 'en';
-        let currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
         // 翻译表
         const translations = {
@@ -1887,12 +1886,6 @@
             }
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
         // Generate neural network visualization
         function generateNeuralNetwork() {
             const container = document.getElementById('neural-network');
@@ -1941,11 +1934,13 @@
         }
 
         // Docs section navigation
-        function showDocsSection(sectionId) {
+        function showDocsSection(sectionId, event) {
             document.querySelectorAll('.docs-nav-links a').forEach(link => {
                 link.classList.remove('active');
             });
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             
             // Scroll to section
             const section = document.getElementById(`docs-${sectionId}`);
