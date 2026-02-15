@@ -6,44 +6,72 @@ const lang = getLangFromUrl(Astro.url);
 ---
 
 <Layout 
-  title={lang === 'zh' ? 'ChatBot - Meow Note' : 'ChatBot - Meow Note'}
-  description={lang === 'zh' ? 'AI智能对话助手' : 'AI Chat Assistant'}
+  title={lang === 'zh' ? 'AI 助手 - Meow Note' : 'AI Assistant - Meow Note'}
+  description={lang === 'zh' ? '智能AI对话助手，支持多模型、多语言' : 'Intelligent AI chat assistant with multi-model support'}
 >
-  <div class="chat-container" data-lang={lang}>
+  <div class="chat-app" data-lang={lang}>
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
-        <button class="new-chat-btn" id="new-chat-btn">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          <span>{lang === 'zh' ? '新对话' : 'New Chat'}</span>
-        </button>
+        <a href="/" class="sidebar-logo">
+          <video class="logo-video" autoplay loop muted playsinline preload="auto">
+            <source src="/logo.mp4" type="video/mp4" />
+          </video>
+          <span class="logo-text">Meow Note</span>
+        </a>
       </div>
       
-      <div class="sidebar-history">
-        <div class="history-header">
-          <span>{lang === 'zh' ? '最近对话' : 'Recent'}</span>
+      <button class="new-chat-btn" id="new-chat-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>{lang === 'zh' ? '新对话' : 'New Chat'}</span>
+      </button>
+      
+      <div class="sidebar-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" class="search-input" id="search-input" placeholder={lang === 'zh' ? '搜索对话...' : 'Search chats...'} />
+      </div>
+      
+      <div class="sidebar-section">
+        <div class="section-header">
+          <span>{lang === 'zh' ? '今天' : 'Today'}</span>
         </div>
-        <div class="history-list" id="history-list"></div>
+        <div class="history-list" id="history-today"></div>
+      </div>
+      
+      <div class="sidebar-section">
+        <div class="section-header">
+          <span>{lang === 'zh' ? '过去7天' : 'Last 7 days'}</span>
+        </div>
+        <div class="history-list" id="history-week"></div>
+      </div>
+      
+      <div class="sidebar-section">
+        <div class="section-header">
+          <span>{lang === 'zh' ? '更早' : 'Earlier'}</span>
+        </div>
+        <div class="history-list" id="history-older"></div>
       </div>
       
       <div class="sidebar-footer">
-        <button class="sidebar-footer-btn" id="settings-btn">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        <button class="sidebar-action" id="clear-all-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
           </svg>
-          <span>{lang === 'zh' ? '设置' : 'Settings'}</span>
+          <span>{lang === 'zh' ? '清空对话' : 'Clear chats'}</span>
         </button>
       </div>
     </aside>
 
-    <!-- Mobile overlay -->
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-    <!-- Main content -->
+    <!-- Main Content -->
     <main class="main-content">
       <!-- Header -->
       <header class="chat-header">
@@ -55,109 +83,277 @@ const lang = getLangFromUrl(Astro.url);
           </svg>
         </button>
         
-        <div class="model-selector">
+        <div class="model-selector" id="model-selector">
           <button class="model-btn" id="model-btn">
-            <span class="model-name" id="model-name">Doubao</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div class="model-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 16v-4"></path>
+                <path d="M12 8h.01"></path>
+              </svg>
+            </div>
+            <span class="model-name" id="model-name">Doubao Pro</span>
+            <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
           <div class="model-dropdown" id="model-dropdown">
-            <button class="model-option active" data-model="doubao-2.0-pro" data-name="Doubao Pro">
-              <span class="model-option-name">Doubao 2.0 Pro</span>
-              <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-            </button>
-            <button class="model-option" data-model="doubao-2.0-code" data-name="Doubao Code">
-              <span class="model-option-name">Doubao 2.0 Code</span>
-              <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <!-- Chat area -->
-      <div class="chat-area" id="chat-area">
-        <!-- Welcome screen -->
-        <div class="welcome-screen" id="welcome-screen">
-          <div class="welcome-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            </svg>
-          </div>
-          <h1 class="welcome-title">{lang === 'zh' ? '你好，我是 Meow' : 'Hello, I\'m Meow'}</h1>
-          <p class="welcome-subtitle">{lang === 'zh' ? '有什么我可以帮助你的？' : 'How can I help you today?'}</p>
-          
-          <div class="suggestion-grid">
-            <button class="suggestion-item" data-prompt={lang === 'zh' ? '帮我写一段Python代码来计算斐波那契数列' : 'Write Python code for Fibonacci sequence'}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="16 18 22 12 16 6"></polyline>
-                <polyline points="8 6 2 12 8 18"></polyline>
-              </svg>
-              <span>{lang === 'zh' ? '编写代码' : 'Write code'}</span>
-            </button>
-            <button class="suggestion-item" data-prompt={lang === 'zh' ? '用简单的语言解释量子计算' : 'Explain quantum computing simply'}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
-              <span>{lang === 'zh' ? '解释概念' : 'Explain concepts'}</span>
-            </button>
-            <button class="suggestion-item" data-prompt={lang === 'zh' ? '翻译这段话成英文' : 'Translate to English'}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 8l6 6"></path>
-                <path d="M4 14l6-6 2-3"></path>
-                <path d="M2 5h12"></path>
-                <path d="M7 2h1"></path>
-                <path d="M22 22l-5-10-5 10"></path>
-                <path d="M14 18h6"></path>
-              </svg>
-              <span>{lang === 'zh' ? '翻译文本' : 'Translate'}</span>
-            </button>
-            <button class="suggestion-item" data-prompt={lang === 'zh' ? '帮我写一篇关于AI的短文' : 'Write about AI'}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-              </svg>
-              <span>{lang === 'zh' ? '创作内容' : 'Create content'}</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Messages container -->
-        <div class="messages-container" id="messages-container"></div>
-      </div>
-
-      <!-- Input area -->
-      <div class="input-area">
-        <div class="input-wrapper">
-          <div class="input-box">
-            <textarea 
-              id="chat-input"
-              class="chat-input"
-              placeholder={lang === 'zh' ? '输入消息...' : 'Message...'}
-              rows="1"
-            ></textarea>
-            <div class="input-actions">
-              <button class="send-btn" id="send-btn" disabled>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+            <div class="model-group">
+              <div class="model-group-label">Doubao</div>
+              <button class="model-option active" data-model="doubao-2.0-pro" data-name="Doubao Pro">
+                <div class="model-option-content">
+                  <span class="model-option-name">Doubao 2.0 Pro</span>
+                  <span class="model-option-desc">{lang === 'zh' ? '最强推理能力' : 'Best reasoning'}</span>
+                </div>
+                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
               </button>
-              <button class="stop-btn" id="stop-btn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+              <button class="model-option" data-model="doubao-2.0-code" data-name="Doubao Code">
+                <div class="model-option-content">
+                  <span class="model-option-name">Doubao 2.0 Code</span>
+                  <span class="model-option-desc">{lang === 'zh' ? '代码专家' : 'Code expert'}</span>
+                </div>
+                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+            </div>
+            <div class="model-group">
+              <div class="model-group-label">Qwen</div>
+              <button class="model-option" data-model="qwen-turbo" data-name="Qwen Turbo">
+                <div class="model-option-content">
+                  <span class="model-option-name">Qwen Turbo</span>
+                  <span class="model-option-desc">{lang === 'zh' ? '快速响应' : 'Fast response'}</span>
+                </div>
+                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              <button class="model-option" data-model="qwen-plus" data-name="Qwen Plus">
+                <div class="model-option-content">
+                  <span class="model-option-name">Qwen Plus</span>
+                  <span class="model-option-desc">{lang === 'zh' ? '均衡性能' : 'Balanced'}</span>
+                </div>
+                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
               </button>
             </div>
           </div>
-          <p class="input-hint">{lang === 'zh' ? 'AI 可能会产生错误信息，请核实重要内容。' : 'AI may make mistakes. Please verify important information.'}</p>
+        </div>
+        
+        <div class="header-actions">
+          <button class="header-action" id="share-btn" title={lang === 'zh' ? '分享' : 'Share'}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Chat Area -->
+      <div class="chat-area" id="chat-area">
+        <!-- Welcome Screen -->
+        <div class="welcome-screen" id="welcome-screen">
+          <div class="welcome-content">
+            <div class="welcome-brand">
+              <video class="welcome-logo" autoplay loop muted playsinline preload="auto">
+                <source src="/logo.mp4" type="video/mp4" />
+              </video>
+              <h1 class="welcome-title">{lang === 'zh' ? '你好，我是 Meow' : 'Hello, I\'m Meow'}</h1>
+              <p class="welcome-subtitle">{lang === 'zh' ? '你的智能AI助手，随时为你提供帮助' : 'Your intelligent AI assistant, ready to help'}</p>
+            </div>
+            
+            <div class="quick-actions">
+              <div class="quick-actions-title">
+                <span>{lang === 'zh' ? '快速开始' : 'Quick Start'}</span>
+              </div>
+              <div class="quick-actions-grid">
+                <button class="quick-action-card" data-prompt={lang === 'zh' ? '帮我写一段Python代码，实现一个简单的Web服务器' : 'Write Python code for a simple web server'}>
+                  <div class="quick-action-icon code">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="16 18 22 12 16 6"></polyline>
+                      <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                  </div>
+                  <div class="quick-action-content">
+                    <span class="quick-action-title">{lang === 'zh' ? '编写代码' : 'Write Code'}</span>
+                    <span class="quick-action-desc">{lang === 'zh' ? 'Python、JavaScript、Go...' : 'Python, JavaScript, Go...'}</span>
+                  </div>
+                </button>
+                
+                <button class="quick-action-card" data-prompt={lang === 'zh' ? '请帮我翻译以下内容成英文：' : 'Help me translate the following to Chinese:'}>
+                  <div class="quick-action-icon translate">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M5 8l6 6"></path>
+                      <path d="M4 14l6-6 2-3"></path>
+                      <path d="M2 5h12"></path>
+                      <path d="M7 2h1"></path>
+                      <path d="M22 22l-5-10-5 10"></path>
+                      <path d="M14 18h6"></path>
+                    </svg>
+                  </div>
+                  <div class="quick-action-content">
+                    <span class="quick-action-title">{lang === 'zh' ? '翻译文本' : 'Translate'}</span>
+                    <span class="quick-action-desc">{lang === 'zh' ? '中英互译、多语言支持' : 'Chinese-English, multi-language'}</span>
+                  </div>
+                </button>
+                
+                <button class="quick-action-card" data-prompt={lang === 'zh' ? '请帮我总结以下文章的要点：' : 'Summarize the key points of the following:'}>
+                  <div class="quick-action-icon summarize">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                  </div>
+                  <div class="quick-action-content">
+                    <span class="quick-action-title">{lang === 'zh' ? '总结内容' : 'Summarize'}</span>
+                    <span class="quick-action-desc">{lang === 'zh' ? '快速提取关键信息' : 'Extract key information'}</span>
+                  </div>
+                </button>
+                
+                <button class="quick-action-card" data-prompt={lang === 'zh' ? '请用简单的语言解释什么是' : 'Explain in simple terms what is'}>
+                  <div class="quick-action-icon explain">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                  </div>
+                  <div class="quick-action-content">
+                    <span class="quick-action-title">{lang === 'zh' ? '解释概念' : 'Explain'}</span>
+                    <span class="quick-action-desc">{lang === 'zh' ? '深入浅出地理解复杂概念' : 'Understand complex concepts'}</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+            
+            <div class="capabilities">
+              <div class="capabilities-title">{lang === 'zh' ? '我能做什么' : 'What I can do'}</div>
+              <div class="capabilities-list">
+                <div class="capability-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span>{lang === 'zh' ? '回答问题和提供建议' : 'Answer questions & provide advice'}</span>
+                </div>
+                <div class="capability-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span>{lang === 'zh' ? '编写和调试代码' : 'Write & debug code'}</span>
+                </div>
+                <div class="capability-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span>{lang === 'zh' ? '翻译和润色文本' : 'Translate & polish text'}</span>
+                </div>
+                <div class="capability-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span>{lang === 'zh' ? '分析和总结内容' : 'Analyze & summarize content'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages Container -->
+        <div class="messages-container" id="messages-container"></div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="input-area">
+        <div class="input-wrapper">
+          <!-- Quick Commands -->
+          <div class="quick-commands" id="quick-commands">
+            <button class="quick-command" data-command={lang === 'zh' ? '继续' : 'continue'}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>{lang === 'zh' ? '继续' : 'Continue'}</span>
+            </button>
+            <button class="quick-command" data-command={lang === 'zh' ? '详细解释' : 'explain more'}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>{lang === 'zh' ? '详细解释' : 'Explain'}</span>
+            </button>
+            <button class="quick-command" data-command={lang === 'zh' ? '更简洁' : 'be concise'}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="4" y1="21" x2="4" y2="14"></line>
+                <line x1="4" y1="10" x2="4" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="3"></line>
+                <line x1="20" y1="21" x2="20" y2="16"></line>
+                <line x1="20" y1="12" x2="20" y2="3"></line>
+              </svg>
+              <span>{lang === 'zh' ? '更简洁' : 'Concise'}</span>
+            </button>
+            <button class="quick-command" data-command={lang === 'zh' ? '举例说明' : 'give examples'}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+              <span>{lang === 'zh' ? '举例' : 'Examples'}</span>
+            </button>
+          </div>
+          
+          <div class="input-box" id="input-box">
+            <div class="input-content">
+              <textarea 
+                id="chat-input"
+                class="chat-input"
+                placeholder={lang === 'zh' ? '输入消息，按 Enter 发送...' : 'Message...'}
+                rows="1"
+              ></textarea>
+            </div>
+            <div class="input-actions">
+              <div class="input-actions-left">
+                <button class="input-action-btn" id="attach-btn" title={lang === 'zh' ? '附件' : 'Attach'}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                  </svg>
+                </button>
+              </div>
+              <div class="input-actions-right">
+                <button class="send-btn" id="send-btn" disabled>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                  </svg>
+                </button>
+                <button class="stop-btn" id="stop-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <p class="input-hint">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            {lang === 'zh' ? 'AI 可能会产生错误信息，请核实重要内容' : 'AI may make mistakes. Verify important information'}
+          </p>
         </div>
       </div>
     </main>
@@ -166,19 +362,14 @@ const lang = getLangFromUrl(Astro.url);
 
 <style>
   :root {
-    --sidebar-width: 280px;
-    --header-height: 56px;
-    --input-height: auto;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 24px;
+    --sidebar-width: 260px;
+    --header-height: 52px;
+    --input-max-width: 768px;
   }
 
-  .chat-container {
+  .chat-app {
     display: flex;
     height: 100vh;
-    margin-top: var(--header-total-height);
     background: var(--bg-primary);
   }
 
@@ -187,36 +378,65 @@ const lang = getLangFromUrl(Astro.url);
     width: var(--sidebar-width);
     height: 100vh;
     background: var(--bg-secondary);
-    border-right: 1px solid var(--border-primary);
     display: flex;
     flex-direction: column;
     position: fixed;
     left: 0;
     top: 0;
-    z-index: 50;
-    transition: transform 0.3s ease;
+    z-index: 100;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-right: 1px solid var(--border-primary);
   }
 
   .sidebar-header {
     padding: 12px;
-    border-bottom: 1px solid var(--border-primary);
+    border-bottom: 1px solid var(--border-secondary);
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+
+  .sidebar-logo:hover {
+    background: var(--bg-tertiary);
+  }
+
+  .logo-video {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+  }
+
+  .logo-text {
+    font-family: var(--font-brand);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
   }
 
   .new-chat-btn {
-    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px 16px;
+    width: calc(100% - 24px);
+    margin: 12px;
+    padding: 10px 16px;
     background: transparent;
     border: 1px solid var(--border-primary);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     color: var(--text-primary);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
   }
 
   .new-chat-btn:hover {
@@ -224,15 +444,49 @@ const lang = getLangFromUrl(Astro.url);
     border-color: var(--border-hover);
   }
 
-  .sidebar-history {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px 8px;
+  .sidebar-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 12px 12px;
+    padding: 8px 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-secondary);
+    border-radius: var(--radius-lg);
+    transition: border-color 0.15s ease;
   }
 
-  .history-header {
+  .sidebar-search:focus-within {
+    border-color: var(--color-primary);
+  }
+
+  .sidebar-search svg {
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+  }
+
+  .search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+
+  .search-input::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  .sidebar-section {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 8px;
+  }
+
+  .section-header {
     padding: 8px 12px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--text-tertiary);
     text-transform: uppercase;
@@ -242,27 +496,28 @@ const lang = getLangFromUrl(Astro.url);
   .history-list {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
   }
 
   .history-item {
     display: flex;
     align-items: center;
     gap: 10px;
+    width: 100%;
     padding: 10px 12px;
-    border-radius: var(--radius-sm);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
     color: var(--text-secondary);
-    font-size: 14px;
+    font-size: 13px;
+    text-align: left;
     cursor: pointer;
     transition: all 0.15s ease;
-    border: none;
-    background: transparent;
-    width: 100%;
-    text-align: left;
   }
 
   .history-item:hover {
     background: var(--bg-tertiary);
+    color: var(--text-primary);
   }
 
   .history-item.active {
@@ -283,13 +538,17 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   .history-item-delete {
-    opacity: 0;
-    padding: 4px;
-    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
     background: transparent;
     border: none;
+    border-radius: var(--radius-sm);
     color: var(--text-tertiary);
     cursor: pointer;
+    opacity: 0;
     transition: all 0.15s ease;
   }
 
@@ -299,30 +558,30 @@ const lang = getLangFromUrl(Astro.url);
 
   .history-item-delete:hover {
     background: var(--bg-primary);
-    color: var(--color-accent-red);
+    color: var(--color-error);
   }
 
   .sidebar-footer {
     padding: 12px;
-    border-top: 1px solid var(--border-primary);
+    border-top: 1px solid var(--border-secondary);
   }
 
-  .sidebar-footer-btn {
-    width: 100%;
+  .sidebar-action {
     display: flex;
     align-items: center;
     gap: 10px;
+    width: 100%;
     padding: 10px 12px;
-    border-radius: var(--radius-sm);
     background: transparent;
     border: none;
-    color: var(--text-secondary);
-    font-size: 14px;
+    border-radius: var(--radius-md);
+    color: var(--text-tertiary);
+    font-size: 13px;
     cursor: pointer;
     transition: all 0.15s ease;
   }
 
-  .sidebar-footer-btn:hover {
+  .sidebar-action:hover {
     background: var(--bg-tertiary);
     color: var(--text-primary);
   }
@@ -335,7 +594,6 @@ const lang = getLangFromUrl(Astro.url);
     min-width: 0;
     margin-left: var(--sidebar-width);
     height: 100vh;
-    background: var(--bg-primary);
   }
 
   /* ===== Header ===== */
@@ -344,10 +602,10 @@ const lang = getLangFromUrl(Astro.url);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
-    border-bottom: 1px solid var(--border-primary);
-    flex-shrink: 0;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border-secondary);
     background: var(--bg-primary);
+    flex-shrink: 0;
   }
 
   .menu-toggle {
@@ -358,7 +616,7 @@ const lang = getLangFromUrl(Astro.url);
     height: 36px;
     background: transparent;
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.15s ease;
@@ -376,21 +634,41 @@ const lang = getLangFromUrl(Astro.url);
   .model-btn {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
+    gap: 8px;
+    padding: 6px 12px;
     background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-md);
+    border: 1px solid var(--border-secondary);
+    border-radius: var(--radius-lg);
     color: var(--text-primary);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
   }
 
   .model-btn:hover {
-    border-color: var(--border-hover);
     background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+  }
+
+  .model-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent-blue));
+    border-radius: var(--radius-sm);
+    color: white;
+  }
+
+  .chevron {
+    color: var(--text-tertiary);
+    transition: transform 0.15s ease;
+  }
+
+  .model-btn[aria-expanded="true"] .chevron {
+    transform: rotate(180deg);
   }
 
   .model-dropdown {
@@ -398,35 +676,62 @@ const lang = getLangFromUrl(Astro.url);
     top: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%);
-    min-width: 220px;
+    width: 240px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    border-radius: var(--radius-md);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    padding: 6px;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    padding: 8px;
     display: none;
-    z-index: 100;
+    z-index: 200;
   }
 
   .model-dropdown.open {
     display: block;
+    animation: dropdownIn 0.15s ease;
+  }
+
+  @keyframes dropdownIn {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  .model-group {
+    padding: 4px 0;
+  }
+
+  .model-group:not(:last-child) {
+    border-bottom: 1px solid var(--border-secondary);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+  }
+
+  .model-group-label {
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .model-option {
-    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    width: 100%;
     padding: 10px 12px;
     background: transparent;
     border: none;
-    border-radius: var(--radius-sm);
-    color: var(--text-primary);
-    font-size: 14px;
+    border-radius: var(--radius-lg);
     cursor: pointer;
-    transition: all 0.15s ease;
-    text-align: left;
+    transition: background 0.15s ease;
   }
 
   .model-option:hover {
@@ -434,16 +739,59 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   .model-option.active {
-    background: var(--bg-tertiary);
+    background: var(--color-primary-subtle);
+  }
+
+  .model-option-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+  }
+
+  .model-option-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .model-option-desc {
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+
+  .check-icon {
+    color: var(--color-primary);
+    opacity: 0;
   }
 
   .model-option.active .check-icon {
     opacity: 1;
   }
 
-  .check-icon {
-    opacity: 0;
-    color: var(--color-accent-blue);
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .header-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .header-action:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
   }
 
   /* ===== Chat Area ===== */
@@ -455,98 +803,176 @@ const lang = getLangFromUrl(Astro.url);
     flex-direction: column;
   }
 
-  .chat-area::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .chat-area::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .chat-area::-webkit-scrollbar-thumb {
-    background: var(--text-quaternary);
-    border-radius: 3px;
-  }
-
   /* ===== Welcome Screen ===== */
   .welcome-screen {
     flex: 1;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px 20px 100px;
-    min-height: 100%;
+    padding: 40px 20px 120px;
+    overflow-y: auto;
   }
 
   .welcome-screen.hidden {
     display: none;
   }
 
-  .welcome-icon {
-    width: 64px;
-    height: 64px;
+  .welcome-content {
+    width: 100%;
+    max-width: 680px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-xl);
-    color: var(--text-secondary);
-    margin-bottom: 24px;
+  }
+
+  .welcome-brand {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .welcome-logo {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-2xl);
+    object-fit: cover;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
 
   .welcome-title {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 8px;
   }
 
   .welcome-subtitle {
-    font-size: 15px;
+    font-size: 16px;
     color: var(--text-secondary);
+  }
+
+  .quick-actions {
+    width: 100%;
     margin-bottom: 32px;
   }
 
-  .suggestion-grid {
+  .quick-actions-title {
+    padding: 0 4px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+  }
+
+  .quick-actions-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-    max-width: 600px;
-    width: 100%;
   }
 
-  .suggestion-item {
+  .quick-action-card {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
-    padding: 14px 16px;
+    padding: 16px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 500;
+    border-radius: var(--radius-xl);
     cursor: pointer;
     transition: all 0.2s ease;
+    text-align: left;
   }
 
-  .suggestion-item:hover {
+  .quick-action-card:hover {
     background: var(--bg-tertiary);
     border-color: var(--border-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   }
 
-  .suggestion-item svg {
+  .quick-action-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-lg);
+    flex-shrink: 0;
+  }
+
+  .quick-action-icon.code {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+  }
+
+  .quick-action-icon.translate {
+    background: linear-gradient(135deg, #06b6d4, #0ea5e9);
+    color: white;
+  }
+
+  .quick-action-icon.summarize {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    color: white;
+  }
+
+  .quick-action-icon.explain {
+    background: linear-gradient(135deg, #10b981, #14b8a6);
+    color: white;
+  }
+
+  .quick-action-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .quick-action-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .quick-action-desc {
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+
+  .capabilities {
+    width: 100%;
+    padding: 20px 24px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl);
+  }
+
+  .capabilities-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    margin-bottom: 16px;
+  }
+
+  .capabilities-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .capability-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
     color: var(--text-secondary);
+  }
+
+  .capability-item svg {
+    color: var(--color-success);
     flex-shrink: 0;
   }
 
   /* ===== Messages ===== */
   .messages-container {
-    flex: 1;
     display: flex;
     flex-direction: column;
     padding: 0;
@@ -554,40 +980,42 @@ const lang = getLangFromUrl(Astro.url);
 
   .message {
     display: flex;
-    gap: 12px;
-    padding: 24px 24px;
+    gap: 16px;
+    padding: 24px;
     max-width: 100%;
-    transition: background 0.15s ease;
+    animation: messageIn 0.3s ease;
   }
 
-  .message:hover {
-    background: var(--bg-secondary);
+  @keyframes messageIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .message.user {
     background: var(--bg-secondary);
   }
 
-  .message.user:hover {
-    background: var(--bg-tertiary);
-  }
-
   .message-avatar {
     width: 32px;
     height: 32px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    overflow: hidden;
+    font-size: 14px;
+    font-weight: 600;
   }
 
   .message-avatar.user {
     background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
     color: white;
-    font-size: 14px;
-    font-weight: 600;
   }
 
   .message-avatar.assistant {
@@ -598,7 +1026,7 @@ const lang = getLangFromUrl(Astro.url);
   .message-content {
     flex: 1;
     min-width: 0;
-    max-width: 800px;
+    max-width: 720px;
   }
 
   .message-header {
@@ -609,14 +1037,9 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   .message-author {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
-  }
-
-  .message-time {
-    font-size: 12px;
-    color: var(--text-tertiary);
   }
 
   .message-text {
@@ -628,6 +1051,7 @@ const lang = getLangFromUrl(Astro.url);
 
   .message-text p {
     margin: 0 0 12px 0;
+    color: var(--text-primary);
   }
 
   .message-text p:last-child {
@@ -638,15 +1062,15 @@ const lang = getLangFromUrl(Astro.url);
     background: var(--bg-tertiary);
     padding: 2px 6px;
     border-radius: 4px;
-    font-family: var(--font-mono, 'SF Mono', Monaco, monospace);
+    font-family: var(--font-mono);
     font-size: 0.9em;
   }
 
   .message-text pre {
     background: #1e1e1e;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     padding: 16px;
-    margin: 12px 0;
+    margin: 16px 0;
     overflow-x: auto;
   }
 
@@ -659,16 +1083,17 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   .message-text ul, .message-text ol {
-    margin: 8px 0;
+    margin: 12px 0;
     padding-left: 24px;
+    color: var(--text-primary);
   }
 
   .message-text li {
-    margin: 4px 0;
+    margin: 6px 0;
   }
 
   .message-text a {
-    color: var(--color-accent-blue);
+    color: var(--color-primary);
     text-decoration: none;
   }
 
@@ -677,17 +1102,18 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   .message-text blockquote {
-    border-left: 3px solid var(--color-accent-blue);
-    margin: 12px 0;
+    border-left: 3px solid var(--color-primary);
+    margin: 16px 0;
     padding: 8px 16px;
     background: var(--bg-tertiary);
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    color: var(--text-secondary);
   }
 
   .message-actions {
     display: flex;
     gap: 4px;
-    margin-top: 8px;
+    margin-top: 12px;
     opacity: 0;
     transition: opacity 0.15s ease;
   }
@@ -715,11 +1141,17 @@ const lang = getLangFromUrl(Astro.url);
     color: var(--text-primary);
   }
 
-  /* Typing indicator */
+  .message-action.copied {
+    color: var(--color-success);
+    border-color: var(--color-success);
+  }
+
+  /* Typing Indicator */
   .typing-indicator {
     display: flex;
+    align-items: center;
     gap: 4px;
-    padding: 4px 0;
+    padding: 8px 0;
   }
 
   .typing-indicator span {
@@ -741,33 +1173,69 @@ const lang = getLangFromUrl(Astro.url);
   /* ===== Input Area ===== */
   .input-area {
     padding: 16px 24px 24px;
-    background: var(--bg-primary);
+    background: linear-gradient(to top, var(--bg-primary) 80%, transparent);
     flex-shrink: 0;
   }
 
   .input-wrapper {
-    max-width: 800px;
+    max-width: var(--input-max-width);
     margin: 0 auto;
+  }
+
+  .quick-commands {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .quick-commands::-webkit-scrollbar {
+    display: none;
+  }
+
+  .quick-command {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .quick-command:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+    color: var(--text-primary);
   }
 
   .input-box {
     display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    padding: 8px 12px;
+    flex-direction: column;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     transition: all 0.2s ease;
   }
 
   .input-box:focus-within {
-    border-color: var(--color-accent-blue);
-    box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+  }
+
+  .input-content {
+    padding: 12px 16px;
   }
 
   .chat-input {
-    flex: 1;
+    width: 100%;
     background: transparent;
     border: none;
     color: var(--text-primary);
@@ -777,7 +1245,6 @@ const lang = getLangFromUrl(Astro.url);
     max-height: 200px;
     min-height: 24px;
     outline: none;
-    padding: 6px 0;
   }
 
   .chat-input::placeholder {
@@ -787,7 +1254,35 @@ const lang = getLangFromUrl(Astro.url);
   .input-actions {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-top: 1px solid var(--border-secondary);
+  }
+
+  .input-actions-left,
+  .input-actions-right {
+    display: flex;
+    align-items: center;
     gap: 4px;
+  }
+
+  .input-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .input-action-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
   }
 
   .send-btn, .stop-btn {
@@ -797,7 +1292,7 @@ const lang = getLangFromUrl(Astro.url);
     width: 32px;
     height: 32px;
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: all 0.15s ease;
   }
@@ -814,12 +1309,12 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   .send-btn:not(:disabled):hover {
-    background: var(--color-accent-blue);
+    background: var(--color-primary);
   }
 
   .stop-btn {
     display: none;
-    background: var(--color-accent-red);
+    background: var(--color-error);
     color: white;
   }
 
@@ -828,10 +1323,14 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   .input-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     text-align: center;
     font-size: 12px;
     color: var(--text-tertiary);
-    margin-top: 8px;
+    margin-top: 10px;
   }
 
   /* ===== Mobile ===== */
@@ -849,7 +1348,8 @@ const lang = getLangFromUrl(Astro.url);
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.5);
-      z-index: 40;
+      z-index: 90;
+      backdrop-filter: blur(4px);
     }
 
     .sidebar-overlay.visible {
@@ -865,16 +1365,24 @@ const lang = getLangFromUrl(Astro.url);
     }
 
     .welcome-screen {
-      padding: 20px 16px 80px;
+      padding: 20px 16px 100px;
     }
 
-    .suggestion-grid {
+    .welcome-title {
+      font-size: 24px;
+    }
+
+    .quick-actions-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .capabilities-list {
       grid-template-columns: 1fr;
     }
 
     .message {
       padding: 16px;
-      gap: 10px;
+      gap: 12px;
     }
 
     .message-avatar {
@@ -886,22 +1394,23 @@ const lang = getLangFromUrl(Astro.url);
       padding: 12px 16px 16px;
     }
 
-    .input-box {
-      padding: 8px 10px;
+    .quick-commands {
+      margin-bottom: 8px;
     }
   }
 </style>
 
 <script>
-  // Get language from data attribute
-  const chatContainer = document.querySelector('.chat-container');
-  const lang = chatContainer?.getAttribute('data-lang') || 'zh';
+  const chatApp = document.querySelector('.chat-app');
+  const lang = chatApp?.getAttribute('data-lang') || 'zh';
 
   const API_BASE = 'https://api.agiera.net';
+  
   const sidebar = document.getElementById('sidebar');
   const menuToggle = document.getElementById('menu-toggle');
   const sidebarOverlay = document.getElementById('sidebar-overlay');
   const newChatBtn = document.getElementById('new-chat-btn');
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
   const modelBtn = document.getElementById('model-btn');
   const modelDropdown = document.getElementById('model-dropdown');
   const modelName = document.getElementById('model-name');
@@ -911,7 +1420,11 @@ const lang = getLangFromUrl(Astro.url);
   const chatInput = document.getElementById('chat-input') as HTMLTextAreaElement;
   const sendBtn = document.getElementById('send-btn');
   const stopBtn = document.getElementById('stop-btn');
-  const historyList = document.getElementById('history-list');
+  const quickCommands = document.getElementById('quick-commands');
+  const historyToday = document.getElementById('history-today');
+  const historyWeek = document.getElementById('history-week');
+  const historyOlder = document.getElementById('history-older');
+  const clearAllBtn = document.getElementById('clear-all-btn');
   
   let chatHistory: { role: string; content: string }[] = [];
   let isStreaming = false;
@@ -919,27 +1432,33 @@ const lang = getLangFromUrl(Astro.url);
   let conversations: { id: string; title: string; messages: typeof chatHistory; date: number }[] = [];
   let currentConversationId: string | null = null;
   let abortController: AbortController | null = null;
-  
+
   function init() {
     loadConversations();
-    renderHistoryList();
+    renderHistory();
     setupEventListeners();
   }
-  
+
   function setupEventListeners() {
     menuToggle?.addEventListener('click', toggleSidebar);
     sidebarOverlay?.addEventListener('click', toggleSidebar);
     newChatBtn?.addEventListener('click', startNewChat);
-    modelBtn?.addEventListener('click', toggleModelDropdown);
+    clearAllBtn?.addEventListener('click', clearAllConversations);
     
-    document.querySelectorAll('.model-option').forEach(option => {
-      option.addEventListener('click', () => selectModel(option as HTMLElement));
+    modelBtn?.addEventListener('click', () => {
+      modelDropdown?.classList.toggle('open');
+      modelBtn?.setAttribute('aria-expanded', String(modelDropdown?.classList.contains('open')));
     });
     
     document.addEventListener('click', (e) => {
       if (!modelBtn?.contains(e.target as Node) && !modelDropdown?.contains(e.target as Node)) {
         modelDropdown?.classList.remove('open');
+        modelBtn?.setAttribute('aria-expanded', 'false');
       }
+    });
+    
+    document.querySelectorAll('.model-option').forEach(option => {
+      option.addEventListener('click', () => selectModel(option as HTMLElement));
     });
     
     chatInput?.addEventListener('input', handleInput);
@@ -948,9 +1467,9 @@ const lang = getLangFromUrl(Astro.url);
     sendBtn?.addEventListener('click', sendMessage);
     stopBtn?.addEventListener('click', stopGeneration);
     
-    document.querySelectorAll('.suggestion-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const prompt = item.getAttribute('data-prompt');
+    document.querySelectorAll('.quick-action-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const prompt = card.getAttribute('data-prompt');
         if (prompt && chatInput) {
           chatInput.value = prompt;
           handleInput();
@@ -958,17 +1477,28 @@ const lang = getLangFromUrl(Astro.url);
         }
       });
     });
+    
+    quickCommands?.querySelectorAll('.quick-command').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const command = btn.getAttribute('data-command');
+        if (command && chatInput) {
+          chatInput.value = command;
+          handleInput();
+          sendMessage();
+        }
+      });
+    });
+    
+    searchInput?.addEventListener('input', () => {
+      renderHistory(searchInput.value.toLowerCase());
+    });
   }
-  
+
   function toggleSidebar() {
     sidebar?.classList.toggle('open');
     sidebarOverlay?.classList.toggle('visible');
   }
-  
-  function toggleModelDropdown() {
-    modelDropdown?.classList.toggle('open');
-  }
-  
+
   function selectModel(option: HTMLElement) {
     const model = option.getAttribute('data-model');
     const name = option.getAttribute('data-name');
@@ -982,8 +1512,9 @@ const lang = getLangFromUrl(Astro.url);
     }
     
     modelDropdown?.classList.remove('open');
+    modelBtn?.setAttribute('aria-expanded', 'false');
   }
-  
+
   function handleInput() {
     if (!chatInput || !sendBtn) return;
     
@@ -992,14 +1523,14 @@ const lang = getLangFromUrl(Astro.url);
     
     (sendBtn as HTMLButtonElement).disabled = !chatInput.value.trim() || isStreaming;
   }
-  
+
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   }
-  
+
   function startNewChat() {
     if (chatHistory.length > 0 && currentConversationId) {
       saveConversation();
@@ -1017,8 +1548,9 @@ const lang = getLangFromUrl(Astro.url);
     
     sidebar?.classList.remove('open');
     sidebarOverlay?.classList.remove('visible');
+    renderHistory();
   }
-  
+
   async function sendMessage() {
     if (!chatInput) return;
     
@@ -1061,7 +1593,7 @@ const lang = getLangFromUrl(Astro.url);
         chatHistory.push({ role: 'assistant', content: result.answer });
         saveConversation();
       } else {
-        addMessage('assistant', result.error || result.message || lang === 'zh' ? '抱歉，出现错误。' : 'Sorry, something went wrong.');
+        addMessage('assistant', result.error || result.message || (lang === 'zh' ? '抱歉，出现错误。' : 'Sorry, something went wrong.'));
       }
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
@@ -1078,13 +1610,13 @@ const lang = getLangFromUrl(Astro.url);
       updateInputState();
     }
   }
-  
+
   function stopGeneration() {
     if (abortController) {
       abortController.abort();
     }
   }
-  
+
   function updateInputState() {
     if (!sendBtn || !stopBtn) return;
     
@@ -1097,23 +1629,21 @@ const lang = getLangFromUrl(Astro.url);
       (sendBtn as HTMLButtonElement).disabled = !chatInput?.value.trim();
     }
   }
-  
+
   function addMessage(role: 'user' | 'assistant', content: string) {
     if (!messagesContainer) return;
     
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${role}`;
     
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const author = role === 'user' ? (lang === 'zh' ? '你' : 'You') : (lang === 'zh' ? 'Meow' : 'Meow');
     const avatarContent = role === 'user' ? (lang === 'zh' ? '你' : 'Y') : 'M';
+    const author = role === 'user' ? (lang === 'zh' ? '你' : 'You') : 'Meow';
     
     messageDiv.innerHTML = `
       <div class="message-avatar ${role}">${avatarContent}</div>
       <div class="message-content">
         <div class="message-header">
           <span class="message-author">${author}</span>
-          <span class="message-time">${time}</span>
         </div>
         <div class="message-text">${formatMessage(content)}</div>
         <div class="message-actions">
@@ -1135,15 +1665,14 @@ const lang = getLangFromUrl(Astro.url);
       </div>
     `;
     
-    const actionButtons = messageDiv.querySelectorAll('.message-action');
-    actionButtons.forEach(btn => {
+    messageDiv.querySelectorAll('.message-action').forEach(btn => {
       btn.addEventListener('click', () => handleMessageAction(btn as HTMLElement, role));
     });
     
     messagesContainer.appendChild(messageDiv);
     scrollToBottom();
   }
-  
+
   function handleMessageAction(btn: HTMLElement, role: string) {
     const action = btn.getAttribute('data-action');
     const messageDiv = btn.closest('.message');
@@ -1151,10 +1680,8 @@ const lang = getLangFromUrl(Astro.url);
     if (action === 'copy') {
       const text = messageDiv?.querySelector('.message-text')?.textContent || '';
       navigator.clipboard.writeText(text);
-      btn.style.color = 'var(--color-accent-green)';
-      setTimeout(() => {
-        btn.style.color = '';
-      }, 1000);
+      btn.classList.add('copied');
+      setTimeout(() => btn.classList.remove('copied'), 1500);
     } else if (action === 'regenerate' && !isStreaming) {
       const allMessages = Array.from(messagesContainer?.querySelectorAll('.message') || []);
       const currentIndex = allMessages.indexOf(messageDiv as HTMLElement);
@@ -1173,7 +1700,7 @@ const lang = getLangFromUrl(Astro.url);
       }
     }
   }
-  
+
   function addTypingIndicator() {
     if (!messagesContainer) return;
     
@@ -1184,12 +1711,10 @@ const lang = getLangFromUrl(Astro.url);
       <div class="message-avatar assistant">M</div>
       <div class="message-content">
         <div class="message-header">
-          <span class="message-author">${lang === 'zh' ? 'Meow' : 'Meow'}</span>
+          <span class="message-author">Meow</span>
         </div>
         <div class="typing-indicator">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span></span><span></span><span></span>
         </div>
       </div>
     `;
@@ -1197,11 +1722,11 @@ const lang = getLangFromUrl(Astro.url);
     messagesContainer.appendChild(messageDiv);
     scrollToBottom();
   }
-  
+
   function removeTypingIndicator() {
     document.getElementById('typing-message')?.remove();
   }
-  
+
   function formatMessage(content: string): string {
     let formatted = escapeHtml(content);
     
@@ -1210,25 +1735,21 @@ const lang = getLangFromUrl(Astro.url);
     });
     
     formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
-    
     formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
     formatted = formatted.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
-    
     formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
     formatted = formatted.replace(/~~([^~]+)~~/g, '<del>$1</del>');
     formatted = formatted.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
-    
     formatted = formatted.replace(/^[-*] (.+)$/gm, '<li>$1</li>');
     formatted = formatted.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
     formatted = formatted.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
-    
     formatted = formatted.replace(/\n/g, '<br>');
     formatted = formatted.replace(/(<br>){3,}/g, '<br><br>');
     
     return formatted;
   }
-  
+
   function scrollToBottom() {
     if (chatArea) {
       requestAnimationFrame(() => {
@@ -1236,11 +1757,11 @@ const lang = getLangFromUrl(Astro.url);
       });
     }
   }
-  
+
   function generateId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
-  
+
   function saveConversation() {
     if (!currentConversationId || chatHistory.length === 0) return;
     
@@ -1260,14 +1781,14 @@ const lang = getLangFromUrl(Astro.url);
       conversations.unshift(conversation);
     }
     
-    if (conversations.length > 30) {
-      conversations = conversations.slice(0, 30);
+    if (conversations.length > 50) {
+      conversations = conversations.slice(0, 50);
     }
     
     localStorage.setItem('chat_conversations', JSON.stringify(conversations));
-    renderHistoryList();
+    renderHistory();
   }
-  
+
   function loadConversations() {
     const saved = localStorage.getItem('chat_conversations');
     if (saved) {
@@ -1279,16 +1800,34 @@ const lang = getLangFromUrl(Astro.url);
     }
     currentConversationId = generateId();
   }
-  
-  function renderHistoryList() {
-    if (!historyList) return;
+
+  function renderHistory(searchQuery: string = '') {
+    const now = Date.now();
+    const todayStart = new Date().setHours(0, 0, 0, 0);
+    const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
     
-    if (conversations.length === 0) {
-      historyList.innerHTML = `<p style="padding: 12px; color: var(--text-tertiary); font-size: 13px; text-align: center;">${lang === 'zh' ? '暂无对话记录' : 'No conversations yet'}</p>`;
+    const filtered = searchQuery 
+      ? conversations.filter(c => c.title.toLowerCase().includes(searchQuery))
+      : conversations;
+    
+    const today = filtered.filter(c => c.date >= todayStart);
+    const week = filtered.filter(c => c.date >= weekAgo && c.date < todayStart);
+    const older = filtered.filter(c => c.date < weekAgo);
+    
+    renderHistorySection(historyToday, today);
+    renderHistorySection(historyWeek, week);
+    renderHistorySection(historyOlder, older);
+  }
+
+  function renderHistorySection(container: HTMLElement | null, items: typeof conversations) {
+    if (!container) return;
+    
+    if (items.length === 0) {
+      container.innerHTML = '';
       return;
     }
     
-    historyList.innerHTML = conversations.map(conv => `
+    container.innerHTML = items.map(conv => `
       <button class="history-item ${conv.id === currentConversationId ? 'active' : ''}" data-id="${conv.id}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -1303,23 +1842,22 @@ const lang = getLangFromUrl(Astro.url);
       </button>
     `).join('');
     
-    historyList.querySelectorAll('.history-item').forEach(item => {
+    container.querySelectorAll('.history-item').forEach(item => {
       item.addEventListener('click', (e) => {
-        const target = e.target as HTMLElement;
-        if (!target.closest('.history-item-delete')) {
+        if (!(e.target as HTMLElement).closest('.history-item-delete')) {
           loadConversation(item.getAttribute('data-id')!);
         }
       });
     });
     
-    historyList.querySelectorAll('.history-item-delete').forEach(btn => {
+    container.querySelectorAll('.history-item-delete').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         deleteConversation(btn.getAttribute('data-id')!);
       });
     });
   }
-  
+
   function loadConversation(id: string) {
     const conversation = conversations.find(c => c.id === id);
     if (!conversation) return;
@@ -1335,27 +1873,35 @@ const lang = getLangFromUrl(Astro.url);
     }
     
     welcomeScreen?.classList.add('hidden');
-    renderHistoryList();
+    renderHistory();
     
     sidebar?.classList.remove('open');
     sidebarOverlay?.classList.remove('visible');
   }
-  
+
   function deleteConversation(id: string) {
     conversations = conversations.filter(c => c.id !== id);
     localStorage.setItem('chat_conversations', JSON.stringify(conversations));
-    renderHistoryList();
+    renderHistory();
     
     if (id === currentConversationId) {
       startNewChat();
     }
   }
-  
+
+  function clearAllConversations() {
+    if (confirm(lang === 'zh' ? '确定要清空所有对话吗？' : 'Clear all conversations?')) {
+      conversations = [];
+      localStorage.removeItem('chat_conversations');
+      startNewChat();
+    }
+  }
+
   function escapeHtml(text: string): string {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
-  
+
   init();
 </script>
