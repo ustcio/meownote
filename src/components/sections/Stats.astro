@@ -113,11 +113,14 @@ const stats = [
   }
   
   .stat-value {
-    font-family: var(--font-display);
+    font-family: var(--font-number);
     font-size: var(--text-2xl);
     font-weight: var(--font-semibold);
     color: var(--text-primary);
     margin-bottom: var(--space-1);
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
   }
   
   @media (min-width: 768px) {
