@@ -702,45 +702,85 @@ const lang = getLangFromUrl(Astro.url);
   .messages-container {
     display: flex;
     flex-direction: column;
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 0;
     width: 100%;
   }
 
+  /* Message Groups - Alternate background for visual separation */
   .message {
     display: flex;
     gap: 16px;
-    padding: 20px 0;
-    animation: messageIn 0.3s ease;
+    padding: 24px 32px;
+    animation: messageIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.2s ease;
+  }
+
+  .message:hover {
+    background-color: rgba(var(--bg-tertiary-rgb, 128, 128, 128), 0.03);
+  }
+
+  /* User messages - right aligned with distinct styling */
+  .message.user {
+    flex-direction: row-reverse;
+  }
+
+  .message.user .message-content {
+    align-items: flex-end;
+  }
+
+  .message.user .message-bubble {
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+    color: white;
+    border-radius: 18px 18px 4px 18px;
+    box-shadow: 0 2px 12px rgba(41, 151, 255, 0.25);
+  }
+
+  .message.user .message-text {
+    color: white;
+  }
+
+  .message.user .message-text code {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+
+  /* Assistant messages - left aligned with subtle styling */
+  .message.assistant .message-bubble {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 18px 18px 18px 4px;
   }
 
   @keyframes messageIn {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(12px) scale(0.98);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
     }
   }
 
+  /* Avatar Styling */
   .message-avatar {
     flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
   .message-avatar.user {
     background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
     color: white;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
   }
 
@@ -754,35 +794,61 @@ const lang = getLangFromUrl(Astro.url);
     object-fit: cover;
   }
 
+  /* Message Content Layout */
   .message-content {
     flex: 1;
     min-width: 0;
-    padding-top: 4px;
+    max-width: calc(100% - 60px);
+    display: flex;
+    flex-direction: column;
   }
 
+  .message.user .message-content {
+    align-items: flex-end;
+  }
+
+  /* Message Bubble */
+  .message-bubble {
+    padding: 14px 18px;
+    max-width: 85%;
+    word-wrap: break-word;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .message-bubble:hover {
+    transform: translateY(-1px);
+  }
+
+  /* Message Header */
   .message-header {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    padding: 0 4px;
+  }
+
+  .message.user .message-header {
+    justify-content: flex-end;
   }
 
   .message-author {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--text-primary);
   }
 
   .message-time {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-tertiary);
+    font-weight: 400;
   }
 
+  /* Message Text Styling */
   .message-text {
     font-size: 15px;
-    line-height: 1.7;
+    line-height: 1.75;
     color: var(--text-primary);
-    word-wrap: break-word;
   }
 
   .message-text p {
@@ -793,57 +859,209 @@ const lang = getLangFromUrl(Astro.url);
     margin-bottom: 0;
   }
 
+  /* Inline Code */
   .message-text code {
     background: var(--bg-tertiary);
     padding: 2px 6px;
     border-radius: 4px;
-    font-family: var(--font-mono);
-    font-size: 0.9em;
+    font-family: var(--font-mono, 'SF Mono', Monaco, monospace);
+    font-size: 0.88em;
+    color: var(--text-primary);
   }
 
+  /* Code Blocks */
   .message-text pre {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: 8px;
-    padding: 16px;
+    background: #1e1e1e;
+    border: none;
+    border-radius: 10px;
+    padding: 16px 20px;
     overflow-x: auto;
     margin: 12px 0;
+    position: relative;
+  }
+
+  .message-text pre::before {
+    content: attr(data-language);
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 11px;
+    color: #6e7681;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
   .message-text pre code {
     background: transparent;
     padding: 0;
+    color: #e6edf3;
+    font-size: 13px;
+    line-height: 1.6;
   }
 
+  /* Lists */
+  .message-text ul, .message-text ol {
+    margin: 8px 0;
+    padding-left: 24px;
+  }
+
+  .message-text li {
+    margin: 4px 0;
+  }
+
+  /* Blockquotes */
+  .message-text blockquote {
+    border-left: 3px solid var(--color-accent-blue);
+    margin: 12px 0;
+    padding: 8px 16px;
+    background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+  }
+
+  /* Links */
+  .message-text a {
+    color: var(--color-accent-blue);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+  }
+
+  .message-text a:hover {
+    border-bottom-color: var(--color-accent-blue);
+  }
+
+  /* Message Actions */
   .message-actions {
     display: flex;
-    gap: 8px;
-    margin-top: 12px;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 0 4px;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transform: translateY(-4px);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .message:hover .message-actions {
     opacity: 1;
+    transform: translateY(0);
   }
 
   .message-action {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
     color: var(--text-tertiary);
     cursor: pointer;
     transition: all 0.2s ease;
   }
 
   .message-action:hover {
-    background: var(--bg-secondary);
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
     color: var(--text-primary);
+    transform: translateY(-1px);
+  }
+
+  .message-action:active {
+    transform: translateY(0);
+  }
+
+  /* Message Status Indicator */
+  .message-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+    padding: 0 4px;
+  }
+
+  .message-status.sending::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--border-primary);
+    border-top-color: var(--color-accent-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .message-status.sent::before {
+    content: '✓';
+    color: var(--color-accent-green);
+    font-weight: bold;
+  }
+
+  .message-status.error {
+    color: var(--color-accent-red);
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Typing Indicator Enhancement */
+  .typing-message {
+    opacity: 0.8;
+  }
+
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 12px 0;
+    align-items: center;
+  }
+
+  .typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite ease-in-out both;
+  }
+
+  .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+  .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0s; }
+
+  @keyframes typingBounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Timestamp Divider */
+  .timestamp-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 24px 0;
+    position: relative;
+  }
+
+  .timestamp-divider::before {
+    content: '';
+    position: absolute;
+    left: 32px;
+    right: 32px;
+    height: 1px;
+    background: var(--border-primary);
+  }
+
+  .timestamp-divider span {
+    background: var(--bg-primary);
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    border-radius: 12px;
+    position: relative;
+    z-index: 1;
   }
 
   /* ========== Typing Indicator ========== */
@@ -1026,17 +1244,92 @@ const lang = getLangFromUrl(Astro.url);
       grid-template-columns: 1fr;
     }
 
+    /* Mobile message adjustments */
     .messages-container {
-      padding: 16px;
+      padding: 0;
     }
 
     .message {
-      padding: 16px 0;
+      padding: 16px 20px;
       gap: 12px;
+    }
+
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+    }
+
+    .message-content {
+      max-width: calc(100% - 48px);
+    }
+
+    .message-bubble {
+      max-width: 95%;
+      padding: 12px 14px;
+    }
+
+    .message-text {
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .message-header {
+      margin-bottom: 4px;
+    }
+
+    .message-author {
+      font-size: 12px;
+    }
+
+    .message-time {
+      font-size: 10px;
+    }
+
+    .message-actions {
+      opacity: 1;
+      transform: none;
+      margin-top: 6px;
+    }
+
+    .message-action {
+      width: 28px;
+      height: 28px;
     }
 
     .input-container {
       padding: 12px 16px 16px;
+    }
+  }
+
+  /* Small mobile devices */
+  @media (max-width: 480px) {
+    .message {
+      padding: 12px 16px;
+      gap: 10px;
+    }
+
+    .message-bubble {
+      padding: 10px 12px;
+      border-radius: 16px 16px 16px 4px;
+    }
+
+    .message.user .message-bubble {
+      border-radius: 16px 16px 4px 16px;
+    }
+
+    .message-text {
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .message-text pre {
+      padding: 12px 14px;
+      margin: 8px 0;
+    }
+
+    .message-text pre code {
+      font-size: 12px;
     }
   }
 
@@ -1234,16 +1527,13 @@ const lang = getLangFromUrl(Astro.url);
     // Hide welcome screen
     welcomeContainer?.classList.add('hidden');
     
-    // Add user message
-    addMessage('user', message);
+    // Add user message with sending status
+    const userMessageDiv = addMessage('user', message, 'sending');
     chatHistory.push({ role: 'user', content: message });
     
     // Clear input
     chatInput.value = '';
     handleInput();
-    
-    // Show typing indicator
-    addTypingIndicator();
     
     // Update UI state
     isStreaming = true;
@@ -1264,9 +1554,15 @@ const lang = getLangFromUrl(Astro.url);
         signal: abortController.signal
       });
       
-      removeTypingIndicator();
+      // Update user message status to sent
+      updateMessageStatus(userMessageDiv, 'sent');
+      
+      // Show typing indicator
+      addTypingIndicator();
       
       const result = await response.json();
+      
+      removeTypingIndicator();
       
       if (result.answer) {
         addMessage('assistant', result.answer);
@@ -1279,9 +1575,11 @@ const lang = getLangFromUrl(Astro.url);
       }
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
+        removeTypingIndicator();
         addMessage('assistant', 'Generation stopped.');
       } else {
         console.error('Chat error:', error);
+        updateMessageStatus(userMessageDiv, 'error');
         removeTypingIndicator();
         addMessage('assistant', 'Network error. Please try again.');
       }
@@ -1312,13 +1610,21 @@ const lang = getLangFromUrl(Astro.url);
   }
   
   // Message functions
-  function addMessage(role: 'user' | 'assistant', content: string) {
+  function addMessage(role: 'user' | 'assistant', content: string, status?: 'sending' | 'sent' | 'error') {
     const messageDiv = document.createElement('div');
-    messageDiv.className = 'message';
+    messageDiv.className = `message ${role}`;
+    messageDiv.dataset.role = role;
     
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const author = role === 'user' ? 'You' : 'AI Assistant';
-    const avatarContent = role === 'user' ? 'U' : '<video autoplay loop muted playsinline width="32" height="32"><source src="/logo.mp4" type="video/mp4" /></video>';
+    const avatarContent = role === 'user' ? 'U' : '<video autoplay loop muted playsinline width="36" height="36"><source src="/logo.mp4" type="video/mp4" /></video>';
+    
+    // Status indicator
+    let statusHtml = '';
+    if (status) {
+      const statusText = status === 'sending' ? 'Sending...' : status === 'sent' ? 'Sent' : 'Failed';
+      statusHtml = `<div class="message-status ${status}">${statusText}</div>`;
+    }
     
     messageDiv.innerHTML = `
       <div class="message-avatar ${role}">
@@ -1329,12 +1635,21 @@ const lang = getLangFromUrl(Astro.url);
           <span class="message-author">${author}</span>
           <span class="message-time">${time}</span>
         </div>
-        <div class="message-text">${formatMessage(content)}</div>
+        <div class="message-bubble">
+          <div class="message-text">${formatMessage(content)}</div>
+        </div>
+        ${statusHtml}
         <div class="message-actions">
           <button class="message-action" title="Copy" onclick="copyMessage(this)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+          <button class="message-action" title="Regenerate" onclick="regenerateMessage(this)" style="display: ${role === 'assistant' ? 'flex' : 'none'}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
             </svg>
           </button>
         </div>
@@ -1345,6 +1660,15 @@ const lang = getLangFromUrl(Astro.url);
     scrollToBottom();
     
     return messageDiv;
+  }
+  
+  // Update message status
+  function updateMessageStatus(messageDiv: HTMLElement, status: 'sending' | 'sent' | 'error') {
+    const statusDiv = messageDiv.querySelector('.message-status');
+    if (statusDiv) {
+      statusDiv.className = `message-status ${status}`;
+      statusDiv.textContent = status === 'sending' ? 'Sending...' : status === 'sent' ? 'Sent' : 'Failed';
+    }
   }
   
   function addTypingIndicator() {
@@ -1378,10 +1702,50 @@ const lang = getLangFromUrl(Astro.url);
   }
   
   function formatMessage(content: string): string {
-    return content
-      .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\n/g, '<br>');
+    // Escape HTML first
+    let formatted = escapeHtml(content);
+    
+    // Code blocks with language detection
+    formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+      const language = lang || 'code';
+      return `<pre data-language="${language}"><code>${code}</code></pre>`;
+    });
+    
+    // Inline code
+    formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+    
+    // Links
+    formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    
+    // Auto-link URLs
+    formatted = formatted.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    
+    // Bold
+    formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    
+    // Italic
+    formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    
+    // Strikethrough
+    formatted = formatted.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+    
+    // Blockquotes
+    formatted = formatted.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+    
+    // Unordered lists
+    formatted = formatted.replace(/^[-*] (.+)$/gm, '<li>$1</li>');
+    formatted = formatted.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+    
+    // Ordered lists
+    formatted = formatted.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+    
+    // Line breaks (after lists to avoid breaking them)
+    formatted = formatted.replace(/\n/g, '<br>');
+    
+    // Clean up consecutive breaks
+    formatted = formatted.replace(/(<br>){3,}/g, '<br><br>');
+    
+    return formatted;
   }
   
   function scrollToBottom() {
@@ -1494,8 +1858,41 @@ const lang = getLangFromUrl(Astro.url);
     if (messageText) {
       navigator.clipboard.writeText(messageText);
       // Visual feedback
-      btn.style.color = 'var(--color-accent-green)';
-      setTimeout(() => btn.style.color = '', 1000);
+      const originalBg = btn.style.background;
+      btn.style.background = 'var(--color-accent-green)';
+      btn.style.color = 'white';
+      setTimeout(() => {
+        btn.style.background = originalBg;
+        btn.style.color = '';
+      }, 1200);
+    }
+  };
+  
+  // Regenerate assistant message
+  (window as any).regenerateMessage = function(btn: HTMLElement) {
+    const messageDiv = btn.closest('.message') as HTMLElement;
+    if (!messageDiv || isStreaming) return;
+    
+    // Find the user message that triggered this response
+    const allMessages = Array.from(messagesContainer?.querySelectorAll('.message') || []);
+    const currentIndex = allMessages.indexOf(messageDiv);
+    
+    if (currentIndex > 0) {
+      const userMessageDiv = allMessages[currentIndex - 1];
+      const userText = userMessageDiv.querySelector('.message-text')?.textContent;
+      
+      if (userText && chatInput) {
+        // Remove the current assistant message
+        messageDiv.remove();
+        
+        // Remove from chat history
+        chatHistory = chatHistory.slice(0, -1);
+        
+        // Resend the message
+        chatInput.value = userText;
+        handleInput();
+        sendMessage();
+      }
     }
   };
   
