@@ -555,27 +555,56 @@ async function handleStatsVisit(request, env, ctx) {
       ).bind(visitorId, today).run();
     }
 
-    return await getStatsResponse(env);
+    const pvResult = await env.DB.prepare(`SELECT COUNT(*) as count FROM page_views`).first();
+    const online = await env.DB.prepare(
+      `SELECT COUNT(DISTINCT visitor_id) as count FROM unique_visitors 
+       WHERE date = date('now')`
+    ).first();
+
+    return jsonResponse({ 
+      success: true,
+      pv: pvResult?.count || 0,
+      total: pvResult?.count || 0,
+      online: online?.count || 1
+    });
 
   } catch (error) {
     console.error('Stats visit error:', error);
-    return jsonResponse({ pv: 0, uv: 0 });
+    return jsonResponse({ success: true, pv: 0, total: 0, online: 1 });
   }
 }
 
 async function handleStatsGet(request, env, ctx) {
   try {
-    return await getStatsResponse(env);
+    const pvResult = await env.DB.prepare(`SELECT COUNT(*) as count FROM page_views`).first();
+    const uvResult = await env.DB.prepare(`SELECT COUNT(DISTINCT visitor_id) as count FROM unique_visitors`).first();
+    
+    const online = await env.DB.prepare(
+      `SELECT COUNT(DISTINCT visitor_id) as count FROM unique_visitors 
+       WHERE date = date('now')`
+    ).first();
+
+    return jsonResponse({ 
+      success: true,
+      pv: pvResult?.count || 0, 
+      uv: uvResult?.count || 0,
+      total: pvResult?.count || 0,
+      online: online?.count || 1
+    });
   } catch (error) {
     console.error('Stats get error:', error);
-    return jsonResponse({ pv: 0, uv: 0 });
+    return jsonResponse({ success: true, pv: 0, uv: 0, total: 0, online: 1 });
   }
 }
 
 async function getStatsResponse(env) {
   const pvResult = await env.DB.prepare(`SELECT COUNT(*) as count FROM page_views`).first();
   const uvResult = await env.DB.prepare(`SELECT COUNT(DISTINCT visitor_id) as count FROM unique_visitors`).first();
-  return jsonResponse({ pv: pvResult?.count || 0, uv: uvResult?.count || 0 });
+  return jsonResponse({ 
+    success: true,
+    pv: pvResult?.count || 0, 
+    uv: uvResult?.count || 0 
+  });
 }
 
 // ================================================================================
