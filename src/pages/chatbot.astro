@@ -112,7 +112,7 @@ const lang = getLangFromUrl(Astro.url);
         <div class="welcome-container" id="welcome-container">
           <div class="welcome-content">
             <div class="welcome-logo">
-              <video autoplay loop muted playsinline width="64" height="64">
+              <video autoplay loop muted playsinline width="120" height="120">
                 <source src="/logo.mp4" type="video/mp4" />
               </video>
             </div>
@@ -627,12 +627,18 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   .welcome-logo {
-    margin-bottom: 24px;
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .welcome-logo video {
-    border-radius: 16px;
-    transform: scale(1.1);
+    width: 120px;
+    height: 120px;
+    border-radius: 24px;
+    object-fit: cover;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   }
 
   .welcome-title {
@@ -1064,30 +1070,6 @@ const lang = getLangFromUrl(Astro.url);
     z-index: 1;
   }
 
-  /* ========== Typing Indicator ========== */
-  .typing-indicator {
-    display: flex;
-    gap: 4px;
-    padding: 8px 0;
-  }
-
-  .typing-indicator span {
-    width: 8px;
-    height: 8px;
-    background: var(--text-tertiary);
-    border-radius: 50%;
-    animation: typing 1.4s infinite ease-in-out both;
-  }
-
-  .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-  .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-  .typing-indicator span:nth-child(3) { animation-delay: 0s; }
-
-  @keyframes typing {
-    0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
-    40% { transform: scale(1); opacity: 1; }
-  }
-
   /* ========== Input Area ========== */
   .input-container {
     padding: 16px 20px 20px;
@@ -1236,6 +1218,12 @@ const lang = getLangFromUrl(Astro.url);
       display: none;
     }
 
+    /* Welcome screen mobile adjustments */
+    .welcome-logo video {
+      width: 100px;
+      height: 100px;
+    }
+
     .welcome-title {
       font-size: 24px;
     }
@@ -1330,6 +1318,11 @@ const lang = getLangFromUrl(Astro.url);
 
     .message-text pre code {
       font-size: 12px;
+    }
+
+    .welcome-logo video {
+      width: 80px;
+      height: 80px;
     }
   }
 
@@ -1673,11 +1666,11 @@ const lang = getLangFromUrl(Astro.url);
   
   function addTypingIndicator() {
     const messageDiv = document.createElement('div');
-    messageDiv.className = 'message typing';
+    messageDiv.className = 'message assistant typing';
     messageDiv.id = 'typing-message';
     messageDiv.innerHTML = `
       <div class="message-avatar assistant">
-        <video autoplay loop muted playsinline width="32" height="32">
+        <video autoplay loop muted playsinline width="36" height="36">
           <source src="/logo.mp4" type="video/mp4" />
         </video>
       </div>
