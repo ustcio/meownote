@@ -9,208 +9,155 @@ const lang = getLangFromUrl(Astro.url);
   title={lang === 'zh' ? 'ChatBot - Meow Note' : 'ChatBot - Meow Note'}
   description={lang === 'zh' ? 'AI智能对话助手' : 'AI Chat Assistant'}
 >
-  <div class="chat-app" id="chat-app">
-    <!-- Sidebar: 对话历史管理 -->
+  <div class="chat-container">
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <button class="new-chat-btn" id="new-chat-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
-          <span>{lang === 'zh' ? '新对话' : 'New chat'}</span>
-        </button>
-        <button class="sidebar-toggle" id="sidebar-toggle" title={lang === 'zh' ? '关闭侧边栏' : 'Close sidebar'}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="9" y1="3" x2="9" y2="21"></line>
-          </svg>
+          <span>{lang === 'zh' ? '新对话' : 'New Chat'}</span>
         </button>
       </div>
       
-      <div class="sidebar-content">
-        <div class="history-section">
-          <div class="history-header">
-            <span class="history-label">{lang === 'zh' ? '今天' : 'Today'}</span>
-          </div>
-          <div class="history-list" id="history-list">
-            <!-- 动态生成的历史对话列表 -->
-          </div>
+      <div class="sidebar-history">
+        <div class="history-header">
+          <span>{lang === 'zh' ? '最近对话' : 'Recent'}</span>
         </div>
+        <div class="history-list" id="history-list"></div>
       </div>
       
       <div class="sidebar-footer">
-        <button class="user-menu-btn" id="user-menu-btn">
-          <div class="user-avatar">
-            <span>U</span>
-          </div>
-          <span class="user-name">{lang === 'zh' ? '用户' : 'User'}</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="1"></circle>
-            <circle cx="19" cy="12" r="1"></circle>
-            <circle cx="5" cy="12" r="1"></circle>
+        <button class="sidebar-footer-btn" id="settings-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
+          <span>{lang === 'zh' ? '设置' : 'Settings'}</span>
         </button>
       </div>
     </aside>
 
-    <!-- Main Content: 对话区域 -->
+    <!-- Mobile overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Main content -->
     <main class="main-content">
-      <!-- Header: 模型选择和移动端菜单 -->
+      <!-- Header -->
       <header class="chat-header">
-        <div class="header-left">
-          <button class="menu-btn" id="menu-btn" title={lang === 'zh' ? '打开侧边栏' : 'Open sidebar'}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
+        <button class="menu-toggle" id="menu-toggle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        
+        <div class="model-selector">
+          <button class="model-btn" id="model-btn">
+            <span class="model-name" id="model-name">Doubao</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
-          <div class="model-selector">
-            <button class="model-btn" id="model-btn">
-              <span class="model-name" id="model-name">Doubao 2.0 Pro</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9"></polyline>
+          <div class="model-dropdown" id="model-dropdown">
+            <button class="model-option active" data-model="doubao-2.0-pro" data-name="Doubao Pro">
+              <span class="model-option-name">Doubao 2.0 Pro</span>
+              <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </button>
-            <div class="model-dropdown" id="model-dropdown">
-              <button class="model-option active" data-model="doubao-2.0-pro" data-name="Doubao 2.0 Pro">
-                <div class="model-option-info">
-                  <span class="model-option-name">Doubao 2.0 Pro</span>
-                  <span class="model-option-desc">{lang === 'zh' ? '通用对话模型' : 'General conversation'}</span>
-                </div>
-                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="model-option" data-model="doubao-2.0-code" data-name="Doubao 2.0 Code">
-                <div class="model-option-info">
-                  <span class="model-option-name">Doubao 2.0 Code</span>
-                  <span class="model-option-desc">{lang === 'zh' ? '代码生成专家' : 'Code generation expert'}</span>
-                </div>
-                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-            </div>
+            <button class="model-option" data-model="doubao-2.0-code" data-name="Doubao Code">
+              <span class="model-option-name">Doubao 2.0 Code</span>
+              <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
           </div>
-        </div>
-        <div class="header-actions">
-          <button class="header-action-btn" id="share-btn" title={lang === 'zh' ? '分享对话' : 'Share chat'}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-              <polyline points="16 6 12 2 8 6"></polyline>
-              <line x1="12" y1="2" x2="12" y2="15"></line>
-            </svg>
-          </button>
         </div>
       </header>
 
-      <!-- Chat Area: 消息显示区域 -->
+      <!-- Chat area -->
       <div class="chat-area" id="chat-area">
-        <!-- Welcome Screen -->
-        <div class="welcome-container" id="welcome-container">
-          <div class="welcome-content">
-            <div class="welcome-logo">
-              <video autoplay loop muted playsinline width="120" height="120">
-                <source src="/logo.mp4" type="video/mp4" />
-              </video>
-            </div>
-            <h1 class="welcome-title">{lang === 'zh' ? '有什么可以帮您的？' : 'How can I help you today?'}</h1>
-            <div class="suggestion-cards">
-              <button class="suggestion-card" data-prompt={lang === 'zh' ? '帮我写一段Python代码来计算斐波那契数列' : 'Help me write Python code to calculate Fibonacci sequence'}>
-                <div class="suggestion-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="16 18 22 12 16 6"></polyline>
-                    <polyline points="8 6 2 12 8 18"></polyline>
-                  </svg>
-                </div>
-                <div class="suggestion-text">
-                  <span class="suggestion-title">{lang === 'zh' ? '编写代码' : 'Write code'}</span>
-                  <span class="suggestion-desc">{lang === 'zh' ? 'Python、JavaScript、Java等' : 'Python, JavaScript, Java, etc.'}</span>
-                </div>
-              </button>
-              <button class="suggestion-card" data-prompt={lang === 'zh' ? '用简单的语言解释量子计算' : 'Explain quantum computing in simple terms'}>
-                <div class="suggestion-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                  </svg>
-                </div>
-                <div class="suggestion-text">
-                  <span class="suggestion-title">{lang === 'zh' ? '解释概念' : 'Explain concepts'}</span>
-                  <span class="suggestion-desc">{lang === 'zh' ? '科学、技术、历史等' : 'Science, technology, history, etc.'}</span>
-                </div>
-              </button>
-              <button class="suggestion-card" data-prompt={lang === 'zh' ? '将这段中文翻译成英文' : 'Translate this text to English'}>
-                <div class="suggestion-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M5 8l6 6"></path>
-                    <path d="M4 14l6-6 2-3"></path>
-                    <path d="M2 5h12"></path>
-                    <path d="M7 2h1"></path>
-                    <path d="M22 22l-5-10-5 10"></path>
-                    <path d="M14 18h6"></path>
-                  </svg>
-                </div>
-                <div class="suggestion-text">
-                  <span class="suggestion-title">{lang === 'zh' ? '翻译文本' : 'Translate text'}</span>
-                  <span class="suggestion-desc">{lang === 'zh' ? '支持多种语言互译' : 'Support multiple languages'}</span>
-                </div>
-              </button>
-              <button class="suggestion-card" data-prompt={lang === 'zh' ? '帮我写一篇关于人工智能的短文' : 'Help me write a short essay about AI'}>
-                <div class="suggestion-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                    <polyline points="10 9 9 9 8 9"></polyline>
-                  </svg>
-                </div>
-                <div class="suggestion-text">
-                  <span class="suggestion-title">{lang === 'zh' ? '创作内容' : 'Create content'}</span>
-                  <span class="suggestion-desc">{lang === 'zh' ? '文章、故事、邮件等' : 'Essays, stories, emails, etc.'}</span>
-                </div>
-              </button>
-            </div>
+        <!-- Welcome screen -->
+        <div class="welcome-screen" id="welcome-screen">
+          <div class="welcome-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <h1 class="welcome-title">{lang === 'zh' ? '你好，我是 Meow' : 'Hello, I\'m Meow'}</h1>
+          <p class="welcome-subtitle">{lang === 'zh' ? '有什么我可以帮助你的？' : 'How can I help you today?'}</p>
+          
+          <div class="suggestion-grid">
+            <button class="suggestion-item" data-prompt={lang === 'zh' ? '帮我写一段Python代码来计算斐波那契数列' : 'Write Python code for Fibonacci sequence'}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+              <span>{lang === 'zh' ? '编写代码' : 'Write code'}</span>
+            </button>
+            <button class="suggestion-item" data-prompt={lang === 'zh' ? '用简单的语言解释量子计算' : 'Explain quantum computing simply'}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <span>{lang === 'zh' ? '解释概念' : 'Explain concepts'}</span>
+            </button>
+            <button class="suggestion-item" data-prompt={lang === 'zh' ? '翻译这段话成英文' : 'Translate to English'}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 8l6 6"></path>
+                <path d="M4 14l6-6 2-3"></path>
+                <path d="M2 5h12"></path>
+                <path d="M7 2h1"></path>
+                <path d="M22 22l-5-10-5 10"></path>
+                <path d="M14 18h6"></path>
+              </svg>
+              <span>{lang === 'zh' ? '翻译文本' : 'Translate'}</span>
+            </button>
+            <button class="suggestion-item" data-prompt={lang === 'zh' ? '帮我写一篇关于AI的短文' : 'Write about AI'}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              <span>{lang === 'zh' ? '创作内容' : 'Create content'}</span>
+            </button>
           </div>
         </div>
 
-        <!-- Messages Container -->
+        <!-- Messages container -->
         <div class="messages-container" id="messages-container"></div>
       </div>
 
-      <!-- Input Area: 用户输入区域 -->
-      <div class="input-container">
+      <!-- Input area -->
+      <div class="input-area">
         <div class="input-wrapper">
           <div class="input-box">
             <textarea 
               id="chat-input"
               class="chat-input"
-              placeholder={lang === 'zh' ? '发送消息...' : 'Message...'}
+              placeholder={lang === 'zh' ? '输入消息...' : 'Message...'}
               rows="1"
             ></textarea>
             <div class="input-actions">
-              <button class="input-action-btn" id="attach-btn" title={lang === 'zh' ? '上传文件' : 'Upload file'}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-                </svg>
-              </button>
               <button class="send-btn" id="send-btn" disabled>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
                 </svg>
               </button>
-              <button class="stop-btn" id="stop-btn" style="display: none;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <button class="stop-btn" id="stop-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   <rect x="6" y="6" width="12" height="12" rx="2"></rect>
                 </svg>
               </button>
             </div>
           </div>
-          <p class="input-footer">{lang === 'zh' ? 'AI 可能会生成不准确的信息，请核实重要内容。' : 'AI may generate inaccurate information. Please verify important content.'}</p>
+          <p class="input-hint">{lang === 'zh' ? 'AI 可能会产生错误信息，请核实重要内容。' : 'AI may make mistakes. Please verify important information.'}</p>
         </div>
       </div>
     </main>
@@ -218,50 +165,53 @@ const lang = getLangFromUrl(Astro.url);
 </Layout>
 
 <style>
-  /* ========== Layout Structure ========== */
-  .chat-app {
-    display: flex;
-    height: calc(100vh - var(--header-total-height));
-    margin-top: var(--header-total-height);
-    background: var(--bg-primary);
-    overflow: hidden;
+  :root {
+    --sidebar-width: 280px;
+    --header-height: 56px;
+    --input-height: auto;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
   }
 
-  /* ========== Sidebar ========== */
+  .chat-container {
+    display: flex;
+    height: 100vh;
+    margin-top: var(--header-total-height);
+    background: var(--bg-primary);
+  }
+
+  /* ===== Sidebar ===== */
   .sidebar {
-    width: 260px;
+    width: var(--sidebar-width);
+    height: 100vh;
     background: var(--bg-secondary);
     border-right: 1px solid var(--border-primary);
     display: flex;
     flex-direction: column;
-    flex-shrink: 0;
-    transition: transform 0.3s ease, width 0.3s ease;
-  }
-
-  .sidebar.collapsed {
-    width: 0;
-    transform: translateX(-100%);
-    border-right: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 50;
+    transition: transform 0.3s ease;
   }
 
   .sidebar-header {
     padding: 12px;
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
     border-bottom: 1px solid var(--border-primary);
   }
 
   .new-chat-btn {
-    flex: 1;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px 12px;
+    padding: 12px 16px;
     background: transparent;
     border: 1px solid var(--border-primary);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     color: var(--text-primary);
     font-size: 14px;
     font-weight: 500;
@@ -274,40 +224,14 @@ const lang = getLangFromUrl(Astro.url);
     border-color: var(--border-hover);
   }
 
-  .sidebar-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: transparent;
-    border: 1px solid var(--border-primary);
-    border-radius: 8px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .sidebar-toggle:hover {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-  }
-
-  .sidebar-content {
+  .sidebar-history {
     flex: 1;
     overflow-y: auto;
-    padding: 8px;
-  }
-
-  .history-section {
-    margin-bottom: 16px;
+    padding: 12px 8px;
   }
 
   .history-header {
     padding: 8px 12px;
-  }
-
-  .history-label {
     font-size: 12px;
     font-weight: 600;
     color: var(--text-tertiary);
@@ -318,7 +242,7 @@ const lang = getLangFromUrl(Astro.url);
   .history-list {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
   }
 
   .history-item {
@@ -326,17 +250,19 @@ const lang = getLangFromUrl(Astro.url);
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     color: var(--text-secondary);
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
+    transition: all 0.15s ease;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
   }
 
   .history-item:hover {
     background: var(--bg-tertiary);
-    color: var(--text-primary);
   }
 
   .history-item.active {
@@ -344,7 +270,7 @@ const lang = getLangFromUrl(Astro.url);
     color: var(--text-primary);
   }
 
-  .history-item-icon {
+  .history-item svg {
     flex-shrink: 0;
     opacity: 0.6;
   }
@@ -356,28 +282,24 @@ const lang = getLangFromUrl(Astro.url);
     white-space: nowrap;
   }
 
-  .history-item-actions {
-    display: none;
-    gap: 4px;
-  }
-
-  .history-item:hover .history-item-actions {
-    display: flex;
-  }
-
-  .history-item-action {
+  .history-item-delete {
+    opacity: 0;
     padding: 4px;
+    border-radius: 4px;
     background: transparent;
     border: none;
-    border-radius: 4px;
     color: var(--text-tertiary);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
   }
 
-  .history-item-action:hover {
+  .history-item:hover .history-item-delete {
+    opacity: 1;
+  }
+
+  .history-item-delete:hover {
     background: var(--bg-primary);
-    color: var(--text-primary);
+    color: var(--color-accent-red);
   }
 
   .sidebar-footer {
@@ -385,71 +307,50 @@ const lang = getLangFromUrl(Astro.url);
     border-top: 1px solid var(--border-primary);
   }
 
-  .user-menu-btn {
+  .sidebar-footer-btn {
     width: 100%;
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
+    border-radius: var(--radius-sm);
     background: transparent;
-    border: 1px solid var(--border-primary);
-    border-radius: 8px;
-    color: var(--text-primary);
+    border: none;
+    color: var(--text-secondary);
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
   }
 
-  .user-menu-btn:hover {
+  .sidebar-footer-btn:hover {
     background: var(--bg-tertiary);
+    color: var(--text-primary);
   }
 
-  .user-avatar {
-    width: 28px;
-    height: 28px;
-    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .user-name {
-    flex: 1;
-    text-align: left;
-  }
-
-  /* ========== Main Content ========== */
+  /* ===== Main Content ===== */
   .main-content {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-width: 0;
-    min-height: 0;
+    margin-left: var(--sidebar-width);
+    height: 100vh;
     background: var(--bg-primary);
   }
 
-  /* ========== Header ========== */
+  /* ===== Header ===== */
   .chat-header {
+    height: var(--header-height);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 20px;
+    padding: 0 20px;
     border-bottom: 1px solid var(--border-primary);
     flex-shrink: 0;
     background: var(--bg-primary);
   }
 
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .menu-btn {
+  .menu-toggle {
     display: none;
     align-items: center;
     justify-content: center;
@@ -457,13 +358,13 @@ const lang = getLangFromUrl(Astro.url);
     height: 36px;
     background: transparent;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
   }
 
-  .menu-btn:hover {
+  .menu-toggle:hover {
     background: var(--bg-secondary);
     color: var(--text-primary);
   }
@@ -476,37 +377,38 @@ const lang = getLangFromUrl(Astro.url);
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 12px;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 8px;
+    padding: 8px 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
     color: var(--text-primary);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
   }
 
   .model-btn:hover {
-    background: var(--bg-secondary);
-    border-color: var(--border-primary);
+    border-color: var(--border-hover);
+    background: var(--bg-tertiary);
   }
 
   .model-dropdown {
     position: absolute;
     top: calc(100% + 8px);
-    left: 0;
-    min-width: 280px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 220px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    padding: 8px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    padding: 6px;
     display: none;
     z-index: 100;
   }
 
-  .model-dropdown.visible {
+  .model-dropdown.open {
     display: block;
   }
 
@@ -514,14 +416,16 @@ const lang = getLangFromUrl(Astro.url);
     width: 100%;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 12px;
-    padding: 12px;
+    padding: 10px 12px;
     background: transparent;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     color: var(--text-primary);
+    font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
     text-align: left;
   }
 
@@ -537,64 +441,22 @@ const lang = getLangFromUrl(Astro.url);
     opacity: 1;
   }
 
-  .model-option-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .model-option-name {
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .model-option-desc {
-    font-size: 12px;
-    color: var(--text-tertiary);
-  }
-
   .check-icon {
     opacity: 0;
     color: var(--color-accent-blue);
   }
 
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .header-action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: transparent;
-    border: none;
-    border-radius: 8px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .header-action-btn:hover {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-  }
-
-  /* ========== Chat Area ========== */
+  /* ===== Chat Area ===== */
   .chat-area {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
   }
 
   .chat-area::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
   }
 
   .chat-area::-webkit-scrollbar-track {
@@ -603,239 +465,147 @@ const lang = getLangFromUrl(Astro.url);
 
   .chat-area::-webkit-scrollbar-thumb {
     background: var(--text-quaternary);
-    border-radius: 4px;
+    border-radius: 3px;
   }
 
-  /* ========== Welcome Screen ========== */
-  .welcome-container {
+  /* ===== Welcome Screen ===== */
+  .welcome-screen {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 40px 20px 100px;
     min-height: 100%;
-    padding: 40px 20px;
   }
 
-  .welcome-container.hidden {
+  .welcome-screen.hidden {
     display: none;
   }
 
-  .welcome-content {
-    max-width: 600px;
-    width: 100%;
-    text-align: center;
-  }
-
-  .welcome-logo {
-    margin-bottom: 32px;
+  .welcome-icon {
+    width: 64px;
+    height: 64px;
     display: flex;
-    justify-content: center;
     align-items: center;
-  }
-
-  .welcome-logo video {
-    width: 120px;
-    height: 120px;
-    border-radius: 24px;
-    object-fit: cover;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    justify-content: center;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl);
+    color: var(--text-secondary);
+    margin-bottom: 24px;
   }
 
   .welcome-title {
-    font-size: 32px;
+    font-size: 24px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 32px;
-    line-height: 1.3;
+    margin-bottom: 8px;
   }
 
-  .suggestion-cards {
+  .welcome-subtitle {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+  }
+
+  .suggestion-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+    max-width: 600px;
+    width: 100%;
   }
 
-  .suggestion-card {
+  .suggestion-item {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
-    padding: 16px;
+    padding: 14px 16px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     color: var(--text-primary);
-    text-align: left;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
   }
 
-  .suggestion-card:hover {
+  .suggestion-item:hover {
     background: var(--bg-tertiary);
     border-color: var(--border-hover);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
-  .suggestion-icon {
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    background: var(--bg-tertiary);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .suggestion-item svg {
     color: var(--text-secondary);
+    flex-shrink: 0;
   }
 
-  .suggestion-text {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .suggestion-title {
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .suggestion-desc {
-    font-size: 12px;
-    color: var(--text-tertiary);
-  }
-
-  /* ========== Messages ========== */
+  /* ===== Messages ===== */
   .messages-container {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    max-width: 900px;
-    margin: 0 auto;
     padding: 0;
-    width: 100%;
   }
 
-  /* Message Groups - Alternate background for visual separation */
   .message {
     display: flex;
-    gap: 16px;
-    padding: 24px 32px;
-    animation: messageIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    transition: background-color 0.2s ease;
+    gap: 12px;
+    padding: 24px 24px;
+    max-width: 100%;
+    transition: background 0.15s ease;
   }
 
   .message:hover {
-    background-color: rgba(var(--bg-tertiary-rgb, 128, 128, 128), 0.03);
-  }
-
-  /* User messages - right aligned with distinct styling */
-  .message.user {
-    flex-direction: row-reverse;
-  }
-
-  .message.user .message-content {
-    align-items: flex-end;
-  }
-
-  .message.user .message-bubble {
-    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
-    color: white;
-    border-radius: 18px 18px 4px 18px;
-    box-shadow: 0 2px 12px rgba(41, 151, 255, 0.25);
-  }
-
-  .message.user .message-text {
-    color: white;
-  }
-
-  .message.user .message-text code {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-  }
-
-  /* Assistant messages - left aligned with subtle styling */
-  .message.assistant .message-bubble {
     background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: 18px 18px 18px 4px;
   }
 
-  @keyframes messageIn {
-    from {
-      opacity: 0;
-      transform: translateY(12px) scale(0.98);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
+  .message.user {
+    background: var(--bg-secondary);
   }
 
-  /* Avatar Styling */
+  .message.user:hover {
+    background: var(--bg-tertiary);
+  }
+
   .message-avatar {
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
   .message-avatar.user {
     background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
     color: white;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
   }
 
   .message-avatar.assistant {
     background: linear-gradient(135deg, #10a37f, #1a7f64);
+    color: white;
   }
 
-  .message-avatar.assistant video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* Message Content Layout */
   .message-content {
     flex: 1;
     min-width: 0;
-    max-width: calc(100% - 60px);
-    display: flex;
-    flex-direction: column;
+    max-width: 800px;
   }
 
-  .message.user .message-content {
-    align-items: flex-end;
-  }
-
-  /* Message Bubble */
-  .message-bubble {
-    padding: 14px 18px;
-    max-width: 85%;
-    word-wrap: break-word;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .message-bubble:hover {
-    transform: translateY(-1px);
-  }
-
-  /* Message Header */
   .message-header {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 6px;
-    padding: 0 4px;
-  }
-
-  .message.user .message-header {
-    justify-content: flex-end;
+    margin-bottom: 8px;
   }
 
   .message-author {
@@ -845,16 +615,15 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   .message-time {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-tertiary);
-    font-weight: 400;
   }
 
-  /* Message Text Styling */
   .message-text {
     font-size: 15px;
-    line-height: 1.75;
+    line-height: 1.7;
     color: var(--text-primary);
+    word-wrap: break-word;
   }
 
   .message-text p {
@@ -865,36 +634,20 @@ const lang = getLangFromUrl(Astro.url);
     margin-bottom: 0;
   }
 
-  /* Inline Code */
   .message-text code {
     background: var(--bg-tertiary);
     padding: 2px 6px;
     border-radius: 4px;
     font-family: var(--font-mono, 'SF Mono', Monaco, monospace);
-    font-size: 0.88em;
-    color: var(--text-primary);
+    font-size: 0.9em;
   }
 
-  /* Code Blocks */
   .message-text pre {
     background: #1e1e1e;
-    border: none;
-    border-radius: 10px;
-    padding: 16px 20px;
-    overflow-x: auto;
+    border-radius: var(--radius-md);
+    padding: 16px;
     margin: 12px 0;
-    position: relative;
-  }
-
-  .message-text pre::before {
-    content: attr(data-language);
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    font-size: 11px;
-    color: #6e7681;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    overflow-x: auto;
   }
 
   .message-text pre code {
@@ -905,7 +658,6 @@ const lang = getLangFromUrl(Astro.url);
     line-height: 1.6;
   }
 
-  /* Lists */
   .message-text ul, .message-text ol {
     margin: 8px 0;
     padding-left: 24px;
@@ -915,166 +667,81 @@ const lang = getLangFromUrl(Astro.url);
     margin: 4px 0;
   }
 
-  /* Blockquotes */
+  .message-text a {
+    color: var(--color-accent-blue);
+    text-decoration: none;
+  }
+
+  .message-text a:hover {
+    text-decoration: underline;
+  }
+
   .message-text blockquote {
     border-left: 3px solid var(--color-accent-blue);
     margin: 12px 0;
     padding: 8px 16px;
-    background: var(--bg-secondary);
-    border-radius: 0 8px 8px 0;
-    font-style: italic;
+    background: var(--bg-tertiary);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   }
 
-  /* Links */
-  .message-text a {
-    color: var(--color-accent-blue);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.2s ease;
-  }
-
-  .message-text a:hover {
-    border-bottom-color: var(--color-accent-blue);
-  }
-
-  /* Message Actions */
   .message-actions {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     margin-top: 8px;
-    padding: 0 4px;
     opacity: 0;
-    transform: translateY(-4px);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.15s ease;
   }
 
   .message:hover .message-actions {
     opacity: 1;
-    transform: translateY(0);
   }
 
   .message-action {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
-    background: var(--bg-secondary);
+    width: 28px;
+    height: 28px;
+    background: transparent;
     border: 1px solid var(--border-primary);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     color: var(--text-tertiary);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
   }
 
   .message-action:hover {
-    background: var(--bg-tertiary);
-    border-color: var(--border-hover);
+    background: var(--bg-primary);
     color: var(--text-primary);
-    transform: translateY(-1px);
   }
 
-  .message-action:active {
-    transform: translateY(0);
-  }
-
-  /* Message Status Indicator */
-  .message-status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--text-tertiary);
-    margin-top: 4px;
-    padding: 0 4px;
-  }
-
-  .message-status.sending::before {
-    content: '';
-    width: 10px;
-    height: 10px;
-    border: 2px solid var(--border-primary);
-    border-top-color: var(--color-accent-blue);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  .message-status.sent::before {
-    content: '✓';
-    color: var(--color-accent-green);
-    font-weight: bold;
-  }
-
-  .message-status.error {
-    color: var(--color-accent-red);
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  /* Typing Indicator Enhancement */
-  .typing-message {
-    opacity: 0.8;
-  }
-
+  /* Typing indicator */
   .typing-indicator {
     display: flex;
     gap: 4px;
-    padding: 12px 0;
-    align-items: center;
+    padding: 4px 0;
   }
 
   .typing-indicator span {
-    width: 8px;
-    height: 8px;
-    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+    width: 6px;
+    height: 6px;
+    background: var(--text-tertiary);
     border-radius: 50%;
-    animation: typingBounce 1.4s infinite ease-in-out both;
+    animation: typingBounce 1.4s infinite ease-in-out;
   }
 
   .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
   .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-  .typing-indicator span:nth-child(3) { animation-delay: 0s; }
 
   @keyframes typingBounce {
-    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
     40% { transform: scale(1); opacity: 1; }
   }
 
-  /* Timestamp Divider */
-  .timestamp-divider {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 24px 0;
-    position: relative;
-  }
-
-  .timestamp-divider::before {
-    content: '';
-    position: absolute;
-    left: 32px;
-    right: 32px;
-    height: 1px;
-    background: var(--border-primary);
-  }
-
-  .timestamp-divider span {
+  /* ===== Input Area ===== */
+  .input-area {
+    padding: 16px 24px 24px;
     background: var(--bg-primary);
-    padding: 4px 12px;
-    font-size: 12px;
-    color: var(--text-tertiary);
-    border-radius: 12px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ========== Input Area ========== */
-  .input-container {
-    padding: 16px 20px 20px;
-    background: var(--bg-primary);
-    border-top: 1px solid var(--border-primary);
     flex-shrink: 0;
   }
 
@@ -1086,18 +753,17 @@ const lang = getLangFromUrl(Astro.url);
   .input-box {
     display: flex;
     align-items: flex-end;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 8px;
+    padding: 8px 12px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border-radius: var(--radius-lg);
     transition: all 0.2s ease;
   }
 
   .input-box:focus-within {
     border-color: var(--color-accent-blue);
-    box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.1);
   }
 
   .chat-input {
@@ -1111,7 +777,7 @@ const lang = getLangFromUrl(Astro.url);
     max-height: 200px;
     min-height: 24px;
     outline: none;
-    padding: 4px 0;
+    padding: 6px 0;
   }
 
   .chat-input::placeholder {
@@ -1121,27 +787,7 @@ const lang = getLangFromUrl(Astro.url);
   .input-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
-  .input-action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: transparent;
-    border: none;
-    border-radius: 8px;
-    color: var(--text-tertiary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .input-action-btn:hover {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
+    gap: 4px;
   }
 
   .send-btn, .stop-btn {
@@ -1151,9 +797,9 @@ const lang = getLangFromUrl(Astro.url);
     width: 32px;
     height: 32px;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
   }
 
   .send-btn {
@@ -1169,199 +815,103 @@ const lang = getLangFromUrl(Astro.url);
 
   .send-btn:not(:disabled):hover {
     background: var(--color-accent-blue);
-    transform: scale(1.05);
   }
 
   .stop-btn {
+    display: none;
     background: var(--color-accent-red);
     color: white;
   }
 
   .stop-btn:hover {
     background: #dc2626;
-    transform: scale(1.05);
   }
 
-  .input-footer {
+  .input-hint {
     text-align: center;
     font-size: 12px;
     color: var(--text-tertiary);
     margin-top: 8px;
   }
 
-  /* ========== Responsive Design ========== */
+  /* ===== Mobile ===== */
   @media (max-width: 768px) {
     .sidebar {
-      position: fixed;
-      left: 0;
-      top: var(--header-total-height);
-      bottom: 0;
-      z-index: 100;
       transform: translateX(-100%);
-      width: 280px;
     }
 
     .sidebar.open {
       transform: translateX(0);
     }
 
-    .sidebar.collapsed {
-      width: 280px;
-      transform: translateX(-100%);
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 40;
     }
 
-    .menu-btn {
+    .sidebar-overlay.visible {
+      display: block;
+    }
+
+    .main-content {
+      margin-left: 0;
+    }
+
+    .menu-toggle {
       display: flex;
     }
 
-    .sidebar-toggle {
-      display: none;
+    .welcome-screen {
+      padding: 20px 16px 80px;
     }
 
-    /* Welcome screen mobile adjustments */
-    .welcome-logo video {
-      width: 100px;
-      height: 100px;
-    }
-
-    .welcome-title {
-      font-size: 24px;
-    }
-
-    .suggestion-cards {
+    .suggestion-grid {
       grid-template-columns: 1fr;
     }
 
-    /* Mobile message adjustments */
-    .messages-container {
-      padding: 0;
-    }
-
     .message {
-      padding: 16px 20px;
-      gap: 12px;
+      padding: 16px;
+      gap: 10px;
     }
 
     .message-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-    }
-
-    .message-content {
-      max-width: calc(100% - 48px);
-    }
-
-    .message-bubble {
-      max-width: 95%;
-      padding: 12px 14px;
-    }
-
-    .message-text {
-      font-size: 15px;
-      line-height: 1.7;
-    }
-
-    .message-header {
-      margin-bottom: 4px;
-    }
-
-    .message-author {
-      font-size: 12px;
-    }
-
-    .message-time {
-      font-size: 10px;
-    }
-
-    .message-actions {
-      opacity: 1;
-      transform: none;
-      margin-top: 6px;
-    }
-
-    .message-action {
       width: 28px;
       height: 28px;
     }
 
-    .input-container {
+    .input-area {
       padding: 12px 16px 16px;
     }
-  }
 
-  /* Small mobile devices */
-  @media (max-width: 480px) {
-    .message {
-      padding: 12px 16px;
-      gap: 10px;
-    }
-
-    .message-bubble {
-      padding: 10px 12px;
-      border-radius: 16px 16px 16px 4px;
-    }
-
-    .message.user .message-bubble {
-      border-radius: 16px 16px 4px 16px;
-    }
-
-    .message-text {
-      font-size: 14px;
-      line-height: 1.65;
-    }
-
-    .message-text pre {
-      padding: 12px 14px;
-      margin: 8px 0;
-    }
-
-    .message-text pre code {
-      font-size: 12px;
-    }
-
-    .welcome-logo video {
-      width: 80px;
-      height: 80px;
-    }
-  }
-
-  /* ========== Overlay for mobile sidebar ========== */
-  .sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: var(--header-total-height);
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 99;
-  }
-
-  .sidebar-overlay.visible {
-    display: block;
-  }
-
-  @media (min-width: 769px) {
-    .sidebar-overlay {
-      display: none !important;
+    .input-box {
+      padding: 8px 10px;
     }
   }
 </style>
 
 <script>
+  // Hide global header on chatbot page
+  document.addEventListener('DOMContentLoaded', () => {
+    const globalHeader = document.querySelector('.header');
+    if (globalHeader) {
+      (globalHeader as HTMLElement).style.display = 'none';
+    }
+  });
+
   const API_BASE = 'https://api.agiera.net';
   
-  // DOM Elements
-  const chatApp = document.getElementById('chat-app');
+  const chatContainer = document.querySelector('.chat-container');
   const sidebar = document.getElementById('sidebar');
-  const menuBtn = document.getElementById('menu-btn');
-  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const menuToggle = document.getElementById('menu-toggle');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
   const newChatBtn = document.getElementById('new-chat-btn');
   const modelBtn = document.getElementById('model-btn');
   const modelDropdown = document.getElementById('model-dropdown');
   const modelName = document.getElementById('model-name');
-  const welcomeContainer = document.getElementById('welcome-container');
+  const welcomeScreen = document.getElementById('welcome-screen');
   const messagesContainer = document.getElementById('messages-container');
   const chatArea = document.getElementById('chat-area');
   const chatInput = document.getElementById('chat-input') as HTMLTextAreaElement;
@@ -1369,55 +919,44 @@ const lang = getLangFromUrl(Astro.url);
   const stopBtn = document.getElementById('stop-btn');
   const historyList = document.getElementById('history-list');
   
-  // State
   let chatHistory: { role: string; content: string }[] = [];
   let isStreaming = false;
   let currentModel = 'doubao-2.0-pro';
-  let conversations: { id: string; title: string; messages: typeof chatHistory }[] = [];
+  let conversations: { id: string; title: string; messages: typeof chatHistory; date: number }[] = [];
   let currentConversationId: string | null = null;
   let abortController: AbortController | null = null;
   
-  // Initialize
   function init() {
     loadConversations();
     renderHistoryList();
     setupEventListeners();
   }
   
-  // Event Listeners
   function setupEventListeners() {
-    // Sidebar toggle
-    menuBtn?.addEventListener('click', toggleSidebar);
-    sidebarToggle?.addEventListener('click', toggleSidebar);
-    
-    // New chat
+    menuToggle?.addEventListener('click', toggleSidebar);
+    sidebarOverlay?.addEventListener('click', toggleSidebar);
     newChatBtn?.addEventListener('click', startNewChat);
-    
-    // Model selector
     modelBtn?.addEventListener('click', toggleModelDropdown);
+    
     document.querySelectorAll('.model-option').forEach(option => {
       option.addEventListener('click', () => selectModel(option as HTMLElement));
     });
     
-    // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
       if (!modelBtn?.contains(e.target as Node) && !modelDropdown?.contains(e.target as Node)) {
-        modelDropdown?.classList.remove('visible');
+        modelDropdown?.classList.remove('open');
       }
     });
     
-    // Input
     chatInput?.addEventListener('input', handleInput);
     chatInput?.addEventListener('keydown', handleKeyDown);
     
-    // Send/Stop buttons
     sendBtn?.addEventListener('click', sendMessage);
     stopBtn?.addEventListener('click', stopGeneration);
     
-    // Suggestion cards
-    document.querySelectorAll('.suggestion-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const prompt = card.getAttribute('data-prompt');
+    document.querySelectorAll('.suggestion-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const prompt = item.getAttribute('data-prompt');
         if (prompt && chatInput) {
           chatInput.value = prompt;
           handleInput();
@@ -1427,56 +966,36 @@ const lang = getLangFromUrl(Astro.url);
     });
   }
   
-  // Sidebar functions
   function toggleSidebar() {
     sidebar?.classList.toggle('open');
-    sidebar?.classList.toggle('collapsed');
-    
-    // Create/remove overlay for mobile
-    let overlay = document.querySelector('.sidebar-overlay');
-    if (sidebar?.classList.contains('open')) {
-      if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'sidebar-overlay';
-        overlay.addEventListener('click', toggleSidebar);
-        chatApp?.appendChild(overlay);
-      }
-      overlay.classList.add('visible');
-    } else {
-      overlay?.classList.remove('visible');
-    }
+    sidebarOverlay?.classList.toggle('visible');
   }
   
-  // Model functions
   function toggleModelDropdown() {
-    modelDropdown?.classList.toggle('visible');
+    modelDropdown?.classList.toggle('open');
   }
   
   function selectModel(option: HTMLElement) {
     const model = option.getAttribute('data-model');
     const name = option.getAttribute('data-name');
     
-    if (model && name) {
+    if (model && name && modelName) {
       currentModel = model;
-      if (modelName) modelName.textContent = name;
+      modelName.textContent = name;
       
-      // Update active state
       document.querySelectorAll('.model-option').forEach(opt => opt.classList.remove('active'));
       option.classList.add('active');
     }
     
-    modelDropdown?.classList.remove('visible');
+    modelDropdown?.classList.remove('open');
   }
   
-  // Input functions
   function handleInput() {
     if (!chatInput || !sendBtn) return;
     
-    // Auto-resize
     chatInput.style.height = 'auto';
     chatInput.style.height = Math.min(chatInput.scrollHeight, 200) + 'px';
     
-    // Update button state
     (sendBtn as HTMLButtonElement).disabled = !chatInput.value.trim() || isStreaming;
   }
   
@@ -1487,28 +1006,23 @@ const lang = getLangFromUrl(Astro.url);
     }
   }
   
-  // Chat functions
   function startNewChat() {
-    // Save current conversation if it has messages
     if (chatHistory.length > 0 && currentConversationId) {
       saveConversation();
     }
     
-    // Reset state
     chatHistory = [];
     currentConversationId = generateId();
     
-    // Clear UI
     if (messagesContainer) messagesContainer.innerHTML = '';
-    welcomeContainer?.classList.remove('hidden');
+    welcomeScreen?.classList.remove('hidden');
     if (chatInput) {
       chatInput.value = '';
       handleInput();
     }
     
-    // Close sidebar on mobile
     sidebar?.classList.remove('open');
-    document.querySelector('.sidebar-overlay')?.classList.remove('visible');
+    sidebarOverlay?.classList.remove('visible');
   }
   
   async function sendMessage() {
@@ -1517,25 +1031,22 @@ const lang = getLangFromUrl(Astro.url);
     const message = chatInput.value.trim();
     if (!message || isStreaming) return;
     
-    // Hide welcome screen
-    welcomeContainer?.classList.add('hidden');
+    welcomeScreen?.classList.add('hidden');
     
-    // Add user message with sending status
-    const userMessageDiv = addMessage('user', message, 'sending');
+    addMessage('user', message);
     chatHistory.push({ role: 'user', content: message });
     
-    // Clear input
     chatInput.value = '';
     handleInput();
     
-    // Update UI state
     isStreaming = true;
     updateInputState();
     
-    // Create abort controller for cancellation
     abortController = new AbortController();
     
     try {
+      addTypingIndicator();
+      
       const response = await fetch(`${API_BASE}/api/doubao`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1547,12 +1058,6 @@ const lang = getLangFromUrl(Astro.url);
         signal: abortController.signal
       });
       
-      // Update user message status to sent
-      updateMessageStatus(userMessageDiv, 'sent');
-      
-      // Show typing indicator
-      addTypingIndicator();
-      
       const result = await response.json();
       
       removeTypingIndicator();
@@ -1560,21 +1065,18 @@ const lang = getLangFromUrl(Astro.url);
       if (result.answer) {
         addMessage('assistant', result.answer);
         chatHistory.push({ role: 'assistant', content: result.answer });
-        
-        // Save conversation
         saveConversation();
       } else {
-        addMessage('assistant', result.error || result.message || 'Sorry, something went wrong.');
+        addMessage('assistant', result.error || result.message || lang === 'zh' ? '抱歉，出现错误。' : 'Sorry, something went wrong.');
       }
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
         removeTypingIndicator();
-        addMessage('assistant', 'Generation stopped.');
+        addMessage('assistant', lang === 'zh' ? '已停止生成。' : 'Generation stopped.');
       } else {
         console.error('Chat error:', error);
-        updateMessageStatus(userMessageDiv, 'error');
         removeTypingIndicator();
-        addMessage('assistant', 'Network error. Please try again.');
+        addMessage('assistant', lang === 'zh' ? '网络错误，请重试。' : 'Network error. Please try again.');
       }
     } finally {
       isStreaming = false;
@@ -1602,81 +1104,93 @@ const lang = getLangFromUrl(Astro.url);
     }
   }
   
-  // Message functions
-  function addMessage(role: 'user' | 'assistant', content: string, status?: 'sending' | 'sent' | 'error') {
+  function addMessage(role: 'user' | 'assistant', content: string) {
+    if (!messagesContainer) return;
+    
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${role}`;
-    messageDiv.dataset.role = role;
     
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const author = role === 'user' ? 'You' : 'AI Assistant';
-    const avatarContent = role === 'user' ? 'U' : '<video autoplay loop muted playsinline width="36" height="36"><source src="/logo.mp4" type="video/mp4" /></video>';
-    
-    // Status indicator
-    let statusHtml = '';
-    if (status) {
-      const statusText = status === 'sending' ? 'Sending...' : status === 'sent' ? 'Sent' : 'Failed';
-      statusHtml = `<div class="message-status ${status}">${statusText}</div>`;
-    }
+    const author = role === 'user' ? (lang === 'zh' ? '你' : 'You') : (lang === 'zh' ? 'Meow' : 'Meow');
+    const avatarContent = role === 'user' ? (lang === 'zh' ? '你' : 'Y') : 'M';
     
     messageDiv.innerHTML = `
-      <div class="message-avatar ${role}">
-        ${avatarContent}
-      </div>
+      <div class="message-avatar ${role}">${avatarContent}</div>
       <div class="message-content">
         <div class="message-header">
           <span class="message-author">${author}</span>
           <span class="message-time">${time}</span>
         </div>
-        <div class="message-bubble">
-          <div class="message-text">${formatMessage(content)}</div>
-        </div>
-        ${statusHtml}
+        <div class="message-text">${formatMessage(content)}</div>
         <div class="message-actions">
-          <button class="message-action" title="Copy" onclick="copyMessage(this)">
+          <button class="message-action" title="${lang === 'zh' ? '复制' : 'Copy'}" data-action="copy">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
             </svg>
           </button>
-          <button class="message-action" title="Regenerate" onclick="regenerateMessage(this)" style="display: ${role === 'assistant' ? 'flex' : 'none'}">
+          ${role === 'assistant' ? `
+          <button class="message-action" title="${lang === 'zh' ? '重新生成' : 'Regenerate'}" data-action="regenerate">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="23 4 23 10 17 10"></polyline>
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
             </svg>
           </button>
+          ` : ''}
         </div>
       </div>
     `;
     
-    messagesContainer?.appendChild(messageDiv);
-    scrollToBottom();
+    const actionButtons = messageDiv.querySelectorAll('.message-action');
+    actionButtons.forEach(btn => {
+      btn.addEventListener('click', () => handleMessageAction(btn as HTMLElement, role));
+    });
     
-    return messageDiv;
+    messagesContainer.appendChild(messageDiv);
+    scrollToBottom();
   }
   
-  // Update message status
-  function updateMessageStatus(messageDiv: HTMLElement, status: 'sending' | 'sent' | 'error') {
-    const statusDiv = messageDiv.querySelector('.message-status');
-    if (statusDiv) {
-      statusDiv.className = `message-status ${status}`;
-      statusDiv.textContent = status === 'sending' ? 'Sending...' : status === 'sent' ? 'Sent' : 'Failed';
+  function handleMessageAction(btn: HTMLElement, role: string) {
+    const action = btn.getAttribute('data-action');
+    const messageDiv = btn.closest('.message');
+    
+    if (action === 'copy') {
+      const text = messageDiv?.querySelector('.message-text')?.textContent || '';
+      navigator.clipboard.writeText(text);
+      btn.style.color = 'var(--color-accent-green)';
+      setTimeout(() => {
+        btn.style.color = '';
+      }, 1000);
+    } else if (action === 'regenerate' && !isStreaming) {
+      const allMessages = Array.from(messagesContainer?.querySelectorAll('.message') || []);
+      const currentIndex = allMessages.indexOf(messageDiv as HTMLElement);
+      
+      if (currentIndex > 0) {
+        const userMessageDiv = allMessages[currentIndex - 1];
+        const userText = userMessageDiv.querySelector('.message-text')?.textContent;
+        
+        if (userText) {
+          messageDiv?.remove();
+          chatHistory = chatHistory.slice(0, -1);
+          chatInput!.value = userText;
+          handleInput();
+          sendMessage();
+        }
+      }
     }
   }
   
   function addTypingIndicator() {
+    if (!messagesContainer) return;
+    
     const messageDiv = document.createElement('div');
-    messageDiv.className = 'message assistant typing';
+    messageDiv.className = 'message assistant';
     messageDiv.id = 'typing-message';
     messageDiv.innerHTML = `
-      <div class="message-avatar assistant">
-        <video autoplay loop muted playsinline width="36" height="36">
-          <source src="/logo.mp4" type="video/mp4" />
-        </video>
-      </div>
+      <div class="message-avatar assistant">M</div>
       <div class="message-content">
         <div class="message-header">
-          <span class="message-author">AI Assistant</span>
+          <span class="message-author">${lang === 'zh' ? 'Meow' : 'Meow'}</span>
         </div>
         <div class="typing-indicator">
           <span></span>
@@ -1685,57 +1199,37 @@ const lang = getLangFromUrl(Astro.url);
         </div>
       </div>
     `;
-    messagesContainer?.appendChild(messageDiv);
+    
+    messagesContainer.appendChild(messageDiv);
     scrollToBottom();
   }
   
   function removeTypingIndicator() {
-    const typingMessage = document.getElementById('typing-message');
-    typingMessage?.remove();
+    document.getElementById('typing-message')?.remove();
   }
   
   function formatMessage(content: string): string {
-    // Escape HTML first
     let formatted = escapeHtml(content);
     
-    // Code blocks with language detection
-    formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-      const language = lang || 'code';
-      return `<pre data-language="${language}"><code>${code}</code></pre>`;
+    formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, (_match, _lang, code) => {
+      return `<pre><code>${code}</code></pre>`;
     });
     
-    // Inline code
     formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
     
-    // Links
     formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-    
-    // Auto-link URLs
     formatted = formatted.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
     
-    // Bold
     formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    
-    // Italic
     formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-    
-    // Strikethrough
     formatted = formatted.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+    formatted = formatted.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
     
-    // Blockquotes
-    formatted = formatted.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
-    
-    // Unordered lists
     formatted = formatted.replace(/^[-*] (.+)$/gm, '<li>$1</li>');
     formatted = formatted.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
-    
-    // Ordered lists
     formatted = formatted.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
     
-    // Line breaks (after lists to avoid breaking them)
     formatted = formatted.replace(/\n/g, '<br>');
-    
-    // Clean up consecutive breaks
     formatted = formatted.replace(/(<br>){3,}/g, '<br><br>');
     
     return formatted;
@@ -1749,7 +1243,6 @@ const lang = getLangFromUrl(Astro.url);
     }
   }
   
-  // Conversation management
   function generateId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
@@ -1758,12 +1251,13 @@ const lang = getLangFromUrl(Astro.url);
     if (!currentConversationId || chatHistory.length === 0) return;
     
     const existingIndex = conversations.findIndex(c => c.id === currentConversationId);
-    const title = chatHistory[0]?.content.slice(0, 30) + '...' || 'New Chat';
+    const title = chatHistory[0]?.content.slice(0, 40) || (lang === 'zh' ? '新对话' : 'New Chat');
     
     const conversation = {
       id: currentConversationId,
       title,
-      messages: [...chatHistory]
+      messages: [...chatHistory],
+      date: Date.now()
     };
     
     if (existingIndex >= 0) {
@@ -1772,9 +1266,8 @@ const lang = getLangFromUrl(Astro.url);
       conversations.unshift(conversation);
     }
     
-    // Keep only last 20 conversations
-    if (conversations.length > 20) {
-      conversations = conversations.slice(0, 20);
+    if (conversations.length > 30) {
+      conversations = conversations.slice(0, 30);
     }
     
     localStorage.setItem('chat_conversations', JSON.stringify(conversations));
@@ -1784,7 +1277,11 @@ const lang = getLangFromUrl(Astro.url);
   function loadConversations() {
     const saved = localStorage.getItem('chat_conversations');
     if (saved) {
-      conversations = JSON.parse(saved);
+      try {
+        conversations = JSON.parse(saved);
+      } catch {
+        conversations = [];
+      }
     }
     currentConversationId = generateId();
   }
@@ -1792,26 +1289,40 @@ const lang = getLangFromUrl(Astro.url);
   function renderHistoryList() {
     if (!historyList) return;
     
+    if (conversations.length === 0) {
+      historyList.innerHTML = `<p style="padding: 12px; color: var(--text-tertiary); font-size: 13px; text-align: center;">${lang === 'zh' ? '暂无对话记录' : 'No conversations yet'}</p>`;
+      return;
+    }
+    
     historyList.innerHTML = conversations.map(conv => `
-      <div class="history-item ${conv.id === currentConversationId ? 'active' : ''}" data-id="${conv.id}">
-        <svg class="history-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <button class="history-item ${conv.id === currentConversationId ? 'active' : ''}" data-id="${conv.id}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
         </svg>
         <span class="history-item-text">${escapeHtml(conv.title)}</span>
-        <div class="history-item-actions">
-          <button class="history-item-action" onclick="deleteConversation('${conv.id}', event)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-          </button>
-        </div>
-      </div>
+        <button class="history-item-delete" data-id="${conv.id}" title="${lang === 'zh' ? '删除' : 'Delete'}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+      </button>
     `).join('');
     
-    // Add click handlers
     historyList.querySelectorAll('.history-item').forEach(item => {
-      item.addEventListener('click', () => loadConversation(item.getAttribute('data-id')!));
+      item.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest('.history-item-delete')) {
+          loadConversation(item.getAttribute('data-id')!);
+        }
+      });
+    });
+    
+    historyList.querySelectorAll('.history-item-delete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteConversation(btn.getAttribute('data-id')!);
+      });
     });
   }
   
@@ -1822,7 +1333,6 @@ const lang = getLangFromUrl(Astro.url);
     currentConversationId = id;
     chatHistory = [...conversation.messages];
     
-    // Render messages
     if (messagesContainer) {
       messagesContainer.innerHTML = '';
       conversation.messages.forEach(msg => {
@@ -1830,67 +1340,14 @@ const lang = getLangFromUrl(Astro.url);
       });
     }
     
-    welcomeContainer?.classList.add('hidden');
+    welcomeScreen?.classList.add('hidden');
     renderHistoryList();
     
-    // Close sidebar on mobile
     sidebar?.classList.remove('open');
-    document.querySelector('.sidebar-overlay')?.classList.remove('visible');
+    sidebarOverlay?.classList.remove('visible');
   }
   
-  // Utility functions
-  function escapeHtml(text: string): string {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-  
-  // Expose functions to window for onclick handlers
-  (window as any).copyMessage = function(btn: HTMLElement) {
-    const messageText = btn.closest('.message')?.querySelector('.message-text')?.textContent;
-    if (messageText) {
-      navigator.clipboard.writeText(messageText);
-      // Visual feedback
-      const originalBg = btn.style.background;
-      btn.style.background = 'var(--color-accent-green)';
-      btn.style.color = 'white';
-      setTimeout(() => {
-        btn.style.background = originalBg;
-        btn.style.color = '';
-      }, 1200);
-    }
-  };
-  
-  // Regenerate assistant message
-  (window as any).regenerateMessage = function(btn: HTMLElement) {
-    const messageDiv = btn.closest('.message') as HTMLElement;
-    if (!messageDiv || isStreaming) return;
-    
-    // Find the user message that triggered this response
-    const allMessages = Array.from(messagesContainer?.querySelectorAll('.message') || []);
-    const currentIndex = allMessages.indexOf(messageDiv);
-    
-    if (currentIndex > 0) {
-      const userMessageDiv = allMessages[currentIndex - 1];
-      const userText = userMessageDiv.querySelector('.message-text')?.textContent;
-      
-      if (userText && chatInput) {
-        // Remove the current assistant message
-        messageDiv.remove();
-        
-        // Remove from chat history
-        chatHistory = chatHistory.slice(0, -1);
-        
-        // Resend the message
-        chatInput.value = userText;
-        handleInput();
-        sendMessage();
-      }
-    }
-  };
-  
-  (window as any).deleteConversation = function(id: string, event: Event) {
-    event.stopPropagation();
+  function deleteConversation(id: string) {
     conversations = conversations.filter(c => c.id !== id);
     localStorage.setItem('chat_conversations', JSON.stringify(conversations));
     renderHistoryList();
@@ -1898,8 +1355,13 @@ const lang = getLangFromUrl(Astro.url);
     if (id === currentConversationId) {
       startNewChat();
     }
-  };
+  }
   
-  // Initialize
+  function escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+  
   init();
 </script>
