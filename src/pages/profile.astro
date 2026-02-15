@@ -1,0 +1,713 @@
+---
+import Layout from '@layouts/Layout.astro';
+
+const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
+---
+
+<Layout 
+  title={lang === 'zh' ? '个人资料 - Meow Note' : 'Profile - Meow Note'}
+  description={lang === 'zh' ? '查看和管理您的个人资料' : 'View and manage your profile'}
+>
+  <section class="profile">
+    <div class="profile-container">
+      <div class="profile-header">
+        <div class="profile-avatar" id="profile-avatar">
+          <span id="avatar-initial">?</span>
+        </div>
+        <div class="profile-info">
+          <h1 class="profile-name" id="profile-name">--</h1>
+          <p class="profile-email" id="profile-email">--</p>
+        </div>
+        <button class="edit-btn" id="edit-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          <span>{lang === 'zh' ? '编辑资料' : 'Edit Profile'}</span>
+        </button>
+      </div>
+      
+      <div class="profile-stats">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value" id="stat-login-count">0</span>
+            <span class="stat-label">{lang === 'zh' ? '登录次数' : 'Logins'}</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value" id="stat-last-login">--</span>
+            <span class="stat-label">{lang === 'zh' ? '最后登录' : 'Last Login'}</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value" id="stat-join-date">--</span>
+            <span class="stat-label">{lang === 'zh' ? '加入时间' : 'Joined'}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-sections">
+        <div class="section-card">
+          <h2 class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            {lang === 'zh' ? '账户信息' : 'Account Information'}
+          </h2>
+          <div class="info-list">
+            <div class="info-item">
+              <span class="info-label">{lang === 'zh' ? '用户名' : 'Username'}</span>
+              <span class="info-value" id="info-username">--</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">{lang === 'zh' ? '邮箱' : 'Email'}</span>
+              <span class="info-value" id="info-email">--</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">{lang === 'zh' ? '用户ID' : 'User ID'}</span>
+              <span class="info-value" id="info-userid">--</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section-card">
+          <h2 class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            {lang === 'zh' ? '账户设置' : 'Account Settings'}
+          </h2>
+          <div class="settings-list">
+            <button class="setting-item" id="change-password-btn">
+              <div class="setting-info">
+                <span class="setting-title">{lang === 'zh' ? '修改密码' : 'Change Password'}</span>
+                <span class="setting-desc">{lang === 'zh' ? '更新您的登录密码' : 'Update your login password'}</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+            <button class="setting-item danger" id="logout-btn">
+              <div class="setting-info">
+                <span class="setting-title">{lang === 'zh' ? '退出登录' : 'Sign Out'}</span>
+                <span class="setting-desc">{lang === 'zh' ? '退出当前账户' : 'Sign out of your account'}</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <div class="modal" id="edit-modal">
+    <div class="modal-backdrop" id="edit-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>{lang === 'zh' ? '编辑资料' : 'Edit Profile'}</h3>
+        <button class="modal-close" id="edit-modal-close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <form class="modal-form" id="edit-form">
+        <div class="form-group">
+          <label for="edit-username">{lang === 'zh' ? '用户名' : 'Username'}</label>
+          <input type="text" id="edit-username" name="username" required minlength="3" maxlength="20" />
+        </div>
+        <div class="form-group">
+          <label for="edit-email">{lang === 'zh' ? '邮箱' : 'Email'}</label>
+          <input type="email" id="edit-email" name="email" required />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="edit-cancel">{lang === 'zh' ? '取消' : 'Cancel'}</button>
+          <button type="submit" class="btn-primary">{lang === 'zh' ? '保存' : 'Save'}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <div class="modal" id="password-modal">
+    <div class="modal-backdrop" id="password-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>{lang === 'zh' ? '修改密码' : 'Change Password'}</h3>
+        <button class="modal-close" id="password-modal-close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <form class="modal-form" id="password-form">
+        <div class="form-group">
+          <label for="current-password">{lang === 'zh' ? '当前密码' : 'Current Password'}</label>
+          <input type="password" id="current-password" name="currentPassword" required />
+        </div>
+        <div class="form-group">
+          <label for="new-password">{lang === 'zh' ? '新密码' : 'New Password'}</label>
+          <input type="password" id="new-password" name="newPassword" required minlength="6" />
+        </div>
+        <div class="form-group">
+          <label for="confirm-new-password">{lang === 'zh' ? '确认新密码' : 'Confirm New Password'}</label>
+          <input type="password" id="confirm-new-password" name="confirmPassword" required />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="password-cancel">{lang === 'zh' ? '取消' : 'Cancel'}</button>
+          <button type="submit" class="btn-primary">{lang === 'zh' ? '更新密码' : 'Update Password'}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .profile {
+    min-height: 100vh;
+    padding: calc(var(--header-height) + var(--space-8)) var(--space-4) var(--space-12);
+  }
+  
+  .profile-container {
+    max-width: var(--container-md);
+    margin: 0 auto;
+  }
+  
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    padding: var(--space-6);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-2xl);
+    margin-bottom: var(--space-6);
+  }
+  
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+    border-radius: var(--radius-full);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: white;
+    flex-shrink: 0;
+  }
+  
+  .profile-info {
+    flex: 1;
+  }
+  
+  .profile-name {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+  }
+  
+  .profile-email {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+  
+  .edit-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .edit-btn:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+  }
+  
+  .profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+  
+  @media (max-width: 640px) {
+    .profile-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+  }
+  
+  .stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
+  }
+  
+  .stat-content {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .stat-value {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+  }
+  
+  .stat-label {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+  }
+  
+  .profile-sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  
+  .section-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+  }
+  
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--border-primary);
+  }
+  
+  .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-2) 0;
+  }
+  
+  .info-label {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+  }
+  
+  .info-value {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+  }
+  
+  .settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  
+  .setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-secondary);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .setting-item:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+  }
+  
+  .setting-item.danger .setting-title {
+    color: #ef4444;
+  }
+  
+  .setting-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .setting-title {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+  }
+  
+  .setting-desc {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+  }
+  
+  .setting-item svg {
+    color: var(--text-tertiary);
+  }
+  
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal.open {
+    display: flex;
+  }
+  
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+  }
+  
+  .modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: var(--space-4);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+    animation: modalIn 0.2s ease-out;
+  }
+  
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+  
+  .modal-header h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+  }
+  
+  .modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    color: var(--text-tertiary);
+    border-radius: var(--radius-lg);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .modal-close:hover {
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+  }
+  
+  .modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  
+  .form-group label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+  }
+  
+  .form-group input {
+    padding: var(--space-3);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .form-group input:focus {
+    outline: none;
+    border-color: var(--color-accent-blue);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+  }
+  
+  .modal-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+  
+  .btn-secondary {
+    flex: 1;
+    padding: var(--space-3);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .btn-secondary:hover {
+    background: var(--bg-tertiary);
+  }
+  
+  .btn-primary {
+    flex: 1;
+    padding: var(--space-3);
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: white;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+  }
+</style>
+
+<script>
+  const API_BASE = 'https://api.agiera.net';
+  const lang = document.documentElement.lang === 'zh' ? 'zh' : 'en';
+  
+  const editModal = document.getElementById('edit-modal');
+  const passwordModal = document.getElementById('password-modal');
+  const editForm = document.getElementById('edit-form');
+  const passwordForm = document.getElementById('password-form');
+  
+  let currentUser = null;
+  
+  function loadUserProfile() {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+      window.location.href = '/';
+      return;
+    }
+    
+    currentUser = JSON.parse(userStr);
+    
+    document.getElementById('avatar-initial').textContent = currentUser.username?.charAt(0).toUpperCase() || '?';
+    document.getElementById('profile-name').textContent = currentUser.username || '--';
+    document.getElementById('profile-email').textContent = currentUser.email || '--';
+    document.getElementById('info-username').textContent = currentUser.username || '--';
+    document.getElementById('info-email').textContent = currentUser.email || '--';
+    document.getElementById('info-userid').textContent = currentUser.id || '--';
+    document.getElementById('stat-login-count').textContent = currentUser.login_count || 0;
+    
+    if (currentUser.last_login) {
+      const lastLogin = new Date(currentUser.last_login);
+      document.getElementById('stat-last-login').textContent = formatDate(lastLogin);
+    }
+    
+    if (currentUser.created_at) {
+      const joinDate = new Date(currentUser.created_at);
+      document.getElementById('stat-join-date').textContent = formatDate(joinDate);
+    }
+  }
+  
+  function formatDate(date) {
+    const now = new Date();
+    const diff = now - date;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (days === 0) {
+      return lang === 'zh' ? '今天' : 'Today';
+    } else if (days === 1) {
+      return lang === 'zh' ? '昨天' : 'Yesterday';
+    } else if (days < 7) {
+      return lang === 'zh' ? `${days}天前` : `${days} days ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  }
+  
+  function openModal(modal) {
+    modal?.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  
+  function closeModal(modal) {
+    modal?.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  
+  document.getElementById('edit-btn')?.addEventListener('click', () => {
+    document.getElementById('edit-username').value = currentUser?.username || '';
+    document.getElementById('edit-email').value = currentUser?.email || '';
+    openModal(editModal);
+  });
+  
+  document.getElementById('change-password-btn')?.addEventListener('click', () => {
+    openModal(passwordModal);
+  });
+  
+  document.getElementById('edit-modal-close')?.addEventListener('click', () => closeModal(editModal));
+  document.getElementById('edit-backdrop')?.addEventListener('click', () => closeModal(editModal));
+  document.getElementById('edit-cancel')?.addEventListener('click', () => closeModal(editModal));
+  
+  document.getElementById('password-modal-close')?.addEventListener('click', () => closeModal(passwordModal));
+  document.getElementById('password-backdrop')?.addEventListener('click', () => closeModal(passwordModal));
+  document.getElementById('password-cancel')?.addEventListener('click', () => closeModal(passwordModal));
+  
+  document.getElementById('logout-btn')?.addEventListener('click', () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    window.dispatchEvent(new CustomEvent('auth:logout'));
+    window.location.href = '/';
+  });
+  
+  editForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(editForm);
+    const username = formData.get('username');
+    const email = formData.get('email');
+    
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${API_BASE}/api/user/profile`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ username, email })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        currentUser = { ...currentUser, username, email };
+        localStorage.setItem('user', JSON.stringify(currentUser));
+        loadUserProfile();
+        closeModal(editModal);
+        alert(lang === 'zh' ? '资料更新成功' : 'Profile updated successfully');
+      } else {
+        alert(result.message || 'Update failed');
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      alert('Update failed. Please try again.');
+    }
+  });
+  
+  passwordForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(passwordForm);
+    const currentPassword = formData.get('currentPassword');
+    const newPassword = formData.get('newPassword');
+    const confirmPassword = formData.get('confirmPassword');
+    
+    if (newPassword !== confirmPassword) {
+      alert(lang === 'zh' ? '两次输入的新密码不一致' : 'New passwords do not match');
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${API_BASE}/api/user/password`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        closeModal(passwordModal);
+        passwordForm.reset();
+        alert(lang === 'zh' ? '密码更新成功' : 'Password updated successfully');
+      } else {
+        alert(result.message || 'Password update failed');
+      }
+    } catch (error) {
+      console.error('Password update error:', error);
+      alert('Password update failed. Please try again.');
+    }
+  });
+  
+  document.addEventListener('DOMContentLoaded', loadUserProfile);
+</script>

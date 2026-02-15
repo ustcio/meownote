@@ -68,6 +68,8 @@ const ROUTES = {
   '/api/visitor': { handler: handleVisitor },
   '/api/gold': { handler: handleGoldPrice },
   '/api/gold/history': { handler: handleGoldHistory },
+  '/api/user/profile': { handler: handleUserProfile },
+  '/api/user/password': { handler: handleUserPassword },
   '/stats/visit': { handler: handleStatsVisit },
   '/stats/visitor': { handler: handleStatsGet },
   '/stats/heatmap': { handler: handleHeatmap },
@@ -883,6 +885,141 @@ async function handleGoldHistory(request, env, ctx) {
   } catch (error) {
     console.error('Gold history error:', error);
     return jsonResponse({ success: false, labels: [], domestic: { prices: [] }, international: { prices: [] } });
+  }
+}
+
+// ================================================================================
+// 用户资料 API
+// ================================================================================
+
+async function handleUserProfile(request, env, ctx) {
+  if (request.method !== 'PUT') {
+    return jsonResponse({ error: 'Method not allowed' }, 405);
+  }
+
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return jsonResponse({ success: false, message: '未授权' }, 401);
+  }
+
+  const token = authHeader.substring(7);
+
+  try {
+    const user = await env.DB.prepare(
+      'SELECT * FROM users WHERE token = ?'
+    ).bind(token).first();
+
+    if (!user) {
+      return jsonResponse({ success: false, message: '用户不存在' }, 401);
+    }
+
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+    }
+
+    const { username, email } = body;
+
+    if (!username || !email) {
+      return jsonResponse({ success: false, message: '请填写完整信息' }, 400);
+    }
+
+    const sanitizedUsername = sanitizeInput(username);
+    const sanitizedEmail = sanitizeInput(email).toLowerCase();
+
+    // 检查用户名是否被其他用户占用
+    const existingUser = await env.DB.prepare(
+      'SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ?'
+    ).bind(sanitizedUsername, sanitizedEmail, user.id).first();
+
+    if (existingUser) {
+      return jsonResponse({ success: false, message: '用户名或邮箱已被使用' }, 400);
+    }
+
+    await env.DB.prepare(
+      'UPDATE users SET username = ?, email = ? WHERE id = ?'
+    ).bind(sanitizedUsername, sanitizedEmail, user.id).run();
+
+    return jsonResponse({
+      success: true,
+      message: '资料更新成功',
+      user: {
+        id: user.id,
+        username: sanitizedUsername,
+        email: sanitizedEmail,
+        login_count: user.login_count,
+        last_login: user.last_login,
+        created_at: user.created_at
+      }
+    });
+
+  } catch (error) {
+    console.error('Profile update error:', error);
+    return jsonResponse({ success: false, message: '更新失败' }, 500);
+  }
+}
+
+async function handleUserPassword(request, env, ctx) {
+  if (request.method !== 'PUT') {
+    return jsonResponse({ error: 'Method not allowed' }, 405);
+  }
+
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return jsonResponse({ success: false, message: '未授权' }, 401);
+  }
+
+  const token = authHeader.substring(7);
+
+  try {
+    const user = await env.DB.prepare(
+      'SELECT * FROM users WHERE token = ?'
+    ).bind(token).first();
+
+    if (!user) {
+      return jsonResponse({ success: false, message: '用户不存在' }, 401);
+    }
+
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+    }
+
+    const { currentPassword, newPassword } = body;
+
+    if (!currentPassword || !newPassword) {
+      return jsonResponse({ success: false, message: '请填写完整信息' }, 400);
+    }
+
+    if (newPassword.length < 6) {
+      return jsonResponse({ success: false, message: '新密码至少6个字符' }, 400);
+    }
+
+    const isValid = await verifyPassword(currentPassword, user.password);
+    if (!isValid) {
+      return jsonResponse({ success: false, message: '当前密码错误' }, 401);
+    }
+
+    const newHashedPassword = await hashPassword(newPassword);
+    const newToken = generateToken();
+
+    await env.DB.prepare(
+      'UPDATE users SET password = ?, token = ? WHERE id = ?'
+    ).bind(newHashedPassword, newToken, user.id).run();
+
+    return jsonResponse({
+      success: true,
+      message: '密码更新成功',
+      token: newToken
+    });
+
+  } catch (error) {
+    console.error('Password update error:', error);
+    return jsonResponse({ success: false, message: '更新失败' }, 500);
   }
 }
 
