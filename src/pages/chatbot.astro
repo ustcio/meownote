@@ -43,7 +43,7 @@ const messages = [
           <span class="chatbot-title">{t('chatbot.title')}</span>
         </div>
         
-        <div class="chatbot-messages">
+        <div class="chatbot-messages" id="chat-messages">
           {messages.map((message) => (
             <div class:list={['message', message.type]}>
               {message.type === 'bot' && (
@@ -74,10 +74,11 @@ const messages = [
         <div class="chatbot-input">
           <input 
             type="text" 
+            id="chat-input"
             placeholder={t('chatbot.placeholder')}
             class="input-field"
           />
-          <button class="send-btn">
+          <button class="send-btn" id="send-btn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="22" y1="2" x2="11" y2="13" />
               <polygon points="22 2 15 22 11 13 2 9 22 2" />
@@ -267,4 +268,150 @@ const messages = [
     background: var(--color-primary-hover);
     transform: scale(1.05);
   }
+  
+  .message-bubble.loading {
+    opacity: 0.7;
+  }
+  
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: var(--space-2);
+  }
+  
+  .typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: var(--text-tertiary);
+    border-radius: 50%;
+    animation: typing 1.4s infinite ease-in-out;
+  }
+  
+  .typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  
+  .typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+  
+  @keyframes typing {
+    0%, 60%, 100% {
+      transform: translateY(0);
+    }
+    30% {
+      transform: translateY(-4px);
+    }
+  }
 </style>
+
+<script>
+  const API_BASE = 'https://api.agiera.net';
+  const chatMessages = document.getElementById('chat-messages');
+  const chatInput = document.getElementById('chat-input') as HTMLInputElement;
+  const sendBtn = document.getElementById('send-btn');
+  
+  const chatHistory: { role: string; content: string }[] = [];
+  
+  function addMessage(content: string, type: 'user' | 'bot') {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    
+    if (type === 'bot') {
+      messageDiv.innerHTML = `
+        <div class="message-avatar bot">
+          <video class="avatar-video" autoplay loop muted playsinline>
+            <source src="/logo.mp4" type="video/mp4" />
+          </video>
+        </div>
+        <div class="message-bubble bot">
+          <p>${content}</p>
+        </div>
+      `;
+    } else {
+      messageDiv.innerHTML = `
+        <div class="message-bubble user">
+          <p>${content}</p>
+        </div>
+        <div class="message-avatar user">
+          <span>U</span>
+        </div>
+      `;
+    }
+    
+    chatMessages?.appendChild(messageDiv);
+    chatMessages?.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+  }
+  
+  function addLoadingMessage() {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message bot';
+    messageDiv.id = 'loading-message';
+    messageDiv.innerHTML = `
+      <div class="message-avatar bot">
+        <video class="avatar-video" autoplay loop muted playsinline>
+          <source src="/logo.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <div class="message-bubble bot loading">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    `;
+    chatMessages?.appendChild(messageDiv);
+    chatMessages?.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+  }
+  
+  function removeLoadingMessage() {
+    const loadingMessage = document.getElementById('loading-message');
+    loadingMessage?.remove();
+  }
+  
+  async function sendMessage() {
+    const message = chatInput?.value.trim();
+    if (!message) return;
+    
+    addMessage(message, 'user');
+    chatHistory.push({ role: 'user', content: message });
+    chatInput.value = '';
+    
+    addLoadingMessage();
+    
+    try {
+      const response = await fetch(`${API_BASE}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message, 
+          history: chatHistory.slice(-10) 
+        })
+      });
+      
+      const result = await response.json();
+      removeLoadingMessage();
+      
+      if (result.success && result.reply) {
+        addMessage(result.reply, 'bot');
+        chatHistory.push({ role: 'assistant', content: result.reply });
+      } else {
+        addMessage(result.message || 'Sorry, something went wrong.', 'bot');
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      removeLoadingMessage();
+      addMessage('Network error. Please try again.', 'bot');
+    }
+  }
+  
+  sendBtn?.addEventListener('click', sendMessage);
+  
+  chatInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+</script>
