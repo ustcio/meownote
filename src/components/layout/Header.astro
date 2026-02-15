@@ -10,9 +10,9 @@ const t = useTranslations(lang);
 
 const navItems = [
   { href: '/', label: t('nav.home'), id: 'home' },
-  { href: '/research', label: t('nav.research'), id: 'research' },
   { href: '/chatbot', label: t('nav.chatbot'), id: 'chatbot' },
   { href: '/kit', label: t('nav.kit'), id: 'kit' },
+  { href: '/research', label: t('nav.research'), id: 'research' },
   { href: '/about', label: t('nav.about'), id: 'about' },
 ];
 
@@ -52,33 +52,42 @@ const currentPath = Astro.url.pathname;
     </nav>
     
     <div class="header-actions">
-      <ThemeToggle />
-      <LanguageSwitcher />
+      <a href="/chatbot" class="nav-cta">
+        {lang === 'zh' ? '开始使用' : 'Get Started'}
+      </a>
       
-      <div class="user-menu" id="user-menu">
-        <button class="auth-btn" id="auth-btn" aria-label="Login">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <span class="auth-btn-text">{t('auth.login')}</span>
-        </button>
-        <div class="user-dropdown" id="user-dropdown">
-          <a href="/profile" class="dropdown-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="header-utils">
+        <ThemeToggle />
+        <LanguageSwitcher />
+        
+        <div class="user-menu" id="user-menu">
+          <button class="auth-btn" id="auth-btn" aria-label="Login">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-            <span>{lang === 'zh' ? '个人资料' : 'Profile'}</span>
-          </a>
-          <button class="dropdown-item logout" id="dropdown-logout">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            <span>{t('auth.logout')}</span>
           </button>
+          <div class="user-dropdown" id="user-dropdown">
+            <div class="dropdown-header">
+              <span class="dropdown-username" id="dropdown-username"></span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <a href="/profile" class="dropdown-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>{lang === 'zh' ? '个人资料' : 'Profile'}</span>
+            </a>
+            <button class="dropdown-item logout" id="dropdown-logout">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>{t('auth.logout')}</span>
+            </button>
+          </div>
         </div>
       </div>
       
@@ -105,16 +114,19 @@ const currentPath = Astro.url.pathname;
           </a>
         </li>
       ))}
-      <li>
-        <button class="mobile-auth-btn" id="mobile-auth-btn">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <span>{t('auth.login')}</span>
-        </button>
-      </li>
     </ul>
+    <div class="mobile-nav-actions">
+      <a href="/chatbot" class="mobile-cta">
+        {lang === 'zh' ? '开始使用' : 'Get Started'}
+      </a>
+      <button class="mobile-auth-btn" id="mobile-auth-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span>{t('auth.login')}</span>
+      </button>
+    </div>
   </nav>
 </header>
 
@@ -127,6 +139,7 @@ const currentPath = Astro.url.pathname;
   const mobileAuthBtn = document.getElementById('mobile-auth-btn');
   const userMenu = document.getElementById('user-menu');
   const dropdownLogout = document.getElementById('dropdown-logout');
+  const dropdownUsername = document.getElementById('dropdown-username');
   
   mobileMenuBtn?.addEventListener('click', () => {
     const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
@@ -189,16 +202,15 @@ const currentPath = Astro.url.pathname;
   
   function updateAuthUI() {
     const user = localStorage.getItem('user');
-    const authBtnText = document.querySelector('.auth-btn-text');
     const mobileAuthBtnSpan = mobileAuthBtn?.querySelector('span');
     
     if (user) {
       const userData = JSON.parse(user);
-      if (authBtnText) authBtnText.textContent = userData.username;
+      if (dropdownUsername) dropdownUsername.textContent = userData.username;
       if (mobileAuthBtnSpan) mobileAuthBtnSpan.textContent = userData.username;
       userMenu?.classList.add('logged-in');
     } else {
-      if (authBtnText) authBtnText.textContent = 'Login';
+      if (dropdownUsername) dropdownUsername.textContent = '';
       userMenu?.classList.remove('logged-in');
     }
   }
@@ -269,11 +281,12 @@ const currentPath = Astro.url.pathname;
     gap: var(--space-2);
     text-decoration: none;
     color: var(--text-primary);
+    flex-shrink: 0;
   }
   
   .logo-video {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: var(--radius-lg);
     object-fit: cover;
     object-position: center;
@@ -284,6 +297,7 @@ const currentPath = Astro.url.pathname;
     display: none;
     font-family: var(--font-brand);
     font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
     letter-spacing: 0.02em;
   }
   
@@ -297,7 +311,7 @@ const currentPath = Astro.url.pathname;
     display: none;
   }
   
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
     .nav {
       display: block;
     }
@@ -337,17 +351,49 @@ const currentPath = Astro.url.pathname;
   .header-actions {
     display: flex;
     align-items: center;
+    gap: var(--space-3);
+    flex-shrink: 0;
+  }
+  
+  .nav-cta {
+    display: none;
+    align-items: center;
+    padding: var(--space-2) var(--space-5);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: white;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-blue) 100%);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: transform var(--duration-fast) var(--ease-default),
+                box-shadow var(--duration-fast) var(--ease-default);
+    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+  }
+  
+  @media (min-width: 768px) {
+    .nav-cta {
+      display: inline-flex;
+    }
+  }
+  
+  .nav-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+  }
+  
+  .header-utils {
+    display: flex;
+    align-items: center;
     gap: var(--space-1);
   }
   
   .auth-btn {
-    display: none;
+    display: flex;
     align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: var(--text-tertiary);
     border-radius: var(--radius-lg);
     transition: color var(--duration-fast) var(--ease-default),
                 background-color var(--duration-fast) var(--ease-default);
@@ -362,12 +408,16 @@ const currentPath = Astro.url.pathname;
     position: relative;
   }
   
+  .user-menu.logged-in .auth-btn {
+    color: var(--color-primary);
+  }
+  
   .user-dropdown {
     position: absolute;
     top: 100%;
     right: 0;
     margin-top: var(--space-2);
-    min-width: 160px;
+    min-width: 180px;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-xl);
@@ -387,6 +437,22 @@ const currentPath = Astro.url.pathname;
     transform: translateY(0);
   }
   
+  .dropdown-header {
+    padding: var(--space-2) var(--space-3);
+  }
+  
+  .dropdown-username {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+  }
+  
+  .dropdown-divider {
+    height: 1px;
+    background: var(--border-primary);
+    margin: var(--space-2) 0;
+  }
+  
   .dropdown-item {
     display: flex;
     align-items: center;
@@ -397,6 +463,10 @@ const currentPath = Astro.url.pathname;
     color: var(--text-secondary);
     border-radius: var(--radius-lg);
     transition: all var(--duration-fast) var(--ease-default);
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
   }
   
   .dropdown-item:hover {
@@ -410,31 +480,6 @@ const currentPath = Astro.url.pathname;
   
   .dropdown-item.logout:hover {
     background: rgba(239, 68, 68, 0.1);
-  }
-  
-  @media (min-width: 768px) {
-    .auth-btn {
-      display: flex;
-    }
-  }
-  
-  .mobile-auth-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    width: 100%;
-    padding: var(--space-3) var(--space-4);
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    border-radius: var(--radius-lg);
-    transition: color var(--duration-fast) var(--ease-default),
-                background-color var(--duration-fast) var(--ease-default);
-  }
-  
-  .mobile-auth-btn:hover {
-    color: var(--text-primary);
-    background-color: var(--bg-tertiary);
   }
   
   .mobile-menu-btn {
@@ -454,7 +499,7 @@ const currentPath = Astro.url.pathname;
     background-color: var(--bg-tertiary);
   }
   
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
     .mobile-menu-btn {
       display: none;
     }
@@ -471,7 +516,7 @@ const currentPath = Astro.url.pathname;
     -webkit-backdrop-filter: var(--surface-blur-heavy);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-2xl);
-    padding: var(--space-3);
+    padding: var(--space-4);
     animation: slideDown var(--duration-fast) var(--ease-default);
     box-shadow: var(--shadow-float);
   }
@@ -480,7 +525,7 @@ const currentPath = Astro.url.pathname;
     display: block;
   }
   
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
     .mobile-nav {
       display: none !important;
     }
@@ -508,6 +553,56 @@ const currentPath = Astro.url.pathname;
   
   .mobile-nav-link:hover,
   .mobile-nav-link.active {
+    color: var(--text-primary);
+    background-color: var(--bg-tertiary);
+  }
+  
+  .mobile-nav-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-primary);
+  }
+  
+  .mobile-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: white;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-blue) 100%);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: transform var(--duration-fast) var(--ease-default);
+  }
+  
+  .mobile-cta:hover {
+    transform: translateY(-1px);
+  }
+  
+  .mobile-auth-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    border-radius: var(--radius-lg);
+    transition: color var(--duration-fast) var(--ease-default),
+                background-color var(--duration-fast) var(--ease-default);
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .mobile-auth-btn:hover {
     color: var(--text-primary);
     background-color: var(--bg-tertiary);
   }

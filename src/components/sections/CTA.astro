@@ -1,0 +1,165 @@
+---
+import { getLangFromUrl, useTranslations } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
+---
+
+<section class="cta-section">
+  <div class="cta-container">
+    <div class="cta-content">
+      <h2 class="cta-title">
+        {lang === 'zh' ? '准备好开始了吗？' : 'Ready to Get Started?'}
+      </h2>
+      <p class="cta-subtitle">
+        {lang === 'zh' 
+          ? '立即体验智能对话，开启您的AI之旅' 
+          : 'Experience intelligent conversation and start your AI journey today'}
+      </p>
+      <div class="cta-actions">
+        <a href="/chatbot" class="cta-primary">
+          {lang === 'zh' ? '免费开始' : 'Get Started Free'}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+        <a href="/about" class="cta-secondary">
+          {lang === 'zh' ? '了解更多' : 'Learn More'}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-section {
+    padding: var(--space-20) var(--space-4);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  @media (min-width: 768px) {
+    .cta-section {
+      padding: var(--space-32) var(--space-6);
+    }
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
+    opacity: 0.05;
+    pointer-events: none;
+  }
+
+  .cta-container {
+    max-width: var(--container-lg);
+    margin: 0 auto;
+  }
+
+  .cta-content {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-4);
+    line-height: var(--leading-tight);
+  }
+
+  @media (min-width: 768px) {
+    .cta-title {
+      font-size: var(--text-4xl);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .cta-title {
+      font-size: var(--text-5xl);
+    }
+  }
+
+  .cta-subtitle {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-8);
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: var(--leading-relaxed);
+  }
+
+  .cta-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (min-width: 480px) {
+    .cta-actions {
+      flex-direction: row;
+      gap: var(--space-4);
+    }
+  }
+
+  .cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-8);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: white;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-blue) 100%);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: transform var(--duration-normal) var(--ease-default),
+                box-shadow var(--duration-normal) var(--ease-default);
+    box-shadow: 0 4px 16px rgba(0, 113, 227, 0.25);
+  }
+
+  .cta-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 113, 227, 0.35);
+  }
+
+  .cta-primary svg {
+    transition: transform var(--duration-fast) var(--ease-default);
+  }
+
+  .cta-primary:hover svg {
+    transform: translateX(4px);
+  }
+
+  .cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-4) var(--space-8);
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    background: transparent;
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: background-color var(--duration-fast) var(--ease-default),
+                border-color var(--duration-fast) var(--ease-default);
+  }
+
+  .cta-secondary:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+  }
+</style>

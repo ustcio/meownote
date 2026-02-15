@@ -1,0 +1,121 @@
+---
+import { getLangFromUrl, useTranslations } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
+
+const stats = [
+  {
+    value: '10K+',
+    label: lang === 'zh' ? '活跃用户' : 'Active Users',
+  },
+  {
+    value: '1M+',
+    label: lang === 'zh' ? '对话次数' : 'Conversations',
+  },
+  {
+    value: '99.9%',
+    label: lang === 'zh' ? '服务可用性' : 'Uptime',
+  },
+  {
+    value: '<100ms',
+    label: lang === 'zh' ? '平均响应' : 'Response Time',
+  },
+];
+---
+
+<section class="social-proof">
+  <div class="proof-container">
+    <div class="proof-grid">
+      {stats.map((stat, index) => (
+        <div class="proof-item" style={`--delay: ${index * 0.1}s`}>
+          <span class="proof-value">{stat.value}</span>
+          <span class="proof-label">{stat.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .social-proof {
+    padding: var(--space-16) var(--space-4);
+    background: var(--bg-primary);
+    position: relative;
+  }
+
+  @media (min-width: 768px) {
+    .social-proof {
+      padding: var(--space-20) var(--space-6);
+    }
+  }
+
+  .proof-container {
+    max-width: var(--container-xl);
+    margin: 0 auto;
+  }
+
+  .proof-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-8);
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .proof-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-12);
+    }
+  }
+
+  .proof-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    animation: fadeInUp 0.6s var(--ease-out) var(--delay) both;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .proof-value {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    line-height: 1;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  @media (min-width: 768px) {
+    .proof-value {
+      font-size: var(--text-4xl);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .proof-value {
+      font-size: var(--text-5xl);
+    }
+  }
+
+  .proof-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+  }
+</style>
