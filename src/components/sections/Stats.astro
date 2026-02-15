@@ -1,5 +1,6 @@
 ---
 import { getLangFromUrl, useTranslations } from '@i18n';
+import Icon from '@components/ui/Icon.astro';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -8,17 +9,17 @@ const stats = [
   { 
     value: '1,234', 
     label: lang === 'zh' ? '当前在线' : 'Online Now',
-    icon: '●'
+    icon: 'users'
   },
   { 
     value: '56,789', 
     label: lang === 'zh' ? '累计访问' : 'Total Visits',
-    icon: '↑'
+    icon: 'trending'
   },
   { 
     value: '99.9%', 
     label: lang === 'zh' ? '正常运行时间' : 'Uptime',
-    icon: '⚡'
+    icon: 'zap'
   },
 ];
 ---
@@ -28,7 +29,9 @@ const stats = [
     <div class="stats-grid">
       {stats.map((stat) => (
         <div class="stat-card hover-lift">
-          <div class="stat-icon">{stat.icon}</div>
+          <div class="stat-icon">
+            <Icon name={stat.icon} size={20} />
+          </div>
           <div class="stat-value">{stat.value}</div>
           <div class="stat-label">{stat.label}</div>
         </div>
@@ -84,9 +87,15 @@ const stats = [
   }
   
   .stat-icon {
-    font-size: var(--text-xl);
-    margin-bottom: var(--space-2);
-    color: var(--color-accent-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto var(--space-3);
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+    border-radius: var(--radius-lg);
+    color: white;
   }
   
   .stat-value {

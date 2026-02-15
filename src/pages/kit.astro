@@ -1,6 +1,7 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import { getLangFromUrl, useTranslations } from '@i18n';
+import Icon from '@components/ui/Icon.astro';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -9,78 +10,78 @@ const categories = [
   {
     id: 'finance',
     title: t('kit.category.finance'),
-    icon: '💰',
+    icon: 'dollar',
     tools: [
       { 
         name: lang === 'zh' ? '实时金价' : 'Gold Price',
         description: lang === 'zh' ? '查看实时黄金价格' : 'View real-time gold prices',
-        icon: '🥇'
+        icon: 'dollar'
       },
       { 
         name: lang === 'zh' ? '汇率换算' : 'Currency Exchange',
         description: lang === 'zh' ? '货币汇率实时换算' : 'Real-time currency conversion',
-        icon: '💱'
+        icon: 'refresh'
       },
     ]
   },
   {
     id: 'network',
     title: t('kit.category.network'),
-    icon: '🌐',
+    icon: 'globe',
     tools: [
       { 
         name: lang === 'zh' ? 'IP 查询' : 'IP Lookup',
         description: lang === 'zh' ? '查询IP地址信息' : 'Query IP address information',
-        icon: '🔍'
+        icon: 'search'
       },
       { 
         name: lang === 'zh' ? '域名 WHOIS' : 'Domain WHOIS',
         description: lang === 'zh' ? '查询域名注册信息' : 'Query domain registration info',
-        icon: '📡'
+        icon: 'database'
       },
       { 
         name: lang === 'zh' ? '网速测试' : 'Speed Test',
         description: lang === 'zh' ? '测试网络连接速度' : 'Test network connection speed',
-        icon: '⚡'
+        icon: 'zap'
       },
     ]
   },
   {
     id: 'security',
     title: t('kit.category.security'),
-    icon: '🔒',
+    icon: 'shield',
     tools: [
       { 
         name: lang === 'zh' ? '密码生成器' : 'Password Generator',
         description: lang === 'zh' ? '生成安全随机密码' : 'Generate secure random passwords',
-        icon: '🔑'
+        icon: 'key'
       },
       { 
         name: lang === 'zh' ? 'SSL 检查' : 'SSL Check',
         description: lang === 'zh' ? '检查网站SSL证书' : 'Check website SSL certificate',
-        icon: '🛡️'
+        icon: 'lock'
       },
     ]
   },
   {
     id: 'converter',
     title: t('kit.category.converter'),
-    icon: '🔄',
+    icon: 'refresh',
     tools: [
       { 
         name: lang === 'zh' ? 'JSON 格式化' : 'JSON Formatter',
         description: lang === 'zh' ? '格式化和验证JSON数据' : 'Format and validate JSON data',
-        icon: '📋'
+        icon: 'code'
       },
       { 
         name: lang === 'zh' ? 'Base64 编码' : 'Base64 Encoder',
         description: lang === 'zh' ? '文本Base64编码解码' : 'Encode and decode Base64 text',
-        icon: '📝'
+        icon: 'terminal'
       },
       { 
         name: lang === 'zh' ? '时间戳转换' : 'Timestamp Converter',
         description: lang === 'zh' ? '时间戳与日期转换' : 'Convert timestamp to date',
-        icon: '🕐'
+        icon: 'clock'
       },
     ]
   },
@@ -102,13 +103,17 @@ const categories = [
         {categories.map((category) => (
           <div class="category-card hover-lift">
             <div class="category-header">
-              <span class="category-icon">{category.icon}</span>
+              <div class="category-icon">
+                <Icon name={category.icon} size={18} />
+              </div>
               <h2 class="category-title">{category.title}</h2>
             </div>
             <div class="tools-list">
               {category.tools.map((tool) => (
                 <div class="tool-item hover-lift">
-                  <span class="tool-icon">{tool.icon}</span>
+                  <div class="tool-icon">
+                    <Icon name={tool.icon} size={16} />
+                  </div>
                   <div class="tool-info">
                     <span class="tool-name">{tool.name}</span>
                     <span class="tool-description">{tool.description}</span>
@@ -179,8 +184,17 @@ const categories = [
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-2xl);
-    padding: var(--space-6);
+    padding: var(--space-5);
     box-shadow: var(--card-shadow);
+    transition: transform var(--duration-normal) var(--ease-default),
+                box-shadow var(--duration-normal) var(--ease-default),
+                border-color var(--duration-normal) var(--ease-default);
+  }
+  
+  .category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-hover-shadow);
+    border-color: var(--border-hover);
   }
   
   .category-header {
@@ -193,11 +207,18 @@ const categories = [
   }
   
   .category-icon {
-    font-size: var(--text-2xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+    border-radius: var(--radius-md);
+    color: white;
   }
   
   .category-title {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-weight: var(--font-semibold);
     color: var(--text-primary);
   }
@@ -205,7 +226,7 @@ const categories = [
   .tools-list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
   
   .tool-item {
@@ -217,17 +238,24 @@ const categories = [
     border: 1px solid var(--border-secondary);
     border-radius: var(--radius-xl);
     cursor: pointer;
+    transition: transform var(--duration-fast) var(--ease-default),
+                border-color var(--duration-fast) var(--ease-default);
+  }
+  
+  .tool-item:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-hover);
   }
   
   .tool-icon {
-    font-size: var(--text-xl);
-    width: 40px;
-    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 32px;
+    height: 32px;
     background: var(--bg-tertiary);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
   }
   
   .tool-info {

@@ -2,6 +2,7 @@
 import { getLangFromUrl, useTranslations, type Lang } from '@i18n';
 import LanguageSwitcher from '@components/ui/LanguageSwitcher.astro';
 import ThemeToggle from '@components/ui/ThemeToggle.astro';
+import Icon from '@components/ui/Icon.astro';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -59,11 +60,7 @@ const currentPath = Astro.url.pathname;
         aria-expanded="false"
         aria-controls="mobile-nav"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="3" y1="18" x2="21" y2="18" />
-        </svg>
+        <Icon name="menu" size={18} />
       </button>
     </div>
   </div>
@@ -243,12 +240,14 @@ const currentPath = Astro.url.pathname;
     justify-content: center;
     width: 36px;
     height: 36px;
-    color: var(--text-primary);
+    color: var(--text-secondary);
     border-radius: var(--radius-lg);
-    transition: background-color var(--duration-fast) var(--ease-default);
+    transition: color var(--duration-fast) var(--ease-default),
+                background-color var(--duration-fast) var(--ease-default);
   }
   
   .mobile-menu-btn:hover {
+    color: var(--text-primary);
     background-color: var(--bg-tertiary);
   }
   
