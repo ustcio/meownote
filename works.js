@@ -627,11 +627,10 @@ async function handleHeatmap(request, env, ctx) {
         date(created_at) as date,
         COUNT(*) as count
       FROM page_views
-      WHERE date(created_at) >= date(? || '-01-01')
-        AND date(created_at) <= date(? || '-12-31')
+      WHERE created_at >= datetime('now', '-1 year')
       GROUP BY date(created_at)
       ORDER BY date
-    `).bind(year, year).all();
+    `).all();
 
     const heatmapData = {};
     (result.results || []).forEach(row => {

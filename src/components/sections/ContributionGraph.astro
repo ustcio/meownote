@@ -12,24 +12,11 @@ const days = lang === 'zh'
   ? ['日', '一', '二', '三', '四', '五', '六']
   : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const currentYear = 2026;
-const startDate = new Date(currentYear, 0, 1);
-const endDate = new Date(currentYear, 11, 31);
-
-function generateYearData() {
-  const data: { date: Date; level: number; count: number }[] = [];
-  const currentDate = new Date(startDate);
-  
-  while (currentDate <= endDate) {
-    data.push({
-      date: new Date(currentDate),
-      level: 0,
-      count: 0
-    });
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-  return data;
-}
+const today = new Date();
+const currentYear = today.getFullYear();
+const startDate = new Date(today);
+startDate.setFullYear(startDate.getFullYear() - 1);
+startDate.setDate(startDate.getDate() - startDate.getDay());
 
 function getMonthPositions() {
   const positions: { month: number; week: number }[] = [];
@@ -38,7 +25,7 @@ function getMonthPositions() {
   const currentDate = new Date(startDate);
   let dayIndex = 0;
   
-  while (currentDate <= endDate) {
+  while (currentDate <= today) {
     const week = Math.floor(dayIndex / 7);
     const month = currentDate.getMonth();
     if (month !== lastMonth) {
@@ -53,7 +40,7 @@ function getMonthPositions() {
 }
 
 const monthPositions = getMonthPositions();
-const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+const totalDays = Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 const totalWeeks = Math.ceil(totalDays / 7);
 ---
 
@@ -64,7 +51,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
         <h2 class="contribution-title">
           {lang === 'zh' ? '访问活动' : 'Visitor Activity'}
         </h2>
-        <p class="contribution-subtitle">2026</p>
+        <p class="contribution-subtitle">{currentYear}</p>
       </div>
       
       <div class="contribution-graph-wrapper">
@@ -91,11 +78,11 @@ const totalWeeks = Math.ceil(totalDays / 7);
               {Array.from({ length: totalWeeks }).map((_, weekIndex) => (
                 <div class="contribution-week">
                   {Array.from({ length: 7 }).map((_, dayIndex) => {
-                    const dayOfYear = weekIndex * 7 + dayIndex;
+                    const dayOffset = weekIndex * 7 + dayIndex;
                     const cellDate = new Date(startDate);
-                    cellDate.setDate(cellDate.getDate() + dayOfYear);
+                    cellDate.setDate(cellDate.getDate() + dayOffset);
                     
-                    if (cellDate > endDate) return null;
+                    if (cellDate > today) return null;
                     
                     const dateStr = cellDate.toISOString().split('T')[0];
                     const displayDateStr = cellDate.toLocaleDateString(
