@@ -57,20 +57,34 @@ const stats = [
   }
   
   .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: var(--space-4);
   }
   
-  @media (min-width: 768px) {
+  @media (min-width: 640px) {
     .stats-grid {
-      grid-template-columns: repeat(3, 1fr);
+      flex-direction: row;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .stats-grid {
+      flex-wrap: nowrap;
     }
   }
   
   .stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: var(--space-5);
+    padding: var(--space-6);
+    min-width: 180px;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-2xl);
@@ -90,17 +104,18 @@ const stats = [
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    margin: 0 auto var(--space-3);
+    width: 44px;
+    height: 44px;
+    margin-bottom: var(--space-3);
     background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
     border-radius: var(--radius-lg);
     color: white;
   }
   
   .stat-value {
+    font-family: var(--font-display);
     font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
+    font-weight: var(--font-semibold);
     color: var(--text-primary);
     margin-bottom: var(--space-1);
   }
@@ -112,7 +127,9 @@ const stats = [
   }
   
   .stat-label {
+    font-family: var(--font-sans);
     font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     color: var(--text-secondary);
   }
 </style>

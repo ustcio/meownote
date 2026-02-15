@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap');
 @import './tokens.css';
 
 /* ==================== Reset & Base ==================== */
@@ -19,7 +20,7 @@ html {
 }
 
 body {
-  font-family: var(--font-system);
+  font-family: var(--font-sans);
   font-size: var(--text-base);
   font-weight: var(--font-regular);
   line-height: var(--leading-normal);
@@ -30,9 +31,10 @@ body {
               color var(--duration-normal) var(--ease-default);
 }
 
-/* ==================== Typography ==================== */
+/* ==================== Typography Hierarchy ==================== */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: var(--font-semibold);
+  font-family: var(--font-display);
+  font-weight: var(--font-medium);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
   color: var(--text-primary);
@@ -40,11 +42,13 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 {
   font-size: var(--text-5xl);
-  font-weight: var(--font-bold);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-tighter);
 }
 
 h2 {
   font-size: var(--text-4xl);
+  letter-spacing: var(--tracking-tight);
 }
 
 h3 {
@@ -64,11 +68,14 @@ h6 {
 }
 
 p {
+  font-family: var(--font-sans);
+  font-weight: var(--font-regular);
   color: var(--text-secondary);
   line-height: var(--leading-relaxed);
 }
 
 a {
+  font-family: var(--font-sans);
   color: var(--color-primary);
   text-decoration: none;
   transition: color var(--duration-fast) var(--ease-default);
@@ -78,9 +85,25 @@ a:hover {
   color: var(--interactive-primary-hover);
 }
 
+/* ==================== Labels & Small Text ==================== */
+.label {
+  font-family: var(--font-sans);
+  font-weight: var(--font-medium);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.caption {
+  font-family: var(--font-sans);
+  font-weight: var(--font-regular);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
 /* ==================== Interactive Elements ==================== */
 button {
-  font-family: inherit;
+  font-family: var(--font-sans);
   font-size: inherit;
   cursor: pointer;
   border: none;
@@ -91,7 +114,7 @@ button {
 input,
 textarea,
 select {
-  font-family: inherit;
+  font-family: var(--font-sans);
   font-size: inherit;
   color: var(--text-primary);
   background-color: var(--bg-secondary);
@@ -184,12 +207,8 @@ textarea::placeholder {
 
 /* ==================== Animation Utilities ==================== */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {

@@ -1,4 +1,6 @@
 :root {
+  /* ==================== Font Import ==================== */
+  
   /* ==================== Color System ==================== */
   
   /* Primary Colors */
@@ -23,24 +25,24 @@
   /* ==================== Typography Scale ==================== */
   
   /* Font Families */
-  --font-system: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, 'Cascadia Mono', monospace;
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
   
-  /* Font Sizes - Mobile First */
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
-  --text-3xl: 1.875rem;
-  --text-4xl: 2.25rem;
-  --text-5xl: 3rem;
-  --text-6xl: 3.75rem;
-  --text-7xl: 4.5rem;
+  /* Font Sizes - Mobile First with Clear Hierarchy */
+  --text-xs: 0.75rem;       /* 12px - Captions, Labels */
+  --text-sm: 0.875rem;      /* 14px - Small text, Meta */
+  --text-base: 1rem;        /* 16px - Body text */
+  --text-lg: 1.125rem;      /* 18px - Large body, Lead */
+  --text-xl: 1.25rem;       /* 20px - Small heading */
+  --text-2xl: 1.5rem;       /* 24px - H4 */
+  --text-3xl: 1.875rem;     /* 30px - H3 */
+  --text-4xl: 2.25rem;      /* 36px - H2 */
+  --text-5xl: 3rem;         /* 48px - H1 */
+  --text-6xl: 3.75rem;      /* 60px - Display */
+  --text-7xl: 4.5rem;       /* 72px - Hero */
   
   /* Font Weights */
-  --font-light: 300;
   --font-regular: 400;
   --font-medium: 500;
   --font-semibold: 600;
@@ -49,33 +51,33 @@
   /* Line Heights */
   --leading-none: 1;
   --leading-tight: 1.2;
-  --leading-snug: 1.375;
+  --leading-snug: 1.35;
   --leading-normal: 1.5;
-  --leading-relaxed: 1.625;
-  --leading-loose: 2;
+  --leading-relaxed: 1.65;
+  --leading-loose: 1.8;
   
   /* Letter Spacing */
-  --tracking-tighter: -0.05em;
-  --tracking-tight: -0.025em;
+  --tracking-tighter: -0.04em;
+  --tracking-tight: -0.02em;
   --tracking-normal: 0;
-  --tracking-wide: 0.025em;
-  --tracking-wider: 0.05em;
+  --tracking-wide: 0.02em;
+  --tracking-wider: 0.04em;
   
   /* ==================== Spacing Scale ==================== */
   --space-0: 0;
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  --space-20: 5rem;
-  --space-24: 6rem;
-  --space-32: 8rem;
+  --space-1: 0.25rem;       /* 4px */
+  --space-2: 0.5rem;        /* 8px */
+  --space-3: 0.75rem;       /* 12px */
+  --space-4: 1rem;          /* 16px */
+  --space-5: 1.25rem;       /* 20px */
+  --space-6: 1.5rem;        /* 24px */
+  --space-8: 2rem;          /* 32px */
+  --space-10: 2.5rem;       /* 40px */
+  --space-12: 3rem;         /* 48px */
+  --space-16: 4rem;         /* 64px */
+  --space-20: 5rem;         /* 80px */
+  --space-24: 6rem;         /* 96px */
+  --space-32: 8rem;         /* 128px */
   
   /* ==================== Border Radius - Unified ==================== */
   --radius-none: 0;
@@ -124,7 +126,7 @@
   --container-xl: 1280px;
   --container-2xl: 1536px;
   
-  --header-height: 3rem;
+  --header-height: 3.5rem;
   --footer-height: auto;
 }
 
