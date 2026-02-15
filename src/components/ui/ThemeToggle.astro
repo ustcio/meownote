@@ -74,25 +74,28 @@ const lang = getLangFromUrl(Astro.url);
                 transform var(--duration-fast) var(--ease-default);
   }
   
-  /* 深色模式：显示太阳图标（可切换到浅色） */
-  [data-theme="dark"] .icon-sun {
+  /* 默认显示太阳图标（深色模式） */
+  .icon-sun {
     opacity: 1;
     transform: scale(1);
   }
   
-  [data-theme="dark"] .icon-moon {
+  .icon-moon {
     opacity: 0;
     transform: scale(0.5);
+    pointer-events: none;
   }
   
-  /* 浅色模式：显示月牙图标（可切换到深色） */
-  [data-theme="light"] .icon-sun {
+  /* 浅色模式：显示月牙图标 */
+  :global([data-theme="light"]) .icon-sun {
     opacity: 0;
     transform: scale(0.5);
+    pointer-events: none;
   }
   
-  [data-theme="light"] .icon-moon {
+  :global([data-theme="light"]) .icon-moon {
     opacity: 1;
     transform: scale(1);
+    pointer-events: auto;
   }
 </style>
