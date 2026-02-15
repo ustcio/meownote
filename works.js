@@ -759,9 +759,9 @@ async function handleGoldHistory(request, env, ctx) {
     const range = url.searchParams.get('range') || '1m';
     
     const now = Date.now();
-    const labels: string[] = [];
-    const domesticPrices: number[] = [];
-    const internationalPrices: number[] = [];
+    const labels = [];
+    const domesticPrices = [];
+    const internationalPrices = [];
     
     let days = 30;
     switch (range) {
