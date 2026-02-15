@@ -1,0 +1,163 @@
+---
+import { languages, getLangFromUrl, type Lang } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
+const currentPath = Astro.url.pathname;
+
+function getLocalizedPath(targetLang: Lang): string {
+  if (lang === 'en') {
+    if (currentPath === '/') {
+      return `/${targetLang}`;
+    }
+    return `/${targetLang}${currentPath}`;
+  } else {
+    if (currentPath === `/${lang}`) {
+      return targetLang === 'en' ? '/' : `/${targetLang}`;
+    }
+    return targetLang === 'en' 
+      ? currentPath.replace(`/${lang}`, '') 
+      : currentPath.replace(`/${lang}`, `/${targetLang}`);
+  }
+}
+---
+
+<div class="lang-switcher">
+  <button 
+    class="lang-btn" 
+    aria-label="Change language"
+    aria-expanded="false"
+    aria-controls="lang-dropdown"
+  >
+    <span class="lang-current">{lang.toUpperCase()}</span>
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  </button>
+  
+  <div id="lang-dropdown" class="lang-dropdown" role="menu">
+    {Object.entries(languages).map(([code, name]) => (
+      <a 
+        href={getLocalizedPath(code as Lang)}
+        class:list={['lang-option', { active: code === lang }]}
+        role="menuitem"
+        data-lang={code}
+      >
+        <span class="lang-code">{code.toUpperCase()}</span>
+        <span class="lang-name">{name}</span>
+      </a>
+    ))}
+  </div>
+</div>
+
+<script>
+  const langBtn = document.querySelector('.lang-btn');
+  const langDropdown = document.getElementById('lang-dropdown');
+  
+  langBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isExpanded = langBtn.getAttribute('aria-expanded') === 'true';
+    langBtn.setAttribute('aria-expanded', String(!isExpanded));
+    langDropdown?.classList.toggle('open');
+  });
+  
+  // Close dropdown when clicking outside
+  document.addEventListener('click', () => {
+    langBtn?.setAttribute('aria-expanded', 'false');
+    langDropdown?.classList.remove('open');
+  });
+  
+  // Close on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      langBtn?.setAttribute('aria-expanded', 'false');
+      langDropdown?.classList.remove('open');
+    }
+  });
+</script>
+
+<style>
+  .lang-switcher {
+    position: relative;
+  }
+  
+  .lang-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    border-radius: var(--radius-md);
+    transition: color var(--duration-fast) var(--ease-default),
+                background-color var(--duration-fast) var(--ease-default);
+  }
+  
+  .lang-btn:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-tertiary);
+  }
+  
+  .lang-btn svg {
+    transition: transform var(--duration-fast) var(--ease-default);
+  }
+  
+  .lang-btn[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
+  
+  .lang-dropdown {
+    position: absolute;
+    top: calc(100% + var(--space-2));
+    right: 0;
+    min-width: 140px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity var(--duration-fast) var(--ease-default),
+                visibility var(--duration-fast) var(--ease-default),
+                transform var(--duration-fast) var(--ease-default);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .lang-dropdown.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .lang-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    transition: color var(--duration-fast) var(--ease-default),
+                background-color var(--duration-fast) var(--ease-default);
+  }
+  
+  .lang-option:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-tertiary);
+  }
+  
+  .lang-option.active {
+    color: var(--text-primary);
+    background-color: var(--bg-tertiary);
+  }
+  
+  .lang-code {
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+  }
+  
+  .lang-name {
+    font-size: var(--text-sm);
+  }
+</style>

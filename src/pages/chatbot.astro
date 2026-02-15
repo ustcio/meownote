@@ -1,405 +1,270 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Navigation from '../components/Navigation.astro';
+import Layout from '@layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const messages = [
+  {
+    type: 'bot',
+    content: lang === 'zh' 
+      ? '你好！我是 AI 助手，有什么我可以帮助你的吗？'
+      : 'Hello! I\'m an AI assistant. How can I help you today?'
+  },
+  {
+    type: 'user',
+    content: lang === 'zh'
+      ? '请介绍一下你自己。'
+      : 'Please introduce yourself.'
+  },
+  {
+    type: 'bot',
+    content: lang === 'zh'
+      ? '我是一个基于先进AI技术的智能助手，可以帮助你进行编程、写作、分析等各种任务。'
+      : 'I\'m an intelligent assistant based on advanced AI technology, capable of helping you with programming, writing, analysis, and various other tasks.'
+  }
+];
 ---
 
-<Layout title="ChatBot - Meow Note">
-  <Navigation />
-    <section class="chatbot-hero">
-      <h1>AI <span class="gradient">ChatBot</span></h1>
-      <p>Experience the power of advanced AI. Ask anything and get intelligent responses powered by Qwen.</p>
-    </section>
-
+<Layout 
+  title={lang === 'zh' ? '聊天机器人 - Meow Note' : 'ChatBot - Meow Note'}
+  description={t('chatbot.title')}
+>
+  <section class="chatbot">
     <div class="chatbot-container">
       <div class="chatbot-window">
         <div class="chatbot-header">
-          <div class="chatbot-header-dots">
-            <div class="chatbot-header-dot red"></div>
-            <div class="chatbot-header-dot yellow"></div>
-            <div class="chatbot-header-dot green"></div>
+          <div class="window-controls">
+            <span class="window-dot red"></span>
+            <span class="window-dot yellow"></span>
+            <span class="window-dot green"></span>
           </div>
-          <div class="chatbot-header-title">AGI Era Assistant</div>
-          <!-- AI 选择器 -->
-          <div class="ai-selector" id="chatbot-ai-selector">
-            <button class="ai-selector-btn" onclick="toggleAISelector('chatbot')">
-              <span class="ai-selector-icon" id="chatbot-ai-icon">⚡</span>
-              <span class="ai-selector-name" id="chatbot-ai-name">豆包 2.0 Pro</span>
-              <svg class="ai-selector-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-            <div class="ai-selector-dropdown" id="chatbot-ai-dropdown">
-              <div class="ai-option active" data-ai="doubao-pro" onclick="selectAI('chatbot', 'doubao-pro')">
-                <span class="ai-option-icon">⚡</span>
-                <div class="ai-option-info">
-                  <span class="ai-option-name">豆包 2.0 Pro</span>
-                  <span class="ai-option-desc">豆包 2.0 Pro · 火山引擎</span>
-                </div>
-                <span class="ai-option-check">✓</span>
-              </div>
-              <div class="ai-option" data-ai="qwen" onclick="selectAI('chatbot', 'qwen')">
-                <span class="ai-option-icon">🔮</span>
-                <div class="ai-option-info">
-                  <span class="ai-option-name">Qwen</span>
-                  <span class="ai-option-desc">通义千问 · 阿里云</span>
-                </div>
-                <span class="ai-option-check">✓</span>
-              </div>
-              <div class="ai-option" data-ai="doubao-code" onclick="selectAI('chatbot', 'doubao-code')">
-                <span class="ai-option-icon">⌨️</span>
-                <div class="ai-option-info">
-                  <span class="ai-option-name">豆包 2.0 Code</span>
-                  <span class="ai-option-desc">豆包 2.0 Code · 火山引擎</span>
-                </div>
-                <span class="ai-option-check">✓</span>
-              </div>
-            </div>
-          </div>
+          <span class="chatbot-title">{t('chatbot.title')}</span>
         </div>
         
-        <div class="chatbot-messages" id="chatbot-messages">
-          <div class="chatbot-message">
-            <div class="chatbot-avatar">
-                    <div class="cb-face cb-face-front"></div>
-                    <div class="cb-face cb-face-top"></div>
-                    <div class="cb-face cb-face-right"></div>
+        <div class="chatbot-messages">
+          {messages.map((message) => (
+            <div class:list={['message', message.type]}>
+              {message.type === 'bot' && (
+                <div class="message-avatar bot">
+                  <video 
+                    class="avatar-video" 
+                    autoplay 
+                    loop 
+                    muted 
+                    playsinline
+                  >
+                    <source src="/logo.mp4" type="video/mp4" />
+                  </video>
                 </div>
-            <div class="chatbot-bubble">
-              <p>Hello! I'm AGI Era's AI assistant powered by Qwen. I can help you with coding, analysis, creative writing, and much more. What would you like to explore today?</p>
+              )}
+              <div class:list={['message-bubble', message.type]}>
+                <p>{message.content}</p>
+              </div>
+              {message.type === 'user' && (
+                <div class="message-avatar user">
+                  <span>U</span>
+                </div>
+              )}
             </div>
-          </div>
+          ))}
         </div>
-
+        
         <div class="chatbot-input">
-          <input type="text" id="chatbot-input" placeholder="Type your message..." onkeypress="handleChatKeypress(event)">
-          <button id="chatbot-send-btn" onclick="sendChatMessage()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="22" y1="2" x2="11" y2="13"></line>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          <input 
+            type="text" 
+            placeholder={t('chatbot.placeholder')}
+            class="input-field"
+          />
+          <button class="send-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
             </svg>
-            Send
           </button>
         </div>
       </div>
     </div>
+  </section>
 </Layout>
 
 <style>
-  .chatbot-hero {
-    min-height: 50vh;
+  .chatbot {
+    min-height: 100vh;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    text-align: center;
-    padding: 6rem 2rem;
-  }
-
-  .chatbot-hero h1 {
-    font-size: 3rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .chatbot-hero .gradient {
-    background: linear-gradient(135deg, #fff 0%, #2997ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .chatbot-hero p {
-    font-size: 1.25rem;
-    color: var(--text-secondary);
-    max-width: 600px;
-  }
-
-  .chatbot-container {
-    padding: 0 2rem 6rem;
-    display: flex;
     justify-content: center;
+    padding: calc(var(--header-height) + var(--space-8)) var(--space-4) var(--space-8);
   }
-
-  .chatbot-window {
+  
+  .chatbot-container {
     width: 100%;
-    max-width: 800px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    max-width: 600px;
+    margin: 0 auto;
   }
-
+  
+  .chatbot-window {
+    background: var(--card-bg);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-2xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-2xl);
+  }
+  
   .chatbot-header {
     display: flex;
     align-items: center;
-    gap: 2rem;
-    padding: 1.5rem 2rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    gap: var(--space-4);
+    padding: var(--space-4);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-primary);
   }
-
-  .chatbot-header-dots {
+  
+  .window-controls {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
-
-  .chatbot-header-dot {
+  
+  .window-dot {
     width: 12px;
     height: 12px;
     border-radius: 50%;
   }
-
-  .chatbot-header-dot.red {
-    background: #ff5f56;
+  
+  .window-dot.red {
+    background: #ff5f57;
   }
-
-  .chatbot-header-dot.yellow {
-    background: #ffbd2e;
+  
+  .window-dot.yellow {
+    background: #febc2e;
   }
-
-  .chatbot-header-dot.green {
-    background: #27ca40;
+  
+  .window-dot.green {
+    background: #28c840;
   }
-
-  .chatbot-header-title {
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  .ai-selector {
-    margin-left: auto;
-    position: relative;
-  }
-
-  .ai-selector-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1.25rem;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    color: var(--text-primary);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .ai-selector-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.15);
-  }
-
-  .ai-selector-dropdown {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    right: 0;
-    min-width: 300px;
-    background: rgba(20, 20, 25, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(20px);
-    z-index: 100;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-  }
-
-  .ai-selector-dropdown.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
-
-  .ai-option {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.25rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .ai-option:last-child {
-    border-bottom: none;
-  }
-
-  .ai-option:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .ai-option.active {
-    background: rgba(41, 151, 255, 0.1);
-    border-left: 3px solid var(--accent);
-  }
-
-  .ai-option-icon {
-    font-size: 1.25rem;
-  }
-
-  .ai-option-info {
-    flex: 1;
-  }
-
-  .ai-option-name {
-    display: block;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  .ai-option-desc {
-    display: block;
-    font-size: 0.85rem;
+  
+  .chatbot-title {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     color: var(--text-secondary);
-    margin-top: 0.25rem;
   }
-
-  .ai-option-check {
-    color: var(--accent);
-    font-weight: 600;
-    opacity: 0;
-    transition: all 0.3s ease;
-  }
-
-  .ai-option.active .ai-option-check {
-    opacity: 1;
-  }
-
+  
   .chatbot-messages {
-    padding: 2rem;
-    height: 600px;
+    height: 400px;
     overflow-y: auto;
-  }
-
-  .chatbot-message {
+    padding: var(--space-4);
     display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    flex-direction: column;
+    gap: var(--space-4);
   }
-
-  .chatbot-avatar {
-    width: 40px;
-    height: 40px;
-    position: relative;
-    transform-style: preserve-3d;
-    transform: rotateX(10deg) rotateY(-10deg);
+  
+  .message {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+  
+  .message.user {
+    flex-direction: row-reverse;
+  }
+  
+  .message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
   }
-
-  .cb-face {
-    position: absolute;
-    border-radius: 8px;
+  
+  .message-avatar.bot {
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
   }
-
-  .cb-face-front {
-    width: 28px;
-    height: 28px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-purple));
-    transform: translateZ(14px);
-    top: 6px;
-    left: 6px;
-  }
-
-  .cb-face-top {
-    width: 28px;
-    height: 16px;
-    background: rgba(41, 151, 255, 0.6);
-    transform: rotateX(90deg) translateZ(6px);
-    top: -4px;
-    left: 6px;
-  }
-
-  .cb-face-right {
-    width: 16px;
-    height: 28px;
-    background: rgba(139, 92, 246, 0.6);
-    transform: rotateY(90deg) translateZ(22px);
-    top: 6px;
-    left: 6px;
-  }
-
-  .chatbot-bubble {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 16px;
-    padding: 1.5rem;
-  }
-
-  .chatbot-bubble p {
+  
+  .message-avatar.user {
+    background: var(--bg-tertiary);
     color: var(--text-primary);
-    line-height: 1.6;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
   }
-
+  
+  .avatar-video {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+  
+  .message-bubble {
+    max-width: 80%;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-xl);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+  }
+  
+  .message-bubble.bot {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-bottom-left-radius: var(--radius-sm);
+  }
+  
+  .message-bubble.user {
+    background: var(--color-primary);
+    color: white;
+    border-bottom-right-radius: var(--radius-sm);
+  }
+  
+  .message-bubble p {
+    margin: 0;
+    color: inherit;
+  }
+  
   .chatbot-input {
     display: flex;
-    gap: 1rem;
-    padding: 2rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    gap: var(--space-2);
+    padding: var(--space-4);
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-primary);
   }
-
-  .chatbot-input input {
+  
+  .input-field {
     flex: 1;
-    padding: 1rem 1.5rem;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-full);
     color: var(--text-primary);
-    font-size: 1rem;
+    font-size: var(--text-sm);
+    transition: border-color var(--duration-fast) var(--ease-default);
   }
-
-  .chatbot-input input::placeholder {
-    color: var(--text-secondary);
+  
+  .input-field:focus {
+    outline: none;
+    border-color: var(--color-primary);
   }
-
-  .chatbot-input button {
-    padding: 1rem 2rem;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  
+  .input-field::placeholder {
+    color: var(--text-tertiary);
+  }
+  
+  .send-btn {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-full);
+    transition: background-color var(--duration-fast) var(--ease-default),
+                transform var(--duration-fast) var(--ease-default);
   }
-
-  .chatbot-input button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(41, 151, 255, 0.3);
-  }
-
-  @media (max-width: 768px) {
-    .chatbot-hero h1 {
-      font-size: 2.5rem;
-    }
-
-    .chatbot-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-
-    .ai-selector {
-      margin-left: 0;
-      width: 100%;
-    }
-
-    .chatbot-messages {
-      height: 500px;
-    }
+  
+  .send-btn:hover {
+    background: var(--color-primary-hover);
+    transform: scale(1.05);
   }
 </style>
-
-<script>
-  // Chatbot functionality is handled by global JavaScript in main.js
-  // This script ensures proper initialization
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('Chatbot page loaded');
-  });
-</script>

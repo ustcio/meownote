@@ -1,0 +1,264 @@
+---
+import { getLangFromUrl, useTranslations } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const months = lang === 'zh' 
+  ? ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+  : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const days = lang === 'zh' 
+  ? ['日', '一', '二', '三', '四', '五', '六']
+  : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function generateContributionData() {
+  const data: { date: Date; level: number }[] = [];
+  const today = new Date();
+  const startDate = new Date(today);
+  startDate.setFullYear(startDate.getFullYear() - 1);
+  startDate.setDate(startDate.getDate() - startDate.getDay());
+  
+  const currentDate = new Date(startDate);
+  while (currentDate <= today) {
+    const random = Math.random();
+    let level = 0;
+    if (random > 0.3) level = 1;
+    if (random > 0.5) level = 2;
+    if (random > 0.7) level = 3;
+    if (random > 0.9) level = 4;
+    
+    data.push({
+      date: new Date(currentDate),
+      level
+    });
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  return data;
+}
+
+const contributionData = generateContributionData();
+
+function getMonthPositions(data: { date: Date; level: number }[]) {
+  const positions: { month: number; week: number }[] = [];
+  let lastMonth = -1;
+  
+  data.forEach((item, index) => {
+    const week = Math.floor(index / 7);
+    const month = item.date.getMonth();
+    if (month !== lastMonth) {
+      positions.push({ month, week });
+      lastMonth = month;
+    }
+  });
+  
+  return positions;
+}
+
+const monthPositions = getMonthPositions(contributionData);
+const totalWeeks = Math.ceil(contributionData.length / 7);
+---
+
+<section class="contribution">
+  <div class="contribution-container">
+    <div class="contribution-header">
+      <h2 class="contribution-title">
+        {lang === 'zh' ? '访问活动' : 'Visitor Activity'}
+      </h2>
+      <p class="contribution-subtitle">
+        {lang === 'zh' ? '过去一年的网站访问记录' : 'Website visits over the past year'}
+      </p>
+    </div>
+    
+    <div class="contribution-graph">
+      <div class="contribution-months">
+        {monthPositions.map(({ month, week }) => (
+          <span 
+            class="contribution-month" 
+            style={`--week: ${week}`}
+          >
+            {months[month]}
+          </span>
+        ))}
+      </div>
+      
+      <div class="contribution-body">
+        <div class="contribution-days">
+          {days.map((day, i) => (
+            <span class="contribution-day">{i % 2 === 0 ? day : ''}</span>
+          ))}
+        </div>
+        
+        <div class="contribution-grid">
+          {Array.from({ length: totalWeeks }).map((_, weekIndex) => (
+            <div class="contribution-week">
+              {Array.from({ length: 7 }).map((_, dayIndex) => {
+                const dataIndex = weekIndex * 7 + dayIndex;
+                const item = contributionData[dataIndex];
+                if (!item) return null;
+                
+                const dateStr = item.date.toLocaleDateString(
+                  lang === 'zh' ? 'zh-CN' : 'en-US',
+                  { month: 'short', day: 'numeric', year: 'numeric' }
+                );
+                
+                return (
+                  <div 
+                    class="contribution-cell"
+                    data-level={item.level}
+                    title={dateStr}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+    
+    <div class="contribution-legend">
+      <span class="contribution-legend-text">
+        {lang === 'zh' ? '少' : 'Less'}
+      </span>
+      <div class="contribution-legend-cells">
+        {[0, 1, 2, 3, 4].map((level) => (
+          <div class="contribution-cell" data-level={level} />
+        ))}
+      </div>
+      <span class="contribution-legend-text">
+        {lang === 'zh' ? '多' : 'More'}
+      </span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contribution {
+    padding: var(--space-12) var(--space-4);
+    background: var(--bg-secondary);
+  }
+  
+  .contribution-container {
+    max-width: var(--container-lg);
+    margin: 0 auto;
+  }
+  
+  .contribution-header {
+    text-align: center;
+    margin-bottom: var(--space-8);
+  }
+  
+  .contribution-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+  }
+  
+  @media (min-width: 768px) {
+    .contribution-title {
+      font-size: var(--text-3xl);
+    }
+  }
+  
+  .contribution-subtitle {
+    color: var(--text-secondary);
+    font-size: var(--text-base);
+  }
+  
+  .contribution-graph {
+    overflow-x: auto;
+    padding: var(--space-4) 0;
+  }
+  
+  .contribution-months {
+    display: flex;
+    margin-left: 40px;
+    margin-bottom: var(--space-2);
+    position: relative;
+    height: 20px;
+  }
+  
+  .contribution-month {
+    position: absolute;
+    left: calc(var(--week) * 14px);
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+  }
+  
+  .contribution-body {
+    display: flex;
+    gap: var(--space-2);
+  }
+  
+  .contribution-days {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-top: 2px;
+  }
+  
+  .contribution-day {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    height: 11px;
+    line-height: 11px;
+  }
+  
+  .contribution-grid {
+    display: flex;
+    gap: 3px;
+  }
+  
+  .contribution-week {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  
+  .contribution-cell {
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+    background-color: var(--contribution-0);
+    transition: transform var(--duration-fast) var(--ease-default);
+  }
+  
+  .contribution-cell[data-level="1"] {
+    background-color: var(--contribution-1);
+  }
+  
+  .contribution-cell[data-level="2"] {
+    background-color: var(--contribution-2);
+  }
+  
+  .contribution-cell[data-level="3"] {
+    background-color: var(--contribution-3);
+  }
+  
+  .contribution-cell[data-level="4"] {
+    background-color: var(--contribution-4);
+  }
+  
+  .contribution-cell:hover {
+    transform: scale(1.2);
+  }
+  
+  .contribution-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+  }
+  
+  .contribution-legend-text {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+  }
+  
+  .contribution-legend-cells {
+    display: flex;
+    gap: 3px;
+  }
+</style>

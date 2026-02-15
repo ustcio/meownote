@@ -1,0 +1,94 @@
+---
+import { getLangFromUrl, useTranslations } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const stats = [
+  { 
+    value: '1,234', 
+    label: lang === 'zh' ? '当前在线' : 'Online Now',
+    icon: '●'
+  },
+  { 
+    value: '56,789', 
+    label: lang === 'zh' ? '累计访问' : 'Total Visits',
+    icon: '↑'
+  },
+  { 
+    value: '99.9%', 
+    label: lang === 'zh' ? '正常运行时间' : 'Uptime',
+    icon: '⚡'
+  },
+];
+---
+
+<section class="stats">
+  <div class="stats-container">
+    <div class="stats-grid">
+      {stats.map((stat) => (
+        <div class="stat-card hover-lift">
+          <div class="stat-icon">{stat.icon}</div>
+          <div class="stat-value">{stat.value}</div>
+          <div class="stat-label">{stat.label}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .stats {
+    padding: var(--space-12) var(--space-4);
+  }
+  
+  .stats-container {
+    max-width: var(--container-lg);
+    margin: 0 auto;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+  }
+  
+  @media (min-width: 768px) {
+    .stats-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  .stat-card {
+    text-align: center;
+    padding: var(--space-6);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--card-shadow);
+  }
+  
+  .stat-icon {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-3);
+    color: var(--color-accent-blue);
+  }
+  
+  .stat-value {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+  }
+  
+  @media (min-width: 768px) {
+    .stat-value {
+      font-size: var(--text-4xl);
+    }
+  }
+  
+  .stat-label {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+</style>

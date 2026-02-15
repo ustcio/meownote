@@ -1,334 +1,261 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Navigation from '../components/Navigation.astro';
+import Layout from '@layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const features = [
+  {
+    icon: '🚀',
+    title: lang === 'zh' ? '高性能' : 'High Performance',
+    description: lang === 'zh' 
+      ? '极速响应，毫秒级延迟'
+      : 'Lightning fast response with millisecond latency'
+  },
+  {
+    icon: '🔒',
+    title: lang === 'zh' ? '安全可靠' : 'Secure & Reliable',
+    description: lang === 'zh'
+      ? '企业级安全保障，数据加密传输'
+      : 'Enterprise-grade security with encrypted data transmission'
+  },
+  {
+    icon: '🧠',
+    title: lang === 'zh' ? '智能理解' : 'Intelligent Understanding',
+    description: lang === 'zh'
+      ? '深度理解上下文，精准响应需求'
+      : 'Deep context understanding for precise responses'
+  },
+  {
+    icon: '🌍',
+    title: lang === 'zh' ? '全球部署' : 'Global Deployment',
+    description: lang === 'zh'
+      ? '遍布全球的节点，就近访问'
+      : 'Global nodes for nearest access'
+  },
+];
+
+const team = [
+  { name: 'Alex Chen', role: lang === 'zh' ? '创始人 & CEO' : 'Founder & CEO' },
+  { name: 'Sarah Kim', role: lang === 'zh' ? '技术总监' : 'CTO' },
+  { name: 'Mike Wang', role: lang === 'zh' ? '产品负责人' : 'Head of Product' },
+];
 ---
 
-<Layout title="About - Meow Note">
-  <Navigation />
-    <section class="about-hero">
-      <h1>Building Responsible AGI</h1>
-      <p>We're on a mission to develop artificial general intelligence that benefits humanity. Our team combines world-class AI research with a deep commitment to safety and ethics.</p>
-    </section>
-
-    <section class="about-section">
-      <div class="about-grid">
-        <div class="about-content">
-          <h2>Our Mission</h2>
-          <p>At AGI Era, we believe that artificial general intelligence has the potential to solve humanity's greatest challenges—from climate change to disease to poverty.</p>
-          <p>But we also recognize that such powerful technology must be developed responsibly. That's why safety isn't just a priority—it's embedded in everything we do.</p>
-          <p>Our team includes leading researchers in AI safety, alignment, and interpretability, working alongside engineers to build systems that are not only capable but trustworthy.</p>
+<Layout 
+  title={lang === 'zh' ? '关于 - Meow Note' : 'About - Meow Note'}
+  description={t('about.subtitle')}
+>
+  <section class="about">
+    <div class="about-container">
+      <div class="about-hero">
+        <h1 class="about-title">{t('about.title')}</h1>
+        <p class="about-subtitle">{t('about.subtitle')}</p>
+      </div>
+      
+      <div class="about-content">
+        <div class="about-section">
+          <h2 class="section-title">
+            {lang === 'zh' ? '我们的使命' : 'Our Mission'}
+          </h2>
+          <p class="section-text">
+            {lang === 'zh'
+              ? '我们致力于构建安全、可靠、易用的AI工具，让每个人都能享受到人工智能带来的便利。'
+              : 'We are dedicated to building safe, reliable, and easy-to-use AI tools, making artificial intelligence accessible to everyone.'}
+          </p>
         </div>
-        <div class="about-visual">
-          <div class="neural-network" id="neural-network"></div>
+        
+        <div class="features-grid">
+          {features.map((feature) => (
+            <div class="feature-card hover-lift">
+              <span class="feature-icon">{feature.icon}</span>
+              <h3 class="feature-title">{feature.title}</h3>
+              <p class="feature-description">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+        
+        <div class="team-section">
+          <h2 class="section-title">
+            {lang === 'zh' ? '核心团队' : 'Core Team'}
+          </h2>
+          <div class="team-grid">
+            {team.map((member) => (
+              <div class="team-card hover-lift">
+                <div class="team-avatar">
+                  {member.name.split(' ').map(n => n[0]).join('')}
+                </div>
+                <h3 class="team-name">{member.name}</h3>
+                <p class="team-role">{member.role}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </section>
-
-    <section class="about-section">
-      <div class="section-header">
-        <h2>Our Values</h2>
-        <p>The principles that guide our work</p>
-      </div>
-      <div class="values-grid">
-        <div class="value-card">
-          <h3>🎯 Safety First</h3>
-          <p>We prioritize the safe development of AI above all else, investing heavily in alignment research and testing.</p>
-        </div>
-        <div class="value-card">
-          <h3>🔬 Scientific Rigor</h3>
-          <p>We publish our research openly and subject our work to peer review and external scrutiny.</p>
-        </div>
-        <div class="value-card">
-          <h3>🤝 Collaboration</h3>
-          <p>We work with governments, academia, and industry to establish best practices for AI development.</p>
-        </div>
-        <div class="value-card">
-          <h3>💡 Innovation</h3>
-          <p>We push the boundaries of what's possible while maintaining our commitment to responsible development.</p>
-        </div>
-        <div class="value-card">
-          <h3>🌍 Global Impact</h3>
-          <p>We build technology that can benefit people everywhere, not just in wealthy nations.</p>
-        </div>
-        <div class="value-card">
-          <h3>👥 Diversity</h3>
-          <p>We believe diverse perspectives lead to better AI systems that work for everyone.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="about-section">
-      <div class="section-header">
-        <h2>Leadership Team</h2>
-        <p>Meet the people driving our mission forward</p>
-      </div>
-      <div class="team-grid">
-        <div class="team-card">
-          <div class="team-avatar">SL</div>
-          <h4>Dr. Sarah Lin</h4>
-          <p>CEO & Co-Founder</p>
-        </div>
-        <div class="team-card">
-          <div class="team-avatar">MK</div>
-          <h4>Marcus Kim</h4>
-          <p>CTO & Co-Founder</p>
-        </div>
-        <div class="team-card">
-          <div class="team-avatar">EP</div>
-          <h4>Dr. Elena Petrov</h4>
-          <p>Chief Scientist</p>
-        </div>
-        <div class="team-card">
-          <div class="team-avatar">JW</div>
-          <h4>James Wright</h4>
-          <p>Head of Safety</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="about-section">
-      <div class="section-header">
-        <h2>Our Journey</h2>
-      </div>
-      <div class="timeline">
-        <div class="timeline-item">
-          <div class="date">2024</div>
-          <h4>AGI Era v2.0 Launch</h4>
-          <p>Released our most capable model yet, with breakthrough reasoning capabilities.</p>
-        </div>
-        <div class="timeline-item">
-          <div class="date">2023</div>
-          <h4>Series B Funding</h4>
-          <p>Raised $500M to accelerate research and expand our team globally.</p>
-        </div>
-        <div class="timeline-item">
-          <div class="date">2022</div>
-          <h4>API Platform Launch</h4>
-          <p>Made our AI accessible to developers worldwide through our API platform.</p>
-        </div>
-        <div class="timeline-item">
-          <div class="date">2021</div>
-          <h4>Company Founded</h4>
-          <p>Started with a small team of researchers committed to safe AGI development.</p>
-        </div>
-      </div>
-    </section>
+    </div>
+  </section>
 </Layout>
 
 <style>
+  .about {
+    min-height: 100vh;
+    padding: calc(var(--header-height) + var(--space-8)) var(--space-4) var(--space-12);
+  }
+  
+  .about-container {
+    max-width: var(--container-lg);
+    margin: 0 auto;
+  }
+  
   .about-hero {
-    min-height: 70vh;
+    text-align: center;
+    margin-bottom: var(--space-12);
+  }
+  
+  .about-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-4);
+  }
+  
+  @media (min-width: 768px) {
+    .about-title {
+      font-size: var(--text-5xl);
+    }
+  }
+  
+  .about-subtitle {
+    color: var(--text-secondary);
+    font-size: var(--text-xl);
+  }
+  
+  .about-content {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 6rem 2rem;
+    gap: var(--space-12);
   }
-
-  .about-hero h1 {
-    font-size: 3rem;
-    margin-bottom: 1.5rem;
-    background: linear-gradient(135deg, #fff 0%, #2997ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .about-hero p {
-    font-size: 1.25rem;
-    color: var(--text-secondary);
-    max-width: 600px;
-  }
-
+  
   .about-section {
-    padding: 6rem 2rem;
-  }
-
-  .about-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  .about-content h2 {
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
-    background: linear-gradient(135deg, #fff 0%, #2997ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .about-content p {
-    margin-bottom: 1rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-  }
-
-  .about-visual {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .section-header {
     text-align: center;
-    margin-bottom: 3rem;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .section-header h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, #fff 0%, #2997ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .section-header p {
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-  }
-
-  .values-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
-    max-width: 1200px;
+    max-width: 600px;
     margin: 0 auto;
   }
-
-  .value-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 20px;
-    padding: 2rem;
-    transition: all 0.4s ease;
-  }
-
-  .value-card:hover {
-    transform: scale(1.02);
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.12);
-  }
-
-  .value-card h3 {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
+  
+  .section-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
     color: var(--text-primary);
+    margin-bottom: var(--space-4);
   }
-
-  .value-card p {
+  
+  @media (min-width: 768px) {
+    .section-title {
+      font-size: var(--text-3xl);
+    }
+  }
+  
+  .section-text {
     color: var(--text-secondary);
-    line-height: 1.6;
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
   }
-
+  
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-4);
+  }
+  
+  @media (min-width: 768px) {
+    .features-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .features-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  
+  .feature-card {
+    text-align: center;
+    padding: var(--space-6);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--card-shadow);
+  }
+  
+  .feature-icon {
+    font-size: var(--text-4xl);
+    display: block;
+    margin-bottom: var(--space-4);
+  }
+  
+  .feature-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+  }
+  
+  .feature-description {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: var(--leading-relaxed);
+  }
+  
+  .team-section {
+    text-align: center;
+  }
+  
   .team-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 2rem;
-    max-width: 1000px;
-    margin: 0 auto;
+    gap: var(--space-6);
+    margin-top: var(--space-8);
   }
-
+  
+  @media (min-width: 768px) {
+    .team-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
   .team-card {
-    text-align: center;
+    padding: var(--space-6);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--card-shadow);
   }
-
+  
   .team-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--space-4);
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+    border-radius: var(--radius-full);
     display: flex;
-    justify-content: center;
     align-items: center;
-    font-size: 1.5rem;
-    font-weight: 700;
+    justify-content: center;
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
     color: white;
-    margin: 0 auto 1rem;
   }
-
-  .team-card h4 {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
+  
+  .team-name {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
     color: var(--text-primary);
+    margin-bottom: var(--space-1);
   }
-
-  .team-card p {
+  
+  .team-role {
+    font-size: var(--text-sm);
     color: var(--text-secondary);
-    font-size: 0.9rem;
-  }
-
-  .timeline {
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  .timeline-item {
-    position: relative;
-    padding-left: 3rem;
-    margin-bottom: 3rem;
-  }
-
-  .timeline-item::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.5rem;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--accent);
-  }
-
-  .timeline-item::after {
-    content: '';
-    position: absolute;
-    left: 5px;
-    top: 1rem;
-    width: 2px;
-    height: calc(100% + 2rem);
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .timeline-item:last-child::after {
-    display: none;
-  }
-
-  .date {
-    font-size: 0.9rem;
-    color: var(--accent);
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-
-  .timeline-item h4 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-    color: var(--text-primary);
-  }
-
-  .timeline-item p {
-    color: var(--text-secondary);
-    line-height: 1.6;
-  }
-
-  @media (max-width: 768px) {
-    .about-grid {
-      grid-template-columns: 1fr;
-      gap: 2rem;
-    }
-
-    .about-hero h1 {
-      font-size: 2.5rem;
-    }
-
-    .section-header h2 {
-      font-size: 2rem;
-    }
   }
 </style>

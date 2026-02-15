@@ -1,0 +1,286 @@
+---
+import { getLangFromUrl, useTranslations, languages, type Lang } from '@i18n';
+import LanguageSwitcher from '@components/ui/LanguageSwitcher.astro';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const navItems = [
+  { href: '/', label: t('nav.home'), id: 'home' },
+  { href: '/research', label: t('nav.research'), id: 'research' },
+  { href: '/chatbot', label: t('nav.chatbot'), id: 'chatbot' },
+  { href: '/kit', label: t('nav.kit'), id: 'kit' },
+  { href: '/about', label: t('nav.about'), id: 'about' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="header">
+  <div class="header-container">
+    <a href="/" class="logo">
+      <video 
+        class="logo-video" 
+        autoplay 
+        loop 
+        muted 
+        playsinline 
+        preload="auto" 
+        poster="/favicon-32x32.png"
+      >
+        <source src="/logo.mp4" type="video/mp4" />
+      </video>
+      <span class="logo-text">Meow Note</span>
+    </a>
+    
+    <nav class="nav" aria-label="Main navigation">
+      <ul class="nav-list">
+        {navItems.map((item) => (
+          <li>
+            <a 
+              href={item.href}
+              class:list={['nav-link', { active: currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) }]}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    
+    <div class="header-actions">
+      <LanguageSwitcher />
+      
+      <button 
+        class="mobile-menu-btn" 
+        aria-label="Toggle menu" 
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Mobile Navigation -->
+  <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation">
+    <ul class="mobile-nav-list">
+      {navItems.map((item) => (
+        <li>
+          <a 
+            href={item.href}
+            class:list={['mobile-nav-link', { active: currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) }]}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<script>
+  const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+  const mobileNav = document.getElementById('mobile-nav');
+  
+  mobileMenuBtn?.addEventListener('click', () => {
+    const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+    mobileMenuBtn.setAttribute('aria-expanded', String(!isExpanded));
+    mobileNav?.classList.toggle('open');
+  });
+  
+  // Close mobile menu when clicking a link
+  document.querySelectorAll('.mobile-nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      mobileMenuBtn?.setAttribute('aria-expanded', 'false');
+      mobileNav?.classList.remove('open');
+    });
+  });
+  
+  // Close mobile menu on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      mobileMenuBtn?.setAttribute('aria-expanded', 'false');
+      mobileNav?.classList.remove('open');
+    }
+  });
+</script>
+
+<style>
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-fixed);
+    background: var(--glass-bg);
+    backdrop-filter: var(--surface-blur);
+    -webkit-backdrop-filter: var(--surface-blur);
+    border-bottom: 1px solid var(--border-secondary);
+  }
+  
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: var(--container-xl);
+    margin: 0 auto;
+    padding: var(--space-3) var(--space-4);
+    height: var(--header-height);
+  }
+  
+  @media (min-width: 768px) {
+    .header-container {
+      padding: var(--space-3) var(--space-6);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .header-container {
+      padding: var(--space-3) var(--space-8);
+    }
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-lg);
+  }
+  
+  .logo-video {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+  }
+  
+  .logo-text {
+    display: none;
+  }
+  
+  @media (min-width: 640px) {
+    .logo-text {
+      display: block;
+    }
+  }
+  
+  .nav {
+    display: none;
+  }
+  
+  @media (min-width: 768px) {
+    .nav {
+      display: block;
+    }
+  }
+  
+  .nav-list {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    list-style: none;
+  }
+  
+  .nav-link {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    transition: color var(--duration-fast) var(--ease-default),
+                background-color var(--duration-fast) var(--ease-default);
+  }
+  
+  .nav-link:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-tertiary);
+  }
+  
+  .nav-link.active {
+    color: var(--text-primary);
+    background-color: var(--bg-tertiary);
+  }
+  
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    transition: background-color var(--duration-fast) var(--ease-default);
+  }
+  
+  .mobile-menu-btn:hover {
+    background-color: var(--bg-tertiary);
+  }
+  
+  @media (min-width: 768px) {
+    .mobile-menu-btn {
+      display: none;
+    }
+  }
+  
+  .mobile-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border-primary);
+    padding: var(--space-4);
+    animation: slideDown var(--duration-fast) var(--ease-default);
+  }
+  
+  .mobile-nav.open {
+    display: block;
+  }
+  
+  @media (min-width: 768px) {
+    .mobile-nav {
+      display: none !important;
+    }
+  }
+  
+  .mobile-nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  
+  .mobile-nav-link {
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    color: var(--text-secondary);
+    font-weight: var(--font-medium);
+    text-decoration: none;
+    border-radius: var(--radius-lg);
+    transition: color var(--duration-fast) var(--ease-default),
+                background-color var(--duration-fast) var(--ease-default);
+  }
+  
+  .mobile-nav-link:hover,
+  .mobile-nav-link.active {
+    color: var(--text-primary);
+    background-color: var(--bg-tertiary);
+  }
+</style>

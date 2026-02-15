@@ -1,0 +1,194 @@
+---
+import { getLangFromUrl, useTranslations } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <a href="/" class="footer-logo">
+          <video 
+            class="footer-logo-video" 
+            autoplay 
+            loop 
+            muted 
+            playsinline 
+            preload="auto"
+          >
+            <source src="/logo.mp4" type="video/mp4" />
+          </video>
+          <span>Meow Note</span>
+        </a>
+        <p class="footer-tagline">
+          {lang === 'zh' ? '构建AI的未来' : 'Building the future of AI'}
+        </p>
+      </div>
+      
+      <div class="footer-links">
+        <div class="footer-section">
+          <h4 class="footer-section-title">
+            {lang === 'zh' ? '导航' : 'Navigation'}
+          </h4>
+          <ul class="footer-list">
+            <li><a href="/">{t('nav.home')}</a></li>
+            <li><a href="/research">{t('nav.research')}</a></li>
+            <li><a href="/chatbot">{t('nav.chatbot')}</a></li>
+            <li><a href="/kit">{t('nav.kit')}</a></li>
+            <li><a href="/about">{t('nav.about')}</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4 class="footer-section-title">
+            {lang === 'zh' ? '法律' : 'Legal'}
+          </h4>
+          <ul class="footer-list">
+            <li><a href="/privacy">{t('footer.privacy')}</a></li>
+            <li><a href="/terms">{t('footer.terms')}</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p class="footer-copyright">
+        © {currentYear} Meow Note. {t('footer.rights')}
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-primary);
+    margin-top: auto;
+  }
+  
+  .footer-container {
+    max-width: var(--container-xl);
+    margin: 0 auto;
+    padding: var(--space-12) var(--space-4) var(--space-6);
+  }
+  
+  @media (min-width: 768px) {
+    .footer-container {
+      padding: var(--space-16) var(--space-6) var(--space-8);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .footer-container {
+      padding: var(--space-16) var(--space-8) var(--space-8);
+    }
+  }
+  
+  .footer-content {
+    display: grid;
+    gap: var(--space-8);
+  }
+  
+  @media (min-width: 768px) {
+    .footer-content {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-12);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .footer-content {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+  
+  .footer-brand {
+    max-width: 300px;
+  }
+  
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-lg);
+    text-decoration: none;
+    margin-bottom: var(--space-3);
+  }
+  
+  .footer-logo-video {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+  }
+  
+  .footer-tagline {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+  }
+  
+  .footer-links {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-6);
+  }
+  
+  @media (min-width: 640px) {
+    .footer-links {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-8);
+    }
+  }
+  
+  .footer-section-title {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+  }
+  
+  .footer-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  
+  .footer-list a {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-default);
+  }
+  
+  .footer-list a:hover {
+    color: var(--text-primary);
+  }
+  
+  .footer-bottom {
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border-primary);
+  }
+  
+  .footer-copyright {
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+  
+  @media (min-width: 768px) {
+    .footer-copyright {
+      text-align: left;
+    }
+  }
+</style>

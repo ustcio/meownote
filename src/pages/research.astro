@@ -1,257 +1,189 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Navigation from '../components/Navigation.astro';
+import Layout from '@layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const timeline = [
+  {
+    year: '2024',
+    title: lang === 'zh' ? 'GPT-4o 发布' : 'GPT-4o Released',
+    description: lang === 'zh' 
+      ? 'OpenAI 发布多模态模型 GPT-4o，实现文本、音频、图像的实时处理。'
+      : 'OpenAI released the multimodal model GPT-4o, enabling real-time processing of text, audio, and images.'
+  },
+  {
+    year: '2023',
+    title: lang === 'zh' ? 'ChatGPT 爆发式增长' : 'ChatGPT Explosive Growth',
+    description: lang === 'zh'
+      ? 'ChatGPT 成为历史上增长最快的消费应用，推动AI技术普及。'
+      : 'ChatGPT became the fastest-growing consumer app in history, driving AI adoption.'
+  },
+  {
+    year: '2022',
+    title: lang === 'zh' ? 'ChatGPT 发布' : 'ChatGPT Released',
+    description: lang === 'zh'
+      ? 'OpenAI 发布 ChatGPT，开启大语言模型时代。'
+      : 'OpenAI released ChatGPT, starting the era of large language models.'
+  },
+  {
+    year: '2020',
+    title: lang === 'zh' ? 'GPT-3 发布' : 'GPT-3 Released',
+    description: lang === 'zh'
+      ? 'OpenAI 发布 GPT-3，展示了大规模语言模型的惊人能力。'
+      : 'OpenAI released GPT-3, demonstrating the amazing capabilities of large-scale language models.'
+  },
+  {
+    year: '2017',
+    title: lang === 'zh' ? 'Transformer 架构' : 'Transformer Architecture',
+    description: lang === 'zh'
+      ? 'Google 发布 "Attention Is All You Need" 论文，奠定现代AI基础。'
+      : 'Google published "Attention Is All You Need" paper, laying the foundation for modern AI.'
+  },
+  {
+    year: '2016',
+    title: lang === 'zh' ? 'AlphaGo 战胜李世石' : 'AlphaGo Defeats Lee Sedol',
+    description: lang === 'zh'
+      ? 'DeepMind 的 AlphaGo 在围棋比赛中击败世界冠军李世石。'
+      : 'DeepMind\'s AlphaGo defeated world champion Lee Sedol in Go.'
+  },
+  {
+    year: '2012',
+    title: lang === 'zh' ? 'AlexNet 突破' : 'AlexNet Breakthrough',
+    description: lang === 'zh'
+      ? '深度学习在 ImageNet 竞赛中取得突破性进展，开启深度学习时代。'
+      : 'Deep learning achieved breakthrough progress in ImageNet competition, starting the deep learning era.'
+  },
+];
 ---
 
-<Layout title="Research - Meow Note">
-  <Navigation />
-    <section class="research-hero">
-      <h1>Research</h1>
-      <p>Advancing the frontier of AI capabilities and safety</p>
-    </section>
-
-    <section class="research-section">
-      <div class="section-header" style="text-align: left; margin-bottom: 2rem;">
-        <h2>Recent Publications</h2>
+<Layout 
+  title={lang === 'zh' ? '研究 - Meow Note' : 'Research - Meow Note'}
+  description={t('research.subtitle')}
+>
+  <section class="research">
+    <div class="research-container">
+      <div class="research-header">
+        <h1 class="research-title">{t('research.title')}</h1>
+        <p class="research-subtitle">{t('research.subtitle')}</p>
       </div>
-      <div class="papers-list">
-        <div class="paper-card">
-          <div class="paper-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10 9 9 9 8 9"/>
-            </svg>
-          </div>
-          <div class="paper-content">
-            <h3>Scaling Laws for Neural Language Models</h3>
-            <div class="paper-meta">
-              <span>March 2024</span>
-              <span>•</span>
-              <span>Chen et al.</span>
+      
+      <div class="timeline">
+        {timeline.map((item, index) => (
+          <div class="timeline-item">
+            <div class="timeline-marker">
+              <div class="timeline-dot"></div>
+              {index < timeline.length - 1 && <div class="timeline-line"></div>}
             </div>
-            <p>We investigate the scaling properties of language model performance on downstream tasks. Our findings reveal predictable relationships between compute, data, and model performance.</p>
-            <div class="paper-tags">
-              <span class="paper-tag">Language Models</span>
-              <span class="paper-tag">Scaling Laws</span>
-              <span class="paper-tag">Training</span>
+            <div class="timeline-content hover-lift">
+              <span class="timeline-year">{item.year}</span>
+              <h3 class="timeline-item-title">{item.title}</h3>
+              <p class="timeline-description">{item.description}</p>
             </div>
           </div>
-        </div>
-
-        <div class="paper-card">
-          <div class="paper-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10 9 9 9 8 9"/>
-            </svg>
-          </div>
-          <div class="paper-content">
-            <h3>Constitutional AI: Harmlessness from AI Feedback</h3>
-            <div class="paper-meta">
-              <span>January 2024</span>
-              <span>•</span>
-              <span>Park et al.</span>
-            </div>
-            <p>We propose a method for training harmless AI assistants without human labels for harms, using a set of principles to guide the AI's behavior during training.</p>
-            <div class="paper-tags">
-              <span class="paper-tag">AI Safety</span>
-              <span class="paper-tag">Alignment</span>
-              <span class="paper-tag">RLHF</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="paper-card">
-          <div class="paper-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10 9 9 9 8 9"/>
-            </svg>
-          </div>
-          <div class="paper-content">
-            <h3>Efficient Training of Large Transformers</h3>
-            <div class="paper-meta">
-              <span>November 2023</span>
-              <span>•</span>
-              <span>Wong et al.</span>
-            </div>
-            <p>We present techniques for reducing the computational requirements of training large transformer models by up to 40% without sacrificing performance.</p>
-            <div class="paper-tags">
-              <span class="paper-tag">Efficiency</span>
-              <span class="paper-tag">Transformers</span>
-              <span class="paper-tag">Optimization</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="paper-card">
-          <div class="paper-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10 9 9 9 8 9"/>
-            </svg>
-          </div>
-          <div class="paper-content">
-            <h3>Interpretability in Deep Neural Networks</h3>
-            <div class="paper-meta">
-              <span>September 2023</span>
-              <span>•</span>
-              <span>Miller et al.</span>
-            </div>
-            <p>New methods for understanding what neural networks learn, including visualization techniques and mechanistic interpretability approaches.</p>
-            <div class="paper-tags">
-              <span class="paper-tag">Interpretability</span>
-              <span class="paper-tag">Visualization</span>
-              <span class="paper-tag">Safety</span>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
-    </section>
+    </div>
+  </section>
 </Layout>
 
 <style>
-  .research-hero {
-    min-height: 70vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 6rem 2rem;
+  .research {
+    min-height: 100vh;
+    padding: calc(var(--header-height) + var(--space-12)) var(--space-4) var(--space-12);
   }
-
-  .research-hero h1 {
-    font-size: 3rem;
-    margin-bottom: 1.5rem;
-    background: linear-gradient(135deg, #fff 0%, #2997ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .research-hero p {
-    font-size: 1.25rem;
-    color: var(--text-secondary);
-    max-width: 600px;
-  }
-
-  .research-section {
-    padding: 6rem 2rem;
-  }
-
-  .section-header h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, #fff 0%, #2997ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .papers-list {
-    max-width: 1200px;
+  
+  .research-container {
+    max-width: var(--container-md);
     margin: 0 auto;
   }
-
-  .paper-card {
-    display: flex;
-    gap: 2rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 20px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    transition: all 0.4s ease;
+  
+  .research-header {
+    text-align: center;
+    margin-bottom: var(--space-12);
   }
-
-  .paper-card:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  }
-
-  .paper-icon {
-    flex-shrink: 0;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
-    border-radius: 12px;
-    color: white;
-  }
-
-  .paper-content {
-    flex: 1;
-  }
-
-  .paper-content h3 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+  
+  .research-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
     color: var(--text-primary);
+    margin-bottom: var(--space-3);
   }
-
-  .paper-meta {
-    font-size: 0.9rem;
+  
+  @media (min-width: 768px) {
+    .research-title {
+      font-size: var(--text-4xl);
+    }
+  }
+  
+  .research-subtitle {
     color: var(--text-secondary);
-    margin-bottom: 1rem;
+    font-size: var(--text-lg);
   }
-
-  .paper-meta span {
-    margin-right: 0.5rem;
-  }
-
-  .paper-content p {
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-  }
-
-  .paper-tags {
+  
+  .timeline {
     display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: var(--space-6);
   }
-
-  .paper-tag {
-    padding: 0.35rem 0.75rem;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    font-size: 0.85rem;
+  
+  .timeline-item {
+    display: flex;
+    gap: var(--space-4);
+  }
+  
+  .timeline-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  
+  .timeline-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    border: 2px solid var(--bg-primary);
+    box-shadow: 0 0 0 4px var(--color-primary);
+  }
+  
+  .timeline-line {
+    width: 2px;
+    flex: 1;
+    background: var(--border-primary);
+    margin-top: var(--space-2);
+  }
+  
+  .timeline-content {
+    flex: 1;
+    padding: var(--space-5);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--card-shadow);
+    margin-bottom: var(--space-2);
+  }
+  
+  .timeline-year {
+    display: inline-block;
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-primary);
+    margin-bottom: var(--space-2);
+  }
+  
+  .timeline-item-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+  }
+  
+  .timeline-description {
+    font-size: var(--text-base);
     color: var(--text-secondary);
-  }
-
-  @media (max-width: 768px) {
-    .paper-card {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1.5rem;
-    }
-
-    .research-hero h1 {
-      font-size: 2.5rem;
-    }
-
-    .section-header h2 {
-      font-size: 2rem;
-    }
-
-    .paper-content h3 {
-      font-size: 1.25rem;
-    }
+    line-height: var(--leading-relaxed);
   }
 </style>
