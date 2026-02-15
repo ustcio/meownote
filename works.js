@@ -412,13 +412,14 @@ async function handleLogin(request, env, ctx) {
     return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
   }
 
-  const { email, password } = body;
+  const { username, email, password } = body;
+  const loginIdentifier = username || email;
 
-  if (!email || !password) {
-    return jsonResponse({ success: false, message: '请填写邮箱和密码' }, 400);
+  if (!loginIdentifier || !password) {
+    return jsonResponse({ success: false, message: '请填写用户名/邮箱和密码' }, 400);
   }
 
-  const sanitizedEmail = sanitizeInput(email).toLowerCase();
+  const sanitizedIdentifier = sanitizeInput(loginIdentifier).toLowerCase();
   const ip = getClientIP(request);
 
   const attempts = LOGIN_ATTEMPTS.get(ip) || { count: 0, lastAttempt: 0 };
@@ -431,19 +432,25 @@ async function handleLogin(request, env, ctx) {
   }
 
   try {
-    const user = await env.DB.prepare(
-      'SELECT * FROM users WHERE email = ?'
-    ).bind(sanitizedEmail).first();
+    // 支持用户名或邮箱登录
+    const isEmail = sanitizedIdentifier.includes('@');
+    const query = isEmail 
+      ? 'SELECT * FROM users WHERE email = ?'
+      : 'SELECT * FROM users WHERE username = ? OR email = ?';
+    
+    const user = isEmail 
+      ? await env.DB.prepare(query).bind(sanitizedIdentifier).first()
+      : await env.DB.prepare(query).bind(sanitizedIdentifier, sanitizedIdentifier).first();
 
     if (!user) {
       recordFailedLogin(ip);
-      return jsonResponse({ success: false, message: '邮箱或密码错误' }, 401);
+      return jsonResponse({ success: false, message: '用户名/邮箱或密码错误' }, 401);
     }
 
     const isValid = await verifyPassword(password, user.password);
     if (!isValid) {
       recordFailedLogin(ip);
-      return jsonResponse({ success: false, message: '邮箱或密码错误' }, 401);
+      return jsonResponse({ success: false, message: '用户名/邮箱或密码错误' }, 401);
     }
 
     LOGIN_ATTEMPTS.delete(ip);
