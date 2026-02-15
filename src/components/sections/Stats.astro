@@ -33,8 +33,8 @@ const t = useTranslations(lang);
         <div class="stat-icon">
           <Icon name="zap" size={20} />
         </div>
-        <div class="stat-value">99.9%</div>
-        <div class="stat-label">{lang === 'zh' ? '正常运行时间' : 'Uptime'}</div>
+        <div class="stat-value" id="stat-today">--</div>
+        <div class="stat-label">{lang === 'zh' ? '今日访问' : 'Today Visits'}</div>
       </div>
     </div>
   </div>
@@ -202,6 +202,7 @@ const t = useTranslations(lang);
       if (result.success) {
         updateStatValue('stat-online', result.online || 0);
         updateStatValue('stat-total', result.total || 0);
+        updateStatValue('stat-today', result.today || 0);
       }
     } catch (error) {
       console.warn('Failed to fetch stats:', error);

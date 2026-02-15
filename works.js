@@ -563,17 +563,23 @@ async function handleStatsVisit(request, env, ctx) {
         GROUP BY visitor_id
       )`
     ).first();
+    
+    const todayPV = await env.DB.prepare(
+      `SELECT COUNT(*) as count FROM page_views 
+       WHERE date(created_at) = date('now')`
+    ).first();
 
     return jsonResponse({ 
       success: true,
       pv: pvResult?.count || 0,
       total: pvResult?.count || 0,
-      online: online?.count || 0
+      online: online?.count || 0,
+      today: todayPV?.count || 0
     });
 
   } catch (error) {
     console.error('Stats visit error:', error);
-    return jsonResponse({ success: true, pv: 0, total: 0, online: 0 });
+    return jsonResponse({ success: true, pv: 0, total: 0, online: 0, today: 0 });
   }
 }
 
@@ -589,17 +595,23 @@ async function handleStatsGet(request, env, ctx) {
         GROUP BY visitor_id
       )`
     ).first();
+    
+    const todayPV = await env.DB.prepare(
+      `SELECT COUNT(*) as count FROM page_views 
+       WHERE date(created_at) = date('now')`
+    ).first();
 
     return jsonResponse({ 
       success: true,
       pv: pvResult?.count || 0, 
       uv: uvResult?.count || 0,
       total: pvResult?.count || 0,
-      online: online?.count || 0
+      online: online?.count || 0,
+      today: todayPV?.count || 0
     });
   } catch (error) {
     console.error('Stats get error:', error);
-    return jsonResponse({ success: true, pv: 0, uv: 0, total: 0, online: 0 });
+    return jsonResponse({ success: true, pv: 0, uv: 0, total: 0, online: 0, today: 0 });
   }
 }
 
