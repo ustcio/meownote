@@ -31,7 +31,7 @@ const t = useTranslations(lang);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: calc(var(--header-height) + var(--space-8)) var(--space-4) var(--space-8);
+    padding: calc(var(--header-height) + var(--space-12)) var(--space-4) var(--space-8);
   }
   
   .hero-container {
@@ -42,16 +42,16 @@ const t = useTranslations(lang);
   
   .hero-content {
     text-align: center;
-    max-width: 800px;
+    max-width: 720px;
     margin: 0 auto;
   }
   
   .hero-title {
-    font-size: var(--text-4xl);
+    font-size: var(--text-3xl);
     font-weight: var(--font-bold);
     line-height: var(--leading-tight);
     letter-spacing: var(--tracking-tight);
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-5);
   }
   
   @media (min-width: 768px) {
@@ -80,18 +80,19 @@ const t = useTranslations(lang);
   }
   
   .hero-subtitle {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--text-secondary);
     line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-8);
-    max-width: 600px;
+    margin-bottom: var(--space-6);
+    max-width: 540px;
     margin-left: auto;
     margin-right: auto;
   }
   
   @media (min-width: 768px) {
     .hero-subtitle {
-      font-size: var(--text-xl);
+      font-size: var(--text-lg);
+      margin-bottom: var(--space-8);
     }
   }
   
@@ -114,14 +115,22 @@ const t = useTranslations(lang);
     align-items: center;
     justify-content: center;
     padding: var(--space-3) var(--space-6);
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     font-weight: var(--font-medium);
     text-decoration: none;
     border-radius: var(--radius-full);
     transition: transform var(--duration-fast) var(--ease-default),
                 box-shadow var(--duration-fast) var(--ease-default),
                 background-color var(--duration-fast) var(--ease-default);
-    min-width: 140px;
+    min-width: 120px;
+  }
+  
+  @media (min-width: 768px) {
+    .btn {
+      padding: var(--space-3) var(--space-8);
+      font-size: var(--text-base);
+      min-width: 140px;
+    }
   }
   
   .btn:hover {
@@ -135,7 +144,7 @@ const t = useTranslations(lang);
   
   .btn-primary:hover {
     background: var(--color-primary-hover);
-    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.25);
   }
   
   .btn-secondary {

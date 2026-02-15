@@ -1,6 +1,7 @@
 ---
-import { getLangFromUrl, useTranslations, languages, type Lang } from '@i18n';
+import { getLangFromUrl, useTranslations, type Lang } from '@i18n';
 import LanguageSwitcher from '@components/ui/LanguageSwitcher.astro';
+import ThemeToggle from '@components/ui/ThemeToggle.astro';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -49,6 +50,7 @@ const currentPath = Astro.url.pathname;
     </nav>
     
     <div class="header-actions">
+      <ThemeToggle />
       <LanguageSwitcher />
       
       <button 
@@ -57,7 +59,7 @@ const currentPath = Astro.url.pathname;
         aria-expanded="false"
         aria-controls="mobile-nav"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="6" x2="21" y2="6" />
           <line x1="3" y1="12" x2="21" y2="12" />
           <line x1="3" y1="18" x2="21" y2="18" />
@@ -66,7 +68,6 @@ const currentPath = Astro.url.pathname;
     </div>
   </div>
   
-  <!-- Mobile Navigation -->
   <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation">
     <ul class="mobile-nav-list">
       {navItems.map((item) => (
@@ -93,7 +94,6 @@ const currentPath = Astro.url.pathname;
     mobileNav?.classList.toggle('open');
   });
   
-  // Close mobile menu when clicking a link
   document.querySelectorAll('.mobile-nav-link').forEach(link => {
     link.addEventListener('click', () => {
       mobileMenuBtn?.setAttribute('aria-expanded', 'false');
@@ -101,7 +101,6 @@ const currentPath = Astro.url.pathname;
     });
   });
   
-  // Close mobile menu on escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       mobileMenuBtn?.setAttribute('aria-expanded', 'false');
@@ -113,14 +112,40 @@ const currentPath = Astro.url.pathname;
 <style>
   .header {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: var(--space-4);
+    left: var(--space-4);
+    right: var(--space-4);
     z-index: var(--z-fixed);
     background: var(--glass-bg);
-    backdrop-filter: var(--surface-blur);
-    -webkit-backdrop-filter: var(--surface-blur);
-    border-bottom: 1px solid var(--border-secondary);
+    backdrop-filter: var(--surface-blur-heavy);
+    -webkit-backdrop-filter: var(--surface-blur-heavy);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-float);
+    transition: background var(--duration-normal) var(--ease-default),
+                border-color var(--duration-normal) var(--ease-default),
+                box-shadow var(--duration-normal) var(--ease-default);
+  }
+  
+  .header:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+  }
+  
+  @media (min-width: 768px) {
+    .header {
+      top: var(--space-5);
+      left: var(--space-6);
+      right: var(--space-6);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .header {
+      top: var(--space-6);
+      left: var(--space-8);
+      right: var(--space-8);
+    }
   }
   
   .header-container {
@@ -129,19 +154,13 @@ const currentPath = Astro.url.pathname;
     justify-content: space-between;
     max-width: var(--container-xl);
     margin: 0 auto;
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-2) var(--space-3);
     height: var(--header-height);
   }
   
   @media (min-width: 768px) {
     .header-container {
-      padding: var(--space-3) var(--space-6);
-    }
-  }
-  
-  @media (min-width: 1024px) {
-    .header-container {
-      padding: var(--space-3) var(--space-8);
+      padding: var(--space-2) var(--space-4);
     }
   }
   
@@ -152,13 +171,13 @@ const currentPath = Astro.url.pathname;
     text-decoration: none;
     color: var(--text-primary);
     font-weight: var(--font-semibold);
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
   }
   
   .logo-video {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-md);
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
     object-fit: cover;
   }
   
@@ -190,13 +209,14 @@ const currentPath = Astro.url.pathname;
   }
   
   .nav-link {
+    position: relative;
     display: block;
     padding: var(--space-2) var(--space-3);
     color: var(--text-secondary);
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
     text-decoration: none;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     transition: color var(--duration-fast) var(--ease-default),
                 background-color var(--duration-fast) var(--ease-default);
   }
@@ -214,17 +234,17 @@ const currentPath = Astro.url.pathname;
   .header-actions {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: var(--space-1);
   }
   
   .mobile-menu-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     color: var(--text-primary);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     transition: background-color var(--duration-fast) var(--ease-default);
   }
   
@@ -241,13 +261,17 @@ const currentPath = Astro.url.pathname;
   .mobile-nav {
     display: none;
     position: absolute;
-    top: 100%;
+    top: calc(100% + var(--space-2));
     left: 0;
     right: 0;
-    background: var(--bg-elevated);
-    border-bottom: 1px solid var(--border-primary);
-    padding: var(--space-4);
+    background: var(--glass-bg);
+    backdrop-filter: var(--surface-blur-heavy);
+    -webkit-backdrop-filter: var(--surface-blur-heavy);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-3);
     animation: slideDown var(--duration-fast) var(--ease-default);
+    box-shadow: var(--shadow-float);
   }
   
   .mobile-nav.open {
@@ -272,6 +296,7 @@ const currentPath = Astro.url.pathname;
     padding: var(--space-3) var(--space-4);
     color: var(--text-secondary);
     font-weight: var(--font-medium);
+    font-size: var(--text-sm);
     text-decoration: none;
     border-radius: var(--radius-lg);
     transition: color var(--duration-fast) var(--ease-default),
@@ -282,5 +307,16 @@ const currentPath = Astro.url.pathname;
   .mobile-nav-link.active {
     color: var(--text-primary);
     background-color: var(--bg-tertiary);
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 </style>

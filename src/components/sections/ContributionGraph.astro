@@ -61,81 +61,88 @@ const totalWeeks = Math.ceil(contributionData.length / 7);
 
 <section class="contribution">
   <div class="contribution-container">
-    <div class="contribution-header">
-      <h2 class="contribution-title">
-        {lang === 'zh' ? '访问活动' : 'Visitor Activity'}
-      </h2>
-      <p class="contribution-subtitle">
-        {lang === 'zh' ? '过去一年的网站访问记录' : 'Website visits over the past year'}
-      </p>
-    </div>
-    
-    <div class="contribution-graph">
-      <div class="contribution-months">
-        {monthPositions.map(({ month, week }) => (
-          <span 
-            class="contribution-month" 
-            style={`--week: ${week}`}
-          >
-            {months[month]}
-          </span>
-        ))}
+    <div class="contribution-card">
+      <div class="contribution-header">
+        <h2 class="contribution-title">
+          {lang === 'zh' ? '访问活动' : 'Visitor Activity'}
+        </h2>
+        <p class="contribution-subtitle">
+          {lang === 'zh' ? '过去一年的网站访问记录' : 'Website visits over the past year'}
+        </p>
       </div>
       
-      <div class="contribution-body">
-        <div class="contribution-days">
-          {days.map((day, i) => (
-            <span class="contribution-day">{i % 2 === 0 ? day : ''}</span>
+      <div class="contribution-graph">
+        <div class="contribution-months">
+          {monthPositions.map(({ month, week }) => (
+            <span 
+              class="contribution-month" 
+              style={`--week: ${week}`}
+            >
+              {months[month]}
+            </span>
           ))}
         </div>
         
-        <div class="contribution-grid">
-          {Array.from({ length: totalWeeks }).map((_, weekIndex) => (
-            <div class="contribution-week">
-              {Array.from({ length: 7 }).map((_, dayIndex) => {
-                const dataIndex = weekIndex * 7 + dayIndex;
-                const item = contributionData[dataIndex];
-                if (!item) return null;
-                
-                const dateStr = item.date.toLocaleDateString(
-                  lang === 'zh' ? 'zh-CN' : 'en-US',
-                  { month: 'short', day: 'numeric', year: 'numeric' }
-                );
-                
-                return (
-                  <div 
-                    class="contribution-cell"
-                    data-level={item.level}
-                    title={dateStr}
-                  />
-                );
-              })}
-            </div>
-          ))}
+        <div class="contribution-body">
+          <div class="contribution-days">
+            {days.map((day, i) => (
+              <span class="contribution-day">{i % 2 === 0 ? day : ''}</span>
+            ))}
+          </div>
+          
+          <div class="contribution-grid">
+            {Array.from({ length: totalWeeks }).map((_, weekIndex) => (
+              <div class="contribution-week">
+                {Array.from({ length: 7 }).map((_, dayIndex) => {
+                  const dataIndex = weekIndex * 7 + dayIndex;
+                  const item = contributionData[dataIndex];
+                  if (!item) return null;
+                  
+                  const dateStr = item.date.toLocaleDateString(
+                    lang === 'zh' ? 'zh-CN' : 'en-US',
+                    { month: 'short', day: 'numeric', year: 'numeric' }
+                  );
+                  
+                  return (
+                    <div 
+                      class="contribution-cell"
+                      data-level={item.level}
+                      title={dateStr}
+                    />
+                  );
+                })}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
-    
-    <div class="contribution-legend">
-      <span class="contribution-legend-text">
-        {lang === 'zh' ? '少' : 'Less'}
-      </span>
-      <div class="contribution-legend-cells">
-        {[0, 1, 2, 3, 4].map((level) => (
-          <div class="contribution-cell" data-level={level} />
-        ))}
+      
+      <div class="contribution-legend">
+        <span class="contribution-legend-text">
+          {lang === 'zh' ? '少' : 'Less'}
+        </span>
+        <div class="contribution-legend-cells">
+          {[0, 1, 2, 3, 4].map((level) => (
+            <div class="contribution-cell" data-level={level} />
+          ))}
+        </div>
+        <span class="contribution-legend-text">
+          {lang === 'zh' ? '多' : 'More'}
+        </span>
       </div>
-      <span class="contribution-legend-text">
-        {lang === 'zh' ? '多' : 'More'}
-      </span>
     </div>
   </div>
 </section>
 
 <style>
   .contribution {
-    padding: var(--space-12) var(--space-4);
-    background: var(--bg-secondary);
+    padding: var(--space-8) var(--space-4);
+  }
+  
+  @media (min-width: 768px) {
+    .contribution {
+      padding: var(--space-12) var(--space-4);
+    }
   }
   
   .contribution-container {
@@ -143,13 +150,27 @@ const totalWeeks = Math.ceil(contributionData.length / 7);
     margin: 0 auto;
   }
   
+  .contribution-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    box-shadow: var(--card-shadow);
+  }
+  
+  @media (min-width: 768px) {
+    .contribution-card {
+      padding: var(--space-8);
+    }
+  }
+  
   .contribution-header {
     text-align: center;
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-6);
   }
   
   .contribution-title {
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     font-weight: var(--font-semibold);
     color: var(--text-primary);
     margin-bottom: var(--space-2);
@@ -157,31 +178,31 @@ const totalWeeks = Math.ceil(contributionData.length / 7);
   
   @media (min-width: 768px) {
     .contribution-title {
-      font-size: var(--text-3xl);
+      font-size: var(--text-2xl);
     }
   }
   
   .contribution-subtitle {
     color: var(--text-secondary);
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
   }
   
   .contribution-graph {
     overflow-x: auto;
-    padding: var(--space-4) 0;
+    padding: var(--space-2) 0;
   }
   
   .contribution-months {
     display: flex;
-    margin-left: 40px;
+    margin-left: 36px;
     margin-bottom: var(--space-2);
     position: relative;
-    height: 20px;
+    height: 18px;
   }
   
   .contribution-month {
     position: absolute;
-    left: calc(var(--week) * 14px);
+    left: calc(var(--week) * 13px);
     font-size: var(--text-xs);
     color: var(--text-tertiary);
   }
@@ -194,32 +215,32 @@ const totalWeeks = Math.ceil(contributionData.length / 7);
   .contribution-days {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
     padding-top: 2px;
   }
   
   .contribution-day {
     font-size: var(--text-xs);
     color: var(--text-tertiary);
-    height: 11px;
-    line-height: 11px;
+    height: 10px;
+    line-height: 10px;
   }
   
   .contribution-grid {
     display: flex;
-    gap: 3px;
+    gap: 2px;
   }
   
   .contribution-week {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
   }
   
   .contribution-cell {
-    width: 11px;
-    height: 11px;
-    border-radius: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-sm);
     background-color: var(--contribution-0);
     transition: transform var(--duration-fast) var(--ease-default);
   }
@@ -241,7 +262,7 @@ const totalWeeks = Math.ceil(contributionData.length / 7);
   }
   
   .contribution-cell:hover {
-    transform: scale(1.2);
+    transform: scale(1.3);
   }
   
   .contribution-legend {
@@ -259,6 +280,6 @@ const totalWeeks = Math.ceil(contributionData.length / 7);
   
   .contribution-legend-cells {
     display: flex;
-    gap: 3px;
+    gap: 2px;
   }
 </style>
