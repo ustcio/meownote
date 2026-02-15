@@ -23,6 +23,7 @@
   /* ==================== Typography Scale ==================== */
   
   /* Font Families */
+  --font-brand: "Limelight", cursive;
   --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
