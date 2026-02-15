@@ -74,6 +74,12 @@ const messages = [
         </div>
         
         <div class="chatbot-input">
+          <div class="model-selector">
+            <select id="model-select">
+              <option value="doubao-2.0-pro">Doubao 2.0 Pro</option>
+              <option value="doubao-2.0-code">Doubao 2.0 Code</option>
+            </select>
+          </div>
           <input 
             type="text" 
             id="chat-input"
@@ -243,6 +249,47 @@ const messages = [
     border-top: 1px solid var(--border-primary);
   }
   
+  .model-selector {
+    position: relative;
+  }
+  
+  .model-selector select {
+    appearance: none;
+    padding: var(--space-2) var(--space-3);
+    padding-right: var(--space-6);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .model-selector select:hover {
+    border-color: var(--border-hover);
+  }
+  
+  .model-selector select:focus {
+    outline: none;
+    border-color: var(--color-accent-blue);
+  }
+  
+  .model-selector::after {
+    content: '';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid var(--text-tertiary);
+    pointer-events: none;
+  }
+  
   .input-field {
     flex: 1;
     padding: var(--space-3) var(--space-4);
@@ -386,6 +433,9 @@ const messages = [
     const message = chatInput?.value.trim();
     if (!message) return;
     
+    const modelSelect = document.getElementById('model-select') as HTMLSelectElement;
+    const selectedModel = modelSelect?.value || 'doubao-2.0-pro';
+    
     addMessage(message, 'user');
     chatHistory.push({ role: 'user', content: message });
     chatInput.value = '';
@@ -393,11 +443,12 @@ const messages = [
     addLoadingMessage();
     
     try {
-      const response = await fetch(`${API_BASE}/api/chat`, {
+      const response = await fetch(`${API_BASE}/api/doubao`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          message, 
+          prompt: message, 
+          model: selectedModel,
           history: chatHistory.slice(-10) 
         })
       });
@@ -405,11 +456,11 @@ const messages = [
       const result = await response.json();
       removeLoadingMessage();
       
-      if (result.success && result.reply) {
-        addMessage(result.reply, 'bot');
-        chatHistory.push({ role: 'assistant', content: result.reply });
+      if (result.answer) {
+        addMessage(result.answer, 'bot');
+        chatHistory.push({ role: 'assistant', content: result.answer });
       } else {
-        addMessage(result.message || 'Sorry, something went wrong.', 'bot');
+        addMessage(result.message || result.error || 'Sorry, something went wrong.', 'bot');
       }
     } catch (error) {
       console.error('Chat error:', error);
