@@ -12,51 +12,49 @@ const days = lang === 'zh'
   ? ['日', '一', '二', '三', '四', '五', '六']
   : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-function generateContributionData() {
-  const data: { date: Date; level: number }[] = [];
-  const today = new Date();
-  const startDate = new Date(today);
-  startDate.setFullYear(startDate.getFullYear() - 1);
-  startDate.setDate(startDate.getDate() - startDate.getDay());
-  
+const currentYear = 2026;
+const startDate = new Date(currentYear, 0, 1);
+const endDate = new Date(currentYear, 11, 31);
+
+function generateYearData() {
+  const data: { date: Date; level: number; count: number }[] = [];
   const currentDate = new Date(startDate);
-  while (currentDate <= today) {
-    const random = Math.random();
-    let level = 0;
-    if (random > 0.3) level = 1;
-    if (random > 0.5) level = 2;
-    if (random > 0.7) level = 3;
-    if (random > 0.9) level = 4;
-    
+  
+  while (currentDate <= endDate) {
     data.push({
       date: new Date(currentDate),
-      level
+      level: 0,
+      count: 0
     });
     currentDate.setDate(currentDate.getDate() + 1);
   }
   return data;
 }
 
-const contributionData = generateContributionData();
-
-function getMonthPositions(data: { date: Date; level: number }[]) {
+function getMonthPositions() {
   const positions: { month: number; week: number }[] = [];
   let lastMonth = -1;
   
-  data.forEach((item, index) => {
-    const week = Math.floor(index / 7);
-    const month = item.date.getMonth();
+  const currentDate = new Date(startDate);
+  let dayIndex = 0;
+  
+  while (currentDate <= endDate) {
+    const week = Math.floor(dayIndex / 7);
+    const month = currentDate.getMonth();
     if (month !== lastMonth) {
       positions.push({ month, week });
       lastMonth = month;
     }
-  });
+    currentDate.setDate(currentDate.getDate() + 1);
+    dayIndex++;
+  }
   
   return positions;
 }
 
-const monthPositions = getMonthPositions(contributionData);
-const totalWeeks = Math.ceil(contributionData.length / 7);
+const monthPositions = getMonthPositions();
+const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+const totalWeeks = Math.ceil(totalDays / 7);
 ---
 
 <section class="contribution">
@@ -66,11 +64,11 @@ const totalWeeks = Math.ceil(contributionData.length / 7);
         <h2 class="contribution-title">
           {lang === 'zh' ? '访问活动' : 'Visitor Activity'}
         </h2>
-        <p class="contribution-subtitle">2025</p>
+        <p class="contribution-subtitle">2026</p>
       </div>
       
       <div class="contribution-graph-wrapper">
-        <div class="contribution-graph">
+        <div class="contribution-graph" id="contribution-graph" data-year={currentYear}>
           <div class="contribution-months">
             {monthPositions.map(({ month, week }) => (
               <span 
@@ -89,15 +87,18 @@ const totalWeeks = Math.ceil(contributionData.length / 7);
               ))}
             </div>
             
-            <div class="contribution-grid">
+            <div class="contribution-grid" id="contribution-grid">
               {Array.from({ length: totalWeeks }).map((_, weekIndex) => (
                 <div class="contribution-week">
                   {Array.from({ length: 7 }).map((_, dayIndex) => {
-                    const dataIndex = weekIndex * 7 + dayIndex;
-                    const item = contributionData[dataIndex];
-                    if (!item) return null;
+                    const dayOfYear = weekIndex * 7 + dayIndex;
+                    const cellDate = new Date(startDate);
+                    cellDate.setDate(cellDate.getDate() + dayOfYear);
                     
-                    const dateStr = item.date.toLocaleDateString(
+                    if (cellDate > endDate) return null;
+                    
+                    const dateStr = cellDate.toISOString().split('T')[0];
+                    const displayDateStr = cellDate.toLocaleDateString(
                       lang === 'zh' ? 'zh-CN' : 'en-US',
                       { month: 'short', day: 'numeric', year: 'numeric' }
                     );
@@ -105,8 +106,9 @@ const totalWeeks = Math.ceil(contributionData.length / 7);
                     return (
                       <div 
                         class="contribution-cell"
-                        data-level={item.level}
-                        title={dateStr}
+                        data-date={dateStr}
+                        data-level="0"
+                        title={displayDateStr}
                       />
                     );
                   })}
@@ -297,3 +299,58 @@ const totalWeeks = Math.ceil(contributionData.length / 7);
     gap: 3px;
   }
 </style>
+
+<script>
+  const API_BASE = 'https://api.agiera.net';
+  const REFRESH_INTERVAL = 60000;
+  
+  async function fetchHeatmapData() {
+    try {
+      const graph = document.getElementById('contribution-graph');
+      const year = graph?.getAttribute('data-year') || 2026;
+      
+      const response = await fetch(`${API_BASE}/stats/heatmap?year=${year}`);
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        updateHeatmap(result.data, result.maxCount);
+      }
+    } catch (error) {
+      console.warn('Failed to fetch heatmap data:', error);
+    }
+  }
+  
+  function updateHeatmap(data: Record<string, number>, maxCount: number) {
+    const cells = document.querySelectorAll('.contribution-cell[data-date]');
+    
+    cells.forEach(cell => {
+      const date = cell.getAttribute('data-date');
+      if (date && data[date]) {
+        const count = data[date];
+        const level = calculateLevel(count, maxCount);
+        cell.setAttribute('data-level', String(level));
+        
+        const existingTitle = cell.getAttribute('title') || '';
+        const baseTitle = existingTitle.split(' - ')[0];
+        const countText = count === 1 ? '1 visit' : `${count} visits`;
+        cell.setAttribute('title', `${baseTitle} - ${countText}`);
+      }
+    });
+  }
+  
+  function calculateLevel(count: number, maxCount: number): number {
+    if (count === 0) return 0;
+    if (maxCount === 0) return 0;
+    
+    const ratio = count / maxCount;
+    if (ratio >= 0.75) return 4;
+    if (ratio >= 0.5) return 3;
+    if (ratio >= 0.25) return 2;
+    return 1;
+  }
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    fetchHeatmapData();
+    setInterval(fetchHeatmapData, REFRESH_INTERVAL);
+  });
+</script>

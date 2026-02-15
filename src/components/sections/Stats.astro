@@ -4,38 +4,34 @@ import Icon from '@components/ui/Icon.astro';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
-
-const stats = [
-  { 
-    value: '1,234', 
-    label: lang === 'zh' ? '当前在线' : 'Online Now',
-    icon: 'users'
-  },
-  { 
-    value: '56,789', 
-    label: lang === 'zh' ? '累计访问' : 'Total Visits',
-    icon: 'trending'
-  },
-  { 
-    value: '99.9%', 
-    label: lang === 'zh' ? '正常运行时间' : 'Uptime',
-    icon: 'zap'
-  },
-];
 ---
 
 <section class="stats">
   <div class="stats-container">
-    <div class="stats-grid">
-      {stats.map((stat) => (
-        <div class="stat-card hover-lift">
-          <div class="stat-icon">
-            <Icon name={stat.icon} size={20} />
-          </div>
-          <div class="stat-value">{stat.value}</div>
-          <div class="stat-label">{stat.label}</div>
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card hover-lift">
+        <div class="stat-icon">
+          <Icon name="users" size={20} />
         </div>
-      ))}
+        <div class="stat-value" id="stat-online">--</div>
+        <div class="stat-label">{lang === 'zh' ? '当前在线' : 'Online Now'}</div>
+      </div>
+      
+      <div class="stat-card hover-lift">
+        <div class="stat-icon">
+          <Icon name="trending" size={20} />
+        </div>
+        <div class="stat-value" id="stat-total">--</div>
+        <div class="stat-label">{lang === 'zh' ? '累计访问' : 'Total Visits'}</div>
+      </div>
+      
+      <div class="stat-card hover-lift">
+        <div class="stat-icon">
+          <Icon name="zap" size={20} />
+        </div>
+        <div class="stat-value">99.9%</div>
+        <div class="stat-label">{lang === 'zh' ? '正常运行时间' : 'Uptime'}</div>
+      </div>
     </div>
   </div>
 </section>
@@ -136,3 +132,58 @@ const stats = [
     color: var(--text-secondary);
   }
 </style>
+
+<script>
+  const API_BASE = 'https://api.agiera.net';
+  const REFRESH_INTERVAL = 60000;
+  
+  async function recordVisit() {
+    try {
+      await fetch(`${API_BASE}/stats/visit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page: window.location.pathname })
+      });
+    } catch (error) {
+      console.warn('Failed to record visit:', error);
+    }
+  }
+  
+  async function fetchStats() {
+    try {
+      await recordVisit();
+      
+      const response = await fetch(`${API_BASE}/stats/visitor`);
+      const result = await response.json();
+      
+      if (result.success) {
+        updateStatValue('stat-online', result.online || 0);
+        updateStatValue('stat-total', result.total || 0);
+      }
+    } catch (error) {
+      console.warn('Failed to fetch stats:', error);
+    }
+  }
+  
+  function updateStatValue(elementId: string, value: number) {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.textContent = formatNumber(value);
+    }
+  }
+  
+  function formatNumber(num: number): string {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    }
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toLocaleString();
+  }
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    fetchStats();
+    setInterval(fetchStats, REFRESH_INTERVAL);
+  });
+</script>

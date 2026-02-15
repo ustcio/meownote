@@ -1,11 +1,11 @@
 // ================================================================================
-// AGI Era Backend API - 完整整合版（支持大文件上传）
+// AGI Era Backend API - 重构优化版
 // ================================================================================
 // 
 // 功能模块：
-// 1. 通义千问 ChatBot
-// 2. 用户注册/登录
-// 3. 访客统计 (PV/UV)
+// 1. 通义千问/豆包 ChatBot
+// 2. 用户注册/登录（增强安全）
+// 3. 访客统计 (PV/UV/热力图)
 // 4. 管理员系统（登录、文件管理）
 // 5. Resend 邮件通知
 // 6. R2 大文件上传（Multipart Upload）
@@ -18,7 +18,6 @@
 
 export default {
   async fetch(request, env, ctx) {
-    // CORS 预检请求
     if (request.method === 'OPTIONS') {
       return handleCORS();
     }
@@ -27,74 +26,27 @@ export default {
     const path = url.pathname;
 
     try {
-      // ==================== 路由分发 ====================
+      const route = ROUTES[path] || ROUTES[path.endsWith('/') ? path.slice(0, -1) : path];
       
-      // --- 原有接口 ---
-      if (path === '/api/chat') {
-        return await handleChat(request, env);
+      if (route) {
+        if (route.pattern) {
+          const match = path.match(route.pattern);
+          if (match) {
+            return await route.handler(request, env, ctx, match);
+          }
+        } else {
+          return await route.handler(request, env, ctx);
+        }
       }
-      if (path === '/api/doubao') {
-        return await handleDoubao(request, env);
-      }
-      if (path === '/api/signup') {
-        return await handleSignup(request, env, ctx);
-      }
-      if (path === '/api/login') {
-        return await handleLogin(request, env);
-      }
-      if (path === '/api/visitor') {
-        return await handleVisitor(request, env);
-      }
-      if (path === '/stats/visit') {
-        return await handleStatsVisit(request, env);
-      }
-      if (path === '/stats/visitor') {
-        return await handleStatsGet(request, env);
-      }
-      
-      // --- 管理员接口 ---
-      if (path === '/api/admin/login') {
-        return await handleAdminLogin(request, env);
-      }
-      if (path === '/api/admin/verify') {
-        return await handleAdminVerify(request, env);
-      }
-      if (path === '/api/admin/files') {
-        return await handleAdminFiles(request, env);
-      }
-      if (path === '/api/admin/folders') {
-        return await handleAdminFolders(request, env);
-      }
-      if (path.startsWith('/api/admin/folders/')) {
-        return await handleAdminFolderAction(request, env, path);
-      }
-      if (path === '/api/admin/stats') {
-        return await handleAdminStats(request, env);
-      }
-      if (path === '/api/admin/change-password') {
-        return await handleAdminChangePassword(request, env);
-      }
-      
-      // --- 大文件上传接口（Multipart Upload） ---
-      if (path === '/api/admin/upload/init') {
-        return await handleUploadInit(request, env);
-      }
-      if (path === '/api/admin/upload/part') {
-        return await handleUploadPart(request, env);
-      }
-      if (path === '/api/admin/upload/complete') {
-        return await handleUploadComplete(request, env);
-      }
-      if (path === '/api/admin/upload/abort') {
-        return await handleUploadAbort(request, env);
-      }
-      
-      // 文件操作（带ID的动态路由）
+
       if (path.startsWith('/api/admin/files/')) {
         return await handleAdminFileAction(request, env, path);
       }
       
-      // 404
+      if (path.startsWith('/api/admin/folders/')) {
+        return await handleAdminFolderAction(request, env, path);
+      }
+
       return jsonResponse({ error: 'Not Found' }, 404);
       
     } catch (error) {
@@ -105,8 +57,43 @@ export default {
 };
 
 // ================================================================================
+// 路由配置
+// ================================================================================
+
+const ROUTES = {
+  '/api/chat': { handler: handleChat },
+  '/api/doubao': { handler: handleDoubao },
+  '/api/signup': { handler: handleSignup },
+  '/api/login': { handler: handleLogin },
+  '/api/visitor': { handler: handleVisitor },
+  '/stats/visit': { handler: handleStatsVisit },
+  '/stats/visitor': { handler: handleStatsGet },
+  '/stats/heatmap': { handler: handleHeatmap },
+  '/api/admin/login': { handler: handleAdminLogin },
+  '/api/admin/verify': { handler: handleAdminVerify },
+  '/api/admin/files': { handler: handleAdminFiles },
+  '/api/admin/folders': { handler: handleAdminFolders },
+  '/api/admin/stats': { handler: handleAdminStats },
+  '/api/admin/change-password': { handler: handleAdminChangePassword },
+  '/api/admin/upload/init': { handler: handleUploadInit },
+  '/api/admin/upload/part': { handler: handleUploadPart },
+  '/api/admin/upload/complete': { handler: handleUploadComplete },
+  '/api/admin/upload/abort': { handler: handleUploadAbort },
+};
+
+// ================================================================================
 // CORS 处理
 // ================================================================================
+
+const ALLOWED_ORIGINS = [
+  'https://agiera.net',
+  'https://www.agiera.net',
+  'https://meow-note.com',
+  'http://localhost:4321',
+  'http://localhost:4322',
+  'http://localhost:4323',
+  'http://localhost:4324',
+];
 
 function handleCORS() {
   return new Response(null, {
@@ -130,25 +117,77 @@ function jsonResponse(data, status = 200) {
 }
 
 // ================================================================================
+// 输入验证工具
+// ================================================================================
+
+function validateEmail(email) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+}
+
+function validatePassword(password) {
+  return password && password.length >= 8;
+}
+
+function sanitizeInput(str) {
+  if (typeof str !== 'string') return '';
+  return str.replace(/[<>\"'&]/g, char => ({
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+    '&': '&amp;'
+  })[char]);
+}
+
+function getClientIP(request) {
+  return request.headers.get('CF-Connecting-IP') || 
+         request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() || 
+         'unknown';
+}
+
+// ================================================================================
 // 1. 通义千问 ChatBot
 // ================================================================================
 
-async function handleChat(request, env) {
+const CHAT_SYSTEM_PROMPT = 'You are AGI Era AI Assistant, a helpful, harmless, and honest AI assistant. You can help users with coding, analysis, creative writing, and various other tasks. Please respond in the same language as the user.';
+
+async function handleChat(request, env, ctx) {
   if (request.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
-  const { message } = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+  }
+
+  const { message, history = [] } = body;
   
-  if (!message) {
-    return jsonResponse({ success: false, message: 'Message is required' });
+  if (!message || typeof message !== 'string') {
+    return jsonResponse({ success: false, message: 'Message is required' }, 400);
+  }
+
+  if (message.length > 4000) {
+    return jsonResponse({ success: false, message: 'Message too long (max 4000 chars)' }, 400);
   }
 
   const DASHSCOPE_API_KEY = env.DASHSCOPE_API_KEY;
   
   if (!DASHSCOPE_API_KEY) {
-    return jsonResponse({ success: false, message: 'API not configured' });
+    return jsonResponse({ success: false, message: 'API not configured' }, 500);
   }
+
+  const messages = [
+    { role: 'system', content: CHAT_SYSTEM_PROMPT },
+    ...history.slice(-10).map(h => ({
+      role: h.role || 'user',
+      content: h.content
+    })),
+    { role: 'user', content: sanitizeInput(message) }
+  ];
 
   try {
     const response = await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', {
@@ -159,16 +198,7 @@ async function handleChat(request, env) {
       },
       body: JSON.stringify({
         model: 'qwen-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are AGI Era AI Assistant, a helpful, harmless, and honest AI assistant. You can help users with coding, analysis, creative writing, and various other tasks. Please respond in the same language as the user.'
-          },
-          {
-            role: 'user',
-            content: message
-          }
-        ],
+        messages,
         temperature: 0.7,
         max_tokens: 2000
       })
@@ -176,45 +206,64 @@ async function handleChat(request, env) {
 
     const data = await response.json();
     
-    if (data.choices && data.choices[0]) {
+    if (data.choices?.[0]?.message?.content) {
       return jsonResponse({
         success: true,
         reply: data.choices[0].message.content
       });
-    } else if (data.error) {
+    }
+    
+    if (data.error) {
       console.error('Qwen API error:', data.error);
       return jsonResponse({
         success: false,
         message: data.error.message || 'AI service error'
-      });
-    } else {
-      return jsonResponse({
-        success: false,
-        message: 'Unexpected response from AI'
-      });
+      }, 500);
     }
+
+    return jsonResponse({
+      success: false,
+      message: 'Unexpected response from AI'
+    }, 500);
+
   } catch (error) {
     console.error('Chat error:', error);
     return jsonResponse({
       success: false,
       message: 'Failed to get AI response'
-    });
+    }, 500);
   }
 }
 
 // ================================================================================
-// 1.1 豆包 ChatBot (火山引擎)
+// 2. 豆包 ChatBot (火山引擎)
 // ================================================================================
 
-async function handleDoubao(request, env) {
+const MODEL_MAP = {
+  'doubao-2.0-pro': 'doubao-seed-2-0-pro-260215',
+  'doubao-2.0-code': 'doubao-seed-2-0-code-preview-260215'
+};
+
+async function handleDoubao(request, env, ctx) {
   if (request.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
-  const { prompt, model } = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: 'Invalid JSON' }, 400);
+  }
+
+  const { prompt, model, history = [] } = body;
   
-  if (!prompt) {
+  if (!prompt || typeof prompt !== 'string') {
     return jsonResponse({ error: 'Prompt is required' }, 400);
+  }
+
+  if (prompt.length > 4000) {
+    return jsonResponse({ error: 'Prompt too long (max 4000 chars)' }, 400);
   }
 
   const DOUBAO_API_KEY = env.DOUBAO_API_KEY;
@@ -223,13 +272,16 @@ async function handleDoubao(request, env) {
     return jsonResponse({ error: 'Doubao API key not configured' }, 500);
   }
 
-  // Model mapping - 根据火山引擎实际模型ID调整
-  const modelMap = {
-    'doubao-2.0-pro': 'doubao-seed-2-0-pro-260215',
-    'doubao-2.0-code': 'doubao-seed-2-0-code-preview-260215'
-  };
+  const endpointId = MODEL_MAP[model] || 'doubao-seed-2-0-pro-260215';
 
-  const endpointId = modelMap[model] || 'doubao-seed-2-0-pro-260215';
+  const messages = [
+    { role: 'system', content: CHAT_SYSTEM_PROMPT },
+    ...history.slice(-10).map(h => ({
+      role: h.role || 'user',
+      content: h.content
+    })),
+    { role: 'user', content: sanitizeInput(prompt) }
+  ];
 
   try {
     const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
@@ -240,16 +292,7 @@ async function handleDoubao(request, env) {
       },
       body: JSON.stringify({
         model: endpointId,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are AGI Era AI Assistant, a helpful, harmless, and honest AI assistant. You can help users with coding, analysis, creative writing, and various other tasks. Please respond in the same language as the user.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
+        messages,
         temperature: 0.7,
         max_tokens: 2000
       })
@@ -257,20 +300,22 @@ async function handleDoubao(request, env) {
 
     const data = await response.json();
     
-    if (data.choices && data.choices[0]) {
+    if (data.choices?.[0]?.message?.content) {
       return jsonResponse({
         answer: data.choices[0].message.content
       });
-    } else if (data.error) {
+    }
+    
+    if (data.error) {
       console.error('Doubao API error:', data.error);
       return jsonResponse({
         error: data.error.message || 'AI service error'
       }, 500);
-    } else {
-      return jsonResponse({
-        error: 'Unexpected response from AI'
-      }, 500);
     }
+
+    return jsonResponse({
+      error: 'Unexpected response from AI'
+    }, 500);
 
   } catch (error) {
     console.error('Doubao chat error:', error);
@@ -281,7 +326,7 @@ async function handleDoubao(request, env) {
 }
 
 // ================================================================================
-// 2. 用户注册
+// 3. 用户注册（增强安全）
 // ================================================================================
 
 async function handleSignup(request, env, ctx) {
@@ -289,74 +334,117 @@ async function handleSignup(request, env, ctx) {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
-  const { username, email, password } = await request.json();
-
-  if (!username || !email || !password) {
-    return jsonResponse({ success: false, message: '请填写所有字段' });
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
   }
 
-  const ip = request.headers.get('CF-Connecting-IP') || 'Unknown';
+  const { username, email, password } = body;
+
+  if (!username || !email || !password) {
+    return jsonResponse({ success: false, message: '请填写所有字段' }, 400);
+  }
+
+  if (!validateEmail(email)) {
+    return jsonResponse({ success: false, message: '请输入有效的邮箱地址' }, 400);
+  }
+
+  if (!validatePassword(password)) {
+    return jsonResponse({ success: false, message: '密码至少需要8个字符' }, 400);
+  }
+
+  const sanitizedUsername = sanitizeInput(username).substring(0, 50);
+  const sanitizedEmail = sanitizeInput(email).toLowerCase();
+  const ip = getClientIP(request);
 
   try {
     const existing = await env.DB.prepare(
       'SELECT id FROM users WHERE email = ?'
-    ).bind(email).first();
+    ).bind(sanitizedEmail).first();
 
     if (existing) {
-      return jsonResponse({ success: false, message: '该邮箱已注册' });
+      return jsonResponse({ success: false, message: '该邮箱已注册' }, 400);
     }
 
-    const hashedPassword = await hashUserPassword(password);
+    const hashedPassword = await hashPassword(password);
     const token = generateToken();
 
     await env.DB.prepare(
       `INSERT INTO users (username, email, password, ip, token, login_count, created_at, last_login) 
        VALUES (?, ?, ?, ?, ?, 1, datetime('now'), datetime('now'))`
-    ).bind(username, email, hashedPassword, ip, token).run();
+    ).bind(sanitizedUsername, sanitizedEmail, hashedPassword, ip, token).run();
 
-    // 异步发送邮件，不阻塞响应
-    ctx.waitUntil(sendRegistrationEmail(username, email, ip, env));
+    ctx.waitUntil(sendRegistrationEmail(sanitizedUsername, sanitizedEmail, ip, env));
 
     return jsonResponse({
       success: true,
       token,
-      user: { username, email, loginCount: 1 }
+      user: { username: sanitizedUsername, email: sanitizedEmail, loginCount: 1 }
     });
 
   } catch (error) {
     console.error('Signup error:', error);
-    return jsonResponse({ success: false, message: '注册失败，请重试' });
+    return jsonResponse({ success: false, message: '注册失败，请重试' }, 500);
   }
 }
 
 // ================================================================================
-// 3. 用户登录
+// 4. 用户登录（增强安全）
 // ================================================================================
 
-async function handleLogin(request, env) {
+const LOGIN_ATTEMPTS = new Map();
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_LOCKOUT_TIME = 15 * 60 * 1000;
+
+async function handleLogin(request, env, ctx) {
   if (request.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
-  const { email, password } = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+  }
+
+  const { email, password } = body;
 
   if (!email || !password) {
-    return jsonResponse({ success: false, message: '请填写邮箱和密码' });
+    return jsonResponse({ success: false, message: '请填写邮箱和密码' }, 400);
+  }
+
+  const sanitizedEmail = sanitizeInput(email).toLowerCase();
+  const ip = getClientIP(request);
+
+  const attempts = LOGIN_ATTEMPTS.get(ip) || { count: 0, lastAttempt: 0 };
+  
+  if (attempts.count >= MAX_LOGIN_ATTEMPTS && Date.now() - attempts.lastAttempt < LOGIN_LOCKOUT_TIME) {
+    return jsonResponse({ 
+      success: false, 
+      message: '登录尝试次数过多，请15分钟后再试' 
+    }, 429);
   }
 
   try {
     const user = await env.DB.prepare(
       'SELECT * FROM users WHERE email = ?'
-    ).bind(email).first();
+    ).bind(sanitizedEmail).first();
 
     if (!user) {
-      return jsonResponse({ success: false, message: '邮箱或密码错误' });
+      recordFailedLogin(ip);
+      return jsonResponse({ success: false, message: '邮箱或密码错误' }, 401);
     }
 
-    const isValid = await verifyUserPassword(password, user.password);
+    const isValid = await verifyPassword(password, user.password);
     if (!isValid) {
-      return jsonResponse({ success: false, message: '邮箱或密码错误' });
+      recordFailedLogin(ip);
+      return jsonResponse({ success: false, message: '邮箱或密码错误' }, 401);
     }
+
+    LOGIN_ATTEMPTS.delete(ip);
 
     const newLoginCount = user.login_count + 1;
     const newToken = generateToken();
@@ -377,16 +465,23 @@ async function handleLogin(request, env) {
 
   } catch (error) {
     console.error('Login error:', error);
-    return jsonResponse({ success: false, message: '登录失败，请重试' });
+    return jsonResponse({ success: false, message: '登录失败，请重试' }, 500);
   }
 }
 
+function recordFailedLogin(ip) {
+  const attempts = LOGIN_ATTEMPTS.get(ip) || { count: 0, lastAttempt: 0 };
+  attempts.count++;
+  attempts.lastAttempt = Date.now();
+  LOGIN_ATTEMPTS.set(ip, attempts);
+}
+
 // ================================================================================
-// 4. 访客统计 - 旧版（保留兼容）
+// 5. 访客统计 - 旧版（保留兼容）
 // ================================================================================
 
-async function handleVisitor(request, env) {
-  const ip = request.headers.get('CF-Connecting-IP') || 'Unknown';
+async function handleVisitor(request, env, ctx) {
+  const ip = getClientIP(request);
   const today = new Date().toISOString().split('T')[0];
 
   try {
@@ -422,30 +517,34 @@ async function handleVisitor(request, env) {
 }
 
 // ================================================================================
-// 5. 访客统计 - 新版 PV/UV
+// 6. 访客统计 - 新版 PV/UV
 // ================================================================================
 
-async function handleStatsVisit(request, env) {
+async function handleStatsVisit(request, env, ctx) {
   if (request.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
   try {
-    const body = await request.json().catch(() => ({}));
-    const page = body.page || '/';
-    const referrer = body.referrer || null;
-    const userAgent = body.userAgent || request.headers.get('User-Agent') || '';
-    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+    let body = {};
+    try {
+      body = await request.json();
+    } catch {
+      body = {};
+    }
+
+    const page = sanitizeInput(body.page || '/');
+    const referrer = body.referrer ? sanitizeInput(body.referrer) : null;
+    const userAgent = request.headers.get('User-Agent') || '';
+    const ip = getClientIP(request);
 
     const visitorId = await generateVisitorId(ip, userAgent);
     const today = new Date().toISOString().split('T')[0];
 
-    // 记录 PV
     await env.DB.prepare(
       `INSERT INTO page_views (page, referrer, visitor_id, created_at) VALUES (?, ?, ?, datetime('now'))`
     ).bind(page, referrer, visitorId).run();
 
-    // 检查并记录 UV
     const existingVisitor = await env.DB.prepare(
       `SELECT id FROM unique_visitors WHERE visitor_id = ? AND date = ?`
     ).bind(visitorId, today).first();
@@ -464,7 +563,7 @@ async function handleStatsVisit(request, env) {
   }
 }
 
-async function handleStatsGet(request, env) {
+async function handleStatsGet(request, env, ctx) {
   try {
     return await getStatsResponse(env);
   } catch (error) {
@@ -480,40 +579,83 @@ async function getStatsResponse(env) {
 }
 
 // ================================================================================
-// 6. 管理员登录
+// 7. 访客热力图数据接口
 // ================================================================================
 
-async function handleAdminLogin(request, env) {
+async function handleHeatmap(request, env, ctx) {
+  try {
+    const url = new URL(request.url);
+    const year = parseInt(url.searchParams.get('year')) || new Date().getFullYear();
+
+    const result = await env.DB.prepare(`
+      SELECT 
+        date(created_at) as date,
+        COUNT(*) as count
+      FROM page_views
+      WHERE date(created_at) >= date(? || '-01-01')
+        AND date(created_at) <= date(? || '-12-31')
+      GROUP BY date(created_at)
+      ORDER BY date
+    `).bind(year, year).all();
+
+    const heatmapData = {};
+    (result.results || []).forEach(row => {
+      heatmapData[row.date] = row.count;
+    });
+
+    const maxCount = Math.max(...Object.values(heatmapData), 1);
+
+    return jsonResponse({
+      success: true,
+      year,
+      data: heatmapData,
+      maxCount
+    });
+
+  } catch (error) {
+    console.error('Heatmap error:', error);
+    return jsonResponse({ success: false, data: {}, maxCount: 0 });
+  }
+}
+
+// ================================================================================
+// 8. 管理员登录
+// ================================================================================
+
+async function handleAdminLogin(request, env, ctx) {
   if (request.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
   try {
-    const { username, password } = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+    }
+
+    const { username, password } = body;
 
     if (!username || !password) {
       return jsonResponse({ success: false, message: '请输入用户名和密码' }, 400);
     }
 
-    // 计算密码哈希
     const passwordHash = await hashAdminPassword(password);
 
-    // 从数据库验证
     const user = await env.DB.prepare(
       'SELECT id, username, role FROM admin_users WHERE username = ? AND password_hash = ?'
-    ).bind(username, passwordHash).first();
+    ).bind(sanitizeInput(username), passwordHash).first();
 
     if (!user) {
       console.log('Admin login failed for:', username);
       return jsonResponse({ success: false, message: '用户名或密码错误' }, 401);
     }
 
-    // 更新最后登录时间
     await env.DB.prepare(
       "UPDATE admin_users SET last_login = datetime('now') WHERE id = ?"
     ).bind(user.id).run();
 
-    // 生成 JWT Token
     const token = await createAdminToken(
       { userId: user.id, username: user.username, role: user.role },
       env.JWT_SECRET || 'agiera-default-jwt-secret-2024'
@@ -534,10 +676,10 @@ async function handleAdminLogin(request, env) {
 }
 
 // ================================================================================
-// 7. 验证管理员 Token
+// 9. 验证管理员 Token
 // ================================================================================
 
-async function handleAdminVerify(request, env) {
+async function handleAdminVerify(request, env, ctx) {
   const authResult = await verifyAdminAuth(request, env);
   
   if (!authResult.success) {
@@ -548,160 +690,162 @@ async function handleAdminVerify(request, env) {
 }
 
 // ================================================================================
-// 8. 管理员文件列表/上传（小文件直接上传）
+// 10. 管理员文件列表/上传
 // ================================================================================
 
-async function handleAdminFiles(request, env) {
-  // 验证管理员身份
+async function handleAdminFiles(request, env, ctx) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
     return jsonResponse({ success: false, message: authResult.message }, 401);
   }
 
-  // GET - 获取文件列表
   if (request.method === 'GET') {
-    try {
-      const url = new URL(request.url);
-      const folderId = url.searchParams.get('folder_id') || null;
-      
-      let files, folders;
-      
-      if (folderId) {
-        // 获取指定文件夹内的文件
-        files = await env.DB.prepare(
-          'SELECT id, name, type, size, downloads, folder_id, created_at as date FROM files WHERE folder_id = ? ORDER BY created_at DESC'
-        ).bind(folderId).all();
-        // 获取子文件夹
-        folders = await env.DB.prepare(
-          'SELECT id, name, parent_id, created_at as date FROM folders WHERE parent_id = ? ORDER BY name ASC'
-        ).bind(folderId).all();
-      } else {
-        // 获取根目录文件（folder_id 为 null）
-        files = await env.DB.prepare(
-          'SELECT id, name, type, size, downloads, folder_id, created_at as date FROM files WHERE folder_id IS NULL ORDER BY created_at DESC'
-        ).all();
-        // 获取根目录文件夹
-        folders = await env.DB.prepare(
-          'SELECT id, name, parent_id, created_at as date FROM folders WHERE parent_id IS NULL ORDER BY name ASC'
-        ).all();
-      }
-
-      return jsonResponse({
-        success: true,
-        files: files.results || [],
-        folders: folders.results || [],
-        currentFolder: folderId
-      });
-    } catch (error) {
-      console.error('Get files error:', error);
-      return jsonResponse({ success: false, message: '获取文件列表失败' }, 500);
-    }
+    return await getAdminFiles(request, env);
   }
 
-  // POST - 上传文件到 R2（小文件直接上传，大文件使用 multipart）
   if (request.method === 'POST') {
-    try {
-      const contentType = request.headers.get('Content-Type') || '';
-      const url = new URL(request.url);
-      const folderId = url.searchParams.get('folder_id') || null;
-      
-      if (contentType.includes('multipart/form-data')) {
-        // 直接上传（适用于小文件 < 100MB）
-        const formData = await request.formData();
-        const file = formData.get('file');
-        
-        if (!file || !(file instanceof File)) {
-          return jsonResponse({ success: false, message: '请选择文件' }, 400);
-        }
-        
-        const fileId = crypto.randomUUID();
-        const ext = file.name.split('.').pop() || 'bin';
-        const storagePath = `uploads/${fileId}.${ext}`;
-        
-        // 上传到 R2
-        if (env.R2) {
-          await env.R2.put(storagePath, file.stream(), {
-            httpMetadata: {
-              contentType: file.type || 'application/octet-stream',
-            },
-            customMetadata: {
-              originalName: file.name,
-              uploadedBy: String(authResult.user.userId),
-            },
-          });
-        }
-        
-        // 保存到数据库（包含 folder_id）
-        await env.DB.prepare(
-          `INSERT INTO files (id, name, type, size, storage_path, downloads, uploaded_by, folder_id, created_at) 
-           VALUES (?, ?, ?, ?, ?, 0, ?, ?, datetime('now'))`
-        ).bind(
-          fileId,
-          file.name,
-          ext,
-          file.size,
-          storagePath,
-          authResult.user.userId,
-          folderId
-        ).run();
-        
-        return jsonResponse({
-          success: true,
-          message: '文件上传成功',
-          file: { id: fileId, name: file.name, type: ext, size: file.size }
-        });
-        
-      } else {
-        // JSON 元数据上传（兼容旧方式）
-        const { name, type, size } = await request.json();
-
-        if (!name) {
-          return jsonResponse({ success: false, message: '文件名不能为空' }, 400);
-        }
-
-        const fileId = crypto.randomUUID();
-        const storagePath = `uploads/${fileId}.${type || 'bin'}`;
-
-        await env.DB.prepare(
-          `INSERT INTO files (id, name, type, size, storage_path, downloads, uploaded_by, created_at) 
-           VALUES (?, ?, ?, ?, ?, 0, ?, datetime('now'))`
-        ).bind(
-          fileId,
-          name,
-          type || '',
-          size || 0,
-          storagePath,
-          authResult.user.userId
-        ).run();
-
-        return jsonResponse({
-          success: true,
-          message: '文件记录已创建',
-          file: { id: fileId, name, type, size }
-        });
-      }
-
-    } catch (error) {
-      console.error('Upload error:', error);
-      return jsonResponse({ success: false, message: '上传失败: ' + error.message }, 500);
-    }
+    return await uploadAdminFile(request, env, authResult);
   }
 
   return jsonResponse({ error: 'Method not allowed' }, 405);
 }
 
+async function getAdminFiles(request, env) {
+  try {
+    const url = new URL(request.url);
+    const folderId = url.searchParams.get('folder_id') || null;
+    
+    let files, folders;
+    
+    if (folderId) {
+      files = await env.DB.prepare(
+        'SELECT id, name, type, size, downloads, folder_id, created_at as date FROM files WHERE folder_id = ? ORDER BY created_at DESC'
+      ).bind(folderId).all();
+      folders = await env.DB.prepare(
+        'SELECT id, name, parent_id, created_at as date FROM folders WHERE parent_id = ? ORDER BY name ASC'
+      ).bind(folderId).all();
+    } else {
+      files = await env.DB.prepare(
+        'SELECT id, name, type, size, downloads, folder_id, created_at as date FROM files WHERE folder_id IS NULL ORDER BY created_at DESC'
+      ).all();
+      folders = await env.DB.prepare(
+        'SELECT id, name, parent_id, created_at as date FROM folders WHERE parent_id IS NULL ORDER BY name ASC'
+      ).all();
+    }
+
+    return jsonResponse({
+      success: true,
+      files: files.results || [],
+      folders: folders.results || [],
+      currentFolder: folderId
+    });
+  } catch (error) {
+    console.error('Get files error:', error);
+    return jsonResponse({ success: false, message: '获取文件列表失败' }, 500);
+  }
+}
+
+async function uploadAdminFile(request, env, authResult) {
+  try {
+    const contentType = request.headers.get('Content-Type') || '';
+    const url = new URL(request.url);
+    const folderId = url.searchParams.get('folder_id') || null;
+    
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      const file = formData.get('file');
+      
+      if (!file || !(file instanceof File)) {
+        return jsonResponse({ success: false, message: '请选择文件' }, 400);
+      }
+      
+      const fileId = crypto.randomUUID();
+      const ext = file.name.split('.').pop() || 'bin';
+      const storagePath = `uploads/${fileId}.${ext}`;
+      
+      if (env.R2) {
+        await env.R2.put(storagePath, file.stream(), {
+          httpMetadata: {
+            contentType: file.type || 'application/octet-stream',
+          },
+          customMetadata: {
+            originalName: file.name,
+            uploadedBy: String(authResult.user.userId),
+          },
+        });
+      }
+      
+      await env.DB.prepare(
+        `INSERT INTO files (id, name, type, size, storage_path, downloads, uploaded_by, folder_id, created_at) 
+         VALUES (?, ?, ?, ?, ?, 0, ?, ?, datetime('now'))`
+      ).bind(
+        fileId,
+        sanitizeInput(file.name),
+        ext,
+        file.size,
+        storagePath,
+        authResult.user.userId,
+        folderId
+      ).run();
+      
+      return jsonResponse({
+        success: true,
+        message: '文件上传成功',
+        file: { id: fileId, name: file.name, type: ext, size: file.size }
+      });
+      
+    } else {
+      let body;
+      try {
+        body = await request.json();
+      } catch {
+        return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+      }
+
+      const { name, type, size } = body;
+
+      if (!name) {
+        return jsonResponse({ success: false, message: '文件名不能为空' }, 400);
+      }
+
+      const fileId = crypto.randomUUID();
+      const storagePath = `uploads/${fileId}.${type || 'bin'}`;
+
+      await env.DB.prepare(
+        `INSERT INTO files (id, name, type, size, storage_path, downloads, uploaded_by, created_at) 
+         VALUES (?, ?, ?, ?, ?, 0, ?, datetime('now'))`
+      ).bind(
+        fileId,
+        sanitizeInput(name),
+        type || '',
+        size || 0,
+        storagePath,
+        authResult.user.userId
+      ).run();
+
+      return jsonResponse({
+        success: true,
+        message: '文件记录已创建',
+        file: { id: fileId, name, type, size }
+      });
+    }
+
+  } catch (error) {
+    console.error('Upload error:', error);
+    return jsonResponse({ success: false, message: '上传失败: ' + error.message }, 500);
+  }
+}
+
 // ================================================================================
-// 8.1 管理员文件夹管理
+// 11. 管理员文件夹管理
 // ================================================================================
 
-async function handleAdminFolders(request, env) {
-  // 验证管理员身份
+async function handleAdminFolders(request, env, ctx) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
     return jsonResponse({ success: false, message: authResult.message }, 401);
   }
 
-  // GET - 获取所有文件夹（用于移动文件时选择）
   if (request.method === 'GET') {
     try {
       const folders = await env.DB.prepare(
@@ -718,21 +862,28 @@ async function handleAdminFolders(request, env) {
     }
   }
 
-  // POST - 创建新文件夹
   if (request.method === 'POST') {
     try {
-      const { name, parent_id } = await request.json();
+      let body;
+      try {
+        body = await request.json();
+      } catch {
+        return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+      }
+
+      const { name, parent_id } = body;
 
       if (!name || name.trim() === '') {
         return jsonResponse({ success: false, message: '文件夹名称不能为空' }, 400);
       }
 
-      // 检查同级目录下是否有同名文件夹
+      const sanitizedName = sanitizeInput(name.trim());
+
       const existing = await env.DB.prepare(
         parent_id 
           ? 'SELECT id FROM folders WHERE name = ? AND parent_id = ?'
           : 'SELECT id FROM folders WHERE name = ? AND parent_id IS NULL'
-      ).bind(...(parent_id ? [name.trim(), parent_id] : [name.trim()])).first();
+      ).bind(...(parent_id ? [sanitizedName, parent_id] : [sanitizedName])).first();
 
       if (existing) {
         return jsonResponse({ success: false, message: '该文件夹已存在' }, 400);
@@ -745,7 +896,7 @@ async function handleAdminFolders(request, env) {
          VALUES (?, ?, ?, ?, datetime('now'))`
       ).bind(
         folderId,
-        name.trim(),
+        sanitizedName,
         parent_id || null,
         authResult.user.userId
       ).run();
@@ -753,7 +904,7 @@ async function handleAdminFolders(request, env) {
       return jsonResponse({
         success: true,
         message: '文件夹创建成功',
-        folder: { id: folderId, name: name.trim(), parent_id: parent_id || null }
+        folder: { id: folderId, name: sanitizedName, parent_id: parent_id || null }
       });
 
     } catch (error) {
@@ -766,11 +917,10 @@ async function handleAdminFolders(request, env) {
 }
 
 // ================================================================================
-// 8.2 管理员文件夹操作（重命名/删除）
+// 12. 管理员文件夹操作（重命名/删除）
 // ================================================================================
 
 async function handleAdminFolderAction(request, env, path) {
-  // 验证管理员身份
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
     return jsonResponse({ success: false, message: authResult.message }, 401);
@@ -778,7 +928,6 @@ async function handleAdminFolderAction(request, env, path) {
 
   const folderId = path.split('/').pop();
 
-  // GET - 获取文件夹详情
   if (request.method === 'GET') {
     try {
       const folder = await env.DB.prepare(
@@ -789,7 +938,6 @@ async function handleAdminFolderAction(request, env, path) {
         return jsonResponse({ success: false, message: '文件夹不存在' }, 404);
       }
 
-      // 获取面包屑路径
       const breadcrumbs = await getFolderBreadcrumbs(env, folderId);
 
       return jsonResponse({
@@ -804,14 +952,22 @@ async function handleAdminFolderAction(request, env, path) {
     }
   }
 
-  // PUT - 重命名文件夹
   if (request.method === 'PUT') {
     try {
-      const { name } = await request.json();
+      let body;
+      try {
+        body = await request.json();
+      } catch {
+        return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+      }
+
+      const { name } = body;
 
       if (!name || name.trim() === '') {
         return jsonResponse({ success: false, message: '文件夹名称不能为空' }, 400);
       }
+
+      const sanitizedName = sanitizeInput(name.trim());
 
       const folder = await env.DB.prepare(
         'SELECT * FROM folders WHERE id = ?'
@@ -821,12 +977,11 @@ async function handleAdminFolderAction(request, env, path) {
         return jsonResponse({ success: false, message: '文件夹不存在' }, 404);
       }
 
-      // 检查同级目录下是否有同名文件夹
       const existing = await env.DB.prepare(
         folder.parent_id 
           ? 'SELECT id FROM folders WHERE name = ? AND parent_id = ? AND id != ?'
           : 'SELECT id FROM folders WHERE name = ? AND parent_id IS NULL AND id != ?'
-      ).bind(...(folder.parent_id ? [name.trim(), folder.parent_id, folderId] : [name.trim(), folderId])).first();
+      ).bind(...(folder.parent_id ? [sanitizedName, folder.parent_id, folderId] : [sanitizedName, folderId])).first();
 
       if (existing) {
         return jsonResponse({ success: false, message: '该文件夹名已存在' }, 400);
@@ -834,7 +989,7 @@ async function handleAdminFolderAction(request, env, path) {
 
       await env.DB.prepare(
         'UPDATE folders SET name = ? WHERE id = ?'
-      ).bind(name.trim(), folderId).run();
+      ).bind(sanitizedName, folderId).run();
 
       return jsonResponse({ success: true, message: '文件夹已重命名' });
 
@@ -844,7 +999,6 @@ async function handleAdminFolderAction(request, env, path) {
     }
   }
 
-  // DELETE - 删除文件夹
   if (request.method === 'DELETE') {
     try {
       const folder = await env.DB.prepare(
@@ -855,7 +1009,6 @@ async function handleAdminFolderAction(request, env, path) {
         return jsonResponse({ success: false, message: '文件夹不存在' }, 404);
       }
 
-      // 检查文件夹是否为空
       const filesInFolder = await env.DB.prepare(
         'SELECT COUNT(*) as count FROM files WHERE folder_id = ?'
       ).bind(folderId).first();
@@ -871,7 +1024,6 @@ async function handleAdminFolderAction(request, env, path) {
         }, 400);
       }
 
-      // 删除文件夹
       await env.DB.prepare(
         'DELETE FROM folders WHERE id = ?'
       ).bind(folderId).run();
@@ -887,7 +1039,6 @@ async function handleAdminFolderAction(request, env, path) {
   return jsonResponse({ error: 'Method not allowed' }, 405);
 }
 
-// 获取文件夹面包屑路径
 async function getFolderBreadcrumbs(env, folderId) {
   const breadcrumbs = [];
   let currentId = folderId;
@@ -909,49 +1060,54 @@ async function getFolderBreadcrumbs(env, folderId) {
 }
 
 // ================================================================================
-// 9. 大文件上传 - Multipart Upload（初始化）
+// 13. 大文件上传 - Multipart Upload（初始化）
 // ================================================================================
 
-async function handleUploadInit(request, env) {
+async function handleUploadInit(request, env, ctx) {
   if (request.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
-  // 验证管理员身份
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
     return jsonResponse({ success: false, message: authResult.message }, 401);
   }
 
   try {
-    const { filename, fileSize, contentType } = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+    }
+
+    const { filename, fileSize, contentType } = body;
 
     if (!filename) {
       return jsonResponse({ success: false, message: '文件名不能为空' }, 400);
     }
 
+    const sanitizedFilename = sanitizeInput(filename);
     const fileId = crypto.randomUUID();
-    const ext = filename.split('.').pop() || 'bin';
+    const ext = sanitizedFilename.split('.').pop() || 'bin';
     const storagePath = `uploads/${fileId}.${ext}`;
 
-    // 创建 R2 multipart upload
     const multipartUpload = await env.R2.createMultipartUpload(storagePath, {
       httpMetadata: {
         contentType: contentType || 'application/octet-stream',
       },
       customMetadata: {
-        originalName: filename,
+        originalName: sanitizedFilename,
         uploadedBy: String(authResult.user.userId),
       },
     });
 
-    // 临时存储上传信息（可以用 KV 或内存，这里简单返回给前端管理）
     return jsonResponse({
       success: true,
       uploadId: multipartUpload.uploadId,
       fileId: fileId,
       storagePath: storagePath,
-      filename: filename,
+      filename: sanitizedFilename,
       fileSize: fileSize,
       ext: ext
     });
@@ -963,15 +1119,14 @@ async function handleUploadInit(request, env) {
 }
 
 // ================================================================================
-// 10. 大文件上传 - Multipart Upload（上传分片）
+// 14. 大文件上传 - Multipart Upload（上传分片）
 // ================================================================================
 
-async function handleUploadPart(request, env) {
+async function handleUploadPart(request, env, ctx) {
   if (request.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
-  // 验证管理员身份
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
     return jsonResponse({ success: false, message: authResult.message }, 401);
@@ -987,10 +1142,8 @@ async function handleUploadPart(request, env) {
       return jsonResponse({ success: false, message: '缺少必要参数' }, 400);
     }
 
-    // 获取 multipart upload 对象
     const multipartUpload = env.R2.resumeMultipartUpload(storagePath, uploadId);
 
-    // 上传分片
     const partData = await request.arrayBuffer();
     const uploadedPart = await multipartUpload.uploadPart(partNumber, partData);
 
@@ -1007,40 +1160,43 @@ async function handleUploadPart(request, env) {
 }
 
 // ================================================================================
-// 11. 大文件上传 - Multipart Upload（完成上传）
+// 15. 大文件上传 - Multipart Upload（完成上传）
 // ================================================================================
 
-async function handleUploadComplete(request, env) {
+async function handleUploadComplete(request, env, ctx) {
   if (request.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
-  // 验证管理员身份
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
     return jsonResponse({ success: false, message: authResult.message }, 401);
   }
 
   try {
-    const { uploadId, storagePath, fileId, filename, fileSize, ext, parts } = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+    }
+
+    const { uploadId, storagePath, fileId, filename, fileSize, ext, parts } = body;
 
     if (!uploadId || !storagePath || !parts || !Array.isArray(parts)) {
       return jsonResponse({ success: false, message: '缺少必要参数' }, 400);
     }
 
-    // 获取 multipart upload 对象并完成上传
     const multipartUpload = env.R2.resumeMultipartUpload(storagePath, uploadId);
     
-    // parts 格式: [{ partNumber: 1, etag: "xxx" }, ...]
     await multipartUpload.complete(parts);
 
-    // 保存文件记录到数据库
     await env.DB.prepare(
       `INSERT INTO files (id, name, type, size, storage_path, downloads, uploaded_by, created_at) 
        VALUES (?, ?, ?, ?, ?, 0, ?, datetime('now'))`
     ).bind(
       fileId,
-      filename,
+      sanitizeInput(filename),
       ext,
       fileSize,
       storagePath,
@@ -1060,28 +1216,33 @@ async function handleUploadComplete(request, env) {
 }
 
 // ================================================================================
-// 12. 大文件上传 - Multipart Upload（取消上传）
+// 16. 大文件上传 - Multipart Upload（取消上传）
 // ================================================================================
 
-async function handleUploadAbort(request, env) {
+async function handleUploadAbort(request, env, ctx) {
   if (request.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
-  // 验证管理员身份
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
     return jsonResponse({ success: false, message: authResult.message }, 401);
   }
 
   try {
-    const { uploadId, storagePath } = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+    }
+
+    const { uploadId, storagePath } = body;
 
     if (!uploadId || !storagePath) {
       return jsonResponse({ success: false, message: '缺少必要参数' }, 400);
     }
 
-    // 取消 multipart upload
     const multipartUpload = env.R2.resumeMultipartUpload(storagePath, uploadId);
     await multipartUpload.abort();
 
@@ -1097,11 +1258,10 @@ async function handleUploadAbort(request, env) {
 }
 
 // ================================================================================
-// 13. 管理员文件操作（下载/删除）
+// 17. 管理员文件操作（下载/删除）
 // ================================================================================
 
 async function handleAdminFileAction(request, env, path) {
-  // 验证管理员身份
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
     return jsonResponse({ success: false, message: authResult.message }, 401);
@@ -1109,7 +1269,6 @@ async function handleAdminFileAction(request, env, path) {
 
   const fileId = path.split('/').pop();
 
-  // GET - 下载文件
   if (request.method === 'GET') {
     try {
       const file = await env.DB.prepare(
@@ -1120,17 +1279,14 @@ async function handleAdminFileAction(request, env, path) {
         return jsonResponse({ success: false, message: '文件不存在' }, 404);
       }
 
-      // 更新下载次数
       await env.DB.prepare(
         'UPDATE files SET downloads = downloads + 1 WHERE id = ?'
       ).bind(fileId).run();
 
-      // 从 R2 获取文件
       if (env.R2 && file.storage_path) {
         const object = await env.R2.get(file.storage_path);
         
         if (object) {
-          // 返回真实文件
           const headers = new Headers();
           headers.set('Content-Type', object.httpMetadata?.contentType || 'application/octet-stream');
           headers.set('Content-Disposition', `attachment; filename="${encodeURIComponent(file.name)}"`);
@@ -1140,7 +1296,6 @@ async function handleAdminFileAction(request, env, path) {
         }
       }
 
-      // 如果 R2 没有文件，返回文件信息
       return jsonResponse({
         success: true,
         file: file,
@@ -1153,7 +1308,6 @@ async function handleAdminFileAction(request, env, path) {
     }
   }
 
-  // DELETE - 删除文件
   if (request.method === 'DELETE') {
     try {
       const file = await env.DB.prepare(
@@ -1164,7 +1318,6 @@ async function handleAdminFileAction(request, env, path) {
         return jsonResponse({ success: false, message: '文件不存在' }, 404);
       }
 
-      // 从 R2 删除
       if (env.R2 && file.storage_path) {
         try {
           await env.R2.delete(file.storage_path);
@@ -1173,7 +1326,6 @@ async function handleAdminFileAction(request, env, path) {
         }
       }
 
-      // 从数据库删除记录
       await env.DB.prepare(
         'DELETE FROM files WHERE id = ?'
       ).bind(fileId).run();
@@ -1190,11 +1342,10 @@ async function handleAdminFileAction(request, env, path) {
 }
 
 // ================================================================================
-// 14. 管理员统计信息
+// 18. 管理员统计信息
 // ================================================================================
 
-async function handleAdminStats(request, env) {
-  // 验证管理员身份
+async function handleAdminStats(request, env, ctx) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
     return jsonResponse({ success: false, message: authResult.message }, 401);
@@ -1217,12 +1368,10 @@ async function handleAdminStats(request, env) {
       'SELECT created_at FROM files ORDER BY created_at DESC LIMIT 1'
     ).first();
 
-    // 用户统计
     const userCount = await env.DB.prepare(
       'SELECT COUNT(*) as count FROM users'
     ).first();
 
-    // 今日访客
     const todayUV = await env.DB.prepare(
       `SELECT COUNT(DISTINCT visitor_id) as count FROM unique_visitors WHERE date = date('now')`
     ).first();
@@ -1246,28 +1395,34 @@ async function handleAdminStats(request, env) {
 }
 
 // ================================================================================
-// 15. 管理员修改密码
+// 19. 管理员修改密码
 // ================================================================================
 
-async function handleAdminChangePassword(request, env) {
+async function handleAdminChangePassword(request, env, ctx) {
   if (request.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
-  // 验证管理员身份
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
     return jsonResponse({ success: false, message: authResult.message }, 401);
   }
 
   try {
-    const { oldPassword, newPassword } = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+    }
+
+    const { oldPassword, newPassword } = body;
 
     if (!oldPassword || !newPassword) {
       return jsonResponse({ success: false, message: '请输入旧密码和新密码' }, 400);
     }
 
-    if (newPassword.length < 8) {
+    if (!validatePassword(newPassword)) {
       return jsonResponse({ success: false, message: '新密码至少需要8个字符' }, 400);
     }
 
@@ -1304,9 +1459,11 @@ async function sendRegistrationEmail(username, email, ip, env) {
     return;
   }
 
-  // 1. 给管理员发送通知
+  const sanitizedUsername = sanitizeInput(username);
+  const sanitizedEmail = sanitizeInput(email);
+
   try {
-    const adminRes = await fetch('https://api.resend.com/emails', {
+    await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
@@ -1326,11 +1483,11 @@ async function sendRegistrationEmail(username, email, ip, env) {
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #71717a;">用户名</td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #fafafa; text-align: right; font-weight: 600;">${username}</td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #fafafa; text-align: right; font-weight: 600;">${sanitizedUsername}</td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #71717a;">邮箱</td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #00d4ff; text-align: right;">${email}</td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #00d4ff; text-align: right;">${sanitizedEmail}</td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #71717a;">IP 地址</td>
@@ -1348,18 +1505,13 @@ async function sendRegistrationEmail(username, email, ip, env) {
       }),
     });
     
-    if (adminRes.ok) {
-      console.log('Admin notification sent');
-    } else {
-      console.error('Admin email error:', await adminRes.text());
-    }
+    console.log('Admin notification sent');
   } catch (error) {
     console.error('Admin email exception:', error);
   }
 
-  // 2. 给用户发送欢迎邮件
   try {
-    const userRes = await fetch('https://api.resend.com/emails', {
+    await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
@@ -1367,7 +1519,7 @@ async function sendRegistrationEmail(username, email, ip, env) {
       },
       body: JSON.stringify({
         from: 'AGI Era <noreply@agiera.net>',
-        to: [email],
+        to: [sanitizedEmail],
         subject: '🚀 欢迎加入 AGI Era',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0b; color: #fafafa;">
@@ -1376,7 +1528,7 @@ async function sendRegistrationEmail(username, email, ip, env) {
               <p style="color: #71717a; margin-top: 5px;">欢迎加入我们</p>
             </div>
             <div style="background: #18181b; padding: 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-              <p style="color: #fafafa; font-size: 16px; margin: 0 0 16px 0;">Hi ${username}，</p>
+              <p style="color: #fafafa; font-size: 16px; margin: 0 0 16px 0;">Hi ${sanitizedUsername}，</p>
               <p style="color: #a1a1aa; line-height: 1.6; margin: 0 0 16px 0;">感谢你注册 AGI Era！你的账号已创建成功。</p>
               <p style="color: #a1a1aa; line-height: 1.6; margin: 0 0 24px 0;">现在你可以使用我们的 AI 助手、探索最新的 AGI 技术资讯，开启你的智能时代之旅。</p>
               <div style="text-align: center;">
@@ -1389,31 +1541,46 @@ async function sendRegistrationEmail(username, email, ip, env) {
       }),
     });
     
-    if (userRes.ok) {
-      console.log('Welcome email sent to:', email);
-    } else {
-      console.error('User email error:', await userRes.text());
-    }
+    console.log('Welcome email sent to:', sanitizedEmail);
   } catch (error) {
     console.error('User email exception:', error);
   }
 }
 
 // ================================================================================
-// 工具函数 - 用户密码（带 salt）
+// 工具函数 - 密码哈希（增强安全）
 // ================================================================================
 
-async function hashUserPassword(password) {
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const salt = crypto.randomUUID().substring(0, 16);
+  const data = encoder.encode(password + salt);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return `${salt}:${hash}`;
+}
+
+async function verifyPassword(password, storedHash) {
+  const [salt, hash] = storedHash.split(':');
+  if (!salt || !hash) {
+    const legacyHash = await legacyHashPassword(password);
+    return legacyHash === storedHash;
+  }
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + salt);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const computedHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return computedHash === hash;
+}
+
+async function legacyHashPassword(password) {
   const encoder = new TextEncoder();
   const data = encoder.encode(password + 'agi-era-salt-2024');
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-async function verifyUserPassword(password, hash) {
-  const hashedInput = await hashUserPassword(password);
-  return hashedInput === hash;
 }
 
 function generateToken() {
@@ -1423,7 +1590,7 @@ function generateToken() {
 }
 
 // ================================================================================
-// 工具函数 - 管理员密码（Base64，与数据库中的格式匹配）
+// 工具函数 - 管理员密码
 // ================================================================================
 
 async function hashAdminPassword(password) {
@@ -1435,12 +1602,12 @@ async function hashAdminPassword(password) {
 }
 
 // ================================================================================
-// 工具函数 - 管理员 JWT Token
+// 工具函数 - 管理员 JWT Token（增强验证）
 // ================================================================================
 
 async function createAdminToken(payload, secret) {
   const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-  const exp = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7天过期
+  const exp = Date.now() + 7 * 24 * 60 * 60 * 1000;
   const body = btoa(JSON.stringify({ ...payload, exp }));
 
   const key = await crypto.subtle.importKey(
@@ -1462,14 +1629,33 @@ async function createAdminToken(payload, secret) {
 
 async function verifyAdminToken(token, secret) {
   try {
-    const [header, body, sig] = token.split('.');
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+
+    const [header, body, sig] = parts;
     const payload = JSON.parse(atob(body));
 
     if (payload.exp < Date.now()) {
-      return null; // Token 已过期
+      return null;
     }
 
-    return payload;
+    const key = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify']
+    );
+
+    const signatureBuffer = Uint8Array.from(atob(sig), c => c.charCodeAt(0));
+    const isValid = await crypto.subtle.verify(
+      'HMAC',
+      key,
+      signatureBuffer,
+      new TextEncoder().encode(`${header}.${body}`)
+    );
+
+    return isValid ? payload : null;
   } catch {
     return null;
   }
@@ -1490,7 +1676,7 @@ async function verifyAdminAuth(request, env) {
   const payload = await verifyAdminToken(token, env.JWT_SECRET || 'agiera-default-jwt-secret-2024');
 
   if (!payload) {
-    return { success: false, message: 'Token 已过期，请重新登录' };
+    return { success: false, message: 'Token 已过期或无效，请重新登录' };
   }
 
   return { success: true, user: payload };
@@ -1501,7 +1687,7 @@ async function verifyAdminAuth(request, env) {
 // ================================================================================
 
 async function generateVisitorId(ip, userAgent) {
-  const data = `${ip}-${userAgent}`;
+  const data = `${ip}-${userAgent}-${Date.now().toString(36)}`;
   const encoder = new TextEncoder();
   const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
   const hashArray = Array.from(new Uint8Array(hashBuffer));
