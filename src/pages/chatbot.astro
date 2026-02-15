@@ -9,7 +9,7 @@ const lang = getLangFromUrl(Astro.url);
   title={lang === 'zh' ? 'ChatBot - Meow Note' : 'ChatBot - Meow Note'}
   description={lang === 'zh' ? 'AI智能对话助手' : 'AI Chat Assistant'}
 >
-  <div class="chat-container">
+  <div class="chat-container" data-lang={lang}>
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
@@ -893,17 +893,11 @@ const lang = getLangFromUrl(Astro.url);
 </style>
 
 <script>
-  // Hide global header on chatbot page
-  document.addEventListener('DOMContentLoaded', () => {
-    const globalHeader = document.querySelector('.header');
-    if (globalHeader) {
-      (globalHeader as HTMLElement).style.display = 'none';
-    }
-  });
+  // Get language from data attribute
+  const chatContainer = document.querySelector('.chat-container');
+  const lang = chatContainer?.getAttribute('data-lang') || 'zh';
 
   const API_BASE = 'https://api.agiera.net';
-  
-  const chatContainer = document.querySelector('.chat-container');
   const sidebar = document.getElementById('sidebar');
   const menuToggle = document.getElementById('menu-toggle');
   const sidebarOverlay = document.getElementById('sidebar-overlay');
