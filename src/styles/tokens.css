@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Limelight&display=swap');
+
 :root {
   /* ==================== Color System ==================== */
   
@@ -23,7 +25,7 @@
   /* ==================== Typography Scale ==================== */
   
   /* Font Families */
-  --font-brand: "Poppins", cursive;
+  --font-brand: "Limelight", cursive;
   --font-sans: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
