@@ -54,6 +54,8 @@ const messages = [
                     loop 
                     muted 
                     playsinline
+                    width="28"
+                    height="28"
                   >
                     <source src="/logo.mp4" type="video/mp4" />
                   </video>
@@ -178,6 +180,7 @@ const messages = [
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    overflow: hidden;
   }
   
   .message-avatar.bot {
@@ -192,10 +195,16 @@ const messages = [
   }
   
   .avatar-video {
-    width: 28px;
-    height: 28px;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px;
+    min-height: 28px;
+    max-width: 28px;
+    max-height: 28px;
     border-radius: var(--radius-sm);
     object-fit: cover;
+    overflow: hidden;
+    display: block;
   }
   
   .message-bubble {
@@ -320,7 +329,7 @@ const messages = [
     if (type === 'bot') {
       messageDiv.innerHTML = `
         <div class="message-avatar bot">
-          <video class="avatar-video" autoplay loop muted playsinline>
+          <video class="avatar-video" autoplay loop muted playsinline width="28" height="28">
             <source src="/logo.mp4" type="video/mp4" />
           </video>
         </div>
@@ -349,7 +358,7 @@ const messages = [
     messageDiv.id = 'loading-message';
     messageDiv.innerHTML = `
       <div class="message-avatar bot">
-        <video class="avatar-video" autoplay loop muted playsinline>
+        <video class="avatar-video" autoplay loop muted playsinline width="28" height="28">
           <source src="/logo.mp4" type="video/mp4" />
         </video>
       </div>
