@@ -127,7 +127,23 @@
   --container-2xl: 1536px;
   
   --header-height: 3.5rem;
+  --header-margin: var(--space-4);
+  --header-total-height: calc(var(--header-height) + var(--header-margin) * 2 + var(--space-4));
   --footer-height: auto;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --header-margin: var(--space-5);
+    --header-total-height: calc(var(--header-height) + var(--header-margin) * 2 + var(--space-4));
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --header-margin: var(--space-6);
+    --header-total-height: calc(var(--header-height) + var(--header-margin) * 2 + var(--space-4));
+  }
 }
 
 /* ==================== Light Theme ==================== */
