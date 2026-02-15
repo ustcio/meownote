@@ -169,7 +169,8 @@ const messages = [
   }
   
   .message.user {
-    flex-direction: row-reverse;
+    flex-direction: row;
+    justify-content: flex-end;
   }
   
   .message-avatar {
@@ -222,7 +223,7 @@ const messages = [
   }
   
   .message-bubble.user {
-    background: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
     color: white;
     border-bottom-right-radius: var(--radius-sm);
   }
@@ -340,7 +341,7 @@ const messages = [
     } else {
       messageDiv.innerHTML = `
         <div class="message-bubble user">
-          <p>${content}</p>
+          <p class="message-text">${content}</p>
         </div>
         <div class="message-avatar user">
           <span>U</span>
