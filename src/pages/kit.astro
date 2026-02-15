@@ -7,18 +7,16 @@ const tools = [
   {
     id: 'gold',
     href: '/kit/gold',
-    icon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`,
+    icon: 'clock',
     title: lang === 'zh' ? '黄金价格' : 'Gold Price',
-    desc: lang === 'zh' ? '实时追踪国内外黄金价格' : 'Track domestic and international gold prices',
-    color: '#FFD700'
+    desc: lang === 'zh' ? '实时追踪国内外黄金价格' : 'Track domestic and international gold prices'
   },
   {
     id: 'academic',
     href: '/kit/academic',
-    icon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>`,
-    title: lang === 'zh' ? '学术工具箱' : 'Academic Toolkit',
-    desc: lang === 'zh' ? 'DOI引用转换、BibTeX生成、期刊查询等' : 'DOI citation, BibTeX generator, journal lookup & more',
-    color: '#00D4FF'
+    icon: 'book',
+    title: lang === 'zh' ? '学术工具' : 'Academic Tools',
+    desc: lang === 'zh' ? 'DOI引用转换、BibTeX生成等' : 'DOI citation, BibTeX generator & more'
   }
 ];
 ---
@@ -29,38 +27,37 @@ const tools = [
 >
   <section class="kit">
     <div class="kit-container">
-      <header class="kit-header">
-        <h1 class="kit-title">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-          </svg>
-          {lang === 'zh' ? '工具箱' : 'Toolkit'}
-        </h1>
-        <p class="kit-subtitle">{lang === 'zh' ? '精选实用工具，助力工作与学习' : 'Curated tools to boost your productivity'}</p>
-      </header>
-      
-      <div class="tools-grid">
-        {tools.map(tool => (
-          <a href={tool.href} class="tool-card">
-            <div class="tool-icon" style={`--tool-color: ${tool.color}`}>
-              {tool.icon}
-            </div>
-            <div class="tool-content">
-              <h2 class="tool-title">{tool.title}</h2>
-              <p class="tool-desc">{tool.desc}</p>
-            </div>
-            <div class="tool-arrow">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </div>
-          </a>
-        ))}
+      <div class="kit-header">
+        <h1 class="kit-title">{lang === 'zh' ? '工具箱' : 'Toolkit'}</h1>
+        <p class="kit-desc">{lang === 'zh' ? '精选实用工具' : 'Curated useful tools'}</p>
       </div>
       
-      <div class="coming-soon">
-        <h3 class="coming-title">{lang === 'zh' ? '更多工具开发中...' : 'More tools coming soon...'}</h3>
-        <p class="coming-desc">{lang === 'zh' ? '我们正在开发更多实用工具，敬请期待' : 'We are developing more useful tools. Stay tuned!'}</p>
+      <div class="tools-list">
+        {tools.map(tool => (
+          <a href={tool.href} class="tool-item">
+            <div class="tool-icon">
+              {tool.icon === 'clock' && (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+              )}
+              {tool.icon === 'book' && (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+              )}
+            </div>
+            <div class="tool-content">
+              <span class="tool-title">{tool.title}</span>
+              <span class="tool-desc">{tool.desc}</span>
+            </div>
+            <svg class="tool-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        ))}
       </div>
     </div>
   </section>
@@ -69,125 +66,95 @@ const tools = [
 <style>
   .kit {
     min-height: 100vh;
-    padding: calc(var(--header-height) + var(--space-8)) var(--space-4) var(--space-12);
+    padding: calc(var(--header-height) + var(--space-16)) var(--space-4) var(--space-16);
   }
   
   .kit-container {
-    max-width: var(--container-md);
+    max-width: 640px;
     margin: 0 auto;
   }
   
   .kit-header {
-    text-align: center;
     margin-bottom: var(--space-10);
   }
   
   .kit-title {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-3);
     font-size: var(--text-3xl);
     font-weight: var(--font-bold);
     color: var(--text-primary);
-    margin-bottom: var(--space-3);
+    margin-bottom: var(--space-2);
   }
   
-  .kit-title svg {
-    color: var(--color-accent-blue);
-  }
-  
-  .kit-subtitle {
+  .kit-desc {
+    font-size: var(--text-base);
     color: var(--text-secondary);
-    font-size: var(--text-lg);
   }
   
-  .tools-grid {
-    display: grid;
-    gap: var(--space-4);
-    margin-bottom: var(--space-10);
+  .tools-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
   }
   
-  .tool-card {
+  .tool-item {
     display: flex;
     align-items: center;
-    gap: var(--space-5);
-    padding: var(--space-6);
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-2xl);
-    transition: all 0.2s ease;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl);
+    transition: all var(--duration-fast) var(--ease-default);
   }
   
-  .tool-card:hover {
-    border-color: var(--color-accent-blue);
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-float);
+  .tool-item:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
   }
   
   .tool-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 64px;
-    height: 64px;
-    background: linear-gradient(135deg, var(--tool-color), color-mix(in srgb, var(--tool-color) 70%, white));
-    border-radius: var(--radius-xl);
-    color: white;
+    width: 48px;
+    height: 48px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
     flex-shrink: 0;
+  }
+  
+  .tool-item:hover .tool-icon {
+    color: var(--color-accent-blue);
   }
   
   .tool-content {
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
   
   .tool-title {
-    font-size: var(--text-xl);
-    font-weight: var(--font-semibold);
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
     color: var(--text-primary);
-    margin-bottom: var(--space-1);
   }
   
   .tool-desc {
     font-size: var(--text-sm);
-    color: var(--text-secondary);
+    color: var(--text-tertiary);
   }
   
   .tool-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-full);
     color: var(--text-tertiary);
-    transition: all 0.2s ease;
+    flex-shrink: 0;
+    transition: transform var(--duration-fast) var(--ease-default);
   }
   
-  .tool-card:hover .tool-arrow {
-    background: var(--color-accent-blue);
-    color: white;
+  .tool-item:hover .tool-arrow {
     transform: translateX(4px);
-  }
-  
-  .coming-soon {
-    text-align: center;
-    padding: var(--space-8);
-    background: var(--bg-secondary);
-    border: 1px dashed var(--border-primary);
-    border-radius: var(--radius-2xl);
-  }
-  
-  .coming-title {
-    font-size: var(--text-lg);
-    font-weight: var(--font-medium);
     color: var(--text-secondary);
-    margin-bottom: var(--space-2);
-  }
-  
-  .coming-desc {
-    font-size: var(--text-sm);
-    color: var(--text-tertiary);
   }
 </style>
