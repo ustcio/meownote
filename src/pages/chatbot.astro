@@ -9,7 +9,7 @@ const lang = getLangFromUrl(Astro.url);
   title={lang === 'zh' ? 'ChatBot - Meow Note' : 'ChatBot - Meow Note'}
   description={lang === 'zh' ? 'AI智能对话助手' : 'AI Chat Assistant'}
 >
-  <div class="chat-layout">
+  <div class="chat-layout" id="chat-layout">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <button class="new-chat-btn" id="new-chat-btn">
@@ -132,6 +132,8 @@ const lang = getLangFromUrl(Astro.url);
     height: calc(100vh - var(--header-total-height));
     margin-top: var(--header-total-height);
     background: var(--bg-primary);
+    overflow: hidden;
+    position: relative;
   }
   
   .sidebar {
@@ -141,6 +143,7 @@ const lang = getLangFromUrl(Astro.url);
     display: flex;
     flex-direction: column;
     transition: width 0.3s ease, transform 0.3s ease;
+    flex-shrink: 0;
   }
   
   .sidebar.collapsed {
@@ -152,6 +155,7 @@ const lang = getLangFromUrl(Astro.url);
     padding: var(--space-3);
     display: flex;
     gap: var(--space-2);
+    flex-shrink: 0;
   }
   
   .new-chat-btn {
@@ -194,7 +198,27 @@ const lang = getLangFromUrl(Astro.url);
   .chat-history {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: var(--space-2);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  .chat-history::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .chat-history::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .chat-history::-webkit-scrollbar-thumb {
+    background: var(--text-quaternary);
+    border-radius: 3px;
+  }
+  
+  .chat-history::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
   }
   
   .history-section {
@@ -231,6 +255,8 @@ const lang = getLangFromUrl(Astro.url);
     display: flex;
     flex-direction: column;
     min-width: 0;
+    min-height: 0;
+    overflow: hidden;
   }
   
   .chat-header {
@@ -240,6 +266,7 @@ const lang = getLangFromUrl(Astro.url);
     padding: var(--space-3) var(--space-4);
     border-bottom: 1px solid var(--border-primary);
     position: relative;
+    flex-shrink: 0;
   }
   
   .mobile-menu-btn {
@@ -287,8 +314,29 @@ const lang = getLangFromUrl(Astro.url);
   
   .chat-container {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    overflow-x: hidden;
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  .chat-container::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .chat-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .chat-container::-webkit-scrollbar-thumb {
+    background: var(--text-quaternary);
+    border-radius: 4px;
+  }
+  
+  .chat-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
   }
   
   .chat-messages {
@@ -486,6 +534,7 @@ const lang = getLangFromUrl(Astro.url);
   .input-area {
     padding: var(--space-4);
     background: var(--bg-primary);
+    flex-shrink: 0;
   }
   
   .input-container {
@@ -588,6 +637,8 @@ const lang = getLangFromUrl(Astro.url);
 <script>
   const API_BASE = 'https://api.agiera.net';
   
+  const chatLayout = document.getElementById('chat-layout');
+  const chatContainer = document.getElementById('chat-container');
   const chatMessages = document.getElementById('chat-messages');
   const chatInput = document.getElementById('chat-input') as HTMLTextAreaElement;
   const sendBtn = document.getElementById('send-btn');
@@ -600,6 +651,18 @@ const lang = getLangFromUrl(Astro.url);
   
   let chatHistory: { role: string; content: string }[] = [];
   let isStreaming = false;
+  
+  if (chatContainer) {
+    chatContainer.addEventListener('touchmove', (e) => {
+      e.stopPropagation();
+    }, { passive: true });
+  }
+  
+  if (sidebar) {
+    sidebar.addEventListener('touchmove', (e) => {
+      e.stopPropagation();
+    }, { passive: true });
+  }
   
   function autoResize() {
     if (!chatInput) return;
@@ -730,9 +793,8 @@ const lang = getLangFromUrl(Astro.url);
   }
   
   function scrollToBottom() {
-    const container = document.getElementById('chat-container');
-    if (container) {
-      container.scrollTop = container.scrollHeight;
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
   }
   
