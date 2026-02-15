@@ -1,0 +1,346 @@
+---
+import { getLangFromUrl, useTranslations } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<div class="auth-modal" id="auth-modal">
+  <div class="auth-backdrop" id="auth-backdrop"></div>
+  <div class="auth-container">
+    <button class="auth-close" id="auth-close" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">{t('auth.login')}</button>
+      <button class="auth-tab" data-tab="signup">{t('auth.signup')}</button>
+    </div>
+    
+    <form class="auth-form" id="login-form">
+      <div class="form-group">
+        <label for="login-email">{t('auth.email')}</label>
+        <input type="email" id="login-email" name="email" required placeholder={t('auth.email')} />
+      </div>
+      <div class="form-group">
+        <label for="login-password">{t('auth.password')}</label>
+        <input type="password" id="login-password" name="password" required placeholder={t('auth.password')} />
+      </div>
+      <button type="submit" class="auth-submit">{t('auth.login')}</button>
+      <p class="auth-switch">{t('auth.noAccount')} <span class="auth-link" data-tab="signup">{t('auth.signup')}</span></p>
+    </form>
+    
+    <form class="auth-form hidden" id="signup-form">
+      <div class="form-group">
+        <label for="signup-username">{t('auth.username')}</label>
+        <input type="text" id="signup-username" name="username" required placeholder={t('auth.username')} />
+      </div>
+      <div class="form-group">
+        <label for="signup-email">{t('auth.email')}</label>
+        <input type="email" id="signup-email" name="email" required placeholder={t('auth.email')} />
+      </div>
+      <div class="form-group">
+        <label for="signup-password">{t('auth.password')}</label>
+        <input type="password" id="signup-password" name="password" required placeholder={t('auth.password')} />
+      </div>
+      <div class="form-group">
+        <label for="signup-confirm">{t('auth.confirmPassword')}</label>
+        <input type="password" id="signup-confirm" name="confirmPassword" required placeholder={t('auth.confirmPassword')} />
+      </div>
+      <button type="submit" class="auth-submit">{t('auth.signup')}</button>
+      <p class="auth-switch">{t('auth.hasAccount')} <span class="auth-link" data-tab="login">{t('auth.login')}</span></p>
+    </form>
+  </div>
+</div>
+
+<style>
+  .auth-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-modal);
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .auth-modal.open {
+    display: flex;
+  }
+  
+  .auth-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+  }
+  
+  .auth-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: var(--space-4);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-float);
+    animation: modalIn 0.2s ease-out;
+  }
+  
+  @keyframes modalIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+  
+  .auth-close {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    color: var(--text-tertiary);
+    border-radius: var(--radius-lg);
+    transition: color var(--duration-fast) var(--ease-default),
+                background-color var(--duration-fast) var(--ease-default);
+  }
+  
+  .auth-close:hover {
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+  }
+  
+  .auth-tabs {
+    display: flex;
+    gap: var(--space-1);
+    margin-bottom: var(--space-6);
+    background: var(--bg-tertiary);
+    padding: var(--space-1);
+    border-radius: var(--radius-lg);
+  }
+  
+  .auth-tab {
+    flex: 1;
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .auth-tab.active {
+    color: var(--text-primary);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .auth-tab:hover:not(.active) {
+    color: var(--text-primary);
+  }
+  
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  
+  .auth-form.hidden {
+    display: none;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  
+  .form-group label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+  }
+  
+  .form-group input {
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    transition: border-color var(--duration-fast) var(--ease-default),
+                box-shadow var(--duration-fast) var(--ease-default);
+  }
+  
+  .form-group input:focus {
+    outline: none;
+    border-color: var(--color-accent-blue);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+  }
+  
+  .form-group input::placeholder {
+    color: var(--text-tertiary);
+  }
+  
+  .auth-submit {
+    padding: var(--space-3) var(--space-4);
+    margin-top: var(--space-2);
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+    color: white;
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    border-radius: var(--radius-lg);
+    transition: transform var(--duration-fast) var(--ease-default),
+                box-shadow var(--duration-fast) var(--ease-default);
+  }
+  
+  .auth-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+  }
+  
+  .auth-submit:active {
+    transform: translateY(0);
+  }
+  
+  .auth-switch {
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+  }
+  
+  .auth-link {
+    color: var(--color-accent-blue);
+    cursor: pointer;
+    font-weight: var(--font-medium);
+  }
+  
+  .auth-link:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<script>
+  const API_BASE = 'https://api.agiera.net';
+  
+  const modal = document.getElementById('auth-modal');
+  const backdrop = document.getElementById('auth-backdrop');
+  const closeBtn = document.getElementById('auth-close');
+  const loginForm = document.getElementById('login-form');
+  const signupForm = document.getElementById('signup-form');
+  const tabs = document.querySelectorAll('.auth-tab');
+  const links = document.querySelectorAll('.auth-link');
+  
+  function openModal(tab: string = 'login') {
+    modal?.classList.add('open');
+    switchTab(tab);
+    document.body.style.overflow = 'hidden';
+  }
+  
+  function closeModal() {
+    modal?.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  
+  function switchTab(tab: string) {
+    tabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-tab') === tab));
+    loginForm?.classList.toggle('hidden', tab !== 'login');
+    signupForm?.classList.toggle('hidden', tab !== 'signup');
+  }
+  
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.getAttribute('data-tab') || 'login'));
+  });
+  
+  links.forEach(link => {
+    link.addEventListener('click', () => switchTab(link.getAttribute('data-tab') || 'login'));
+  });
+  
+  closeBtn?.addEventListener('click', closeModal);
+  backdrop?.addEventListener('click', closeModal);
+  
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+  
+  loginForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(loginForm as HTMLFormElement);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    
+    try {
+      const response = await fetch(`${API_BASE}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        localStorage.setItem('auth_token', result.token);
+        localStorage.setItem('user', JSON.stringify(result.user));
+        closeModal();
+        window.dispatchEvent(new CustomEvent('auth:login', { detail: result.user }));
+      } else {
+        alert(result.message || 'Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Login failed. Please try again.');
+    }
+  });
+  
+  signupForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(signupForm as HTMLFormElement);
+    const username = formData.get('username') as string;
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+    
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API_BASE}/api/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        localStorage.setItem('auth_token', result.token);
+        localStorage.setItem('user', JSON.stringify(result.user));
+        closeModal();
+        window.dispatchEvent(new CustomEvent('auth:login', { detail: result.user }));
+      } else {
+        alert(result.message || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      alert('Registration failed. Please try again.');
+    }
+  });
+  
+  (window as any).openAuthModal = openModal;
+</script>
