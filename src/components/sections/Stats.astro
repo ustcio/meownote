@@ -10,6 +10,10 @@ const t = useTranslations(lang);
   <div class="stats-container">
     <div class="stats-grid" id="stats-grid">
       <div class="stat-card hover-lift">
+        <div class="live-badge">
+          <span class="live-dot"></span>
+          <span class="live-text">LIVE</span>
+        </div>
         <div class="stat-icon">
           <Icon name="users" size={20} />
         </div>
@@ -88,6 +92,45 @@ const t = useTranslations(lang);
     transition: transform var(--duration-normal) var(--ease-default),
                 box-shadow var(--duration-normal) var(--ease-default),
                 border-color var(--duration-normal) var(--ease-default);
+    position: relative;
+  }
+  
+  .live-badge {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: rgba(34, 197, 94, 0.15);
+    border-radius: var(--radius-full);
+    font-size: 10px;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.05em;
+  }
+  
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  .live-text {
+    color: #22c55e;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.5;
+      transform: scale(0.8);
+    }
   }
   
   .stat-card:hover {
