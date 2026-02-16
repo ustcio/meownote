@@ -540,7 +540,7 @@ const lang = getLangFromUrl(Astro.url);
       border-radius: var(--radius-md);
       color: var(--text-secondary);
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: all var(--duration-fast) var(--ease-default);
     }
     
     .close-sidebar:hover {
@@ -562,7 +562,7 @@ const lang = getLangFromUrl(Astro.url);
       font-size: var(--font-size-sm);
       font-weight: var(--font-medium);
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: all var(--duration-fast) var(--ease-default);
     }
     
     .new-chat-btn:hover {
@@ -593,7 +593,7 @@ const lang = getLangFromUrl(Astro.url);
       border-radius: var(--radius-md);
       font-size: var(--font-size-sm);
       color: var(--text-primary);
-      transition: all var(--transition-fast);
+      transition: all var(--duration-fast) var(--ease-default);
     }
     
     .search-input:focus {
@@ -626,7 +626,7 @@ const lang = getLangFromUrl(Astro.url);
       text-transform: uppercase;
       letter-spacing: 0.04em;
       cursor: pointer;
-      transition: color var(--transition-fast);
+      transition: color var(--duration-fast) var(--ease-default);
     }
     
     .section-header:hover {
@@ -634,7 +634,7 @@ const lang = getLangFromUrl(Astro.url);
     }
     
     .section-chevron {
-      transition: transform var(--transition-fast);
+      transition: transform var(--duration-fast) var(--ease-default);
     }
     
     .section-header[aria-expanded="false"] .section-chevron {
@@ -661,7 +661,7 @@ const lang = getLangFromUrl(Astro.url);
       background: transparent;
       border-radius: var(--radius-md);
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: all var(--duration-fast) var(--ease-default);
     }
     
     .history-item:hover {
@@ -709,7 +709,7 @@ const lang = getLangFromUrl(Astro.url);
       color: var(--text-secondary);
       font-size: var(--font-size-sm);
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: all var(--duration-fast) var(--ease-default);
     }
     
     .sidebar-action:hover {
@@ -725,7 +725,7 @@ const lang = getLangFromUrl(Astro.url);
       backdrop-filter: blur(4px);
       opacity: 0;
       visibility: hidden;
-      transition: all var(--transition-slow);
+      transition: all var(--duration-slow) var(--ease-default);
       z-index: calc(var(--z-sidebar) - 1);
     }
     
@@ -744,7 +744,7 @@ const lang = getLangFromUrl(Astro.url);
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
-      transition: margin-left var(--transition-slow);
+      transition: margin-left var(--duration-slow) var(--ease-default);
     }
     
     /* Header */
@@ -772,7 +772,7 @@ const lang = getLangFromUrl(Astro.url);
       border-radius: var(--radius-md);
       color: var(--text-secondary);
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: all var(--duration-fast) var(--ease-default);
     }
     
     .menu-toggle:hover {
@@ -797,7 +797,7 @@ const lang = getLangFromUrl(Astro.url);
       border-radius: var(--radius-md);
       color: var(--text-secondary);
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: all var(--duration-fast) var(--ease-default);
     }
     
     .header-action:hover {
@@ -820,7 +820,7 @@ const lang = getLangFromUrl(Astro.url);
       border: 1px solid transparent;
       border-radius: var(--radius-md);
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: all var(--duration-fast) var(--ease-default);
     }
     
     .model-btn:hover {
@@ -850,7 +850,7 @@ const lang = getLangFromUrl(Astro.url);
     
     .chevron {
       color: var(--text-tertiary);
-      transition: transform var(--transition-fast);
+      transition: transform var(--duration-fast) var(--ease-default);
     }
     
     .model-btn[aria-expanded="true"] .chevron {
@@ -870,7 +870,7 @@ const lang = getLangFromUrl(Astro.url);
       opacity: 0;
       visibility: hidden;
       transform: translateY(-8px);
-      transition: all var(--transition-fast);
+      transition: all var(--duration-fast) var(--ease-default);
       z-index: var(--z-modal);
     }
     
@@ -907,7 +907,7 @@ const lang = getLangFromUrl(Astro.url);
       border: none;
       border-radius: var(--radius-md);
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: all var(--duration-fast) var(--ease-default);
       text-align: left;
     }
     
@@ -939,7 +939,7 @@ const lang = getLangFromUrl(Astro.url);
     .check-icon {
       color: var(--accent-color);
       opacity: 0;
-      transition: opacity var(--transition-fast);
+      transition: opacity var(--duration-fast) var(--ease-default);
     }
     
     .model-option.active .check-icon {
@@ -1027,7 +1027,7 @@ const lang = getLangFromUrl(Astro.url);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: all var(--duration-fast) var(--ease-default);
     }
     
     .quick-action:hover {
@@ -1189,7 +1189,7 @@ const lang = getLangFromUrl(Astro.url);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-xl);
       padding: var(--space-3) var(--space-4);
-      transition: all var(--transition-fast);
+      transition: all var(--duration-fast) var(--ease-default);
     }
     
     .input-wrapper:focus-within {
@@ -1237,7 +1237,7 @@ const lang = getLangFromUrl(Astro.url);
       border-radius: var(--radius-md);
       color: white;
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: all var(--duration-fast) var(--ease-default);
     }
     
     .send-btn:hover {
@@ -1395,68 +1395,95 @@ const lang = getLangFromUrl(Astro.url);
     let isStreaming = false;
     let abortController: AbortController | null = null;
     
+    // Language detection
+    const lang = document.documentElement.lang || 'en';
+    
     // API Base
     const API_BASE = 'https://api.agiera.net';
     
     // Initialize
     function init() {
+      console.log('[Chatbot] Initializing...');
+      console.log('[Chatbot] Language:', lang);
+      
+      // Ensure DOM is ready
+      if (!document.getElementById('chat-input')) {
+        console.error('[Chatbot] Chat input element not found!');
+        return;
+      }
+      
       loadConversations();
       setupEventListeners();
       renderHistory();
+      
+      console.log('[Chatbot] Initialization complete');
     }
     
     function setupEventListeners() {
+      console.log('[Chatbot] Setting up event listeners...');
+      
       // Model selection
       const modelBtn = document.getElementById('model-btn');
       const modelDropdown = document.getElementById('model-dropdown');
       
-      modelBtn?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isVisible = modelDropdown?.classList.contains('visible');
-        modelDropdown?.classList.toggle('visible', !isVisible);
-        modelBtn?.setAttribute('aria-expanded', isVisible ? 'false' : 'true');
-      });
-      
-      // Model options
-      modelDropdown?.querySelectorAll('.model-option').forEach(option => {
-        option.addEventListener('click', () => {
-          const model = option.getAttribute('data-model');
-          const name = option.getAttribute('data-name');
-          if (model && name) {
-            selectModel(model, name);
-          }
+      if (modelBtn && modelDropdown) {
+        modelBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isVisible = modelDropdown.classList.contains('visible');
+          modelDropdown.classList.toggle('visible', !isVisible);
+          modelBtn.setAttribute('aria-expanded', isVisible ? 'false' : 'true');
         });
-      });
-      
-      // Close dropdown when clicking outside
-      document.addEventListener('click', () => {
-        modelDropdown?.classList.remove('visible');
-        modelBtn?.setAttribute('aria-expanded', 'false');
-      });
+        
+        // Model options
+        modelDropdown.querySelectorAll('.model-option').forEach(option => {
+          option.addEventListener('click', () => {
+            const model = option.getAttribute('data-model');
+            const name = option.getAttribute('data-name');
+            if (model && name) {
+              selectModel(model, name);
+            }
+          });
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+          modelDropdown.classList.remove('visible');
+          modelBtn.setAttribute('aria-expanded', 'false');
+        });
+      }
       
       // New chat
-      document.getElementById('new-chat-btn')?.addEventListener('click', startNewChat);
+      const newChatBtn = document.getElementById('new-chat-btn');
+      if (newChatBtn) {
+        newChatBtn.addEventListener('click', startNewChat);
+      }
       
       // Send message
       const chatInput = document.getElementById('chat-input') as HTMLTextAreaElement;
       const sendBtn = document.getElementById('send-btn');
       
-      chatInput?.addEventListener('input', () => {
-        if (sendBtn) {
+      console.log('[Chatbot] Chat input:', chatInput ? 'found' : 'NOT FOUND');
+      console.log('[Chatbot] Send button:', sendBtn ? 'found' : 'NOT FOUND');
+      
+      if (chatInput && sendBtn) {
+        chatInput.addEventListener('input', () => {
+          console.log('[Chatbot] Input event triggered, value:', chatInput.value);
           sendBtn.disabled = chatInput.value.trim() === '';
-        }
-      });
-      
-      sendBtn?.addEventListener('click', sendMessage);
-      
-      chatInput?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          if (!sendBtn.disabled) {
-            sendMessage();
+        });
+        
+        sendBtn.addEventListener('click', sendMessage);
+        
+        chatInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if (!sendBtn.disabled) {
+              sendMessage();
+            }
           }
-        }
-      });
+        });
+      } else {
+        console.error('[Chatbot] Critical: chat input or send button not found!');
+      }
     }
     
     function selectModel(model: string, name: string) {
