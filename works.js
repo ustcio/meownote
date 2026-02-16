@@ -151,10 +151,43 @@ function getClientIP(request) {
 }
 
 // ================================================================================
-// 1. 通义千问 ChatBot
+// 1. Unified Chat API (Qwen & Doubao Models)
 // ================================================================================
 
-const CHAT_SYSTEM_PROMPT = 'You are AGI Era AI Assistant, a helpful, harmless, and honest AI assistant. You can help users with coding, analysis, creative writing, and various other tasks. Please respond in the same language as the user.';
+const CHAT_SYSTEM_PROMPT = 'You are Meow AI Assistant, a helpful, harmless, and honest AI assistant. You can help users with coding, analysis, creative writing, and various other tasks. Please respond in the same language as the user.';
+
+const MODEL_CONFIG = {
+  // Qwen Models
+  'qwen-turbo': {
+    provider: 'qwen',
+    model: 'qwen-turbo',
+    endpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    maxTokens: 2000,
+    temperature: 0.7
+  },
+  'qwen-plus': {
+    provider: 'qwen',
+    model: 'qwen-plus',
+    endpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    maxTokens: 2000,
+    temperature: 0.7
+  },
+  // Doubao Models
+  'doubao-2.0-pro': {
+    provider: 'doubao',
+    model: 'doubao-seed-2-0-pro-260215',
+    endpoint: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
+    maxTokens: 2000,
+    temperature: 0.7
+  },
+  'doubao-2.0-code': {
+    provider: 'doubao',
+    model: 'doubao-seed-2-0-code-preview-260215',
+    endpoint: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
+    maxTokens: 2000,
+    temperature: 0.7
+  }
+};
 
 async function handleChat(request, env, ctx) {
   if (request.method !== 'POST') {
@@ -168,7 +201,7 @@ async function handleChat(request, env, ctx) {
     return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
   }
 
-  const { message, history = [] } = body;
+  const { message, model = 'doubao-2.0-pro', history = [] } = body;
   
   if (!message || typeof message !== 'string') {
     return jsonResponse({ success: false, message: 'Message is required' }, 400);
@@ -178,9 +211,14 @@ async function handleChat(request, env, ctx) {
     return jsonResponse({ success: false, message: 'Message too long (max 4000 chars)' }, 400);
   }
 
-  const DASHSCOPE_API_KEY = env.DASHSCOPE_API_KEY;
+  const config = MODEL_CONFIG[model];
+  if (!config) {
+    return jsonResponse({ success: false, message: 'Invalid model selected' }, 400);
+  }
+
+  const apiKey = config.provider === 'qwen' ? env.DASHSCOPE_API_KEY : env.DOUBAO_API_KEY;
   
-  if (!DASHSCOPE_API_KEY) {
+  if (!apiKey) {
     return jsonResponse({ success: false, message: 'API not configured' }, 500);
   }
 
@@ -194,17 +232,17 @@ async function handleChat(request, env, ctx) {
   ];
 
   try {
-    const response = await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', {
+    const response = await fetch(config.endpoint, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${DASHSCOPE_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'qwen-turbo',
+        model: config.model,
         messages,
-        temperature: 0.7,
-        max_tokens: 2000
+        temperature: config.temperature,
+        max_tokens: config.maxTokens
       })
     });
 
@@ -213,12 +251,14 @@ async function handleChat(request, env, ctx) {
     if (data.choices?.[0]?.message?.content) {
       return jsonResponse({
         success: true,
-        reply: data.choices[0].message.content
+        reply: data.choices[0].message.content,
+        model: model,
+        usage: data.usage
       });
     }
     
     if (data.error) {
-      console.error('Qwen API error:', data.error);
+      console.error(`${model} API error:`, data.error);
       return jsonResponse({
         success: false,
         message: data.error.message || 'AI service error'
