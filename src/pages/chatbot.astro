@@ -14,12 +14,7 @@ const lang = getLangFromUrl(Astro.url);
     <!-- Sidebar - Claude Style -->
     <aside class="sidebar" id="sidebar" role="navigation" aria-label={lang === 'zh' ? '对话历史' : 'Chat history'}>
       <div class="sidebar-header">
-        <a href="/" class="sidebar-logo" aria-label="Meow Note Home">
-          <video class="logo-video" autoplay loop muted playsinline preload="auto" width="28" height="28" aria-hidden="true">
-            <source src="/logo.mp4" type="video/mp4" />
-          </video>
-          <span class="logo-text">Meow Note</span>
-        </a>
+        <span class="sidebar-title">{lang === 'zh' ? '对话历史' : 'Chat History'}</span>
         <button class="close-sidebar" id="close-sidebar" type="button" aria-label={lang === 'zh' ? '关闭侧边栏' : 'Close sidebar'}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -515,18 +510,10 @@ const lang = getLangFromUrl(Astro.url);
       border-bottom: 1px solid var(--border-color);
     }
     
-    .sidebar-logo {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      text-decoration: none;
-      color: var(--text-primary);
-      font-weight: var(--font-semibold);
+    .sidebar-title {
       font-size: var(--font-size-lg);
-    }
-    
-    .logo-video {
-      border-radius: var(--radius-md);
+      font-weight: var(--font-semibold);
+      color: var(--text-primary);
     }
     
     .close-sidebar {
@@ -1426,29 +1413,39 @@ const lang = getLangFromUrl(Astro.url);
       const modelBtn = document.getElementById('model-btn');
       const modelDropdown = document.getElementById('model-dropdown');
       
+      console.log('[Chatbot] Model button:', modelBtn ? 'found' : 'NOT FOUND');
+      console.log('[Chatbot] Model dropdown:', modelDropdown ? 'found' : 'NOT FOUND');
+      
       if (modelBtn && modelDropdown) {
         modelBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           const isVisible = modelDropdown.classList.contains('visible');
+          console.log('[Chatbot] Model dropdown visible:', isVisible, '-> toggling to:', !isVisible);
           modelDropdown.classList.toggle('visible', !isVisible);
           modelBtn.setAttribute('aria-expanded', isVisible ? 'false' : 'true');
         });
         
         // Model options
         modelDropdown.querySelectorAll('.model-option').forEach(option => {
-          option.addEventListener('click', () => {
+          option.addEventListener('click', (e) => {
+            e.stopPropagation();
             const model = option.getAttribute('data-model');
             const name = option.getAttribute('data-name');
+            console.log('[Chatbot] Model option clicked:', model, name);
             if (model && name) {
               selectModel(model, name);
+              modelDropdown.classList.remove('visible');
+              modelBtn.setAttribute('aria-expanded', 'false');
             }
           });
         });
         
         // Close dropdown when clicking outside
-        document.addEventListener('click', () => {
-          modelDropdown.classList.remove('visible');
-          modelBtn.setAttribute('aria-expanded', 'false');
+        document.addEventListener('click', (e) => {
+          if (!modelDropdown.contains(e.target as Node) && !modelBtn.contains(e.target as Node)) {
+            modelDropdown.classList.remove('visible');
+            modelBtn.setAttribute('aria-expanded', 'false');
+          }
         });
       }
       
