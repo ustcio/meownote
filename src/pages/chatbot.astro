@@ -1509,7 +1509,14 @@ const lang = getLangFromUrl(Astro.url);
       const chatInput = document.getElementById('chat-input') as HTMLTextAreaElement;
       const content = chatInput?.value.trim();
       
-      if (!content || isStreaming) return;
+      console.log('[Chatbot] Sending message:', content);
+      console.log('[Chatbot] Current model:', currentModel);
+      console.log('[Chatbot] API Base:', API_BASE);
+      
+      if (!content || isStreaming) {
+        console.error('[Chatbot] Aborted: content=', content, 'isStreaming=', isStreaming);
+        return;
+      }
       
       // Add user message
       addMessage('user', content);
@@ -1519,31 +1526,48 @@ const lang = getLangFromUrl(Astro.url);
       showTypingIndicator();
       
       try {
+        console.log('[Chatbot] Fetching from API:', `${API_BASE}/api/chat`);
+        
+        const requestBody = {
+          message: content,
+          model: currentModel,
+          history: chatHistory.slice(-10)
+        };
+        
+        console.log('[Chatbot] Request body:', JSON.stringify(requestBody, null, 2));
+        
         const response = await fetch(`${API_BASE}/api/chat`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            message: content,
-            model: currentModel,
-            history: chatHistory.slice(-10)
-          })
+          body: JSON.stringify(requestBody)
         });
         
+        console.log('[Chatbot] Response status:', response.status, response.statusText);
+        
+        if (!response.ok) {
+          console.error('[Chatbot] HTTP error:', response.status, response.statusText);
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const data = await response.json();
+        console.log('[Chatbot] Response data:', data);
         
         // Remove typing indicator
         removeTypingIndicator();
         
         if (data.success && data.reply) {
+          console.log('[Chatbot] Adding AI response:', data.reply);
           addMessage('assistant', data.reply);
         } else {
+          console.error('[Chatbot] API returned error:', data);
           showToast(data.message || 'Failed to get response', 'error');
         }
       } catch (error) {
+        console.error('[Chatbot] Fetch error:', error);
         removeTypingIndicator();
-        showToast('Network error', 'error');
+        showToast(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
       }
     }
     

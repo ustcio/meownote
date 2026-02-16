@@ -190,35 +190,48 @@ const MODEL_CONFIG = {
 };
 
 async function handleChat(request, env, ctx) {
+  console.log('[Chat API] Received request');
+  
   if (request.method !== 'POST') {
+    console.log('[Chat API] Method not allowed:', request.method);
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
   let body;
   try {
     body = await request.json();
-  } catch {
+    console.log('[Chat API] Request body:', JSON.stringify(body, null, 2));
+  } catch (error) {
+    console.error('[Chat API] Invalid JSON:', error);
     return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
   }
 
   const { message, model = 'doubao-2.0-pro', history = [] } = body;
   
+  console.log('[Chat API] Message:', message?.substring(0, 50));
+  console.log('[Chat API] Model:', model);
+  console.log('[Chat API] History length:', history?.length);
+  
   if (!message || typeof message !== 'string') {
+    console.error('[Chat API] Message is required');
     return jsonResponse({ success: false, message: 'Message is required' }, 400);
   }
 
   if (message.length > 4000) {
+    console.error('[Chat API] Message too long:', message.length);
     return jsonResponse({ success: false, message: 'Message too long (max 4000 chars)' }, 400);
   }
 
   const config = MODEL_CONFIG[model];
   if (!config) {
+    console.error('[Chat API] Invalid model selected:', model);
     return jsonResponse({ success: false, message: 'Invalid model selected' }, 400);
   }
 
   const apiKey = config.provider === 'qwen' ? env.DASHSCOPE_API_KEY : env.DOUBAO_API_KEY;
   
   if (!apiKey) {
+    console.error('[Chat API] API key not configured for provider:', config.provider);
     return jsonResponse({ success: false, message: 'API not configured' }, 500);
   }
 
@@ -231,24 +244,38 @@ async function handleChat(request, env, ctx) {
     { role: 'user', content: sanitizeInput(message) }
   ];
 
+  console.log('[Chat API] Sending to', config.provider, 'endpoint:', config.endpoint);
+  console.log('[Chat API] Messages count:', messages.length);
+
   try {
+    const requestBody = {
+      model: config.model,
+      messages,
+      temperature: config.temperature,
+      max_tokens: config.maxTokens
+    };
+    
+    console.log('[Chat API] Request body to AI provider:', JSON.stringify({
+      ...requestBody,
+      messages: requestBody.messages.slice(-2) // Only log last 2 messages for brevity
+    }, null, 2));
+
     const response = await fetch(config.endpoint, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        model: config.model,
-        messages,
-        temperature: config.temperature,
-        max_tokens: config.maxTokens
-      })
+      body: JSON.stringify(requestBody)
     });
 
+    console.log('[Chat API] AI provider response status:', response.status);
+
     const data = await response.json();
+    console.log('[Chat API] AI provider response:', JSON.stringify(data, null, 2));
     
     if (data.choices?.[0]?.message?.content) {
+      console.log('[Chat API] Success! Reply length:', data.choices[0].message.content.length);
       return jsonResponse({
         success: true,
         reply: data.choices[0].message.content,
@@ -258,20 +285,21 @@ async function handleChat(request, env, ctx) {
     }
     
     if (data.error) {
-      console.error(`${model} API error:`, data.error);
+      console.error('[Chat API] AI provider error:', data.error);
       return jsonResponse({
         success: false,
         message: data.error.message || 'AI service error'
       }, 500);
     }
 
+    console.error('[Chat API] Unexpected response format:', data);
     return jsonResponse({
       success: false,
       message: 'Unexpected response from AI'
     }, 500);
 
   } catch (error) {
-    console.error('Chat error:', error);
+    console.error('[Chat API] Fetch error:', error);
     return jsonResponse({
       success: false,
       message: 'Failed to get AI response'
