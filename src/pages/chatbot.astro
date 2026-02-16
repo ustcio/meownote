@@ -37,7 +37,13 @@ const lang = getLangFromUrl(Astro.url);
     <!-- Sidebar - Claude Style -->
     <aside class="sidebar" id="sidebar" role="navigation" aria-label={lang === 'zh' ? '对话历史' : 'Chat history'}>
       <div class="sidebar-header">
-        <span class="sidebar-title">{lang === 'zh' ? '对话历史' : 'Chat History'}</span>
+        <a href="/" class="sidebar-brand" aria-label={lang === 'zh' ? '返回首页' : 'Go to homepage'}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span class="brand-text">Meow Note</span>
+        </a>
         <button class="close-sidebar" id="close-sidebar" type="button" aria-label={lang === 'zh' ? '关闭侧边栏' : 'Close sidebar'}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -45,6 +51,32 @@ const lang = getLangFromUrl(Astro.url);
           </svg>
         </button>
       </div>
+      
+      <!-- Navigation Links -->
+      <nav class="sidebar-nav" aria-label={lang === 'zh' ? '主导航' : 'Main navigation'}>
+        <a href="/" class="nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>{lang === 'zh' ? '首页' : 'Home'}</span>
+        </a>
+        <button class="nav-item active" id="nav-chatbot" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>{lang === 'zh' ? 'AI 对话' : 'AI Chat'}</span>
+        </button>
+        <a href="/kit" class="nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>{lang === 'zh' ? '工具箱' : 'Toolkit'}</span>
+        </a>
+      </nav>
       
       <button class="new-chat-btn" id="new-chat-btn" type="button">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -98,7 +130,14 @@ const lang = getLangFromUrl(Astro.url);
       </div>
       
       <div class="sidebar-footer">
-        <button class="sidebar-action" id="clear-all-btn" type="button">
+        <button class="sidebar-action" id="settings-btn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>{lang === 'zh' ? '设置' : 'Settings'}</span>
+        </button>
+        <button class="sidebar-action danger" id="clear-all-btn" type="button">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <polyline points="3 6 5 6 21 6"></polyline>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -533,10 +572,23 @@ const lang = getLangFromUrl(Astro.url);
       border-bottom: 1px solid var(--border-color);
     }
     
-    .sidebar-title {
-      font-size: var(--font-size-lg);
-      font-weight: var(--font-semibold);
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      text-decoration: none;
       color: var(--text-primary);
+      font-weight: var(--font-semibold);
+      font-size: var(--font-size-lg);
+      transition: color var(--duration-fast) var(--ease-default);
+    }
+    
+    .sidebar-brand:hover {
+      color: var(--accent-primary);
+    }
+    
+    .brand-text {
+      font-family: var(--font-sans);
     }
     
     .close-sidebar {
@@ -579,6 +631,47 @@ const lang = getLangFromUrl(Astro.url);
       background: var(--bg-tertiary);
       border-color: var(--accent-color);
       box-shadow: var(--shadow-sm);
+    }
+    
+    /* Sidebar Navigation */
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      padding: 0 var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-medium);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-default);
+      width: 100%;
+      text-align: left;
+    }
+    
+    .nav-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    
+    .nav-item.active {
+      background: var(--accent-light);
+      color: var(--accent-color);
+    }
+    
+    .nav-item svg {
+      flex-shrink: 0;
     }
     
     .sidebar-search {
@@ -705,6 +798,9 @@ const lang = getLangFromUrl(Astro.url);
     .sidebar-footer {
       padding: var(--space-4);
       border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
     }
     
     .sidebar-action {
@@ -724,6 +820,12 @@ const lang = getLangFromUrl(Astro.url);
     
     .sidebar-action:hover {
       background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-color: var(--border-color);
+    }
+    
+    .sidebar-action.danger:hover {
+      background: var(--error-light);
       color: var(--error-color);
       border-color: var(--error-color);
     }
