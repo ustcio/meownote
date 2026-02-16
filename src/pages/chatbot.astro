@@ -161,67 +161,6 @@ const lang = getLangFromUrl(Astro.url);
           </svg>
         </button>
         
-        <!-- Model Selector - Three Models -->
-        <div class="model-selector" id="model-selector">
-          <button class="model-btn" id="model-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label={lang === 'zh' ? '选择模型' : 'Select model'}>
-            <div class="model-icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M12 16v-4"></path>
-                <path d="M12 8h.01"></path>
-              </svg>
-            </div>
-            <span class="model-name" id="model-name">Doubao 2.0 Pro</span>
-            <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <div class="model-dropdown" id="model-dropdown" role="listbox" aria-label={lang === 'zh' ? '模型列表' : 'Model list'}>
-            <div class="model-group">
-              <div class="model-group-label">Doubao</div>
-              <button class="model-option active" data-model="doubao-2.0-pro" data-name="Doubao 2.0 Pro" role="option" aria-selected="true" type="button">
-                <div class="model-option-content">
-                  <span class="model-option-name">Doubao 2.0 Pro</span>
-                  <span class="model-option-desc">{lang === 'zh' ? '最强推理能力，适合复杂任务' : 'Best reasoning for complex tasks'}</span>
-                </div>
-                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="model-option" data-model="doubao-2.0-code" data-name="Doubao 2.0 Code" role="option" aria-selected="false" type="button">
-                <div class="model-option-content">
-                  <span class="model-option-name">Doubao 2.0 Code</span>
-                  <span class="model-option-desc">{lang === 'zh' ? '代码生成与优化专家' : 'Code generation and optimization expert'}</span>
-                </div>
-                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-            </div>
-            <div class="model-group">
-              <div class="model-group-label">Qwen</div>
-              <button class="model-option" data-model="qwen-turbo" data-name="Qwen Turbo" role="option" aria-selected="false" type="button">
-                <div class="model-option-content">
-                  <span class="model-option-name">Qwen Turbo</span>
-                  <span class="model-option-desc">{lang === 'zh' ? '快速响应，适合简单问答' : 'Fast response for simple Q&A'}</span>
-                </div>
-                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="model-option" data-model="qwen-plus" data-name="Qwen Plus" role="option" aria-selected="false" type="button">
-                <div class="model-option-content">
-                  <span class="model-option-name">Qwen Plus</span>
-                  <span class="model-option-desc">{lang === 'zh' ? '均衡性能，适合通用场景' : 'Balanced performance for general use'}</span>
-                </div>
-                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-        
         <div class="header-actions">
           <button class="header-action" id="theme-toggle" title={lang === 'zh' ? '切换主题' : 'Toggle theme'} type="button" aria-label={lang === 'zh' ? '切换主题' : 'Toggle theme'}>
             <svg class="theme-icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -314,6 +253,53 @@ const lang = getLangFromUrl(Astro.url);
       <!-- Input Area - Claude Style -->
       <div class="input-area" id="input-area">
         <div class="input-container">
+          <!-- Model Selector - In Input Area -->
+          <div class="model-selector-inline" id="model-selector">
+            <button class="model-btn-inline" id="model-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label={lang === 'zh' ? '选择模型' : 'Select model'}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 16v-4"></path>
+                <path d="M12 8h.01"></path>
+              </svg>
+              <span class="model-name-inline" id="model-name">Doubao 2.0 Pro</span>
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="model-dropdown-inline" id="model-dropdown" role="listbox" aria-label={lang === 'zh' ? '模型列表' : 'Model list'}>
+              <div class="model-group">
+                <div class="model-group-label">Doubao</div>
+                <button class="model-option active" data-model="doubao-2.0-pro" data-name="Doubao 2.0 Pro" role="option" aria-selected="true" type="button">
+                  <span class="model-option-name">Doubao 2.0 Pro</span>
+                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </button>
+                <button class="model-option" data-model="doubao-2.0-code" data-name="Doubao 2.0 Code" role="option" aria-selected="false" type="button">
+                  <span class="model-option-name">Doubao 2.0 Code</span>
+                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div class="model-group">
+                <div class="model-group-label">Qwen</div>
+                <button class="model-option" data-model="qwen-turbo" data-name="Qwen Turbo" role="option" aria-selected="false" type="button">
+                  <span class="model-option-name">Qwen Turbo</span>
+                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </button>
+                <button class="model-option" data-model="qwen-plus" data-name="Qwen Plus" role="option" aria-selected="false" type="button">
+                  <span class="model-option-name">Qwen Plus</span>
+                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          
           <div class="input-wrapper">
             <textarea 
               id="chat-input" 
@@ -337,9 +323,9 @@ const lang = getLangFromUrl(Astro.url);
               </button>
             </div>
           </div>
-          <div class="input-hint" id="input-hint">
-            <span>{lang === 'zh' ? 'AI 生成内容可能不准确，请核实重要信息' : 'AI may produce inaccurate information, please verify important details'}</span>
-          </div>
+        </div>
+        <div class="input-hint" id="input-hint">
+          <span>{lang === 'zh' ? 'AI 生成内容可能不准确，请核实重要信息' : 'AI may produce inaccurate information, please verify important details'}</span>
         </div>
       </div>
     </main>
@@ -1291,6 +1277,127 @@ const lang = getLangFromUrl(Astro.url);
     .input-container {
       max-width: var(--input-max-width);
       margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+      gap: var(--space-3);
+    }
+    
+    /* Model Selector Inline - In Input Area */
+    .model-selector-inline {
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .model-btn-inline {
+      height: 44px;
+      padding: 0 var(--space-3);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-default);
+      color: var(--text-primary);
+    }
+    
+    .model-btn-inline:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-color);
+    }
+    
+    .model-btn-inline[aria-expanded="true"] {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-color);
+    }
+    
+    .model-name-inline {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-medium);
+      color: var(--text-primary);
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .model-dropdown-inline {
+      position: absolute;
+      bottom: calc(100% + var(--space-2));
+      left: 0;
+      width: 220px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: var(--space-2);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(8px);
+      transition: all var(--duration-fast) var(--ease-default);
+      z-index: var(--z-modal);
+    }
+    
+    .model-dropdown-inline.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .model-dropdown-inline .model-group {
+      margin-bottom: var(--space-2);
+    }
+    
+    .model-dropdown-inline .model-group:last-child {
+      margin-bottom: 0;
+    }
+    
+    .model-dropdown-inline .model-group-label {
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-semibold);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    
+    .model-dropdown-inline .model-option {
+      width: 100%;
+      padding: var(--space-2) var(--space-3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-default);
+      text-align: left;
+    }
+    
+    .model-dropdown-inline .model-option:hover {
+      background: var(--bg-tertiary);
+    }
+    
+    .model-dropdown-inline .model-option.active {
+      background: var(--accent-light);
+    }
+    
+    .model-dropdown-inline .model-option-name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-medium);
+      color: var(--text-primary);
+    }
+    
+    .model-dropdown-inline .check-icon {
+      color: var(--accent-color);
+      opacity: 0;
+      transition: opacity var(--duration-fast) var(--ease-default);
+    }
+    
+    .model-dropdown-inline .model-option.active .check-icon {
+      opacity: 1;
     }
     
     .input-wrapper {
