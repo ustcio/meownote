@@ -520,6 +520,23 @@ const lang = getLangFromUrl(Astro.url);
     }
     
     /* ================================================================================
+       Global Focus Styles - Accessibility
+       ================================================================================ */
+    :focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+    
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    [role="button"]:focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+    
+    /* ================================================================================
        Layout Structure - Clean & Minimal
        ================================================================================ */
     .chat-app {
@@ -615,7 +632,7 @@ const lang = getLangFromUrl(Astro.url);
     
     .new-chat-btn:hover {
       background: var(--bg-tertiary);
-      border-color: var(--accent-color);
+      border-color: var(--accent-primary);
       box-shadow: var(--shadow-sm);
     }
     
@@ -653,7 +670,7 @@ const lang = getLangFromUrl(Astro.url);
     
     .nav-item.active {
       background: var(--accent-light);
-      color: var(--accent-color);
+      color: var(--accent-primary);
     }
     
     .nav-item svg {
@@ -687,7 +704,7 @@ const lang = getLangFromUrl(Astro.url);
     
     .search-input:focus {
       outline: none;
-      border-color: var(--accent-color);
+      border-color: var(--accent-primary);
       box-shadow: 0 0 0 3px var(--accent-light);
     }
     
@@ -937,7 +954,7 @@ const lang = getLangFromUrl(Astro.url);
       justify-content: center;
       background: var(--accent-light);
       border-radius: var(--radius-sm);
-      color: var(--accent-color);
+      color: var(--accent-primary);
     }
     
     .model-name {
@@ -1035,7 +1052,7 @@ const lang = getLangFromUrl(Astro.url);
     }
     
     .check-icon {
-      color: var(--accent-color);
+      color: var(--accent-primary);
       opacity: 0;
       transition: opacity var(--duration-fast) var(--ease-default);
     }
@@ -1130,7 +1147,7 @@ const lang = getLangFromUrl(Astro.url);
     
     .quick-action:hover {
       background: var(--bg-tertiary);
-      border-color: var(--accent-color);
+      border-color: var(--accent-primary);
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
     }
@@ -1143,7 +1160,7 @@ const lang = getLangFromUrl(Astro.url);
       justify-content: center;
       background: var(--accent-light);
       border-radius: var(--radius-md);
-      color: var(--accent-color);
+      color: var(--accent-primary);
     }
     
     .quick-action span {
@@ -1197,6 +1214,45 @@ const lang = getLangFromUrl(Astro.url);
       line-height: var(--leading-relaxed);
       color: var(--text-primary);
       margin: 0;
+    }
+    
+    .message-time {
+      display: block;
+      font-size: var(--font-size-xs);
+      color: var(--text-tertiary);
+      margin-top: var(--space-2);
+    }
+    
+    .message-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: var(--space-2);
+      gap: var(--space-2);
+    }
+    
+    .copy-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--text-tertiary);
+      cursor: pointer;
+      opacity: 0;
+      transition: all var(--duration-fast) var(--ease-default);
+    }
+    
+    .message-content:hover .copy-btn {
+      opacity: 1;
+    }
+    
+    .copy-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
     }
     
     .assistant-message {
@@ -1312,12 +1368,12 @@ const lang = getLangFromUrl(Astro.url);
     
     .model-btn-inline:hover {
       background: var(--bg-tertiary);
-      border-color: var(--accent-color);
+      border-color: var(--accent-primary);
     }
     
     .model-btn-inline[aria-expanded="true"] {
       background: var(--bg-tertiary);
-      border-color: var(--accent-color);
+      border-color: var(--accent-primary);
     }
     
     .model-name-inline {
@@ -1399,7 +1455,7 @@ const lang = getLangFromUrl(Astro.url);
     }
     
     .model-dropdown-inline .check-icon {
-      color: var(--accent-color);
+      color: var(--accent-primary);
       opacity: 0;
       transition: opacity var(--duration-fast) var(--ease-default);
     }
@@ -1423,8 +1479,26 @@ const lang = getLangFromUrl(Astro.url);
     }
     
     .input-wrapper:focus-within {
-      border-color: var(--accent-color);
+      border-color: var(--accent-primary);
       box-shadow: 0 0 0 3px var(--accent-light), var(--shadow-md);
+    }
+    
+    .input-wrapper.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    
+    .input-wrapper.loading::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
     }
     
     .chat-input {
@@ -1463,7 +1537,7 @@ const lang = getLangFromUrl(Astro.url);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--accent-color);
+      background: var(--accent-primary);
       border: none;
       border-radius: var(--radius-md);
       color: white;
@@ -1719,6 +1793,40 @@ const lang = getLangFromUrl(Astro.url);
             modelBtn.setAttribute('aria-expanded', 'false');
           }
         });
+        
+        // Keyboard navigation for model dropdown
+        modelBtn.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            modelBtn.click();
+          } else if (e.key === 'Escape') {
+            modelDropdown.classList.remove('visible');
+            modelBtn.setAttribute('aria-expanded', 'false');
+          }
+        });
+        
+        // Arrow key navigation in dropdown
+        const modelOptions = modelDropdown.querySelectorAll('.model-option');
+        modelOptions.forEach((option, index) => {
+          option.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              const next = modelOptions[index + 1] || modelOptions[0];
+              (next as HTMLElement).focus();
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              const prev = modelOptions[index - 1] || modelOptions[modelOptions.length - 1];
+              (prev as HTMLElement).focus();
+            } else if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              (option as HTMLElement).click();
+            } else if (e.key === 'Escape') {
+              modelDropdown.classList.remove('visible');
+              modelBtn.setAttribute('aria-expanded', 'false');
+              modelBtn.focus();
+            }
+          });
+        });
       }
       
       // New chat
@@ -1738,6 +1846,18 @@ const lang = getLangFromUrl(Astro.url);
         chatInput.addEventListener('input', () => {
           console.log('[Chatbot] Input event triggered, value:', chatInput.value);
           sendBtn.disabled = chatInput.value.trim() === '';
+        });
+        
+        // Mobile keyboard handling
+        chatInput.addEventListener('focus', () => {
+          if (window.innerWidth <= 768) {
+            setTimeout(() => {
+              const inputArea = document.getElementById('input-area');
+              if (inputArea) {
+                inputArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
+              }
+            }, 300);
+          }
         });
         
         sendBtn.addEventListener('click', sendMessage);
@@ -1797,10 +1917,17 @@ const lang = getLangFromUrl(Astro.url);
       addMessage('user', content);
       chatInput.value = '';
       
-      // Disable send button
+      // Set streaming state
+      isStreaming = true;
+      
+      // Disable input and show loading state
       const sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
+      const inputWrapper = document.querySelector('.input-wrapper');
       if (sendBtn) {
         sendBtn.disabled = true;
+      }
+      if (inputWrapper) {
+        inputWrapper.classList.add('loading');
       }
       
       // Show typing indicator
@@ -1845,10 +1972,27 @@ const lang = getLangFromUrl(Astro.url);
           console.error('[Chatbot] API returned error:', data);
           showToast(data.message || 'Failed to get response', 'error');
         }
+        
+        // Reset streaming state
+        isStreaming = false;
+        const inputWrapper = document.querySelector('.input-wrapper');
+        if (inputWrapper) {
+          inputWrapper.classList.remove('loading');
+        }
       } catch (error) {
         console.error('[Chatbot] Fetch error:', error);
         removeTypingIndicator();
-        showToast(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+        
+        // Reset streaming state
+        isStreaming = false;
+        const inputWrapper = document.querySelector('.input-wrapper');
+        if (inputWrapper) {
+          inputWrapper.classList.remove('loading');
+        }
+        
+        // Show error with retry option
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        showToast(`${lang === 'zh' ? '网络错误' : 'Network error'}: ${errorMessage}`, 'error');
       }
     }
     
@@ -1857,6 +2001,12 @@ const lang = getLangFromUrl(Astro.url);
       const chatArea = document.getElementById('chat-area');
       if (!messagesContainer) return;
       
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString(lang === 'zh' ? 'zh-CN' : 'en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+      
       const messageDiv = document.createElement('div');
       messageDiv.className = `message ${role}-message`;
       
@@ -1864,6 +2014,7 @@ const lang = getLangFromUrl(Astro.url);
         messageDiv.innerHTML = `
           <div class="message-bubble">
             <p>${escapeHtml(content)}</p>
+            <span class="message-time">${timeStr}</span>
           </div>
         `;
       } else {
@@ -1877,11 +2028,33 @@ const lang = getLangFromUrl(Astro.url);
           </div>
           <div class="message-content">
             <p>${escapeHtml(content)}</p>
+            <div class="message-footer">
+              <span class="message-time">${timeStr}</span>
+              <button class="copy-btn" data-content="${escapeHtml(content)}" aria-label="${lang === 'zh' ? '复制消息' : 'Copy message'}" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
           </div>
         `;
       }
       
       messagesContainer.appendChild(messageDiv);
+      
+      // Add copy button event listener
+      const copyBtn = messageDiv.querySelector('.copy-btn');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          const text = copyBtn.getAttribute('data-content') || '';
+          navigator.clipboard.writeText(text).then(() => {
+            showToast(lang === 'zh' ? '已复制到剪贴板' : 'Copied to clipboard', 'success');
+          }).catch(() => {
+            showToast(lang === 'zh' ? '复制失败' : 'Copy failed', 'error');
+          });
+        });
+      }
       
       // Scroll to bottom - use chat-area as the scroll container
       if (chatArea) {
@@ -1892,7 +2065,7 @@ const lang = getLangFromUrl(Astro.url);
       }
       
       // Add to history
-      chatHistory.push({ role, content, timestamp: new Date() });
+      chatHistory.push({ role, content, timestamp: now });
       
       // Save conversation
       saveConversation();
