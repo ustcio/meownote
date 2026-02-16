@@ -1,15 +1,38 @@
 ---
-import Layout from '@layouts/Layout.astro';
+import '@styles/global.css';
 import { getLangFromUrl } from '@i18n';
 
 const lang = getLangFromUrl(Astro.url);
 ---
 
-<Layout 
-  title={lang === 'zh' ? 'AI 助手 - Meow Note' : 'AI Assistant - Meow Note'}
-  description={lang === 'zh' ? '智能 AI 对话助手，支持通义千问、豆包 2.0 Pro、豆包 2.0 Code 多模型' : 'Intelligent AI chat assistant with Qwen and Doubao models support'}
->
-  <div class="chat-app" data-lang={lang} role="application" aria-label={lang === 'zh' ? 'AI 对话助手' : 'AI Chat Assistant'}>
+<!DOCTYPE html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    
+    <title>{lang === 'zh' ? 'AI 助手 - Meow Note' : 'AI Assistant - Meow Note'}</title>
+    <meta name="title" content={lang === 'zh' ? 'AI 助手 - Meow Note' : 'AI Assistant - Meow Note'} />
+    <meta name="description" content={lang === 'zh' ? '智能 AI 对话助手，支持通义千问、豆包 2.0 Pro、豆包 2.0 Code 多模型' : 'Intelligent AI chat assistant with Qwen and Doubao models support'} />
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light dark" />
+    
+    <script is:inline>
+      (function() {
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="chat-app" data-lang={lang} role="application" aria-label={lang === 'zh' ? 'AI 对话助手' : 'AI Chat Assistant'}>
     
     <!-- Sidebar - Claude Style -->
     <aside class="sidebar" id="sidebar" role="navigation" aria-label={lang === 'zh' ? '对话历史' : 'Chat history'}>
@@ -1810,4 +1833,5 @@ const lang = getLangFromUrl(Astro.url);
     // Initialize on load
     init();
   </script>
-</Layout>
+</body>
+</html>
