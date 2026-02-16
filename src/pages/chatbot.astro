@@ -2102,6 +2102,8 @@ const lang = getLangFromUrl(Astro.url);
     }
     
     function startNewChat() {
+      // Clear session to start a new conversation
+      sessionStorage.removeItem('chatbot_session_id');
       currentConversationId = null;
       chatHistory = [];
       
@@ -2128,24 +2130,58 @@ const lang = getLangFromUrl(Astro.url);
           conversations = [];
         }
       }
+      
+      // Check if there's a session conversation ID stored
+      const sessionId = sessionStorage.getItem('chatbot_session_id');
+      if (sessionId) {
+        currentConversationId = sessionId;
+        // Load the conversation if it exists
+        const conv = conversations.find(c => c.id === sessionId);
+        if (conv) {
+          chatHistory = [...conv.messages];
+        }
+      }
     }
     
     function saveConversation() {
-      if (!currentConversationId) {
-        currentConversationId = Date.now().toString();
+      // Use session storage to track the current session conversation
+      let sessionId = sessionStorage.getItem('chatbot_session_id');
+      
+      if (!sessionId) {
+        // Create a new session conversation for this page visit
+        sessionId = 'session_' + Date.now().toString();
+        sessionStorage.setItem('chatbot_session_id', sessionId);
+        currentConversationId = sessionId;
+        
         conversations.unshift({
           id: currentConversationId,
-          title: chatHistory[0]?.content.slice(0, 50) || 'New Chat',
+          title: chatHistory[0]?.content.slice(0, 50) || (lang === 'zh' ? '新对话' : 'New Chat'),
           messages: [...chatHistory],
           model: currentModel,
           createdAt: new Date(),
           updatedAt: new Date()
         });
       } else {
-        const conv = conversations.find(c => c.id === currentConversationId);
+        // Update existing session conversation
+        currentConversationId = sessionId;
+        const conv = conversations.find(c => c.id === sessionId);
         if (conv) {
           conv.messages = [...chatHistory];
           conv.updatedAt = new Date();
+          // Update title if first message changed
+          if (chatHistory.length > 0) {
+            conv.title = chatHistory[0].content.slice(0, 50);
+          }
+        } else {
+          // Conversation doesn't exist (was deleted), create new one
+          conversations.unshift({
+            id: sessionId,
+            title: chatHistory[0]?.content.slice(0, 50) || (lang === 'zh' ? '新对话' : 'New Chat'),
+            messages: [...chatHistory],
+            model: currentModel,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
         }
       }
       
