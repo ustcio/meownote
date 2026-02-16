@@ -2139,6 +2139,75 @@ const lang = getLangFromUrl(Astro.url);
         const conv = conversations.find(c => c.id === sessionId);
         if (conv) {
           chatHistory = [...conv.messages];
+          
+          // Render messages to the UI
+          const messagesContainer = document.getElementById('messages-container');
+          const welcomeScreen = document.getElementById('welcome-screen');
+          
+          if (messagesContainer && chatHistory.length > 0) {
+            // Hide welcome screen
+            if (welcomeScreen) {
+              welcomeScreen.classList.add('hidden');
+            }
+            
+            // Render all messages
+            chatHistory.forEach(msg => {
+              const now = msg.timestamp ? new Date(msg.timestamp) : new Date();
+              const timeStr = now.toLocaleTimeString(lang === 'zh' ? 'zh-CN' : 'en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              });
+              
+              const messageDiv = document.createElement('div');
+              messageDiv.className = `message ${msg.role}-message`;
+              
+              if (msg.role === 'user') {
+                messageDiv.innerHTML = `
+                  <div class="message-bubble">
+                    <p>${escapeHtml(msg.content)}</p>
+                    <span class="message-time">${timeStr}</span>
+                  </div>
+                `;
+              } else {
+                messageDiv.innerHTML = `
+                  <div class="assistant-avatar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M12 16v-4"></path>
+                      <path d="M12 8h.01"></path>
+                    </svg>
+                  </div>
+                  <div class="message-content">
+                    <p>${escapeHtml(msg.content)}</p>
+                    <div class="message-footer">
+                      <span class="message-time">${timeStr}</span>
+                      <button class="copy-btn" data-content="${escapeHtml(msg.content)}" aria-label="${lang === 'zh' ? '复制消息' : 'Copy message'}" type="button">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }
+              
+              messagesContainer.appendChild(messageDiv);
+              
+              // Add copy button event listener
+              const copyBtn = messageDiv.querySelector('.copy-btn');
+              if (copyBtn) {
+                copyBtn.addEventListener('click', () => {
+                  const text = copyBtn.getAttribute('data-content') || '';
+                  navigator.clipboard.writeText(text).then(() => {
+                    showToast(lang === 'zh' ? '已复制到剪贴板' : 'Copied to clipboard', 'success');
+                  }).catch(() => {
+                    showToast(lang === 'zh' ? '复制失败' : 'Copy failed', 'error');
+                  });
+                });
+              }
+            });
+          }
         }
       }
     }
