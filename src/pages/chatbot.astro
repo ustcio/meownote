@@ -1518,9 +1518,21 @@ const lang = getLangFromUrl(Astro.url);
         return;
       }
       
+      // Hide welcome screen when sending first message
+      const welcomeScreen = document.getElementById('welcome-screen');
+      if (welcomeScreen) {
+        welcomeScreen.classList.add('hidden');
+      }
+      
       // Add user message
       addMessage('user', content);
       chatInput.value = '';
+      
+      // Disable send button
+      const sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
+      if (sendBtn) {
+        sendBtn.disabled = true;
+      }
       
       // Show typing indicator
       showTypingIndicator();
