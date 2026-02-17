@@ -53,6 +53,20 @@ export default {
       console.error('Server Error:', error);
       return jsonResponse({ error: 'Internal Server Error', message: error.message }, 500);
     }
+  },
+  
+  // Cron Trigger - 每60秒执行一次金价爬取
+  async scheduled(event, env, ctx) {
+    console.log('[Cron] Triggered at:', new Date().toISOString());
+    
+    switch (event.cron) {
+      case '*/1 * * * *': // 每分钟执行
+        console.log('[Cron] Starting gold price crawl...');
+        ctx.waitUntil(scheduledGoldCrawlWithRetry(event, env, ctx));
+        break;
+      default:
+        console.log('[Cron] Unknown cron pattern:', event.cron);
+    }
   }
 };
 
@@ -66,6 +80,7 @@ const ROUTES = {
   '/api/login': { handler: handleLogin },
   '/api/visitor': { handler: handleVisitor },
   '/api/gold': { handler: handleGoldPrice },
+  '/api/gold/stream': { handler: handleGoldPriceStream },
   '/api/gold/history': { handler: handleGoldHistory },
   '/api/user/profile': { handler: handleUserProfile },
   '/api/user/password': { handler: handleUserPassword },
@@ -1117,15 +1132,61 @@ async function performCrawl(env) {
   }
 }
 
-// HTTP 处理函数
+// HTTP 处理函数 - 优先从 KV 读取缓存数据
 async function handleGoldPrice(request, env, ctx) {
   try {
-    // 每次都执行实时爬取，不使用缓存
+    const url = new URL(request.url);
+    const forceRefresh = url.searchParams.get('refresh') === 'true';
+    
+    // 1. 尝试从 KV 获取缓存数据（除非强制刷新）
+    if (!forceRefresh && env?.GOLD_PRICE_CACHE) {
+      try {
+        const cached = await env.GOLD_PRICE_CACHE.get('latest');
+        if (cached) {
+          const data = JSON.parse(cached);
+          const cacheAge = Date.now() - (data.cachedAt || 0);
+          
+          // 缓存小于2分钟，直接返回
+          if (cacheAge < 120000) {
+            console.log('[Gold Price] Returning cached data, age:', cacheAge, 'ms');
+            return jsonResponse({
+              ...data,
+              fromCache: true,
+              cacheAge: cacheAge
+            });
+          }
+        }
+      } catch (e) {
+        console.log('[Gold Price] Cache read failed:', e.message);
+      }
+    }
+    
+    // 2. 执行实时爬取
     console.log('[Gold Price] Fetching real-time data...');
     const data = await performCrawl(env);
     
     if (!data.success) {
       console.error('[Gold Price] Failed to fetch:', data.error);
+      
+      // 尝试返回缓存数据（即使过期）
+      if (env?.GOLD_PRICE_CACHE) {
+        try {
+          const cached = await env.GOLD_PRICE_CACHE.get('latest');
+          if (cached) {
+            const cachedData = JSON.parse(cached);
+            console.log('[Gold Price] Returning stale cache');
+            return jsonResponse({
+              ...cachedData,
+              fromCache: true,
+              stale: true,
+              error: data.error
+            });
+          }
+        } catch (e) {
+          // 忽略缓存错误
+        }
+      }
+      
       return jsonResponse({
         success: false,
         error: data.error || 'Failed to fetch gold price',
@@ -1134,10 +1195,37 @@ async function handleGoldPrice(request, env, ctx) {
       }, 503);
     }
     
-    return jsonResponse(data);
+    // 3. 存储到 KV
+    if (env?.GOLD_PRICE_CACHE) {
+      await storeGoldPriceData(env, data);
+    }
+    
+    return jsonResponse({
+      ...data,
+      fromCache: false
+    });
     
   } catch (error) {
     console.error('Gold price error:', error);
+    
+    // 尝试返回缓存数据
+    if (env?.GOLD_PRICE_CACHE) {
+      try {
+        const cached = await env.GOLD_PRICE_CACHE.get('latest');
+        if (cached) {
+          const cachedData = JSON.parse(cached);
+          return jsonResponse({
+            ...cachedData,
+            fromCache: true,
+            stale: true,
+            error: error.message
+          });
+        }
+      } catch (e) {
+        // 忽略缓存错误
+      }
+    }
+    
     return jsonResponse({
       success: false,
       error: error.message,
@@ -1147,10 +1235,250 @@ async function handleGoldPrice(request, env, ctx) {
   }
 }
 
-// 定时爬取入口（用于 Cron Trigger）
+// SSE 实时推送端点
+async function handleGoldPriceStream(request, env, ctx) {
+  const url = new URL(request.url);
+  const clientId = crypto.randomUUID();
+  
+  console.log(`[SSE] Client connected: ${clientId}`);
+  
+  const stream = new ReadableStream({
+    start(controller) {
+      // 发送初始数据
+      const sendData = async () => {
+        try {
+          let data = null;
+          
+          // 尝试从 KV 获取最新数据
+          if (env?.GOLD_PRICE_CACHE) {
+            const cached = await env.GOLD_PRICE_CACHE.get('latest');
+            if (cached) {
+              data = JSON.parse(cached);
+            }
+          }
+          
+          // 如果没有缓存，执行爬取
+          if (!data) {
+            data = await performCrawl(env);
+          }
+          
+          const message = `data: ${JSON.stringify({
+            type: 'price_update',
+            clientId: clientId,
+            timestamp: Date.now(),
+            data: data
+          })}\n\n`;
+          
+          controller.enqueue(new TextEncoder().encode(message));
+        } catch (error) {
+          const errorMessage = `data: ${JSON.stringify({
+            type: 'error',
+            clientId: clientId,
+            timestamp: Date.now(),
+            error: error.message
+          })}\n\n`;
+          controller.enqueue(new TextEncoder().encode(errorMessage));
+        }
+      };
+      
+      // 立即发送一次数据
+      sendData();
+      
+      // 每30秒推送一次
+      const intervalId = setInterval(sendData, 30000);
+      
+      // 清理函数
+      ctx.waitUntil(new Promise((resolve) => {
+        // 当客户端断开时清理
+        request.signal.addEventListener('abort', () => {
+          clearInterval(intervalId);
+          console.log(`[SSE] Client disconnected: ${clientId}`);
+          resolve();
+        });
+      }));
+    },
+    
+    cancel() {
+      console.log(`[SSE] Stream cancelled for client: ${clientId}`);
+    }
+  });
+  
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*'
+    }
+  });
+}
+
+// 定时爬取入口（用于 Cron Trigger）- 带重试机制
+async function scheduledGoldCrawlWithRetry(event, env, ctx) {
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 5000; // 5秒
+  
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    console.log(`[Scheduled] Attempt ${attempt}/${MAX_RETRIES} at`, new Date().toISOString());
+    
+    try {
+      const result = await performCrawl(env);
+      
+      if (result.success) {
+        console.log('[Scheduled] Crawl successful');
+        
+        // 存储到 KV 并记录成功
+        await storeGoldPriceData(env, result);
+        await logCrawlStatus(env, 'success', result);
+        
+        return result;
+      } else {
+        console.error('[Scheduled] Crawl failed:', result.error);
+        
+        if (attempt < MAX_RETRIES) {
+          console.log(`[Scheduled] Retrying in ${RETRY_DELAY}ms...`);
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        } else {
+          // 最后一次尝试失败，记录错误
+          await logCrawlStatus(env, 'failed', result);
+          throw new Error(result.error || 'Crawl failed after max retries');
+        }
+      }
+    } catch (error) {
+      console.error(`[Scheduled] Attempt ${attempt} error:`, error.message);
+      
+      if (attempt < MAX_RETRIES) {
+        console.log(`[Scheduled] Retrying in ${RETRY_DELAY}ms...`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+      } else {
+        console.error('[Scheduled] All retries exhausted');
+        await logCrawlStatus(env, 'error', { error: error.message });
+        throw error;
+      }
+    }
+  }
+}
+
+// 存储金价数据到 KV
+async function storeGoldPriceData(env, data) {
+  if (!env?.GOLD_PRICE_CACHE) {
+    console.warn('[Store] GOLD_PRICE_CACHE not configured');
+    return;
+  }
+  
+  try {
+    const timestamp = Date.now();
+    const dateKey = new Date().toISOString().split('T')[0];
+    
+    // 1. 存储最新数据（5分钟过期）
+    await env.GOLD_PRICE_CACHE.put('latest', JSON.stringify({
+      ...data,
+      cachedAt: timestamp
+    }), { expirationTtl: 300 });
+    
+    // 2. 存储到历史数据列表
+    const historyKey = `history:${dateKey}`;
+    let history = [];
+    try {
+      const existing = await env.GOLD_PRICE_CACHE.get(historyKey);
+      if (existing) {
+        history = JSON.parse(existing);
+      }
+    } catch (e) {
+      console.log('[Store] No existing history');
+    }
+    
+    history.push({
+      timestamp: timestamp,
+      domestic: data.domestic?.price || 0,
+      international: data.international?.price || 0,
+      domesticChange: data.domestic?.changePercent || 0,
+      internationalChange: data.international?.changePercent || 0
+    });
+    
+    // 限制历史数据数量（最多保存1440条，即24小时）
+    if (history.length > 1440) {
+      history = history.slice(-1440);
+    }
+    
+    await env.GOLD_PRICE_CACHE.put(historyKey, JSON.stringify(history), {
+      expirationTtl: 86400 // 24小时过期
+    });
+    
+    // 3. 存储统计数据
+    const statsKey = `stats:${dateKey}`;
+    const stats = {
+      lastUpdate: timestamp,
+      updateCount: history.length,
+      domesticHigh: Math.max(...history.map(h => h.domestic)),
+      domesticLow: Math.min(...history.map(h => h.domestic)),
+      internationalHigh: Math.max(...history.map(h => h.international)),
+      internationalLow: Math.min(...history.map(h => h.international))
+    };
+    
+    await env.GOLD_PRICE_CACHE.put(statsKey, JSON.stringify(stats), {
+      expirationTtl: 86400
+    });
+    
+    console.log('[Store] Data stored successfully');
+    
+  } catch (error) {
+    console.error('[Store] Failed to store data:', error);
+  }
+}
+
+// 记录爬取状态日志
+async function logCrawlStatus(env, status, data) {
+  const timestamp = Date.now();
+  const logEntry = {
+    timestamp: timestamp,
+    status: status,
+    data: status === 'success' ? {
+      domesticPrice: data.domestic?.price,
+      internationalPrice: data.international?.price,
+      domesticSource: data.domestic?.source,
+      internationalSource: data.international?.source
+    } : data
+  };
+  
+  console.log(`[Log] Crawl status: ${status}`, JSON.stringify(logEntry));
+  
+  // 如果配置了 KV，存储日志
+  if (env?.GOLD_PRICE_CACHE) {
+    try {
+      const dateKey = new Date().toISOString().split('T')[0];
+      const logKey = `logs:${dateKey}`;
+      
+      let logs = [];
+      try {
+        const existing = await env.GOLD_PRICE_CACHE.get(logKey);
+        if (existing) {
+          logs = JSON.parse(existing);
+        }
+      } catch (e) {
+        // 没有现有日志
+      }
+      
+      logs.push(logEntry);
+      
+      // 限制日志数量
+      if (logs.length > 1000) {
+        logs = logs.slice(-1000);
+      }
+      
+      await env.GOLD_PRICE_CACHE.put(logKey, JSON.stringify(logs), {
+        expirationTtl: 86400
+      });
+    } catch (e) {
+      console.error('[Log] Failed to store log:', e);
+    }
+  }
+}
+
+// 导出定时爬取函数（兼容旧版本）
 export async function scheduledGoldCrawl(event, env, ctx) {
   console.log('[Scheduled] Gold price crawl triggered at', new Date().toISOString());
-  ctx.waitUntil(performCrawl(env));
+  ctx.waitUntil(scheduledGoldCrawlWithRetry(event, env, ctx));
 }
 
 async function handleGoldHistory(request, env, ctx) {
