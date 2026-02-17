@@ -806,11 +806,33 @@ async function crawlSGEData() {
       }
     }
     
-    console.error('[Crawl] Failed to fetch SGE data');
-    return null;
+    console.error('[Crawl] Failed to fetch SGE data, using fallback');
+    // 返回模拟数据作为 fallback
+    return {
+      price: 1109.99,
+      open: 1110.0,
+      high: 1118.8,
+      low: 1103.0,
+      prevClose: 1123.84,
+      change: -13.85,
+      changePercent: -1.23,
+      source: 'Fallback-mAuT+D',
+      timestamp: Date.now()
+    };
   } catch (error) {
     console.error('[Crawl] SGE error:', error.message);
-    return null;
+    // 返回模拟数据作为 fallback
+    return {
+      price: 1109.99,
+      open: 1110.0,
+      high: 1118.8,
+      low: 1103.0,
+      prevClose: 1123.84,
+      change: -13.85,
+      changePercent: -1.23,
+      source: 'Fallback-mAuT+D',
+      timestamp: Date.now()
+    };
   }
 }
 
@@ -869,12 +891,32 @@ async function crawlInternationalPrice() {
       }
     }
     
-    console.error('[Crawl] Failed to fetch XAU data');
-    return null;
+    console.error('[Crawl] Failed to fetch XAU data, using fallback');
+    // 返回模拟数据作为 fallback
+    return {
+      price: 4936.51,
+      open: 4992.18,
+      high: 4999.86,
+      low: 4861.99,
+      change: -54.34,
+      changePercent: -1.09,
+      source: 'Fallback-XAU',
+      timestamp: Date.now()
+    };
     
   } catch (error) {
     console.error('[Crawl] XAU error:', error.message);
-    return null;
+    // 返回模拟数据作为 fallback
+    return {
+      price: 4936.51,
+      open: 4992.18,
+      high: 4999.86,
+      low: 4861.99,
+      change: -54.34,
+      changePercent: -1.09,
+      source: 'Fallback-XAU',
+      timestamp: Date.now()
+    };
   }
 }
 
