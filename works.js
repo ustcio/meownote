@@ -57,7 +57,8 @@ export default {
   
   // Cron Trigger - 每60秒执行一次金价爬取
   async scheduled(event, env, ctx) {
-    console.log('[Cron] Triggered at:', new Date().toISOString());
+    const now = Date.now();
+    console.log('[Cron] Triggered at:', now);
     
     switch (event.cron) {
       case '*/1 * * * *': // 每分钟执行
@@ -1517,12 +1518,6 @@ async function logCrawlStatus(env, status, data) {
       console.error('[Log] Failed to store log:', e.message);
     }
   }
-}
-
-// 导出定时爬取函数（兼容旧版本）
-export async function scheduledGoldCrawl(event, env, ctx) {
-  console.log('[Scheduled] Gold price crawl triggered at', new Date().toISOString());
-  ctx.waitUntil(scheduledGoldCrawlWithRetry(event, env, ctx));
 }
 
 async function handleGoldHistory(request, env, ctx) {
