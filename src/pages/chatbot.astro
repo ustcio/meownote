@@ -1341,7 +1341,7 @@ const t = useTranslations(lang);
       max-width: var(--input-max-width);
       margin: 0 auto;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       gap: var(--space-3);
     }
     
@@ -1467,7 +1467,7 @@ const t = useTranslations(lang);
     .input-wrapper {
       flex: 1;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       gap: var(--space-3);
       background: var(--bg-primary);
       border: 1px solid var(--border-color);
@@ -1533,7 +1533,6 @@ const t = useTranslations(lang);
       gap: var(--space-2);
       align-items: center;
       flex-shrink: 0;
-      margin-bottom: var(--space-1);
     }
 
     .send-btn,
@@ -1696,6 +1695,7 @@ const t = useTranslations(lang);
       .input-container {
         flex-wrap: nowrap;
         gap: var(--space-2);
+        align-items: center;
       }
 
       .model-selector-inline {
@@ -1717,6 +1717,7 @@ const t = useTranslations(lang);
       .input-wrapper {
         min-height: 48px;
         padding: var(--space-2) var(--space-3);
+        align-items: center;
       }
 
       .chat-input {
@@ -1972,13 +1973,14 @@ const t = useTranslations(lang);
           chatInput.style.height = newHeight + 'px';
         });
         
-        // Mobile keyboard handling
+        // Mobile keyboard handling - ensure input stays visible
         chatInput.addEventListener('focus', () => {
           if (window.innerWidth <= 768) {
+            // Wait for layout to adjust
             setTimeout(() => {
               const inputArea = document.getElementById('input-area');
               if (inputArea) {
-                inputArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                inputArea.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
               }
             }, 300);
           }
