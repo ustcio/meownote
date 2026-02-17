@@ -723,168 +723,349 @@ async function handleHeatmap(request, env, ctx) {
 }
 
 // ================================================================================
-// 黄金价格 API
+// 黄金价格 API - 增强版（带定时爬取和缓存）
 // ================================================================================
 
-async function handleGoldPrice(request, env, ctx) {
+// 金价数据缓存
+let goldPriceCache = {
+  data: null,
+  timestamp: 0,
+  isCrawling: false
+};
+
+// 爬取上海黄金交易所数据
+async function crawlSGEData() {
   try {
-    let domesticPrice = null;
-    let internationalPrice = null;
-    let domesticChange = 0;
-    let internationalChange = 0;
-    let domesticHigh = 0;
-    let domesticLow = 0;
-    let domesticOpen = 0;
-    let internationalHigh = 0;
-    let internationalLow = 0;
-    let internationalOpen = 0;
+    // 尝试多个 SGE 数据源
+    const sgeApis = [
+      'https://www.sge.com.cn/graph/DelayMakretData',
+      'https://www.sge.com.cn/sgepub/sgepublication/marketdata/delaymarketdata'
+    ];
     
-    // 获取国际金价 (美元/盎司)
-    try {
-      const goldPriceRes = await fetch('https://api.goldprice.org/goldprice/api/v1/gold/spot', {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-      });
-      
-      if (goldPriceRes.ok) {
-        const goldData = await goldPriceRes.json();
-        if (goldData && goldData.price) {
-          internationalPrice = parseFloat(goldData.price);
-          internationalChange = parseFloat(goldData.changePercent || 0);
-          internationalHigh = parseFloat(goldData.high || internationalPrice * 1.005);
-          internationalLow = parseFloat(goldData.low || internationalPrice * 0.995);
-          internationalOpen = parseFloat(goldData.open || internationalPrice);
-        }
-      }
-    } catch (e) {
-      console.error('International gold API error:', e);
-    }
-    
-    // 备用：使用 metals.dev 免费API获取国际金价
-    if (!internationalPrice) {
+    for (const api of sgeApis) {
       try {
-        const metalsRes = await fetch('https://api.metals.dev/v1/latest?api_key=FREEAPI&currency=USD&unit=toz', {
+        const response = await fetch(api, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'Referer': 'https://www.sge.com.cn/',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          cf: { cacheTtl: 0 }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          // 查找 Au99.99 数据
+          const au9999 = data.find(item => 
+            item.name?.includes('Au99.99') || 
+            item.code === 'Au99.99' ||
+            item.symbol === 'Au99.99'
+          );
+          
+          if (au9999) {
+            return {
+              price: parseFloat(au9999.lastPrice || au9999.price || au9999.close),
+              open: parseFloat(au9999.openPrice || au9999.open),
+              high: parseFloat(au9999.highPrice || au9999.high),
+              low: parseFloat(au9999.lowPrice || au9999.low),
+              prevClose: parseFloat(au9999.prevClose || au9999.prevSettlement),
+              change: parseFloat(au9999.change || 0),
+              changePercent: parseFloat(au9999.changePercent || au9999.changeRate || 0),
+              volume: parseFloat(au9999.volume || 0),
+              source: 'SGE',
+              timestamp: Date.now()
+            };
+          }
+        }
+      } catch (e) {
+        console.error(`SGE API ${api} error:`, e.message);
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('Crawl SGE error:', error);
+    return null;
+  }
+}
+
+// 爬取国际金价
+async function crawlInternationalPrice() {
+  try {
+    // 尝试多个国际金价 API
+    const apis = [
+      // CoinGecko
+      async () => {
+        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether-gold&vs_currencies=usd&include_24hr_change=true');
+        if (res.ok) {
+          const data = await res.json();
+          const xaut = data['tether-gold'];
+          if (xaut?.usd) {
+            const change = xaut.usd_24h_change || 0;
+            const open = xaut.usd / (1 + change / 100);
+            return {
+              price: xaut.usd,
+              open: open,
+              high: Math.max(xaut.usd, open) * 1.005,
+              low: Math.min(xaut.usd, open) * 0.995,
+              change: change,
+              changePercent: change,
+              source: 'CoinGecko'
+            };
+          }
+        }
+        return null;
+      },
+      // GoldPrice.org
+      async () => {
+        const res = await fetch('https://api.goldprice.org/goldprice/api/v1/gold/spot', {
           headers: { 'User-Agent': 'Mozilla/5.0' }
         });
-        
-        if (metalsRes.ok) {
-          const metalsData = await metalsRes.json();
-          if (metalsData && metalsData.rates && metalsData.rates.XAU) {
-            // metals.dev 返回的是 1盎司黄金 = X美元
-            internationalPrice = metalsData.rates.XAU;
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.price) {
+            return {
+              price: parseFloat(data.price),
+              open: parseFloat(data.open || data.price),
+              high: parseFloat(data.high || data.price * 1.005),
+              low: parseFloat(data.low || data.price * 0.995),
+              change: parseFloat(data.changePercent || 0),
+              changePercent: parseFloat(data.changePercent || 0),
+              source: 'GoldPrice.org'
+            };
           }
         }
-      } catch (e) {
-        console.error('Metals API error:', e);
-      }
-    }
-    
-    // 备用：使用新浪财经获取国内金价
-    if (!domesticPrice) {
-      try {
-        const sinaRes = await fetch('https://hq.sinajs.cn/list=hf_GC', {
-          headers: {
-            'Referer': 'https://finance.sina.com.cn',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-          }
+        return null;
+      },
+      // Metals.dev
+      async () => {
+        const res = await fetch('https://api.metals.dev/v1/latest?api_key=FREEAPI&currency=USD&unit=toz', {
+          headers: { 'User-Agent': 'Mozilla/5.0' }
         });
-        
-        if (sinaRes.ok) {
-          const text = await sinaRes.text();
-          // 格式: var hq_str_hf_GC="名称,开盘价,最高价,最低价,当前价,..."
-          const match = text.match(/hq_str_hf_GC="(.+?)"/);
-          if (match && match[1]) {
-            const parts = match[1].split(',');
-            if (parts.length >= 5) {
-              // 新浪返回的是美元/盎司，需要转换为人民币/克
-              const usdPrice = parseFloat(parts[4]) || parseFloat(parts[1]);
-              // 获取美元兑人民币汇率
-              const rateRes = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-              let cnyRate = 7.25; // 默认汇率
-              if (rateRes.ok) {
-                const rateData = await rateRes.json();
-                cnyRate = rateData.rates?.CNY || 7.25;
-              }
-              // 转换：美元/盎司 -> 人民币/克
-              // 1盎司 = 31.1035克
-              domesticPrice = (usdPrice * cnyRate) / 31.1035;
-              domesticHigh = (parseFloat(parts[2]) * cnyRate) / 31.1035;
-              domesticLow = (parseFloat(parts[3]) * cnyRate) / 31.1035;
-              domesticOpen = (parseFloat(parts[1]) * cnyRate) / 31.1035;
-              
-              if (!internationalPrice) {
-                internationalPrice = usdPrice;
-                internationalHigh = parseFloat(parts[2]) || usdPrice;
-                internationalLow = parseFloat(parts[3]) || usdPrice;
-                internationalOpen = parseFloat(parts[1]) || usdPrice;
-              }
-            }
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.rates?.XAU) {
+            return {
+              price: data.rates.XAU,
+              open: data.rates.XAU * 0.998,
+              high: data.rates.XAU * 1.005,
+              low: data.rates.XAU * 0.995,
+              change: 0,
+              changePercent: 0,
+              source: 'Metals.dev'
+            };
           }
         }
+        return null;
+      }
+    ];
+    
+    for (const apiFn of apis) {
+      try {
+        const result = await apiFn();
+        if (result) return result;
       } catch (e) {
-        console.error('Sina API error:', e);
+        console.error('International API error:', e.message);
       }
     }
+    return null;
+  } catch (error) {
+    console.error('Crawl international error:', error);
+    return null;
+  }
+}
+
+// 获取 USD/CNY 汇率
+async function getExchangeRate() {
+  try {
+    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD', {
+      cf: { cacheTtl: 3600 } // 缓存1小时
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.rates?.CNY || 7.25;
+    }
+  } catch (e) {
+    console.error('Exchange rate error:', e);
+  }
+  return 7.25;
+}
+
+// 执行爬取任务
+async function performCrawl(env) {
+  if (goldPriceCache.isCrawling) {
+    console.log('[Gold Crawler] Already crawling, skipping...');
+    return goldPriceCache.data;
+  }
+  
+  goldPriceCache.isCrawling = true;
+  console.log('[Gold Crawler] Starting crawl at', new Date().toISOString());
+  
+  try {
+    // 并行爬取数据
+    const [sgeData, intlData, exchangeRate] = await Promise.all([
+      crawlSGEData(),
+      crawlInternationalPrice(),
+      getExchangeRate()
+    ]);
     
-    // 如果获取到了真实数据
-    if (domesticPrice && internationalPrice) {
-      const baseDomestic = domesticOpen || domesticPrice;
-      domesticChange = ((domesticPrice - baseDomestic) / baseDomestic) * 100;
+    const OZ_TO_G = 31.1035;
+    
+    // 构建结果
+    let domestic, international;
+    
+    if (sgeData) {
+      // 使用真实的 SGE 数据
+      domestic = {
+        price: sgeData.price,
+        open: sgeData.open,
+        high: sgeData.high,
+        low: sgeData.low,
+        change: sgeData.changePercent,
+        changePercent: sgeData.changePercent,
+        volume: sgeData.volume,
+        source: 'SGE'
+      };
+    } else if (intlData) {
+      // 从国际金价计算国内金价
+      const cnyPrice = (intlData.price * exchangeRate) / OZ_TO_G;
+      domestic = {
+        price: cnyPrice,
+        open: (intlData.open * exchangeRate) / OZ_TO_G,
+        high: (intlData.high * exchangeRate) / OZ_TO_G,
+        low: (intlData.low * exchangeRate) / OZ_TO_G,
+        change: intlData.changePercent,
+        changePercent: intlData.changePercent,
+        source: 'Calculated'
+      };
+    }
+    
+    if (intlData) {
+      international = {
+        price: intlData.price,
+        open: intlData.open,
+        high: intlData.high,
+        low: intlData.low,
+        change: intlData.change,
+        changePercent: intlData.changePercent,
+        source: intlData.source
+      };
+    }
+    
+    // 如果都没有获取到，使用缓存或默认值
+    if (!domestic || !international) {
+      if (goldPriceCache.data) {
+        console.log('[Gold Crawler] Using cached data');
+        goldPriceCache.isCrawling = false;
+        return goldPriceCache.data;
+      }
       
-      const baseInternational = internationalOpen || internationalPrice;
-      internationalChange = ((internationalPrice - baseInternational) / baseInternational) * 100;
+      // 使用默认值
+      domestic = {
+        price: 580.00,
+        open: 579.00,
+        high: 582.00,
+        low: 578.00,
+        change: 0.17,
+        changePercent: 0.17,
+        source: 'Default'
+      };
+      international = {
+        price: 2650.00,
+        open: 2645.00,
+        high: 2660.00,
+        low: 2640.00,
+        change: 5.00,
+        changePercent: 0.19,
+        source: 'Default'
+      };
+    }
+    
+    const result = {
+      success: true,
+      timestamp: Date.now(),
+      exchangeRate: exchangeRate,
+      domestic: domestic,
+      international: international
+    };
+    
+    // 更新缓存
+    goldPriceCache.data = result;
+    goldPriceCache.timestamp = Date.now();
+    
+    // 存储到 KV（如果有）
+    if (env?.GOLD_PRICE_CACHE) {
+      await env.GOLD_PRICE_CACHE.put('latest', JSON.stringify(result), {
+        expirationTtl: 300 // 5分钟过期
+      });
       
-      return jsonResponse({
-        success: true,
-        domestic: {
-          price: Math.round(domesticPrice * 100) / 100,
-          change: Math.round(domesticChange * 100) / 100,
-          high: Math.round((domesticHigh || domesticPrice * 1.005) * 100) / 100,
-          low: Math.round((domesticLow || domesticPrice * 0.995) * 100) / 100,
-          open: Math.round((domesticOpen || domesticPrice) * 100) / 100
-        },
-        international: {
-          price: Math.round(internationalPrice * 100) / 100,
-          change: Math.round(internationalChange * 100) / 100,
-          high: Math.round((internationalHigh || internationalPrice * 1.005) * 100) / 100,
-          low: Math.round((internationalLow || internationalPrice * 0.995) * 100) / 100,
-          open: Math.round((internationalOpen || internationalPrice) * 100) / 100
-        }
+      // 存储历史数据
+      const historyKey = `history:${new Date().toISOString().split('T')[0]}`;
+      let history = await env.GOLD_PRICE_CACHE.get(historyKey);
+      history = history ? JSON.parse(history) : [];
+      history.push({
+        timestamp: Date.now(),
+        domestic: domestic.price,
+        international: international.price
+      });
+      if (history.length > 1440) history = history.slice(-1440);
+      await env.GOLD_PRICE_CACHE.put(historyKey, JSON.stringify(history), {
+        expirationTtl: 86400
       });
     }
     
-    // 最终备用：返回模拟数据
-    const baseDomesticPrice = 580.50;
-    const baseInternationalPrice = 2650.50;
-    const fluctuation = Math.sin(Date.now() / 60000) * 5;
+    console.log('[Gold Crawler] Crawl completed successfully');
+    return result;
     
-    return jsonResponse({
+  } catch (error) {
+    console.error('[Gold Crawler] Crawl failed:', error);
+    // 返回缓存数据或默认值
+    return goldPriceCache.data || {
       success: true,
-      domestic: {
-        price: Math.round((baseDomesticPrice + fluctuation) * 100) / 100,
-        change: Math.round((fluctuation / baseDomesticPrice * 100) * 100) / 100,
-        high: Math.round((baseDomesticPrice + 5) * 100) / 100,
-        low: Math.round((baseDomesticPrice - 5) * 100) / 100,
-        open: baseDomesticPrice
-      },
-      international: {
-        price: Math.round((baseInternationalPrice + fluctuation * 3) * 100) / 100,
-        change: Math.round((fluctuation * 3 / baseInternationalPrice * 100) * 100) / 100,
-        high: Math.round((baseInternationalPrice + 20) * 100) / 100,
-        low: Math.round((baseInternationalPrice - 20) * 100) / 100,
-        open: baseInternationalPrice
-      }
-    });
+      timestamp: Date.now(),
+      exchangeRate: 7.25,
+      domestic: { price: 580.00, open: 579.00, high: 582.00, low: 578.00, change: 0.17, changePercent: 0.17 },
+      international: { price: 2650.00, open: 2645.00, high: 2660.00, low: 2640.00, change: 5.00, changePercent: 0.19 }
+    };
+  } finally {
+    goldPriceCache.isCrawling = false;
+  }
+}
+
+// HTTP 处理函数
+async function handleGoldPrice(request, env, ctx) {
+  try {
+    // 检查缓存是否有效（30秒内）
+    const now = Date.now();
+    if (goldPriceCache.data && (now - goldPriceCache.timestamp) < 30000) {
+      console.log('[Gold Price] Returning cached data');
+      return jsonResponse(goldPriceCache.data);
+    }
+    
+    // 执行爬取
+    const data = await performCrawl(env);
+    return jsonResponse(data);
     
   } catch (error) {
     console.error('Gold price error:', error);
+    // 返回缓存或默认值
+    if (goldPriceCache.data) {
+      return jsonResponse(goldPriceCache.data);
+    }
     return jsonResponse({
       success: true,
-      domestic: { price: 580.50, change: 0.5, high: 585.20, low: 576.80, open: 580.00 },
-      international: { price: 2650.50, change: 0.3, high: 2670.00, low: 2635.00, open: 2650.00 }
+      timestamp: Date.now(),
+      exchangeRate: 7.25,
+      domestic: { price: 580.00, change: 0.17, high: 582.00, low: 578.00, open: 579.00 },
+      international: { price: 2650.00, change: 0.19, high: 2660.00, low: 2640.00, open: 2645.00 }
     });
   }
+}
+
+// 定时爬取入口（用于 Cron Trigger）
+export async function scheduledGoldCrawl(event, env, ctx) {
+  console.log('[Scheduled] Gold price crawl triggered at', new Date().toISOString());
+  ctx.waitUntil(performCrawl(env));
 }
 
 async function handleGoldHistory(request, env, ctx) {
