@@ -806,6 +806,7 @@ body {
   min-height: var(--input-height);
   transition: all var(--duration-fast) var(--ease-default);
   box-shadow: var(--shadow-sm);
+  position: relative; /* Required for dropdown positioning */
 }
 
 .input-container:focus-within {
@@ -865,8 +866,8 @@ body {
 /* Model Dropdown Panel */
 .model-dropdown-panel {
   position: absolute;
-  bottom: calc(100% + var(--space-2));
-  left: var(--space-2);
+  bottom: calc(100% + 8px);
+  left: 8px;
   width: 240px;
   background: var(--bg-elevated);
   border: 1px solid var(--border-color);
@@ -876,14 +877,18 @@ body {
   opacity: 0;
   visibility: hidden;
   transform: translateY(8px);
-  transition: all var(--duration-fast) var(--ease-default);
+  transition: opacity var(--duration-fast) var(--ease-default),
+              visibility var(--duration-fast) var(--ease-default),
+              transform var(--duration-fast) var(--ease-default);
   z-index: var(--z-popover);
+  pointer-events: none;
 }
 
 .model-dropdown-panel.visible {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
+  pointer-events: auto;
 }
 
 .model-dropdown-header {

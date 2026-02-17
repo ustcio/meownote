@@ -128,6 +128,10 @@ function setupModelSelector(): void {
   const modelBtn = document.getElementById('model-selector-btn');
   const modelDropdown = document.getElementById('model-dropdown');
   
+  console.log('[Chatbot] Setting up model selector...');
+  console.log('[Chatbot] Model button found:', !!modelBtn);
+  console.log('[Chatbot] Model dropdown found:', !!modelDropdown);
+  
   if (!modelBtn || !modelDropdown) {
     console.error('[Chatbot] Model selector elements not found');
     return;
@@ -135,10 +139,18 @@ function setupModelSelector(): void {
   
   // Toggle dropdown on button click
   modelBtn.addEventListener('click', (e) => {
+    console.log('[Chatbot] Model button clicked');
     e.stopPropagation();
+    e.preventDefault();
+    
     const isVisible = modelDropdown.classList.contains('visible');
+    console.log('[Chatbot] Dropdown currently visible:', isVisible);
+    
     modelDropdown.classList.toggle('visible', !isVisible);
     modelBtn.setAttribute('aria-expanded', isVisible ? 'false' : 'true');
+    
+    console.log('[Chatbot] Dropdown visibility toggled to:', !isVisible);
+    console.log('[Chatbot] Dropdown classes:', modelDropdown.className);
     
     // Position dropdown above the input container
     if (!isVisible) {
