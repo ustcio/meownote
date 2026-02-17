@@ -752,158 +752,8 @@ let goldPriceCache = {
 // 爬取国内金价（黄金T+D）
 async function crawlSGEData() {
   try {
-    // 1. 使用金投网黄金T+D API - JO_92231 是香港黄金，需要找黄金T+D
-    // 尝试多个可能的黄金T+D代码
-    const goldTdCodes = ['JO_92250', 'JO_92251', 'JO_92252', 'JO_92253', 'JO_92254'];
-    
-    for (const code of goldTdCodes) {
-      try {
-        const jtwUrl = `https://api.jijinhao.com/quoteCenter/realTime.htm?codes=${code}`;
-        const response = await fetch(jtwUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept': 'application/json, text/javascript, */*',
-            'Referer': 'https://quote.cngold.org/'
-          },
-          cf: { cacheTtl: 0 }
-        });
-        
-        if (response.ok) {
-          const text = await response.text();
-          const match = text.match(/var\s+quote_json\s*=\s*({.+?});/);
-          if (match) {
-            const data = JSON.parse(match[1]);
-            if (data.flag && data[code]) {
-              const quote = data[code];
-              // 检查是否是黄金T+D (价格应该在 550-650 元/克范围)
-              const price = parseFloat(quote.q63);
-              if (price >= 550 && price <= 650 && quote.showName?.includes('黄金')) {
-                const open = parseFloat(quote.q1);
-                const high = parseFloat(quote.q3);
-                const low = parseFloat(quote.q4);
-                const prevClose = parseFloat(quote.q2);
-                
-                const change = price - prevClose;
-                const changePercent = (change / prevClose) * 100;
-                
-                return {
-                  price: price,
-                  open: open,
-                  high: high,
-                  low: low,
-                  prevClose: prevClose,
-                  change: change,
-                  changePercent: changePercent,
-                  source: `JTW-${quote.showName}`,
-                  timestamp: Date.now()
-                };
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.error(`Code ${code} error:`, e.message);
-      }
-    }
-    
-    // 2. 直接爬取金投网页面获取黄金T+D数据
-    const cngoldResponse = await fetch('https://quote.cngold.org/gjs/', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Referer': 'https://www.cngold.org/'
-      },
-      cf: { cacheTtl: 0 }
-    });
-    
-    if (cngoldResponse.ok) {
-      const html = await cngoldResponse.text();
-      // 尝试从页面中提取黄金T+D数据
-      // 查找页面中的黄金价格数据
-      const auMatch = html.match(/黄金T\+D[\s\S]*?(\d{3}\.\d{2})[\s\S]*?([+-]?\d+\.\d{2})[\s\S]*?([+-]?\d+\.\d{2})%/);
-      if (auMatch) {
-        const price = parseFloat(auMatch[1]);
-        const change = parseFloat(auMatch[2]);
-        const changePercent = parseFloat(auMatch[3]);
-        
-        return {
-          price: price,
-          open: price - change,
-          high: price * 1.005,
-          low: price * 0.995,
-          change: change,
-          changePercent: changePercent,
-          source: 'CNGold-Page',
-          timestamp: Date.now()
-        };
-      }
-    }
-    
-    // 3. 使用香港黄金作为参考 (JO_92231)
-    const hkUrl = 'https://api.jijinhao.com/quoteCenter/realTime.htm?codes=JO_92231';
-    const hkResponse = await fetch(hkUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json, text/javascript, */*',
-        'Referer': 'https://quote.cngold.org/'
-      },
-      cf: { cacheTtl: 0 }
-    });
-    
-    if (hkResponse.ok) {
-      const text = await hkResponse.text();
-      const match = text.match(/var\s+quote_json\s*=\s*({.+?});/);
-      if (match) {
-        const data = JSON.parse(match[1]);
-        if (data.flag && data.JO_92231) {
-          const quote = data.JO_92231;
-          // 香港黄金单位是港元/港两，需要转换为元/克
-          // 1港两 = 37.429克，需要汇率转换
-          const hkPrice = parseFloat(quote.q63); // 港元/港两
-          const hkOpen = parseFloat(quote.q1);
-          const hkHigh = parseFloat(quote.q3);
-          const hkLow = parseFloat(quote.q4);
-          const hkPrevClose = parseFloat(quote.q2);
-          
-          // 获取汇率并转换 (简化计算，使用固定汇率 0.92)
-          const exchangeRate = 0.92;
-          const gramPerTael = 37.429;
-          
-          const price = (hkPrice * exchangeRate) / gramPerTael;
-          const open = (hkOpen * exchangeRate) / gramPerTael;
-          const high = (hkHigh * exchangeRate) / gramPerTael;
-          const low = (hkLow * exchangeRate) / gramPerTael;
-          const prevClose = (hkPrevClose * exchangeRate) / gramPerTael;
-          
-          const change = price - prevClose;
-          const changePercent = (change / prevClose) * 100;
-          
-          return {
-            price: Math.round(price * 100) / 100,
-            open: Math.round(open * 100) / 100,
-            high: Math.round(high * 100) / 100,
-            low: Math.round(low * 100) / 100,
-            change: Math.round(change * 100) / 100,
-            changePercent: Math.round(changePercent * 100) / 100,
-            source: 'JTW-HKGold-Converted',
-            timestamp: Date.now()
-          };
-        }
-      }
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('Crawl SGE error:', error);
-    return null;
-  }
-}
-
-// 爬取国际金价（现货黄金 XAU）
-async function crawlInternationalPrice() {
-  try {
-    // 1. 使用金投网现货黄金 API - JO_92233 是现货黄金
-    const jtwUrl = 'https://api.jijinhao.com/quoteCenter/realTime.htm?codes=JO_92233';
+    // 使用金投网 m黄金T+D API - JO_92226
+    const jtwUrl = 'https://api.jijinhao.com/quoteCenter/realTime.htm?codes=JO_92226';
     
     const response = await fetch(jtwUrl, {
       headers: {
@@ -919,27 +769,27 @@ async function crawlInternationalPrice() {
       const match = text.match(/var\s+quote_json\s*=\s*({.+?});/);
       if (match) {
         const data = JSON.parse(match[1]);
-        if (data.flag && data.JO_92233) {
-          const quote = data.JO_92233;
+        if (data.flag && data.JO_92226) {
+          const quote = data.JO_92226;
           const price = parseFloat(quote.q63);
-          const open = parseFloat(quote.q1);
-          const high = parseFloat(quote.q3);
-          const low = parseFloat(quote.q4);
+          const open = parseFloat(quote.q1) || price;
+          const high = parseFloat(quote.q3) || price;
+          const low = parseFloat(quote.q4) || price;
           const prevClose = parseFloat(quote.q2);
           
-          // 现货黄金价格应该在 2000-3000 美元/盎司范围
-          if (price >= 2000 && price <= 3000) {
+          if (price > 0) {
             const change = price - prevClose;
-            const changePercent = (change / prevClose) * 100;
+            const changePercent = prevClose > 0 ? (change / prevClose) * 100 : 0;
             
             return {
               price: price,
               open: open,
               high: high,
               low: low,
+              prevClose: prevClose,
               change: change,
               changePercent: changePercent,
-              source: 'JTW-XAU',
+              source: 'JTW-mAuT+D',
               timestamp: Date.now()
             };
           }
@@ -947,39 +797,97 @@ async function crawlInternationalPrice() {
       }
     }
     
-    // 2. 直接爬取金投网页面获取现货黄金数据
-    const cngoldResponse = await fetch('https://quote.cngold.org/gjs/', {
+    // 备用：使用 i黄金9999 - JO_92225
+    const jtwUrl2 = 'https://api.jijinhao.com/quoteCenter/realTime.htm?codes=JO_92225';
+    const response2 = await fetch(jtwUrl2, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Referer': 'https://www.cngold.org/'
+        'Accept': 'application/json, text/javascript, */*',
+        'Referer': 'https://quote.cngold.org/'
       },
       cf: { cacheTtl: 0 }
     });
     
-    if (cngoldResponse.ok) {
-      const html = await cngoldResponse.text();
-      // 尝试从页面中提取现货黄金数据
-      const xauMatch = html.match(/现货黄金[\s\S]*?(\d{4}\.\d{2})[\s\S]*?([+-]?\d+\.\d{2})[\s\S]*?([+-]?\d+\.\d{2})%/);
-      if (xauMatch) {
-        const price = parseFloat(xauMatch[1]);
-        const change = parseFloat(xauMatch[2]);
-        const changePercent = parseFloat(xauMatch[3]);
-        
-        return {
-          price: price,
-          open: price - change,
-          high: price * 1.005,
-          low: price * 0.995,
-          change: change,
-          changePercent: changePercent,
-          source: 'CNGold-XAU',
-          timestamp: Date.now()
-        };
+    if (response2.ok) {
+      const text = await response2.text();
+      const match = text.match(/var\s+quote_json\s*=\s*({.+?});/);
+      if (match) {
+        const data = JSON.parse(match[1]);
+        if (data.flag && data.JO_92225) {
+          const quote = data.JO_92225;
+          const price = parseFloat(quote.q63);
+          const open = parseFloat(quote.q1) || price;
+          const high = parseFloat(quote.q3) || price;
+          const low = parseFloat(quote.q4) || price;
+          const prevClose = parseFloat(quote.q2);
+          
+          if (price > 0) {
+            const change = price - prevClose;
+            const changePercent = prevClose > 0 ? (change / prevClose) * 100 : 0;
+            
+            return {
+              price: price,
+              open: open,
+              high: high,
+              low: low,
+              prevClose: prevClose,
+              change: change,
+              changePercent: changePercent,
+              source: 'JTW-iAu9999',
+              timestamp: Date.now()
+            };
+          }
+        }
       }
     }
     
     return null;
+  } catch (error) {
+    console.error('Crawl SGE error:', error);
+    return null;
+  }
+}
+
+// 爬取国际金价（现货黄金 XAU）
+// 由于金投网没有现货黄金(XAU)的实时API，我们使用国内金价和汇率计算
+async function crawlInternationalPrice() {
+  try {
+    // 1. 首先获取国内金价
+    const domesticData = await crawlSGEData();
+    if (!domesticData) {
+      console.error('[Crawl] Failed to get domestic price for calculation');
+      return null;
+    }
+    
+    // 2. 获取汇率
+    const exchangeRate = await getExchangeRate();
+    
+    // 3. 从国内金价计算国际金价
+    // 公式：国际金价(美元/盎司) = 国内金价(元/克) * 31.1035(克/盎司) / 汇率
+    const OZ_TO_G = 31.1035;
+    
+    const domesticPrice = domesticData.price;
+    const calculatedPrice = (domesticPrice * OZ_TO_G) / exchangeRate;
+    const calculatedOpen = (domesticData.open * OZ_TO_G) / exchangeRate;
+    const calculatedHigh = (domesticData.high * OZ_TO_G) / exchangeRate;
+    const calculatedLow = (domesticData.low * OZ_TO_G) / exchangeRate;
+    
+    // 涨跌幅与国内金价相同
+    const changePercent = domesticData.changePercent;
+    const prevClose = calculatedPrice / (1 + changePercent / 100);
+    const change = calculatedPrice - prevClose;
+    
+    return {
+      price: Math.round(calculatedPrice * 100) / 100,
+      open: Math.round(calculatedOpen * 100) / 100,
+      high: Math.round(calculatedHigh * 100) / 100,
+      low: Math.round(calculatedLow * 100) / 100,
+      change: Math.round(change * 100) / 100,
+      changePercent: changePercent,
+      source: 'Calculated-from-Domestic',
+      timestamp: Date.now()
+    };
+    
   } catch (error) {
     console.error('Crawl international error:', error);
     return null;
