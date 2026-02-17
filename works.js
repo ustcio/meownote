@@ -1248,29 +1248,47 @@ async function handleGoldPriceStream(request, env, ctx) {
       const sendData = async () => {
         try {
           let data = null;
+          let fromCache = false;
           
           // 尝试从 KV 获取最新数据
           if (env?.GOLD_PRICE_CACHE) {
-            const cached = await env.GOLD_PRICE_CACHE.get('latest');
-            if (cached) {
-              data = JSON.parse(cached);
+            try {
+              const cached = await env.GOLD_PRICE_CACHE.get('latest');
+              if (cached) {
+                data = JSON.parse(cached);
+                fromCache = true;
+                console.log(`[SSE] Data from KV for client: ${clientId}`);
+              }
+            } catch (kvError) {
+              console.warn(`[SSE] KV read failed for client ${clientId}:`, kvError.message);
             }
+          }
+          
+          // 如果 KV 没有数据，尝试内存缓存
+          if (!data && goldPriceCache.data) {
+            data = goldPriceCache.data;
+            fromCache = true;
+            console.log(`[SSE] Data from memory cache for client: ${clientId}`);
           }
           
           // 如果没有缓存，执行爬取
           if (!data) {
+            console.log(`[SSE] No cache, crawling for client: ${clientId}`);
             data = await performCrawl(env);
+            fromCache = false;
           }
           
           const message = `data: ${JSON.stringify({
             type: 'price_update',
             clientId: clientId,
             timestamp: Date.now(),
+            fromCache: fromCache,
             data: data
           })}\n\n`;
           
           controller.enqueue(new TextEncoder().encode(message));
         } catch (error) {
+          console.error(`[SSE] Error for client ${clientId}:`, error.message);
           const errorMessage = `data: ${JSON.stringify({
             type: 'error',
             clientId: clientId,
@@ -1362,7 +1380,10 @@ async function scheduledGoldCrawlWithRetry(event, env, ctx) {
 // 存储金价数据到 KV
 async function storeGoldPriceData(env, data) {
   if (!env?.GOLD_PRICE_CACHE) {
-    console.warn('[Store] GOLD_PRICE_CACHE not configured');
+    console.warn('[Store] GOLD_PRICE_CACHE not configured, using memory cache only');
+    // 更新内存缓存
+    goldPriceCache.data = { ...data, cachedAt: Date.now() };
+    goldPriceCache.timestamp = Date.now();
     return;
   }
   
@@ -1371,59 +1392,77 @@ async function storeGoldPriceData(env, data) {
     const dateKey = new Date().toISOString().split('T')[0];
     
     // 1. 存储最新数据（5分钟过期）
-    await env.GOLD_PRICE_CACHE.put('latest', JSON.stringify({
-      ...data,
-      cachedAt: timestamp
-    }), { expirationTtl: 300 });
+    try {
+      await env.GOLD_PRICE_CACHE.put('latest', JSON.stringify({
+        ...data,
+        cachedAt: timestamp
+      }), { expirationTtl: 300 });
+    } catch (kvError) {
+      console.warn('[Store] Failed to store latest data to KV:', kvError.message);
+      // 回退到内存缓存
+      goldPriceCache.data = { ...data, cachedAt: timestamp };
+      goldPriceCache.timestamp = timestamp;
+    }
     
     // 2. 存储到历史数据列表
-    const historyKey = `history:${dateKey}`;
-    let history = [];
     try {
-      const existing = await env.GOLD_PRICE_CACHE.get(historyKey);
-      if (existing) {
-        history = JSON.parse(existing);
+      const historyKey = `history:${dateKey}`;
+      let history = [];
+      try {
+        const existing = await env.GOLD_PRICE_CACHE.get(historyKey);
+        if (existing) {
+          history = JSON.parse(existing);
+        }
+      } catch (e) {
+        console.log('[Store] No existing history in KV');
       }
-    } catch (e) {
-      console.log('[Store] No existing history');
+      
+      history.push({
+        timestamp: timestamp,
+        domestic: data.domestic?.price || 0,
+        international: data.international?.price || 0,
+        domesticChange: data.domestic?.changePercent || 0,
+        internationalChange: data.international?.changePercent || 0
+      });
+      
+      // 限制历史数据数量（最多保存1440条，即24小时）
+      if (history.length > 1440) {
+        history = history.slice(-1440);
+      }
+      
+      await env.GOLD_PRICE_CACHE.put(historyKey, JSON.stringify(history), {
+        expirationTtl: 86400 // 24小时过期
+      });
+    } catch (kvError) {
+      console.warn('[Store] Failed to store history to KV:', kvError.message);
     }
-    
-    history.push({
-      timestamp: timestamp,
-      domestic: data.domestic?.price || 0,
-      international: data.international?.price || 0,
-      domesticChange: data.domestic?.changePercent || 0,
-      internationalChange: data.international?.changePercent || 0
-    });
-    
-    // 限制历史数据数量（最多保存1440条，即24小时）
-    if (history.length > 1440) {
-      history = history.slice(-1440);
-    }
-    
-    await env.GOLD_PRICE_CACHE.put(historyKey, JSON.stringify(history), {
-      expirationTtl: 86400 // 24小时过期
-    });
     
     // 3. 存储统计数据
-    const statsKey = `stats:${dateKey}`;
-    const stats = {
-      lastUpdate: timestamp,
-      updateCount: history.length,
-      domesticHigh: Math.max(...history.map(h => h.domestic)),
-      domesticLow: Math.min(...history.map(h => h.domestic)),
-      internationalHigh: Math.max(...history.map(h => h.international)),
-      internationalLow: Math.min(...history.map(h => h.international))
-    };
-    
-    await env.GOLD_PRICE_CACHE.put(statsKey, JSON.stringify(stats), {
-      expirationTtl: 86400
-    });
+    try {
+      const statsKey = `stats:${dateKey}`;
+      const stats = {
+        lastUpdate: timestamp,
+        updateCount: history?.length || 1,
+        domesticHigh: data.domestic?.high || data.domestic?.price || 0,
+        domesticLow: data.domestic?.low || data.domestic?.price || 0,
+        internationalHigh: data.international?.high || data.international?.price || 0,
+        internationalLow: data.international?.low || data.international?.price || 0
+      };
+      
+      await env.GOLD_PRICE_CACHE.put(statsKey, JSON.stringify(stats), {
+        expirationTtl: 86400
+      });
+    } catch (kvError) {
+      console.warn('[Store] Failed to store stats to KV:', kvError.message);
+    }
     
     console.log('[Store] Data stored successfully');
     
   } catch (error) {
     console.error('[Store] Failed to store data:', error);
+    // 确保内存缓存已更新
+    goldPriceCache.data = { ...data, cachedAt: Date.now() };
+    goldPriceCache.timestamp = Date.now();
   }
 }
 
@@ -1456,7 +1495,8 @@ async function logCrawlStatus(env, status, data) {
           logs = JSON.parse(existing);
         }
       } catch (e) {
-        // 没有现有日志
+        // 没有现有日志或读取失败
+        console.log('[Log] No existing logs in KV or read failed');
       }
       
       logs.push(logEntry);
@@ -1466,11 +1506,15 @@ async function logCrawlStatus(env, status, data) {
         logs = logs.slice(-1000);
       }
       
-      await env.GOLD_PRICE_CACHE.put(logKey, JSON.stringify(logs), {
-        expirationTtl: 86400
-      });
+      try {
+        await env.GOLD_PRICE_CACHE.put(logKey, JSON.stringify(logs), {
+          expirationTtl: 86400
+        });
+      } catch (kvError) {
+        console.warn('[Log] Failed to write log to KV:', kvError.message);
+      }
     } catch (e) {
-      console.error('[Log] Failed to store log:', e);
+      console.error('[Log] Failed to store log:', e.message);
     }
   }
 }
