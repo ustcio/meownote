@@ -813,14 +813,14 @@ body {
   box-shadow: 0 0 0 3px var(--accent-light), var(--shadow-md);
 }
 
-/* Model Selector Button (+ button) */
+/* Model Selector Button (shows current model name) */
 .model-selector-btn {
-  width: 36px;
   height: 36px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: transparent;
+  gap: var(--space-1);
+  padding: 0 var(--space-3);
+  background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
@@ -830,7 +830,7 @@ body {
 }
 
 .model-selector-btn:hover {
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   border-color: var(--accent-primary);
   color: var(--accent-primary);
 }
@@ -839,6 +839,27 @@ body {
   background: var(--accent-light);
   border-color: var(--accent-primary);
   color: var(--accent-primary);
+}
+
+.model-selector-btn[aria-expanded="true"] .chevron-down {
+  transform: rotate(180deg);
+}
+
+.model-current-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.model-selector-btn:hover .model-current-name,
+.model-selector-btn[aria-expanded="true"] .model-current-name {
+  color: var(--accent-primary);
+}
+
+.chevron-down {
+  transition: transform var(--duration-fast) var(--ease-default);
+  flex-shrink: 0;
 }
 
 /* Model Dropdown Panel */

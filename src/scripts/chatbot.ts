@@ -219,14 +219,33 @@ function selectModel(model: string, name: string): void {
   currentModel = model;
   currentModelName = name;
   
-  // Update UI
+  // Update UI - model options in dropdown
   document.querySelectorAll('.model-option').forEach(opt => {
     const isActive = opt.getAttribute('data-model') === model;
     opt.classList.toggle('active', isActive);
     opt.setAttribute('aria-selected', isActive ? 'true' : 'false');
   });
   
+  // Update button text
+  const modelCurrentName = document.getElementById('model-current-name');
+  if (modelCurrentName) {
+    // Shorten name for button display
+    const shortName = getShortModelName(name);
+    modelCurrentName.textContent = shortName;
+  }
+  
   showToast(`${lang === 'zh' ? '已切换到' : 'Switched to'} ${name}`, 'success');
+}
+
+function getShortModelName(fullName: string): string {
+  // Shorten model names for button display
+  const nameMap: Record<string, string> = {
+    'Doubao 2.0 Pro': 'Doubao Pro',
+    'Doubao 2.0 Code': 'Doubao Code',
+    'Qwen Turbo': 'Qwen Turbo',
+    'Qwen Plus': 'Qwen Plus'
+  };
+  return nameMap[fullName] || fullName;
 }
 
 // ================================================================================
