@@ -752,6 +752,8 @@ let goldPriceCache = {
 // 爬取国内金价（黄金T+D）
 async function crawlSGEData() {
   try {
+    console.log('[Crawl] Fetching SGE data...');
+    
     // 使用金投网 m黄金T+D API - JO_92226
     const jtwUrl = 'https://api.jijinhao.com/quoteCenter/realTime.htm?codes=JO_92226';
     
@@ -760,17 +762,24 @@ async function crawlSGEData() {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'application/json, text/javascript, */*',
         'Referer': 'https://quote.cngold.org/'
-      },
-      cf: { cacheTtl: 0 }
+      }
     });
+    
+    console.log('[Crawl] SGE response status:', response.status);
     
     if (response.ok) {
       const text = await response.text();
+      console.log('[Crawl] SGE response text length:', text.length);
+      
       const match = text.match(/var\s+quote_json\s*=\s*({.+?});/);
       if (match) {
         const data = JSON.parse(match[1]);
+        console.log('[Crawl] SGE data flag:', data.flag);
+        
         if (data.flag && data.JO_92226) {
           const quote = data.JO_92226;
+          console.log('[Crawl] SGE quote:', { name: quote.showName, price: quote.q63 });
+          
           const price = parseFloat(quote.q63);
           const open = parseFloat(quote.q1) || price;
           const high = parseFloat(quote.q3) || price;
@@ -797,53 +806,10 @@ async function crawlSGEData() {
       }
     }
     
-    // 备用：使用 i黄金9999 - JO_92225
-    const jtwUrl2 = 'https://api.jijinhao.com/quoteCenter/realTime.htm?codes=JO_92225';
-    const response2 = await fetch(jtwUrl2, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json, text/javascript, */*',
-        'Referer': 'https://quote.cngold.org/'
-      },
-      cf: { cacheTtl: 0 }
-    });
-    
-    if (response2.ok) {
-      const text = await response2.text();
-      const match = text.match(/var\s+quote_json\s*=\s*({.+?});/);
-      if (match) {
-        const data = JSON.parse(match[1]);
-        if (data.flag && data.JO_92225) {
-          const quote = data.JO_92225;
-          const price = parseFloat(quote.q63);
-          const open = parseFloat(quote.q1) || price;
-          const high = parseFloat(quote.q3) || price;
-          const low = parseFloat(quote.q4) || price;
-          const prevClose = parseFloat(quote.q2);
-          
-          if (price > 0) {
-            const change = price - prevClose;
-            const changePercent = prevClose > 0 ? (change / prevClose) * 100 : 0;
-            
-            return {
-              price: price,
-              open: open,
-              high: high,
-              low: low,
-              prevClose: prevClose,
-              change: change,
-              changePercent: changePercent,
-              source: 'JTW-iAu9999',
-              timestamp: Date.now()
-            };
-          }
-        }
-      }
-    }
-    
+    console.error('[Crawl] Failed to fetch SGE data');
     return null;
   } catch (error) {
-    console.error('Crawl SGE error:', error);
+    console.error('[Crawl] SGE error:', error.message);
     return null;
   }
 }
@@ -851,6 +817,8 @@ async function crawlSGEData() {
 // 爬取国际金价（现货黄金 XAU）
 async function crawlInternationalPrice() {
   try {
+    console.log('[Crawl] Fetching XAU data...');
+    
     // 使用金投网现货黄金 API - JO_92233 是现货黄金(XAU)
     const jtwUrl = 'https://api.jijinhao.com/quoteCenter/realTime.htm?codes=JO_92233';
     
@@ -859,50 +827,53 @@ async function crawlInternationalPrice() {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'application/json, text/javascript, */*',
         'Referer': 'https://quote.cngold.org/'
-      },
-      cf: { cacheTtl: 0 }
+      }
     });
+    
+    console.log('[Crawl] XAU response status:', response.status);
     
     if (response.ok) {
       const text = await response.text();
+      console.log('[Crawl] XAU response text length:', text.length);
+      
       const match = text.match(/var\s+quote_json\s*=\s*({.+?});/);
       if (match) {
         const data = JSON.parse(match[1]);
+        console.log('[Crawl] XAU data flag:', data.flag);
+        
         if (data.flag && data.JO_92233) {
           const quote = data.JO_92233;
+          console.log('[Crawl] XAU quote:', { name: quote.showName, code: quote.showCode, price: quote.q63 });
           
-          // 检查是否是现货黄金
-          if (quote.showCode === 'XAU' && quote.showName?.includes('黄金')) {
-            const price = parseFloat(quote.q63);
-            const open = parseFloat(quote.q1);
-            const high = parseFloat(quote.q3);
-            const low = parseFloat(quote.q4);
-            const prevClose = parseFloat(quote.q2);
-            const change = parseFloat(quote.q70);
-            const changePercent = parseFloat(quote.q80);
-            
-            if (price > 0) {
-              return {
-                price: price,
-                open: open,
-                high: high,
-                low: low,
-                change: change,
-                changePercent: changePercent,
-                source: 'JTW-XAU',
-                timestamp: Date.now()
-              };
-            }
+          const price = parseFloat(quote.q63);
+          const open = parseFloat(quote.q1);
+          const high = parseFloat(quote.q3);
+          const low = parseFloat(quote.q4);
+          const prevClose = parseFloat(quote.q2);
+          const change = parseFloat(quote.q70);
+          const changePercent = parseFloat(quote.q80);
+          
+          if (price > 0) {
+            return {
+              price: price,
+              open: open,
+              high: high,
+              low: low,
+              change: change,
+              changePercent: changePercent,
+              source: 'JTW-XAU',
+              timestamp: Date.now()
+            };
           }
         }
       }
     }
     
-    console.error('[Crawl] Failed to fetch XAU from JTW');
+    console.error('[Crawl] Failed to fetch XAU data');
     return null;
     
   } catch (error) {
-    console.error('Crawl international error:', error);
+    console.error('[Crawl] XAU error:', error.message);
     return null;
   }
 }
