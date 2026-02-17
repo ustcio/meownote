@@ -28,8 +28,12 @@ const t = useTranslations(lang);
     
     <script is:inline>
       (function() {
-        const theme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', theme);
+        try {
+          const theme = localStorage.getItem('theme') || 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
       })();
     </script>
   </head>
@@ -677,6 +681,11 @@ const t = useTranslations(lang);
       flex-direction: column;
       gap: var(--space-1);
       margin-top: var(--space-2);
+      transition: all var(--duration-fast) var(--ease-default);
+    }
+    
+    .history-list.collapsed {
+      display: none;
     }
     
     .history-item {
@@ -746,8 +755,8 @@ const t = useTranslations(lang);
     
     .sidebar-action.danger:hover {
       background: var(--error-light);
-      color: var(--error-color);
-      border-color: var(--error-color);
+      color: var(--error);
+      border-color: var(--error);
     }
     
     .sidebar-overlay {
@@ -1205,7 +1214,7 @@ const t = useTranslations(lang);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--claude-gradient);
+      background: var(--accent-gradient);
       border-radius: var(--radius-full);
       color: white;
     }
@@ -1415,6 +1424,7 @@ const t = useTranslations(lang);
       min-height: 56px;
       transition: all var(--duration-fast) var(--ease-default);
       box-shadow: var(--shadow-sm);
+      position: relative;
     }
     
     .input-wrapper:focus-within {
@@ -1433,6 +1443,7 @@ const t = useTranslations(lang);
       inset: 0;
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
       animation: shimmer 1.5s infinite;
+      border-radius: var(--radius-xl);
     }
     
     @keyframes shimmer {
@@ -1522,7 +1533,7 @@ const t = useTranslations(lang);
     }
     
     .stop-btn {
-      background: var(--error-color);
+      background: var(--error);
     }
     
     .stop-btn:hover {
@@ -1565,15 +1576,15 @@ const t = useTranslations(lang);
     }
     
     .toast-success {
-      border-left-color: var(--success-color);
+      border-left-color: var(--success);
     }
     
     .toast-error {
-      border-left-color: var(--error-color);
+      border-left-color: var(--error);
     }
     
     .toast-info {
-      border-left-color: var(--info-color);
+      border-left-color: var(--info);
     }
     
     @keyframes slideIn {
@@ -1656,31 +1667,16 @@ const t = useTranslations(lang);
         height: 44px;
       }
     }
-    
-    /* ================================================================================
-       Dark Theme
-       ================================================================================ */
-    [data-theme="dark"] {
-      --bg-primary: #1A1A1A;
-      --bg-secondary: #0F0F0F;
-      --bg-tertiary: #2A2A2A;
-      --bg-elevated: #1C1C1E;
-      --text-primary: #F5F5F5;
-      --text-secondary: #9A9A9A;
-      --text-tertiary: #6B6B6B;
-      --border-color: #3A3A3A;
-      --border-light: rgba(255, 255, 255, 0.06);
-      --accent-light: rgba(255, 140, 71, 0.12);
-      --claude-orange: #FF8C47;
-    }
   </style>
 
   <script>
-    // TypeScript interfaces
+    // ================================================================================
+    // TypeScript Interfaces
+    // ================================================================================
     interface Message {
       role: 'user' | 'assistant';
       content: string;
-      timestamp?: Date;
+      timestamp?: string;
     }
     
     interface Conversation {
@@ -1688,11 +1684,13 @@ const t = useTranslations(lang);
       title: string;
       messages: Message[];
       model: string;
-      createdAt: Date;
-      updatedAt: Date;
+      createdAt: string;
+      updatedAt: string;
     }
     
-    // State
+    // ================================================================================
+    // State Management
+    // ================================================================================
     let currentModel = 'doubao-2.0-pro';
     let currentModelName = 'Doubao 2.0 Pro';
     let chatHistory: Message[] = [];
@@ -1700,6 +1698,7 @@ const t = useTranslations(lang);
     let currentConversationId: string | null = null;
     let isStreaming = false;
     let abortController: AbortController | null = null;
+    let searchDebounceTimer: number | null = null;
     
     // Language detection
     const lang = document.documentElement.lang || 'en';
@@ -1707,7 +1706,70 @@ const t = useTranslations(lang);
     // API Base
     const API_BASE = 'https://api.agiera.net';
     
-    // Initialize
+    // ================================================================================
+    // Safe Storage Helpers
+    // ================================================================================
+    function safeGetItem(key: string): string | null {
+      try {
+        return localStorage.getItem(key);
+      } catch (e) {
+        console.warn(`[Chatbot] Failed to get ${key} from localStorage:`, e);
+        return null;
+      }
+    }
+    
+    function safeSetItem(key: string, value: string): boolean {
+      try {
+        localStorage.setItem(key, value);
+        return true;
+      } catch (e) {
+        console.warn(`[Chatbot] Failed to set ${key} in localStorage:`, e);
+        return false;
+      }
+    }
+    
+    function safeRemoveItem(key: string): boolean {
+      try {
+        localStorage.removeItem(key);
+        return true;
+      } catch (e) {
+        console.warn(`[Chatbot] Failed to remove ${key} from localStorage:`, e);
+        return false;
+      }
+    }
+    
+    function safeGetSessionItem(key: string): string | null {
+      try {
+        return sessionStorage.getItem(key);
+      } catch (e) {
+        console.warn(`[Chatbot] Failed to get ${key} from sessionStorage:`, e);
+        return null;
+      }
+    }
+    
+    function safeSetSessionItem(key: string, value: string): boolean {
+      try {
+        sessionStorage.setItem(key, value);
+        return true;
+      } catch (e) {
+        console.warn(`[Chatbot] Failed to set ${key} in sessionStorage:`, e);
+        return false;
+      }
+    }
+    
+    function safeRemoveSessionItem(key: string): boolean {
+      try {
+        sessionStorage.removeItem(key);
+        return true;
+      } catch (e) {
+        console.warn(`[Chatbot] Failed to remove ${key} from sessionStorage:`, e);
+        return false;
+      }
+    }
+    
+    // ================================================================================
+    // Initialization
+    // ================================================================================
     function init() {
       console.log('[Chatbot] Initializing...');
       console.log('[Chatbot] Language:', lang);
@@ -1721,10 +1783,20 @@ const t = useTranslations(lang);
       loadConversations();
       setupEventListeners();
       renderHistory();
+      setupQuickActions();
+      setupSidebarToggle();
+      setupSearch();
+      setupSectionToggle();
+      setupSettings();
+      setupClearAll();
+      setupExport();
       
       console.log('[Chatbot] Initialization complete');
     }
     
+    // ================================================================================
+    // Event Listeners Setup
+    // ================================================================================
     function setupEventListeners() {
       console.log('[Chatbot] Setting up event listeners...');
       
@@ -1811,6 +1883,7 @@ const t = useTranslations(lang);
       // Send message
       const chatInput = document.getElementById('chat-input') as HTMLTextAreaElement;
       const sendBtn = document.getElementById('send-btn');
+      const stopBtn = document.getElementById('stop-btn');
       
       console.log('[Chatbot] Chat input:', chatInput ? 'found' : 'NOT FOUND');
       console.log('[Chatbot] Send button:', sendBtn ? 'found' : 'NOT FOUND');
@@ -1819,6 +1892,10 @@ const t = useTranslations(lang);
         chatInput.addEventListener('input', () => {
           console.log('[Chatbot] Input event triggered, value:', chatInput.value);
           sendBtn.disabled = chatInput.value.trim() === '';
+          
+          // Auto-resize textarea
+          chatInput.style.height = 'auto';
+          chatInput.style.height = Math.min(chatInput.scrollHeight, 200) + 'px';
         });
         
         // Mobile keyboard handling
@@ -1835,10 +1912,16 @@ const t = useTranslations(lang);
         
         sendBtn.addEventListener('click', sendMessage);
         
+        // Stop button
+        if (stopBtn) {
+          stopBtn.addEventListener('click', stopGeneration);
+        }
+        
         chatInput.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
+          // Only send on Enter if not in a composition session (IME)
+          if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
             e.preventDefault();
-            if (!sendBtn.disabled) {
+            if (!sendBtn.disabled && !isStreaming) {
               sendMessage();
             }
           }
@@ -1848,6 +1931,184 @@ const t = useTranslations(lang);
       }
     }
     
+    // ================================================================================
+    // Quick Actions Setup
+    // ================================================================================
+    function setupQuickActions() {
+      const quickActions = document.querySelectorAll('.quick-action');
+      const chatInput = document.getElementById('chat-input') as HTMLTextAreaElement;
+      const sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
+      
+      quickActions.forEach(action => {
+        action.addEventListener('click', () => {
+          const prompt = action.getAttribute('data-prompt');
+          if (prompt && chatInput) {
+            chatInput.value = prompt;
+            chatInput.focus();
+            if (sendBtn) {
+              sendBtn.disabled = false;
+            }
+            // Trigger input event for auto-resize
+            chatInput.dispatchEvent(new Event('input'));
+          }
+        });
+      });
+    }
+    
+    // ================================================================================
+    // Sidebar Toggle Setup
+    // ================================================================================
+    function setupSidebarToggle() {
+      const menuToggle = document.getElementById('menu-toggle');
+      const closeSidebar = document.getElementById('close-sidebar');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      
+      function openSidebar() {
+        sidebar?.classList.add('open');
+        overlay?.classList.add('visible');
+        menuToggle?.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+      }
+      
+      function closeSidebarFn() {
+        sidebar?.classList.remove('open');
+        overlay?.classList.remove('visible');
+        menuToggle?.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+      }
+      
+      menuToggle?.addEventListener('click', openSidebar);
+      closeSidebar?.addEventListener('click', closeSidebarFn);
+      overlay?.addEventListener('click', closeSidebarFn);
+      
+      // Close on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar?.classList.contains('open')) {
+          closeSidebarFn();
+        }
+      });
+    }
+    
+    // ================================================================================
+    // Search Setup
+    // ================================================================================
+    function setupSearch() {
+      const searchInput = document.getElementById('search-input') as HTMLInputElement;
+      
+      if (!searchInput) return;
+      
+      searchInput.addEventListener('input', () => {
+        if (searchDebounceTimer) {
+          clearTimeout(searchDebounceTimer);
+        }
+        
+        searchDebounceTimer = window.setTimeout(() => {
+          const query = searchInput.value.toLowerCase().trim();
+          filterConversations(query);
+        }, 300);
+      });
+    }
+    
+    function filterConversations(query: string) {
+      const historyItems = document.querySelectorAll('.history-item');
+      
+      historyItems.forEach(item => {
+        const title = item.querySelector('.history-title')?.textContent?.toLowerCase() || '';
+        if (query === '' || title.includes(query)) {
+          (item as HTMLElement).style.display = '';
+        } else {
+          (item as HTMLElement).style.display = 'none';
+        }
+      });
+    }
+    
+    // ================================================================================
+    // Section Toggle Setup
+    // ================================================================================
+    function setupSectionToggle() {
+      const sectionHeaders = document.querySelectorAll('.section-header');
+      
+      sectionHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+          const section = header.getAttribute('data-toggle');
+          const list = document.getElementById(`history-${section}`);
+          const isExpanded = header.getAttribute('aria-expanded') === 'true';
+          
+          header.setAttribute('aria-expanded', (!isExpanded).toString());
+          list?.classList.toggle('collapsed', isExpanded);
+        });
+      });
+    }
+    
+    // ================================================================================
+    // Settings Setup
+    // ================================================================================
+    function setupSettings() {
+      const settingsBtn = document.getElementById('settings-btn');
+      
+      settingsBtn?.addEventListener('click', () => {
+        showToast(lang === 'zh' ? '设置功能即将推出' : 'Settings coming soon', 'info');
+      });
+    }
+    
+    // ================================================================================
+    // Clear All Setup
+    // ================================================================================
+    function setupClearAll() {
+      const clearAllBtn = document.getElementById('clear-all-btn');
+      
+      clearAllBtn?.addEventListener('click', () => {
+        const confirmMessage = lang === 'zh' 
+          ? '确定要清除所有对话历史吗？此操作无法撤销。' 
+          : 'Are you sure you want to clear all conversation history? This cannot be undone.';
+        
+        if (confirm(confirmMessage)) {
+          conversations = [];
+          safeRemoveItem('chatbot_conversations');
+          safeRemoveSessionItem('chatbot_session_id');
+          startNewChat();
+          showToast(lang === 'zh' ? '所有对话已清除' : 'All conversations cleared', 'success');
+        }
+      });
+    }
+    
+    // ================================================================================
+    // Export Setup
+    // ================================================================================
+    function setupExport() {
+      const exportBtn = document.getElementById('export-btn');
+      
+      exportBtn?.addEventListener('click', () => {
+        if (chatHistory.length === 0) {
+          showToast(lang === 'zh' ? '没有可导出的对话' : 'No conversation to export', 'error');
+          return;
+        }
+        
+        const exportData = {
+          title: conversations.find(c => c.id === currentConversationId)?.title || 'Chat Export',
+          model: currentModel,
+          messages: chatHistory,
+          exportedAt: new Date().toISOString()
+        };
+        
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat-export-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showToast(lang === 'zh' ? '对话已导出' : 'Conversation exported', 'success');
+      });
+    }
+    
+    // ================================================================================
+    // Model Selection
+    // ================================================================================
     function selectModel(model: string, name: string) {
       currentModel = model;
       currentModelName = name;
@@ -1867,6 +2128,9 @@ const t = useTranslations(lang);
       showToast(`${lang === 'zh' ? '已切换到' : 'Switched to'} ${name}`, 'success');
     }
     
+    // ================================================================================
+    // Send Message
+    // ================================================================================
     async function sendMessage() {
       const chatInput = document.getElementById('chat-input') as HTMLTextAreaElement;
       const content = chatInput?.value.trim();
@@ -1889,22 +2153,34 @@ const t = useTranslations(lang);
       // Add user message
       addMessage('user', content);
       chatInput.value = '';
+      chatInput.style.height = 'auto';
       
       // Set streaming state
       isStreaming = true;
       
       // Disable input and show loading state
       const sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
+      const stopBtn = document.getElementById('stop-btn') as HTMLButtonElement;
       const inputWrapper = document.querySelector('.input-wrapper');
+      
       if (sendBtn) {
-        sendBtn.disabled = true;
+        sendBtn.style.display = 'none';
+      }
+      if (stopBtn) {
+        stopBtn.style.display = 'flex';
       }
       if (inputWrapper) {
         inputWrapper.classList.add('loading');
       }
+      if (chatInput) {
+        chatInput.disabled = true;
+      }
       
       // Show typing indicator
       showTypingIndicator();
+      
+      // Create abort controller for cancellation
+      abortController = new AbortController();
       
       try {
         console.log('[Chatbot] Fetching from API:', `${API_BASE}/api/chat`);
@@ -1922,7 +2198,8 @@ const t = useTranslations(lang);
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(requestBody)
+          body: JSON.stringify(requestBody),
+          signal: abortController.signal
         });
         
         console.log('[Chatbot] Response status:', response.status, response.statusText);
@@ -1945,31 +2222,65 @@ const t = useTranslations(lang);
           console.error('[Chatbot] API returned error:', data);
           showToast(data.message || 'Failed to get response', 'error');
         }
-        
-        // Reset streaming state
-        isStreaming = false;
-        const inputWrapper = document.querySelector('.input-wrapper');
-        if (inputWrapper) {
-          inputWrapper.classList.remove('loading');
-        }
       } catch (error) {
-        console.error('[Chatbot] Fetch error:', error);
-        removeTypingIndicator();
-        
+        // Check if it's an abort error
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.log('[Chatbot] Request was aborted');
+          removeTypingIndicator();
+          addMessage('assistant', lang === 'zh' ? '生成已停止。' : 'Generation stopped.');
+        } else {
+          console.error('[Chatbot] Fetch error:', error);
+          removeTypingIndicator();
+          
+          // Show error with retry option
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          showToast(`${lang === 'zh' ? '网络错误' : 'Network error'}: ${errorMessage}`, 'error');
+          
+          // Add error message to chat
+          addMessage('assistant', lang === 'zh' 
+            ? `抱歉，发生了错误：${errorMessage}。请稍后重试。`
+            : `Sorry, an error occurred: ${errorMessage}. Please try again later.`
+          );
+        }
+      } finally {
         // Reset streaming state
         isStreaming = false;
+        abortController = null;
+        
+        const sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
+        const stopBtn = document.getElementById('stop-btn') as HTMLButtonElement;
         const inputWrapper = document.querySelector('.input-wrapper');
+        
+        if (sendBtn) {
+          sendBtn.style.display = 'flex';
+          sendBtn.disabled = true;
+        }
+        if (stopBtn) {
+          stopBtn.style.display = 'none';
+        }
         if (inputWrapper) {
           inputWrapper.classList.remove('loading');
         }
-        
-        // Show error with retry option
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        showToast(`${lang === 'zh' ? '网络错误' : 'Network error'}: ${errorMessage}`, 'error');
+        if (chatInput) {
+          chatInput.disabled = false;
+          chatInput.focus();
+        }
       }
     }
     
-    function addMessage(role: 'user' | 'assistant', content: string) {
+    // ================================================================================
+    // Stop Generation
+    // ================================================================================
+    function stopGeneration() {
+      if (abortController) {
+        abortController.abort();
+      }
+    }
+    
+    // ================================================================================
+    // Add Message
+    // ================================================================================
+    function addMessage(role: 'user' | 'assistant', content: string, shouldSave: boolean = true) {
       const messagesContainer = document.getElementById('messages-container');
       const chatArea = document.getElementById('chat-area');
       if (!messagesContainer) return;
@@ -2003,7 +2314,7 @@ const t = useTranslations(lang);
             <p>${escapeHtml(content)}</p>
             <div class="message-footer">
               <span class="message-time">${timeStr}</span>
-              <button class="copy-btn" data-content="${escapeHtml(content)}" aria-label="${lang === 'zh' ? '复制消息' : 'Copy message'}" type="button">
+              <button class="copy-btn" aria-label="${lang === 'zh' ? '复制消息' : 'Copy message'}" type="button">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -2020,8 +2331,7 @@ const t = useTranslations(lang);
       const copyBtn = messageDiv.querySelector('.copy-btn');
       if (copyBtn) {
         copyBtn.addEventListener('click', () => {
-          const text = copyBtn.getAttribute('data-content') || '';
-          navigator.clipboard.writeText(text).then(() => {
+          navigator.clipboard.writeText(content).then(() => {
             showToast(lang === 'zh' ? '已复制到剪贴板' : 'Copied to clipboard', 'success');
           }).catch(() => {
             showToast(lang === 'zh' ? '复制失败' : 'Copy failed', 'error');
@@ -2038,12 +2348,21 @@ const t = useTranslations(lang);
       }
       
       // Add to history
-      chatHistory.push({ role, content, timestamp: now });
-      
-      // Save conversation
-      saveConversation();
+      if (shouldSave) {
+        chatHistory.push({ 
+          role, 
+          content, 
+          timestamp: now.toISOString() 
+        });
+        
+        // Save conversation
+        saveConversation();
+      }
     }
     
+    // ================================================================================
+    // Typing Indicator
+    // ================================================================================
     function showTypingIndicator() {
       const messagesContainer = document.getElementById('messages-container');
       const chatArea = document.getElementById('chat-area');
@@ -2074,9 +2393,12 @@ const t = useTranslations(lang);
       typingIndicator?.remove();
     }
     
+    // ================================================================================
+    // New Chat
+    // ================================================================================
     function startNewChat() {
       // Clear session to start a new conversation
-      sessionStorage.removeItem('chatbot_session_id');
+      safeRemoveSessionItem('chatbot_session_id');
       currentConversationId = null;
       chatHistory = [];
       
@@ -2091,21 +2413,47 @@ const t = useTranslations(lang);
         welcomeScreen.classList.remove('hidden');
       }
       
+      // Reset input
+      const chatInput = document.getElementById('chat-input') as HTMLTextAreaElement;
+      const sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
+      if (chatInput) {
+        chatInput.value = '';
+        chatInput.style.height = 'auto';
+      }
+      if (sendBtn) {
+        sendBtn.disabled = true;
+      }
+      
       renderHistory();
+      
+      // Close mobile sidebar if open
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      const menuToggle = document.getElementById('menu-toggle');
+      if (sidebar?.classList.contains('open')) {
+        sidebar.classList.remove('open');
+        overlay?.classList.remove('visible');
+        menuToggle?.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+      }
     }
     
+    // ================================================================================
+    // Load Conversations
+    // ================================================================================
     function loadConversations() {
-      const stored = localStorage.getItem('chatbot_conversations');
+      const stored = safeGetItem('chatbot_conversations');
       if (stored) {
         try {
           conversations = JSON.parse(stored);
         } catch (e) {
+          console.error('[Chatbot] Failed to parse conversations:', e);
           conversations = [];
         }
       }
       
       // Check if there's a session conversation ID stored
-      const sessionId = sessionStorage.getItem('chatbot_session_id');
+      const sessionId = safeGetSessionItem('chatbot_session_id');
       if (sessionId) {
         currentConversationId = sessionId;
         // Load the conversation if it exists
@@ -2125,74 +2473,24 @@ const t = useTranslations(lang);
             
             // Render all messages
             chatHistory.forEach(msg => {
-              const now = msg.timestamp ? new Date(msg.timestamp) : new Date();
-              const timeStr = now.toLocaleTimeString(lang === 'zh' ? 'zh-CN' : 'en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              });
-              
-              const messageDiv = document.createElement('div');
-              messageDiv.className = `message ${msg.role}-message`;
-              
-              if (msg.role === 'user') {
-                messageDiv.innerHTML = `
-                  <div class="message-bubble">
-                    <p>${escapeHtml(msg.content)}</p>
-                    <span class="message-time">${timeStr}</span>
-                  </div>
-                `;
-              } else {
-                messageDiv.innerHTML = `
-                  <div class="assistant-avatar">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <path d="M12 16v-4"></path>
-                      <path d="M12 8h.01"></path>
-                    </svg>
-                  </div>
-                  <div class="message-content">
-                    <p>${escapeHtml(msg.content)}</p>
-                    <div class="message-footer">
-                      <span class="message-time">${timeStr}</span>
-                      <button class="copy-btn" data-content="${escapeHtml(msg.content)}" aria-label="${lang === 'zh' ? '复制消息' : 'Copy message'}" type="button">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                `;
-              }
-              
-              messagesContainer.appendChild(messageDiv);
-              
-              // Add copy button event listener
-              const copyBtn = messageDiv.querySelector('.copy-btn');
-              if (copyBtn) {
-                copyBtn.addEventListener('click', () => {
-                  const text = copyBtn.getAttribute('data-content') || '';
-                  navigator.clipboard.writeText(text).then(() => {
-                    showToast(lang === 'zh' ? '已复制到剪贴板' : 'Copied to clipboard', 'success');
-                  }).catch(() => {
-                    showToast(lang === 'zh' ? '复制失败' : 'Copy failed', 'error');
-                  });
-                });
-              }
+              addMessage(msg.role, msg.content, false);
             });
           }
         }
       }
     }
     
+    // ================================================================================
+    // Save Conversation
+    // ================================================================================
     function saveConversation() {
       // Use session storage to track the current session conversation
-      let sessionId = sessionStorage.getItem('chatbot_session_id');
+      let sessionId = safeGetSessionItem('chatbot_session_id');
       
       if (!sessionId) {
         // Create a new session conversation for this page visit
         sessionId = 'session_' + Date.now().toString();
-        sessionStorage.setItem('chatbot_session_id', sessionId);
+        safeSetSessionItem('chatbot_session_id', sessionId);
         currentConversationId = sessionId;
         
         conversations.unshift({
@@ -2200,8 +2498,8 @@ const t = useTranslations(lang);
           title: chatHistory[0]?.content.slice(0, 50) || (lang === 'zh' ? '新对话' : 'New Chat'),
           messages: [...chatHistory],
           model: currentModel,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         });
       } else {
         // Update existing session conversation
@@ -2209,7 +2507,7 @@ const t = useTranslations(lang);
         const conv = conversations.find(c => c.id === sessionId);
         if (conv) {
           conv.messages = [...chatHistory];
-          conv.updatedAt = new Date();
+          conv.updatedAt = new Date().toISOString();
           // Update title if first message changed
           if (chatHistory.length > 0) {
             conv.title = chatHistory[0].content.slice(0, 50);
@@ -2221,16 +2519,19 @@ const t = useTranslations(lang);
             title: chatHistory[0]?.content.slice(0, 50) || (lang === 'zh' ? '新对话' : 'New Chat'),
             messages: [...chatHistory],
             model: currentModel,
-            createdAt: new Date(),
-            updatedAt: new Date()
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
           });
         }
       }
       
-      localStorage.setItem('chatbot_conversations', JSON.stringify(conversations));
+      safeSetItem('chatbot_conversations', JSON.stringify(conversations));
       renderHistory();
     }
     
+    // ================================================================================
+    // Render History
+    // ================================================================================
     function renderHistory() {
       const todayList = document.getElementById('history-today');
       const weekList = document.getElementById('history-week');
@@ -2275,11 +2576,18 @@ const t = useTranslations(lang);
         }
       });
       
-      document.getElementById('count-today')!.textContent = todayCount.toString();
-      document.getElementById('count-week')!.textContent = weekCount.toString();
-      document.getElementById('count-older')!.textContent = olderCount.toString();
+      const countToday = document.getElementById('count-today');
+      const countWeek = document.getElementById('count-week');
+      const countOlder = document.getElementById('count-older');
+      
+      if (countToday) countToday.textContent = todayCount.toString();
+      if (countWeek) countWeek.textContent = weekCount.toString();
+      if (countOlder) countOlder.textContent = olderCount.toString();
     }
     
+    // ================================================================================
+    // Load Conversation
+    // ================================================================================
     function loadConversation(id: string) {
       const conv = conversations.find(c => c.id === id);
       if (!conv) return;
@@ -2299,9 +2607,24 @@ const t = useTranslations(lang);
         welcomeScreen.classList.add('hidden');
       }
       
+      // Update active state in sidebar
       renderHistory();
+      
+      // Close mobile sidebar
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      const menuToggle = document.getElementById('menu-toggle');
+      if (sidebar?.classList.contains('open')) {
+        sidebar.classList.remove('open');
+        overlay?.classList.remove('visible');
+        menuToggle?.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+      }
     }
     
+    // ================================================================================
+    // Show Toast
+    // ================================================================================
     function showToast(message: string, type: 'success' | 'error' | 'info') {
       const toastContainer = document.getElementById('toast-container');
       if (!toastContainer) return;
@@ -2313,16 +2636,25 @@ const t = useTranslations(lang);
       toastContainer.appendChild(toast);
       
       setTimeout(() => {
-        toast.remove();
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(calc(100% + var(--space-6)))';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
       }, 3000);
     }
     
+    // ================================================================================
+    // Escape HTML
+    // ================================================================================
     function escapeHtml(text: string): string {
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
     }
     
+    // ================================================================================
+    // Format Date
+    // ================================================================================
     function formatDate(date: Date): string {
       return date.toLocaleTimeString(lang === 'zh' ? 'zh-CN' : 'en-US', {
         hour: '2-digit',
@@ -2330,8 +2662,27 @@ const t = useTranslations(lang);
       });
     }
     
+    // ================================================================================
+    // Global Error Handler
+    // ================================================================================
+    window.addEventListener('error', (e) => {
+      console.error('[Chatbot] Global error:', e.error);
+      showToast(lang === 'zh' ? '发生错误，请刷新页面重试' : 'An error occurred, please refresh the page', 'error');
+    });
+    
+    window.addEventListener('unhandledrejection', (e) => {
+      console.error('[Chatbot] Unhandled promise rejection:', e.reason);
+      showToast(lang === 'zh' ? '发生错误，请刷新页面重试' : 'An error occurred, please refresh the page', 'error');
+    });
+    
+    // ================================================================================
     // Initialize on load
-    init();
+    // ================================================================================
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
   </script>
 </body>
 </html>
