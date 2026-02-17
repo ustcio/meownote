@@ -100,15 +100,17 @@ function safeRemoveSessionItem(key: string): boolean {
 export function initChatbot(): void {
   console.log('[Chatbot] Initializing...');
   console.log('[Chatbot] Language:', lang);
+  console.log('[Chatbot] DOM ready state:', document.readyState);
   
   if (!document.getElementById('chat-input')) {
     console.error('[Chatbot] Chat input element not found!');
     return;
   }
   
+  // Initialize in correct order
   loadConversations();
+  setupModelSelector(); // Setup model selector first
   setupEventListeners();
-  setupModelSelector();
   setupQuickActions();
   setupSidebarToggle();
   setupSearch();
@@ -121,77 +123,130 @@ export function initChatbot(): void {
 }
 
 // ================================================================================
-// Model Selector Setup (New + Button Design)
+// Model Selector Setup - COMPLETE REWRITE WITH DEBUGGING
 // ================================================================================
 
 function setupModelSelector(): void {
+  console.log('[ModelSelector] ========== SETUP START ==========');
+  
   const modelBtn = document.getElementById('model-selector-btn');
   const modelDropdown = document.getElementById('model-dropdown');
+  const modelCurrentName = document.getElementById('model-current-name');
   
-  console.log('[Chatbot] Setting up model selector...');
-  console.log('[Chatbot] Model button found:', !!modelBtn);
-  console.log('[Chatbot] Model dropdown found:', !!modelDropdown);
+  console.log('[ModelSelector] Button element:', modelBtn);
+  console.log('[ModelSelector] Dropdown element:', modelDropdown);
+  console.log('[ModelSelector] Name display element:', modelCurrentName);
+  console.log('[ModelSelector] Button exists:', !!modelBtn);
+  console.log('[ModelSelector] Dropdown exists:', !!modelDropdown);
   
-  if (!modelBtn || !modelDropdown) {
-    console.error('[Chatbot] Model selector elements not found');
+  if (!modelBtn) {
+    console.error('[ModelSelector] CRITICAL: Button element not found!');
+    console.log('[ModelSelector] Available buttons:', document.querySelectorAll('button'));
     return;
   }
   
-  // Toggle dropdown on button click
-  modelBtn.addEventListener('click', (e) => {
-    console.log('[Chatbot] Model button clicked');
+  if (!modelDropdown) {
+    console.error('[ModelSelector] CRITICAL: Dropdown element not found!');
+    return;
+  }
+  
+  // Check if button is visible and clickable
+  const btnStyles = window.getComputedStyle(modelBtn);
+  console.log('[ModelSelector] Button display:', btnStyles.display);
+  console.log('[ModelSelector] Button visibility:', btnStyles.visibility);
+  console.log('[ModelSelector] Button pointer-events:', btnStyles.pointerEvents);
+  console.log('[ModelSelector] Button z-index:', btnStyles.zIndex);
+  
+  // Remove any existing listeners (prevent duplicates)
+  const newBtn = modelBtn.cloneNode(true) as HTMLElement;
+  modelBtn.parentNode?.replaceChild(newBtn, modelBtn);
+  
+  console.log('[ModelSelector] Button cloned, new element:', newBtn);
+  
+  // Toggle dropdown on button click - using mousedown for better responsiveness
+  newBtn.addEventListener('mousedown', (e) => {
+    console.log('[ModelSelector] ========== BUTTON CLICKED ==========');
+    console.log('[ModelSelector] Event type:', e.type);
+    console.log('[ModelSelector] Event target:', e.target);
     e.stopPropagation();
     e.preventDefault();
     
     const isVisible = modelDropdown.classList.contains('visible');
-    console.log('[Chatbot] Dropdown currently visible:', isVisible);
+    console.log('[ModelSelector] Dropdown currently visible:', isVisible);
+    console.log('[ModelSelector] Dropdown classes before toggle:', modelDropdown.className);
     
-    modelDropdown.classList.toggle('visible', !isVisible);
-    modelBtn.setAttribute('aria-expanded', isVisible ? 'false' : 'true');
-    
-    console.log('[Chatbot] Dropdown visibility toggled to:', !isVisible);
-    console.log('[Chatbot] Dropdown classes:', modelDropdown.className);
-    
-    // Position dropdown above the input container
-    if (!isVisible) {
-      positionDropdown(modelDropdown, modelBtn);
+    // Toggle visibility
+    if (isVisible) {
+      modelDropdown.classList.remove('visible');
+      newBtn.setAttribute('aria-expanded', 'false');
+      console.log('[ModelSelector] Dropdown hidden');
+    } else {
+      modelDropdown.classList.add('visible');
+      newBtn.setAttribute('aria-expanded', 'true');
+      console.log('[ModelSelector] Dropdown shown');
+      positionDropdown(modelDropdown, newBtn);
     }
+    
+    console.log('[ModelSelector] Dropdown classes after toggle:', modelDropdown.className);
+    console.log('[ModelSelector] aria-expanded:', newBtn.getAttribute('aria-expanded'));
+  });
+  
+  // Also handle click event as fallback
+  newBtn.addEventListener('click', (e) => {
+    console.log('[ModelSelector] Click event fired');
+    e.stopPropagation();
+    e.preventDefault();
   });
   
   // Handle model selection
-  modelDropdown.querySelectorAll('.model-option').forEach(option => {
+  const modelOptions = modelDropdown.querySelectorAll('.model-option');
+  console.log('[ModelSelector] Found', modelOptions.length, 'model options');
+  
+  modelOptions.forEach((option, index) => {
+    console.log(`[ModelSelector] Setting up option ${index}:`, option.getAttribute('data-model'));
+    
     option.addEventListener('click', (e) => {
+      console.log('[ModelSelector] ========== OPTION SELECTED ==========');
       e.stopPropagation();
+      e.preventDefault();
+      
       const model = option.getAttribute('data-model');
       const name = option.getAttribute('data-name');
+      console.log('[ModelSelector] Selected model:', model, name);
+      
       if (model && name) {
         selectModel(model, name);
         modelDropdown.classList.remove('visible');
-        modelBtn.setAttribute('aria-expanded', 'false');
+        newBtn.setAttribute('aria-expanded', 'false');
       }
     });
   });
   
   // Close dropdown when clicking outside
   document.addEventListener('click', (e) => {
-    if (!modelDropdown.contains(e.target as Node) && !modelBtn.contains(e.target as Node)) {
-      modelDropdown.classList.remove('visible');
-      modelBtn.setAttribute('aria-expanded', 'false');
+    const target = e.target as Node;
+    if (!modelDropdown.contains(target) && !newBtn.contains(target)) {
+      if (modelDropdown.classList.contains('visible')) {
+        console.log('[ModelSelector] Closing dropdown (click outside)');
+        modelDropdown.classList.remove('visible');
+        newBtn.setAttribute('aria-expanded', 'false');
+      }
     }
   });
   
   // Keyboard navigation
-  modelBtn.addEventListener('keydown', (e) => {
+  newBtn.addEventListener('keydown', (e) => {
+    console.log('[ModelSelector] Keydown on button:', e.key);
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      modelBtn.click();
+      newBtn.dispatchEvent(new MouseEvent('mousedown'));
     } else if (e.key === 'Escape') {
       modelDropdown.classList.remove('visible');
-      modelBtn.setAttribute('aria-expanded', 'false');
+      newBtn.setAttribute('aria-expanded', 'false');
     }
   });
   
-  const modelOptions = modelDropdown.querySelectorAll('.model-option');
+  // Setup keyboard navigation for options
   modelOptions.forEach((option, index) => {
     option.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowDown') {
@@ -207,50 +262,75 @@ function setupModelSelector(): void {
         (option as HTMLElement).click();
       } else if (e.key === 'Escape') {
         modelDropdown.classList.remove('visible');
-        modelBtn.setAttribute('aria-expanded', 'false');
-        modelBtn.focus();
+        newBtn.setAttribute('aria-expanded', 'false');
+        newBtn.focus();
       }
     });
   });
+  
+  console.log('[ModelSelector] ========== SETUP COMPLETE ==========');
 }
 
 function positionDropdown(dropdown: HTMLElement, button: HTMLElement): void {
-  // The dropdown is positioned via CSS, but we can add dynamic positioning if needed
+  console.log('[ModelSelector] Positioning dropdown');
+  
+  // Reset any manual positioning
+  dropdown.style.left = '8px';
+  dropdown.style.right = 'auto';
+  
   const rect = button.getBoundingClientRect();
   const dropdownRect = dropdown.getBoundingClientRect();
-  
-  // Ensure dropdown doesn't go off-screen
   const viewportWidth = window.innerWidth;
-  if (rect.left + dropdownRect.width > viewportWidth) {
+  
+  console.log('[ModelSelector] Button rect:', rect);
+  console.log('[ModelSelector] Dropdown rect:', dropdownRect);
+  console.log('[ModelSelector] Viewport width:', viewportWidth);
+  
+  // Ensure dropdown doesn't go off-screen on the right
+  if (rect.left + dropdownRect.width > viewportWidth - 16) {
+    console.log('[ModelSelector] Adjusting position to prevent overflow');
     dropdown.style.left = 'auto';
     dropdown.style.right = '8px';
   }
 }
 
 function selectModel(model: string, name: string): void {
+  console.log('[ModelSelector] ========== SELECTING MODEL ==========');
+  console.log('[ModelSelector] Model:', model);
+  console.log('[ModelSelector] Name:', name);
+  
   currentModel = model;
   currentModelName = name;
   
   // Update UI - model options in dropdown
-  document.querySelectorAll('.model-option').forEach(opt => {
-    const isActive = opt.getAttribute('data-model') === model;
-    opt.classList.toggle('active', isActive);
-    opt.setAttribute('aria-selected', isActive ? 'true' : 'false');
-  });
+  const modelDropdown = document.getElementById('model-dropdown');
+  if (modelDropdown) {
+    const options = modelDropdown.querySelectorAll('.model-option');
+    console.log('[ModelSelector] Updating', options.length, 'options');
+    
+    options.forEach(opt => {
+      const optModel = opt.getAttribute('data-model');
+      const isActive = optModel === model;
+      console.log('[ModelSelector] Option', optModel, 'active:', isActive);
+      
+      opt.classList.toggle('active', isActive);
+      opt.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+  }
   
   // Update button text
   const modelCurrentName = document.getElementById('model-current-name');
   if (modelCurrentName) {
-    // Shorten name for button display
     const shortName = getShortModelName(name);
+    console.log('[ModelSelector] Updating button text to:', shortName);
     modelCurrentName.textContent = shortName;
   }
   
   showToast(`${lang === 'zh' ? '已切换到' : 'Switched to'} ${name}`, 'success');
+  console.log('[ModelSelector] ========== MODEL SELECTED ==========');
 }
 
 function getShortModelName(fullName: string): string {
-  // Shorten model names for button display
   const nameMap: Record<string, string> = {
     'Doubao 2.0 Pro': 'Doubao Pro',
     'Doubao 2.0 Code': 'Doubao Code',
@@ -527,16 +607,12 @@ async function sendMessage(): Promise<void> {
   // Disable input and show loading state
   const sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
   const stopBtn = document.getElementById('stop-btn') as HTMLButtonElement;
-  const inputWrapper = document.querySelector('.input-wrapper');
   
   if (sendBtn) {
     sendBtn.style.display = 'none';
   }
   if (stopBtn) {
     stopBtn.style.display = 'flex';
-  }
-  if (inputWrapper) {
-    inputWrapper.classList.add('loading');
   }
   if (chatInput) {
     chatInput.disabled = true;
@@ -554,6 +630,8 @@ async function sendMessage(): Promise<void> {
       model: currentModel,
       history: chatHistory.slice(-10)
     };
+    
+    console.log('[Chatbot] Sending message with model:', currentModel);
     
     const response = await fetch(`${API_BASE}/api/chat`, {
       method: 'POST',
@@ -600,7 +678,6 @@ async function sendMessage(): Promise<void> {
     
     const sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
     const stopBtn = document.getElementById('stop-btn') as HTMLButtonElement;
-    const inputWrapper = document.querySelector('.input-wrapper');
     
     if (sendBtn) {
       sendBtn.style.display = 'flex';
@@ -608,9 +685,6 @@ async function sendMessage(): Promise<void> {
     }
     if (stopBtn) {
       stopBtn.style.display = 'none';
-    }
-    if (inputWrapper) {
-      inputWrapper.classList.remove('loading');
     }
     if (chatInput) {
       chatInput.disabled = false;
