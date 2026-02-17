@@ -171,9 +171,9 @@ function setupWindowControls(): void {
 
     // Scroll to bottom after resize animation
     setTimeout(() => {
-      const chatArea = document.getElementById('chat-area');
-      if (chatArea) {
-        chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: 'smooth' });
+      const windowContent = document.querySelector('.window-content');
+      if (windowContent) {
+        windowContent.scrollTo({ top: windowContent.scrollHeight, behavior: 'smooth' });
       }
     }, 300);
   });
@@ -353,9 +353,9 @@ function setupEventListeners(): void {
     chatInput.addEventListener('focus', () => {
       if (window.innerWidth <= 768) {
         setTimeout(() => {
-          const inputArea = document.getElementById('input-area');
-          if (inputArea) {
-            inputArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          const windowInputArea = document.querySelector('.window-input-area');
+          if (windowInputArea) {
+            windowInputArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           }
         }, 300);
       }
@@ -632,7 +632,7 @@ function stopGeneration(): void {
 
 function addMessage(role: 'user' | 'assistant', content: string, shouldSave: boolean = true): void {
   const messagesContainer = document.getElementById('messages-container');
-  const chatArea = document.getElementById('chat-area');
+  const windowContent = document.querySelector('.window-content');
   if (!messagesContainer) return;
 
   const now = new Date();
@@ -690,10 +690,10 @@ function addMessage(role: 'user' | 'assistant', content: string, shouldSave: boo
   }
 
   // Scroll to bottom
-  if (chatArea) {
+  if (windowContent) {
     requestAnimationFrame(() => {
-      chatArea.scrollTo({
-        top: chatArea.scrollHeight,
+      windowContent.scrollTo({
+        top: windowContent.scrollHeight,
         behavior: 'smooth'
       });
     });
@@ -717,7 +717,7 @@ function addMessage(role: 'user' | 'assistant', content: string, shouldSave: boo
 
 function showTypingIndicator(): void {
   const messagesContainer = document.getElementById('messages-container');
-  const chatArea = document.getElementById('chat-area');
+  const windowContent = document.querySelector('.window-content');
   if (!messagesContainer) return;
 
   const typingDiv = document.createElement('div');
@@ -738,10 +738,10 @@ function showTypingIndicator(): void {
 
   messagesContainer.appendChild(typingDiv);
 
-  if (chatArea) {
+  if (windowContent) {
     requestAnimationFrame(() => {
-      chatArea.scrollTo({
-        top: chatArea.scrollHeight,
+      windowContent.scrollTo({
+        top: windowContent.scrollHeight,
         behavior: 'smooth'
       });
     });
