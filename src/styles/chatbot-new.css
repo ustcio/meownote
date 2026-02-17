@@ -818,9 +818,7 @@
     0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
-[data-theme="dark"] .window-titlebar {
-  background: linear-gradient(180deg, #2a2a2a 0%, #1f1f1f 100%);
-}
+/* Titlebar uses var(--bg-primary) in both light and dark mode for consistency with chat content */
 
 [data-theme="dark"] .window-btn svg {
   color: rgba(0, 0, 0, 0.6);
