@@ -736,87 +736,80 @@ let goldPriceCache = {
 // 爬取上海黄金交易所数据
 async function crawlSGEData() {
   try {
-    // 使用东方财富网的数据源（更稳定）
-    const eastmoneyUrl = 'https://push2.eastmoney.com/api/qt/stock/get?secid=113.Au99.99&fields=f43,f44,f45,f46,f47,f48,f50,f51,f52,f57,f58,f60,f170';
+    // 使用金投网国内金价 API
+    const jtwUrl = 'https://api.jijinhao.com/quoteCenter/realTime.htm?code=JO_92233';
     
-    const response = await fetch(eastmoneyUrl, {
+    const response = await fetch(jtwUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': '*/*',
-        'Referer': 'https://quote.eastmoney.com/'
+        'Accept': 'application/json, text/javascript, */*',
+        'Referer': 'https://quote.cngold.org/'
       },
       cf: { cacheTtl: 0 }
     });
     
     if (response.ok) {
-      const result = await response.json();
-      const data = result.data;
-      
-      if (data) {
-        // 东方财富字段说明：
-        // f43=最新价, f44=最高价, f45=最低价, f46=开盘价, f47=成交量
-        // f57=代码, f58=名称, f60=昨收, f170=涨跌幅
-        const price = parseFloat(data.f43) / 100; // 价格需要除以100
-        const high = parseFloat(data.f44) / 100;
-        const low = parseFloat(data.f45) / 100;
-        const open = parseFloat(data.f46) / 100;
-        const prevClose = parseFloat(data.f60) / 100;
-        const changePercent = parseFloat(data.f170) / 100;
-        const volume = parseFloat(data.f47);
-        
-        if (price > 0) {
-          return {
-            price: price,
-            open: open,
-            high: high,
-            low: low,
-            prevClose: prevClose,
-            change: price - prevClose,
-            changePercent: changePercent,
-            volume: volume,
-            source: 'Eastmoney-SGE',
-            timestamp: Date.now()
-          };
-        }
-      }
-    }
-    
-    // 备用：使用新浪财经
-    const sinaUrl = 'https://hq.sinajs.cn/list=hf_AU0';
-    const sinaResponse = await fetch(sinaUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Referer': 'https://finance.sina.com.cn'
-      },
-      cf: { cacheTtl: 0 }
-    });
-    
-    if (sinaResponse.ok) {
-      const text = await sinaResponse.text();
-      // 解析新浪数据格式: var hq_str_hf_AU0="..."
-      const match = text.match(/var hq_str_hf_AU0="([^"]+)"/);
+      const text = await response.text();
+      // 解析 JSONP 格式: var quote_center_realTime = {...};
+      const match = text.match(/var\s+quote_center_realTime\s*=\s*({.+?});/);
       if (match) {
-        const parts = match[1].split(',');
-        if (parts.length > 8) {
-          // 新浪黄金期货格式: 名称,最新价,涨跌,买价,卖价,最高价,最低价,成交量,持仓量...
-          const price = parseFloat(parts[1]);
-          const change = parseFloat(parts[2]);
-          const high = parseFloat(parts[5]);
-          const low = parseFloat(parts[6]);
-          const open = parseFloat(parts[8]) || price - change;
+        const data = JSON.parse(match[1]);
+        if (data && data.data) {
+          const quote = data.data;
+          const price = parseFloat(quote.q63); // 最新价
+          const open = parseFloat(quote.q1);   // 开盘价
+          const high = parseFloat(quote.q3);   // 最高价
+          const low = parseFloat(quote.q4);    // 最低价
+          const prevClose = parseFloat(quote.q2); // 昨收
           
           if (price > 0) {
+            const change = price - prevClose;
+            const changePercent = (change / prevClose) * 100;
+            
             return {
               price: price,
               open: open,
               high: high,
               low: low,
+              prevClose: prevClose,
               change: change,
-              changePercent: (change / (price - change)) * 100,
-              source: 'Sina-SGE',
+              changePercent: changePercent,
+              source: 'JTWSGE',
               timestamp: Date.now()
             };
           }
+        }
+      }
+    }
+    
+    // 备用：使用黄金价格网
+    const goldApiUrl = 'https://api.it120.cc/free/open/gold/price';
+    const goldResponse = await fetch(goldApiUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      },
+      cf: { cacheTtl: 0 }
+    });
+    
+    if (goldResponse.ok) {
+      const data = await goldResponse.json();
+      if (data.code === 0 && data.data) {
+        const goldData = data.data;
+        // 查找上海黄金交易所数据
+        const sgeItem = goldData.find(item => 
+          item.name?.includes('黄金') && item.name?.includes('上海')
+        );
+        
+        if (sgeItem) {
+          return {
+            price: parseFloat(sgeItem.price),
+            open: parseFloat(sgeItem.open) || parseFloat(sgeItem.price),
+            high: parseFloat(sgeItem.high) || parseFloat(sgeItem.price) * 1.005,
+            low: parseFloat(sgeItem.low) || parseFloat(sgeItem.price) * 0.995,
+            changePercent: parseFloat(sgeItem.changePercent) || 0,
+            source: 'GoldAPI-CN',
+            timestamp: Date.now()
+          };
         }
       }
     }
@@ -831,76 +824,43 @@ async function crawlSGEData() {
 // 爬取国际金价
 async function crawlInternationalPrice() {
   try {
-    // 1. 使用东方财富国际金价（最可靠）
-    const eastmoneyUrl = 'https://push2.eastmoney.com/api/qt/stock/get?secid=102.GC00Y&fields=f43,f44,f45,f46,f47,f48,f50,f51,f52,f57,f58,f60,f170';
+    // 1. 使用金投网国际金价 API
+    const jtwUrl = 'https://api.jijinhao.com/quoteCenter/realTime.htm?code=JO_92234';
     
-    const response = await fetch(eastmoneyUrl, {
+    const response = await fetch(jtwUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': '*/*',
-        'Referer': 'https://quote.eastmoney.com/'
+        'Accept': 'application/json, text/javascript, */*',
+        'Referer': 'https://quote.cngold.org/'
       },
       cf: { cacheTtl: 0 }
     });
     
     if (response.ok) {
-      const result = await response.json();
-      const data = result.data;
-      
-      if (data && data.f43) {
-        const price = parseFloat(data.f43) / 100;
-        const high = parseFloat(data.f44) / 100;
-        const low = parseFloat(data.f45) / 100;
-        const open = parseFloat(data.f46) / 100;
-        const prevClose = parseFloat(data.f60) / 100;
-        const changePercent = parseFloat(data.f170) / 100;
-        
-        if (price > 1000) { // 金价应该在 1000+ 美元
-          return {
-            price: price,
-            open: open || prevClose,
-            high: high || price * 1.005,
-            low: low || price * 0.995,
-            change: price - prevClose,
-            changePercent: changePercent,
-            source: 'Eastmoney-COMEX',
-            timestamp: Date.now()
-          };
-        }
-      }
-    }
-    
-    // 2. 使用新浪财经国际金价
-    const sinaUrl = 'https://hq.sinajs.cn/list=hf_GC';
-    const sinaResponse = await fetch(sinaUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Referer': 'https://finance.sina.com.cn'
-      },
-      cf: { cacheTtl: 0 }
-    });
-    
-    if (sinaResponse.ok) {
-      const text = await sinaResponse.text();
-      const match = text.match(/var hq_str_hf_GC="([^"]+)"/);
+      const text = await response.text();
+      const match = text.match(/var\s+quote_center_realTime\s*=\s*({.+?});/);
       if (match) {
-        const parts = match[1].split(',');
-        if (parts.length > 8) {
-          const price = parseFloat(parts[1]);
-          const change = parseFloat(parts[2]);
-          const high = parseFloat(parts[5]);
-          const low = parseFloat(parts[6]);
-          const open = parseFloat(parts[8]) || price - change;
+        const data = JSON.parse(match[1]);
+        if (data && data.data) {
+          const quote = data.data;
+          const price = parseFloat(quote.q63);
+          const open = parseFloat(quote.q1);
+          const high = parseFloat(quote.q3);
+          const low = parseFloat(quote.q4);
+          const prevClose = parseFloat(quote.q2);
           
           if (price > 1000) {
+            const change = price - prevClose;
+            const changePercent = (change / prevClose) * 100;
+            
             return {
               price: price,
               open: open,
               high: high,
               low: low,
               change: change,
-              changePercent: (change / (price - change)) * 100,
-              source: 'Sina-COMEX',
+              changePercent: changePercent,
+              source: 'JTW-International',
               timestamp: Date.now()
             };
           }
@@ -908,38 +868,32 @@ async function crawlInternationalPrice() {
       }
     }
     
-    // 3. 使用伦敦金现货数据
-    const londonUrl = 'https://push2.eastmoney.com/api/qt/stock/get?secid=103.XAUUSD&fields=f43,f44,f45,f46,f47,f48,f50,f51,f52,f57,f58,f60,f170';
-    const londonResponse = await fetch(londonUrl, {
+    // 2. 使用黄金价格网国际金价
+    const goldApiUrl = 'https://api.it120.cc/free/open/gold/price';
+    const goldResponse = await fetch(goldApiUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': '*/*',
-        'Referer': 'https://quote.eastmoney.com/'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
       },
       cf: { cacheTtl: 0 }
     });
     
-    if (londonResponse.ok) {
-      const result = await londonResponse.json();
-      const data = result.data;
-      
-      if (data && data.f43) {
-        const price = parseFloat(data.f43) / 100;
-        const high = parseFloat(data.f44) / 100;
-        const low = parseFloat(data.f45) / 100;
-        const open = parseFloat(data.f46) / 100;
-        const prevClose = parseFloat(data.f60) / 100;
-        const changePercent = parseFloat(data.f170) / 100;
+    if (goldResponse.ok) {
+      const data = await goldResponse.json();
+      if (data.code === 0 && data.data) {
+        const goldData = data.data;
+        // 查找国际金价数据
+        const intlItem = goldData.find(item => 
+          item.name?.includes('黄金') && (item.name?.includes('国际') || item.name?.includes('伦敦'))
+        );
         
-        if (price > 1000) {
+        if (intlItem) {
           return {
-            price: price,
-            open: open || prevClose,
-            high: high || price * 1.005,
-            low: low || price * 0.995,
-            change: price - prevClose,
-            changePercent: changePercent,
-            source: 'Eastmoney-XAU',
+            price: parseFloat(intlItem.price),
+            open: parseFloat(intlItem.open) || parseFloat(intlItem.price),
+            high: parseFloat(intlItem.high) || parseFloat(intlItem.price) * 1.005,
+            low: parseFloat(intlItem.low) || parseFloat(intlItem.price) * 0.995,
+            changePercent: parseFloat(intlItem.changePercent) || 0,
+            source: 'GoldAPI-Intl',
             timestamp: Date.now()
           };
         }
