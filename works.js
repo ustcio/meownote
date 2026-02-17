@@ -881,16 +881,19 @@ async function crawlInternationalPrice() {
 // 获取 USD/CNY 汇率
 async function getExchangeRate() {
   try {
-    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD', {
-      cf: { cacheTtl: 3600 } // 缓存1小时
-    });
+    console.log('[Crawl] Fetching exchange rate...');
+    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    console.log('[Crawl] Exchange rate response status:', response.status);
     if (response.ok) {
       const data = await response.json();
-      return data.rates?.CNY || 7.25;
+      const rate = data.rates?.CNY || 7.25;
+      console.log('[Crawl] Exchange rate:', rate);
+      return rate;
     }
   } catch (e) {
-    console.error('Exchange rate error:', e);
+    console.error('[Crawl] Exchange rate error:', e.message);
   }
+  console.log('[Crawl] Using default exchange rate: 7.25');
   return 7.25;
 }
 
