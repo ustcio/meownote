@@ -119,13 +119,42 @@ const timeRanges = [
   .chart canvas { width: 100% !important; height: 100% !important; }
   
   .update { text-align: center; margin-top: var(--space-6); font-size: var(--text-xs); color: var(--text-tertiary); }
+  
+  /* 加载状态样式 */
+  .price.loading {
+    opacity: 0.6;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
 </style>
 
 <script>
   // Gold Price API Configuration
   // Using your Cloudflare Worker for SGE and international gold prices
   const API_BASE = 'https://api.agiera.net'; // 你的 Worker 地址
-  const REFRESH_INTERVAL = 60000; // 60 seconds
+  const REFRESH_INTERVAL = 30000; // 30 seconds - 更频繁的更新
+  
+  // 显示加载状态
+  function showLoading() {
+    const ids = ['domestic-price', 'international-price'];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('loading');
+    });
+  }
+  
+  // 隐藏加载状态
+  function hideLoading() {
+    const ids = ['domestic-price', 'international-price'];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('loading');
+    });
+  }
   
   let currentTimeRange = 'realtime';
   let domesticChart = null;
@@ -188,25 +217,43 @@ const timeRanges = [
   }
   
   // Fetch gold price from your Worker API
-  async function fetchGoldPriceData() {
+  async function fetchGoldPriceData(forceRefresh = false) {
     try {
-      const response = await fetch(`${API_BASE}/api/gold`, {
-        headers: { 'Accept': 'application/json' }
+      showLoading();
+      
+      // 添加时间戳参数来绕过缓存
+      const timestamp = Date.now();
+      const refreshParam = forceRefresh ? '&refresh=true' : '';
+      const url = `${API_BASE}/api/gold?t=${timestamp}${refreshParam}`;
+      
+      console.log('[Gold] Fetching from:', url);
+      
+      const response = await fetch(url, {
+        headers: { 
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
       });
       
       if (response.ok) {
         const data = await response.json();
+        console.log('[Gold] Data received:', data);
+        
         if (data.success) {
           return data;
         }
+      } else {
+        console.error('[Gold] API error:', response.status, response.statusText);
       }
       
-      console.warn('Failed to fetch gold price from API');
+      console.warn('[Gold] Failed to fetch gold price from API');
       return null;
       
     } catch (error) {
-      console.error('Failed to fetch gold price:', error);
+      console.error('[Gold] Failed to fetch gold price:', error);
       return null;
+    } finally {
+      hideLoading();
     }
   }
   
@@ -252,14 +299,29 @@ const timeRanges = [
     };
   }
   
-  async function fetchGoldPrice() {
+  async function fetchGoldPrice(forceRefresh = false) {
     try {
+      console.log('[Gold] Fetching price data...');
+      
       // 使用正确的函数名 fetchGoldPriceData
-      const data = await fetchGoldPriceData();
+      const data = await fetchGoldPriceData(forceRefresh);
       if (!data || !data.success) {
-        console.error('Failed to fetch gold price data');
+        console.error('[Gold] Failed to fetch gold price data:', data?.error || 'Unknown error');
+        
+        // 显示错误状态
+        const dp = document.getElementById('domestic-price');
+        const ip = document.getElementById('international-price');
+        if (dp) dp.textContent = 'Error';
+        if (ip) ip.textContent = 'Error';
+        
         return;
       }
+      
+      console.log('[Gold] Data fetched successfully:', {
+        domestic: data.domestic?.price,
+        international: data.international?.price,
+        source: data.domestic?.source
+      });
       
       // 从 API 响应中获取国内和国际金价数据
       const domestic = data.domestic;
@@ -272,14 +334,14 @@ const timeRanges = [
       const dl = document.getElementById('domestic-low');
       const dopen = document.getElementById('domestic-open');
       
-      if (dp) dp.textContent = formatPrice(domestic.price);
-      if (dc) { 
+      if (dp && domestic?.price) dp.textContent = formatPrice(domestic.price);
+      if (dc && domestic?.changePercent !== undefined) { 
         dc.textContent = formatChange(domestic.changePercent); 
         dc.className = `change ${domestic.changePercent >= 0 ? 'up' : 'down'}`; 
       }
-      if (dh) dh.textContent = formatPrice(domestic.high);
-      if (dl) dl.textContent = formatPrice(domestic.low);
-      if (dopen) dopen.textContent = formatPrice(domestic.open);
+      if (dh && domestic?.high) dh.textContent = formatPrice(domestic.high);
+      if (dl && domestic?.low) dl.textContent = formatPrice(domestic.low);
+      if (dopen && domestic?.open) dopen.textContent = formatPrice(domestic.open);
       
       // Update International Gold Display
       const ip = document.getElementById('international-price');
@@ -288,34 +350,37 @@ const timeRanges = [
       const il = document.getElementById('international-low');
       const iopen = document.getElementById('international-open');
       
-      if (ip) ip.textContent = formatPrice(international.price);
-      if (ic) { 
+      if (ip && international?.price) ip.textContent = formatPrice(international.price);
+      if (ic && international?.changePercent !== undefined) { 
         ic.textContent = formatChange(international.changePercent); 
         ic.className = `change ${international.changePercent >= 0 ? 'up' : 'down'}`; 
       }
-      if (ih) ih.textContent = formatPrice(international.high);
-      if (il) il.textContent = formatPrice(international.low);
-      if (iopen) iopen.textContent = formatPrice(international.open);
+      if (ih && international?.high) ih.textContent = formatPrice(international.high);
+      if (il && international?.low) il.textContent = formatPrice(international.low);
+      if (iopen && international?.open) iopen.textContent = formatPrice(international.open);
       
-      // Update chart data
-      const now = new Date();
-      const timeLabel = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-      
-      priceHistory.domestic.push(domestic.price);
-      priceHistory.international.push(international.price);
-      priceHistory.labels.push(timeLabel);
-      
-      if (priceHistory.domestic.length > 60) {
-        priceHistory.domestic.shift();
-        priceHistory.international.shift();
-        priceHistory.labels.shift();
+      // Update chart data (only in realtime mode)
+      if (currentTimeRange === 'realtime') {
+        const now = new Date();
+        const timeLabel = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        
+        priceHistory.domestic.push(domestic.price);
+        priceHistory.international.push(international.price);
+        priceHistory.labels.push(timeLabel);
+        
+        if (priceHistory.domestic.length > 60) {
+          priceHistory.domestic.shift();
+          priceHistory.international.shift();
+          priceHistory.labels.shift();
+        }
+        
+        updateCharts();
       }
       
-      updateCharts();
       updateTime(data.timestamp);
       
     } catch (error) {
-      console.error('Failed to fetch gold price:', error);
+      console.error('[Gold] Failed to fetch gold price:', error);
     }
   }
   
