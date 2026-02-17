@@ -254,13 +254,16 @@ const timeRanges = [
   
   async function fetchGoldPrice() {
     try {
-      const international = await fetchInternationalGoldPrice();
-      if (!international) {
+      // 使用正确的函数名 fetchGoldPriceData
+      const data = await fetchGoldPriceData();
+      if (!data || !data.success) {
         console.error('Failed to fetch gold price data');
         return;
       }
       
-      const domestic = await calculateDomesticPrice(international);
+      // 从 API 响应中获取国内和国际金价数据
+      const domestic = data.domestic;
+      const international = data.international;
       
       // Update Domestic Gold Display
       const dp = document.getElementById('domestic-price');
@@ -271,8 +274,8 @@ const timeRanges = [
       
       if (dp) dp.textContent = formatPrice(domestic.price);
       if (dc) { 
-        dc.textContent = formatChange(domestic.change); 
-        dc.className = `change ${domestic.change >= 0 ? 'up' : 'down'}`; 
+        dc.textContent = formatChange(domestic.changePercent); 
+        dc.className = `change ${domestic.changePercent >= 0 ? 'up' : 'down'}`; 
       }
       if (dh) dh.textContent = formatPrice(domestic.high);
       if (dl) dl.textContent = formatPrice(domestic.low);
@@ -309,7 +312,7 @@ const timeRanges = [
       }
       
       updateCharts();
-      updateTime();
+      updateTime(data.timestamp);
       
     } catch (error) {
       console.error('Failed to fetch gold price:', error);
