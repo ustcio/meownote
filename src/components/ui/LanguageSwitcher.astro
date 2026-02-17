@@ -36,15 +36,16 @@ function getLocalizedPath(targetLang: Lang): string {
   
   <div id="lang-dropdown" class="lang-dropdown" role="menu">
     {Object.entries(languages).map(([code, name]) => (
-      <a 
-        href={getLocalizedPath(code as Lang)}
+      <button 
+        type="button"
         class:list={['lang-option', { active: code === lang }]}
         role="menuitem"
         data-lang={code}
+        data-path={getLocalizedPath(code as Lang)}
       >
         <span class="lang-code">{code.toUpperCase()}</span>
         <span class="lang-name">{name}</span>
-      </a>
+      </button>
     ))}
   </div>
 </div>
@@ -52,12 +53,34 @@ function getLocalizedPath(targetLang: Lang): string {
 <script>
   const langBtn = document.querySelector('.lang-btn');
   const langDropdown = document.getElementById('lang-dropdown');
+  const langOptions = document.querySelectorAll('.lang-option');
   
   langBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
     const isExpanded = langBtn.getAttribute('aria-expanded') === 'true';
     langBtn.setAttribute('aria-expanded', String(!isExpanded));
     langDropdown?.classList.toggle('open');
+  });
+  
+  // Handle language switch without page reload
+  langOptions.forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const targetLang = option.getAttribute('data-lang');
+      const targetPath = option.getAttribute('data-path');
+      
+      if (targetLang && targetPath) {
+        // Save language preference
+        localStorage.setItem('preferred-lang', targetLang);
+        // Navigate to the localized path
+        window.location.href = targetPath;
+      }
+      
+      // Close dropdown
+      langBtn?.setAttribute('aria-expanded', 'false');
+      langDropdown?.classList.remove('open');
+    });
   });
   
   // Close dropdown when clicking outside
@@ -140,6 +163,13 @@ function getLocalizedPath(targetLang: Lang): string {
     border-radius: var(--radius-md);
     transition: color var(--duration-fast) var(--ease-default),
                 background-color var(--duration-fast) var(--ease-default);
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
   }
   
   .lang-option:hover {
