@@ -940,12 +940,19 @@ async function performCrawl(env) {
   console.log('[Gold Crawler] Starting crawl at', new Date().toISOString());
   
   try {
-    // 并行爬取数据
-    const [sgeData, intlData, exchangeRate] = await Promise.all([
+    // 并行爬取数据，使用 Promise.allSettled 防止一个失败影响其他
+    const [sgeResult, intlResult, rateResult] = await Promise.allSettled([
       crawlSGEData(),
       crawlInternationalPrice(),
       getExchangeRate()
     ]);
+    
+    const sgeData = sgeResult.status === 'fulfilled' ? sgeResult.value : null;
+    const intlData = intlResult.status === 'fulfilled' ? intlResult.value : null;
+    const exchangeRate = rateResult.status === 'fulfilled' ? rateResult.value : 7.25;
+    
+    if (!sgeData) console.error('[Gold Crawler] SGE data fetch failed');
+    if (!intlData) console.error('[Gold Crawler] International data fetch failed');
     
     const OZ_TO_G = 31.1035;
     
