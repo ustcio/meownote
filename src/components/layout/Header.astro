@@ -211,12 +211,19 @@ const currentPath = Astro.url.pathname;
   function updateAuthUI() {
     const user = localStorage.getItem('user');
     const mobileAuthBtnSpan = mobileAuthBtn?.querySelector('span');
-    
+
     if (user) {
-      const userData = JSON.parse(user);
-      if (dropdownUsername) dropdownUsername.textContent = userData.username;
-      if (mobileAuthBtnSpan) mobileAuthBtnSpan.textContent = userData.username;
-      userMenu?.classList.add('logged-in');
+      try {
+        const userData = JSON.parse(user);
+        if (dropdownUsername) dropdownUsername.textContent = userData.username || '';
+        if (mobileAuthBtnSpan) mobileAuthBtnSpan.textContent = userData.username || '';
+        userMenu?.classList.add('logged-in');
+      } catch (e) {
+        // Invalid JSON in localStorage, treat as not logged in
+        console.warn('Failed to parse user data:', e);
+        if (dropdownUsername) dropdownUsername.textContent = '';
+        userMenu?.classList.remove('logged-in');
+      }
     } else {
       if (dropdownUsername) dropdownUsername.textContent = '';
       userMenu?.classList.remove('logged-in');

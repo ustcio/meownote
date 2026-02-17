@@ -100,13 +100,23 @@ function getLocalizedPath(targetLang: Lang): string {
   });
 
   // Sync current URL language with localStorage on page load
+  // Note: This is a lightweight sync. The main redirect logic is in lang-redirect.ts
   (function syncLangWithStorage() {
-    const path = window.location.pathname;
-    const langMatch = path.match(/^\/(en|zh)(\/|$)/);
-    if (langMatch) {
-      const urlLang = langMatch[1];
-      localStorage.setItem('preferred-lang', urlLang);
-      document.documentElement.setAttribute('lang', urlLang);
+    try {
+      const path = window.location.pathname;
+      const langMatch = path.match(/^\/(en|zh)(\/|$)/);
+      if (langMatch) {
+        const urlLang = langMatch[1];
+        try {
+          localStorage.setItem('preferred-lang', urlLang);
+        } catch (e) {
+          // localStorage might be disabled
+          console.warn('Failed to sync language:', e);
+        }
+        document.documentElement.setAttribute('lang', urlLang);
+      }
+    } catch (error) {
+      console.error('Language sync failed:', error);
     }
   })();
 </script>
