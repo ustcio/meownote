@@ -1,6 +1,5 @@
 // ================================================================================
-// Chatbot Module - Extracted from chatbot.astro
-// TypeScript interfaces and state management
+// Chatbot Module - Optimized UI with Model Selector Button
 // ================================================================================
 
 interface Message {
@@ -109,7 +108,7 @@ export function initChatbot(): void {
   
   loadConversations();
   setupEventListeners();
-  renderHistory();
+  setupModelSelector();
   setupQuickActions();
   setupSidebarToggle();
   setupSearch();
@@ -122,77 +121,120 @@ export function initChatbot(): void {
 }
 
 // ================================================================================
+// Model Selector Setup (New + Button Design)
+// ================================================================================
+
+function setupModelSelector(): void {
+  const modelBtn = document.getElementById('model-selector-btn');
+  const modelDropdown = document.getElementById('model-dropdown');
+  
+  if (!modelBtn || !modelDropdown) {
+    console.error('[Chatbot] Model selector elements not found');
+    return;
+  }
+  
+  // Toggle dropdown on button click
+  modelBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isVisible = modelDropdown.classList.contains('visible');
+    modelDropdown.classList.toggle('visible', !isVisible);
+    modelBtn.setAttribute('aria-expanded', isVisible ? 'false' : 'true');
+    
+    // Position dropdown above the input container
+    if (!isVisible) {
+      positionDropdown(modelDropdown, modelBtn);
+    }
+  });
+  
+  // Handle model selection
+  modelDropdown.querySelectorAll('.model-option').forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const model = option.getAttribute('data-model');
+      const name = option.getAttribute('data-name');
+      if (model && name) {
+        selectModel(model, name);
+        modelDropdown.classList.remove('visible');
+        modelBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
+  
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!modelDropdown.contains(e.target as Node) && !modelBtn.contains(e.target as Node)) {
+      modelDropdown.classList.remove('visible');
+      modelBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+  
+  // Keyboard navigation
+  modelBtn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      modelBtn.click();
+    } else if (e.key === 'Escape') {
+      modelDropdown.classList.remove('visible');
+      modelBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+  
+  const modelOptions = modelDropdown.querySelectorAll('.model-option');
+  modelOptions.forEach((option, index) => {
+    option.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const next = modelOptions[index + 1] || modelOptions[0];
+        (next as HTMLElement).focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prev = modelOptions[index - 1] || modelOptions[modelOptions.length - 1];
+        (prev as HTMLElement).focus();
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        (option as HTMLElement).click();
+      } else if (e.key === 'Escape') {
+        modelDropdown.classList.remove('visible');
+        modelBtn.setAttribute('aria-expanded', 'false');
+        modelBtn.focus();
+      }
+    });
+  });
+}
+
+function positionDropdown(dropdown: HTMLElement, button: HTMLElement): void {
+  // The dropdown is positioned via CSS, but we can add dynamic positioning if needed
+  const rect = button.getBoundingClientRect();
+  const dropdownRect = dropdown.getBoundingClientRect();
+  
+  // Ensure dropdown doesn't go off-screen
+  const viewportWidth = window.innerWidth;
+  if (rect.left + dropdownRect.width > viewportWidth) {
+    dropdown.style.left = 'auto';
+    dropdown.style.right = '8px';
+  }
+}
+
+function selectModel(model: string, name: string): void {
+  currentModel = model;
+  currentModelName = name;
+  
+  // Update UI
+  document.querySelectorAll('.model-option').forEach(opt => {
+    const isActive = opt.getAttribute('data-model') === model;
+    opt.classList.toggle('active', isActive);
+    opt.setAttribute('aria-selected', isActive ? 'true' : 'false');
+  });
+  
+  showToast(`${lang === 'zh' ? '已切换到' : 'Switched to'} ${name}`, 'success');
+}
+
+// ================================================================================
 // Event Listeners Setup
 // ================================================================================
 
 function setupEventListeners(): void {
   console.log('[Chatbot] Setting up event listeners...');
-  
-  // Model selection
-  const modelBtn = document.getElementById('model-btn');
-  const modelDropdown = document.getElementById('model-dropdown');
-  
-  if (modelBtn && modelDropdown) {
-    modelBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isVisible = modelDropdown.classList.contains('visible');
-      modelDropdown.classList.toggle('visible', !isVisible);
-      modelBtn.setAttribute('aria-expanded', isVisible ? 'false' : 'true');
-    });
-    
-    modelDropdown.querySelectorAll('.model-option').forEach(option => {
-      option.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const model = option.getAttribute('data-model');
-        const name = option.getAttribute('data-name');
-        if (model && name) {
-          selectModel(model, name);
-          modelDropdown.classList.remove('visible');
-          modelBtn.setAttribute('aria-expanded', 'false');
-        }
-      });
-    });
-    
-    document.addEventListener('click', (e) => {
-      if (!modelDropdown.contains(e.target as Node) && !modelBtn.contains(e.target as Node)) {
-        modelDropdown.classList.remove('visible');
-        modelBtn.setAttribute('aria-expanded', 'false');
-      }
-    });
-    
-    // Keyboard navigation
-    modelBtn.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        modelBtn.click();
-      } else if (e.key === 'Escape') {
-        modelDropdown.classList.remove('visible');
-        modelBtn.setAttribute('aria-expanded', 'false');
-      }
-    });
-    
-    const modelOptions = modelDropdown.querySelectorAll('.model-option');
-    modelOptions.forEach((option, index) => {
-      option.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          const next = modelOptions[index + 1] || modelOptions[0];
-          (next as HTMLElement).focus();
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          const prev = modelOptions[index - 1] || modelOptions[modelOptions.length - 1];
-          (prev as HTMLElement).focus();
-        } else if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          (option as HTMLElement).click();
-        } else if (e.key === 'Escape') {
-          modelDropdown.classList.remove('visible');
-          modelBtn.setAttribute('aria-expanded', 'false');
-          modelBtn.focus();
-        }
-      });
-    });
-  }
   
   // New chat
   const newChatBtn = document.getElementById('new-chat-btn');
@@ -423,28 +465,6 @@ function setupExport(): void {
     
     showToast(lang === 'zh' ? '对话已导出' : 'Conversation exported', 'success');
   });
-}
-
-// ================================================================================
-// Model Selection
-// ================================================================================
-
-function selectModel(model: string, name: string): void {
-  currentModel = model;
-  currentModelName = name;
-  
-  const modelName = document.getElementById('model-name');
-  if (modelName) {
-    modelName.textContent = name;
-  }
-  
-  document.querySelectorAll('.model-option').forEach(opt => {
-    const isActive = opt.getAttribute('data-model') === model;
-    opt.classList.toggle('active', isActive);
-    opt.setAttribute('aria-selected', isActive ? 'true' : 'false');
-  });
-  
-  showToast(`${lang === 'zh' ? '已切换到' : 'Switched to'} ${name}`, 'success');
 }
 
 // ================================================================================

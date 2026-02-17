@@ -2,17 +2,16 @@
 import '@styles/global.css';
 import '@styles/chatbot.css';
 import { getLangFromUrl, useTranslations } from '@i18n';
-import Header from '@components/layout/Header.astro';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 ---
 
 <!DOCTYPE html>
-<html lang={lang}>
+<html lang={lang} data-theme="light">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="generator" content={Astro.generator} />
     
     <title>{t('chatbot.title')} - Meow Note</title>
@@ -39,234 +38,247 @@ const t = useTranslations(lang);
     </script>
   </head>
   <body>
-    <Header />
     <div class="chat-app" data-lang={lang} role="application" aria-label={t('chatbot.title')}>
-
-    <!-- Sidebar - Claude Style -->
-    <aside class="sidebar" id="sidebar" role="navigation" aria-label={t('chatbot.chatHistory')}>
-      <div class="sidebar-header">
-        <span class="sidebar-title">{t('chatbot.chatHistory')}</span>
-        <button class="close-sidebar" id="close-sidebar" type="button" aria-label={t('chatbot.closeSidebar')}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
       
-      <button class="new-chat-btn" id="new-chat-btn" type="button">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        <span>{t('chatbot.newChat')}</span>
-      </button>
-
-      <div class="sidebar-search">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input type="search" class="search-input" id="search-input" placeholder={t('chatbot.search')} aria-label={t('chatbot.searchHistory')} />
-      </div>
-      
-      <div class="sidebar-content" id="sidebar-content" role="list">
-        <div class="sidebar-section" data-section="today">
-          <button class="section-header" data-toggle="today" aria-expanded="true" aria-controls="history-today" type="button">
-            <svg class="section-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <polyline points="6 9 12 15 18 9"></polyline>
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar" role="navigation" aria-label={t('chatbot.chatHistory')}>
+        <div class="sidebar-header">
+          <span class="sidebar-title">{t('chatbot.chatHistory')}</span>
+          <button class="close-sidebar" id="close-sidebar" type="button" aria-label={t('chatbot.closeSidebar')}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
-            <span>{t('chatbot.today')}</span>
-            <span class="section-count" id="count-today">0</span>
           </button>
-          <div class="history-list" id="history-today" role="list"></div>
         </div>
-
-        <div class="sidebar-section" data-section="week">
-          <button class="section-header" data-toggle="week" aria-expanded="true" aria-controls="history-week" type="button">
-            <svg class="section-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-            <span>{t('chatbot.last7Days')}</span>
-            <span class="section-count" id="count-week">0</span>
-          </button>
-          <div class="history-list" id="history-week" role="list"></div>
-        </div>
-
-        <div class="sidebar-section" data-section="older">
-          <button class="section-header" data-toggle="older" aria-expanded="true" aria-controls="history-older" type="button">
-            <svg class="section-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-            <span>{t('chatbot.earlier')}</span>
-            <span class="section-count" id="count-older">0</span>
-          </button>
-          <div class="history-list" id="history-older" role="list"></div>
-        </div>
-      </div>
-      
-      <div class="sidebar-footer">
-        <button class="sidebar-action" id="settings-btn" type="button">
+        
+        <button class="new-chat-btn" id="new-chat-btn" type="button">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
-          <span>{t('chatbot.settings')}</span>
+          <span>{t('chatbot.newChat')}</span>
         </button>
-        <button class="sidebar-action danger" id="clear-all-btn" type="button">
+
+        <div class="sidebar-search">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <span>{t('chatbot.clearChats')}</span>
-        </button>
-      </div>
-    </aside>
+          <input type="search" class="search-input" id="search-input" placeholder={t('chatbot.search')} aria-label={t('chatbot.searchHistory')} />
+        </div>
+        
+        <div class="sidebar-content" id="sidebar-content" role="list">
+          <div class="sidebar-section" data-section="today">
+            <button class="section-header" data-toggle="today" aria-expanded="true" aria-controls="history-today" type="button">
+              <svg class="section-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+              <span>{t('chatbot.today')}</span>
+              <span class="section-count" id="count-today">0</span>
+            </button>
+            <div class="history-list" id="history-today" role="list"></div>
+          </div>
 
-    <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+          <div class="sidebar-section" data-section="week">
+            <button class="section-header" data-toggle="week" aria-expanded="true" aria-controls="history-week" type="button">
+              <svg class="section-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+              <span>{t('chatbot.last7Days')}</span>
+              <span class="section-count" id="count-week">0</span>
+            </button>
+            <div class="history-list" id="history-week" role="list"></div>
+          </div>
 
-    <!-- Main Content - Claude Style Layout -->
-    <main class="main-content">
-      <!-- Header -->
-      <header class="chat-header">
-        <button class="menu-toggle" id="menu-toggle" type="button" aria-label={t('aria.openMenu')} aria-expanded="false" aria-controls="sidebar">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
+          <div class="sidebar-section" data-section="older">
+            <button class="section-header" data-toggle="older" aria-expanded="true" aria-controls="history-older" type="button">
+              <svg class="section-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+              <span>{t('chatbot.earlier')}</span>
+              <span class="section-count" id="count-older">0</span>
+            </button>
+            <div class="history-list" id="history-older" role="list"></div>
+          </div>
+        </div>
+        
+        <div class="sidebar-footer">
+          <button class="sidebar-action" id="settings-btn" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>{t('chatbot.settings')}</span>
+          </button>
+          <button class="sidebar-action danger" id="clear-all-btn" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span>{t('chatbot.clearChats')}</span>
+          </button>
+        </div>
+      </aside>
 
-        <button class="header-action" id="export-btn" title={t('chatbot.exportChat')} type="button" aria-label={t('chatbot.exportChat')} style="margin-left: auto;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-        </button>
-      </header>
+      <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
 
-      <!-- Chat Area -->
-      <div class="chat-area" id="chat-area" role="log" aria-live="polite" aria-label={t('aria.chatArea')}>
-        <!-- Welcome Screen -->
-        <div class="welcome-screen" id="welcome-screen">
-          <div class="welcome-content">
-            <div class="welcome-brand">
-              <video class="welcome-logo" autoplay loop muted playsinline preload="auto" aria-hidden="true">
-                <source src="/logo.mp4" type="video/mp4" />
-              </video>
-              <h1 class="welcome-title">{t('chatbot.welcomeTitle')}</h1>
-              <p class="welcome-subtitle">{t('chatbot.welcomeSubtitle')}</p>
-            </div>
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Header -->
+        <header class="chat-header">
+          <button class="menu-toggle" id="menu-toggle" type="button" aria-label={t('aria.openMenu')} aria-expanded="false" aria-controls="sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
 
-            <div class="quick-actions">
-              <div class="quick-actions-title">{t('chatbot.quickStart')}</div>
-              <div class="quick-actions-grid">
-                <button class="quick-action" data-prompt={t('chatbot.writeCodePrompt')} type="button">
-                  <div class="quick-action-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="16 18 22 12 16 6"></polyline>
-                      <polyline points="8 6 2 12 8 18"></polyline>
-                    </svg>
-                  </div>
-                  <span>{t('chatbot.writeCode')}</span>
-                </button>
-                <button class="quick-action" data-prompt={t('chatbot.answerQuestionPrompt')} type="button">
-                  <div class="quick-action-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <path d="M12 16v-4"></path>
-                      <path d="M12 8h.01"></path>
-                    </svg>
-                  </div>
-                  <span>{t('chatbot.answerQuestion')}</span>
-                </button>
-                <button class="quick-action" data-prompt={t('chatbot.writeDocumentPrompt')} type="button">
-                  <div class="quick-action-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                      <polyline points="22,6 12,13 2,6"></polyline>
-                    </svg>
-                  </div>
-                  <span>{t('chatbot.writeDocument')}</span>
-                </button>
-                <button class="quick-action" data-prompt={t('chatbot.brainstormPrompt')} type="button">
-                  <div class="quick-action-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
-                      <path d="M9 21h6"></path>
-                    </svg>
-                  </div>
-                  <span>{t('chatbot.brainstorm')}</span>
-                </button>
+          <button class="header-action" id="export-btn" title={t('chatbot.exportChat')} type="button" aria-label={t('chatbot.exportChat')}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
+        </header>
+
+        <!-- Chat Area -->
+        <div class="chat-area" id="chat-area" role="log" aria-live="polite" aria-label={t('aria.chatArea')}>
+          <!-- Welcome Screen -->
+          <div class="welcome-screen" id="welcome-screen">
+            <div class="welcome-content">
+              <div class="welcome-brand">
+                <video class="welcome-logo" autoplay loop muted playsinline preload="auto" aria-hidden="true">
+                  <source src="/logo.mp4" type="video/mp4" />
+                </video>
+                <h1 class="welcome-title">{t('chatbot.welcomeTitle')}</h1>
+                <p class="welcome-subtitle">{t('chatbot.welcomeSubtitle')}</p>
+              </div>
+
+              <div class="quick-actions">
+                <div class="quick-actions-title">{t('chatbot.quickStart')}</div>
+                <div class="quick-actions-grid">
+                  <button class="quick-action" data-prompt={t('chatbot.writeCodePrompt')} type="button">
+                    <div class="quick-action-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                      </svg>
+                    </div>
+                    <span>{t('chatbot.writeCode')}</span>
+                  </button>
+                  <button class="quick-action" data-prompt={t('chatbot.answerQuestionPrompt')} type="button">
+                    <div class="quick-action-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                      </svg>
+                    </div>
+                    <span>{t('chatbot.answerQuestion')}</span>
+                  </button>
+                  <button class="quick-action" data-prompt={t('chatbot.writeDocumentPrompt')} type="button">
+                    <div class="quick-action-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                      </svg>
+                    </div>
+                    <span>{t('chatbot.writeDocument')}</span>
+                  </button>
+                  <button class="quick-action" data-prompt={t('chatbot.brainstormPrompt')} type="button">
+                    <div class="quick-action-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                        <path d="M9 21h6"></path>
+                      </svg>
+                    </div>
+                    <span>{t('chatbot.brainstorm')}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+
+          <!-- Messages Container -->
+          <div class="messages-container" id="messages-container" aria-label={t('aria.messagesList')}></div>
         </div>
 
-        <!-- Messages Container -->
-        <div class="messages-container" id="messages-container" aria-label={t('aria.messagesList')}></div>
-      </div>
-
-      <!-- Input Area - Claude Style -->
-      <div class="input-area" id="input-area">
-        <div class="input-container">
-          <!-- Model Selector - In Input Area -->
-          <div class="model-selector-inline" id="model-selector">
-            <button class="model-btn-inline" id="model-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label={t('aria.selectModel')}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M12 16v-4"></path>
-                <path d="M12 8h.01"></path>
-              </svg>
-              <span class="model-name-inline" id="model-name">Doubao 2.0 Pro</span>
-              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <polyline points="6 9 12 15 18 9"></polyline>
+        <!-- Input Area - Unified Container with Model Button -->
+        <div class="input-area" id="input-area">
+          <div class="input-container">
+            <!-- Model Selector Button (+) -->
+            <button class="model-selector-btn" id="model-selector-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label={t('aria.selectModel')} title={t('aria.selectModel')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
             </button>
-            <div class="model-dropdown-inline" id="model-dropdown" role="listbox" aria-label={t('aria.modelList')}>
+            
+            <!-- Model Dropdown Panel -->
+            <div class="model-dropdown-panel" id="model-dropdown" role="listbox" aria-label={t('aria.modelList')}>
+              <div class="model-dropdown-header">{lang === 'zh' ? '选择模型' : 'Select Model'}</div>
+              
               <div class="model-group">
                 <div class="model-group-label">Doubao</div>
                 <button class="model-option active" data-model="doubao-2.0-pro" data-name="Doubao 2.0 Pro" role="option" aria-selected="true" type="button">
-                  <span class="model-option-name">Doubao 2.0 Pro</span>
+                  <div class="model-option-info">
+                    <span class="model-option-name">Doubao 2.0 Pro</span>
+                    <span class="model-option-desc">{lang === 'zh' ? '通用对话' : 'General Chat'}</span>
+                  </div>
                   <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
                 </button>
                 <button class="model-option" data-model="doubao-2.0-code" data-name="Doubao 2.0 Code" role="option" aria-selected="false" type="button">
-                  <span class="model-option-name">Doubao 2.0 Code</span>
+                  <div class="model-option-info">
+                    <span class="model-option-name">Doubao 2.0 Code</span>
+                    <span class="model-option-desc">{lang === 'zh' ? '代码生成' : 'Code Generation'}</span>
+                  </div>
                   <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
                 </button>
               </div>
+              
               <div class="model-group">
                 <div class="model-group-label">Qwen</div>
                 <button class="model-option" data-model="qwen-turbo" data-name="Qwen Turbo" role="option" aria-selected="false" type="button">
-                  <span class="model-option-name">Qwen Turbo</span>
+                  <div class="model-option-info">
+                    <span class="model-option-name">Qwen Turbo</span>
+                    <span class="model-option-desc">{lang === 'zh' ? '快速响应' : 'Fast Response'}</span>
+                  </div>
                   <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
                 </button>
                 <button class="model-option" data-model="qwen-plus" data-name="Qwen Plus" role="option" aria-selected="false" type="button">
-                  <span class="model-option-name">Qwen Plus</span>
+                  <div class="model-option-info">
+                    <span class="model-option-name">Qwen Plus</span>
+                    <span class="model-option-desc">{lang === 'zh' ? '增强能力' : 'Enhanced'}</span>
+                  </div>
                   <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
                 </button>
               </div>
             </div>
-          </div>
-          
-          <div class="input-wrapper">
-            <textarea
-              id="chat-input"
-              class="chat-input"
-              placeholder={t('chatbot.inputPlaceholder')}
-              rows="1"
-              aria-label={t('aria.chatInput')}
-              aria-describedby="input-hint"
-            ></textarea>
+            
+            <!-- Input Wrapper -->
+            <div class="input-wrapper">
+              <textarea
+                id="chat-input"
+                class="chat-input"
+                placeholder={t('chatbot.inputPlaceholder')}
+                rows="1"
+                aria-label={t('aria.chatInput')}
+                aria-describedby="input-hint"
+              ></textarea>
+            </div>
+            
+            <!-- Input Actions -->
             <div class="input-actions">
               <button class="send-btn" id="send-btn" type="button" disabled aria-label={t('aria.sendMessage')}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -281,29 +293,25 @@ const t = useTranslations(lang);
               </button>
             </div>
           </div>
+          
+          <div class="input-hint" id="input-hint">
+            <span>{t('chatbot.inputHint')}</span>
+          </div>
         </div>
-        <div class="input-hint" id="input-hint">
-          <span>{t('chatbot.inputHint')}</span>
-        </div>
-      </div>
-    </main>
+      </main>
 
-    <!-- Toast Notifications -->
-    <div class="toast-container" id="toast-container" role="status" aria-live="polite"></div>
-  </div>
+      <!-- Toast Notifications -->
+      <div class="toast-container" id="toast-container" role="status" aria-live="polite"></div>
+    </div>
 
-  <script>
-    // ================================================================================
-    // Chatbot Module - Imported from external TypeScript
-    // ================================================================================
-    import { initChatbot } from '../scripts/chatbot';
-    
-    // Initialize chatbot when DOM is ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initChatbot);
-    } else {
-      initChatbot();
-    }
-  </script>
-</body>
+    <script>
+      import { initChatbot } from '../scripts/chatbot';
+      
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initChatbot);
+      } else {
+        initChatbot();
+      }
+    </script>
+  </body>
 </html>
