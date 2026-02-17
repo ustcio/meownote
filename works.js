@@ -189,6 +189,7 @@ const MODEL_CONFIG = {
 };
 
 async function handleChat(request, env, ctx) {
+  const requestStartTime = Date.now();
   console.log('[Chat API] Received request');
   
   if (request.method !== 'POST') {
@@ -205,11 +206,12 @@ async function handleChat(request, env, ctx) {
     return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
   }
 
-  const { message, model = 'doubao-2.0-pro', history = [] } = body;
+  const { message, model = 'qwen-turbo', history = [], stream = false } = body;
   
   console.log('[Chat API] Message:', message?.substring(0, 50));
   console.log('[Chat API] Model:', model);
   console.log('[Chat API] History length:', history?.length);
+  console.log('[Chat API] Stream mode:', stream);
   
   if (!message || typeof message !== 'string') {
     console.error('[Chat API] Message is required');
@@ -234,12 +236,17 @@ async function handleChat(request, env, ctx) {
     return jsonResponse({ success: false, message: 'API not configured' }, 500);
   }
 
+  // Optimize history - reduce token count
+  const optimizedHistory = history
+    .slice(-5)  // Reduce from 10 to 5 messages
+    .map(h => ({
+      role: h.role || 'user',
+      content: h.content?.slice(0, 1000) || ''  // Limit each message length
+    }));
+
   const messages = [
     { role: 'system', content: CHAT_SYSTEM_PROMPT },
-    ...history.slice(-10).map(h => ({
-      role: h.role || 'user',
-      content: h.content
-    })),
+    ...optimizedHistory,
     { role: 'user', content: sanitizeInput(message) }
   ];
 
@@ -251,7 +258,8 @@ async function handleChat(request, env, ctx) {
       model: config.model,
       messages,
       temperature: config.temperature,
-      max_tokens: config.maxTokens
+      max_tokens: config.maxTokens,
+      stream: stream  // Enable streaming if requested
     };
     
     console.log('[Chat API] Request body to AI provider:', JSON.stringify({
@@ -259,6 +267,8 @@ async function handleChat(request, env, ctx) {
       messages: requestBody.messages.slice(-2) // Only log last 2 messages for brevity
     }, null, 2));
 
+    const providerStartTime = Date.now();
+    
     const response = await fetch(config.endpoint, {
       method: 'POST',
       headers: {
@@ -268,10 +278,29 @@ async function handleChat(request, env, ctx) {
       body: JSON.stringify(requestBody)
     });
 
+    const providerLatency = Date.now() - providerStartTime;
     console.log('[Chat API] AI provider response status:', response.status);
+    console.log(`[Performance] Provider latency: ${providerLatency}ms`);
 
+    // Handle streaming response
+    if (stream && response.ok) {
+      console.log('[Chat API] Returning streaming response');
+      return new Response(response.body, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+
+    // Handle non-streaming response
     const data = await response.json();
     console.log('[Chat API] AI provider response:', JSON.stringify(data, null, 2));
+    
+    const totalLatency = Date.now() - requestStartTime;
+    console.log(`[Performance] Total latency: ${totalLatency}ms`);
     
     if (data.choices?.[0]?.message?.content) {
       console.log('[Chat API] Success! Reply length:', data.choices[0].message.content.length);
@@ -279,7 +308,11 @@ async function handleChat(request, env, ctx) {
         success: true,
         reply: data.choices[0].message.content,
         model: model,
-        usage: data.usage
+        usage: data.usage,
+        latency: {
+          provider: providerLatency,
+          total: totalLatency
+        }
       });
     }
     
@@ -301,7 +334,7 @@ async function handleChat(request, env, ctx) {
     console.error('[Chat API] Fetch error:', error);
     return jsonResponse({
       success: false,
-      message: 'Failed to get AI response'
+      message: 'Failed to get AI response: ' + error.message
     }, 500);
   }
 }

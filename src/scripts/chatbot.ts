@@ -590,6 +590,10 @@ async function sendMessage(): Promise<void> {
     return;
   }
   
+  // Performance tracking
+  const startTime = performance.now();
+  const ttfbStart = performance.now();
+  
   // Hide welcome screen
   const welcomeScreen = document.getElementById('welcome-screen');
   if (welcomeScreen) {
@@ -618,7 +622,7 @@ async function sendMessage(): Promise<void> {
     chatInput.disabled = true;
   }
   
-  // Show typing indicator
+  // Show typing indicator with model info
   showTypingIndicator();
   
   // Create abort controller
@@ -628,10 +632,12 @@ async function sendMessage(): Promise<void> {
     const requestBody = {
       message: content,
       model: currentModel,
-      history: chatHistory.slice(-10)
+      history: chatHistory,
+      stream: false  // Set to true to enable streaming
     };
     
     console.log('[Chatbot] Sending message with model:', currentModel);
+    console.log('[Performance] Request start');
     
     const response = await fetch(`${API_BASE}/api/chat`, {
       method: 'POST',
@@ -642,16 +648,35 @@ async function sendMessage(): Promise<void> {
       signal: abortController.signal
     });
     
+    const ttfb = performance.now() - ttfbStart;
+    console.log(`[Performance] TTFB: ${ttfb.toFixed(2)}ms`);
+    
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     
     const data = await response.json();
     
+    const totalTime = performance.now() - startTime;
+    console.log(`[Performance] Total time: ${totalTime.toFixed(2)}ms`);
+    
+    if (data.latency) {
+      console.log(`[Performance] Provider latency: ${data.latency.provider}ms`);
+      console.log(`[Performance] Server total: ${data.latency.total}ms`);
+    }
+    
     removeTypingIndicator();
     
     if (data.success && data.reply) {
       addMessage('assistant', data.reply);
+      
+      // Show performance info if slow
+      if (ttfb > 3000) {
+        console.warn(`[Performance] Slow response detected: ${ttfb.toFixed(0)}ms`);
+        if (currentModel !== 'qwen-turbo') {
+          showToast(lang === 'zh' ? '响应较慢，建议切换到 Qwen Turbo 模型' : 'Slow response detected. Consider switching to Qwen Turbo', 'info');
+        }
+      }
     } else {
       showToast(data.message || 'Failed to get response', 'error');
     }
@@ -800,10 +825,17 @@ function showTypingIndicator(): void {
   const typingDiv = document.createElement('div');
   typingDiv.className = 'typing-indicator';
   typingDiv.id = 'typing-indicator';
+  
+  const modelDisplayName = getShortModelName(currentModelName);
+  const thinkingText = lang === 'zh' ? `${modelDisplayName} 正在思考` : `${modelDisplayName} is thinking`;
+  
   typingDiv.innerHTML = `
-    <span class="typing-dot"></span>
-    <span class="typing-dot"></span>
-    <span class="typing-dot"></span>
+    <div class="typing-content">
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-text">${thinkingText}</span>
+    </div>
   `;
   
   messagesContainer.appendChild(typingDiv);
