@@ -387,22 +387,36 @@ async function handleSignup(request, env, ctx) {
 const LOGIN_ATTEMPTS = new Map();
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
-const LOGIN_ATTEMPTS_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour
+const LOGIN_ATTEMPTS_MAX_SIZE = 1000; // Maximum entries to prevent unbounded growth
 
-// Cleanup old login attempts periodically to prevent memory leak
-function cleanupLoginAttempts() {
+// Cleanup old login attempts when map gets too large
+// Called within request handler to comply with Cloudflare Workers restrictions
+function cleanupLoginAttemptsIfNeeded() {
+  // If map is small enough, skip cleanup
+  if (LOGIN_ATTEMPTS.size < LOGIN_ATTEMPTS_MAX_SIZE) {
+    return;
+  }
+
   const now = Date.now();
+  let cleaned = 0;
+
   for (const [ip, attempts] of LOGIN_ATTEMPTS.entries()) {
-    if (now - attempts.lastAttempt > LOGIN_LOCKOUT_TIME) {
+    // Remove entries older than lockout time, or if we've cleaned enough
+    if (now - attempts.lastAttempt > LOGIN_LOCKOUT_TIME || cleaned > 100) {
       LOGIN_ATTEMPTS.delete(ip);
+      cleaned++;
     }
+  }
+
+  if (cleaned > 0) {
+    console.log(`[Login] Cleaned up ${cleaned} expired login attempt records`);
   }
 }
 
-// Schedule cleanup every hour
-setInterval(cleanupLoginAttempts, LOGIN_ATTEMPTS_CLEANUP_INTERVAL);
-
 async function handleLogin(request, env, ctx) {
+  // Cleanup old login attempts if needed (within handler to comply with Workers restrictions)
+  cleanupLoginAttemptsIfNeeded();
+
   if (request.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
