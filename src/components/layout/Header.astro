@@ -8,12 +8,18 @@ import AuthModal from '@components/ui/AuthModal.astro';
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
+// Helper function to get localized path
+function getLocalizedPath(path: string): string {
+  if (lang === 'en') return path;
+  return `/zh${path === '/' ? '' : path}`;
+}
+
 const navItems = [
-  { href: '/', label: t('nav.home'), id: 'home' },
-  { href: '/chatbot', label: t('nav.chatbot'), id: 'chatbot' },
-  { href: '/kit', label: t('nav.kit'), id: 'kit' },
-  { href: '/research', label: t('nav.research'), id: 'research' },
-  { href: '/about', label: t('nav.about'), id: 'about' },
+  { href: getLocalizedPath('/'), label: t('nav.home'), id: 'home' },
+  { href: getLocalizedPath('/chatbot'), label: t('nav.chatbot'), id: 'chatbot' },
+  { href: getLocalizedPath('/kit'), label: t('nav.kit'), id: 'kit' },
+  { href: getLocalizedPath('/research'), label: t('nav.research'), id: 'research' },
+  { href: getLocalizedPath('/about'), label: t('nav.about'), id: 'about' },
 ];
 
 const currentPath = Astro.url.pathname;
@@ -21,7 +27,7 @@ const currentPath = Astro.url.pathname;
 
 <header class="header">
   <div class="header-container">
-    <a href="/" class="logo">
+      <a href={getLocalizedPath('/')} class="logo">
       <video 
         class="logo-video" 
         autoplay 
@@ -52,7 +58,7 @@ const currentPath = Astro.url.pathname;
     </nav>
     
     <div class="header-actions">
-      <a href="/chatbot" class="nav-cta">
+      <a href={getLocalizedPath('/chatbot')} class="nav-cta">
         {t('hero.cta.primary')}
       </a>
       
@@ -72,7 +78,7 @@ const currentPath = Astro.url.pathname;
               <span class="dropdown-username" id="dropdown-username"></span>
             </div>
             <div class="dropdown-divider"></div>
-            <a href="/profile" class="dropdown-item">
+            <a href={getLocalizedPath('/profile')} class="dropdown-item">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
@@ -116,7 +122,7 @@ const currentPath = Astro.url.pathname;
       ))}
     </ul>
     <div class="mobile-nav-actions">
-      <a href="/chatbot" class="mobile-cta">
+      <a href={getLocalizedPath('/chatbot')} class="mobile-cta">
         {t('hero.cta.primary')}
       </a>
       <button class="mobile-auth-btn" id="mobile-auth-btn">
@@ -184,8 +190,10 @@ const currentPath = Astro.url.pathname;
   
   mobileAuthBtn?.addEventListener('click', () => {
     const user = localStorage.getItem('user');
+    const currentLang = localStorage.getItem('preferred-lang') || 'en';
+    const profilePath = currentLang === 'zh' ? '/zh/profile' : '/profile';
     if (user) {
-      window.location.href = '/profile';
+      window.location.href = profilePath;
     } else {
       mobileNav?.classList.remove('open');
       mobileMenuBtn?.setAttribute('aria-expanded', 'false');

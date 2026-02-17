@@ -54,41 +54,43 @@ function getLocalizedPath(targetLang: Lang): string {
   const langBtn = document.querySelector('.lang-btn');
   const langDropdown = document.getElementById('lang-dropdown');
   const langOptions = document.querySelectorAll('.lang-option');
-  
+
   langBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
     const isExpanded = langBtn.getAttribute('aria-expanded') === 'true';
     langBtn.setAttribute('aria-expanded', String(!isExpanded));
     langDropdown?.classList.toggle('open');
   });
-  
-  // Handle language switch without page reload
+
+  // Handle language switch
   langOptions.forEach(option => {
     option.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       const targetLang = option.getAttribute('data-lang');
       const targetPath = option.getAttribute('data-path');
-      
+
       if (targetLang && targetPath) {
-        // Save language preference
+        // Save language preference to localStorage
         localStorage.setItem('preferred-lang', targetLang);
+        // Update html lang attribute
+        document.documentElement.setAttribute('lang', targetLang);
         // Navigate to the localized path
         window.location.href = targetPath;
       }
-      
+
       // Close dropdown
       langBtn?.setAttribute('aria-expanded', 'false');
       langDropdown?.classList.remove('open');
     });
   });
-  
+
   // Close dropdown when clicking outside
   document.addEventListener('click', () => {
     langBtn?.setAttribute('aria-expanded', 'false');
     langDropdown?.classList.remove('open');
   });
-  
+
   // Close on escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -96,6 +98,17 @@ function getLocalizedPath(targetLang: Lang): string {
       langDropdown?.classList.remove('open');
     }
   });
+
+  // Sync current URL language with localStorage on page load
+  (function syncLangWithStorage() {
+    const path = window.location.pathname;
+    const langMatch = path.match(/^\/(en|zh)(\/|$)/);
+    if (langMatch) {
+      const urlLang = langMatch[1];
+      localStorage.setItem('preferred-lang', urlLang);
+      document.documentElement.setAttribute('lang', urlLang);
+    }
+  })();
 </script>
 
 <style>
