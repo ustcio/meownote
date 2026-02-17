@@ -248,19 +248,20 @@ function setupModelSelector(): void {
   
   // Setup keyboard navigation for options
   modelOptions.forEach((option, index) => {
-    option.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowDown') {
+    option.addEventListener('keydown', (e: Event) => {
+      const keyEvent = e as KeyboardEvent;
+      if (keyEvent.key === 'ArrowDown') {
         e.preventDefault();
         const next = modelOptions[index + 1] || modelOptions[0];
         (next as HTMLElement).focus();
-      } else if (e.key === 'ArrowUp') {
+      } else if (keyEvent.key === 'ArrowUp') {
         e.preventDefault();
         const prev = modelOptions[index - 1] || modelOptions[modelOptions.length - 1];
         (prev as HTMLElement).focus();
-      } else if (e.key === 'Enter' || e.key === ' ') {
+      } else if (keyEvent.key === 'Enter' || keyEvent.key === ' ') {
         e.preventDefault();
         (option as HTMLElement).click();
-      } else if (e.key === 'Escape') {
+      } else if (keyEvent.key === 'Escape') {
         modelDropdown.classList.remove('visible');
         newBtn.setAttribute('aria-expanded', 'false');
         newBtn.focus();
@@ -355,8 +356,8 @@ function setupEventListeners(): void {
   
   // Send message
   const chatInput = document.getElementById('chat-input') as HTMLTextAreaElement;
-  const sendBtn = document.getElementById('send-btn');
-  const stopBtn = document.getElementById('stop-btn');
+  const sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
+  const stopBtn = document.getElementById('stop-btn') as HTMLButtonElement;
   
   if (chatInput && sendBtn) {
     chatInput.addEventListener('input', () => {

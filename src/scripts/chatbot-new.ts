@@ -335,8 +335,8 @@ function setupEventListeners(): void {
   console.log('[Chatbot] Setting up event listeners...');
 
   const chatInput = document.getElementById('chat-input') as HTMLTextAreaElement;
-  const sendBtn = document.getElementById('send-btn');
-  const stopBtn = document.getElementById('stop-btn');
+  const sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
+  const stopBtn = document.getElementById('stop-btn') as HTMLButtonElement;
 
   if (chatInput && sendBtn) {
     chatInput.addEventListener('input', () => {
