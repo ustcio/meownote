@@ -62,7 +62,6 @@ export default {
 
 const ROUTES = {
   '/api/chat': { handler: handleChat },
-  '/api/doubao': { handler: handleDoubao },
   '/api/signup': { handler: handleSignup },
   '/api/login': { handler: handleLogin },
   '/api/visitor': { handler: handleVisitor },
@@ -316,87 +315,6 @@ const MODEL_MAP = {
   'doubao-2.0-code': 'doubao-seed-2-0-code-preview-260215'
 };
 
-async function handleDoubao(request, env, ctx) {
-  if (request.method !== 'POST') {
-    return jsonResponse({ error: 'Method not allowed' }, 405);
-  }
-
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return jsonResponse({ error: 'Invalid JSON' }, 400);
-  }
-
-  const { prompt, model, history = [] } = body;
-  
-  if (!prompt || typeof prompt !== 'string') {
-    return jsonResponse({ error: 'Prompt is required' }, 400);
-  }
-
-  if (prompt.length > 4000) {
-    return jsonResponse({ error: 'Prompt too long (max 4000 chars)' }, 400);
-  }
-
-  const DOUBAO_API_KEY = env.DOUBAO_API_KEY;
-  
-  if (!DOUBAO_API_KEY) {
-    return jsonResponse({ error: 'Doubao API key not configured' }, 500);
-  }
-
-  const endpointId = MODEL_MAP[model] || 'doubao-seed-2-0-pro-260215';
-
-  const messages = [
-    { role: 'system', content: CHAT_SYSTEM_PROMPT },
-    ...history.slice(-10).map(h => ({
-      role: h.role || 'user',
-      content: h.content
-    })),
-    { role: 'user', content: sanitizeInput(prompt) }
-  ];
-
-  try {
-    const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${DOUBAO_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: endpointId,
-        messages,
-        temperature: 0.7,
-        max_tokens: 2000
-      })
-    });
-
-    const data = await response.json();
-    
-    if (data.choices?.[0]?.message?.content) {
-      return jsonResponse({
-        answer: data.choices[0].message.content
-      });
-    }
-    
-    if (data.error) {
-      console.error('Doubao API error:', data.error);
-      return jsonResponse({
-        error: data.error.message || 'AI service error'
-      }, 500);
-    }
-
-    return jsonResponse({
-      error: 'Unexpected response from AI'
-    }, 500);
-
-  } catch (error) {
-    console.error('Doubao chat error:', error);
-    return jsonResponse({
-      error: 'Failed to get AI response: ' + error.message
-    }, 500);
-  }
-}
-
 // ================================================================================
 // 3. 用户注册（增强安全）
 // ================================================================================
@@ -468,7 +386,21 @@ async function handleSignup(request, env, ctx) {
 
 const LOGIN_ATTEMPTS = new Map();
 const MAX_LOGIN_ATTEMPTS = 5;
-const LOGIN_LOCKOUT_TIME = 15 * 60 * 1000;
+const LOGIN_LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
+const LOGIN_ATTEMPTS_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour
+
+// Cleanup old login attempts periodically to prevent memory leak
+function cleanupLoginAttempts() {
+  const now = Date.now();
+  for (const [ip, attempts] of LOGIN_ATTEMPTS.entries()) {
+    if (now - attempts.lastAttempt > LOGIN_LOCKOUT_TIME) {
+      LOGIN_ATTEMPTS.delete(ip);
+    }
+  }
+}
+
+// Schedule cleanup every hour
+setInterval(cleanupLoginAttempts, LOGIN_ATTEMPTS_CLEANUP_INTERVAL);
 
 async function handleLogin(request, env, ctx) {
   if (request.method !== 'POST') {
@@ -1825,29 +1757,22 @@ async function handleAdminStats(request, env, ctx) {
   }
 
   try {
-    const fileCount = await env.DB.prepare(
-      'SELECT COUNT(*) as count FROM files'
-    ).first();
-
-    const totalSize = await env.DB.prepare(
-      'SELECT SUM(size) as total FROM files'
-    ).first();
-
-    const totalDownloads = await env.DB.prepare(
-      'SELECT SUM(downloads) as total FROM files'
-    ).first();
-
-    const lastUpload = await env.DB.prepare(
-      'SELECT created_at FROM files ORDER BY created_at DESC LIMIT 1'
-    ).first();
-
-    const userCount = await env.DB.prepare(
-      'SELECT COUNT(*) as count FROM users'
-    ).first();
-
-    const todayUV = await env.DB.prepare(
-      `SELECT COUNT(DISTINCT visitor_id) as count FROM unique_visitors WHERE date = date('now')`
-    ).first();
+    // Parallelize independent database queries for better performance
+    const [
+      fileCount,
+      totalSize,
+      totalDownloads,
+      lastUpload,
+      userCount,
+      todayUV
+    ] = await Promise.all([
+      env.DB.prepare('SELECT COUNT(*) as count FROM files').first(),
+      env.DB.prepare('SELECT SUM(size) as total FROM files').first(),
+      env.DB.prepare('SELECT SUM(downloads) as total FROM files').first(),
+      env.DB.prepare('SELECT created_at FROM files ORDER BY created_at DESC LIMIT 1').first(),
+      env.DB.prepare('SELECT COUNT(*) as count FROM users').first(),
+      env.DB.prepare(`SELECT COUNT(DISTINCT visitor_id) as count FROM unique_visitors WHERE date = date('now')`).first()
+    ]);
 
     return jsonResponse({
       success: true,

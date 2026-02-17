@@ -57,7 +57,17 @@ const imageURL = new URL(image, Astro.site);
     
     <meta name="theme-color" content="#ffffff" />
     <meta name="color-scheme" content="light dark" />
-    
+
+    <!-- Resource Hints for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://api.agiera.net" />
+    <link rel="preconnect" href="https://api.agiera.net" crossorigin />
+
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/favicon.ico" as="image" type="image/x-icon" />
+    <link rel="preload" href="/scripts/lang-redirect.js" as="script" />
+
     <script is:inline>
       (function() {
         const theme = localStorage.getItem('theme') || 'light';
