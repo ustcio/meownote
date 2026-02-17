@@ -486,10 +486,14 @@ async function sendMessage(): Promise<void> {
   const startTime = performance.now();
   const ttfbStart = performance.now();
 
-  // Hide welcome screen
+  // Hide welcome screen and show messages container
   const welcomeScreen = document.getElementById('welcome-screen');
+  const messagesContainer = document.getElementById('messages-container');
   if (welcomeScreen) {
     welcomeScreen.classList.add('hidden');
+  }
+  if (messagesContainer) {
+    messagesContainer.classList.add('active');
   }
 
   // Add user message
@@ -568,11 +572,13 @@ async function sendMessage(): Promise<void> {
     if (data.success && data.reply) {
       addMessage('assistant', data.reply);
 
-      // Show performance info if slow
-      if (ttfb > 3000) {
+      // Only show performance warning if extremely slow (> 8 seconds)
+      if (ttfb > 8000) {
         console.warn(`[Performance] Slow response detected: ${ttfb.toFixed(0)}ms`);
-        if (currentModel !== 'qwen-turbo') {
+        // Only show toast for non-turbo models, and only once per session
+        if (currentModel !== 'qwen-turbo' && !window.sessionStorage.getItem('slowWarningShown')) {
           showToast(lang === 'zh' ? '响应较慢，建议切换到 Qwen Turbo 模型' : 'Slow response detected. Consider switching to Qwen Turbo', 'info');
+          window.sessionStorage.setItem('slowWarningShown', 'true');
         }
       }
     } else {
@@ -814,6 +820,7 @@ function loadConversations(): void {
         if (welcomeScreen) {
           welcomeScreen.classList.add('hidden');
         }
+        messagesContainer.classList.add('active');
 
         chatHistory.forEach(msg => {
           addMessage(msg.role, msg.content, false);
