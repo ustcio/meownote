@@ -40,8 +40,10 @@
 /* Window Title Bar */
 .window-titlebar {
   height: 44px;
-  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-  border-bottom: 1px solid var(--border-primary);
+  background: var(--glass-bg);
+  backdrop-filter: var(--surface-blur-heavy);
+  -webkit-backdrop-filter: var(--surface-blur-heavy);
+  border-bottom: 1px solid var(--glass-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
