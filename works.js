@@ -849,44 +849,57 @@ async function crawlSGEData() {
 }
 
 // 爬取国际金价（现货黄金 XAU）
-// 由于金投网没有现货黄金(XAU)的实时API，我们使用国内金价和汇率计算
 async function crawlInternationalPrice() {
   try {
-    // 1. 首先获取国内金价
-    const domesticData = await crawlSGEData();
-    if (!domesticData) {
-      console.error('[Crawl] Failed to get domestic price for calculation');
-      return null;
+    // 使用金投网现货黄金 API - JO_92233 是现货黄金(XAU)
+    const jtwUrl = 'https://api.jijinhao.com/quoteCenter/realTime.htm?codes=JO_92233';
+    
+    const response = await fetch(jtwUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json, text/javascript, */*',
+        'Referer': 'https://quote.cngold.org/'
+      },
+      cf: { cacheTtl: 0 }
+    });
+    
+    if (response.ok) {
+      const text = await response.text();
+      const match = text.match(/var\s+quote_json\s*=\s*({.+?});/);
+      if (match) {
+        const data = JSON.parse(match[1]);
+        if (data.flag && data.JO_92233) {
+          const quote = data.JO_92233;
+          
+          // 检查是否是现货黄金
+          if (quote.showCode === 'XAU' && quote.showName?.includes('黄金')) {
+            const price = parseFloat(quote.q63);
+            const open = parseFloat(quote.q1);
+            const high = parseFloat(quote.q3);
+            const low = parseFloat(quote.q4);
+            const prevClose = parseFloat(quote.q2);
+            const change = parseFloat(quote.q70);
+            const changePercent = parseFloat(quote.q80);
+            
+            if (price > 0) {
+              return {
+                price: price,
+                open: open,
+                high: high,
+                low: low,
+                change: change,
+                changePercent: changePercent,
+                source: 'JTW-XAU',
+                timestamp: Date.now()
+              };
+            }
+          }
+        }
+      }
     }
     
-    // 2. 获取汇率
-    const exchangeRate = await getExchangeRate();
-    
-    // 3. 从国内金价计算国际金价
-    // 公式：国际金价(美元/盎司) = 国内金价(元/克) * 31.1035(克/盎司) / 汇率
-    const OZ_TO_G = 31.1035;
-    
-    const domesticPrice = domesticData.price;
-    const calculatedPrice = (domesticPrice * OZ_TO_G) / exchangeRate;
-    const calculatedOpen = (domesticData.open * OZ_TO_G) / exchangeRate;
-    const calculatedHigh = (domesticData.high * OZ_TO_G) / exchangeRate;
-    const calculatedLow = (domesticData.low * OZ_TO_G) / exchangeRate;
-    
-    // 涨跌幅与国内金价相同
-    const changePercent = domesticData.changePercent;
-    const prevClose = calculatedPrice / (1 + changePercent / 100);
-    const change = calculatedPrice - prevClose;
-    
-    return {
-      price: Math.round(calculatedPrice * 100) / 100,
-      open: Math.round(calculatedOpen * 100) / 100,
-      high: Math.round(calculatedHigh * 100) / 100,
-      low: Math.round(calculatedLow * 100) / 100,
-      change: Math.round(change * 100) / 100,
-      changePercent: changePercent,
-      source: 'Calculated-from-Domestic',
-      timestamp: Date.now()
-    };
+    console.error('[Crawl] Failed to fetch XAU from JTW');
+    return null;
     
   } catch (error) {
     console.error('Crawl international error:', error);
