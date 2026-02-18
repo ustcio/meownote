@@ -11,6 +11,10 @@ dist/
 .env.test.local
 .env.production.local
 
+# Wrangler local config (contains real IDs)
+.wrangler/
+wrangler.local.toml
+
 # IDE and editor files
 .vscode/
 .idea/
