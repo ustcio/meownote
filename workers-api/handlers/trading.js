@@ -10,6 +10,23 @@ const TRADING_CONFIG = {
   NOTIFICATION_RETRY_LIMIT: 3
 };
 
+async function verifyAuth(request, env) {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { valid: false, error: 'Unauthorized' };
+  }
+
+  const token = authHeader.substring(7);
+  const secret = env.JWT_SECRET || 'agiera-default-jwt-secret-2024';
+  const payload = await verifyAdminToken(token, secret);
+  
+  if (!payload) {
+    return { valid: false, error: 'Invalid or expired token' };
+  }
+
+  return { valid: true, user: payload };
+}
+
 function validateNumber(value, min, max, fieldName) {
   const num = parseFloat(value);
   if (isNaN(num)) {
@@ -100,13 +117,7 @@ export async function handleTradingLogin(request, env) {
 }
 
 export async function handleTradingVerify(request, env) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ success: false, error: 'No token provided' }, 401);
-  }
-
-  const token = authHeader.substring(7);
-  const verification = await verifyAdminToken(token, env);
+  const verification = await verifyAuth(request, env);
   
   if (!verification.valid) {
     return jsonResponse({ success: false, error: verification.error }, 401);
@@ -116,13 +127,7 @@ export async function handleTradingVerify(request, env) {
 }
 
 export async function handleBuyTransaction(request, env) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ success: false, error: 'Unauthorized' }, 401);
-  }
-
-  const token = authHeader.substring(7);
-  const verification = await verifyAdminToken(token, env);
+  const verification = await verifyAuth(request, env);
   
   if (!verification.valid) {
     return jsonResponse({ success: false, error: verification.error }, 401);
@@ -178,13 +183,7 @@ export async function handleBuyTransaction(request, env) {
 }
 
 export async function handleSellTransaction(request, env) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ success: false, error: 'Unauthorized' }, 401);
-  }
-
-  const token = authHeader.substring(7);
-  const verification = await verifyAdminToken(token, env);
+  const verification = await verifyAuth(request, env);
   
   if (!verification.valid) {
     return jsonResponse({ success: false, error: verification.error }, 401);
@@ -295,13 +294,7 @@ async function updateTradingStats(env, dateStr, type, amount, quantity, profit) 
 }
 
 export async function handleGetTransactions(request, env) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ success: false, error: 'Unauthorized' }, 401);
-  }
-
-  const token = authHeader.substring(7);
-  const verification = await verifyAdminToken(token, env);
+  const verification = await verifyAuth(request, env);
   
   if (!verification.valid) {
     return jsonResponse({ success: false, error: verification.error }, 401);
@@ -371,13 +364,7 @@ export async function handleGetTransactions(request, env) {
 }
 
 export async function handleGetTransactionStats(request, env) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ success: false, error: 'Unauthorized' }, 401);
-  }
-
-  const token = authHeader.substring(7);
-  const verification = await verifyAdminToken(token, env);
+  const verification = await verifyAuth(request, env);
   
   if (!verification.valid) {
     return jsonResponse({ success: false, error: verification.error }, 401);
@@ -482,13 +469,7 @@ export async function handleGetTransactionStats(request, env) {
 }
 
 export async function handleCreateAlert(request, env) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ success: false, error: 'Unauthorized' }, 401);
-  }
-
-  const token = authHeader.substring(7);
-  const verification = await verifyAdminToken(token, env);
+  const verification = await verifyAuth(request, env);
   
   if (!verification.valid) {
     return jsonResponse({ success: false, error: verification.error }, 401);
@@ -534,13 +515,7 @@ export async function handleCreateAlert(request, env) {
 }
 
 export async function handleGetAlerts(request, env) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ success: false, error: 'Unauthorized' }, 401);
-  }
-
-  const token = authHeader.substring(7);
-  const verification = await verifyAdminToken(token, env);
+  const verification = await verifyAuth(request, env);
   
   if (!verification.valid) {
     return jsonResponse({ success: false, error: verification.error }, 401);
@@ -565,13 +540,7 @@ export async function handleGetAlerts(request, env) {
 }
 
 export async function handleDeleteAlert(request, env) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ success: false, error: 'Unauthorized' }, 401);
-  }
-
-  const token = authHeader.substring(7);
-  const verification = await verifyAdminToken(token, env);
+  const verification = await verifyAuth(request, env);
   
   if (!verification.valid) {
     return jsonResponse({ success: false, error: verification.error }, 401);
@@ -667,13 +636,7 @@ async function queueNotification(env, notification) {
 }
 
 export async function handleGetNotifications(request, env) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ success: false, error: 'Unauthorized' }, 401);
-  }
-
-  const token = authHeader.substring(7);
-  const verification = await verifyAdminToken(token, env);
+  const verification = await verifyAuth(request, env);
   
   if (!verification.valid) {
     return jsonResponse({ success: false, error: verification.error }, 401);
@@ -699,13 +662,7 @@ export async function handleGetNotifications(request, env) {
 }
 
 export async function handleDeleteTransaction(request, env) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ success: false, error: 'Unauthorized' }, 401);
-  }
-
-  const token = authHeader.substring(7);
-  const verification = await verifyAdminToken(token, env);
+  const verification = await verifyAuth(request, env);
   
   if (!verification.valid) {
     return jsonResponse({ success: false, error: verification.error }, 401);
@@ -730,13 +687,7 @@ export async function handleDeleteTransaction(request, env) {
 }
 
 export async function handleUpdateTransaction(request, env) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ success: false, error: 'Unauthorized' }, 401);
-  }
-
-  const token = authHeader.substring(7);
-  const verification = await verifyAdminToken(token, env);
+  const verification = await verifyAuth(request, env);
   
   if (!verification.valid) {
     return jsonResponse({ success: false, error: verification.error }, 401);
