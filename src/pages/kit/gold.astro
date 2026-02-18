@@ -329,9 +329,27 @@ const dayTabs = [
     if (el) {
       if (timestamp) {
         const date = new Date(timestamp);
-        el.textContent = date.toLocaleString();
+        el.textContent = date.toLocaleString('zh-CN', { 
+          timeZone: 'Asia/Shanghai',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
       } else {
-        el.textContent = new Date().toLocaleString();
+        el.textContent = new Date().toLocaleString('zh-CN', { 
+          timeZone: 'Asia/Shanghai',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
       }
     }
   }
