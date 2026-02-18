@@ -3,19 +3,19 @@ import Layout from '@layouts/Layout.astro';
 
 const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
 
-const timeRanges = [
-  { id: 'realtime', label: lang === 'zh' ? '实时' : 'Real-time' },
-  { id: '1m', label: lang === 'zh' ? '1个月' : '1 Month' },
-  { id: '3m', label: lang === 'zh' ? '3个月' : '3 Months' },
-  { id: '6m', label: lang === 'zh' ? '6个月' : '6 Months' },
-  { id: '1y', label: lang === 'zh' ? '1年' : '1 Year' },
+const dayTabs = [
+  { id: 'today', label: lang === 'zh' ? '今日金价' : 'Today' },
+  { id: 'yesterday', label: lang === 'zh' ? '昨日金价' : 'Yesterday' },
 ];
 ---
 
 <Layout 
   title={lang === 'zh' ? '黄金价格 - Meow Note' : 'Gold Price - Meow Note'}
-  description={lang === 'zh' ? '实时黄金价格查询' : 'Real-time gold price tracking'}
+  description={lang === 'zh' ? '追踪国内外黄金价格' : 'Track domestic and international gold prices'}
 >
+  <!-- Preload Chart.js for faster rendering -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" as="script" />
+  
   <section class="gold">
     <div class="container">
       <header class="header">
@@ -26,13 +26,13 @@ const timeRanges = [
           <span>{lang === 'zh' ? '工具箱' : 'Toolkit'}</span>
         </a>
         <h1 class="title">{lang === 'zh' ? '黄金价格' : 'Gold Price'}</h1>
-        <p class="desc">{lang === 'zh' ? '实时追踪国内外黄金价格' : 'Track domestic and international gold prices'}</p>
+        <p class="desc">{lang === 'zh' ? '追踪国内外黄金价格走势' : 'Track domestic and international gold prices'}</p>
       </header>
       
-      <div class="tabs" id="time-range-tabs">
-        {timeRanges.map((range, index) => (
-          <button class:list={['tab', { active: index === 0 }]} data-range={range.id}>
-            {range.label}
+      <div class="tabs" id="day-tabs">
+        {dayTabs.map((tab, index) => (
+          <button class:list={['tab', { active: index === 0 }]} data-day={tab.id}>
+            {tab.label}
           </button>
         ))}
       </div>
@@ -52,7 +52,7 @@ const timeRanges = [
             <div class="stat"><span class="lbl">{lang === 'zh' ? '最低' : 'Low'}</span><span class="val" id="domestic-low">--</span></div>
             <div class="stat"><span class="lbl">{lang === 'zh' ? '开盘' : 'Open'}</span><span class="val" id="domestic-open">--</span></div>
           </div>
-          <div class="chart"><canvas id="domestic-chart"></canvas></div>
+          <div class="chart"><canvas id="domestic-chart"></canvas><div class="chart-empty" id="domestic-empty">数据采集中...</div></div>
         </div>
         
         <div class="card">
@@ -69,7 +69,7 @@ const timeRanges = [
             <div class="stat"><span class="lbl">{lang === 'zh' ? '最低' : 'Low'}</span><span class="val" id="international-low">--</span></div>
             <div class="stat"><span class="lbl">{lang === 'zh' ? '开盘' : 'Open'}</span><span class="val" id="international-open">--</span></div>
           </div>
-          <div class="chart"><canvas id="international-chart"></canvas></div>
+          <div class="chart"><canvas id="international-chart"></canvas><div class="chart-empty" id="international-empty">数据采集中...</div></div>
         </div>
       </div>
       
@@ -91,7 +91,7 @@ const timeRanges = [
   .desc { font-size: var(--text-sm); color: var(--text-secondary); }
   
   .tabs { display: flex; justify-content: center; gap: var(--space-2); margin-bottom: var(--space-6); flex-wrap: wrap; }
-  .tab { padding: var(--space-2) var(--space-4); font-size: var(--text-sm); color: var(--text-secondary); background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-full); transition: all var(--duration-fast) var(--ease-default); }
+  .tab { padding: var(--space-2) var(--space-6); font-size: var(--text-sm); color: var(--text-secondary); background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-full); transition: all var(--duration-fast) var(--ease-default); cursor: pointer; }
   .tab:hover { color: var(--text-primary); border-color: var(--border-hover); }
   .tab.active { color: var(--bg-primary); background: var(--text-primary); border-color: transparent; }
   
@@ -115,12 +115,20 @@ const timeRanges = [
   .stat .lbl { display: block; font-size: var(--text-xs); color: var(--text-tertiary); margin-bottom: 2px; }
   .stat .val { font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--text-primary); font-variant-numeric: tabular-nums; }
   
-  .chart { height: 160px; }
+  .chart { height: 200px; position: relative; }
   .chart canvas { width: 100% !important; height: 100% !important; }
+  .chart-empty {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+    text-align: center;
+  }
   
   .update { text-align: center; margin-top: var(--space-6); font-size: var(--text-xs); color: var(--text-tertiary); }
   
-  /* 加载状态样式 */
   .price.loading {
     opacity: 0.6;
     animation: pulse 1.5s ease-in-out infinite;
@@ -130,15 +138,16 @@ const timeRanges = [
     0%, 100% { opacity: 0.6; }
     50% { opacity: 1; }
   }
+  
+  .price.error {
+    color: #ef4444;
+  }
 </style>
 
 <script>
-  // Gold Price API Configuration
-  // Using your Cloudflare Worker for SGE and international gold prices
-  const API_BASE = 'https://api.agiera.net'; // 你的 Worker 地址
-  const REFRESH_INTERVAL = 30000; // 30 seconds - 更频繁的更新
+  const API_BASE = 'https://api.agiera.net';
+  const REFRESH_INTERVAL = 10000;
   
-  // 显示加载状态
   function showLoading() {
     const ids = ['domestic-price', 'international-price'];
     ids.forEach(id => {
@@ -147,7 +156,6 @@ const timeRanges = [
     });
   }
   
-  // 隐藏加载状态
   function hideLoading() {
     const ids = ['domestic-price', 'international-price'];
     ids.forEach(id => {
@@ -156,10 +164,11 @@ const timeRanges = [
     });
   }
   
-  let currentTimeRange = 'realtime';
+  let currentDay = 'today';
   let domesticChart = null;
   let internationalChart = null;
-  let priceHistory = { domestic: [], international: [], labels: [] };
+  let todayData = null;
+  let yesterdayData = null;
   
   const domesticCtx = document.getElementById('domestic-chart');
   const internationalCtx = document.getElementById('international-chart');
@@ -170,70 +179,184 @@ const timeRanges = [
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(0, 0, 0, 0.8)', padding: 8, cornerRadius: 6 } },
-        scales: {
-          x: { display: true, grid: { display: false }, ticks: { color: '#888', maxTicksLimit: 5 } },
-          y: { display: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#888', maxTicksLimit: 4 } }
+        plugins: { 
+          legend: { display: false }, 
+          tooltip: { 
+            backgroundColor: 'rgba(0, 0, 0, 0.85)', 
+            padding: 12, 
+            cornerRadius: 8,
+            titleFont: { size: 13, weight: 'bold' },
+            bodyFont: { size: 12 },
+            callbacks: {
+              label: function(context) {
+                return `${context.parsed.y.toFixed(2)}`;
+              }
+            }
+          } 
         },
-        elements: { point: { radius: 0, hoverRadius: 4 }, line: { tension: 0.4, borderWidth: 2 } },
-        interaction: { intersect: false, mode: 'index' }
+        scales: {
+          x: { 
+            display: true, 
+            grid: { display: false, drawBorder: false }, 
+            ticks: { 
+              color: '#888', 
+              maxTicksLimit: 8,
+              font: { size: 10 }
+            },
+            title: {
+              display: true,
+              text: '时间',
+              color: '#666',
+              font: { size: 11 }
+            }
+          },
+          y: { 
+            display: true, 
+            grid: { 
+              color: 'rgba(255, 255, 255, 0.06)',
+              drawBorder: false
+            }, 
+            ticks: { 
+              color: '#888', 
+              maxTicksLimit: 5,
+              font: { size: 10 },
+              callback: function(value) {
+                return value.toFixed(1);
+              }
+            }
+          }
+        },
+        elements: { 
+          point: { 
+            radius: 0, 
+            hoverRadius: 5,
+            hoverBackgroundColor: '#fff',
+            hoverBorderWidth: 2
+          }, 
+          line: { 
+            tension: 0.3, 
+            borderWidth: 2.5
+          } 
+        },
+        interaction: { intersect: false, mode: 'index' },
+        animation: {
+          duration: 300
+        }
       }
     };
     
-    if (domesticCtx && (window as any).Chart) {
-      domesticChart = new (window as any).Chart(domesticCtx, {
+    if (domesticCtx && window.Chart) {
+      domesticChart = new window.Chart(domesticCtx, {
         ...chartConfig,
-        data: { labels: [], datasets: [{ data: [], borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.1)', fill: true }] }
+        data: { 
+          labels: [], 
+          datasets: [{ 
+            data: [], 
+            borderColor: '#f97316', 
+            backgroundColor: 'rgba(249, 115, 22, 0.15)', 
+            fill: true,
+            borderWidth: 2.5
+          }] 
+        },
+        options: {
+          ...chartConfig.options,
+          scales: {
+            ...chartConfig.options.scales,
+            y: {
+              ...chartConfig.options.scales.y,
+              title: {
+                display: true,
+                text: '价格 (元/克)',
+                color: '#f97316',
+                font: { size: 11, weight: 'bold' }
+              }
+            }
+          }
+        }
       });
     }
-    
-    if (internationalCtx && (window as any).Chart) {
-      internationalChart = new (window as any).Chart(internationalCtx, {
+
+    if (internationalCtx && window.Chart) {
+      internationalChart = new window.Chart(internationalCtx, {
         ...chartConfig,
-        data: { labels: [], datasets: [{ data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true }] }
+        data: { 
+          labels: [], 
+          datasets: [{ 
+            data: [], 
+            borderColor: '#3b82f6', 
+            backgroundColor: 'rgba(59, 130, 246, 0.15)', 
+            fill: true,
+            borderWidth: 2.5
+          }] 
+        },
+        options: {
+          ...chartConfig.options,
+          scales: {
+            ...chartConfig.options.scales,
+            y: {
+              ...chartConfig.options.scales.y,
+              title: {
+                display: true,
+                text: '价格 (美元/盎司)',
+                color: '#3b82f6',
+                font: { size: 11, weight: 'bold' }
+              }
+            }
+          }
+        }
       });
     }
   }
   
   function formatPrice(price, decimals = 2) {
+    if (price === undefined || price === null || isNaN(price)) {
+      return '--';
+    }
     return price.toFixed(decimals);
   }
-  
+
   function formatChange(change) {
+    if (change === undefined || change === null || isNaN(change)) return '--';
     const sign = change >= 0 ? '+' : '';
     return `${sign}${change.toFixed(2)}%`;
   }
-  
-  function updateTime(timestamp?: number) {
+
+  function updateTime(timestamp) {
     const el = document.getElementById('update-time');
     if (el) {
       if (timestamp) {
         const date = new Date(timestamp);
-        el.textContent = date.toLocaleTimeString();
+        el.textContent = date.toLocaleString();
       } else {
-        el.textContent = new Date().toLocaleTimeString();
+        el.textContent = new Date().toLocaleString();
       }
     }
   }
   
-  // Fetch gold price from your Worker API
-  async function fetchGoldPriceData(forceRefresh = false) {
+  async function fetchGoldPriceData(date = null) {
     try {
       showLoading();
       
-      // 添加时间戳参数来绕过缓存
       const timestamp = Date.now();
-      const refreshParam = forceRefresh ? '&refresh=true' : '';
-      const url = `${API_BASE}/api/gold?t=${timestamp}${refreshParam}`;
+      let url = `${API_BASE}/api/gold?t=${timestamp}`;
+      if (date) {
+        url += `&date=${date}`;
+      }
       
       console.log('[Gold] Fetching from:', url);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
       
       const response = await fetch(url, {
         headers: { 
           'Accept': 'application/json',
           'Cache-Control': 'no-cache'
-        }
+        },
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (response.ok) {
         const data = await response.json();
@@ -241,160 +364,155 @@ const timeRanges = [
         
         if (data.success) {
           return data;
+        } else {
+          console.error('[Gold] API returned success=false:', data.error);
         }
       } else {
-        console.error('[Gold] API error:', response.status, response.statusText);
+        console.error('[Gold] API error:', response.status);
       }
       
-      console.warn('[Gold] Failed to fetch gold price from API');
       return null;
       
     } catch (error) {
-      console.error('[Gold] Failed to fetch gold price:', error);
+      console.error('[Gold] Failed to fetch gold price:', error.name, error.message);
       return null;
     } finally {
       hideLoading();
     }
   }
   
-  // Fetch historical data from your Worker
-  async function fetchHistoricalData(range: string) {
-    try {
-      const response = await fetch(`${API_BASE}/api/gold/history?range=${range}`);
-      if (response.ok) {
-        return await response.json();
-      }
-    } catch (error) {
-      console.error('Failed to fetch historical data:', error);
-    }
-    
-    // Fallback: generate simulated data
-    return generateSimulatedHistory(range);
-  }
-  
-  // Generate simulated historical data for fallback
-  function generateSimulatedHistory(range: string) {
-    const days = { '1m': 30, '3m': 90, '6m': 180, '1y': 365 }[range] || 30;
-    const basePrice = 2000;
-    const labels = [];
-    const domesticPrices = [];
-    const internationalPrices = [];
-    
-    for (let i = days; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+  function updateDisplay(data) {
+    if (!data || !data.success) {
+      const elementsToUpdate = [
+        'domestic-price', 'domestic-change', 'domestic-high', 'domestic-low', 'domestic-open',
+        'international-price', 'international-change', 'international-high', 'international-low', 'international-open'
+      ];
       
-      const randomChange = (Math.random() - 0.5) * 50;
-      const price = basePrice + randomChange + (days - i) * 0.5;
-      internationalPrices.push(price);
-      domesticPrices.push(price * 7.2 / 31.1035);
-    }
-    
-    return {
-      success: true,
-      labels: labels,
-      domestic: { prices: domesticPrices },
-      international: { prices: internationalPrices }
-    };
-  }
-  
-  async function fetchGoldPrice(forceRefresh = false) {
-    try {
-      console.log('[Gold] Fetching price data...');
-      
-      // 使用正确的函数名 fetchGoldPriceData
-      const data = await fetchGoldPriceData(forceRefresh);
-      if (!data || !data.success) {
-        console.error('[Gold] Failed to fetch gold price data:', data?.error || 'Unknown error');
-        
-        // 显示错误状态
-        const dp = document.getElementById('domestic-price');
-        const ip = document.getElementById('international-price');
-        if (dp) dp.textContent = 'Error';
-        if (ip) ip.textContent = 'Error';
-        
-        return;
-      }
-      
-      console.log('[Gold] Data fetched successfully:', {
-        domestic: data.domestic?.price,
-        international: data.international?.price,
-        source: data.domestic?.source
-      });
-      
-      // 从 API 响应中获取国内和国际金价数据
-      const domestic = data.domestic;
-      const international = data.international;
-      
-      // Update Domestic Gold Display
-      const dp = document.getElementById('domestic-price');
-      const dc = document.getElementById('domestic-change');
-      const dh = document.getElementById('domestic-high');
-      const dl = document.getElementById('domestic-low');
-      const dopen = document.getElementById('domestic-open');
-      
-      if (dp && domestic?.price) dp.textContent = formatPrice(domestic.price);
-      if (dc && domestic?.changePercent !== undefined) { 
-        dc.textContent = formatChange(domestic.changePercent); 
-        dc.className = `change ${domestic.changePercent >= 0 ? 'up' : 'down'}`; 
-      }
-      if (dh && domestic?.high) dh.textContent = formatPrice(domestic.high);
-      if (dl && domestic?.low) dl.textContent = formatPrice(domestic.low);
-      if (dopen && domestic?.open) dopen.textContent = formatPrice(domestic.open);
-      
-      // Update International Gold Display
-      const ip = document.getElementById('international-price');
-      const ic = document.getElementById('international-change');
-      const ih = document.getElementById('international-high');
-      const il = document.getElementById('international-low');
-      const iopen = document.getElementById('international-open');
-      
-      if (ip && international?.price) ip.textContent = formatPrice(international.price);
-      if (ic && international?.changePercent !== undefined) { 
-        ic.textContent = formatChange(international.changePercent); 
-        ic.className = `change ${international.changePercent >= 0 ? 'up' : 'down'}`; 
-      }
-      if (ih && international?.high) ih.textContent = formatPrice(international.high);
-      if (il && international?.low) il.textContent = formatPrice(international.low);
-      if (iopen && international?.open) iopen.textContent = formatPrice(international.open);
-      
-      // Update chart data (only in realtime mode)
-      if (currentTimeRange === 'realtime') {
-        const now = new Date();
-        const timeLabel = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        
-        priceHistory.domestic.push(domestic.price);
-        priceHistory.international.push(international.price);
-        priceHistory.labels.push(timeLabel);
-        
-        if (priceHistory.domestic.length > 60) {
-          priceHistory.domestic.shift();
-          priceHistory.international.shift();
-          priceHistory.labels.shift();
+      elementsToUpdate.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          if (id.includes('price')) {
+            el.textContent = 'Error';
+            el.classList.add('error');
+          } else {
+            el.textContent = '--';
+          }
         }
-        
-        updateCharts();
+      });
+      return;
+    }
+    
+    const domestic = data.domestic;
+    const international = data.international;
+    
+    const dp = document.getElementById('domestic-price');
+    const dc = document.getElementById('domestic-change');
+    const dh = document.getElementById('domestic-high');
+    const dl = document.getElementById('domestic-low');
+    const dopen = document.getElementById('domestic-open');
+    
+    if (dp && domestic && domestic.price !== undefined) dp.textContent = formatPrice(domestic.price);
+    if (dc && domestic && domestic.changePercent !== undefined) { 
+      dc.textContent = formatChange(domestic.changePercent); 
+      dc.className = `change ${domestic.changePercent >= 0 ? 'up' : 'down'}`; 
+    }
+    if (dh && domestic && domestic.high !== undefined) dh.textContent = formatPrice(domestic.high);
+    if (dl && domestic && domestic.low !== undefined) dl.textContent = formatPrice(domestic.low);
+    if (dopen && domestic && domestic.open !== undefined) dopen.textContent = formatPrice(domestic.open);
+    
+    const ip = document.getElementById('international-price');
+    const ic = document.getElementById('international-change');
+    const ih = document.getElementById('international-high');
+    const il = document.getElementById('international-low');
+    const iopen = document.getElementById('international-open');
+    
+    if (ip && international && international.price !== undefined) ip.textContent = formatPrice(international.price);
+    if (ic && international && international.changePercent !== undefined) { 
+      ic.textContent = formatChange(international.changePercent); 
+      ic.className = `change ${international.changePercent >= 0 ? 'up' : 'down'}`; 
+    }
+    if (ih && international && international.high !== undefined) ih.textContent = formatPrice(international.high);
+    if (il && international && international.low !== undefined) il.textContent = formatPrice(international.low);
+    if (iopen && international && international.open !== undefined) iopen.textContent = formatPrice(international.open);
+    
+    updateCharts(data.history);
+    updateTime(data.timestamp);
+  }
+  
+  function updateCharts(history) {
+    const domesticEmpty = document.getElementById('domestic-empty');
+    const internationalEmpty = document.getElementById('international-empty');
+    
+    if (!history || !history.domestic || history.domestic.length === 0) {
+      if (domesticChart) {
+        domesticChart.data.labels = [];
+        domesticChart.data.datasets[0].data = [];
+        domesticChart.update('none');
       }
-      
-      updateTime(data.timestamp);
-      
-    } catch (error) {
-      console.error('[Gold] Failed to fetch gold price:', error);
+      if (internationalChart) {
+        internationalChart.data.labels = [];
+        internationalChart.data.datasets[0].data = [];
+        internationalChart.update('none');
+      }
+      if (domesticEmpty) domesticEmpty.style.display = 'block';
+      if (internationalEmpty) internationalEmpty.style.display = 'block';
+      return;
+    }
+    
+    if (domesticEmpty) domesticEmpty.style.display = 'none';
+    if (internationalEmpty) internationalEmpty.style.display = 'none';
+    
+    if (domesticChart && history.domestic) {
+      domesticChart.data.labels = history.labels || [];
+      domesticChart.data.datasets[0].data = history.domestic;
+      domesticChart.update('active');
+    }
+    
+    if (internationalChart && history.international) {
+      internationalChart.data.labels = history.labels || [];
+      internationalChart.data.datasets[0].data = history.international;
+      internationalChart.update('active');
     }
   }
   
-  function updateCharts() {
-    if (domesticChart) {
-      domesticChart.data.labels = priceHistory.labels;
-      domesticChart.data.datasets[0].data = priceHistory.domestic;
-      domesticChart.update('none');
+  async function loadTodayPrice() {
+    const data = await fetchGoldPriceData();
+    if (data) {
+      todayData = data;
+      if (currentDay === 'today') {
+        updateDisplay(data);
+      }
     }
+  }
+  
+  async function loadYesterdayPrice() {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const dateStr = yesterday.toISOString().split('T')[0];
     
-    if (internationalChart) {
-      internationalChart.data.labels = priceHistory.labels;
-      internationalChart.data.datasets[0].data = priceHistory.international;
-      internationalChart.update('none');
+    const data = await fetchGoldPriceData(dateStr);
+    if (data) {
+      yesterdayData = data;
+      if (currentDay === 'yesterday') {
+        updateDisplay(data);
+      }
+    }
+  }
+  
+  async function switchDay(day) {
+    currentDay = day;
+    
+    if (day === 'today') {
+      if (todayData) {
+        updateDisplay(todayData);
+      }
+      await loadTodayPrice();
+    } else {
+      if (yesterdayData) {
+        updateDisplay(yesterdayData);
+      } else {
+        await loadYesterdayPrice();
+      }
     }
   }
   
@@ -403,31 +521,53 @@ const timeRanges = [
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       
-      currentTimeRange = tab.getAttribute('data-range') || 'realtime';
-      
-      if (currentTimeRange === 'realtime') {
-        priceHistory = { domestic: [], international: [], labels: [] };
-        await fetchGoldPrice();
-      } else {
-        await fetchHistoricalData(currentTimeRange);
-      }
+      const day = tab.getAttribute('data-day') || 'today';
+      await switchDay(day);
     });
   });
   
-  document.addEventListener('DOMContentLoaded', async () => {
-    if ((window as any).Chart) {
+  function initPage() {
+    if (window.Chart) {
       initCharts();
-      await fetchGoldPrice();
-      setInterval(fetchGoldPrice, REFRESH_INTERVAL);
+      loadTodayPrice();
+      if (!window.goldPriceInterval) {
+        window.goldPriceInterval = setInterval(() => {
+          if (currentDay === 'today') {
+            loadTodayPrice();
+          }
+        }, REFRESH_INTERVAL);
+      }
     } else {
       const script = document.createElement('script');
       script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
-      script.onload = async () => {
+      script.async = true;
+      script.onload = () => {
         initCharts();
-        await fetchGoldPrice();
-        setInterval(fetchGoldPrice, REFRESH_INTERVAL);
+        loadTodayPrice();
+        if (!window.goldPriceInterval) {
+          window.goldPriceInterval = setInterval(() => {
+            if (currentDay === 'today') {
+              loadTodayPrice();
+            }
+          }, REFRESH_INTERVAL);
+        }
+      };
+      script.onerror = () => {
+        console.error('[Gold] Failed to load Chart.js');
+        const domesticEmpty = document.getElementById('domestic-empty');
+        const internationalEmpty = document.getElementById('international-empty');
+        if (domesticEmpty) domesticEmpty.textContent = '图表加载失败';
+        if (internationalEmpty) internationalEmpty.textContent = '图表加载失败';
       };
       document.head.appendChild(script);
     }
-  });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPage);
+  } else {
+    initPage();
+  }
+  
+  document.addEventListener('astro:page-load', initPage);
 </script>

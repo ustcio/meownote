@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Limelight&display=swap');
-
 :root {
   /* ==================== Color System ==================== */
   
@@ -30,6 +28,10 @@
   --font-display: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
   --font-number: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  /* Global Font Settings */
+  --font-feature-settings: "kern" 1, "liga" 1;
+  --font-variant-numeric: tabular-nums;
   
   /* Font Sizes - Mobile First with Clear Hierarchy */
   --text-xs: 0.75rem;       /* 12px - Captions, Labels */
@@ -199,6 +201,7 @@
   --contribution-2: #40c463;
   --contribution-3: #30a14e;
   --contribution-4: #216e39;
+  --contribution-5: #0a3d1e;
 }
 
 /* ==================== Dark Theme ==================== */
@@ -252,6 +255,7 @@
   --contribution-2: #006d32;
   --contribution-3: #26a641;
   --contribution-4: #39d353;
+  --contribution-5: #7ee787;
 }
 
 /* ==================== Responsive Typography ==================== */

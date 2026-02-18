@@ -119,7 +119,7 @@ function handleCORS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Cache-Control',
       'Access-Control-Max-Age': '86400',
     }
   });
@@ -771,38 +771,44 @@ async function crawlSGEData() {
       const text = await response.text();
       console.log('[Crawl] SGE response text length:', text.length);
       
-      const match = text.match(/var\s+quote_json\s*=\s*({.+?});/);
+      const match = text.match(/var\s+quote_json\s*=\s*(\{[\s\S]*?\});?\s*$/);
       if (match) {
-        const data = JSON.parse(match[1]);
-        console.log('[Crawl] SGE data flag:', data.flag);
-        
-        if (data.flag && data.JO_92226) {
-          const quote = data.JO_92226;
-          console.log('[Crawl] SGE quote:', { name: quote.showName, price: quote.q63 });
+        try {
+          const data = JSON.parse(match[1]);
+          console.log('[Crawl] SGE data flag:', data.flag);
           
-          const price = parseFloat(quote.q63);
-          const open = parseFloat(quote.q1) || price;
-          const high = parseFloat(quote.q3) || price;
-          const low = parseFloat(quote.q4) || price;
-          const prevClose = parseFloat(quote.q2);
-          
-          if (price > 0) {
-            const change = price - prevClose;
-            const changePercent = prevClose > 0 ? (change / prevClose) * 100 : 0;
+          if (data.flag && data.JO_92226) {
+            const quote = data.JO_92226;
+            console.log('[Crawl] SGE quote:', { name: quote.showName, price: quote.q63 });
             
-            return {
-              price: price,
-              open: open,
-              high: high,
-              low: low,
-              prevClose: prevClose,
-              change: change,
-              changePercent: changePercent,
-              source: 'JTW-mAuT+D',
-              timestamp: Date.now()
-            };
+            const price = parseFloat(quote.q63);
+            const open = parseFloat(quote.q1) || price;
+            const high = parseFloat(quote.q3) || price;
+            const low = parseFloat(quote.q4) || price;
+            const prevClose = parseFloat(quote.q2);
+            
+            if (price > 0) {
+              const change = price - prevClose;
+              const changePercent = prevClose > 0 ? (change / prevClose) * 100 : 0;
+              
+              return {
+                price: price,
+                open: open,
+                high: high,
+                low: low,
+                prevClose: prevClose,
+                change: change,
+                changePercent: changePercent,
+                source: 'JTW-mAuT+D',
+                timestamp: Date.now()
+              };
+            }
           }
+        } catch (parseError) {
+          console.error('[Crawl] SGE JSON parse error:', parseError.message);
         }
+      } else {
+        console.error('[Crawl] SGE regex match failed, response preview:', text.substring(0, 200));
       }
     }
     
@@ -858,36 +864,42 @@ async function crawlInternationalPrice() {
       const text = await response.text();
       console.log('[Crawl] XAU response text length:', text.length);
       
-      const match = text.match(/var\s+quote_json\s*=\s*({.+?});/);
+      const match = text.match(/var\s+quote_json\s*=\s*(\{[\s\S]*?\});?\s*$/);
       if (match) {
-        const data = JSON.parse(match[1]);
-        console.log('[Crawl] XAU data flag:', data.flag);
-        
-        if (data.flag && data.JO_92233) {
-          const quote = data.JO_92233;
-          console.log('[Crawl] XAU quote:', { name: quote.showName, code: quote.showCode, price: quote.q63 });
+        try {
+          const data = JSON.parse(match[1]);
+          console.log('[Crawl] XAU data flag:', data.flag);
           
-          const price = parseFloat(quote.q63);
-          const open = parseFloat(quote.q1);
-          const high = parseFloat(quote.q3);
-          const low = parseFloat(quote.q4);
-          const prevClose = parseFloat(quote.q2);
-          const change = parseFloat(quote.q70);
-          const changePercent = parseFloat(quote.q80);
-          
-          if (price > 0) {
-            return {
-              price: price,
-              open: open,
-              high: high,
-              low: low,
-              change: change,
-              changePercent: changePercent,
-              source: 'JTW-XAU',
-              timestamp: Date.now()
-            };
+          if (data.flag && data.JO_92233) {
+            const quote = data.JO_92233;
+            console.log('[Crawl] XAU quote:', { name: quote.showName, code: quote.showCode, price: quote.q63 });
+            
+            const price = parseFloat(quote.q63);
+            const open = parseFloat(quote.q1);
+            const high = parseFloat(quote.q3);
+            const low = parseFloat(quote.q4);
+            const prevClose = parseFloat(quote.q2);
+            const change = parseFloat(quote.q70);
+            const changePercent = parseFloat(quote.q80);
+            
+            if (price > 0) {
+              return {
+                price: price,
+                open: open,
+                high: high,
+                low: low,
+                change: change,
+                changePercent: changePercent,
+                source: 'JTW-XAU',
+                timestamp: Date.now()
+              };
+            }
           }
+        } catch (parseError) {
+          console.error('[Crawl] XAU JSON parse error:', parseError.message);
         }
+      } else {
+        console.error('[Crawl] XAU regex match failed, response preview:', text.substring(0, 200));
       }
     }
     
@@ -1040,7 +1052,7 @@ async function performCrawl(env) {
     // 存储到 KV（如果有）
     if (env?.GOLD_PRICE_CACHE) {
       await env.GOLD_PRICE_CACHE.put('latest', JSON.stringify(result), {
-        expirationTtl: 300 // 5分钟过期
+        expirationTtl: 60
       });
       
       // 存储历史数据
@@ -1077,106 +1089,189 @@ async function performCrawl(env) {
   }
 }
 
-// HTTP 处理函数 - 优先从 KV 读取缓存数据
+// HTTP 处理函数 - 支持按日期查询金价数据
 async function handleGoldPrice(request, env, ctx) {
   try {
     const url = new URL(request.url);
+    const queryDate = url.searchParams.get('date');
     const forceRefresh = url.searchParams.get('refresh') === 'true';
     
-    // 1. 尝试从 KV 获取缓存数据（除非强制刷新）
-    if (!forceRefresh && env?.GOLD_PRICE_CACHE) {
-      try {
-        const cached = await env.GOLD_PRICE_CACHE.get('latest');
-        if (cached) {
-          const data = JSON.parse(cached);
-          const cacheAge = Date.now() - (data.cachedAt || 0);
-          
-          // 缓存小于2分钟，直接返回
-          if (cacheAge < 120000) {
-            console.log('[Gold Price] Returning cached data, age:', cacheAge, 'ms');
-            return jsonResponse({
-              ...data,
-              fromCache: true,
-              cacheAge: cacheAge
-            });
-          }
-        }
-      } catch (e) {
-        console.log('[Gold Price] Cache read failed:', e.message);
-      }
+    const today = new Date().toISOString().split('T')[0];
+    const targetDate = queryDate || today;
+    
+    console.log('[Gold Price] Request for date:', targetDate);
+    
+    if (targetDate === today) {
+      return await handleTodayGoldPrice(env, ctx, forceRefresh);
+    } else {
+      return await handleHistoricalGoldPrice(env, targetDate);
     }
-    
-    // 2. 执行实时爬取
-    console.log('[Gold Price] Fetching real-time data...');
-    const data = await performCrawl(env);
-    
-    if (!data.success) {
-      console.error('[Gold Price] Failed to fetch:', data.error);
-      
-      // 尝试返回缓存数据（即使过期）
-      if (env?.GOLD_PRICE_CACHE) {
-        try {
-          const cached = await env.GOLD_PRICE_CACHE.get('latest');
-          if (cached) {
-            const cachedData = JSON.parse(cached);
-            console.log('[Gold Price] Returning stale cache');
-            return jsonResponse({
-              ...cachedData,
-              fromCache: true,
-              stale: true,
-              error: data.error
-            });
-          }
-        } catch (e) {
-          // 忽略缓存错误
-        }
-      }
-      
-      return jsonResponse({
-        success: false,
-        error: data.error || 'Failed to fetch gold price',
-        timestamp: Date.now(),
-        message: 'Unable to fetch real-time gold price. Please try again later.'
-      }, 503);
-    }
-    
-    // 3. 存储到 KV
-    if (env?.GOLD_PRICE_CACHE) {
-      await storeGoldPriceData(env, data);
-    }
-    
-    return jsonResponse({
-      ...data,
-      fromCache: false
-    });
     
   } catch (error) {
     console.error('Gold price error:', error);
-    
-    // 尝试返回缓存数据
+    return jsonResponse({
+      success: false,
+      error: error.message,
+      timestamp: Date.now()
+    }, 500);
+  }
+}
+
+async function handleTodayGoldPrice(env, ctx, forceRefresh) {
+  const today = new Date().toISOString().split('T')[0];
+  
+  if (!forceRefresh && env?.GOLD_PRICE_CACHE) {
+    try {
+      const cached = await env.GOLD_PRICE_CACHE.get('latest');
+      if (cached) {
+        const data = JSON.parse(cached);
+        const cacheAge = Date.now() - (data.cachedAt || 0);
+        
+        if (cacheAge < 10000) {
+          console.log('[Gold Price] Returning cached data, age:', cacheAge, 'ms');
+          const history = await getDayHistory(env, today);
+          return jsonResponse({
+            ...data,
+            history: history,
+            fromCache: true,
+            cacheAge: cacheAge
+          });
+        }
+      }
+    } catch (e) {
+      console.log('[Gold Price] Cache read failed:', e.message);
+    }
+  }
+  
+  console.log('[Gold Price] Fetching real-time data...');
+  const data = await performCrawl(env);
+  
+  if (!data.success) {
     if (env?.GOLD_PRICE_CACHE) {
       try {
         const cached = await env.GOLD_PRICE_CACHE.get('latest');
         if (cached) {
           const cachedData = JSON.parse(cached);
+          const history = await getDayHistory(env, today);
           return jsonResponse({
             ...cachedData,
+            history: history,
             fromCache: true,
             stale: true,
-            error: error.message
+            error: data.error
           });
         }
-      } catch (e) {
-        // 忽略缓存错误
-      }
+      } catch (e) {}
     }
     
     return jsonResponse({
       success: false,
-      error: error.message,
-      timestamp: Date.now(),
-      message: 'Server error while fetching gold price'
-    }, 500);
+      error: data.error || 'Failed to fetch gold price',
+      timestamp: Date.now()
+    }, 503);
+  }
+  
+  if (env?.GOLD_PRICE_CACHE) {
+    await storeGoldPriceData(env, data);
+  }
+  
+  if (data.success && data.domestic && data.international) {
+    const history = await getDayHistory(env, today);
+    ctx.waitUntil(sendGoldPriceAlert(data.domestic, data.international, history, env));
+  }
+  
+  const history = await getDayHistory(env, today);
+  return jsonResponse({
+    ...data,
+    history: history,
+    fromCache: false
+  });
+}
+
+async function handleHistoricalGoldPrice(env, targetDate) {
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  
+  if (targetDate !== yesterday && targetDate !== today) {
+    return jsonResponse({
+      success: false,
+      error: 'Only today and yesterday data are available',
+      timestamp: Date.now()
+    }, 400);
+  }
+  
+  const dayStats = await env?.GOLD_PRICE_CACHE?.get(`stats:${targetDate}`);
+  const history = await getDayHistory(env, targetDate);
+  
+  if (!dayStats && (!history || history.domestic.length === 0)) {
+    return jsonResponse({
+      success: false,
+      error: 'No data available for this date',
+      date: targetDate,
+      timestamp: Date.now()
+    }, 404);
+  }
+  
+  const stats = dayStats ? JSON.parse(dayStats) : {};
+  
+  const latestEntry = history.domestic.length > 0 ? {
+    domestic: history.domestic[history.domestic.length - 1],
+    international: history.international[history.international.length - 1]
+  } : null;
+  
+  return jsonResponse({
+    success: true,
+    date: targetDate,
+    timestamp: stats.lastUpdate || Date.now(),
+    domestic: {
+      price: latestEntry?.domestic || stats.domesticHigh || 0,
+      open: stats.domesticOpen || stats.domesticHigh || 0,
+      high: stats.domesticHigh || 0,
+      low: stats.domesticLow || 0,
+      changePercent: stats.domesticChange || 0,
+      source: stats.source || 'Historical'
+    },
+    international: {
+      price: latestEntry?.international || stats.internationalHigh || 0,
+      open: stats.internationalOpen || stats.internationalHigh || 0,
+      high: stats.internationalHigh || 0,
+      low: stats.internationalLow || 0,
+      changePercent: stats.internationalChange || 0,
+      source: stats.source || 'Historical'
+    },
+    history: history,
+    fromCache: true
+  });
+}
+
+async function getDayHistory(env, date) {
+  if (!env?.GOLD_PRICE_CACHE) {
+    return { labels: [], domestic: [], international: [] };
+  }
+  
+  try {
+    const historyKey = `history:${date}`;
+    const historyData = await env.GOLD_PRICE_CACHE.get(historyKey);
+    
+    if (!historyData) {
+      return { labels: [], domestic: [], international: [] };
+    }
+    
+    const history = JSON.parse(historyData);
+    
+    const labels = history.map(h => {
+      const date = new Date(h.timestamp);
+      return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    });
+    
+    return {
+      labels: labels,
+      domestic: history.map(h => h.domestic),
+      international: history.map(h => h.international)
+    };
+  } catch (e) {
+    console.error('[History] Failed to get history:', e.message);
+    return { labels: [], domestic: [], international: [] };
   }
 }
 
@@ -1322,11 +1417,10 @@ async function scheduledGoldCrawlWithRetry(event, env, ctx) {
   }
 }
 
-// 存储金价数据到 KV
+// 存储金价数据到 KV（数据保留至第三日开盘清除）
 async function storeGoldPriceData(env, data) {
   if (!env?.GOLD_PRICE_CACHE) {
     console.warn('[Store] GOLD_PRICE_CACHE not configured, using memory cache only');
-    // 更新内存缓存
     goldPriceCache.data = { ...data, cachedAt: Date.now() };
     goldPriceCache.timestamp = Date.now();
     return;
@@ -1335,21 +1429,20 @@ async function storeGoldPriceData(env, data) {
   try {
     const timestamp = Date.now();
     const dateKey = new Date().toISOString().split('T')[0];
+    const THREE_DAYS_SECONDS = 3 * 24 * 60 * 60;
     
-    // 1. 存储最新数据（5分钟过期）
     try {
       await env.GOLD_PRICE_CACHE.put('latest', JSON.stringify({
         ...data,
-        cachedAt: timestamp
-      }), { expirationTtl: 300 });
+        cachedAt: timestamp,
+        date: dateKey
+      }), { expirationTtl: 60 });
     } catch (kvError) {
       console.warn('[Store] Failed to store latest data to KV:', kvError.message);
-      // 回退到内存缓存
       goldPriceCache.data = { ...data, cachedAt: timestamp };
       goldPriceCache.timestamp = timestamp;
     }
     
-    // 2. 存储到历史数据列表
     try {
       const historyKey = `history:${dateKey}`;
       let history = [];
@@ -1370,42 +1463,52 @@ async function storeGoldPriceData(env, data) {
         internationalChange: data.international?.changePercent || 0
       });
       
-      // 限制历史数据数量（最多保存1440条，即24小时）
       if (history.length > 1440) {
         history = history.slice(-1440);
       }
       
       await env.GOLD_PRICE_CACHE.put(historyKey, JSON.stringify(history), {
-        expirationTtl: 86400 // 24小时过期
+        expirationTtl: THREE_DAYS_SECONDS
       });
     } catch (kvError) {
       console.warn('[Store] Failed to store history to KV:', kvError.message);
     }
     
-    // 3. 存储统计数据
     try {
       const statsKey = `stats:${dateKey}`;
+      let existingStats = {};
+      try {
+        const existing = await env.GOLD_PRICE_CACHE.get(statsKey);
+        if (existing) {
+          existingStats = JSON.parse(existing);
+        }
+      } catch (e) {}
+      
       const stats = {
         lastUpdate: timestamp,
-        updateCount: history?.length || 1,
-        domesticHigh: data.domestic?.high || data.domestic?.price || 0,
-        domesticLow: data.domestic?.low || data.domestic?.price || 0,
-        internationalHigh: data.international?.high || data.international?.price || 0,
-        internationalLow: data.international?.low || data.international?.price || 0
+        updateCount: (existingStats.updateCount || 0) + 1,
+        domesticOpen: existingStats.domesticOpen || data.domestic?.open || data.domestic?.price || 0,
+        domesticHigh: Math.max(existingStats.domesticHigh || 0, data.domestic?.high || data.domestic?.price || 0),
+        domesticLow: existingStats.domesticLow ? Math.min(existingStats.domesticLow, data.domestic?.low || data.domestic?.price || Infinity) : (data.domestic?.low || data.domestic?.price || 0),
+        domesticChange: data.domestic?.changePercent || 0,
+        internationalOpen: existingStats.internationalOpen || data.international?.open || data.international?.price || 0,
+        internationalHigh: Math.max(existingStats.internationalHigh || 0, data.international?.high || data.international?.price || 0),
+        internationalLow: existingStats.internationalLow ? Math.min(existingStats.internationalLow, data.international?.low || data.international?.price || Infinity) : (data.international?.low || data.international?.price || 0),
+        internationalChange: data.international?.changePercent || 0,
+        source: data.domestic?.source || 'Unknown'
       };
       
       await env.GOLD_PRICE_CACHE.put(statsKey, JSON.stringify(stats), {
-        expirationTtl: 86400
+        expirationTtl: THREE_DAYS_SECONDS
       });
     } catch (kvError) {
       console.warn('[Store] Failed to store stats to KV:', kvError.message);
     }
     
-    console.log('[Store] Data stored successfully');
+    console.log('[Store] Data stored successfully for date:', dateKey);
     
   } catch (error) {
     console.error('[Store] Failed to store data:', error);
-    // 确保内存缓存已更新
     goldPriceCache.data = { ...data, cachedAt: Date.now() };
     goldPriceCache.timestamp = Date.now();
   }
@@ -2566,6 +2669,485 @@ async function sendRegistrationEmail(username, email, ip, env) {
     console.log('Welcome email sent to:', sanitizedEmail);
   } catch (error) {
     console.error('User email exception:', error);
+  }
+}
+
+// ================================================================================
+// 金价预警邮件 - 智能波动检测
+// ================================================================================
+
+const ALERT_CONFIG = {
+  WINDOW_SIZE: 5,
+  SHORT_TERM_MINUTES: 1,
+  DOMESTIC_THRESHOLD: 5,
+  INTERNATIONAL_THRESHOLD: 10,
+  COOLDOWN_MINUTES: 1,
+  ALERT_ON_RISE: false
+};
+
+async function sendGoldPriceAlert(domestic, international, history, env) {
+  const RESEND_API_KEY = env.RESEND_API_KEY;
+  
+  if (!RESEND_API_KEY) {
+    console.log('[Gold Alert] RESEND_API_KEY not configured, skipping alert');
+    return;
+  }
+
+  const alerts = [];
+  
+  const domesticWindow = analyzeWindow(history?.domestic || [], ALERT_CONFIG.DOMESTIC_THRESHOLD);
+  const internationalWindow = analyzeWindow(history?.international || [], ALERT_CONFIG.INTERNATIONAL_THRESHOLD);
+  
+  const domesticShortTerm = analyzeShortTerm(history?.domestic || [], ALERT_CONFIG.DOMESTIC_THRESHOLD);
+  const internationalShortTerm = analyzeShortTerm(history?.international || [], ALERT_CONFIG.INTERNATIONAL_THRESHOLD);
+  
+  if (domesticWindow.triggered) {
+    alerts.push({
+      type: 'window',
+      name: '国内黄金 (mAuT+D)',
+      price: domestic.price,
+      unit: '元/克',
+      ...domesticWindow
+    });
+  }
+  
+  if (internationalWindow.triggered) {
+    alerts.push({
+      type: 'window',
+      name: '国际黄金 (XAU)',
+      price: international.price,
+      unit: '美元/盎司',
+      ...internationalWindow
+    });
+  }
+  
+  if (domesticShortTerm.triggered) {
+    alerts.push({
+      type: 'short_term',
+      name: '国内黄金 (mAuT+D)',
+      price: domestic.price,
+      unit: '元/克',
+      ...domesticShortTerm
+    });
+  }
+  
+  if (internationalShortTerm.triggered) {
+    alerts.push({
+      type: 'short_term',
+      name: '国际黄金 (XAU)',
+      price: international.price,
+      unit: '美元/盎司',
+      ...internationalShortTerm
+    });
+  }
+  
+  if (alerts.length === 0) {
+    console.log('[Gold Alert] No significant price movement detected');
+    return;
+  }
+  
+  if (env?.GOLD_PRICE_CACHE) {
+    try {
+      const lastAlert = await env.GOLD_PRICE_CACHE.get('last_alert');
+      if (lastAlert) {
+        const lastAlertTime = parseInt(lastAlert);
+        const cooldownMs = ALERT_CONFIG.COOLDOWN_MINUTES * 60 * 1000;
+        if (Date.now() - lastAlertTime < cooldownMs) {
+          console.log('[Gold Alert] Alert already sent within', ALERT_CONFIG.COOLDOWN_MINUTES, 'minutes, skipping');
+          return;
+        }
+      }
+    } catch (e) {
+      console.log('[Gold Alert] Failed to check last alert time');
+    }
+  }
+  
+  console.log('[Gold Alert] Price movement detected!', alerts.length, 'alerts');
+  await sendAlertEmail(alerts, env);
+}
+
+function analyzeWindow(prices, threshold) {
+  if (prices.length < ALERT_CONFIG.WINDOW_SIZE) {
+    return { triggered: false, reason: 'insufficient_data' };
+  }
+  
+  const window = prices.slice(-ALERT_CONFIG.WINDOW_SIZE);
+  const max = Math.max(...window);
+  const min = Math.min(...window);
+  const range = max - min;
+  const current = window[window.length - 1];
+  const direction = current <= min ? 'down' : (current >= max ? 'up' : 'volatile');
+  
+  if (!ALERT_CONFIG.ALERT_ON_RISE && direction === 'up') {
+    return { triggered: false, reason: 'price_rising' };
+  }
+  
+  if (range >= threshold) {
+    return {
+      triggered: true,
+      range: range.toFixed(2),
+      max: max.toFixed(2),
+      min: min.toFixed(2),
+      current: current.toFixed(2),
+      direction: direction,
+      message: `最近${ALERT_CONFIG.WINDOW_SIZE}个采集点波动 ${range.toFixed(2)}，超过阈值 ${threshold}`
+    };
+  }
+  
+  return { triggered: false };
+}
+
+function analyzeShortTerm(prices, threshold) {
+  if (prices.length < 2) {
+    return { triggered: false, reason: 'insufficient_data' };
+  }
+  
+  const current = prices[prices.length - 1];
+  const pointsInWindow = Math.min(prices.length, 12);
+  const recentPrices = prices.slice(-pointsInWindow, -1);
+  
+  if (recentPrices.length === 0) {
+    return { triggered: false, reason: 'insufficient_data' };
+  }
+  
+  let maxDeviation = 0;
+  let deviationPoint = 0;
+  
+  for (const price of recentPrices) {
+    const deviation = Math.abs(current - price);
+    if (deviation > maxDeviation) {
+      maxDeviation = deviation;
+      deviationPoint = price;
+    }
+  }
+  
+  const direction = current > deviationPoint ? 'up' : 'down';
+  
+  if (!ALERT_CONFIG.ALERT_ON_RISE && direction === 'up') {
+    return { triggered: false, reason: 'price_rising' };
+  }
+  
+  if (maxDeviation >= threshold) {
+    return {
+      triggered: true,
+      deviation: maxDeviation.toFixed(2),
+      current: current.toFixed(2),
+      comparedTo: deviationPoint.toFixed(2),
+      direction: direction,
+      message: `当前价格与近期价格偏差 ${maxDeviation.toFixed(2)}，超过阈值 ${threshold}`
+    };
+  }
+  
+  return { triggered: false };
+}
+
+async function sendAlertEmail(alerts, env) {
+  const RESEND_API_KEY = env.RESEND_API_KEY;
+  
+  sendFeishuAlert(alerts, env);
+  sendWeComAlert(alerts, env);
+  
+  const hasDownward = alerts.some(a => a.direction === 'down');
+  const hasVolatile = alerts.some(a => a.direction === 'volatile');
+  const alertEmoji = hasDownward ? '🚨' : (hasVolatile ? '⚡' : '📈');
+  const alertTitle = hasDownward ? '金价暴跌预警' : (hasVolatile ? '金价剧烈波动' : '金价快速上涨');
+  
+  const windowAlerts = alerts.filter(a => a.type === 'window');
+  const shortTermAlerts = alerts.filter(a => a.type === 'short_term');
+  
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'AGI Era <noreply@agiera.net>',
+        to: ['metanext@foxmail.com'],
+        subject: `${alertEmoji} ${alertTitle} - ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0b; color: #fafafa;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: ${hasDownward ? '#ef4444' : (hasVolatile ? '#f59e0b' : '#22c55e')}; margin: 0;">${alertEmoji} ${alertTitle}</h1>
+              <p style="color: #71717a; margin-top: 5px;">实时金价智能监控</p>
+            </div>
+            
+            ${windowAlerts.length > 0 ? `
+            <div style="background: #18181b; padding: 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;">
+              <h3 style="color: #fafafa; margin: 0 0 16px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">📊 滑动窗口检测 (最近${ALERT_CONFIG.WINDOW_SIZE}个采集点)</h3>
+              ${windowAlerts.map(alert => `
+                <div style="margin-bottom: 16px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                  <h4 style="color: #fafafa; margin: 0 0 12px 0;">${alert.name}</h4>
+                  <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <tr>
+                      <td style="padding: 6px 0; color: #71717a;">当前价格</td>
+                      <td style="padding: 6px 0; color: #fafafa; text-align: right; font-weight: bold;">${alert.current} ${alert.unit}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 6px 0; color: #71717a;">最高价</td>
+                      <td style="padding: 6px 0; color: #22c55e; text-align: right;">${alert.max} ${alert.unit}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 6px 0; color: #71717a;">最低价</td>
+                      <td style="padding: 6px 0; color: #ef4444; text-align: right;">${alert.min} ${alert.unit}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 6px 0; color: #71717a;">波动幅度</td>
+                      <td style="padding: 6px 0; color: ${alert.direction === 'down' ? '#ef4444' : (alert.direction === 'up' ? '#22c55e' : '#f59e0b')}; text-align: right; font-weight: bold;">${alert.range} ${alert.unit}</td>
+                    </tr>
+                  </table>
+                </div>
+              `).join('')}
+            </div>
+            ` : ''}
+            
+            ${shortTermAlerts.length > 0 ? `
+            <div style="background: #18181b; padding: 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;">
+              <h3 style="color: #fafafa; margin: 0 0 16px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">⚡ 短期波动检测 (最近${ALERT_CONFIG.SHORT_TERM_MINUTES}分钟)</h3>
+              ${shortTermAlerts.map(alert => `
+                <div style="margin-bottom: 16px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                  <h4 style="color: #fafafa; margin: 0 0 12px 0;">${alert.name}</h4>
+                  <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <tr>
+                      <td style="padding: 6px 0; color: #71717a;">当前价格</td>
+                      <td style="padding: 6px 0; color: #fafafa; text-align: right; font-weight: bold;">${alert.current} ${alert.unit}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 6px 0; color: #71717a;">对比价格</td>
+                      <td style="padding: 6px 0; color: #a1a1aa; text-align: right;">${alert.comparedTo} ${alert.unit}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 6px 0; color: #71717a;">价格偏差</td>
+                      <td style="padding: 6px 0; color: ${alert.direction === 'down' ? '#ef4444' : '#22c55e'}; text-align: right; font-weight: bold;">${alert.deviation} ${alert.unit}</td>
+                    </tr>
+                  </table>
+                </div>
+              `).join('')}
+            </div>
+            ` : ''}
+            
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="https://agiera.net/kit/gold" style="display: inline-block; background: linear-gradient(135deg, #00d4ff, #0099cc); color: #000; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">查看实时金价</a>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 13px;">
+              <p style="color: #71717a; margin: 0 0 8px 0;"><strong>预警规则：</strong></p>
+              <ul style="color: #a1a1aa; margin: 0; padding-left: 20px;">
+                <li>滑动窗口：最近${ALERT_CONFIG.WINDOW_SIZE}个采集点内，最高价与最低价差值超过阈值</li>
+                <li>短期波动：当前价格与最近${ALERT_CONFIG.SHORT_TERM_MINUTES}分钟内价格偏差超过阈值</li>
+                <li>国内黄金阈值：${ALERT_CONFIG.DOMESTIC_THRESHOLD} 元/克</li>
+                <li>国际黄金阈值：${ALERT_CONFIG.INTERNATIONAL_THRESHOLD} 美元/盎司</li>
+              </ul>
+            </div>
+            
+            <p style="text-align: center; color: #71717a; font-size: 12px; margin-top: 24px;">
+              ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })} | 此邮件由系统自动发送 | ${ALERT_CONFIG.COOLDOWN_MINUTES}分钟内不会重复发送
+            </p>
+          </div>
+        `,
+      }),
+    });
+    
+    if (response.ok) {
+      console.log('[Gold Alert] Alert email sent successfully');
+      if (env?.GOLD_PRICE_CACHE) {
+        await env.GOLD_PRICE_CACHE.put('last_alert', Date.now().toString(), { expirationTtl: 3600 });
+      }
+    } else {
+      const error = await response.text();
+      console.error('[Gold Alert] Failed to send email:', error);
+    }
+  } catch (error) {
+    console.error('[Gold Alert] Exception:', error);
+  }
+}
+
+async function sendFeishuAlert(alerts, env) {
+  const FEISHU_WEBHOOK = env.FEISHU_WEBHOOK;
+  const FEISHU_APP_ID = env.FEISHU_APP_ID;
+  const FEISHU_APP_SECRET = env.FEISHU_APP_SECRET;
+  const FEISHU_CHAT_ID = env.FEISHU_CHAT_ID;
+  
+  if (FEISHU_WEBHOOK) {
+    await sendFeishuWebhook(FEISHU_WEBHOOK, alerts);
+    return;
+  }
+  
+  if (FEISHU_APP_ID && FEISHU_APP_SECRET && FEISHU_CHAT_ID) {
+    await sendFeishuAppMessage(FEISHU_APP_ID, FEISHU_APP_SECRET, FEISHU_CHAT_ID, alerts);
+    return;
+  }
+}
+
+async function sendFeishuWebhook(webhookUrl, alerts) {
+  const hasDownward = alerts.some(a => a.direction === 'down');
+  const hasVolatile = alerts.some(a => a.direction === 'volatile');
+  const alertEmoji = hasDownward ? '🚨' : (hasVolatile ? '⚡' : '📈');
+  const alertTitle = hasDownward ? '金价暴跌预警' : (hasVolatile ? '金价剧烈波动' : '金价快速上涨');
+  
+  let content = `**${alertEmoji} ${alertTitle}**\n`;
+  content += `> 时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}\n\n`;
+  
+  for (const alert of alerts) {
+    if (alert.type === 'window') {
+      content += `**${alert.name}** (滑动窗口)\n`;
+      content += `当前: ${alert.current} ${alert.unit}\n`;
+      content += `最高: ${alert.max} | 最低: ${alert.min}\n`;
+      content += `波动: **${alert.range} ${alert.unit}**\n\n`;
+    } else {
+      content += `**${alert.name}** (短期波动)\n`;
+      content += `当前: ${alert.current} ${alert.unit}\n`;
+      content += `偏差: **${alert.deviation} ${alert.unit}**\n\n`;
+    }
+  }
+  
+  content += `[查看详情](https://agiera.net/kit/gold)`;
+  
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        msg_type: 'interactive',
+        card: {
+          header: {
+            title: { tag: 'plain_text', content: `${alertEmoji} ${alertTitle}` },
+            template: hasDownward ? 'red' : (hasVolatile ? 'orange' : 'green')
+          },
+          elements: [
+            { tag: 'markdown', content: content }
+          ]
+        }
+      })
+    });
+    console.log('[Gold Alert] Feishu webhook sent');
+  } catch (error) {
+    console.error('[Gold Alert] Feishu webhook error:', error);
+  }
+}
+
+async function sendFeishuAppMessage(appId, appSecret, chatId, alerts) {
+  try {
+    const tokenResponse = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        app_id: appId,
+        app_secret: appSecret
+      })
+    });
+    
+    const tokenData = await tokenResponse.json();
+    
+    if (tokenData.code !== 0) {
+      console.error('[Gold Alert] Feishu auth failed:', tokenData.msg);
+      return;
+    }
+    
+    const accessToken = tokenData.tenant_access_token;
+    
+    const hasDownward = alerts.some(a => a.direction === 'down');
+    const hasVolatile = alerts.some(a => a.direction === 'volatile');
+    const alertEmoji = hasDownward ? '🚨' : (hasVolatile ? '⚡' : '📈');
+    const alertTitle = hasDownward ? '金价暴跌预警' : (hasVolatile ? '金价剧烈波动' : '金价快速上涨');
+    
+    const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+    
+    const contentElements = [
+      [{ tag: 'text', text: `时间：${timeStr}` }],
+      [{ tag: 'text', text: '' }]
+    ];
+    
+    for (const alert of alerts) {
+      if (alert.type === 'window') {
+        contentElements.push([{ tag: 'text', text: `${alert.name} (滑动窗口)` }]);
+        contentElements.push([{ tag: 'text', text: `当前价格: ${alert.current} ${alert.unit}` }]);
+        contentElements.push([{ tag: 'text', text: `最高: ${alert.max} | 最低: ${alert.min}` }]);
+        contentElements.push([{ tag: 'text', text: `波动幅度: ${alert.range} ${alert.unit}` }]);
+        contentElements.push([{ tag: 'text', text: '' }]);
+      } else {
+        contentElements.push([{ tag: 'text', text: `${alert.name} (短期波动)` }]);
+        contentElements.push([{ tag: 'text', text: `当前价格: ${alert.current} ${alert.unit}` }]);
+        contentElements.push([{ tag: 'text', text: `价格偏差: ${alert.deviation} ${alert.unit}` }]);
+        contentElements.push([{ tag: 'text', text: '' }]);
+      }
+    }
+    
+    contentElements.push([{ tag: 'a', text: '查看详情', href: 'https://agiera.net/kit/gold' }]);
+    
+    const messageResponse = await fetch('https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({
+        receive_id: chatId,
+        msg_type: 'post',
+        content: JSON.stringify({
+          zh_cn: {
+            title: `${alertEmoji} ${alertTitle}`,
+            content: contentElements
+          }
+        })
+      })
+    });
+    
+    const messageData = await messageResponse.json();
+    
+    if (messageData.code === 0) {
+      console.log('[Gold Alert] Feishu app message sent');
+    } else {
+      console.error('[Gold Alert] Feishu message failed:', messageData.msg);
+    }
+  } catch (error) {
+    console.error('[Gold Alert] Feishu app error:', error);
+  }
+}
+
+async function sendWeComAlert(alerts, env) {
+  const WECOM_WEBHOOK = env.WECOM_WEBHOOK;
+  
+  if (!WECOM_WEBHOOK) {
+    return;
+  }
+  
+  const hasDownward = alerts.some(a => a.direction === 'down');
+  const hasVolatile = alerts.some(a => a.direction === 'volatile');
+  const alertEmoji = hasDownward ? '🚨' : (hasVolatile ? '⚡' : '📈');
+  const alertTitle = hasDownward ? '金价暴跌预警' : (hasVolatile ? '金价剧烈波动' : '金价快速上涨');
+  
+  let content = `## ${alertEmoji} ${alertTitle}\n`;
+  content += `> 时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}\n\n`;
+  
+  for (const alert of alerts) {
+    if (alert.type === 'window') {
+      content += `**${alert.name}** (滑动窗口)\n`;
+      content += `> 当前: ${alert.current} ${alert.unit}\n`;
+      content += `> 最高: ${alert.max} | 最低: ${alert.min}\n`;
+      content += `> 波动: <font color="warning">${alert.range} ${alert.unit}</font>\n\n`;
+    } else {
+      content += `**${alert.name}** (短期波动)\n`;
+      content += `> 当前: ${alert.current} ${alert.unit}\n`;
+      content += `> 偏差: <font color="warning">${alert.deviation} ${alert.unit}</font>\n\n`;
+    }
+  }
+  
+  content += `[查看详情](https://agiera.net/kit/gold)`;
+  
+  try {
+    await fetch(WECOM_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        msgtype: 'markdown',
+        markdown: { content: content }
+      })
+    });
+    console.log('[Gold Alert] WeCom notification sent');
+  } catch (error) {
+    console.error('[Gold Alert] WeCom error:', error);
   }
 }
 

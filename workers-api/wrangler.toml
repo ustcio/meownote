@@ -1,0 +1,29 @@
+name = "meownote-api"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+[site]
+bucket = "../dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "meownote-db"
+database_id = "your-database-id"
+
+[[kv_namespaces]]
+binding = "GOLD_PRICE_CACHE"
+id = "your-kv-id"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "meownote-files"
+
+[vars]
+ENVIRONMENT = "production"
+
+[env.development]
+name = "meownote-api-dev"
+vars = { ENVIRONMENT = "development" }
+
+[triggers]
+crons = ["*/5 * * * *"]
