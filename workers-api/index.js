@@ -15,6 +15,7 @@ import {
   handleGoldPriceStream,
   handleGoldHistory,
   handleGoldAlertTest,
+  handleGoldAnalysis,
   handleAdminVerify,
   handleAdminFiles,
   handleAdminFileAction,
@@ -25,7 +26,19 @@ import {
   handleUploadInit,
   handleUploadPart,
   handleUploadComplete,
-  handleUploadAbort
+  handleUploadAbort,
+  handleTradingLogin,
+  handleTradingVerify,
+  handleBuyTransaction,
+  handleSellTransaction,
+  handleGetTransactions,
+  handleGetTransactionStats,
+  handleCreateAlert,
+  handleGetAlerts,
+  handleDeleteAlert,
+  handleGetNotifications,
+  handleDeleteTransaction,
+  handleUpdateTransaction
 } from './handlers/index.js';
 import { jsonResponse } from './utils/response.js';
 
@@ -40,6 +53,7 @@ const routes = [
   { pattern: '/api/gold/stream', handler: handleGoldPriceStream, method: 'GET' },
   { pattern: '/api/gold/history', handler: handleGoldHistory, method: 'GET' },
   { pattern: '/api/gold/alert/test', handler: handleGoldAlertTest, method: 'GET' },
+  { pattern: '/api/gold/analysis', handler: handleGoldAnalysis, method: 'GET' },
   { pattern: '/stats/visit', handler: handleStatsVisit, method: 'POST' },
   { pattern: '/stats/visitor', handler: handleStatsGet, method: 'GET' },
   { pattern: '/stats/heatmap', handler: handleHeatmap, method: 'GET' },
@@ -53,6 +67,15 @@ const routes = [
   { pattern: '/api/admin/upload/part', handler: handleUploadPart, method: 'POST' },
   { pattern: '/api/admin/upload/complete', handler: handleUploadComplete, method: 'POST' },
   { pattern: '/api/admin/upload/abort', handler: handleUploadAbort, method: 'POST' },
+  { pattern: '/api/trading/login', handler: handleTradingLogin, method: 'POST', rateLimit: 'login' },
+  { pattern: '/api/trading/verify', handler: handleTradingVerify, method: 'GET' },
+  { pattern: '/api/trading/buy', handler: handleBuyTransaction, method: 'POST' },
+  { pattern: '/api/trading/sell', handler: handleSellTransaction, method: 'POST' },
+  { pattern: '/api/trading/transactions', handler: handleGetTransactions, method: 'GET' },
+  { pattern: '/api/trading/stats', handler: handleGetTransactionStats, method: 'GET' },
+  { pattern: '/api/trading/alerts', handler: handleGetAlerts, method: 'GET' },
+  { pattern: '/api/trading/alert', handler: handleCreateAlert, method: 'POST' },
+  { pattern: '/api/trading/notifications', handler: handleGetNotifications, method: 'GET' },
 ];
 
 function matchRoute(pathname) {
@@ -105,6 +128,18 @@ async function handleRequest(request, env, ctx) {
     
     if (pathname.startsWith('/api/admin/folders/')) {
       return await handleAdminFolderAction(request, env, pathname);
+    }
+
+    if (pathname === '/api/trading/alert' && request.method === 'DELETE') {
+      return await handleDeleteAlert(request, env);
+    }
+
+    if (pathname === '/api/trading/transactions' && request.method === 'DELETE') {
+      return await handleDeleteTransaction(request, env);
+    }
+
+    if (pathname === '/api/trading/transactions' && request.method === 'PUT') {
+      return await handleUpdateTransaction(request, env);
     }
 
     const response = await route.handler(request, env, ctx);
