@@ -2944,7 +2944,7 @@ async function sendAlertEmail(alerts, env) {
             ` : ''}
             
             <div style="text-align: center; margin: 24px 0;">
-              <a href="https://meownote.com/kit/gold/" style="display: inline-block; background: linear-gradient(135deg, #00d4ff, #0099cc); color: #000; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">查看实时金价</a>
+              <a href="https://ustc.dev/kit/gold/" style="display: inline-block; background: linear-gradient(135deg, #00d4ff, #0099cc); color: #000; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">查看实时金价</a>
             </div>
             
             <div style="margin-top: 20px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 13px;">
@@ -3030,7 +3030,7 @@ async function sendFeishuWebhook(webhookUrl, alerts) {
     }
   }
   
-  content += `[查看详情](https://meownote.com/kit/gold/)`;
+  content += `[查看详情](https://ustc.dev/kit/gold/)`;
   
   console.log('[Gold Alert] Sending to Feishu webhook:', webhookUrl.substring(0, 50) + '...');
   
@@ -3115,7 +3115,7 @@ async function sendFeishuAppMessage(appId, appSecret, chatId, alerts) {
       }
     }
     
-    contentElements.push([{ tag: 'a', text: '查看详情', href: 'https://meownote.com/kit/gold/' }]);
+    contentElements.push([{ tag: 'a', text: '查看详情', href: 'https://ustc.dev/kit/gold/' }]);
     
     const messageResponse = await fetch('https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id', {
       method: 'POST',
@@ -3179,7 +3179,7 @@ async function sendWeComAlert(alerts, env) {
     }
   }
   
-  content += `[查看详情](https://meownote.com/kit/gold/)`;
+  content += `[查看详情](https://ustc.dev/kit/gold/)`;
   
   try {
     await fetch(WECOM_WEBHOOK, {
@@ -3221,7 +3221,7 @@ async function sendMeoWAlert(alerts, env) {
       body: JSON.stringify({
         title: `${alertEmoji}${alertTitle}`,
         msg: msgContent.trim(),
-        url: 'https://meownote.com/kit/gold/'
+        url: 'https://ustc.dev/kit/gold/'
       })
     });
     const result = await response.json();
