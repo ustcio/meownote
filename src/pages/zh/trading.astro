@@ -838,59 +838,256 @@ import Layout from '@layouts/Layout.astro';
     box-shadow: 0 4px 12px rgba(191, 90, 242, 0.3);
   }
 
+  /* Alert List - New Design */
   .alert-list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-3);
     margin-top: var(--space-4);
-    max-height: 200px;
+    max-height: 400px;
     overflow-y: auto;
   }
 
+  .alert-empty {
+    text-align: center;
+    padding: var(--space-6);
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+  }
+
+  /* Alert Section */
+  .alert-section {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+  }
+
+  .alert-section.triggered {
+    border-color: rgba(100, 210, 255, 0.3);
+    background: rgba(100, 210, 255, 0.05);
+  }
+
+  .alert-section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-primary);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+  }
+
+  .alert-section-icon {
+    font-size: var(--text-base);
+  }
+
+  .alert-section-title {
+    color: var(--text-primary);
+  }
+
+  .alert-section-content {
+    padding: var(--space-2);
+  }
+
+  /* Alert Item */
   .alert-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: var(--space-3);
-    background: var(--bg-secondary);
+    background: var(--bg-primary);
     border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
+    margin-bottom: var(--space-2);
+    transition: all var(--duration-fast) var(--ease-default);
+    border: 1px solid transparent;
   }
 
-  .alert-item .alert-info {
+  .alert-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .alert-item:hover {
+    border-color: var(--border-primary);
+    transform: translateX(4px);
+  }
+
+  .alert-item.triggered {
+    background: rgba(100, 210, 255, 0.1);
+    border-color: rgba(100, 210, 255, 0.2);
+  }
+
+  .alert-item.inactive {
+    opacity: 0.6;
+  }
+
+  .alert-main {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: var(--space-3);
   }
 
-  .alert-item .alert-type {
-    padding: 2px 8px;
-    border-radius: var(--radius-sm);
+  .alert-type-badge {
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
     font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    border: 1px solid transparent;
+  }
+
+  .alert-type-badge.buy {
+    background: rgba(48, 209, 88, 0.1);
+    color: #30d158;
+    border-color: rgba(48, 209, 88, 0.2);
+  }
+
+  .alert-type-badge.sell {
+    background: rgba(255, 55, 95, 0.1);
+    color: #ff375f;
+    border-color: rgba(255, 55, 95, 0.2);
+  }
+
+  .alert-price {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+  }
+
+  .alert-price-value {
+    font-family: var(--font-number);
+    font-weight: var(--font-bold);
+    font-size: var(--text-base);
+    color: var(--text-primary);
+  }
+
+  .alert-price-unit {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+  }
+
+  .alert-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  .alert-status {
+    font-size: var(--text-xs);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
     font-weight: var(--font-medium);
   }
 
-  .alert-item .alert-type.buy {
-    background: rgba(48, 209, 88, 0.15);
+  .alert-status.active {
+    background: rgba(48, 209, 88, 0.1);
     color: #30d158;
   }
 
-  .alert-item .alert-type.sell {
-    background: rgba(255, 55, 95, 0.15);
-    color: #ff375f;
+  .alert-status.triggered {
+    background: rgba(100, 210, 255, 0.1);
+    color: #64d2ff;
   }
 
-  .alert-item .delete-alert {
+  .alert-status.inactive {
+    background: var(--bg-tertiary);
     color: var(--text-tertiary);
-    transition: color var(--duration-fast) var(--ease-default);
+  }
+
+  .alert-time {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+  }
+
+  .delete-alert-btn {
+    color: var(--text-tertiary);
+    transition: all var(--duration-fast) var(--ease-default);
     background: none;
     border: none;
     cursor: pointer;
-    padding: var(--space-1);
+    padding: var(--space-2);
+    border-radius: var(--radius-md);
+    margin-left: var(--space-2);
   }
 
-  .alert-item .delete-alert:hover {
+  .delete-alert-btn:hover {
     color: #ff375f;
+    background: rgba(255, 55, 95, 0.1);
+  }
+
+  /* Alert Actions */
+  .alert-actions {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-3);
+    border-top: 1px solid var(--border-primary);
+    margin-top: var(--space-2);
+  }
+
+  .alert-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    border: 1px solid transparent;
+  }
+
+  .alert-action-btn.delete-all {
+    color: #ff375f;
+    background: rgba(255, 55, 95, 0.1);
+    border-color: rgba(255, 55, 95, 0.2);
+  }
+
+  .alert-action-btn.delete-all:hover {
+    background: rgba(255, 55, 95, 0.2);
+  }
+
+  /* Notification */
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    z-index: 9999;
+  }
+
+  .notification.show {
+    transform: translateX(0);
+  }
+
+  .notification.success {
+    background: rgba(48, 209, 88, 0.95);
+    color: white;
+  }
+
+  .notification.error {
+    background: rgba(255, 55, 95, 0.95);
+    color: white;
+  }
+
+  .notification.info {
+    background: rgba(100, 210, 255, 0.95);
+    color: white;
+  }
+
+  .notification-icon {
+    font-weight: var(--font-bold);
   }
 
   .transactions-section {
@@ -1054,51 +1251,83 @@ import Layout from '@layouts/Layout.astro';
     box-shadow: 0 0 4px #ff375f;
   }
 
-  /* Price Cell */
+  /* Price Cell with Border Container */
   .price-cell {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
   }
 
   .price-cell .display-value {
+    display: inline-block;
     font-weight: var(--font-semibold);
     font-family: var(--font-number);
     font-size: var(--text-base);
     color: var(--text-primary);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    padding: 4px 10px;
+    min-width: 80px;
+    text-align: center;
   }
 
   .price-cell .sell-price {
+    display: inline-block;
     font-size: var(--text-xs);
     color: var(--text-tertiary);
     font-family: var(--font-number);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-sm);
+    padding: 2px 8px;
+    width: fit-content;
   }
 
-  /* Quantity & Amount */
+  /* Quantity & Amount with Border Container */
   .quantity-cell,
   .amount-cell {
     font-family: var(--font-number);
     font-weight: var(--font-medium);
     color: var(--text-primary);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    padding: 4px 10px;
+    display: inline-block;
+    min-width: 70px;
+    text-align: right;
   }
 
-  /* Profit Cell */
+  /* Profit Cell with Border Container */
   .profit-cell {
     font-family: var(--font-number);
     font-weight: var(--font-bold);
     font-size: var(--text-base);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    padding: 4px 10px;
+    display: inline-block;
+    min-width: 80px;
+    text-align: right;
+    background: var(--bg-tertiary);
   }
 
   .profit-cell.positive {
     color: #30d158;
+    border-color: rgba(48, 209, 88, 0.3);
+    background: rgba(48, 209, 88, 0.05);
   }
 
   .profit-cell.negative {
     color: #ff375f;
+    border-color: rgba(255, 55, 95, 0.3);
+    background: rgba(255, 55, 95, 0.05);
   }
 
   .profit-cell.neutral {
     color: var(--text-tertiary);
+    border-color: var(--border-primary);
   }
 
   /* Time Cell */
@@ -1107,6 +1336,11 @@ import Layout from '@layouts/Layout.astro';
     white-space: nowrap;
     font-size: var(--text-xs);
     font-family: var(--font-mono);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-sm);
+    padding: 2px 8px;
+    display: inline-block;
   }
 
   /* Actions Cell */
@@ -1753,24 +1987,105 @@ import Layout from '@layouts/Layout.astro';
     if (!list) return;
 
     if (!alerts?.length) {
-      list.innerHTML = '';
+      list.innerHTML = '<div class="alert-empty">暂无价格预警</div>';
       return;
     }
 
-    list.innerHTML = alerts.map(a => `
-      <div class="alert-item" data-id="${a.id}">
-        <div class="alert-info">
-          <span class="alert-type ${a.alert_type}">${a.alert_type === 'buy' ? '买' : '卖'}</span>
-          <span>¥${a.target_price}/g</span>
+    // 分类预警数据
+    const buyAlerts = alerts.filter(a => a.alert_type === 'buy' && a.is_active);
+    const sellAlerts = alerts.filter(a => a.alert_type === 'sell' && a.is_active);
+    const triggeredAlerts = alerts.filter(a => a.is_triggered);
+
+    let html = '';
+
+    // 买入预警区域
+    if (buyAlerts.length > 0) {
+      html += `
+        <div class="alert-section">
+          <div class="alert-section-header">
+            <span class="alert-section-icon">🟢</span>
+            <span class="alert-section-title">买入预警 (${buyAlerts.length})</span>
+          </div>
+          <div class="alert-section-content">
+            ${buyAlerts.map(a => renderAlertItem(a)).join('')}
+          </div>
         </div>
-        <button class="delete-alert" onclick="deleteAlert(${a.id})">
+      `;
+    }
+
+    // 卖出预警区域
+    if (sellAlerts.length > 0) {
+      html += `
+        <div class="alert-section">
+          <div class="alert-section-header">
+            <span class="alert-section-icon">🔴</span>
+            <span class="alert-section-title">卖出预警 (${sellAlerts.length})</span>
+          </div>
+          <div class="alert-section-content">
+            ${sellAlerts.map(a => renderAlertItem(a)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // 已触发预警区域
+    if (triggeredAlerts.length > 0) {
+      html += `
+        <div class="alert-section triggered">
+          <div class="alert-section-header">
+            <span class="alert-section-icon">✅</span>
+            <span class="alert-section-title">已触发预警 (${triggeredAlerts.length})</span>
+          </div>
+          <div class="alert-section-content">
+            ${triggeredAlerts.map(a => renderAlertItem(a, true)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // 添加批量删除按钮
+    html += `
+      <div class="alert-actions">
+        <button class="alert-action-btn delete-all" onclick="deleteAllAlerts()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          清空所有预警
+        </button>
+      </div>
+    `;
+
+    list.innerHTML = html;
+  }
+
+  function renderAlertItem(alert, isTriggered = false) {
+    const statusClass = isTriggered ? 'triggered' : alert.is_active ? 'active' : 'inactive';
+    const statusText = isTriggered ? '已触发' : alert.is_active ? '监控中' : '已暂停';
+
+    return `
+      <div class="alert-item ${statusClass}" data-id="${alert.id}">
+        <div class="alert-main">
+          <div class="alert-type-badge ${alert.alert_type}">
+            ${alert.alert_type === 'buy' ? '买入' : '卖出'}
+          </div>
+          <div class="alert-price">
+            <span class="alert-price-value">¥${alert.target_price}</span>
+            <span class="alert-price-unit">/克</span>
+          </div>
+        </div>
+        <div class="alert-meta">
+          <span class="alert-status ${statusClass}">${statusText}</span>
+          ${alert.triggered_at ? `<span class="alert-time">${new Date(alert.triggered_at).toLocaleString('zh-CN')}</span>` : ''}
+        </div>
+        <button class="delete-alert-btn" onclick="deleteAlert(${alert.id})" title="删除预警">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
-    `).join('');
+    `;
   }
 
   async function deleteTransaction(id) {
@@ -1868,14 +2183,58 @@ import Layout from '@layouts/Layout.astro';
   }
 
   async function deleteAlert(id) {
+    if (!confirm('确定删除此价格预警？')) return;
+
     try {
       const result = await apiRequest(`/api/trading/alert?id=${id}`, { method: 'DELETE' });
       if (result.success) {
         loadAlerts();
+        showNotification('预警已删除', 'success');
+      } else {
+        console.error('Delete alert failed:', result.error);
+        showNotification(result.error || '删除失败', 'error');
       }
     } catch (error) {
       console.error('Delete alert failed:', error);
+      showNotification('删除失败', 'error');
     }
+  }
+
+  async function deleteAllAlerts() {
+    if (!confirm('确定清空所有价格预警？此操作不可恢复。')) return;
+
+    try {
+      const result = await apiRequest('/api/trading/alerts', { method: 'DELETE' });
+      if (result.success) {
+        loadAlerts();
+        showNotification('所有预警已清空', 'success');
+      } else {
+        console.error('Delete all alerts failed:', result.error);
+        showNotification(result.error || '清空失败', 'error');
+      }
+    } catch (error) {
+      console.error('Delete all alerts failed:', error);
+      showNotification('清空失败', 'error');
+    }
+  }
+
+  function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+      <span class="notification-icon">${type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ'}</span>
+      <span class="notification-message">${message}</span>
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.classList.add('show');
+    }, 10);
+
+    setTimeout(() => {
+      notification.classList.remove('show');
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
   }
 
   document.getElementById('trading-toggle-pwd')?.addEventListener('click', () => {

@@ -82,6 +82,10 @@ export default {
         console.log('[Cron] Starting gold price trend analysis...');
         ctx.waitUntil(scheduledGoldAnalysis(env, ctx));
         break;
+      case '0 0 * * *': // 每日零点清理预设价格任务
+        console.log('[Cron] Starting daily price alerts cleanup...');
+        ctx.waitUntil(cleanupDailyPriceAlerts(env));
+        break;
       default:
         console.log('[Cron] Unknown cron pattern:', event.cron);
         ctx.waitUntil(scheduledGoldCrawlWithRetry(event, env, ctx));
@@ -125,8 +129,8 @@ const ROUTES = {
   '/api/trading/transactions': { handler: handleGetTransactions },
   '/api/trading/transaction': { handler: handleTransactionOperation },
   '/api/trading/stats': { handler: handleGetTransactionStats },
-  '/api/trading/alerts': { handler: handleGetAlerts },
-  '/api/trading/alert': { handler: handleCreateAlert },
+  '/api/trading/alerts': { handler: handleAlertsOperation },
+  '/api/trading/alert': { handler: handleAlertOperation },
   '/api/trading/notifications': { handler: handleGetNotifications },
 };
 
@@ -4581,57 +4585,100 @@ async function handleGetTransactionStats(request, env) {
   }
 }
 
-async function handleCreateAlert(request, env) {
+async function handleAlertOperation(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
     return jsonResponse({ success: false, error: authResult.message }, 401);
   }
 
-  if (request.method !== 'POST') {
-    return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+  // POST - 创建预警
+  if (request.method === 'POST') {
+    try {
+      const { alertType, targetPrice } = await request.json();
+
+      if (!['buy', 'sell'].includes(alertType)) {
+        return jsonResponse({ success: false, error: 'Invalid alert type' }, 400);
+      }
+
+      const priceValidation = validateNumber(targetPrice, TRADING_CONFIG.MIN_PRICE, TRADING_CONFIG.MAX_PRICE, 'Target price');
+      if (!priceValidation.valid) {
+        return jsonResponse({ success: false, error: priceValidation.error }, 400);
+      }
+
+      const stmt = env.DB.prepare(`INSERT INTO price_alerts (alert_type, target_price, created_at) VALUES (?, ?, ?)`);
+      const now = new Date().toISOString();
+      const result = await stmt.bind(alertType, priceValidation.value, now).run();
+
+      return jsonResponse({
+        success: true,
+        alert: { id: result.meta.last_row_id, alertType, targetPrice: priceValidation.value, createdAt: now }
+      });
+    } catch (error) {
+      console.error('[Create Alert Error]', error);
+      return jsonResponse({ success: false, error: 'Failed to create alert' }, 500);
+    }
   }
 
-  try {
-    const { alertType, targetPrice } = await request.json();
+  // DELETE - 删除单个预警
+  if (request.method === 'DELETE') {
+    try {
+      const url = new URL(request.url);
+      const id = url.searchParams.get('id');
 
-    if (!['buy', 'sell'].includes(alertType)) {
-      return jsonResponse({ success: false, error: 'Invalid alert type' }, 400);
+      if (!id) {
+        return jsonResponse({ success: false, error: 'Alert ID required' }, 400);
+      }
+
+      const stmt = env.DB.prepare(`DELETE FROM price_alerts WHERE id = ?`);
+      await stmt.bind(id).run();
+
+      return jsonResponse({ success: true, message: 'Alert deleted' });
+    } catch (error) {
+      console.error('[Delete Alert Error]', error);
+      return jsonResponse({ success: false, error: 'Failed to delete alert' }, 500);
     }
-
-    const priceValidation = validateNumber(targetPrice, TRADING_CONFIG.MIN_PRICE, TRADING_CONFIG.MAX_PRICE, 'Target price');
-    if (!priceValidation.valid) {
-      return jsonResponse({ success: false, error: priceValidation.error }, 400);
-    }
-
-    const stmt = env.DB.prepare(`INSERT INTO price_alerts (alert_type, target_price, created_at) VALUES (?, ?, ?)`);
-    const now = new Date().toISOString();
-    const result = await stmt.bind(alertType, priceValidation.value, now).run();
-
-    return jsonResponse({
-      success: true,
-      alert: { id: result.meta.last_row_id, alertType, targetPrice: priceValidation.value, createdAt: now }
-    });
-  } catch (error) {
-    console.error('[Create Alert Error]', error);
-    return jsonResponse({ success: false, error: 'Failed to create alert' }, 500);
   }
+
+  return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
 }
 
-async function handleGetAlerts(request, env) {
+async function handleAlertsOperation(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
     return jsonResponse({ success: false, error: authResult.message }, 401);
   }
 
-  try {
-    const stmt = env.DB.prepare(`SELECT * FROM price_alerts WHERE is_active = 1 ORDER BY created_at DESC`);
-    const result = await stmt.all();
+  // GET - 获取所有预警
+  if (request.method === 'GET') {
+    try {
+      const stmt = env.DB.prepare(`SELECT * FROM price_alerts ORDER BY created_at DESC`);
+      const result = await stmt.all();
 
-    return jsonResponse({ success: true, alerts: result.results });
-  } catch (error) {
-    console.error('[Get Alerts Error]', error);
-    return jsonResponse({ success: false, error: 'Failed to fetch alerts' }, 500);
+      return jsonResponse({ success: true, alerts: result.results });
+    } catch (error) {
+      console.error('[Get Alerts Error]', error);
+      return jsonResponse({ success: false, error: 'Failed to fetch alerts' }, 500);
+    }
   }
+
+  // DELETE - 批量删除所有预警
+  if (request.method === 'DELETE') {
+    try {
+      const stmt = env.DB.prepare(`DELETE FROM price_alerts`);
+      const result = await stmt.run();
+
+      return jsonResponse({
+        success: true,
+        message: 'All alerts deleted',
+        deletedCount: result.meta?.changes || 0
+      });
+    } catch (error) {
+      console.error('[Delete All Alerts Error]', error);
+      return jsonResponse({ success: false, error: 'Failed to delete alerts' }, 500);
+    }
+  }
+
+  return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
 }
 
 async function handleGetNotifications(request, env) {
@@ -5257,30 +5304,37 @@ function calculateProfitOpportunities(currentPrice, tradingParams, marketAnalysi
     }
   }
 
+  // 优化：价格差值小于2个单位时触发推送
   tradingParams.buyTargets.forEach(target => {
+    const priceDiff = Math.abs(currentPrice - target);
     const distance = ((target - currentPrice) / currentPrice) * 100;
-    if (Math.abs(distance) <= 1.0) {
+    
+    if (priceDiff <= 2.0) { // 小于2个单位触发
       opportunities.push({
         type: 'buy_target',
-        title: '买入目标接近',
-        message: `当前价格 ¥${currentPrice} 接近买入目标 ¥${target}（差距 ${distance.toFixed(2)}%）`,
+        title: '🎯 买入时机提醒',
+        message: `当前价格 ¥${currentPrice} 距离买入目标 ¥${target} 仅差 ¥${priceDiff.toFixed(2)}（${distance.toFixed(2)}%），建议关注买入时机`,
         targetPrice: target,
         currentPrice,
-        recommendation: distance <= 0 ? 'buy_now' : 'watch_buy'
+        priceDiff,
+        recommendation: currentPrice <= target ? 'buy_now' : 'watch_buy'
       });
     }
   });
 
   tradingParams.sellTargets.forEach(target => {
+    const priceDiff = Math.abs(currentPrice - target);
     const distance = ((currentPrice - target) / target) * 100;
-    if (Math.abs(distance) <= 1.0) {
+    
+    if (priceDiff <= 2.0) { // 小于2个单位触发
       opportunities.push({
         type: 'sell_target',
-        title: '卖出目标接近',
-        message: `当前价格 ¥${currentPrice} 接近卖出目标 ¥${target}（差距 ${distance.toFixed(2)}%）`,
+        title: '🎯 卖出时机提醒',
+        message: `当前价格 ¥${currentPrice} 距离卖出目标 ¥${target} 仅差 ¥${priceDiff.toFixed(2)}（${distance.toFixed(2)}%），建议关注卖出时机`,
         targetPrice: target,
         currentPrice,
-        recommendation: distance >= 0 ? 'sell_now' : 'watch_sell'
+        priceDiff,
+        recommendation: currentPrice >= target ? 'sell_now' : 'watch_sell'
       });
     }
   });
@@ -5504,6 +5558,91 @@ async function sendMeowNotification(env, title, content) {
     const result = await response.json();
     return { success: result.status === 200 };
   } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+// ================================================================================
+// 每日零点清理预设价格任务
+// ================================================================================
+
+async function cleanupDailyPriceAlerts(env) {
+  console.log('[Cleanup] Starting daily price alerts cleanup at:', new Date().toISOString());
+  
+  try {
+    // 删除所有已触发或已取消的预警
+    const deleteTriggeredStmt = env.DB.prepare(`
+      DELETE FROM price_alerts 
+      WHERE is_triggered = 1 OR is_active = 0
+    `);
+    const triggeredResult = await deleteTriggeredStmt.run();
+    console.log('[Cleanup] Deleted triggered/inactive alerts:', triggeredResult.meta?.changes || 0);
+    
+    // 重置所有活跃预警的触发状态（保留但重置状态）
+    const resetActiveStmt = env.DB.prepare(`
+      UPDATE price_alerts 
+      SET is_triggered = 0, 
+          triggered_at = NULL, 
+          current_price = NULL,
+          notification_sent = 0,
+          email_sent = 0,
+          feishu_sent = 0,
+          meow_sent = 0
+      WHERE is_active = 1
+    `);
+    const resetResult = await resetActiveStmt.run();
+    console.log('[Cleanup] Reset active alerts:', resetResult.meta?.changes || 0);
+    
+    // 发送清理完成通知
+    await sendMultiChannelNotification(env, {
+      title: '🧹 每日预警清理完成',
+      emailSubject: '🧹 每日预警清理完成 - ' + new Date().toLocaleDateString('zh-CN'),
+      emailHtml: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; }
+    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
+    .stats { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 12px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🧹 每日预警清理完成</h1>
+      <p>${new Date().toLocaleDateString('zh-CN')}</p>
+    </div>
+    <div class="content">
+      <div class="stats">
+        <h3>清理统计</h3>
+        <p>已删除已触发的预警: ${triggeredResult.meta?.changes || 0} 条</p>
+        <p>已重置活跃预警: ${resetResult.meta?.changes || 0} 条</p>
+      </div>
+      <p>系统已自动清理昨日预警数据，今日预警任务已重置。</p>
+      <div class="footer">
+        <p><a href="https://ustc.dev/trading/">查看交易详情</a></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`,
+      feishuContent: `**🧹 每日预警清理完成**\n\n日期：${new Date().toLocaleDateString('zh-CN')}\n\n清理统计：\n- 已删除已触发预警：${triggeredResult.meta?.changes || 0} 条\n- 已重置活跃预警：${resetResult.meta?.changes || 0} 条\n\n今日预警任务已重置，请重新设置交易策略。`,
+      meowContent: `🧹 每日预警清理完成\n\n已删除已触发预警: ${triggeredResult.meta?.changes || 0} 条\n已重置活跃预警: ${resetResult.meta?.changes || 0} 条\n\n今日预警任务已重置`
+    });
+    
+    console.log('[Cleanup] Daily cleanup completed successfully');
+    return { 
+      success: true, 
+      deleted: triggeredResult.meta?.changes || 0,
+      reset: resetResult.meta?.changes || 0
+    };
+  } catch (error) {
+    console.error('[Cleanup] Error during daily cleanup:', error);
     return { success: false, error: error.message };
   }
 }
