@@ -2984,15 +2984,27 @@ async function sendFeishuAlert(alerts, env) {
   const FEISHU_APP_SECRET = env.FEISHU_APP_SECRET;
   const FEISHU_CHAT_ID = env.FEISHU_CHAT_ID;
   
+  console.log('[Gold Alert] Feishu config check:', {
+    hasWebhook: !!FEISHU_WEBHOOK,
+    hasAppId: !!FEISHU_APP_ID,
+    hasAppSecret: !!FEISHU_APP_SECRET,
+    hasChatId: !!FEISHU_CHAT_ID
+  });
+  
   if (FEISHU_WEBHOOK) {
-    await sendFeishuWebhook(FEISHU_WEBHOOK, alerts);
-    return;
+    console.log('[Gold Alert] Using webhook mode');
+    const result = await sendFeishuWebhook(FEISHU_WEBHOOK, alerts);
+    return { method: 'webhook', result };
   }
   
   if (FEISHU_APP_ID && FEISHU_APP_SECRET && FEISHU_CHAT_ID) {
-    await sendFeishuAppMessage(FEISHU_APP_ID, FEISHU_APP_SECRET, FEISHU_CHAT_ID, alerts);
-    return;
+    console.log('[Gold Alert] Using app message mode');
+    const result = await sendFeishuAppMessage(FEISHU_APP_ID, FEISHU_APP_SECRET, FEISHU_CHAT_ID, alerts);
+    return { method: 'app', result };
   }
+  
+  console.log('[Gold Alert] No Feishu configuration found');
+  return { method: 'none', error: 'No Feishu configuration found' };
 }
 
 async function sendFeishuWebhook(webhookUrl, alerts) {
@@ -3019,8 +3031,10 @@ async function sendFeishuWebhook(webhookUrl, alerts) {
   
   content += `[查看详情](https://agiera.net/kit/gold)`;
   
+  console.log('[Gold Alert] Sending to Feishu webhook:', webhookUrl.substring(0, 50) + '...');
+  
   try {
-    await fetch(webhookUrl, {
+    const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -3036,9 +3050,20 @@ async function sendFeishuWebhook(webhookUrl, alerts) {
         }
       })
     });
-    console.log('[Gold Alert] Feishu webhook sent');
+    
+    const result = await response.json();
+    console.log('[Gold Alert] Feishu webhook response:', JSON.stringify(result));
+    
+    if (result.code === 0 || result.StatusCode === 0) {
+      console.log('[Gold Alert] Feishu webhook sent successfully');
+      return { success: true, response: result };
+    } else {
+      console.error('[Gold Alert] Feishu webhook failed:', JSON.stringify(result));
+      return { success: false, error: result };
+    }
   } catch (error) {
     console.error('[Gold Alert] Feishu webhook error:', error);
+    return { success: false, error: error.message };
   }
 }
 
@@ -3110,14 +3135,18 @@ async function sendFeishuAppMessage(appId, appSecret, chatId, alerts) {
     });
     
     const messageData = await messageResponse.json();
+    console.log('[Gold Alert] Feishu message response:', JSON.stringify(messageData));
     
     if (messageData.code === 0) {
-      console.log('[Gold Alert] Feishu app message sent');
+      console.log('[Gold Alert] Feishu app message sent successfully');
+      return { success: true, response: messageData };
     } else {
       console.error('[Gold Alert] Feishu message failed:', messageData.msg);
+      return { success: false, error: messageData.msg, stage: 'message' };
     }
   } catch (error) {
     console.error('[Gold Alert] Feishu app error:', error);
+    return { success: false, error: error.message, stage: 'exception' };
   }
 }
 
@@ -3171,7 +3200,7 @@ async function sendWeComAlert(alerts, env) {
 
 async function handleGoldAlertTest(request, env, ctx) {
   const url = new URL(request.url);
-  const type = url.searchParams.get('type') || 'webhook';
+  const type = url.searchParams.get('type') || 'feishu';
   
   const testAlerts = [
     {
@@ -3196,25 +3225,43 @@ async function handleGoldAlertTest(request, env, ctx) {
     }
   ];
   
+  const config = {
+    hasWebhook: !!env.FEISHU_WEBHOOK,
+    hasAppId: !!env.FEISHU_APP_ID,
+    hasAppSecret: !!env.FEISHU_APP_SECRET,
+    hasChatId: !!env.FEISHU_CHAT_ID,
+    hasEmailKey: !!env.RESEND_API_KEY
+  };
+  
   try {
     if (type === 'email') {
       await sendAlertEmail(testAlerts, env);
-      return new Response(JSON.stringify({ success: true, message: 'Email alert test sent' }), {
+      return new Response(JSON.stringify({ success: true, message: 'Email alert test sent', config }), {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
     }
     
     if (type === 'feishu' || type === 'webhook') {
-      await sendFeishuAlert(testAlerts, env);
-      return new Response(JSON.stringify({ success: true, message: 'Feishu alert test sent' }), {
+      const result = await sendFeishuAlert(testAlerts, env);
+      return new Response(JSON.stringify({ 
+        success: result.method !== 'none', 
+        message: 'Feishu alert test completed',
+        config,
+        feishuResult: result
+      }), {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
     }
     
     if (type === 'all') {
       await sendAlertEmail(testAlerts, env);
-      await sendFeishuAlert(testAlerts, env);
-      return new Response(JSON.stringify({ success: true, message: 'All alerts test sent' }), {
+      const feishuResult = await sendFeishuAlert(testAlerts, env);
+      return new Response(JSON.stringify({ 
+        success: true, 
+        message: 'All alerts test sent',
+        config,
+        feishuResult
+      }), {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
     }
@@ -3222,7 +3269,8 @@ async function handleGoldAlertTest(request, env, ctx) {
     return new Response(JSON.stringify({ 
       success: false, 
       error: 'Invalid type. Use: email, feishu, webhook, or all',
-      usage: '/api/gold/alert/test?type=email|feishu|webhook|all'
+      usage: '/api/gold/alert/test?type=email|feishu|webhook|all',
+      config
     }), {
       status: 400,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
@@ -3230,7 +3278,7 @@ async function handleGoldAlertTest(request, env, ctx) {
     
   } catch (error) {
     console.error('[Gold Alert Test] Error:', error);
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
+    return new Response(JSON.stringify({ success: false, error: error.message, config }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
