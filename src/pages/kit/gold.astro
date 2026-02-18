@@ -147,6 +147,7 @@ const dayTabs = [
 <script>
   const API_BASE = 'https://api.agiera.net';
   const REFRESH_INTERVAL = 10000;
+  const lang = window.location.pathname.startsWith('/zh') ? 'zh' : 'en';
   
   function showLoading() {
     const ids = ['domestic-price', 'international-price'];
