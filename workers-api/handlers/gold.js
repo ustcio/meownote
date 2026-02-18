@@ -878,3 +878,59 @@ async function sendFeishuAppMessage(appId, appSecret, chatId, alerts) {
     console.error('[Gold Alert] Feishu app error:', error);
   }
 }
+
+export async function handleGoldAlertTest(request, env, ctx) {
+  const url = new URL(request.url);
+  const type = url.searchParams.get('type') || 'webhook';
+  
+  const testAlerts = [
+    {
+      type: 'window',
+      name: '国内金价 (mAuT+D)',
+      current: '678.50',
+      max: '680.20',
+      min: '675.30',
+      range: '4.90',
+      unit: '元/克',
+      direction: 'down'
+    },
+    {
+      type: 'window',
+      name: '国际金价 (XAU)',
+      current: '2890.50',
+      max: '2895.00',
+      min: '2880.00',
+      range: '15.00',
+      unit: '美元/盎司',
+      direction: 'down'
+    }
+  ];
+  
+  try {
+    if (type === 'email') {
+      await sendAlertEmail(testAlerts, env);
+      return jsonResponse({ success: true, message: 'Email alert test sent' });
+    }
+    
+    if (type === 'feishu' || type === 'webhook') {
+      await sendFeishuAlert(testAlerts, env);
+      return jsonResponse({ success: true, message: 'Feishu alert test sent' });
+    }
+    
+    if (type === 'all') {
+      await sendAlertEmail(testAlerts, env);
+      await sendFeishuAlert(testAlerts, env);
+      return jsonResponse({ success: true, message: 'All alerts test sent' });
+    }
+    
+    return jsonResponse({ 
+      success: false, 
+      error: 'Invalid type. Use: email, feishu, webhook, or all',
+      usage: '/api/gold/alert/test?type=email|feishu|webhook|all'
+    }, 400);
+    
+  } catch (error) {
+    console.error('[Gold Alert Test] Error:', error);
+    return jsonResponse({ success: false, error: error.message }, 500);
+  }
+}

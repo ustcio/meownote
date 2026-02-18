@@ -92,6 +92,7 @@ const ROUTES = {
   '/api/gold': { handler: handleGoldPrice },
   '/api/gold/stream': { handler: handleGoldPriceStream },
   '/api/gold/history': { handler: handleGoldHistory },
+  '/api/gold/alert/test': { handler: handleGoldAlertTest },
   '/api/user/profile': { handler: handleUserProfile },
   '/api/user/password': { handler: handleUserPassword },
   '/stats/visit': { handler: handleStatsVisit },
@@ -3162,6 +3163,77 @@ async function sendWeComAlert(alerts, env) {
     console.log('[Gold Alert] WeCom notification sent');
   } catch (error) {
     console.error('[Gold Alert] WeCom error:', error);
+  }
+}
+
+// 工具函数 - 密码哈希（增强安全）
+// ================================================================================
+
+async function handleGoldAlertTest(request, env, ctx) {
+  const url = new URL(request.url);
+  const type = url.searchParams.get('type') || 'webhook';
+  
+  const testAlerts = [
+    {
+      type: 'window',
+      name: '国内金价 (mAuT+D)',
+      current: '678.50',
+      max: '680.20',
+      min: '675.30',
+      range: '4.90',
+      unit: '元/克',
+      direction: 'down'
+    },
+    {
+      type: 'window',
+      name: '国际金价 (XAU)',
+      current: '2890.50',
+      max: '2895.00',
+      min: '2880.00',
+      range: '15.00',
+      unit: '美元/盎司',
+      direction: 'down'
+    }
+  ];
+  
+  try {
+    if (type === 'email') {
+      await sendAlertEmail(testAlerts, env);
+      return new Response(JSON.stringify({ success: true, message: 'Email alert test sent' }), {
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+    
+    if (type === 'feishu' || type === 'webhook') {
+      await sendFeishuAlert(testAlerts, env);
+      return new Response(JSON.stringify({ success: true, message: 'Feishu alert test sent' }), {
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+    
+    if (type === 'all') {
+      await sendAlertEmail(testAlerts, env);
+      await sendFeishuAlert(testAlerts, env);
+      return new Response(JSON.stringify({ success: true, message: 'All alerts test sent' }), {
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+    
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: 'Invalid type. Use: email, feishu, webhook, or all',
+      usage: '/api/gold/alert/test?type=email|feishu|webhook|all'
+    }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+    
+  } catch (error) {
+    console.error('[Gold Alert Test] Error:', error);
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
   }
 }
 
