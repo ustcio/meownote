@@ -1,5 +1,6 @@
 import { jsonResponse } from '../utils/response.js';
 import { verifyAdminToken } from '../middleware/auth.js';
+import { createAdminToken } from '../utils/crypto.js';
 
 const TRADING_CONFIG = {
   MAX_QUANTITY: 10000,
@@ -73,19 +74,12 @@ export async function handleTradingLogin(request, env) {
       return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
     }
 
-    const tokenData = {
+    const secret = env.JWT_SECRET || 'agiera-default-jwt-secret-2024';
+    const token = await createAdminToken({
       userId: result.id,
       username: result.username,
-      role: result.role,
-      exp: Date.now() + 7 * 24 * 60 * 60 * 1000
-    };
-    
-    const tokenBase = btoa(JSON.stringify(tokenData));
-    const secret = env.JWT_SECRET || 'meownote-admin-secret-key';
-    const signatureData = encoder.encode(tokenBase + secret);
-    const sigBuffer = await crypto.subtle.digest('SHA-256', signatureData);
-    const signature = Array.from(new Uint8Array(sigBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-    const token = `${tokenBase}.${signature}`;
+      role: result.role
+    }, secret);
 
     await env.DB.prepare(
       'UPDATE admin_users SET last_login = ? WHERE id = ?'
