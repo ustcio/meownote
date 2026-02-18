@@ -1414,6 +1414,13 @@ import Layout from '@layouts/Layout.astro';
     background: var(--bg-primary);
   }
 
+  .transactions-table td:nth-child(3),
+  .transactions-table td:nth-child(4),
+  .transactions-table td:nth-child(5),
+  .transactions-table td:nth-child(6) {
+    text-align: center;
+  }
+
   .transactions-table td:first-child {
     border-radius: var(--radius-lg) 0 0 var(--radius-lg);
     padding-left: var(--space-4);
@@ -2655,10 +2662,10 @@ import Layout from '@layouts/Layout.astro';
                   <span class="display-value">¥${t.price.toFixed(2)}</span>
                   ${!isBuy ? `<span class="sell-price">卖出 ¥${(t.actual_sell_price || t.price).toFixed(2)}</span>` : ''}
                 </td>
-                <td class="quantity-cell">${t.quantity.toFixed(3)} g</td>
-                <td class="amount-cell">${formatCurrency(t.total_amount)}</td>
-                <td class="profit-cell ${profitClass}">${profitDisplay}</td>
-                <td class="time-cell">${formatDate(t.created_at)}</td>
+                <td><span class="quantity-cell">${t.quantity.toFixed(3)} g</span></td>
+                <td><span class="amount-cell">${formatCurrency(t.total_amount)}</span></td>
+                <td><span class="profit-cell ${profitClass}">${profitDisplay}</span></td>
+                <td><span class="time-cell">${formatDate(t.created_at)}</span></td>
                 <td class="actions-cell">
                   <button class="action-btn edit" onclick="editTransaction(${t.id})" title="编辑">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
