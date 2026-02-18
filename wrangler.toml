@@ -4,9 +4,9 @@ compatibility_date = "2024-01-01"
 
 [[kv_namespaces]]
 binding = "GOLD_PRICE_CACHE"
-id = "your-kv-id"
+id = "301ba411dab34e1993c94ec202448118"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "visitor-stats-db"
-database_id = "your-database-id"
+database_id = "3b506248-f6ff-4878-ac86-3744bd5de05e"
