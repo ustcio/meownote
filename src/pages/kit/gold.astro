@@ -174,6 +174,8 @@ const dayTabs = [
   const internationalCtx = document.getElementById('international-chart');
   
   function initCharts() {
+    const SF_PRO_FONT = '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif';
+    
     const chartConfig = {
       type: 'line',
       options: {
@@ -185,8 +187,8 @@ const dayTabs = [
             backgroundColor: 'rgba(0, 0, 0, 0.85)', 
             padding: 12, 
             cornerRadius: 8,
-            titleFont: { size: 13, weight: 'bold' },
-            bodyFont: { size: 12 },
+            titleFont: { family: SF_PRO_FONT, size: 13, weight: 'bold' },
+            bodyFont: { family: SF_PRO_FONT, size: 12 },
             callbacks: {
               label: function(context) {
                 return `${context.parsed.y.toFixed(2)}`;
@@ -201,13 +203,13 @@ const dayTabs = [
             ticks: { 
               color: '#888', 
               maxTicksLimit: 8,
-              font: { size: 10 }
+              font: { family: SF_PRO_FONT, size: 10 }
             },
             title: {
               display: true,
-              text: '时间',
+              text: lang === 'zh' ? '时间' : 'Time',
               color: '#666',
-              font: { size: 11 }
+              font: { family: SF_PRO_FONT, size: 11 }
             }
           },
           y: { 
@@ -219,7 +221,7 @@ const dayTabs = [
             ticks: { 
               color: '#888', 
               maxTicksLimit: 5,
-              font: { size: 10 },
+              font: { family: SF_PRO_FONT, size: 10 },
               callback: function(value) {
                 return value.toFixed(1);
               }
@@ -266,9 +268,9 @@ const dayTabs = [
               ...chartConfig.options.scales.y,
               title: {
                 display: true,
-                text: '价格 (元/克)',
+                text: lang === 'zh' ? '价格 (元/克)' : 'Price (CNY/g)',
                 color: '#f97316',
-                font: { size: 11, weight: 'bold' }
+                font: { family: SF_PRO_FONT, size: 11, weight: 'bold' }
               }
             }
           }
@@ -297,9 +299,9 @@ const dayTabs = [
               ...chartConfig.options.scales.y,
               title: {
                 display: true,
-                text: '价格 (美元/盎司)',
+                text: lang === 'zh' ? '价格 (美元/盎司)' : 'Price (USD/oz)',
                 color: '#3b82f6',
-                font: { size: 11, weight: 'bold' }
+                font: { family: SF_PRO_FONT, size: 11, weight: 'bold' }
               }
             }
           }

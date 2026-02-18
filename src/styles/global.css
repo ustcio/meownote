@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @import './tokens.css';
 
 /* ==================== Reset & Base ==================== */
@@ -32,13 +31,31 @@ body {
               color var(--duration-normal) var(--ease-default);
 }
 
-/* ==================== Number Typography (Apple Style) ==================== */
+/* ==================== Global Number Typography (SF Pro Display) ==================== */
+/* Apply SF Pro Display to all numbers globally */
 .number,
 [data-number],
 .stat-value,
 .contribution-subtitle,
-.font-number {
-  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+.font-number,
+.price,
+.change,
+.val,
+.stat .val,
+[id$="-price"],
+[id$="-change"],
+[id$="-high"],
+[id$="-low"],
+[id$="-open"],
+[id$="-count"],
+[id$="-total"],
+[id$="-today"],
+[id$="-online"],
+[id$="-uv"],
+[id$="-pv"],
+[id*="stat-"],
+.footer-copyright {
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-feature-settings: "tnum";
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
