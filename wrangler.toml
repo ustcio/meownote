@@ -19,4 +19,4 @@ binding = "analytic_engine"
 dataset = "analytic_event"
 
 [triggers]
-crons = ["*/1 * * * *", "*/5 * * * *"]
+crons = ["*/1 * * * *", "*/2 * * * *", "*/5 * * * *"]

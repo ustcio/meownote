@@ -70,12 +70,16 @@ export default {
     console.log('[Cron] Triggered at:', now);
     
     switch (event.cron) {
-      case '*/1 * * * *': // 每分钟执行
+      case '*/1 * * * *': // 每分钟执行金价爬取
         console.log('[Cron] Starting gold price crawl...');
         ctx.waitUntil(scheduledGoldCrawlWithRetry(event, env, ctx));
         break;
-      case '*/5 * * * *': // 每5分钟执行分析
-        console.log('[Cron] Starting gold price analysis...');
+      case '*/2 * * * *': // 每2分钟执行智能分析
+        console.log('[Cron] Starting intelligent gold analysis...');
+        ctx.waitUntil(scheduledIntelligentGoldAnalysis(env, ctx));
+        break;
+      case '*/5 * * * *': // 每5分钟执行趋势分析
+        console.log('[Cron] Starting gold price trend analysis...');
         ctx.waitUntil(scheduledGoldAnalysis(env, ctx));
         break;
       default:
@@ -1686,9 +1690,23 @@ async function storeGoldPriceData(env, data) {
     } catch (kvError) {
       console.warn('[Store] Failed to store stats to KV:', kvError.message);
     }
-    
+
+    // Store in D1 for intelligent analysis
+    try {
+      const price = data.domestic?.price || data.international?.price;
+      if (price && env.DB) {
+        await env.DB.prepare(`
+          INSERT INTO gold_price_history (price, date, timestamp)
+          VALUES (?, ?, ?)
+        `).bind(price, dateKey, new Date().toISOString()).run();
+        console.log('[Store] Price history stored in D1:', price);
+      }
+    } catch (dbError) {
+      console.warn('[Store] Failed to store price history to D1:', dbError.message);
+    }
+
     console.log('[Store] Data stored successfully for date:', dateKey);
-    
+
   } catch (error) {
     console.error('[Store] Failed to store data:', error);
     goldPriceCache.data = { ...data, cachedAt: Date.now() };
@@ -4798,17 +4816,17 @@ async function sendTradingFeishuAlert(alert, env) {
 
 async function sendTradingMeoWAlert(alert, env) {
   const MEOW_USER_ID = env.MEOW_USER_ID || '5bf48882';
-  
+
   const isBuy = alert.alert_type === 'buy';
   const emoji = isBuy ? '🟢' : '🔴';
   const title = isBuy ? '买入提醒' : '卖出提醒';
   const action = isBuy ? '买入' : '卖出';
   const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
-  
+
   const msgContent = `时间: ${timeStr}\n\n目标${action}价格: ¥${alert.target_price}/克\n当前价格: ¥${alert.currentPrice}/克\n\n金价已达到您预设的${action}价格，请及时关注市场动态。`;
-  
+
   const meowUrl = `https://api.chuckfang.com/${MEOW_USER_ID}`;
-  
+
   try {
     const response = await fetch(meowUrl, {
       method: 'POST',
@@ -4820,7 +4838,7 @@ async function sendTradingMeoWAlert(alert, env) {
       })
     });
     const result = await response.json();
-    
+
     if (result.status === 200) {
       console.log('[Trading Alert] MeoW notification sent successfully');
       return { success: true };
@@ -4830,6 +4848,585 @@ async function sendTradingMeoWAlert(alert, env) {
     }
   } catch (error) {
     console.error('[Trading Alert] MeoW error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// ================================================================================
+// 智能金价分析与交易建议系统
+// ================================================================================
+
+const INTELLIGENT_ANALYSIS_CONFIG = {
+  MIN_DATA_POINTS: 10,
+  PRICE_CHANGE_THRESHOLD: 0.3,
+  SIGNIFICANT_CHANGE_THRESHOLD: 0.8,
+  TREND_CONFIRMATION_PERIODS: 3,
+  COOLDOWN_MINUTES: 30,
+  PROFIT_TARGET_PCT: 2.0,
+  STOP_LOSS_PCT: -1.5
+};
+
+async function scheduledIntelligentGoldAnalysis(env, ctx) {
+  console.log('[Intelligent Analysis] Starting comprehensive gold price analysis...');
+
+  try {
+    const today = getBeijingDate();
+
+    const historyData = await getTodayGoldPriceHistory(env, today);
+    if (!historyData || historyData.length < INTELLIGENT_ANALYSIS_CONFIG.MIN_DATA_POINTS) {
+      console.log('[Intelligent Analysis] Insufficient data points:', historyData?.length || 0);
+      return;
+    }
+
+    const currentPrice = historyData[historyData.length - 1].price;
+    console.log('[Intelligent Analysis] Current price:', currentPrice);
+
+    const tradingParams = await getTradingParameters(env);
+    console.log('[Intelligent Analysis] Trading params:', tradingParams);
+
+    const marketAnalysis = analyzeMarketTrend(historyData);
+    console.log('[Intelligent Analysis] Market trend:', marketAnalysis);
+
+    const tradingAlerts = await checkAndSendTradingAlerts(currentPrice, env);
+
+    const aiAnalysis = await performAIAnalysis(env, historyData, tradingParams, marketAnalysis);
+
+    if (aiAnalysis.hasValue) {
+      await sendIntelligentTradingAdvice(env, aiAnalysis, currentPrice, tradingParams);
+    }
+
+    const profitOpportunities = calculateProfitOpportunities(currentPrice, tradingParams, marketAnalysis);
+    if (profitOpportunities.length > 0) {
+      await sendProfitOpportunityAlerts(env, profitOpportunities, currentPrice);
+    }
+
+    console.log('[Intelligent Analysis] Completed successfully');
+
+  } catch (error) {
+    console.error('[Intelligent Analysis] Error:', error);
+  }
+}
+
+async function getTodayGoldPriceHistory(env, date) {
+  try {
+    const stmt = env.DB.prepare(`
+      SELECT price, timestamp 
+      FROM gold_price_history 
+      WHERE date = ? 
+      ORDER BY timestamp ASC
+    `);
+    const result = await stmt.bind(date).all();
+    return result.results || [];
+  } catch (error) {
+    console.error('[Get History] Error:', error);
+    return [];
+  }
+}
+
+async function getTradingParameters(env) {
+  try {
+    const alertsStmt = env.DB.prepare(`
+      SELECT alert_type, target_price 
+      FROM price_alerts 
+      WHERE is_active = 1 
+      ORDER BY created_at DESC
+    `);
+    const alertsResult = await alertsStmt.all();
+
+    const avgBuyStmt = env.DB.prepare(`
+      SELECT AVG(price) as avg_buy_price, SUM(quantity) as total_quantity
+      FROM gold_transactions 
+      WHERE type = 'buy' AND status = 'completed'
+    `);
+    const avgBuyResult = await avgBuyStmt.first();
+
+    return {
+      alerts: alertsResult.results || [],
+      avgBuyPrice: avgBuyResult?.avg_buy_price || 0,
+      totalHoldings: avgBuyResult?.total_quantity || 0,
+      buyTargets: (alertsResult.results || []).filter(a => a.alert_type === 'buy').map(a => a.target_price),
+      sellTargets: (alertsResult.results || []).filter(a => a.alert_type === 'sell').map(a => a.target_price)
+    };
+  } catch (error) {
+    console.error('[Get Trading Params] Error:', error);
+    return { alerts: [], avgBuyPrice: 0, totalHoldings: 0, buyTargets: [], sellTargets: [] };
+  }
+}
+
+function analyzeMarketTrend(historyData) {
+  if (historyData.length < 5) return { trend: 'unknown', strength: 0 };
+
+  const prices = historyData.map(h => h.price);
+  const recent = prices.slice(-5);
+
+  const changes = [];
+  for (let i = 1; i < recent.length; i++) {
+    changes.push((recent[i] - recent[i - 1]) / recent[i - 1] * 100);
+  }
+
+  const avgChange = changes.reduce((a, b) => a + b, 0) / changes.length;
+  const currentPrice = prices[prices.length - 1];
+  const openPrice = prices[0];
+  const dayChange = ((currentPrice - openPrice) / openPrice) * 100;
+
+  const high = Math.max(...prices);
+  const low = Math.min(...prices);
+  const volatility = ((high - low) / low) * 100;
+
+  let trend;
+  if (avgChange > INTELLIGENT_ANALYSIS_CONFIG.SIGNIFICANT_CHANGE_THRESHOLD) {
+    trend = 'strong_up';
+  } else if (avgChange > INTELLIGENT_ANALYSIS_CONFIG.PRICE_CHANGE_THRESHOLD) {
+    trend = 'up';
+  } else if (avgChange < -INTELLIGENT_ANALYSIS_CONFIG.SIGNIFICANT_CHANGE_THRESHOLD) {
+    trend = 'strong_down';
+  } else if (avgChange < -INTELLIGENT_ANALYSIS_CONFIG.PRICE_CHANGE_THRESHOLD) {
+    trend = 'down';
+  } else {
+    trend = 'sideways';
+  }
+
+  return {
+    trend,
+    strength: Math.abs(avgChange),
+    dayChange,
+    volatility,
+    high,
+    low,
+    currentPrice,
+    openPrice
+  };
+}
+
+async function performAIAnalysis(env, historyData, tradingParams, marketAnalysis) {
+  const analysisPrompt = buildAnalysisPrompt(historyData, tradingParams, marketAnalysis);
+
+  const qwenResult = await callQwenForAnalysis(env, analysisPrompt);
+  const doubaoResult = await callDoubaoForAnalysis(env, analysisPrompt);
+
+  const combinedAnalysis = combineAIResults(qwenResult, doubaoResult, marketAnalysis);
+
+  return combinedAnalysis;
+}
+
+function buildAnalysisPrompt(historyData, tradingParams, marketAnalysis) {
+  const recentPrices = historyData.slice(-20).map(h => ({
+    time: new Date(h.timestamp).toLocaleTimeString('zh-CN'),
+    price: h.price
+  }));
+
+  return `作为黄金交易专家，请分析以下数据并给出交易建议：
+
+【今日金价走势】
+${recentPrices.map(p => `${p.time}: ¥${p.price}/克`).join('\n')}
+
+【市场概况】
+- 当前趋势: ${marketAnalysis.trend}
+- 趋势强度: ${marketAnalysis.strength.toFixed(2)}%
+- 日内涨跌: ${marketAnalysis.dayChange.toFixed(2)}%
+- 波动率: ${marketAnalysis.volatility.toFixed(2)}%
+- 今日最高: ¥${marketAnalysis.high}/克
+- 今日最低: ¥${marketAnalysis.low}/克
+
+【交易参数】
+- 平均持仓成本: ¥${tradingParams.avgBuyPrice.toFixed(2)}/克
+- 持仓总量: ${tradingParams.totalHoldings.toFixed(3)}克
+- 买入目标价: ${tradingParams.buyTargets.map(p => `¥${p}`).join(', ') || '未设置'}
+- 卖出目标价: ${tradingParams.sellTargets.map(p => `¥${p}`).join(', ') || '未设置'}
+
+请提供：
+1. 趋势判断（上涨/下跌/震荡）及理由
+2. 买入建议（是否适合买入，目标价位）
+3. 卖出建议（是否适合卖出，目标价位）
+4. 风险提示
+5. 预期收益分析
+
+请用简洁专业的语言回答。`;
+}
+
+async function callQwenForAnalysis(env, prompt) {
+  try {
+    const apiKey = env.DASHSCOPE_API_KEY;
+    if (!apiKey) {
+      console.log('[AI Analysis] Qwen API key not configured');
+      return null;
+    }
+
+    const response = await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'qwen-turbo',
+        input: {
+          messages: [
+            { role: 'system', content: '你是黄金交易分析专家，擅长技术分析和趋势判断。' },
+            { role: 'user', content: prompt }
+          ]
+        },
+        parameters: {
+          temperature: 0.7,
+          max_tokens: 800
+        }
+      })
+    });
+
+    const result = await response.json();
+    return result.output?.text || null;
+  } catch (error) {
+    console.error('[AI Analysis] Qwen error:', error);
+    return null;
+  }
+}
+
+async function callDoubaoForAnalysis(env, prompt) {
+  try {
+    const apiKey = env.DOUBAO_API_KEY;
+    if (!apiKey) {
+      console.log('[AI Analysis] Doubao API key not configured');
+      return null;
+    }
+
+    const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'doubao-seed-2-0-pro-260215',
+        messages: [
+          { role: 'system', content: '你是黄金交易分析专家，擅长技术分析和趋势判断。' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 800
+      })
+    });
+
+    const result = await response.json();
+    return result.choices?.[0]?.message?.content || null;
+  } catch (error) {
+    console.error('[AI Analysis] Doubao error:', error);
+    return null;
+  }
+}
+
+function combineAIResults(qwenResult, doubaoResult, marketAnalysis) {
+  const hasQwen = qwenResult && qwenResult.length > 50;
+  const hasDoubao = doubaoResult && doubaoResult.length > 50;
+
+  if (!hasQwen && !hasDoubao) {
+    return { hasValue: false, reason: 'AI分析未返回有效结果' };
+  }
+
+  const combinedText = [qwenResult, doubaoResult].filter(Boolean).join('\n\n---\n\n');
+
+  const buySignals = (combinedText.match(/买入|看多|建议买入|适合买入/gi) || []).length;
+  const sellSignals = (combinedText.match(/卖出|看空|建议卖出|适合卖出/gi) || []).length;
+  const holdSignals = (combinedText.match(/持有|观望|震荡|等待/gi) || []).length;
+
+  let recommendation;
+  if (buySignals > sellSignals && buySignals > holdSignals) {
+    recommendation = 'buy';
+  } else if (sellSignals > buySignals && sellSignals > holdSignals) {
+    recommendation = 'sell';
+  } else {
+    recommendation = 'hold';
+  }
+
+  const hasSignificantInsight = buySignals >= 2 || sellSignals >= 2 || combinedText.includes('预期收益') || combinedText.includes('目标价位');
+
+  return {
+    hasValue: hasSignificantInsight,
+    recommendation,
+    qwenResult,
+    doubaoResult,
+    combinedAnalysis: combinedText,
+    signals: { buy: buySignals, sell: sellSignals, hold: holdSignals }
+  };
+}
+
+function calculateProfitOpportunities(currentPrice, tradingParams, marketAnalysis) {
+  const opportunities = [];
+
+  if (tradingParams.avgBuyPrice > 0 && tradingParams.totalHoldings > 0) {
+    const currentProfitPct = ((currentPrice - tradingParams.avgBuyPrice) / tradingParams.avgBuyPrice) * 100;
+
+    if (currentProfitPct >= INTELLIGENT_ANALYSIS_CONFIG.PROFIT_TARGET_PCT) {
+      const potentialProfit = (currentPrice - tradingParams.avgBuyPrice) * tradingParams.totalHoldings;
+      opportunities.push({
+        type: 'profit_taking',
+        title: '获利了结提醒',
+        message: `当前持仓收益率 ${currentProfitPct.toFixed(2)}%，建议考虑部分获利了结`,
+        potentialProfit,
+        currentPrice,
+        avgBuyPrice: tradingParams.avgBuyPrice,
+        recommendation: 'sell_partial'
+      });
+    }
+
+    if (currentProfitPct <= INTELLIGENT_ANALYSIS_CONFIG.STOP_LOSS_PCT) {
+      opportunities.push({
+        type: 'stop_loss',
+        title: '止损提醒',
+        message: `当前持仓亏损 ${Math.abs(currentProfitPct).toFixed(2)}%，建议考虑止损`,
+        currentPrice,
+        avgBuyPrice: tradingParams.avgBuyPrice,
+        recommendation: 'stop_loss'
+      });
+    }
+  }
+
+  tradingParams.buyTargets.forEach(target => {
+    const distance = ((target - currentPrice) / currentPrice) * 100;
+    if (Math.abs(distance) <= 1.0) {
+      opportunities.push({
+        type: 'buy_target',
+        title: '买入目标接近',
+        message: `当前价格 ¥${currentPrice} 接近买入目标 ¥${target}（差距 ${distance.toFixed(2)}%）`,
+        targetPrice: target,
+        currentPrice,
+        recommendation: distance <= 0 ? 'buy_now' : 'watch_buy'
+      });
+    }
+  });
+
+  tradingParams.sellTargets.forEach(target => {
+    const distance = ((currentPrice - target) / target) * 100;
+    if (Math.abs(distance) <= 1.0) {
+      opportunities.push({
+        type: 'sell_target',
+        title: '卖出目标接近',
+        message: `当前价格 ¥${currentPrice} 接近卖出目标 ¥${target}（差距 ${distance.toFixed(2)}%）`,
+        targetPrice: target,
+        currentPrice,
+        recommendation: distance >= 0 ? 'sell_now' : 'watch_sell'
+      });
+    }
+  });
+
+  return opportunities;
+}
+
+async function sendIntelligentTradingAdvice(env, aiAnalysis, currentPrice, tradingParams) {
+  const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+
+  const titleMap = {
+    'buy': '📈 AI买入建议',
+    'sell': '📉 AI卖出建议',
+    'hold': '⏸️ AI持仓建议'
+  };
+
+  const title = titleMap[aiAnalysis.recommendation] || '🤖 AI交易分析';
+
+  const emailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; }
+    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
+    .price-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .price { font-size: 28px; font-weight: bold; color: #667eea; }
+    .analysis { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    .analysis h3 { color: #667eea; margin-top: 0; }
+    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 12px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>${title}</h1>
+      <p>智能分析时间: ${timeStr}</p>
+    </div>
+    <div class="content">
+      <div class="price-box">
+        <div style="color: #666; font-size: 14px; margin-bottom: 8px;">当前金价</div>
+        <div class="price">¥${currentPrice}/克</div>
+      </div>
+
+      <div class="analysis">
+        <h3>🤖 AI综合分析</h3>
+        <pre style="white-space: pre-wrap; font-family: inherit; line-height: 1.8;">${aiAnalysis.combinedAnalysis}</pre>
+      </div>
+
+      ${tradingParams.avgBuyPrice > 0 ? `
+      <div class="analysis">
+        <h3>📊 持仓分析</h3>
+        <p><strong>平均持仓成本:</strong> ¥${tradingParams.avgBuyPrice.toFixed(2)}/克</p>
+        <p><strong>持仓数量:</strong> ${tradingParams.totalHoldings.toFixed(3)}克</p>
+        <p><strong>当前盈亏:</strong> ${(((currentPrice - tradingParams.avgBuyPrice) / tradingParams.avgBuyPrice) * 100).toFixed(2)}%</p>
+      </div>
+      ` : ''}
+
+      <div class="footer">
+        <p>此分析由千问和豆包大模型联合生成</p>
+        <p><a href="https://ustc.dev/trading/">查看交易详情</a></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  await sendMultiChannelNotification(env, {
+    title: `${title} - ¥${currentPrice}/克`,
+    emailSubject: `${title} - ${timeStr}`,
+    emailHtml,
+    feishuContent: `**${title}**\n\n> 时间：${timeStr}\n\n**当前金价：** ¥${currentPrice}/克\n\n**AI分析结论：**\n${aiAnalysis.recommendation === 'buy' ? '建议买入' : aiAnalysis.recommendation === 'sell' ? '建议卖出' : '建议观望'}\n\n[查看详细分析](https://ustc.dev/trading/)`,
+    meowContent: `${title}\n\n当前金价: ¥${currentPrice}/克\nAI建议: ${aiAnalysis.recommendation === 'buy' ? '买入' : aiAnalysis.recommendation === 'sell' ? '卖出' : '观望'}\n\n点击查看详细分析`
+  });
+}
+
+async function sendProfitOpportunityAlerts(env, opportunities, currentPrice) {
+  const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+
+  for (const opp of opportunities) {
+    const emoji = opp.type === 'profit_taking' ? '💰' : opp.type === 'stop_loss' ? '⚠️' : '🎯';
+
+    await sendMultiChannelNotification(env, {
+      title: `${emoji} ${opp.title}`,
+      emailSubject: `${emoji} ${opp.title} - ${timeStr}`,
+      emailHtml: buildOpportunityEmailHtml(opp, currentPrice, timeStr),
+      feishuContent: `**${emoji} ${opp.title}**\n\n> 时间：${timeStr}\n\n${opp.message}\n\n当前价格：¥${currentPrice}/克\n\n[查看交易详情](https://ustc.dev/trading/)`,
+      meowContent: `${emoji} ${opp.title}\n\n${opp.message}\n\n当前: ¥${currentPrice}/克`
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+}
+
+function buildOpportunityEmailHtml(opp, currentPrice, timeStr) {
+  const colorMap = {
+    'profit_taking': '#30d158',
+    'stop_loss': '#ff375f',
+    'buy_target': '#64d2ff',
+    'sell_target': '#ff9500'
+  };
+
+  const color = colorMap[opp.type] || '#667eea';
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: ${color}; color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; }
+    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
+    .alert-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${color}; }
+    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 12px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>${opp.title}</h1>
+      <p>${timeStr}</p>
+    </div>
+    <div class="content">
+      <div class="alert-box">
+        <h3 style="margin-top: 0; color: ${color};">交易提醒</h3>
+        <p style="font-size: 18px; margin: 15px 0;">${opp.message}</p>
+        <p><strong>当前金价:</strong> ¥${currentPrice}/克</p>
+        ${opp.potentialProfit ? `<p><strong>预期收益:</strong> ¥${opp.potentialProfit.toFixed(2)}</p>` : ''}
+        ${opp.targetPrice ? `<p><strong>目标价格:</strong> ¥${opp.targetPrice}/克</p>` : ''}
+      </div>
+      <div class="footer">
+        <p><a href="https://ustc.dev/trading/">查看交易详情</a></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+async function sendMultiChannelNotification(env, content) {
+  const results = await Promise.allSettled([
+    sendEmailNotification(env, content.emailSubject, content.emailHtml),
+    sendFeishuNotification(env, content.feishuContent),
+    sendMeowNotification(env, content.title, content.meowContent)
+  ]);
+
+  console.log('[Multi-Channel] Notification results:', {
+    email: results[0].status,
+    feishu: results[1].status,
+    meow: results[2].status
+  });
+}
+
+async function sendEmailNotification(env, subject, html) {
+  const RESEND_API_KEY = env.RESEND_API_KEY;
+  if (!RESEND_API_KEY) return { success: false, error: 'No API key' };
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'Meow <noreply@ustc.dev>',
+        to: ['metanext@foxmail.com'],
+        subject,
+        html
+      })
+    });
+    return { success: response.ok };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function sendFeishuNotification(env, content) {
+  const FEISHU_WEBHOOK = env.FEISHU_WEBHOOK;
+  if (!FEISHU_WEBHOOK) return { success: false, error: 'No webhook' };
+
+  try {
+    const response = await fetch(FEISHU_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        msg_type: 'interactive',
+        card: {
+          header: {
+            title: { tag: 'plain_text', content: '智能交易提醒' },
+            template: 'blue'
+          },
+          elements: [{ tag: 'markdown', content }]
+        }
+      })
+    });
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function sendMeowNotification(env, title, content) {
+  const MEOW_USER_ID = env.MEOW_USER_ID || '5bf48882';
+
+  try {
+    const response = await fetch(`https://api.chuckfang.com/${MEOW_USER_ID}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title,
+        msg: content,
+        url: 'https://ustc.dev/trading/'
+      })
+    });
+    const result = await response.json();
+    return { success: result.status === 200 };
+  } catch (error) {
     return { success: false, error: error.message };
   }
 }
