@@ -206,7 +206,7 @@ option.addEventListener('keydown', (e: Event) => {
 
 **接口配置**:
 ```javascript
-const API_BASE = 'https://api.agiera.net';
+const API_BASE = 'https://api.ustc.dev';
 ```
 
 **支持的模型**:

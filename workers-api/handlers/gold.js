@@ -702,7 +702,7 @@ async function sendAlertEmail(alerts, env) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'AGI Era <noreply@agiera.net>',
+        from: 'AGI Era <noreply@ustc.dev>',
         to: ['metanext@foxmail.com'],
         subject: `${alertEmoji} ${alertTitle} - ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`,
         html: generateAlertEmail(alerts, alertEmoji, alertTitle)

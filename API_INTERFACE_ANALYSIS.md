@@ -222,7 +222,7 @@ wrangler r2 bucket list
 
 3. **测试 API 调用**
    ```bash
-   curl -X POST https://api.agiera.net/api/chat \
+   curl -X POST https://api.ustc.dev/api/chat \
      -H "Content-Type: application/json" \
      -d '{"message":"Hello","model":"qwen-turbo"}'
    ```

@@ -335,7 +335,7 @@ async function sendRegistrationEmail(username, email, ip, env) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'AGI Era <noreply@agiera.net>',
+        from: 'AGI Era <noreply@ustc.dev>',
         to: ['metanext@foxmail.com'],
         subject: '🎉 AGI Era 新用户注册通知',
         html: `

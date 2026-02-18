@@ -1,6 +1,6 @@
 const ALLOWED_ORIGINS = [
-  'https://agiera.net',
-  'https://www.agiera.net',
+  'https://ustc.dev',
+  'https://www.ustc.dev',
   'https://meow-note.com',
   'https://www.meow-note.com',
   'http://localhost:4321',

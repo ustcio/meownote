@@ -360,7 +360,7 @@ async function sendMessage(): Promise<void> {
 # 使用 Apache Bench 测试
 ab -n 10 -c 1 -p request.json -T application/json \
   -H "Authorization: Bearer YOUR_TOKEN" \
-  https://api.agiera.net/api/chat
+  https://api.ustc.dev/api/chat
 
 # request.json 内容
 {

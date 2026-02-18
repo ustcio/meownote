@@ -29,7 +29,7 @@ let searchDebounceTimer: number | null = null;
 
 // Constants
 const lang = document.documentElement.lang || 'en';
-const API_BASE = 'https://api.agiera.net';
+const API_BASE = 'https://api.ustc.dev';
 
 // ================================================================================
 // Safe Storage Helpers
