@@ -4543,25 +4543,43 @@ async function handleGetTransactionStats(request, env) {
     `);
     const monthStats = await monthStmt.bind(monthStartStr).first();
 
-    const dailyStmt = env.DB.prepare(`
-      SELECT date(created_at) as date, SUM(profit) as profit
+    const monthlyStmt = env.DB.prepare(`
+      SELECT 
+        strftime('%Y-%W', created_at) as week_key,
+        strftime('%Y', created_at) as year,
+        strftime('%W', created_at) as week,
+        MIN(date(created_at)) as week_start,
+        MAX(date(created_at)) as week_end,
+        COALESCE(SUM(CASE WHEN type = 'buy' THEN total_amount ELSE 0 END), 0) as buy_amount,
+        COALESCE(SUM(CASE WHEN type = 'sell' THEN total_amount ELSE 0 END), 0) as sell_amount,
+        COALESCE(SUM(profit), 0) as profit,
+        COUNT(CASE WHEN type = 'buy' THEN 1 END) as buy_count,
+        COUNT(CASE WHEN type = 'sell' THEN 1 END) as sell_count
+      FROM gold_transactions
+      WHERE created_at >= datetime('now', '-5 weeks')
+      GROUP BY strftime('%Y-%W', created_at)
+      ORDER BY week_key DESC
+      LIMIT 4
+    `);
+    const monthlyResult = await monthlyStmt.all();
+
+    const weeklyStmt = env.DB.prepare(`
+      SELECT 
+        date(created_at) as date,
+        COALESCE(SUM(CASE WHEN type = 'buy' THEN total_amount ELSE 0 END), 0) as buy_amount,
+        COALESCE(SUM(CASE WHEN type = 'sell' THEN total_amount ELSE 0 END), 0) as sell_amount,
+        COALESCE(SUM(CASE WHEN type = 'buy' THEN quantity ELSE 0 END), 0) as buy_quantity,
+        COALESCE(SUM(CASE WHEN type = 'sell' THEN quantity ELSE 0 END), 0) as sell_quantity,
+        COALESCE(SUM(CASE WHEN type = 'sell' THEN profit ELSE 0 END), 0) as profit,
+        COUNT(CASE WHEN type = 'buy' THEN 1 END) as buy_count,
+        COUNT(CASE WHEN type = 'sell' THEN 1 END) as sell_count
       FROM gold_transactions
       WHERE date(created_at) >= date(?)
       GROUP BY date(created_at)
       ORDER BY date DESC
       LIMIT 30
     `);
-    const dailyResult = await dailyStmt.bind(weekStartStr).all();
-
-    const weeklyStmt = env.DB.prepare(`
-      SELECT strftime('%Y-W%W', created_at) as week, SUM(profit) as profit
-      FROM gold_transactions
-      WHERE created_at >= datetime('now', '-12 weeks')
-      GROUP BY strftime('%Y-W%W', created_at)
-      ORDER BY week DESC
-      LIMIT 12
-    `);
-    const weeklyResult = await weeklyStmt.all();
+    const weeklyResult = await weeklyStmt.bind(weekStartStr).all();
 
     return jsonResponse({
       success: true,
@@ -4576,8 +4594,8 @@ async function handleGetTransactionStats(request, env) {
         },
         week: { profit: weekStats?.week_profit || 0 },
         month: { profit: monthStats?.month_profit || 0 },
-        daily: dailyResult.results,
-        weekly: weeklyResult.results
+        monthly: monthlyResult.results || [],
+        weekly: weeklyResult.results || []
       }
     });
   } catch (error) {
