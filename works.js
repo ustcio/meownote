@@ -4186,9 +4186,10 @@ async function handleSellTransaction(request, env) {
   }
 
   try {
-    const { buyTransactionId, actualSellPrice, quantity, notes } = await request.json();
+    const { buyTransactionId, actualSellPrice, price, quantity, notes } = await request.json();
+    const sellPriceInput = actualSellPrice || price;
 
-    const priceValidation = validateNumber(actualSellPrice, TRADING_CONFIG.MIN_PRICE, TRADING_CONFIG.MAX_PRICE, 'Sell price');
+    const priceValidation = validateNumber(sellPriceInput, TRADING_CONFIG.MIN_PRICE, TRADING_CONFIG.MAX_PRICE, 'Sell price');
     if (!priceValidation.valid) {
       return jsonResponse({ success: false, error: priceValidation.error }, 400);
     }
