@@ -7,6 +7,9 @@ CREATE TABLE IF NOT EXISTS price_alerts (
   is_triggered INTEGER DEFAULT 0,
   triggered_at DATETIME,
   notification_sent INTEGER DEFAULT 0,
+  email_sent INTEGER DEFAULT 0,
+  feishu_sent INTEGER DEFAULT 0,
+  meow_sent INTEGER DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

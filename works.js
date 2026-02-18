@@ -1497,6 +1497,12 @@ async function scheduledGoldCrawlWithRetry(event, env, ctx) {
         await storeGoldPriceData(env, result);
         await logCrawlStatus(env, 'success', result);
         
+        // 检查并发送交易价格预警
+        if (result.domesticPrice) {
+          console.log('[Scheduled] Checking trading price alerts...');
+          await checkAndSendTradingAlerts(result.domesticPrice, env);
+        }
+        
         return result;
       } else {
         console.error('[Scheduled] Crawl failed:', result.error);
@@ -4560,4 +4566,270 @@ async function generateVisitorId(ip, userAgent) {
   const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 32);
+}
+
+// ================================================================================
+// Trading 价格预警检查 - 三端通知
+// ================================================================================
+
+async function checkAndSendTradingAlerts(currentPrice, env) {
+  try {
+    const stmt = env.DB.prepare(`
+      SELECT * FROM price_alerts 
+      WHERE is_active = 1 
+      AND is_triggered = 0
+    `);
+    const result = await stmt.all();
+
+    const triggeredAlerts = [];
+
+    for (const alert of result.results) {
+      let shouldTrigger = false;
+
+      if (alert.alert_type === 'buy' && currentPrice <= alert.target_price) {
+        shouldTrigger = true;
+      } else if (alert.alert_type === 'sell' && currentPrice >= alert.target_price) {
+        shouldTrigger = true;
+      }
+
+      if (shouldTrigger) {
+        await env.DB.prepare(`
+          UPDATE price_alerts 
+          SET is_triggered = 1, 
+              triggered_at = ?, 
+              current_price = ?,
+              notification_sent = 1
+          WHERE id = ?
+        `).bind(new Date().toISOString(), currentPrice, alert.id).run();
+
+        const triggeredAlert = {
+          ...alert,
+          currentPrice,
+          triggeredAt: new Date().toISOString()
+        };
+
+        triggeredAlerts.push(triggeredAlert);
+
+        await queueNotification(env, {
+          type: 'push',
+          title: alert.alert_type === 'buy' ? '买入提醒' : '卖出提醒',
+          message: `金价已达到预设${alert.alert_type === 'buy' ? '买入' : '卖出'}价格 ¥${alert.target_price}/克`,
+          data: JSON.stringify({ alertId: alert.id, currentPrice, targetPrice: alert.target_price })
+        });
+
+        const notificationResults = await sendTradingMultiChannelAlert(triggeredAlert, env);
+        
+        await env.DB.prepare(`
+          UPDATE price_alerts 
+          SET email_sent = ?,
+              feishu_sent = ?,
+              meow_sent = ?
+          WHERE id = ?
+        `).bind(
+          notificationResults.email.success ? 1 : 0,
+          notificationResults.feishu.success ? 1 : 0,
+          notificationResults.meow.success ? 1 : 0,
+          alert.id
+        ).run();
+      }
+    }
+
+    return triggeredAlerts;
+  } catch (error) {
+    console.error('[Check Trading Alerts Error]', error);
+    return [];
+  }
+}
+
+async function sendTradingMultiChannelAlert(alert, env) {
+  const results = await Promise.allSettled([
+    sendTradingAlertEmail(alert, env),
+    sendTradingFeishuAlert(alert, env),
+    sendTradingMeoWAlert(alert, env)
+  ]);
+  
+  const [emailResult, feishuResult, meowResult] = results;
+  
+  console.log('[Trading Alert] Multi-channel results:', {
+    email: emailResult.status === 'fulfilled' ? emailResult.value : { success: false, error: emailResult.reason },
+    feishu: feishuResult.status === 'fulfilled' ? feishuResult.value : { success: false, error: feishuResult.reason },
+    meow: meowResult.status === 'fulfilled' ? meowResult.value : { success: false, error: meowResult.reason }
+  });
+  
+  return {
+    email: emailResult.status === 'fulfilled' ? emailResult.value : { success: false, error: emailResult.reason },
+    feishu: feishuResult.status === 'fulfilled' ? feishuResult.value : { success: false, error: feishuResult.reason },
+    meow: meowResult.status === 'fulfilled' ? meowResult.value : { success: false, error: meowResult.reason }
+  };
+}
+
+async function sendTradingAlertEmail(alert, env) {
+  const RESEND_API_KEY = env.RESEND_API_KEY;
+  if (!RESEND_API_KEY) {
+    console.log('[Trading Alert] RESEND_API_KEY not configured');
+    return { success: false, error: 'RESEND_API_KEY not configured' };
+  }
+  
+  const isBuy = alert.alert_type === 'buy';
+  const emoji = isBuy ? '🟢' : '🔴';
+  const title = isBuy ? '买入提醒' : '卖出提醒';
+  const action = isBuy ? '买入' : '卖出';
+  const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+  
+  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: ${isBuy ? '#30d158' : '#ff375f'}; color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; }
+    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
+    .price-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .price { font-size: 32px; font-weight: bold; color: ${isBuy ? '#30d158' : '#ff375f'}; }
+    .label { color: #666; font-size: 14px; margin-bottom: 8px; }
+    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 12px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>${emoji} ${title}</h1>
+    </div>
+    <div class="content">
+      <p>您好，</p>
+      <p>金价已达到您预设的${action}价格，请及时关注市场动态。</p>
+      
+      <div class="price-box">
+        <div class="label">目标${action}价格</div>
+        <div class="price">¥${alert.target_price}/克</div>
+        <div style="margin-top: 10px; color: #666;">当前价格: ¥${alert.currentPrice}/克</div>
+      </div>
+      
+      <p><strong>提醒时间:</strong> ${timeStr}</p>
+      <p><strong>提醒类型:</strong> ${isBuy ? '买入' : '卖出'}预警</p>
+      
+      <div class="footer">
+        <p>此邮件由 Meow 系统自动发送</p>
+        <p><a href="https://ustc.dev/trading/">查看交易详情</a></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+  
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Meow <noreply@ustc.dev>',
+        to: ['metanext@foxmail.com'],
+        subject: `${emoji} ${title} - 金价${action}提醒`,
+        html: htmlContent
+      })
+    });
+    
+    if (response.ok) {
+      console.log('[Trading Alert] Email sent successfully');
+      return { success: true };
+    } else {
+      const error = await response.text();
+      console.error('[Trading Alert] Email failed:', error);
+      return { success: false, error };
+    }
+  } catch (error) {
+    console.error('[Trading Alert] Email error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function sendTradingFeishuAlert(alert, env) {
+  const FEISHU_WEBHOOK = env.FEISHU_WEBHOOK;
+  if (!FEISHU_WEBHOOK) {
+    console.log('[Trading Alert] FEISHU_WEBHOOK not configured');
+    return { success: false, error: 'FEISHU_WEBHOOK not configured' };
+  }
+  
+  const isBuy = alert.alert_type === 'buy';
+  const emoji = isBuy ? '🟢' : '🔴';
+  const title = isBuy ? '买入提醒' : '卖出提醒';
+  const action = isBuy ? '买入' : '卖出';
+  const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+  
+  const content = `**${emoji} ${title}**\n\n> 时间：${timeStr}\n\n**目标${action}价格：** ¥${alert.target_price}/克\n**当前价格：** ¥${alert.currentPrice}/克\n\n💡 金价已达到您预设的${action}价格，请及时关注市场动态。\n\n[查看交易详情](https://ustc.dev/trading/)`;
+  
+  try {
+    const response = await fetch(FEISHU_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        msg_type: 'interactive',
+        card: {
+          header: {
+            title: { tag: 'plain_text', content: `${emoji} ${title}` },
+            template: isBuy ? 'green' : 'red'
+          },
+          elements: [
+            { tag: 'markdown', content: content }
+          ]
+        }
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.code === 0 || result.StatusCode === 0) {
+      console.log('[Trading Alert] Feishu webhook sent successfully');
+      return { success: true };
+    } else {
+      console.error('[Trading Alert] Feishu webhook failed:', JSON.stringify(result));
+      return { success: false, error: result };
+    }
+  } catch (error) {
+    console.error('[Trading Alert] Feishu webhook error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function sendTradingMeoWAlert(alert, env) {
+  const MEOW_USER_ID = env.MEOW_USER_ID || '5bf48882';
+  
+  const isBuy = alert.alert_type === 'buy';
+  const emoji = isBuy ? '🟢' : '🔴';
+  const title = isBuy ? '买入提醒' : '卖出提醒';
+  const action = isBuy ? '买入' : '卖出';
+  const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+  
+  const msgContent = `时间: ${timeStr}\n\n目标${action}价格: ¥${alert.target_price}/克\n当前价格: ¥${alert.currentPrice}/克\n\n金价已达到您预设的${action}价格，请及时关注市场动态。`;
+  
+  const meowUrl = `https://api.chuckfang.com/${MEOW_USER_ID}`;
+  
+  try {
+    const response = await fetch(meowUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: `${emoji} ${title}`,
+        msg: msgContent,
+        url: 'https://ustc.dev/trading/'
+      })
+    });
+    const result = await response.json();
+    
+    if (result.status === 200) {
+      console.log('[Trading Alert] MeoW notification sent successfully');
+      return { success: true };
+    } else {
+      console.error('[Trading Alert] MeoW notification failed:', result.msg);
+      return { success: false, error: result.msg };
+    }
+  } catch (error) {
+    console.error('[Trading Alert] MeoW error:', error);
+    return { success: false, error: error.message };
+  }
 }
