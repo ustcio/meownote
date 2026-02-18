@@ -132,6 +132,7 @@ const ROUTES = {
   '/api/trading/alerts': { handler: handleAlertsOperation },
   '/api/trading/alert': { handler: handleAlertOperation },
   '/api/trading/notifications': { handler: handleGetNotifications },
+  '/api/trading/tolerance': { handler: handleToleranceSettings },
 };
 
 // ================================================================================
@@ -4689,13 +4690,100 @@ async function handleGetNotifications(request, env) {
 
   try {
     const stmt = env.DB.prepare(`SELECT * FROM notification_queue WHERE status = 'pending' ORDER BY created_at DESC LIMIT 50`);
-    const result = await stmt.all();
+    result = await stmt.all();
 
     return jsonResponse({ success: true, notifications: result.results });
   } catch (error) {
     console.error('[Get Notifications Error]', error);
     return jsonResponse({ success: false, error: 'Failed to fetch notifications' }, 500);
   }
+}
+
+// ================================================================================
+// 容错阈值设置管理
+// ================================================================================
+
+async function handleToleranceSettings(request, env) {
+  const authResult = await verifyAdminAuth(request, env);
+  if (!authResult.success) {
+    return jsonResponse({ success: false, error: authResult.message }, 401);
+  }
+
+  // GET - 获取当前容错设置
+  if (request.method === 'GET') {
+    try {
+      const stmt = env.DB.prepare(`SELECT buy_tolerance, sell_tolerance, updated_at FROM alert_tolerance_settings ORDER BY id DESC LIMIT 1`);
+      const result = await stmt.first();
+
+      if (!result) {
+        // 如果没有设置，创建默认设置
+        const insertStmt = env.DB.prepare(`INSERT INTO alert_tolerance_settings (buy_tolerance, sell_tolerance) VALUES (?, ?)`);
+        await insertStmt.bind(2.0, 2.0).run();
+        return jsonResponse({
+          success: true,
+          settings: { buyTolerance: 2.0, sellTolerance: 2.0, updatedAt: new Date().toISOString() }
+        });
+      }
+
+      return jsonResponse({
+        success: true,
+        settings: {
+          buyTolerance: result.buy_tolerance,
+          sellTolerance: result.sell_tolerance,
+          updatedAt: result.updated_at
+        }
+      });
+    } catch (error) {
+      console.error('[Get Tolerance Settings Error]', error);
+      return jsonResponse({ success: false, error: 'Failed to fetch tolerance settings' }, 500);
+    }
+  }
+
+  // POST - 保存容错设置
+  if (request.method === 'POST') {
+    try {
+      const { buyTolerance, sellTolerance } = await request.json();
+
+      // 验证输入
+      const buyToleranceNum = parseFloat(buyTolerance);
+      const sellToleranceNum = parseFloat(sellTolerance);
+
+      if (isNaN(buyToleranceNum) || isNaN(sellToleranceNum)) {
+        return jsonResponse({ success: false, error: '容错值必须是有效数字' }, 400);
+      }
+
+      if (buyToleranceNum < 0.1 || buyToleranceNum > 100) {
+        return jsonResponse({ success: false, error: '买入容错值必须在 0.1-100 之间' }, 400);
+      }
+
+      if (sellToleranceNum < 0.1 || sellToleranceNum > 100) {
+        return jsonResponse({ success: false, error: '卖出容错值必须在 0.1-100 之间' }, 400);
+      }
+
+      // 更新设置
+      const updateStmt = env.DB.prepare(`
+        UPDATE alert_tolerance_settings 
+        SET buy_tolerance = ?, sell_tolerance = ?, updated_at = ?
+        WHERE id = (SELECT id FROM alert_tolerance_settings ORDER BY id DESC LIMIT 1)
+      `);
+      const now = new Date().toISOString();
+      await updateStmt.bind(buyToleranceNum, sellToleranceNum, now).run();
+
+      return jsonResponse({
+        success: true,
+        settings: {
+          buyTolerance: buyToleranceNum,
+          sellTolerance: sellToleranceNum,
+          updatedAt: now
+        }
+      });
+    } catch (error) {
+      console.error('[Save Tolerance Settings Error]', error);
+      return jsonResponse({ success: false, error: 'Failed to save tolerance settings' }, 500);
+    }
+  }
+
+  return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
 }
 
 // ================================================================================
@@ -5019,7 +5107,7 @@ async function scheduledIntelligentGoldAnalysis(env, ctx) {
       await sendIntelligentTradingAdvice(env, aiAnalysis, currentPrice, tradingParams);
     }
 
-    const profitOpportunities = calculateProfitOpportunities(currentPrice, tradingParams, marketAnalysis);
+    const profitOpportunities = await calculateProfitOpportunities(currentPrice, tradingParams, marketAnalysis, env);
     if (profitOpportunities.length > 0) {
       await sendProfitOpportunityAlerts(env, profitOpportunities, currentPrice);
     }
@@ -5273,8 +5361,23 @@ function combineAIResults(qwenResult, doubaoResult, marketAnalysis) {
   };
 }
 
-function calculateProfitOpportunities(currentPrice, tradingParams, marketAnalysis) {
+async function calculateProfitOpportunities(currentPrice, tradingParams, marketAnalysis, env) {
   const opportunities = [];
+
+  // 获取容错阈值设置
+  let toleranceSettings = { buyTolerance: 2.0, sellTolerance: 2.0 };
+  try {
+    const toleranceStmt = env.DB.prepare(`SELECT buy_tolerance, sell_tolerance FROM alert_tolerance_settings ORDER BY id DESC LIMIT 1`);
+    const toleranceResult = await toleranceStmt.first();
+    if (toleranceResult) {
+      toleranceSettings = {
+        buyTolerance: toleranceResult.buy_tolerance,
+        sellTolerance: toleranceResult.sell_tolerance
+      };
+    }
+  } catch (error) {
+    console.log('[Tolerance] Using default tolerance settings');
+  }
 
   if (tradingParams.avgBuyPrice > 0 && tradingParams.totalHoldings > 0) {
     const currentProfitPct = ((currentPrice - tradingParams.avgBuyPrice) / tradingParams.avgBuyPrice) * 100;
@@ -5304,19 +5407,20 @@ function calculateProfitOpportunities(currentPrice, tradingParams, marketAnalysi
     }
   }
 
-  // 优化：价格差值小于2个单位时触发推送
+  // 使用用户设置的容错阈值
   tradingParams.buyTargets.forEach(target => {
     const priceDiff = Math.abs(currentPrice - target);
     const distance = ((target - currentPrice) / currentPrice) * 100;
     
-    if (priceDiff <= 2.0) { // 小于2个单位触发
+    if (priceDiff <= toleranceSettings.buyTolerance) {
       opportunities.push({
         type: 'buy_target',
         title: '🎯 买入时机提醒',
-        message: `当前价格 ¥${currentPrice} 距离买入目标 ¥${target} 仅差 ¥${priceDiff.toFixed(2)}（${distance.toFixed(2)}%），建议关注买入时机`,
+        message: `当前价格 ¥${currentPrice} 距离买入目标 ¥${target} 仅差 ¥${priceDiff.toFixed(2)}（${distance.toFixed(2)}%），在容错范围 ±¥${toleranceSettings.buyTolerance} 内`,
         targetPrice: target,
         currentPrice,
         priceDiff,
+        tolerance: toleranceSettings.buyTolerance,
         recommendation: currentPrice <= target ? 'buy_now' : 'watch_buy'
       });
     }
@@ -5326,14 +5430,15 @@ function calculateProfitOpportunities(currentPrice, tradingParams, marketAnalysi
     const priceDiff = Math.abs(currentPrice - target);
     const distance = ((currentPrice - target) / target) * 100;
     
-    if (priceDiff <= 2.0) { // 小于2个单位触发
+    if (priceDiff <= toleranceSettings.sellTolerance) {
       opportunities.push({
         type: 'sell_target',
         title: '🎯 卖出时机提醒',
-        message: `当前价格 ¥${currentPrice} 距离卖出目标 ¥${target} 仅差 ¥${priceDiff.toFixed(2)}（${distance.toFixed(2)}%），建议关注卖出时机`,
+        message: `当前价格 ¥${currentPrice} 距离卖出目标 ¥${target} 仅差 ¥${priceDiff.toFixed(2)}（${distance.toFixed(2)}%），在容错范围 ±¥${toleranceSettings.sellTolerance} 内`,
         targetPrice: target,
         currentPrice,
         priceDiff,
+        tolerance: toleranceSettings.sellTolerance,
         recommendation: currentPrice >= target ? 'sell_now' : 'watch_sell'
       });
     }

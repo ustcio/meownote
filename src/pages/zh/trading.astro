@@ -240,6 +240,54 @@ import Layout from '@layouts/Layout.astro';
               价格预警
             </h2>
           </div>
+
+          <!-- 容错阈值设置 -->
+          <div class="tolerance-settings" id="tolerance-settings">
+            <div class="tolerance-header">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>容错阈值设置</span>
+              <span class="tolerance-status" id="tolerance-status">加载中...</span>
+            </div>
+            <form class="tolerance-form" id="tolerance-form">
+              <div class="tolerance-row">
+                <div class="tolerance-input-group">
+                  <label class="tolerance-label">
+                    <span class="tolerance-icon buy">🟢</span>
+                    买入容错
+                  </label>
+                  <div class="input-with-unit">
+                    <input type="number" id="buy-tolerance" step="0.1" min="0.1" max="100" value="2.0" required />
+                    <span class="unit">元</span>
+                  </div>
+                  <span class="tolerance-hint">当价格进入目标±此范围内时推送</span>
+                </div>
+                <div class="tolerance-input-group">
+                  <label class="tolerance-label">
+                    <span class="tolerance-icon sell">🔴</span>
+                    卖出容错
+                  </label>
+                  <div class="input-with-unit">
+                    <input type="number" id="sell-tolerance" step="0.1" min="0.1" max="100" value="2.0" required />
+                    <span class="unit">元</span>
+                  </div>
+                  <span class="tolerance-hint">当价格进入目标±此范围内时推送</span>
+                </div>
+              </div>
+              <button type="submit" class="tolerance-save-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                  <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                保存设置
+              </button>
+            </form>
+          </div>
+
           <form class="panel-form" id="alert-form">
             <div class="alert-type-row">
               <label class="alert-type-label">
@@ -783,6 +831,149 @@ import Layout from '@layouts/Layout.astro';
     border: 1px solid var(--card-border);
     border-radius: var(--radius-xl);
     padding: var(--space-5);
+  }
+
+  /* Tolerance Settings */
+  .tolerance-settings {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  .tolerance-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+  }
+
+  .tolerance-header svg {
+    color: var(--accent-primary);
+  }
+
+  .tolerance-status {
+    margin-left: auto;
+    font-size: var(--text-xs);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-weight: var(--font-medium);
+  }
+
+  .tolerance-status.saved {
+    background: rgba(48, 209, 88, 0.1);
+    color: #30d158;
+  }
+
+  .tolerance-status.unsaved {
+    background: rgba(255, 149, 0, 0.1);
+    color: #ff9500;
+  }
+
+  .tolerance-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .tolerance-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
+  .tolerance-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .tolerance-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+  }
+
+  .tolerance-icon {
+    font-size: var(--text-base);
+  }
+
+  .tolerance-input-group .input-with-unit {
+    display: flex;
+    align-items: center;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .tolerance-input-group .input-with-unit:focus-within {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(100, 210, 255, 0.1);
+  }
+
+  .tolerance-input-group input {
+    flex: 1;
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    background: transparent;
+    font-size: var(--text-base);
+    font-family: var(--font-number);
+    color: var(--text-primary);
+    outline: none;
+  }
+
+  .tolerance-input-group .unit {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    border-left: 1px solid var(--border-primary);
+    background: var(--bg-secondary);
+  }
+
+  .tolerance-hint {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+  }
+
+  .tolerance-save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    align-self: flex-start;
+  }
+
+  .tolerance-save-btn:hover {
+    background: var(--accent-secondary);
+    transform: translateY(-1px);
+  }
+
+  .tolerance-save-btn:active {
+    transform: translateY(0);
+  }
+
+  .tolerance-save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
   }
 
   .alert-type-row {
@@ -1793,7 +1984,8 @@ import Layout from '@layouts/Layout.astro';
       loadGoldPrice(),
       loadStats(),
       loadTransactions(),
-      loadAlerts()
+      loadAlerts(),
+      loadToleranceSettings()
     ]);
   }
 
@@ -2397,6 +2589,101 @@ import Layout from '@layouts/Layout.astro';
     } catch (error) {
       console.error('Alert creation failed:', error);
       alert('设置失败');
+    }
+  });
+
+  // 容错阈值设置功能
+  const toleranceForm = document.getElementById('tolerance-form');
+  const buyToleranceInput = document.getElementById('buy-tolerance') as HTMLInputElement;
+  const sellToleranceInput = document.getElementById('sell-tolerance') as HTMLInputElement;
+  const toleranceStatus = document.getElementById('tolerance-status');
+
+  // 加载容错设置
+  async function loadToleranceSettings() {
+    try {
+      const result = await apiRequest('/api/trading/tolerance');
+      if (result.success) {
+        buyToleranceInput.value = result.settings.buyTolerance.toFixed(1);
+        sellToleranceInput.value = result.settings.sellTolerance.toFixed(1);
+        updateToleranceStatus('saved');
+      }
+    } catch (error) {
+      console.error('Failed to load tolerance settings:', error);
+      updateToleranceStatus('error');
+    }
+  }
+
+  // 更新状态显示
+  function updateToleranceStatus(status: string) {
+    if (!toleranceStatus) return;
+    
+    toleranceStatus.className = 'tolerance-status ' + status;
+    switch (status) {
+      case 'saved':
+        toleranceStatus.textContent = '已保存';
+        break;
+      case 'unsaved':
+        toleranceStatus.textContent = '未保存';
+        break;
+      case 'saving':
+        toleranceStatus.textContent = '保存中...';
+        break;
+      case 'error':
+        toleranceStatus.textContent = '加载失败';
+        break;
+    }
+  }
+
+  // 监听输入变化
+  function onToleranceChange() {
+    updateToleranceStatus('unsaved');
+  }
+
+  buyToleranceInput?.addEventListener('input', onToleranceChange);
+  sellToleranceInput?.addEventListener('input', onToleranceChange);
+
+  // 保存容错设置
+  toleranceForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const buyTolerance = parseFloat(buyToleranceInput?.value);
+    const sellTolerance = parseFloat(sellToleranceInput?.value);
+
+    // 输入验证
+    if (isNaN(buyTolerance) || isNaN(sellTolerance)) {
+      showNotification('容错值必须是有效数字', 'error');
+      return;
+    }
+
+    if (buyTolerance < 0.1 || buyTolerance > 100) {
+      showNotification('买入容错值必须在 0.1-100 之间', 'error');
+      return;
+    }
+
+    if (sellTolerance < 0.1 || sellTolerance > 100) {
+      showNotification('卖出容错值必须在 0.1-100 之间', 'error');
+      return;
+    }
+
+    updateToleranceStatus('saving');
+
+    try {
+      const result = await apiRequest('/api/trading/tolerance', {
+        method: 'POST',
+        body: JSON.stringify({ buyTolerance, sellTolerance })
+      });
+
+      if (result.success) {
+        updateToleranceStatus('saved');
+        showNotification('容错设置已保存', 'success');
+      } else {
+        updateToleranceStatus('unsaved');
+        showNotification(result.error || '保存失败', 'error');
+      }
+    } catch (error) {
+      console.error('Save tolerance settings failed:', error);
+      updateToleranceStatus('unsaved');
+      showNotification('保存失败', 'error');
     }
   });
 
