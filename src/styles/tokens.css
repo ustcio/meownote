@@ -114,6 +114,12 @@
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
   
+  /* ==================== Touch Feedback ==================== */
+  --touch-feedback-opacity: 0.1;
+  --touch-feedback-opacity-mobile: 0.15;
+  --touch-scale: 0.98;
+  --touch-transition: transform 0.1s ease;
+  
   /* ==================== Z-Index Scale ==================== */
   --z-dropdown: 100;
   --z-sticky: 200;

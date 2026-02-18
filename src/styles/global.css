@@ -154,6 +154,168 @@ button {
   color: inherit;
 }
 
+/* ==================== Touch Feedback & Border-Radius Consistency ==================== */
+/* Global fix: Ensure touch feedback area matches visual border-radius */
+button,
+[role="button"],
+.btn,
+.nav-link,
+.nav-cta,
+.auth-btn,
+.mobile-nav-link,
+.mobile-cta,
+.mobile-auth-btn,
+.tab,
+.tool-item,
+.tool-btn,
+.feature-card,
+.stat-card,
+.team-card,
+.dropdown-item,
+.lang-option,
+.model-option,
+.history-item,
+.quick-action,
+.setting-item,
+.card,
+a[class*="btn"],
+[onclick],
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Active state touch feedback - matches border-radius */
+button::before,
+[role="button"]::before,
+.btn::before,
+.nav-link::before,
+.nav-cta::before,
+.auth-btn::before,
+.mobile-nav-link::before,
+.mobile-cta::before,
+.mobile-auth-btn::before,
+.tab::before,
+.tool-item::before,
+.tool-btn::before,
+.feature-card::before,
+.stat-card::before,
+.team-card::before,
+.dropdown-item::before,
+.lang-option::before,
+.model-option::before,
+.history-item::before,
+.quick-action::before,
+.setting-item::before,
+.card::before,
+a[class*="btn"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+/* Active state - show touch feedback */
+button:active::before,
+[role="button"]:active::before,
+.btn:active::before,
+.nav-link:active::before,
+.nav-cta:active::before,
+.auth-btn:active::before,
+.mobile-nav-link:active::before,
+.mobile-cta:active::before,
+.mobile-auth-btn:active::before,
+.tab:active::before,
+.tool-item:active::before,
+.tool-btn:active::before,
+.feature-card:active::before,
+.stat-card:active::before,
+.team-card:active::before,
+.dropdown-item:active::before,
+.lang-option:active::before,
+.model-option:active::before,
+.history-item:active::before,
+.quick-action:active::before,
+.setting-item:active::before,
+.card:active::before,
+a[class*="btn"]:active::before {
+  opacity: 0.1;
+}
+
+/* Mobile-specific touch feedback enhancement */
+@media (hover: none) and (pointer: coarse) {
+  button:active,
+  [role="button"]:active,
+  .btn:active,
+  .nav-link:active,
+  .nav-cta:active,
+  .auth-btn:active,
+  .mobile-nav-link:active,
+  .mobile-cta:active,
+  .mobile-auth-btn:active,
+  .tab:active,
+  .tool-item:active,
+  .tool-btn:active,
+  .feature-card:active,
+  .stat-card:active,
+  .team-card:active,
+  .dropdown-item:active,
+  .lang-option:active,
+  .model-option:active,
+  .history-item:active,
+  .quick-action:active,
+  .setting-item:active,
+  .card:active,
+  a[class*="btn"]:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+  
+  button:active::before,
+  [role="button"]:active::before,
+  .btn:active::before,
+  .nav-link:active::before,
+  .nav-cta:active::before,
+  .auth-btn:active::before,
+  .mobile-nav-link:active::before,
+  .mobile-cta:active::before,
+  .mobile-auth-btn:active::before,
+  .tab:active::before,
+  .tool-item:active::before,
+  .tool-btn:active::before,
+  .feature-card:active::before,
+  .stat-card:active::before,
+  .team-card:active::before,
+  .dropdown-item:active::before,
+  .lang-option:active::before,
+  .model-option:active::before,
+  .history-item:active::before,
+  .quick-action:active::before,
+  .setting-item:active::before,
+  .card:active::before,
+  a[class*="btn"]:active::before {
+    opacity: 0.15;
+  }
+}
+
+/* Ensure border-radius is inherited by all child elements including pseudo-elements */
+[class*="radius"],
+[class*="rounded"],
+[style*="border-radius"] {
+  isolation: isolate;
+}
+
 input,
 textarea,
 select {
