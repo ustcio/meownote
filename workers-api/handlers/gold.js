@@ -268,7 +268,13 @@ async function storeGoldPriceData(env, data) {
   
   try {
     const timestamp = Date.now();
-    const dateKey = new Date().toISOString().split('T')[0];
+    const beijingDate = new Date(timestamp);
+    const dateKey = beijingDate.toLocaleDateString('zh-CN', { 
+      timeZone: 'Asia/Shanghai',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).replace(/\//g, '-');
     const THREE_DAYS_SECONDS = 3 * 24 * 60 * 60;
     
     await env.GOLD_PRICE_CACHE.put('latest', JSON.stringify({
@@ -339,7 +345,12 @@ export async function handleGoldPrice(request, env, ctx) {
     const queryDate = url.searchParams.get('date');
     const forceRefresh = url.searchParams.get('refresh') === 'true';
     
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toLocaleDateString('zh-CN', { 
+      timeZone: 'Asia/Shanghai',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).replace(/\//g, '-');
     const targetDate = queryDate || today;
     
     if (targetDate === today) {
@@ -358,7 +369,12 @@ export async function handleGoldPrice(request, env, ctx) {
 }
 
 async function handleTodayGoldPrice(env, ctx, forceRefresh) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toLocaleDateString('zh-CN', { 
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).replace(/\//g, '-');
   
   if (!forceRefresh && env?.GOLD_PRICE_CACHE) {
     try {

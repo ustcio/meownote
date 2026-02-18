@@ -16,6 +16,15 @@
 //
 // ================================================================================
 
+function getBeijingDate(date = new Date()) {
+  return date.toLocaleDateString('zh-CN', { 
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).replace(/\//g, '-');
+}
+
 export default {
   async fetch(request, env, ctx) {
     if (request.method === 'OPTIONS') {
@@ -556,7 +565,7 @@ function recordFailedLogin(ip) {
 
 async function handleVisitor(request, env, ctx) {
   const ip = getClientIP(request);
-  const today = new Date().toISOString().split('T')[0];
+  const today = getBeijingDate();
 
   try {
     const existing = await env.DB.prepare(
@@ -613,7 +622,7 @@ async function handleStatsVisit(request, env, ctx) {
     const ip = getClientIP(request);
 
     const visitorId = await generateVisitorId(ip, userAgent);
-    const today = new Date().toISOString().split('T')[0];
+    const today = getBeijingDate();
 
     await env.DB.prepare(
       `INSERT INTO page_views (page, referrer, visitor_id, created_at) VALUES (?, ?, ?, datetime('now'))`
@@ -1056,7 +1065,7 @@ async function performCrawl(env) {
       });
       
       // 存储历史数据
-      const historyKey = `history:${new Date().toISOString().split('T')[0]}`;
+      const historyKey = `history:${getBeijingDate()}`;
       let history = await env.GOLD_PRICE_CACHE.get(historyKey);
       history = history ? JSON.parse(history) : [];
       history.push({
@@ -1096,7 +1105,7 @@ async function handleGoldPrice(request, env, ctx) {
     const queryDate = url.searchParams.get('date');
     const forceRefresh = url.searchParams.get('refresh') === 'true';
     
-    const today = new Date().toISOString().split('T')[0];
+    const today = getBeijingDate();
     const targetDate = queryDate || today;
     
     console.log('[Gold Price] Request for date:', targetDate);
@@ -1118,7 +1127,7 @@ async function handleGoldPrice(request, env, ctx) {
 }
 
 async function handleTodayGoldPrice(env, ctx, forceRefresh) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getBeijingDate();
   
   if (!forceRefresh && env?.GOLD_PRICE_CACHE) {
     try {
@@ -1189,8 +1198,8 @@ async function handleTodayGoldPrice(env, ctx, forceRefresh) {
 }
 
 async function handleHistoricalGoldPrice(env, targetDate) {
-  const today = new Date().toISOString().split('T')[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  const today = getBeijingDate();
+  const yesterday = getBeijingDate(new Date(Date.now() - 86400000));
   
   if (targetDate !== yesterday && targetDate !== today) {
     return jsonResponse({
@@ -1433,7 +1442,7 @@ async function storeGoldPriceData(env, data) {
   
   try {
     const timestamp = Date.now();
-    const dateKey = new Date().toISOString().split('T')[0];
+    const dateKey = getBeijingDate();
     const THREE_DAYS_SECONDS = 3 * 24 * 60 * 60;
     
     try {
@@ -1538,7 +1547,7 @@ async function logCrawlStatus(env, status, data) {
   // 如果配置了 KV，存储日志
   if (env?.GOLD_PRICE_CACHE) {
     try {
-      const dateKey = new Date().toISOString().split('T')[0];
+      const dateKey = getBeijingDate();
       const logKey = `logs:${dateKey}`;
       
       let logs = [];
