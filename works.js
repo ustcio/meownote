@@ -4574,12 +4574,18 @@ async function handleGetTransactionStats(request, env) {
         COUNT(CASE WHEN type = 'buy' THEN 1 END) as buy_count,
         COUNT(CASE WHEN type = 'sell' THEN 1 END) as sell_count
       FROM gold_transactions
-      WHERE date(created_at) >= date(?)
+      WHERE created_at >= datetime('now', '-30 days')
       GROUP BY date(created_at)
       ORDER BY date DESC
       LIMIT 30
     `);
-    const weeklyResult = await weeklyStmt.bind(weekStartStr).all();
+    const weeklyResult = await weeklyStmt.all();
+
+    console.log('[Stats API] totalStats:', totalStats);
+    console.log('[Stats API] weekStats:', weekStats);
+    console.log('[Stats API] monthStats:', monthStats);
+    console.log('[Stats API] weeklyResult:', weeklyResult.results);
+    console.log('[Stats API] monthlyResult:', monthlyResult.results);
 
     return jsonResponse({
       success: true,
