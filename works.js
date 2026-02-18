@@ -119,6 +119,7 @@ const ROUTES = {
   '/api/trading/buy': { handler: handleBuyTransaction },
   '/api/trading/sell': { handler: handleSellTransaction },
   '/api/trading/transactions': { handler: handleGetTransactions },
+  '/api/trading/transaction': { handler: handleTransactionOperation },
   '/api/trading/stats': { handler: handleGetTransactionStats },
   '/api/trading/alerts': { handler: handleGetAlerts },
   '/api/trading/alert': { handler: handleCreateAlert },
@@ -4214,6 +4215,29 @@ async function handleSellTransaction(request, env) {
         buyPrice = buyResult.price;
         profit = (sellPrice - buyPrice) * sellQuantity;
       }
+    } else {
+      const avgStmt = env.DB.prepare(`
+        SELECT 
+          COALESCE(SUM(quantity), 0) as total_bought,
+          COALESCE(SUM(total_amount), 0) as total_cost
+        FROM gold_transactions 
+        WHERE type = 'buy' AND status = 'completed'
+      `);
+      const avgResult = await avgStmt.first();
+      
+      const avgStmtSell = env.DB.prepare(`
+        SELECT COALESCE(SUM(quantity), 0) as total_sold
+        FROM gold_transactions 
+        WHERE type = 'sell' AND status = 'completed'
+      `);
+      const avgResultSell = await avgStmtSell.first();
+      
+      const holdings = (avgResult?.total_bought || 0) - (avgResultSell?.total_sold || 0);
+      
+      if (holdings > 0 && avgResult?.total_cost > 0) {
+        buyPrice = avgResult.total_cost / avgResult.total_bought;
+        profit = (sellPrice - buyPrice) * sellQuantity;
+      }
     }
 
     const stmt = env.DB.prepare(`
@@ -4294,6 +4318,82 @@ async function handleGetTransactions(request, env) {
     console.error('[Get Transactions Error]', error);
     return jsonResponse({ success: false, error: 'Failed to fetch transactions' }, 500);
   }
+}
+
+async function handleTransactionOperation(request, env) {
+  const authResult = await verifyAdminAuth(request, env);
+  if (!authResult.success) {
+    return jsonResponse({ success: false, error: authResult.message }, 401);
+  }
+
+  const url = new URL(request.url);
+  const id = url.searchParams.get('id');
+
+  if (!id) {
+    return jsonResponse({ success: false, error: 'Transaction ID is required' }, 400);
+  }
+
+  if (request.method === 'DELETE') {
+    try {
+      const stmt = env.DB.prepare('DELETE FROM gold_transactions WHERE id = ?');
+      await stmt.bind(id).run();
+      return jsonResponse({ success: true, message: 'Transaction deleted' });
+    } catch (error) {
+      console.error('[Delete Transaction Error]', error);
+      return jsonResponse({ success: false, error: 'Failed to delete transaction' }, 500);
+    }
+  }
+
+  if (request.method === 'PUT') {
+    try {
+      const { price, quantity, actualSellPrice, notes } = await request.json();
+      
+      const checkStmt = env.DB.prepare('SELECT * FROM gold_transactions WHERE id = ?');
+      const existing = await checkStmt.bind(id).first();
+      
+      if (!existing) {
+        return jsonResponse({ success: false, error: 'Transaction not found' }, 404);
+      }
+
+      const newPrice = price !== undefined ? parseFloat(price) : existing.price;
+      const newQuantity = quantity !== undefined ? parseFloat(quantity) : existing.quantity;
+      const newActualSellPrice = actualSellPrice !== undefined ? parseFloat(actualSellPrice) : existing.actual_sell_price;
+      const newNotes = notes !== undefined ? notes : existing.notes;
+      const newTotalAmount = newPrice * newQuantity;
+
+      let newProfit = existing.profit;
+      if (existing.type === 'sell' && newActualSellPrice) {
+        newProfit = (newActualSellPrice - newPrice) * newQuantity;
+      }
+
+      const updateStmt = env.DB.prepare(`
+        UPDATE gold_transactions 
+        SET price = ?, quantity = ?, total_amount = ?, actual_sell_price = ?, profit = ?, notes = ?
+        WHERE id = ?
+      `);
+      
+      await updateStmt.bind(newPrice, newQuantity, newTotalAmount, newActualSellPrice, newProfit, newNotes, id).run();
+
+      return jsonResponse({
+        success: true,
+        transaction: {
+          id: parseInt(id),
+          type: existing.type,
+          price: newPrice,
+          quantity: newQuantity,
+          totalAmount: newTotalAmount,
+          actualSellPrice: newActualSellPrice,
+          profit: newProfit,
+          notes: newNotes
+        }
+      });
+    } catch (error) {
+      console.error('[Update Transaction Error]', error);
+      return jsonResponse({ success: false, error: 'Failed to update transaction' }, 500);
+    }
+  }
+
+  return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
 }
 
 async function handleGetTransactionStats(request, env) {
