@@ -146,7 +146,7 @@ const dayTabs = [
 
 <script>
   const API_BASE = 'https://api.ustc.dev';
-  const REFRESH_INTERVAL = 10000;
+  const REFRESH_INTERVAL = 30000;
   const lang = window.location.pathname.startsWith('/zh') ? 'zh' : 'en';
   
   function showLoading() {
@@ -231,14 +231,18 @@ const dayTabs = [
         },
         elements: { 
           point: { 
-            radius: 0, 
-            hoverRadius: 5,
+            radius: 0,
+            hitRadius: 10,
+            hoverRadius: 4,
             hoverBackgroundColor: '#fff',
-            hoverBorderWidth: 2
+            hoverBorderWidth: 2,
+            pointStyle: false
           }, 
           line: { 
-            tension: 0.3, 
-            borderWidth: 2.5
+            tension: 0.4, 
+            borderWidth: 2,
+            borderJoinStyle: 'round',
+            borderCapStyle: 'round'
           } 
         },
         interaction: { intersect: false, mode: 'index' },

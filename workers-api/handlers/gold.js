@@ -25,7 +25,8 @@ const GOLD_ANALYSIS_CONFIG = {
     SMA_PERIODS: [5, 10, 20, 50],
     EMA_PERIODS: [12, 26],
     MIN_DATA_POINTS: 15,
-    SUPPORT_RESISTANCE_LOOKBACK: 20
+    SUPPORT_RESISTANCE_LOOKBACK: 20,
+    PRICE_CHANGE_THRESHOLD: 0.5
   },
   SCORING_CONFIG: {
     RSI_WEIGHT: 2.0,
@@ -44,6 +45,14 @@ const GOLD_ANALYSIS_CONFIG = {
     MAX_RETRIES: 3,
     RETRY_DELAY_BASE: 1000,
     CACHE_TTL_SECONDS: 120
+  },
+  TREND_CONFIG: {
+    CONTINUOUS_PERIODS: 3,
+    TREND_THRESHOLD_PCT: 0.3,
+    STRONG_TREND_THRESHOLD_PCT: 0.8,
+    EXTREME_TREND_THRESHOLD_PCT: 1.5,
+    MOMENTUM_LOOKBACK: 5,
+    TREND_CONFIRMATION_PERIODS: 2
   }
 };
 
@@ -580,9 +589,21 @@ function findSupportResistance(prices, lookback = GOLD_ANALYSIS_CONFIG.TECHNICAL
 }
 
 function analyzePriceTrend(prices) {
-  if (prices.length < 5) return { trend: 'unknown', strength: 0, momentum: 0 };
+  const config = GOLD_ANALYSIS_CONFIG.TREND_CONFIG;
   
-  const recent = prices.slice(-5);
+  if (prices.length < config.MOMENTUM_LOOKBACK + config.CONTINUOUS_PERIODS) {
+    return { 
+      trend: 'unknown', 
+      strength: 0, 
+      momentum: 0,
+      trendLevel: 'neutral',
+      confidence: 0,
+      continuousCount: 0,
+      cumulativeChange: 0
+    };
+  }
+  
+  const recent = prices.slice(-config.MOMENTUM_LOOKBACK);
   const changes = [];
   for (let i = 1; i < recent.length; i++) {
     changes.push((recent[i] - recent[i - 1]) / recent[i - 1] * 100);
@@ -590,13 +611,103 @@ function analyzePriceTrend(prices) {
   
   const avgChange = changes.reduce((a, b) => a + b, 0) / changes.length;
   const momentum = changes[changes.length - 1];
-  const trend = avgChange > 0.1 ? 'up' : avgChange < -0.1 ? 'down' : 'sideways';
+  
+  let upCount = 0, downCount = 0;
+  for (const change of changes) {
+    if (change > config.TREND_THRESHOLD_PCT) upCount++;
+    else if (change < -config.TREND_THRESHOLD_PCT) downCount++;
+  }
+  
+  let trend;
+  let continuousCount = 0;
+  let cumulativeChange = 0;
+  
+  const longerPeriod = prices.slice(-(config.CONTINUOUS_PERIODS + config.MOMENTUM_LOOKBACK));
+  const longerChanges = [];
+  for (let i = 1; i < longerPeriod.length; i++) {
+    longerChanges.push((longerPeriod[i] - longerPeriod[i - 1]) / longerPeriod[i - 1] * 100);
+  }
+  
+  let currentStreak = 0;
+  let streakType = null;
+  let maxUpStreak = 0, maxDownStreak = 0;
+  
+  for (const change of longerChanges) {
+    if (change > config.TREND_THRESHOLD_PCT) {
+      if (streakType === 'up') {
+        currentStreak++;
+      } else {
+        streakType = 'up';
+        currentStreak = 1;
+      }
+      maxUpStreak = Math.max(maxUpStreak, currentStreak);
+    } else if (change < -config.TREND_THRESHOLD_PCT) {
+      if (streakType === 'down') {
+        currentStreak++;
+      } else {
+        streakType = 'down';
+        currentStreak = 1;
+      }
+      maxDownStreak = Math.max(maxDownStreak, currentStreak);
+    } else {
+      currentStreak = 0;
+      streakType = null;
+    }
+  }
+  
+  if (upCount >= config.TREND_CONFIRMATION_PERIODS && maxUpStreak >= config.CONTINUOUS_PERIODS) {
+    trend = 'up';
+    continuousCount = maxUpStreak;
+    cumulativeChange = longerChanges.filter(c => c > 0).reduce((a, b) => a + b, 0);
+  } else if (downCount >= config.TREND_CONFIRMATION_PERIODS && maxDownStreak >= config.CONTINUOUS_PERIODS) {
+    trend = 'down';
+    continuousCount = maxDownStreak;
+    cumulativeChange = longerChanges.filter(c => c < 0).reduce((a, b) => a + b, 0);
+  } else if (upCount > downCount) {
+    trend = 'weak_up';
+    continuousCount = maxUpStreak;
+    cumulativeChange = avgChange;
+  } else if (downCount > upCount) {
+    trend = 'weak_down';
+    continuousCount = maxDownStreak;
+    cumulativeChange = avgChange;
+  } else {
+    trend = 'sideways';
+    continuousCount = 0;
+    cumulativeChange = avgChange;
+  }
+  
+  const absCumulative = Math.abs(cumulativeChange);
+  let trendLevel;
+  if (absCumulative >= config.EXTREME_TREND_THRESHOLD_PCT) {
+    trendLevel = trend.includes('up') ? 'extreme_bullish' : 'extreme_bearish';
+  } else if (absCumulative >= config.STRONG_TREND_THRESHOLD_PCT) {
+    trendLevel = trend.includes('up') ? 'strong_bullish' : 'strong_bearish';
+  } else if (absCumulative >= config.TREND_THRESHOLD_PCT * 2) {
+    trendLevel = trend.includes('up') ? 'bullish' : 'bearish';
+  } else {
+    trendLevel = 'neutral';
+  }
+  
+  const confidence = Math.min(
+    (continuousCount / config.CONTINUOUS_PERIODS) * 0.5 + 
+    (absCumulative / config.STRONG_TREND_THRESHOLD_PCT) * 0.5,
+    1.0
+  );
   
   return {
     trend,
+    trendLevel,
     strength: Math.abs(avgChange),
     avgChange: avgChange.toFixed(3),
-    momentum: momentum.toFixed(3)
+    momentum: momentum.toFixed(3),
+    continuousCount,
+    cumulativeChange: cumulativeChange.toFixed(3),
+    confidence: confidence.toFixed(2),
+    upCount,
+    downCount,
+    maxUpStreak,
+    maxDownStreak
   };
 }
 
@@ -707,13 +818,58 @@ function generateTradingSignal(analysis) {
   }
   
   if (analysis.trend) {
-    if (analysis.trend.trend === 'down' && analysis.trend.strength > 0.2) {
-      signals.push({ indicator: 'Trend', signal: '下跌趋势', action: 'watch', strength: 1, value: analysis.trend.avgChange + '%', description: `下跌趋势，强度 ${analysis.trend.strength.toFixed(2)}%` });
-      if (analysis.trend.momentum < -0.1) {
+    const trendConfig = GOLD_ANALYSIS_CONFIG.TREND_CONFIG;
+    const trendLevelMap = {
+      'extreme_bearish': { signal: '极端看跌', action: 'buy', strength: 3, description: '连续下跌趋势，买入机会' },
+      'strong_bearish': { signal: '强烈看跌', action: 'buy', strength: 2.5, description: '明显下跌趋势，关注买入' },
+      'bearish': { signal: '看跌', action: 'buy', strength: 2, description: '下跌趋势形成' },
+      'extreme_bullish': { signal: '极端看涨', action: 'sell', strength: 3, description: '连续上涨趋势，注意风险' },
+      'strong_bullish': { signal: '强烈看涨', action: 'sell', strength: 2.5, description: '明显上涨趋势，谨慎持有' },
+      'bullish': { signal: '看涨', action: 'sell', strength: 2, description: '上涨趋势形成' },
+      'neutral': { signal: '震荡', action: 'hold', strength: 1, description: '无明显趋势' }
+    };
+    
+    const trendInfo = trendLevelMap[analysis.trend.trendLevel] || trendLevelMap['neutral'];
+    const isDownTrend = analysis.trend.trend.includes('down');
+    const isUpTrend = analysis.trend.trend.includes('up');
+    
+    if (isDownTrend && analysis.trend.strength > trendConfig.TREND_THRESHOLD_PCT) {
+      signals.push({ 
+        indicator: 'Trend', 
+        signal: trendInfo.signal, 
+        action: trendInfo.action, 
+        strength: trendInfo.strength, 
+        value: `${analysis.trend.cumulativeChange}% (${analysis.trend.continuousCount}周期)`, 
+        description: `${trendInfo.description}，置信度${(analysis.trend.confidence * 100).toFixed(0)}%` 
+      });
+      
+      if (analysis.trend.trendLevel === 'extreme_bearish' || analysis.trend.trendLevel === 'strong_bearish') {
+        buyScore += config.TREND_WEIGHT * trendInfo.strength;
+      } else {
         buyScore += config.TREND_WEIGHT * 0.5;
       }
-    } else if (analysis.trend.trend === 'up' && analysis.trend.strength > 0.2) {
-      signals.push({ indicator: 'Trend', signal: '上涨趋势', action: 'hold', strength: 1, value: analysis.trend.avgChange + '%', description: `上涨趋势，强度 ${analysis.trend.strength.toFixed(2)}%` });
+    } else if (isUpTrend && analysis.trend.strength > trendConfig.TREND_THRESHOLD_PCT) {
+      signals.push({ 
+        indicator: 'Trend', 
+        signal: trendInfo.signal, 
+        action: trendInfo.action, 
+        strength: trendInfo.strength, 
+        value: `${analysis.trend.cumulativeChange}% (${analysis.trend.continuousCount}周期)`, 
+        description: `${trendInfo.description}，置信度${(analysis.trend.confidence * 100).toFixed(0)}%` 
+      });
+      
+      if (analysis.trend.trendLevel === 'extreme_bullish' || analysis.trend.trendLevel === 'strong_bullish') {
+        sellScore += config.TREND_WEIGHT * trendInfo.strength;
+      }
+    } else {
+      signals.push({ 
+        indicator: 'Trend', 
+        signal: '震荡整理', 
+        action: 'hold', 
+        strength: 1, 
+        value: `${analysis.trend.avgChange}%`, 
+        description: '市场震荡，观望为主' 
+      });
     }
   }
   
@@ -977,6 +1133,8 @@ async function handleTodayGoldPrice(env, ctx, forceRefresh, includeAnalysis) {
     day: '2-digit'
   }).replace(/\//g, '-');
   
+  const CACHE_VALID_MS = 30000;
+  
   if (!forceRefresh && env?.GOLD_PRICE_CACHE) {
     try {
       const cached = await env.GOLD_PRICE_CACHE.get('latest');
@@ -984,7 +1142,7 @@ async function handleTodayGoldPrice(env, ctx, forceRefresh, includeAnalysis) {
         const data = JSON.parse(cached);
         const cacheAge = Date.now() - (data.cachedAt || 0);
         
-        if (cacheAge < 10000) {
+        if (cacheAge < CACHE_VALID_MS) {
           const history = await getDayHistory(env, today);
           const response = { ...data, history, fromCache: true, cacheAge };
           
@@ -998,7 +1156,9 @@ async function handleTodayGoldPrice(env, ctx, forceRefresh, includeAnalysis) {
           return jsonResponse(response);
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('[Gold] Cache read error:', e);
+    }
   }
   
   const data = await performCrawl(env);
@@ -1009,8 +1169,11 @@ async function handleTodayGoldPrice(env, ctx, forceRefresh, includeAnalysis) {
         const cached = await env.GOLD_PRICE_CACHE.get('latest');
         if (cached) {
           const cachedData = JSON.parse(cached);
-          const history = await getDayHistory(env, today);
-          return jsonResponse({ ...cachedData, history, fromCache: true, stale: true, error: data.error });
+          const cacheAge = Date.now() - (cachedData.cachedAt || 0);
+          if (cacheAge < 300000) {
+            const history = await getDayHistory(env, today);
+            return jsonResponse({ ...cachedData, history, fromCache: true, stale: true, error: data.error });
+          }
         }
       } catch (e) {}
     }
@@ -1316,9 +1479,10 @@ async function checkAndSendAlerts(data, env) {
           }
         }
         
-        await sendAlertEmail(enhancedAlerts, env, analysisResult.success ? analysisResult.analysis : null);
-        await sendFeishuAlert(enhancedAlerts, env);
-        await sendMeoWAlert(enhancedAlerts, env);
+        const analysis = analysisResult.success ? analysisResult.analysis : null;
+        await sendAlertEmail(enhancedAlerts, env, analysis);
+        await sendFeishuAlert(enhancedAlerts, env, analysis);
+        await sendMeoWAlert(enhancedAlerts, env, analysis);
         
         await env.GOLD_PRICE_CACHE.put('last_alert_time', String(Date.now()), { expirationTtl: 3600 });
         await env.GOLD_PRICE_CACHE.put('daily_alert_count', String(todayAlertCount + 1), { expirationTtl: 86400 });
@@ -1329,28 +1493,56 @@ async function checkAndSendAlerts(data, env) {
   }
 }
 
+function generateUnifiedAlertContent(alerts, analysis = null) {
+  const hasDownward = alerts.some(a => a.direction === 'down');
+  const hasVolatile = alerts.some(a => a.direction === 'volatile');
+  const hasHighSeverity = alerts.some(a => a.severity === 'high');
+  const hasAnalysis = alerts.some(a => a.type === 'analysis');
+  
+  let alertEmoji, alertTitle, alertLevel;
+  if (hasHighSeverity && hasDownward) {
+    alertEmoji = '🚨';
+    alertTitle = '金价大幅下跌预警';
+    alertLevel = 'high';
+  } else if (hasDownward) {
+    alertEmoji = '📉';
+    alertTitle = '金价下跌提醒';
+    alertLevel = 'medium';
+  } else if (hasVolatile) {
+    alertEmoji = '⚡';
+    alertTitle = '金价剧烈波动';
+    alertLevel = 'medium';
+  } else {
+    alertEmoji = '📈';
+    alertTitle = '金价快速上涨';
+    alertLevel = 'low';
+  }
+  
+  const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+  
+  const priceAlerts = alerts.filter(a => a.type === 'window');
+  const analysisAlert = alerts.find(a => a.type === 'analysis');
+  
+  return {
+    alertEmoji,
+    alertTitle,
+    alertLevel,
+    timeStr,
+    priceAlerts,
+    analysisAlert,
+    hasAnalysis,
+    hasDownward,
+    hasVolatile,
+    hasHighSeverity,
+    analysis
+  };
+}
+
 async function sendAlertEmail(alerts, env, analysis = null) {
   const RESEND_API_KEY = env.RESEND_API_KEY;
   if (!RESEND_API_KEY) return;
   
-  const hasDownward = alerts.some(a => a.direction === 'down');
-  const hasVolatile = alerts.some(a => a.direction === 'volatile');
-  const hasHighSeverity = alerts.some(a => a.severity === 'high');
-  
-  let alertEmoji, alertTitle;
-  if (hasHighSeverity && hasDownward) {
-    alertEmoji = '🚨';
-    alertTitle = '金价大幅下跌预警';
-  } else if (hasDownward) {
-    alertEmoji = '📉';
-    alertTitle = '金价下跌提醒';
-  } else if (hasVolatile) {
-    alertEmoji = '⚡';
-    alertTitle = '金价剧烈波动';
-  } else {
-    alertEmoji = '📈';
-    alertTitle = '金价快速上涨';
-  }
+  const content = generateUnifiedAlertContent(alerts, analysis);
   
   try {
     const response = await fetch('https://api.resend.com/emails', {
@@ -1360,10 +1552,10 @@ async function sendAlertEmail(alerts, env, analysis = null) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'AGI Era <noreply@ustc.dev>',
+        from: 'Meow <noreply@ustc.dev>',
         to: ['metanext@foxmail.com'],
-        subject: `${alertEmoji} ${alertTitle} - ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`,
-        html: generateEnhancedAlertEmail(alerts, alertEmoji, alertTitle, analysis)
+        subject: `${content.alertEmoji} ${content.alertTitle} - ${content.timeStr}`,
+        html: generateEnhancedAlertEmail(alerts, content.alertEmoji, content.alertTitle, analysis)
       })
     });
     
@@ -1483,60 +1675,49 @@ function generateEnhancedAlertEmail(alerts, alertEmoji, alertTitle, analysis) {
   `;
 }
 
-async function sendFeishuAlert(alerts, env) {
+async function sendFeishuAlert(alerts, env, analysis = null) {
   const FEISHU_WEBHOOK = env.FEISHU_WEBHOOK;
   const FEISHU_APP_ID = env.FEISHU_APP_ID;
   const FEISHU_APP_SECRET = env.FEISHU_APP_SECRET;
   const FEISHU_CHAT_ID = env.FEISHU_CHAT_ID;
   
   if (FEISHU_WEBHOOK) {
-    return await sendFeishuWebhook(FEISHU_WEBHOOK, alerts, env);
+    return await sendFeishuWebhook(FEISHU_WEBHOOK, alerts, env, analysis);
   }
   
   if (FEISHU_APP_ID && FEISHU_APP_SECRET && FEISHU_CHAT_ID) {
-    return await sendFeishuAppMessage(FEISHU_APP_ID, FEISHU_APP_SECRET, FEISHU_CHAT_ID, alerts);
+    return await sendFeishuAppMessage(FEISHU_APP_ID, FEISHU_APP_SECRET, FEISHU_CHAT_ID, alerts, analysis);
   }
   
   return { method: 'none', error: 'No Feishu configuration found' };
 }
 
-async function sendFeishuWebhook(webhookUrl, alerts, env) {
-  const hasDownward = alerts.some(a => a.direction === 'down');
-  const hasVolatile = alerts.some(a => a.direction === 'volatile');
-  const hasHighSeverity = alerts.some(a => a.severity === 'high');
+async function sendFeishuWebhook(webhookUrl, alerts, env, analysis = null) {
+  const content = generateUnifiedAlertContent(alerts, analysis);
   
-  let alertEmoji, alertTitle;
-  if (hasHighSeverity && hasDownward) {
-    alertEmoji = '🚨';
-    alertTitle = '金价大幅下跌预警';
-  } else if (hasDownward) {
-    alertEmoji = '📉';
-    alertTitle = '金价下跌提醒';
-  } else if (hasVolatile) {
-    alertEmoji = '⚡';
-    alertTitle = '金价剧烈波动';
-  } else {
-    alertEmoji = '📈';
-    alertTitle = '金价快速上涨';
+  let markdownContent = `**${content.alertEmoji} ${content.alertTitle}**\n`;
+  markdownContent += `> 时间：${content.timeStr}\n\n`;
+  
+  for (const alert of content.priceAlerts) {
+    markdownContent += `**${alert.name}**\n`;
+    markdownContent += `当前: ${alert.current} ${alert.unit}\n`;
+    markdownContent += `最高: ${alert.max} | 最低: ${alert.min}\n`;
+    markdownContent += `波动: **${alert.range} ${alert.unit}**\n\n`;
   }
   
-  let content = `**${alertEmoji} ${alertTitle}**\n`;
-  content += `> 时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}\n\n`;
-  
-  for (const alert of alerts) {
-    if (alert.type === 'window') {
-      content += `**${alert.name}**\n`;
-      content += `当前: ${alert.current} ${alert.unit}\n`;
-      content += `最高: ${alert.max} | 最低: ${alert.min}\n`;
-      content += `波动: **${alert.range} ${alert.unit}**\n\n`;
-    } else if (alert.type === 'analysis') {
-      content += `**📊 智能分析**\n`;
-      content += `建议: ${alert.recommendation}\n`;
-      content += `买入评分: ${alert.buyScore}\n\n`;
-    }
+  if (content.analysisAlert) {
+    markdownContent += `**📊 智能分析**\n`;
+    markdownContent += `建议: ${content.analysisAlert.recommendation}\n`;
+    markdownContent += `买入评分: ${content.analysisAlert.buyScore}\n\n`;
   }
   
-  content += `[查看详情](https://ustc.dev/kit/gold/)`;
+  if (content.analysis) {
+    markdownContent += `**📈 技术指标**\n`;
+    markdownContent += `RSI: ${content.analysis.domestic.rsi?.toFixed(2) || 'N/A'}\n`;
+    markdownContent += `综合建议: ${content.analysis.overallRecommendation}\n\n`;
+  }
+  
+  markdownContent += `[查看详情](https://ustc.dev/kit/gold/)`;
   
   try {
     const response = await fetch(webhookUrl, {
@@ -1546,11 +1727,11 @@ async function sendFeishuWebhook(webhookUrl, alerts, env) {
         msg_type: 'interactive',
         card: {
           header: {
-            title: { tag: 'plain_text', content: `${alertEmoji} ${alertTitle}` },
-            template: hasDownward ? 'red' : (hasVolatile ? 'orange' : 'green')
+            title: { tag: 'plain_text', content: `${content.alertEmoji} ${content.alertTitle}` },
+            template: content.hasDownward ? 'red' : (content.hasVolatile ? 'orange' : 'green')
           },
           elements: [
-            { tag: 'markdown', content: content }
+            { tag: 'markdown', content: markdownContent }
           ]
         }
       })
@@ -1573,7 +1754,7 @@ async function sendFeishuWebhook(webhookUrl, alerts, env) {
   }
 }
 
-async function sendFeishuAppMessage(appId, appSecret, chatId, alerts) {
+async function sendFeishuAppMessage(appId, appSecret, chatId, alerts, analysis = null) {
   try {
     const tokenResponse = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', {
       method: 'POST',
@@ -1593,32 +1774,33 @@ async function sendFeishuAppMessage(appId, appSecret, chatId, alerts) {
     
     const accessToken = tokenData.tenant_access_token;
     
-    const hasDownward = alerts.some(a => a.direction === 'down');
-    const hasVolatile = alerts.some(a => a.direction === 'volatile');
-    const hasHighSeverity = alerts.some(a => a.severity === 'high');
-    
-    let alertEmoji = hasHighSeverity && hasDownward ? '🚨' : hasDownward ? '📉' : hasVolatile ? '⚡' : '📈';
-    let alertTitle = hasHighSeverity && hasDownward ? '金价大幅下跌预警' : hasDownward ? '金价下跌提醒' : hasVolatile ? '金价剧烈波动' : '金价快速上涨';
-    
-    const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+    const content = generateUnifiedAlertContent(alerts, analysis);
     
     const contentElements = [
-      [{ tag: 'text', text: `时间：${timeStr}` }],
+      [{ tag: 'text', text: `时间：${content.timeStr}` }],
       [{ tag: 'text', text: '' }]
     ];
     
-    for (const alert of alerts) {
-      if (alert.type === 'window') {
-        contentElements.push([{ tag: 'text', text: `${alert.name}` }]);
-        contentElements.push([{ tag: 'text', text: `当前价格: ${alert.current} ${alert.unit}` }]);
-        contentElements.push([{ tag: 'text', text: `最高: ${alert.max} | 最低: ${alert.min}` }]);
-        contentElements.push([{ tag: 'text', text: `波动幅度: ${alert.range} ${alert.unit}` }]);
-        contentElements.push([{ tag: 'text', text: '' }]);
-      } else if (alert.type === 'analysis') {
-        contentElements.push([{ tag: 'text', text: `📊 智能分析建议` }]);
-        contentElements.push([{ tag: 'text', text: `建议: ${alert.recommendation}` }]);
-        contentElements.push([{ tag: 'text', text: '' }]);
-      }
+    for (const alert of content.priceAlerts) {
+      contentElements.push([{ tag: 'text', text: `${alert.name}` }]);
+      contentElements.push([{ tag: 'text', text: `当前价格: ${alert.current} ${alert.unit}` }]);
+      contentElements.push([{ tag: 'text', text: `最高: ${alert.max} | 最低: ${alert.min}` }]);
+      contentElements.push([{ tag: 'text', text: `波动幅度: ${alert.range} ${alert.unit}` }]);
+      contentElements.push([{ tag: 'text', text: '' }]);
+    }
+    
+    if (content.analysisAlert) {
+      contentElements.push([{ tag: 'text', text: `📊 智能分析` }]);
+      contentElements.push([{ tag: 'text', text: `建议: ${content.analysisAlert.recommendation}` }]);
+      contentElements.push([{ tag: 'text', text: `买入评分: ${content.analysisAlert.buyScore}` }]);
+      contentElements.push([{ tag: 'text', text: '' }]);
+    }
+    
+    if (content.analysis) {
+      contentElements.push([{ tag: 'text', text: `📈 技术指标` }]);
+      contentElements.push([{ tag: 'text', text: `RSI: ${content.analysis.domestic.rsi?.toFixed(2) || 'N/A'}` }]);
+      contentElements.push([{ tag: 'text', text: `综合建议: ${content.analysis.overallRecommendation}` }]);
+      contentElements.push([{ tag: 'text', text: '' }]);
     }
     
     contentElements.push([{ tag: 'a', text: '查看详情', href: 'https://ustc.dev/kit/gold/' }]);
@@ -1634,7 +1816,7 @@ async function sendFeishuAppMessage(appId, appSecret, chatId, alerts) {
         msg_type: 'post',
         content: JSON.stringify({
           zh_cn: {
-            title: `${alertEmoji} ${alertTitle}`,
+            title: `${content.alertEmoji} ${content.alertTitle}`,
             content: contentElements
           }
         })
@@ -1656,24 +1838,29 @@ async function sendFeishuAppMessage(appId, appSecret, chatId, alerts) {
   }
 }
 
-async function sendMeoWAlert(alerts, env) {
+async function sendMeoWAlert(alerts, env, analysis = null) {
   const MEOW_USER_ID = env.MEOW_USER_ID || '5bf48882';
   
-  const hasDownward = alerts.some(a => a.direction === 'down');
-  const hasVolatile = alerts.some(a => a.direction === 'volatile');
-  const hasHighSeverity = alerts.some(a => a.severity === 'high');
+  const content = generateUnifiedAlertContent(alerts, analysis);
   
-  let alertEmoji = hasHighSeverity && hasDownward ? '🚨' : hasDownward ? '📉' : hasVolatile ? '⚡' : '📈';
-  let alertTitle = hasHighSeverity && hasDownward ? '金价大幅下跌预警' : hasDownward ? '金价下跌提醒' : hasVolatile ? '金价剧烈波动' : '金价快速上涨';
+  let msgContent = `时间: ${content.timeStr}\n\n`;
   
-  let msgContent = `时间: ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}\n`;
+  for (const alert of content.priceAlerts) {
+    msgContent += `${alert.name}: ${alert.current} ${alert.unit}\n`;
+    msgContent += `  最高: ${alert.max} | 最低: ${alert.min}\n`;
+    msgContent += `  波动: ${alert.range} ${alert.unit}\n\n`;
+  }
   
-  for (const alert of alerts) {
-    if (alert.type === 'window') {
-      msgContent += `${alert.name}: ${alert.current} ${alert.unit} (波动${alert.range})\n`;
-    } else if (alert.type === 'analysis') {
-      msgContent += `智能分析: ${alert.recommendation}\n`;
-    }
+  if (content.analysisAlert) {
+    msgContent += `📊 智能分析\n`;
+    msgContent += `  建议: ${content.analysisAlert.recommendation}\n`;
+    msgContent += `  买入评分: ${content.analysisAlert.buyScore}\n\n`;
+  }
+  
+  if (content.analysis) {
+    msgContent += `📈 技术指标\n`;
+    msgContent += `  RSI: ${content.analysis.domestic.rsi?.toFixed(2) || 'N/A'}\n`;
+    msgContent += `  综合建议: ${content.analysis.overallRecommendation}\n\n`;
   }
   
   const meowUrl = `https://api.chuckfang.com/${MEOW_USER_ID}`;
@@ -1683,7 +1870,7 @@ async function sendMeoWAlert(alerts, env) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        title: `${alertEmoji}${alertTitle}`,
+        title: `${content.alertEmoji} ${content.alertTitle}`,
         msg: msgContent.trim(),
         url: 'https://ustc.dev/kit/gold/'
       })
@@ -1695,12 +1882,12 @@ async function sendMeoWAlert(alerts, env) {
       return { success: true, response: result };
     } else {
       console.error('[Gold Alert] MeoW notification failed:', result.msg);
-      await queueFailedNotification(env, { type: 'meow', alerts, error: result.msg });
+      await queueFailedNotification(env, { type: 'meow', alerts, analysis, error: result.msg });
       return { success: false, error: result.msg };
     }
   } catch (error) {
     console.error('[Gold Alert] MeoW error:', error);
-    await queueFailedNotification(env, { type: 'meow', alerts, error: error.message });
+    await queueFailedNotification(env, { type: 'meow', alerts, analysis, error: error.message });
     return { success: false, error: error.message };
   }
 }
