@@ -584,6 +584,7 @@ export async function scheduledGoldCrawl(env) {
       
       if (result.success) {
         console.log('[Scheduled] Crawl successful');
+        await checkAndSendAlerts(result, env);
         return result;
       } else if (attempt < MAX_RETRIES) {
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
@@ -596,4 +597,284 @@ export async function scheduledGoldCrawl(env) {
   }
   
   return { success: false };
+}
+
+async function checkAndSendAlerts(data, env) {
+  if (!env?.GOLD_PRICE_CACHE) return;
+  
+  try {
+    const historyKey = 'alert_history';
+    const alertHistoryStr = await env.GOLD_PRICE_CACHE.get(historyKey);
+    const alertHistory = alertHistoryStr ? JSON.parse(alertHistoryStr) : [];
+    
+    const alerts = [];
+    
+    if (data.domestic?.price && alertHistory.length >= ALERT_CONFIG.WINDOW_SIZE) {
+      const recentPrices = alertHistory.slice(-ALERT_CONFIG.WINDOW_SIZE).map(h => h.domestic);
+      const currentPrice = data.domestic.price;
+      const maxPrice = Math.max(...recentPrices);
+      const minPrice = Math.min(...recentPrices);
+      const range = maxPrice - minPrice;
+      
+      if (range >= ALERT_CONFIG.DOMESTIC_THRESHOLD) {
+        const direction = currentPrice <= minPrice ? 'down' : (currentPrice >= maxPrice ? 'up' : 'volatile');
+        
+        if (direction === 'down' || (direction === 'up' && ALERT_CONFIG.ALERT_ON_RISE) || direction === 'volatile') {
+          alerts.push({
+            type: 'window',
+            name: '国内金价 (mAuT+D)',
+            current: currentPrice.toFixed(2),
+            max: maxPrice.toFixed(2),
+            min: minPrice.toFixed(2),
+            range: range.toFixed(2),
+            unit: '元/克',
+            direction
+          });
+        }
+      }
+    }
+    
+    if (data.international?.price && alertHistory.length >= ALERT_CONFIG.WINDOW_SIZE) {
+      const recentPrices = alertHistory.slice(-ALERT_CONFIG.WINDOW_SIZE).map(h => h.international);
+      const currentPrice = data.international.price;
+      const maxPrice = Math.max(...recentPrices);
+      const minPrice = Math.min(...recentPrices);
+      const range = maxPrice - minPrice;
+      
+      if (range >= ALERT_CONFIG.INTERNATIONAL_THRESHOLD) {
+        const direction = currentPrice <= minPrice ? 'down' : (currentPrice >= maxPrice ? 'up' : 'volatile');
+        
+        if (direction === 'down' || (direction === 'up' && ALERT_CONFIG.ALERT_ON_RISE) || direction === 'volatile') {
+          alerts.push({
+            type: 'window',
+            name: '国际金价 (XAU)',
+            current: currentPrice.toFixed(2),
+            max: maxPrice.toFixed(2),
+            min: minPrice.toFixed(2),
+            range: range.toFixed(2),
+            unit: '美元/盎司',
+            direction
+          });
+        }
+      }
+    }
+    
+    alertHistory.push({
+      timestamp: Date.now(),
+      domestic: data.domestic?.price || 0,
+      international: data.international?.price || 0
+    });
+    
+    const trimmedHistory = alertHistory.slice(-100);
+    await env.GOLD_PRICE_CACHE.put(historyKey, JSON.stringify(trimmedHistory), { expirationTtl: 86400 });
+    
+    if (alerts.length > 0) {
+      const lastAlertStr = await env.GOLD_PRICE_CACHE.get('last_alert_time');
+      const lastAlertTime = lastAlertStr ? parseInt(lastAlertStr) : 0;
+      const cooldownMs = ALERT_CONFIG.COOLDOWN_MINUTES * 60 * 1000;
+      
+      if (Date.now() - lastAlertTime > cooldownMs) {
+        await sendAlertEmail(alerts, env);
+        await sendFeishuAlert(alerts, env);
+        await env.GOLD_PRICE_CACHE.put('last_alert_time', String(Date.now()), { expirationTtl: 3600 });
+      }
+    }
+  } catch (error) {
+    console.error('[Gold Alert] Check error:', error);
+  }
+}
+
+async function sendAlertEmail(alerts, env) {
+  const RESEND_API_KEY = env.RESEND_API_KEY;
+  if (!RESEND_API_KEY) return;
+  
+  const hasDownward = alerts.some(a => a.direction === 'down');
+  const hasVolatile = alerts.some(a => a.direction === 'volatile');
+  const alertEmoji = hasDownward ? '🚨' : (hasVolatile ? '⚡' : '📈');
+  const alertTitle = hasDownward ? '金价暴跌预警' : (hasVolatile ? '金价剧烈波动' : '金价快速上涨');
+  
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'AGI Era <noreply@agiera.net>',
+        to: ['metanext@foxmail.com'],
+        subject: `${alertEmoji} ${alertTitle} - ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`,
+        html: generateAlertEmail(alerts, alertEmoji, alertTitle)
+      })
+    });
+    console.log('[Gold Alert] Email sent');
+  } catch (error) {
+    console.error('[Gold Alert] Email error:', error);
+  }
+}
+
+function generateAlertEmail(alerts, alertEmoji, alertTitle) {
+  const hasDownward = alerts.some(a => a.direction === 'down');
+  const hasVolatile = alerts.some(a => a.direction === 'volatile');
+  
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0b; color: #fafafa;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: ${hasDownward ? '#ef4444' : (hasVolatile ? '#f59e0b' : '#22c55e')}; margin: 0;">${alertEmoji} ${alertTitle}</h1>
+        <p style="color: #71717a; margin-top: 5px;">实时金价智能监控</p>
+      </div>
+      ${alerts.map(alert => `
+        <div style="background: #18181b; padding: 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;">
+          <h3 style="color: #fafafa; margin: 0 0 16px 0;">${alert.name}</h3>
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+            <tr><td style="padding: 6px 0; color: #71717a;">当前价格</td><td style="padding: 6px 0; color: #fafafa; text-align: right; font-weight: bold;">${alert.current} ${alert.unit}</td></tr>
+            <tr><td style="padding: 6px 0; color: #71717a;">最高价</td><td style="padding: 6px 0; color: #22c55e; text-align: right;">${alert.max} ${alert.unit}</td></tr>
+            <tr><td style="padding: 6px 0; color: #71717a;">最低价</td><td style="padding: 6px 0; color: #ef4444; text-align: right;">${alert.min} ${alert.unit}</td></tr>
+            <tr><td style="padding: 6px 0; color: #71717a;">波动幅度</td><td style="padding: 6px 0; color: ${alert.direction === 'down' ? '#ef4444' : '#22c55e'}; text-align: right; font-weight: bold;">${alert.range} ${alert.unit}</td></tr>
+          </table>
+        </div>
+      `).join('')}
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="https://agiera.net/kit/gold" style="display: inline-block; background: linear-gradient(135deg, #00d4ff, #0099cc); color: #000; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">查看实时金价</a>
+      </div>
+    </div>
+  `;
+}
+
+async function sendFeishuAlert(alerts, env) {
+  const FEISHU_WEBHOOK = env.FEISHU_WEBHOOK;
+  const FEISHU_APP_ID = env.FEISHU_APP_ID;
+  const FEISHU_APP_SECRET = env.FEISHU_APP_SECRET;
+  const FEISHU_CHAT_ID = env.FEISHU_CHAT_ID;
+  
+  if (FEISHU_WEBHOOK) {
+    await sendFeishuWebhook(FEISHU_WEBHOOK, alerts);
+    return;
+  }
+  
+  if (FEISHU_APP_ID && FEISHU_APP_SECRET && FEISHU_CHAT_ID) {
+    await sendFeishuAppMessage(FEISHU_APP_ID, FEISHU_APP_SECRET, FEISHU_CHAT_ID, alerts);
+    return;
+  }
+  
+  console.log('[Gold Alert] No Feishu configuration found');
+}
+
+async function sendFeishuWebhook(webhookUrl, alerts) {
+  const hasDownward = alerts.some(a => a.direction === 'down');
+  const hasVolatile = alerts.some(a => a.direction === 'volatile');
+  const alertEmoji = hasDownward ? '🚨' : (hasVolatile ? '⚡' : '📈');
+  const alertTitle = hasDownward ? '金价暴跌预警' : (hasVolatile ? '金价剧烈波动' : '金价快速上涨');
+  
+  let content = `**${alertEmoji} ${alertTitle}**\n`;
+  content += `> 时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}\n\n`;
+  
+  for (const alert of alerts) {
+    content += `**${alert.name}**\n`;
+    content += `当前: ${alert.current} ${alert.unit}\n`;
+    content += `最高: ${alert.max} | 最低: ${alert.min}\n`;
+    content += `波动: **${alert.range} ${alert.unit}**\n\n`;
+  }
+  
+  content += `[查看详情](https://agiera.net/kit/gold)`;
+  
+  try {
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        msg_type: 'interactive',
+        card: {
+          header: {
+            title: { tag: 'plain_text', content: `${alertEmoji} ${alertTitle}` },
+            template: hasDownward ? 'red' : (hasVolatile ? 'orange' : 'green')
+          },
+          elements: [
+            { tag: 'markdown', content: content }
+          ]
+        }
+      })
+    });
+    
+    const result = await response.json();
+    if (result.code === 0 || result.StatusCode === 0) {
+      console.log('[Gold Alert] Feishu webhook sent successfully');
+    } else {
+      console.error('[Gold Alert] Feishu webhook failed:', JSON.stringify(result));
+    }
+  } catch (error) {
+    console.error('[Gold Alert] Feishu webhook error:', error);
+  }
+}
+
+async function sendFeishuAppMessage(appId, appSecret, chatId, alerts) {
+  try {
+    const tokenResponse = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        app_id: appId,
+        app_secret: appSecret
+      })
+    });
+    
+    const tokenData = await tokenResponse.json();
+    
+    if (tokenData.code !== 0) {
+      console.error('[Gold Alert] Feishu auth failed:', tokenData.msg);
+      return;
+    }
+    
+    const accessToken = tokenData.tenant_access_token;
+    
+    const hasDownward = alerts.some(a => a.direction === 'down');
+    const hasVolatile = alerts.some(a => a.direction === 'volatile');
+    const alertEmoji = hasDownward ? '🚨' : (hasVolatile ? '⚡' : '📈');
+    const alertTitle = hasDownward ? '金价暴跌预警' : (hasVolatile ? '金价剧烈波动' : '金价快速上涨');
+    
+    const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+    
+    const contentElements = [
+      [{ tag: 'text', text: `时间：${timeStr}` }],
+      [{ tag: 'text', text: '' }]
+    ];
+    
+    for (const alert of alerts) {
+      contentElements.push([{ tag: 'text', text: `${alert.name}` }]);
+      contentElements.push([{ tag: 'text', text: `当前价格: ${alert.current} ${alert.unit}` }]);
+      contentElements.push([{ tag: 'text', text: `最高: ${alert.max} | 最低: ${alert.min}` }]);
+      contentElements.push([{ tag: 'text', text: `波动幅度: ${alert.range} ${alert.unit}` }]);
+      contentElements.push([{ tag: 'text', text: '' }]);
+    }
+    
+    contentElements.push([{ tag: 'a', text: '查看详情', href: 'https://agiera.net/kit/gold' }]);
+    
+    const messageResponse = await fetch('https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({
+        receive_id: chatId,
+        msg_type: 'post',
+        content: JSON.stringify({
+          zh_cn: {
+            title: `${alertEmoji} ${alertTitle}`,
+            content: contentElements
+          }
+        })
+      })
+    });
+    
+    const messageData = await messageResponse.json();
+    
+    if (messageData.code === 0) {
+      console.log('[Gold Alert] Feishu app message sent successfully');
+    } else {
+      console.error('[Gold Alert] Feishu message failed:', messageData.msg);
+    }
+  } catch (error) {
+    console.error('[Gold Alert] Feishu app error:', error);
+  }
 }
