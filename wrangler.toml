@@ -10,3 +10,7 @@ id = "301ba411dab34e1993c94ec202448118"
 binding = "DB"
 database_name = "visitor-stats-db"
 database_id = "3b506248-f6ff-4878-ac86-3744bd5de05e"
+
+[[analytics_engine_datasets]]
+binding = "analytic_engine"
+dataset = "analytic_event"
