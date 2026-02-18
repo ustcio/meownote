@@ -736,7 +736,7 @@ function generateAlertEmail(alerts, alertEmoji, alertTitle) {
         </div>
       `).join('')}
       <div style="text-align: center; margin: 24px 0;">
-        <a href="https://agiera.net/kit/gold" style="display: inline-block; background: linear-gradient(135deg, #00d4ff, #0099cc); color: #000; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">查看实时金价</a>
+        <a href="https://meownote.com/kit/gold/" style="display: inline-block; background: linear-gradient(135deg, #00d4ff, #0099cc); color: #000; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">查看实时金价</a>
       </div>
     </div>
   `;
@@ -787,7 +787,7 @@ async function sendFeishuWebhook(webhookUrl, alerts) {
     content += `波动: **${alert.range} ${alert.unit}**\n\n`;
   }
   
-  content += `[查看详情](https://agiera.net/kit/gold)`;
+  content += `[查看详情](https://meownote.com/kit/gold/)`;
   
   console.log('[Gold Alert] Sending to Feishu webhook:', webhookUrl.substring(0, 50) + '...');
   
@@ -866,7 +866,7 @@ async function sendFeishuAppMessage(appId, appSecret, chatId, alerts) {
       contentElements.push([{ tag: 'text', text: '' }]);
     }
     
-    contentElements.push([{ tag: 'a', text: '查看详情', href: 'https://agiera.net/kit/gold' }]);
+    contentElements.push([{ tag: 'a', text: '查看详情', href: 'https://meownote.com/kit/gold/' }]);
     
     const messageResponse = await fetch('https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id', {
       method: 'POST',
@@ -927,7 +927,7 @@ async function sendMeoWAlert(alerts, env) {
       body: JSON.stringify({
         title: `${alertEmoji}${alertTitle}`,
         msg: msgContent.trim(),
-        url: 'https://agiera.net/kit/gold'
+        url: 'https://meownote.com/kit/gold/'
       })
     });
     const result = await response.json();
