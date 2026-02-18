@@ -146,7 +146,7 @@ const dayTabs = [
 
 <script>
   const API_BASE = 'https://api.ustc.dev';
-  const REFRESH_INTERVAL = 30000;
+  const REFRESH_INTERVAL = 10000; // 10秒刷新一次
   const lang = window.location.pathname.startsWith('/zh') ? 'zh' : 'en';
   
   function showLoading() {

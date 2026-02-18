@@ -1225,49 +1225,107 @@ async function handleGoldPrice(request, env, ctx) {
   }
 }
 
+// 内存缓存，用于减少重复爬取
+let realtimeCache = {
+  data: null,
+  timestamp: 0,
+  promise: null
+};
+
+const REALTIME_CACHE_TTL = 8000; // 8秒内存缓存
+
 async function handleTodayGoldPrice(env, ctx, forceRefresh) {
   const today = getBeijingDate();
+  const now = Date.now();
   
+  // 检查内存缓存（用于高频请求去重）
+  if (!forceRefresh && realtimeCache.data && (now - realtimeCache.timestamp) < REALTIME_CACHE_TTL) {
+    console.log('[Gold Price] Returning memory cache, age:', now - realtimeCache.timestamp, 'ms');
+    const history = await getDayHistory(env, today);
+    return jsonResponse({
+      ...realtimeCache.data,
+      history: history,
+      fromCache: true,
+      cacheAge: now - realtimeCache.timestamp,
+      cacheType: 'memory'
+    });
+  }
+  
+  // 如果有正在进行的爬取请求，等待它完成
+  if (realtimeCache.promise && (now - realtimeCache.timestamp) < REALTIME_CACHE_TTL + 2000) {
+    console.log('[Gold Price] Waiting for in-progress crawl...');
+    try {
+      const data = await realtimeCache.promise;
+      const history = await getDayHistory(env, today);
+      return jsonResponse({
+        ...data,
+        history: history,
+        fromCache: true,
+        cacheAge: Date.now() - realtimeCache.timestamp,
+        cacheType: 'memory-shared'
+      });
+    } catch (e) {
+      console.log('[Gold Price] Shared crawl failed, proceeding with new crawl');
+    }
+  }
+  
+  // 检查KV缓存
   if (!forceRefresh && env?.GOLD_PRICE_CACHE) {
     try {
       const cached = await env.GOLD_PRICE_CACHE.get('latest');
       if (cached) {
         const data = JSON.parse(cached);
-        const cacheAge = Date.now() - (data.cachedAt || 0);
+        const cacheAge = now - (data.cachedAt || 0);
         
-        if (cacheAge < 10000) {
-          console.log('[Gold Price] Returning cached data, age:', cacheAge, 'ms');
+        // 如果KV缓存小于8秒，直接返回
+        if (cacheAge < REALTIME_CACHE_TTL) {
+          console.log('[Gold Price] Returning KV cache, age:', cacheAge, 'ms');
+          realtimeCache.data = data;
+          realtimeCache.timestamp = now;
           const history = await getDayHistory(env, today);
           return jsonResponse({
             ...data,
             history: history,
             fromCache: true,
-            cacheAge: cacheAge
+            cacheAge: cacheAge,
+            cacheType: 'kv'
           });
         }
       }
     } catch (e) {
-      console.log('[Gold Price] Cache read failed:', e.message);
+      console.log('[Gold Price] KV cache read failed:', e.message);
     }
   }
   
+  // 实时爬取数据
   console.log('[Gold Price] Fetching real-time data...');
-  const data = await performCrawl(env);
+  
+  // 创建爬取Promise并缓存，防止并发重复爬取
+  const crawlPromise = performCrawl(env);
+  realtimeCache.promise = crawlPromise;
+  
+  const data = await crawlPromise;
   
   if (!data.success) {
+    // 爬取失败，尝试使用过期缓存
     if (env?.GOLD_PRICE_CACHE) {
       try {
         const cached = await env.GOLD_PRICE_CACHE.get('latest');
         if (cached) {
           const cachedData = JSON.parse(cached);
-          const history = await getDayHistory(env, today);
-          return jsonResponse({
-            ...cachedData,
-            history: history,
-            fromCache: true,
-            stale: true,
-            error: data.error
-          });
+          const cacheAge = now - (cachedData.cachedAt || 0);
+          // 允许使用30秒内的过期缓存
+          if (cacheAge < 30000) {
+            console.log('[Gold Price] Using stale cache, age:', cacheAge, 'ms');
+            const history = await getDayHistory(env, today);
+            return jsonResponse({
+              ...cachedData,
+              history: history,
+              fromCache: true,
+              stale: true,
+              error: data.error
+            });
+          }
         }
       } catch (e) {}
     }
@@ -1275,14 +1333,32 @@ async function handleTodayGoldPrice(env, ctx, forceRefresh) {
     return jsonResponse({
       success: false,
       error: data.error || 'Failed to fetch gold price',
-      timestamp: Date.now()
+      timestamp: now
     }, 503);
   }
   
+  // 更新缓存
+  realtimeCache.data = data;
+  realtimeCache.timestamp = now;
+  realtimeCache.promise = null;
+  
+  // 异步存储到KV和D1
   if (env?.GOLD_PRICE_CACHE) {
-    await storeGoldPriceData(env, data);
+    ctx.waitUntil(storeGoldPriceData(env, data));
   }
   
+  // 异步检查价格预警
+  if (data.success && data.domestic?.price) {
+    ctx.waitUntil((async () => {
+      try {
+        await checkAndSendTradingAlerts(data.domestic.price, env);
+      } catch (e) {
+        console.error('[Trading Alerts] Error:', e);
+      }
+    })());
+  }
+  
+  // 异步发送价格变动预警
   if (data.success && data.domestic && data.international) {
     const history = await getDayHistory(env, today);
     ctx.waitUntil(sendGoldPriceAlert(data.domestic, data.international, history, env));
@@ -1292,7 +1368,8 @@ async function handleTodayGoldPrice(env, ctx, forceRefresh) {
   return jsonResponse({
     ...data,
     history: history,
-    fromCache: false
+    fromCache: false,
+    cacheType: 'realtime'
   });
 }
 
