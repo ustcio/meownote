@@ -5103,15 +5103,14 @@ async function scheduledIntelligentGoldAnalysis(env, ctx) {
 
     const aiAnalysis = await performAIAnalysis(env, historyData, tradingParams, marketAnalysis);
 
-    // 只在有活跃预警或持仓时才发送AI持仓建议
+    // 只在有活跃价格预警时才发送AI持仓建议
     const hasActiveAlerts = tradingParams.alerts && tradingParams.alerts.length > 0;
-    const hasHoldings = tradingParams.totalHoldings > 0;
     
-    if (aiAnalysis.hasValue && (hasActiveAlerts || hasHoldings)) {
-      console.log('[Intelligent Analysis] Sending AI advice - alerts:', hasActiveAlerts, 'holdings:', hasHoldings);
+    if (aiAnalysis.hasValue && hasActiveAlerts) {
+      console.log('[Intelligent Analysis] Sending AI advice - active alerts:', tradingParams.alerts.length);
       await sendIntelligentTradingAdvice(env, aiAnalysis, currentPrice, tradingParams);
     } else {
-      console.log('[Intelligent Analysis] Skipping AI advice - no active alerts or holdings');
+      console.log('[Intelligent Analysis] Skipping AI advice - no active alerts');
     }
 
     const profitOpportunities = await calculateProfitOpportunities(currentPrice, tradingParams, marketAnalysis, env);
