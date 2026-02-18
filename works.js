@@ -74,8 +74,13 @@ export default {
         console.log('[Cron] Starting gold price crawl...');
         ctx.waitUntil(scheduledGoldCrawlWithRetry(event, env, ctx));
         break;
+      case '*/5 * * * *': // 每5分钟执行分析
+        console.log('[Cron] Starting gold price analysis...');
+        ctx.waitUntil(scheduledGoldAnalysis(env, ctx));
+        break;
       default:
         console.log('[Cron] Unknown cron pattern:', event.cron);
+        ctx.waitUntil(scheduledGoldCrawlWithRetry(event, env, ctx));
     }
   }
 };
@@ -93,6 +98,7 @@ const ROUTES = {
   '/api/gold/stream': { handler: handleGoldPriceStream },
   '/api/gold/history': { handler: handleGoldHistory },
   '/api/gold/alert/test': { handler: handleGoldAlertTest },
+  '/api/gold/analysis': { handler: handleGoldAnalysis },
   '/api/user/profile': { handler: handleUserProfile },
   '/api/user/password': { handler: handleUserPassword },
   '/stats/visit': { handler: handleStatsVisit },
@@ -1478,7 +1484,6 @@ async function scheduledGoldCrawlWithRetry(event, env, ctx) {
       if (result.success) {
         console.log('[Scheduled] Crawl successful');
         
-        // 存储到 KV 并记录成功
         await storeGoldPriceData(env, result);
         await logCrawlStatus(env, 'success', result);
         
@@ -1490,7 +1495,6 @@ async function scheduledGoldCrawlWithRetry(event, env, ctx) {
           console.log(`[Scheduled] Retrying in ${RETRY_DELAY}ms...`);
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
         } else {
-          // 最后一次尝试失败，记录错误
           await logCrawlStatus(env, 'failed', result);
           throw new Error(result.error || 'Crawl failed after max retries');
         }
@@ -1507,6 +1511,75 @@ async function scheduledGoldCrawlWithRetry(event, env, ctx) {
         throw error;
       }
     }
+  }
+}
+
+async function scheduledGoldAnalysis(env, ctx) {
+  console.log('[Scheduled Analysis] Starting gold price analysis...');
+  
+  try {
+    const result = await performGoldAnalysis(env);
+    
+    if (!result.success) {
+      console.error('[Scheduled Analysis] Analysis failed:', result.error);
+      await logAnalysisStatus(env, 'failed', result);
+      return;
+    }
+    
+    console.log('[Scheduled Analysis] Analysis completed successfully');
+    await logAnalysisStatus(env, 'success', result);
+    
+    const shouldNotify = result.analysis.domestic.signal.isBuySignal || 
+                         result.analysis.international.signal.isBuySignal;
+    
+    if (shouldNotify) {
+      const lastNotifyKey = 'last_analysis_notify';
+      const lastNotify = await env.GOLD_PRICE_CACHE.get(lastNotifyKey);
+      const now = Date.now();
+      const COOLDOWN = 30 * 60 * 1000;
+      
+      if (!lastNotify || (now - parseInt(lastNotify)) > COOLDOWN) {
+        console.log('[Scheduled Analysis] Buy signal detected, sending notifications...');
+        await sendAnalysisNotification(result.analysis, env);
+        await env.GOLD_PRICE_CACHE.put(lastNotifyKey, String(now), { expirationTtl: 3600 });
+      } else {
+        console.log('[Scheduled Analysis] Buy signal detected but in cooldown period');
+      }
+    }
+    
+  } catch (error) {
+    console.error('[Scheduled Analysis] Error:', error);
+    await logAnalysisStatus(env, 'error', { error: error.message });
+  }
+}
+
+async function logAnalysisStatus(env, status, data) {
+  if (!env?.GOLD_PRICE_CACHE) return;
+  
+  const today = getBeijingDate();
+  const logKey = `analysis_log:${today}`;
+  
+  try {
+    let logs = [];
+    const existing = await env.GOLD_PRICE_CACHE.get(logKey);
+    if (existing) logs = JSON.parse(existing);
+    
+    logs.push({
+      timestamp: Date.now(),
+      status,
+      recommendation: data.analysis?.overallRecommendation || null,
+      domesticBuyScore: data.analysis?.domestic?.signal?.buyScore || null,
+      internationalBuyScore: data.analysis?.international?.signal?.buyScore || null,
+      error: data.error || null
+    });
+    
+    if (logs.length > 288) logs = logs.slice(-288);
+    
+    await env.GOLD_PRICE_CACHE.put(logKey, JSON.stringify(logs), {
+      expirationTtl: 86400 * 3
+    });
+  } catch (e) {
+    console.error('[Analysis Log] Failed to save:', e);
   }
 }
 
@@ -3316,6 +3389,386 @@ async function sendMeoWAlert(alerts, env) {
     console.error('[Gold Alert] MeoW error:', error);
     return { success: false, error: error.message };
   }
+}
+
+// ================================================================================
+// 金价智能分析系统
+// ================================================================================
+
+const ANALYSIS_CONFIG = {
+  RSI_PERIOD: 14,
+  RSI_OVERSOLD: 30,
+  RSI_OVERBOUGHT: 70,
+  MACD_FAST: 12,
+  MACD_SLOW: 26,
+  MACD_SIGNAL: 9,
+  BOLLINGER_PERIOD: 20,
+  BOLLINGER_STD: 2,
+  VOLUME_SPIKE_THRESHOLD: 1.5,
+  PRICE_CHANGE_THRESHOLD: 0.5,
+  MIN_DATA_POINTS: 15
+};
+
+function calculateSMA(prices, period) {
+  if (prices.length < period) return null;
+  const slice = prices.slice(-period);
+  return slice.reduce((a, b) => a + b, 0) / period;
+}
+
+function calculateEMA(prices, period) {
+  if (prices.length < period) return null;
+  const multiplier = 2 / (period + 1);
+  let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  for (let i = period; i < prices.length; i++) {
+    ema = (prices[i] - ema) * multiplier + ema;
+  }
+  return ema;
+}
+
+function calculateRSI(prices, period = 14) {
+  if (prices.length < period + 1) return null;
+  
+  let gains = 0, losses = 0;
+  for (let i = prices.length - period; i < prices.length; i++) {
+    const change = prices[i] - prices[i - 1];
+    if (change > 0) gains += change;
+    else losses -= change;
+  }
+  
+  const avgGain = gains / period;
+  const avgLoss = losses / period;
+  
+  if (avgLoss === 0) return 100;
+  const rs = avgGain / avgLoss;
+  return 100 - (100 / (1 + rs));
+}
+
+function calculateMACD(prices) {
+  if (prices.length < 26) return null;
+  
+  const ema12 = calculateEMA(prices, 12);
+  const ema26 = calculateEMA(prices, 26);
+  const macd = ema12 - ema26;
+  
+  const recentPrices = prices.slice(-35);
+  const macdLine = [];
+  const multiplier12 = 2 / 13;
+  const multiplier26 = 2 / 27;
+  
+  let e12 = recentPrices.slice(0, 12).reduce((a, b) => a + b, 0) / 12;
+  let e26 = recentPrices.slice(0, 26).reduce((a, b) => a + b, 0) / 26;
+  
+  for (let i = 26; i < recentPrices.length; i++) {
+    e12 = (recentPrices[i] - e12) * multiplier12 + e12;
+    e26 = (recentPrices[i] - e26) * multiplier26 + e26;
+    macdLine.push(e12 - e26);
+  }
+  
+  const signal = macdLine.length >= 9 ? calculateEMA(macdLine, 9) : macd;
+  const histogram = macd - signal;
+  
+  return { macd, signal, histogram };
+}
+
+function calculateBollingerBands(prices, period = 20, stdDev = 2) {
+  if (prices.length < period) return null;
+  
+  const sma = calculateSMA(prices, period);
+  const slice = prices.slice(-period);
+  const variance = slice.reduce((sum, val) => sum + Math.pow(val - sma, 2), 0) / period;
+  const std = Math.sqrt(variance);
+  
+  return {
+    middle: sma,
+    upper: sma + stdDev * std,
+    lower: sma - stdDev * std,
+    bandwidth: (2 * stdDev * std) / sma * 100
+  };
+}
+
+function analyzePriceTrend(prices) {
+  if (prices.length < 5) return { trend: 'unknown', strength: 0 };
+  
+  const recent = prices.slice(-5);
+  const changes = [];
+  for (let i = 1; i < recent.length; i++) {
+    changes.push((recent[i] - recent[i - 1]) / recent[i - 1] * 100);
+  }
+  
+  const avgChange = changes.reduce((a, b) => a + b, 0) / changes.length;
+  const trend = avgChange > 0.1 ? 'up' : avgChange < -0.1 ? 'down' : 'sideways';
+  
+  return {
+    trend,
+    strength: Math.abs(avgChange),
+    avgChange: avgChange.toFixed(3)
+  };
+}
+
+function detectVolumeSpike(volumes) {
+  if (volumes.length < 10) return { spike: false, ratio: 1 };
+  
+  const recent = volumes[volumes.length - 1];
+  const avg = volumes.slice(-10, -1).reduce((a, b) => a + b, 0) / 9;
+  const ratio = recent / avg;
+  
+  return {
+    spike: ratio > ANALYSIS_CONFIG.VOLUME_SPIKE_THRESHOLD,
+    ratio: ratio.toFixed(2)
+  };
+}
+
+function generateTradingSignal(analysis) {
+  const signals = [];
+  let buyScore = 0;
+  let sellScore = 0;
+  
+  if (analysis.rsi !== null) {
+    if (analysis.rsi < ANALYSIS_CONFIG.RSI_OVERSOLD) {
+      signals.push({ indicator: 'RSI', signal: '超卖', action: 'buy', strength: 2, value: analysis.rsi.toFixed(2) });
+      buyScore += 2;
+    } else if (analysis.rsi > ANALYSIS_CONFIG.RSI_OVERBOUGHT) {
+      signals.push({ indicator: 'RSI', signal: '超买', action: 'sell', strength: 2, value: analysis.rsi.toFixed(2) });
+      sellScore += 2;
+    } else {
+      signals.push({ indicator: 'RSI', signal: '中性', action: 'hold', strength: 0, value: analysis.rsi.toFixed(2) });
+    }
+  }
+  
+  if (analysis.macd) {
+    if (analysis.macd.histogram > 0 && analysis.macd.macd > analysis.macd.signal) {
+      signals.push({ indicator: 'MACD', signal: '金叉', action: 'buy', strength: 1.5, value: analysis.macd.histogram.toFixed(4) });
+      buyScore += 1.5;
+    } else if (analysis.macd.histogram < 0 && analysis.macd.macd < analysis.macd.signal) {
+      signals.push({ indicator: 'MACD', signal: '死叉', action: 'sell', strength: 1.5, value: analysis.macd.histogram.toFixed(4) });
+      sellScore += 1.5;
+    }
+  }
+  
+  if (analysis.bollinger) {
+    const currentPrice = analysis.currentPrice;
+    if (currentPrice <= analysis.bollinger.lower) {
+      signals.push({ indicator: 'Bollinger', signal: '触及下轨', action: 'buy', strength: 1.5, value: currentPrice.toFixed(2) });
+      buyScore += 1.5;
+    } else if (currentPrice >= analysis.bollinger.upper) {
+      signals.push({ indicator: 'Bollinger', signal: '触及上轨', action: 'sell', strength: 1.5, value: currentPrice.toFixed(2) });
+      sellScore += 1.5;
+    }
+  }
+  
+  if (analysis.trend) {
+    if (analysis.trend.trend === 'down' && analysis.trend.strength > 0.2) {
+      signals.push({ indicator: 'Trend', signal: '下跌趋势', action: 'watch', strength: 1, value: analysis.trend.avgChange + '%' });
+      buyScore += 0.5;
+    } else if (analysis.trend.trend === 'up' && analysis.trend.strength > 0.2) {
+      signals.push({ indicator: 'Trend', signal: '上涨趋势', action: 'hold', strength: 1, value: analysis.trend.avgChange + '%' });
+    }
+  }
+  
+  if (analysis.priceChange !== null) {
+    if (analysis.priceChange < -ANALYSIS_CONFIG.PRICE_CHANGE_THRESHOLD) {
+      signals.push({ indicator: 'PriceChange', signal: '价格下跌', action: 'buy', strength: 1, value: analysis.priceChange.toFixed(2) + '%' });
+      buyScore += 1;
+    } else if (analysis.priceChange > ANALYSIS_CONFIG.PRICE_CHANGE_THRESHOLD) {
+      signals.push({ indicator: 'PriceChange', signal: '价格上涨', action: 'watch', strength: 1, value: analysis.priceChange.toFixed(2) + '%' });
+    }
+  }
+  
+  const recommendation = buyScore >= 4 ? '强烈买入' : 
+                         buyScore >= 2.5 ? '建议买入' : 
+                         sellScore >= 4 ? '建议卖出' : 
+                         sellScore >= 2.5 ? '谨慎持有' : '观望';
+  
+  return {
+    signals,
+    buyScore,
+    sellScore,
+    recommendation,
+    isBuySignal: buyScore >= 2.5 && buyScore > sellScore
+  };
+}
+
+async function performGoldAnalysis(env) {
+  console.log('[Gold Analysis] Starting analysis...');
+  
+  const today = getBeijingDate();
+  const historyKey = `history:${today}`;
+  
+  if (!env?.GOLD_PRICE_CACHE) {
+    return { success: false, error: 'KV cache not available' };
+  }
+  
+  const historyData = await env.GOLD_PRICE_CACHE.get(historyKey);
+  if (!historyData) {
+    return { success: false, error: 'No history data available for today' };
+  }
+  
+  const history = JSON.parse(historyData);
+  if (history.length < ANALYSIS_CONFIG.MIN_DATA_POINTS) {
+    return { success: false, error: `Insufficient data points: ${history.length}/${ANALYSIS_CONFIG.MIN_DATA_POINTS}` };
+  }
+  
+  const domesticPrices = history.map(h => h.domestic).filter(p => p > 0);
+  const internationalPrices = history.map(h => h.international).filter(p => p > 0);
+  
+  const latestData = history[history.length - 1];
+  const previousData = history.length > 1 ? history[history.length - 2] : latestData;
+  
+  const domesticAnalysis = {
+    currentPrice: latestData.domestic,
+    previousPrice: previousData.domestic,
+    priceChange: ((latestData.domestic - previousData.domestic) / previousData.domestic * 100),
+    high: Math.max(...domesticPrices),
+    low: Math.min(...domesticPrices),
+    rsi: calculateRSI(domesticPrices),
+    macd: calculateMACD(domesticPrices),
+    bollinger: calculateBollingerBands(domesticPrices),
+    trend: analyzePriceTrend(domesticPrices),
+    sma20: calculateSMA(domesticPrices, 20),
+    ema12: calculateEMA(domesticPrices, 12)
+  };
+  
+  const internationalAnalysis = {
+    currentPrice: latestData.international,
+    previousPrice: previousData.international,
+    priceChange: ((latestData.international - previousData.international) / previousData.international * 100),
+    high: Math.max(...internationalPrices),
+    low: Math.min(...internationalPrices),
+    rsi: calculateRSI(internationalPrices),
+    macd: calculateMACD(internationalPrices),
+    bollinger: calculateBollingerBands(internationalPrices),
+    trend: analyzePriceTrend(internationalPrices)
+  };
+  
+  const domesticSignal = generateTradingSignal(domesticAnalysis);
+  const internationalSignal = generateTradingSignal(internationalAnalysis);
+  
+  const analysisResult = {
+    timestamp: Date.now(),
+    date: today,
+    dataPoints: history.length,
+    domestic: {
+      ...domesticAnalysis,
+      signal: domesticSignal
+    },
+    international: {
+      ...internationalAnalysis,
+      signal: internationalSignal
+    },
+    overallRecommendation: domesticSignal.isBuySignal || internationalSignal.isBuySignal ? '建议关注' : '观望'
+  };
+  
+  console.log('[Gold Analysis] Analysis completed:', JSON.stringify({
+    domesticRSI: domesticAnalysis.rsi,
+    domesticRecommendation: domesticSignal.recommendation,
+    internationalRSI: internationalAnalysis.rsi,
+    internationalRecommendation: internationalSignal.recommendation
+  }));
+  
+  return { success: true, analysis: analysisResult };
+}
+
+async function handleGoldAnalysis(request, env, ctx) {
+  const url = new URL(request.url);
+  const action = url.searchParams.get('action') || 'analyze';
+  const notify = url.searchParams.get('notify') === 'true';
+  
+  console.log('[Gold Analysis API] Action:', action, 'Notify:', notify);
+  
+  if (action === 'analyze') {
+    const result = await performGoldAnalysis(env);
+    
+    if (!result.success) {
+      return jsonResponse({
+        success: false,
+        error: result.error,
+        timestamp: Date.now()
+      }, 400);
+    }
+    
+    if (notify && result.analysis) {
+      const shouldNotify = result.analysis.domestic.signal.isBuySignal || 
+                           result.analysis.international.signal.isBuySignal;
+      
+      if (shouldNotify) {
+        await sendAnalysisNotification(result.analysis, env);
+      }
+    }
+    
+    return jsonResponse({
+      success: true,
+      analysis: result.analysis,
+      timestamp: Date.now()
+    });
+  }
+  
+  if (action === 'signal') {
+    const result = await performGoldAnalysis(env);
+    
+    if (!result.success) {
+      return jsonResponse({ success: false, error: result.error }, 400);
+    }
+    
+    return jsonResponse({
+      success: true,
+      domesticSignal: result.analysis.domestic.signal,
+      internationalSignal: result.analysis.international.signal,
+      recommendation: result.analysis.overallRecommendation,
+      timestamp: Date.now()
+    });
+  }
+  
+  return jsonResponse({ success: false, error: 'Invalid action' }, 400);
+}
+
+async function sendAnalysisNotification(analysis, env) {
+  console.log('[Gold Analysis] Sending notification for buy signal...');
+  
+  const hasDomesticSignal = analysis.domestic.signal.isBuySignal;
+  const hasInternationalSignal = analysis.international.signal.isBuySignal;
+  
+  const title = `📊 金价分析：${analysis.overallRecommendation}`;
+  
+  let content = `时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}\n\n`;
+  
+  if (hasDomesticSignal) {
+    content += `🇨🇳 国内金价 (mAuT+D)\n`;
+    content += `当前：${analysis.domestic.currentPrice.toFixed(2)} 元/克\n`;
+    content += `RSI：${analysis.domestic.rsi?.toFixed(2) || 'N/A'}\n`;
+    content += `建议：${analysis.domestic.signal.recommendation}\n`;
+    content += `买入评分：${analysis.domestic.signal.buyScore.toFixed(1)}\n\n`;
+  }
+  
+  if (hasInternationalSignal) {
+    content += `🌍 国际金价 (XAU)\n`;
+    content += `当前：${analysis.international.currentPrice.toFixed(2)} 美元/盎司\n`;
+    content += `RSI：${analysis.international.rsi?.toFixed(2) || 'N/A'}\n`;
+    content += `建议：${analysis.international.signal.recommendation}\n`;
+    content += `买入评分：${analysis.international.signal.buyScore.toFixed(1)}\n\n`;
+  }
+  
+  content += `📈 技术指标详情\n`;
+  if (analysis.domestic.macd) {
+    content += `MACD：${analysis.domestic.macd.histogram > 0 ? '金叉' : '死叉'}\n`;
+  }
+  if (analysis.domestic.bollinger) {
+    content += `布林带：${analysis.domestic.currentPrice < analysis.domestic.bollinger.lower ? '触及下轨' : analysis.domestic.currentPrice > analysis.domestic.bollinger.upper ? '触及上轨' : '中轨附近'}\n`;
+  }
+  
+  const alerts = [{
+    type: 'analysis',
+    name: '金价智能分析',
+    current: analysis.domestic.currentPrice.toFixed(2),
+    unit: '元/克',
+    direction: 'analysis',
+    content
+  }];
+  
+  await sendFeishuAlert(alerts, env);
+  await sendMeoWAlert(alerts, env);
+  await sendAlertEmail(alerts, env);
+  
+  console.log('[Gold Analysis] Notification sent successfully');
 }
 
 // 工具函数 - 密码哈希（增强安全）

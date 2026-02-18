@@ -17,3 +17,6 @@ database_id = "3b506248-f6ff-4878-ac86-3744bd5de05e"
 [[analytics_engine_datasets]]
 binding = "analytic_engine"
 dataset = "analytic_event"
+
+[triggers]
+crons = ["*/1 * * * *", "*/5 * * * *"]
