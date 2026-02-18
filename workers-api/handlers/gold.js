@@ -676,6 +676,7 @@ async function checkAndSendAlerts(data, env) {
       if (Date.now() - lastAlertTime > cooldownMs) {
         await sendAlertEmail(alerts, env);
         await sendFeishuAlert(alerts, env);
+        await sendMeoWAlert(alerts, env);
         await env.GOLD_PRICE_CACHE.put('last_alert_time', String(Date.now()), { expirationTtl: 3600 });
       }
     }
@@ -901,6 +902,50 @@ async function sendFeishuAppMessage(appId, appSecret, chatId, alerts) {
   }
 }
 
+async function sendMeoWAlert(alerts, env) {
+  const MEOW_USER_ID = env.MEOW_USER_ID || '5bf48882';
+  
+  const hasDownward = alerts.some(a => a.direction === 'down');
+  const hasVolatile = alerts.some(a => a.direction === 'volatile');
+  const alertEmoji = hasDownward ? '🚨' : (hasVolatile ? '⚡' : '📈');
+  const alertTitle = hasDownward ? '金价暴跌预警' : (hasVolatile ? '金价剧烈波动' : '金价快速上涨');
+  
+  let msgContent = `时间: ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}\n`;
+  
+  for (const alert of alerts) {
+    msgContent += `${alert.name}: ${alert.current} ${alert.unit} (波动${alert.range})\n`;
+  }
+  
+  const meowUrl = `https://api.chuckfang.com/${MEOW_USER_ID}`;
+  
+  console.log('[Gold Alert] Sending to MeoW...');
+  
+  try {
+    const response = await fetch(meowUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: `${alertEmoji}${alertTitle}`,
+        msg: msgContent.trim(),
+        url: 'https://agiera.net/kit/gold'
+      })
+    });
+    const result = await response.json();
+    console.log('[Gold Alert] MeoW response:', JSON.stringify(result));
+    
+    if (result.status === 200) {
+      console.log('[Gold Alert] MeoW notification sent successfully');
+      return { success: true, response: result };
+    } else {
+      console.error('[Gold Alert] MeoW notification failed:', result.msg);
+      return { success: false, error: result.msg };
+    }
+  } catch (error) {
+    console.error('[Gold Alert] MeoW error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 export async function handleGoldAlertTest(request, env, ctx) {
   const url = new URL(request.url);
   const type = url.searchParams.get('type') || 'feishu';
@@ -933,7 +978,8 @@ export async function handleGoldAlertTest(request, env, ctx) {
     hasAppId: !!env.FEISHU_APP_ID,
     hasAppSecret: !!env.FEISHU_APP_SECRET,
     hasChatId: !!env.FEISHU_CHAT_ID,
-    hasEmailKey: !!env.RESEND_API_KEY
+    hasEmailKey: !!env.RESEND_API_KEY,
+    hasMeoWUserId: !!(env.MEOW_USER_ID || '5bf48882')
   };
   
   try {
@@ -952,14 +998,26 @@ export async function handleGoldAlertTest(request, env, ctx) {
       });
     }
     
+    if (type === 'meow') {
+      const result = await sendMeoWAlert(testAlerts, env);
+      return jsonResponse({ 
+        success: result.success, 
+        message: 'MeoW alert test completed',
+        config,
+        meowResult: result
+      });
+    }
+    
     if (type === 'all') {
       await sendAlertEmail(testAlerts, env);
       const feishuResult = await sendFeishuAlert(testAlerts, env);
+      const meowResult = await sendMeoWAlert(testAlerts, env);
       return jsonResponse({ 
         success: true, 
         message: 'All alerts test sent',
         config,
-        feishuResult
+        feishuResult,
+        meowResult
       });
     }
     
