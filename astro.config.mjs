@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 import path from 'path';
 
 export default defineConfig({
-  site: 'https://meow-note.com',
+  site: 'https://ustc.dev',
   compressHTML: true,
   build: {
     inlineStylesheets: 'auto',
