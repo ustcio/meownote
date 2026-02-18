@@ -1219,15 +1219,32 @@ import Layout from '@layouts/Layout.astro';
   }
 
   async function apiRequest(endpoint, options = {}) {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`,
-        ...options.headers
+    try {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+          ...options.headers
+        }
+      });
+      
+      if (!response.ok) {
+        console.error('API Error:', response.status, response.statusText);
+        return { success: false, error: `HTTP Error: ${response.status}` };
       }
-    });
-    return response.json();
+      
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        console.error('JSON Parse Error:', text);
+        return { success: false, error: 'Invalid JSON response' };
+      }
+    } catch (error) {
+      console.error('API Request Error:', error);
+      return { success: false, error: error.message || 'Network error' };
+    }
   }
 
   async function checkAuth() {
@@ -1525,19 +1542,25 @@ import Layout from '@layouts/Layout.astro';
 
     try {
       const formData = new FormData(loginForm as HTMLFormElement);
+      const username = formData.get('username') as string;
+      const password = formData.get('password') as string;
+      
+      console.log('Attempting login with username:', username);
+      
       const result = await apiRequest('/api/trading/login', {
         method: 'POST',
-        body: JSON.stringify({
-          username: formData.get('username'),
-          password: formData.get('password')
-        })
+        body: JSON.stringify({ username, password })
       });
+
+      console.log('Login result:', result);
 
       if (result.success) {
         authToken = result.token;
         localStorage.setItem('trading_token', authToken);
+        console.log('Login successful, showing dashboard');
         showDashboard();
       } else {
+        console.error('Login failed:', result.error);
         alert(result.error || '登录失败');
       }
     } catch (error) {
