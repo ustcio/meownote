@@ -1261,7 +1261,12 @@ async function getDayHistory(env, date) {
     
     const labels = history.map(h => {
       const date = new Date(h.timestamp);
-      return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString('zh-CN', { 
+        timeZone: 'Asia/Shanghai',
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false
+      });
     });
     
     return {
