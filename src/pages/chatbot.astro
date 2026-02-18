@@ -201,6 +201,28 @@ const t = useTranslations(lang);
                   </svg>
                 </button>
               </div>
+              
+              <div class="model-group">
+                <div class="model-group-label">Llama (Cloudflare)</div>
+                <button class="model-option" data-model="llama-3-8b" data-name="Llama 3 8B" role="option" aria-selected="false" type="button">
+                  <div class="model-option-info">
+                    <span class="model-option-name">Llama 3 8B</span>
+                    <span class="model-option-desc">{lang === 'zh' ? '边缘推理' : 'Edge Inference'}</span>
+                  </div>
+                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </button>
+                <button class="model-option" data-model="llama-3.1-8b" data-name="Llama 3.1 8B" role="option" aria-selected="false" type="button">
+                  <div class="model-option-info">
+                    <span class="model-option-name">Llama 3.1 8B</span>
+                    <span class="model-option-desc">{lang === 'zh' ? '最新版本' : 'Latest Version'}</span>
+                  </div>
+                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </button>
+              </div>
             </div>
             
             <!-- Input Wrapper -->

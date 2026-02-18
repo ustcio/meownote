@@ -211,6 +211,19 @@ const MODEL_CONFIG = {
     endpoint: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
     maxTokens: 2000,
     temperature: 0.7
+  },
+  // Cloudflare Workers AI - Llama 3
+  'llama-3-8b': {
+    provider: 'workers-ai',
+    model: '@cf/meta/llama-3-8b-instruct',
+    maxTokens: 2000,
+    temperature: 0.7
+  },
+  'llama-3.1-8b': {
+    provider: 'workers-ai',
+    model: '@cf/meta/llama-3.1-8b-instruct',
+    maxTokens: 2000,
+    temperature: 0.7
   }
 };
 
@@ -253,6 +266,11 @@ async function handleChat(request, env, ctx) {
   if (!config) {
     console.error('[Chat API] Invalid model selected:', model);
     return jsonResponse({ success: false, message: 'Invalid model selected' }, 400);
+  }
+
+  // Handle Workers AI models
+  if (config.provider === 'workers-ai') {
+    return await handleWorkersAIChat(env, config, message, history, model);
   }
 
   const apiKey = config.provider === 'qwen' ? env.DASHSCOPE_API_KEY : env.DOUBAO_API_KEY;
@@ -361,6 +379,66 @@ async function handleChat(request, env, ctx) {
     return jsonResponse({
       success: false,
       message: 'Failed to get AI response: ' + error.message
+    }, 500);
+  }
+}
+
+async function handleWorkersAIChat(env, config, message, history, model) {
+  const requestStartTime = Date.now();
+  console.log('[Workers AI] Using model:', config.model);
+  
+  try {
+    const optimizedHistory = history
+      .slice(-5)
+      .map(h => ({
+        role: h.role || 'user',
+        content: h.content?.slice(0, 1000) || ''
+      }));
+
+    const messages = [
+      { role: 'system', content: CHAT_SYSTEM_PROMPT },
+      ...optimizedHistory,
+      { role: 'user', content: sanitizeInput(message) }
+    ];
+
+    const aiStartTime = Date.now();
+    
+    const result = await env.AI.run(config.model, {
+      messages,
+      max_tokens: config.maxTokens,
+      temperature: config.temperature
+    });
+
+    const aiLatency = Date.now() - aiStartTime;
+    const totalLatency = Date.now() - requestStartTime;
+    
+    console.log('[Workers AI] Response received, latency:', aiLatency + 'ms');
+    console.log('[Workers AI] Result:', JSON.stringify(result).substring(0, 200));
+
+    if (result.response) {
+      return jsonResponse({
+        success: true,
+        reply: result.response,
+        model: model,
+        usage: result.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+        latency: {
+          provider: aiLatency,
+          total: totalLatency
+        }
+      });
+    }
+
+    console.error('[Workers AI] Unexpected response:', result);
+    return jsonResponse({
+      success: false,
+      message: 'Unexpected response from Workers AI'
+    }, 500);
+
+  } catch (error) {
+    console.error('[Workers AI] Error:', error);
+    return jsonResponse({
+      success: false,
+      message: 'Workers AI error: ' + error.message
     }, 500);
   }
 }

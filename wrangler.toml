@@ -2,6 +2,9 @@ name = "visitor-stats"
 main = "works.js"
 compatibility_date = "2024-01-01"
 
+[ai]
+binding = "AI"
+
 [[kv_namespaces]]
 binding = "GOLD_PRICE_CACHE"
 id = "301ba411dab34e1993c94ec202448118"
