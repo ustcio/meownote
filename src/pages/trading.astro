@@ -313,21 +313,114 @@ const API_BASE = 'https://api.ustc.dev';
             <span>{lang === 'zh' ? '增加记录' : 'Add Record'}</span>
           </button>
         </div>
-        <div class="filter-controls">
-          <div class="filter-row">
-            <select id="filter-type">
-              <option value="">{lang === 'zh' ? '全部类型' : 'All Types'}</option>
-              <option value="buy">{lang === 'zh' ? '买入' : 'Buy'}</option>
-              <option value="sell">{lang === 'zh' ? '卖出' : 'Sell'}</option>
-            </select>
-            <select id="filter-sort">
+        <div class="filter-bar">
+          <div class="filter-segment-control" id="filter-type-segment">
+            <button class="segment-btn active" data-value="">{lang === 'zh' ? '全部' : 'All'}</button>
+            <button class="segment-btn" data-value="buy">{lang === 'zh' ? '买入' : 'Buy'}</button>
+            <button class="segment-btn" data-value="sell">{lang === 'zh' ? '卖出' : 'Sell'}</button>
+          </div>
+          <div class="filter-sort-wrapper">
+            <span class="sort-label">{lang === 'zh' ? '排序' : 'Sort'}</span>
+            <select id="filter-sort" class="sort-select">
               <option value="desc">{lang === 'zh' ? '最新优先' : 'Newest First'}</option>
               <option value="asc">{lang === 'zh' ? '最早优先' : 'Oldest First'}</option>
             </select>
           </div>
         </div>
-        <div class="transactions-cards-container" id="transactions-list"></div>
+        <div class="transactions-table-wrapper" id="transactions-table-wrapper">
+          <div class="transactions-table-scroll">
+            <table class="transactions-table">
+              <thead>
+                <tr>
+                  <th class="col-seq">{lang === 'zh' ? '序号' : '#'}</th>
+                  <th class="col-time">{lang === 'zh' ? '时间' : 'Time'}</th>
+                  <th class="col-buy-price">{lang === 'zh' ? '买入价格' : 'Buy Price'}</th>
+                  <th class="col-buy-qty">{lang === 'zh' ? '买入数量' : 'Buy Qty'}</th>
+                  <th class="col-sell-price">{lang === 'zh' ? '卖出价格' : 'Sell Price'}</th>
+                  <th class="col-sell-qty">{lang === 'zh' ? '卖出数量' : 'Sell Qty'}</th>
+                  <th class="col-profit">{lang === 'zh' ? '收益金额' : 'Profit'}</th>
+                  <th class="col-platform">{lang === 'zh' ? '平台' : 'Platform'}</th>
+                  <th class="col-actions">{lang === 'zh' ? '操作' : 'Actions'}</th>
+                </tr>
+              </thead>
+              <tbody id="transactions-list"></tbody>
+            </table>
+          </div>
+        </div>
         <div class="pagination" id="pagination"></div>
+      </div>
+      
+      <div class="delete-confirm-modal hidden" id="delete-confirm-modal">
+        <div class="delete-modal-backdrop" id="delete-modal-backdrop"></div>
+        <div class="delete-modal-content">
+          <div class="delete-modal-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h3 class="delete-modal-title">{lang === 'zh' ? '确认删除' : 'Confirm Delete'}</h3>
+          <p class="delete-modal-desc">{lang === 'zh' ? '确定要删除这条交易记录吗？此操作无法撤销。' : 'Are you sure you want to delete this transaction? This action cannot be undone.'}</p>
+          <div class="delete-modal-actions">
+            <button class="delete-modal-btn cancel" id="delete-cancel-btn">{lang === 'zh' ? '取消' : 'Cancel'}</button>
+            <button class="delete-modal-btn confirm" id="delete-confirm-btn">{lang === 'zh' ? '删除' : 'Delete'}</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="edit-transaction-modal hidden" id="edit-transaction-modal">
+        <div class="edit-modal-backdrop" id="edit-modal-backdrop"></div>
+        <div class="edit-modal-content">
+          <div class="edit-modal-header">
+            <h3>{lang === 'zh' ? '编辑交易记录' : 'Edit Transaction'}</h3>
+            <button class="modal-close" id="edit-modal-close">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <form id="edit-transaction-form">
+            <input type="hidden" id="edit-tx-id" />
+            <input type="hidden" id="edit-tx-type" />
+            <div class="edit-form-grid">
+              <div class="edit-form-group">
+                <label>{lang === 'zh' ? '交易时间' : 'Transaction Time'}</label>
+                <input type="datetime-local" id="edit-tx-date" required />
+              </div>
+              <div class="edit-form-group">
+                <label>{lang === 'zh' ? '买入价格 (元/克)' : 'Buy Price (¥/g)'}</label>
+                <input type="number" id="edit-tx-buy-price" step="0.01" min="0" placeholder="0.00" />
+              </div>
+              <div class="edit-form-group">
+                <label>{lang === 'zh' ? '买入数量 (克)' : 'Buy Quantity (g)'}</label>
+                <input type="number" id="edit-tx-buy-qty" step="0.001" min="0" placeholder="0.000" />
+              </div>
+              <div class="edit-form-group">
+                <label>{lang === 'zh' ? '卖出价格 (元/克)' : 'Sell Price (¥/g)'}</label>
+                <input type="number" id="edit-tx-sell-price" step="0.01" min="0" placeholder="0.00" />
+              </div>
+              <div class="edit-form-group">
+                <label>{lang === 'zh' ? '卖出数量 (克)' : 'Sell Quantity (g)'}</label>
+                <input type="number" id="edit-tx-sell-qty" step="0.001" min="0" placeholder="0.000" />
+              </div>
+              <div class="edit-form-group">
+                <label>{lang === 'zh' ? '交易平台' : 'Platform'}</label>
+                <input type="text" id="edit-tx-platform" placeholder={lang === 'zh' ? '例如：银行纸黄金' : 'e.g., Bank Paper Gold'} />
+              </div>
+            </div>
+            <div class="edit-form-actions">
+              <button type="button" class="edit-form-btn cancel" id="edit-cancel-btn">{lang === 'zh' ? '取消' : 'Cancel'}</button>
+              <button type="submit" class="edit-form-btn save">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                {lang === 'zh' ? '保存更改' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
 
       <div class="add-transaction-modal hidden" id="add-transaction-modal">
@@ -1185,23 +1278,66 @@ const API_BASE = 'https://api.ustc.dev';
     transform: translateY(0);
   }
 
-  .filter-controls {
+  .filter-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-5);
+    padding: var(--space-4);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-primary);
+    gap: var(--space-4);
     flex-wrap: wrap;
-    gap: var(--space-3);
   }
 
-  .filter-row {
-    display: flex;
-    gap: var(--space-3);
+  .filter-segment-control {
+    display: inline-flex;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+    padding: 3px;
+    gap: 2px;
   }
 
-  .filter-row select {
+  .segment-btn {
     padding: var(--space-2) var(--space-4);
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    white-space: nowrap;
+  }
+
+  .segment-btn:hover {
+    color: var(--text-primary);
+  }
+
+  .segment-btn.active {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .filter-sort-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .sort-label {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    font-weight: var(--font-medium);
+  }
+
+  .sort-select {
+    padding: var(--space-2) var(--space-4);
+    padding-right: var(--space-8);
+    background: var(--bg-tertiary);
     border: 1px solid var(--border-primary);
     border-radius: var(--radius-lg);
     color: var(--text-primary);
@@ -1209,24 +1345,519 @@ const API_BASE = 'https://api.ustc.dev';
     font-weight: var(--font-medium);
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-default);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
   }
 
-  .filter-row select:hover {
+  .sort-select:hover {
     border-color: var(--color-primary);
-    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.15);
   }
 
-  .filter-row select:focus {
+  .sort-select:focus {
     outline: none;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
   }
 
-  .transactions-cards-container {
+  .transactions-table-wrapper {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-primary);
+    overflow: hidden;
+  }
+
+  .transactions-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .transactions-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .transactions-table thead {
+    background: var(--bg-tertiary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .transactions-table th {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-primary);
+    white-space: nowrap;
+  }
+
+  .transactions-table th.col-seq { width: 60px; text-align: center; }
+  .transactions-table th.col-time { width: 130px; }
+  .transactions-table th.col-buy-price { width: 100px; }
+  .transactions-table th.col-buy-qty { width: 90px; }
+  .transactions-table th.col-sell-price { width: 100px; }
+  .transactions-table th.col-sell-qty { width: 90px; }
+  .transactions-table th.col-profit { width: 100px; }
+  .transactions-table th.col-platform { width: 120px; }
+  .transactions-table th.col-actions { width: 110px; text-align: center; }
+
+  .transactions-table tbody tr {
+    transition: background-color var(--duration-fast) var(--ease-default);
+  }
+
+  .transactions-table tbody tr:hover {
+    background: var(--bg-tertiary);
+  }
+
+  .transactions-table tbody tr.buy-row {
+    border-left: 3px solid #30d158;
+  }
+
+  .transactions-table tbody tr.sell-row {
+    border-left: 3px solid #ff375f;
+  }
+
+  .transactions-table td {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-primary);
+    vertical-align: middle;
+  }
+
+  .transactions-table td.col-seq {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-weight: var(--font-medium);
+  }
+
+  .transactions-table td.col-time {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+
+  .transactions-table td.col-buy-price,
+  .transactions-table td.col-sell-price {
+    font-family: var(--font-number);
+    font-weight: var(--font-medium);
+  }
+
+  .transactions-table td.col-buy-qty,
+  .transactions-table td.col-sell-qty {
+    font-family: var(--font-number);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+
+  .transactions-table td.col-profit {
+    font-family: var(--font-number);
+    font-weight: var(--font-semibold);
+  }
+
+  .transactions-table td.col-profit.positive {
+    color: #30d158;
+  }
+
+  .transactions-table td.col-profit.negative {
+    color: #ff375f;
+  }
+
+  .transactions-table td.col-profit.neutral {
+    color: var(--text-tertiary);
+  }
+
+  .transactions-table td.col-platform {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .transactions-table td.col-actions {
+    text-align: center;
+  }
+
+  .tx-row-actions {
+    display: inline-flex;
+    gap: var(--space-1);
+  }
+
+  .tx-row-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .tx-row-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  .tx-row-btn.edit-btn:hover {
+    background: rgba(100, 210, 255, 0.15);
+    color: #64d2ff;
+  }
+
+  .tx-row-btn.delete-btn:hover {
+    background: rgba(255, 55, 95, 0.15);
+    color: #ff375f;
+  }
+
+  .tx-row-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .tx-type-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+  }
+
+  .tx-type-indicator.buy {
+    background: rgba(48, 209, 88, 0.12);
+    color: #30d158;
+  }
+
+  .tx-type-indicator.sell {
+    background: rgba(255, 55, 95, 0.12);
+    color: #ff375f;
+  }
+
+  .tx-empty-table {
+    padding: var(--space-12) var(--space-8);
+    text-align: center;
+  }
+
+  .tx-empty-table-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-4);
+    color: var(--text-quaternary);
+    opacity: 0.5;
+  }
+
+  .tx-empty-table-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+  }
+
+  .tx-empty-table-desc {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+  }
+
+  .tx-loading-row td {
+    padding: var(--space-4);
+  }
+
+  .tx-skeleton-row {
+    height: 48px;
+    background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .delete-confirm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    padding: var(--space-4);
+  }
+
+  .delete-confirm-modal.hidden {
+    display: none;
+  }
+
+  .delete-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    animation: fadeIn var(--duration-fast) var(--ease-default);
+  }
+
+  .delete-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 340px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-8);
+    text-align: center;
+    box-shadow: var(--shadow-2xl);
+    animation: modalSlideIn var(--duration-normal) var(--ease-out);
+  }
+
+  .delete-modal-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 55, 95, 0.1);
+    border-radius: 50%;
+    color: #ff375f;
+  }
+
+  .delete-modal-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+  }
+
+  .delete-modal-desc {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: var(--space-6);
+  }
+
+  .delete-modal-actions {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .delete-modal-btn {
+    flex: 1;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    border: none;
+  }
+
+  .delete-modal-btn.cancel {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .delete-modal-btn.cancel:hover {
+    background: var(--bg-secondary);
+  }
+
+  .delete-modal-btn.confirm {
+    background: #ff375f;
+    color: white;
+  }
+
+  .delete-modal-btn.confirm:hover {
+    background: #ff453a;
+    transform: translateY(-1px);
+  }
+
+  .edit-transaction-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    padding: var(--space-4);
+  }
+
+  .edit-transaction-modal.hidden {
+    display: none;
+  }
+
+  .edit-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    animation: fadeIn var(--duration-fast) var(--ease-default);
+  }
+
+  .edit-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-2xl);
+    animation: modalSlideIn var(--duration-normal) var(--ease-out);
+    overflow: hidden;
+  }
+
+  .edit-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-5) var(--space-6);
+    border-bottom: 1px solid var(--border-primary);
+  }
+
+  .edit-modal-header h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  #edit-transaction-form {
+    padding: var(--space-6);
+  }
+
+  .edit-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+
+  .edit-form-group {
     display: flex;
     flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .edit-form-group label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+  }
+
+  .edit-form-group input {
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .edit-form-group input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+  }
+
+  .edit-form-actions {
+    display: flex;
     gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-primary);
+  }
+
+  .edit-form-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    border: none;
+  }
+
+  .edit-form-btn.cancel {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .edit-form-btn.cancel:hover {
+    background: var(--bg-secondary);
+  }
+
+  .edit-form-btn.save {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+  }
+
+  .edit-form-btn.save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.4);
+  }
+
+  @media (max-width: 768px) {
+    .filter-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .filter-segment-control {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .filter-sort-wrapper {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .edit-form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .transactions-table th,
+    .transactions-table td {
+      padding: var(--space-2) var(--space-3);
+    }
+
+    .segment-btn {
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--text-xs);
+    }
   }
 
   .tx-skeleton {
@@ -3078,59 +3709,27 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   let totalTransactionCount = 0;
+  let currentFilterType = '';
+  let pendingDeleteId = null;
 
   async function loadTransactions(page = 1) {
     const list = document.getElementById('transactions-list');
     const pagination = document.getElementById('pagination');
 
     if (list) {
-      list.innerHTML = `
-        <div class="tx-skeleton">
-          <div class="tx-skeleton-header">
-            <div class="tx-skeleton-badge"></div>
-            <div class="tx-skeleton-status"></div>
-          </div>
-          <div class="tx-skeleton-grid">
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-          </div>
-        </div>
-        <div class="tx-skeleton">
-          <div class="tx-skeleton-header">
-            <div class="tx-skeleton-badge"></div>
-            <div class="tx-skeleton-status"></div>
-          </div>
-          <div class="tx-skeleton-grid">
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-          </div>
-        </div>
-        <div class="tx-skeleton">
-          <div class="tx-skeleton-header">
-            <div class="tx-skeleton-badge"></div>
-            <div class="tx-skeleton-status"></div>
-          </div>
-          <div class="tx-skeleton-grid">
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-          </div>
-        </div>
-      `;
+      list.innerHTML = Array(5).fill(0).map(() => `
+        <tr class="tx-loading-row">
+          <td colspan="9"><div class="tx-skeleton-row"></div></td>
+        </tr>
+      `).join('');
     }
     if (pagination) pagination.innerHTML = '';
 
     try {
-      const type = document.getElementById('filter-type')?.value || '';
       const sort = document.getElementById('filter-sort')?.value || 'desc';
 
       let url = `/api/trading/transactions?page=${page}&limit=10&sortOrder=${sort}`;
-      if (type) url += `&type=${type}`;
+      if (currentFilterType) url += `&type=${currentFilterType}`;
 
       const result = await apiRequest(url);
       if (result.success) {
@@ -3142,35 +3741,40 @@ const API_BASE = 'https://api.ustc.dev';
         const retryMsg = lang === 'zh' ? '重试' : 'Retry';
         if (list) {
           list.innerHTML = `
-            <div class="tx-empty-state">
-              <svg class="tx-empty-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
-              <div class="tx-empty-title">${errorMsg}</div>
-              <div class="tx-empty-desc">${result.error || (lang === 'zh' ? '未知错误' : 'Unknown error')}</div>
-              <button onclick="loadTransactions(${page})" style="margin-top: var(--space-4); padding: var(--space-2) var(--space-4); background: var(--color-primary); color: white; border-radius: var(--radius-lg); border: none; cursor: pointer;">${retryMsg}</button>
-            </div>
+            <tr>
+              <td colspan="9">
+                <div class="tx-empty-table">
+                  <svg class="tx-empty-table-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                  <div class="tx-empty-table-title">${errorMsg}</div>
+                  <div class="tx-empty-table-desc">${result.error || (lang === 'zh' ? '未知错误' : 'Unknown error')}</div>
+                </div>
+              </td>
+            </tr>
           `;
         }
       }
     } catch (error) {
       console.error('Failed to load transactions:', error);
       const errorMsg = lang === 'zh' ? '网络错误' : 'Network Error';
-      const retryMsg = lang === 'zh' ? '重试' : 'Retry';
       if (list) {
         list.innerHTML = `
-          <div class="tx-empty-state">
-            <svg class="tx-empty-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <div class="tx-empty-title">${errorMsg}</div>
-            <div class="tx-empty-desc">${lang === 'zh' ? '请检查连接后重试' : 'Please check connection and retry'}</div>
-            <button onclick="loadTransactions(${page})" style="margin-top: var(--space-4); padding: var(--space-2) var(--space-4); background: var(--color-primary); color: white; border-radius: var(--radius-lg); border: none; cursor: pointer;">${retryMsg}</button>
-          </div>
+          <tr>
+            <td colspan="9">
+              <div class="tx-empty-table">
+                <svg class="tx-empty-table-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <div class="tx-empty-table-title">${errorMsg}</div>
+                <div class="tx-empty-table-desc">${lang === 'zh' ? '请检查连接后重试' : 'Please check connection and retry'}</div>
+              </div>
+            </td>
+          </tr>
         `;
       }
     }
@@ -3182,26 +3786,13 @@ const API_BASE = 'https://api.ustc.dev';
     return `#${String(globalIndex).padStart(3, '0')}`;
   }
 
-  function getTransactionStatus(t) {
-    if (t.type === 'sell') {
-      return 'closed';
-    }
-    if (t.remaining_quantity !== undefined && t.remaining_quantity < t.quantity && t.remaining_quantity > 0) {
-      return 'partial';
-    }
-    if (t.remaining_quantity === 0) {
-      return 'closed';
-    }
-    return 'open';
-  }
-
-  function getStatusLabel(status) {
-    const labels = {
-      open: lang === 'zh' ? '持仓中' : 'Open',
-      partial: lang === 'zh' ? '部分卖出' : 'Partial',
-      closed: lang === 'zh' ? '已平仓' : 'Closed'
-    };
-    return labels[status] || status;
+  function formatTableDate(dateStr) {
+    const date = new Date(dateStr);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    return `${month}/${day} ${hour}:${min}`;
   }
 
   function renderTransactions(transactions, page = 1) {
@@ -3210,16 +3801,20 @@ const API_BASE = 'https://api.ustc.dev';
 
     if (!transactions?.length) {
       list.innerHTML = `
-        <div class="tx-empty-state">
-          <svg class="tx-empty-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-          </svg>
-          <div class="tx-empty-title">${lang === 'zh' ? '暂无交易记录' : 'No Transactions'}</div>
-          <div class="tx-empty-desc">${lang === 'zh' ? '开始记录您的第一笔交易吧' : 'Start recording your first trade'}</div>
-        </div>
+        <tr>
+          <td colspan="9">
+            <div class="tx-empty-table">
+              <svg class="tx-empty-table-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              <div class="tx-empty-table-title">${lang === 'zh' ? '暂无交易记录' : 'No Transactions'}</div>
+              <div class="tx-empty-table-desc">${lang === 'zh' ? '开始记录您的第一笔交易吧' : 'Start recording your first trade'}</div>
+            </div>
+          </td>
+        </tr>
       `;
       return;
     }
@@ -3229,281 +3824,182 @@ const API_BASE = 'https://api.ustc.dev';
       const profitValue = parseFloat(t.profit) || 0;
       const profitClass = profitValue > 0 ? 'positive' : profitValue < 0 ? 'negative' : 'neutral';
       const sequence = calculateSequence(index, page);
-      const status = getTransactionStatus(t);
-      const statusLabel = getStatusLabel(status);
-      const showSellBtn = isBuy && status !== 'closed';
+      
+      const buyPrice = isBuy ? t.price : (t.original_buy_price || t.price);
+      const buyQty = isBuy ? t.quantity : (t.original_quantity || t.quantity);
+      const sellPrice = isBuy ? '-' : (t.actual_sell_price || t.price);
+      const sellQty = isBuy ? '-' : t.quantity;
+      const platform = t.platform || '-';
 
       return `
-        <div class="tx-card ${t.type}" data-id="${t.id}" data-index="${index}">
-          <div class="tx-card-header">
-            <div class="tx-card-left">
-              <span class="tx-sequence">${sequence}</span>
-              <span class="tx-type-badge ${t.type}">
-                ${isBuy ? `
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                ` : `
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                `}
-                ${isBuy ? (lang === 'zh' ? '买入' : 'Buy') : (lang === 'zh' ? '卖出' : 'Sell')}
-              </span>
-            </div>
-            <span class="tx-status-badge ${status}">${statusLabel}</span>
-          </div>
-          
-          <div class="tx-card-body">
-            <div class="tx-data-item">
-              <span class="tx-data-label">${isBuy ? (lang === 'zh' ? '买入价格' : 'Buy Price') : (lang === 'zh' ? '卖出价格' : 'Sell Price')}</span>
-              <span class="tx-data-value price">¥${t.price.toFixed(2)}</span>
-              ${!isBuy && t.actual_sell_price ? `<span class="tx-data-sub sell-price">${lang === 'zh' ? '买入' : 'Buy'}: ¥${t.price.toFixed(2)}</span>` : ''}
-            </div>
-            <div class="tx-data-item">
-              <span class="tx-data-label">${lang === 'zh' ? '数量' : 'Quantity'}</span>
-              <span class="tx-data-value">${t.quantity.toFixed(3)} g</span>
-            </div>
-            <div class="tx-data-item">
-              <span class="tx-data-label">${lang === 'zh' ? '总额' : 'Total'}</span>
-              <span class="tx-data-value">¥${(t.total_amount || t.price * t.quantity).toFixed(2)}</span>
-            </div>
-            <div class="tx-data-item">
-              <span class="tx-data-label">${lang === 'zh' ? '收益' : 'Profit'}</span>
-              <span class="tx-data-value profit ${profitClass} tx-number-animate" data-profit="${profitValue}">
-                ${isBuy ? '-' : formatCurrency(t.profit)}
-              </span>
-            </div>
-          </div>
-          
-          <div class="tx-card-footer">
-            <div class="tx-time">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              ${formatDate(t.created_at)}
-            </div>
-            <div class="tx-actions">
-              <button class="tx-action-btn edit" onclick="toggleEditPanel(${t.id})" data-id="${t.id}">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <tr class="${t.type}-row" data-id="${t.id}">
+          <td class="col-seq">${sequence}</td>
+          <td class="col-time">${formatTableDate(t.created_at)}</td>
+          <td class="col-buy-price">${isBuy ? `¥${t.price.toFixed(2)}` : (buyPrice !== '-' ? `¥${buyPrice.toFixed(2)}` : '-')}</td>
+          <td class="col-buy-qty">${buyQty !== '-' ? `${parseFloat(buyQty).toFixed(3)}g` : '-'}</td>
+          <td class="col-sell-price">${sellPrice !== '-' ? `¥${parseFloat(sellPrice).toFixed(2)}` : '-'}</td>
+          <td class="col-sell-qty">${sellQty !== '-' ? `${parseFloat(sellQty).toFixed(3)}g` : '-'}</td>
+          <td class="col-profit ${profitClass}">${isBuy ? '-' : formatCurrency(t.profit)}</td>
+          <td class="col-platform" title="${platform}">${platform}</td>
+          <td class="col-actions">
+            <div class="tx-row-actions">
+              <button class="tx-row-btn edit-btn" onclick="openEditModal(${t.id})" title="${lang === 'zh' ? '编辑' : 'Edit'}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                 </svg>
-                <span>${lang === 'zh' ? '编辑' : 'Edit'}</span>
               </button>
-              ${showSellBtn ? `
-                <button class="tx-action-btn sell" onclick="toggleSellPanel(${t.id})" data-id="${t.id}">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                  <span>${lang === 'zh' ? '卖出' : 'Sell'}</span>
-                </button>
-              ` : ''}
-              <button class="tx-action-btn delete" onclick="deleteTransaction(${t.id})">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <button class="tx-row-btn delete-btn" onclick="openDeleteModal(${t.id})" title="${lang === 'zh' ? '删除' : 'Delete'}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
               </button>
             </div>
-          </div>
-          
-          <div class="tx-edit-inline hidden" id="edit-panel-${t.id}">
-            <div class="tx-edit-grid">
-              <div class="tx-edit-field">
-                <label>${lang === 'zh' ? '买入价格 (元/克)' : 'Buy Price (¥/g)'}</label>
-                <input type="number" id="edit-price-${t.id}" step="0.01" value="${t.price}" />
-              </div>
-              ${!isBuy ? `
-                <div class="tx-edit-field">
-                  <label>${lang === 'zh' ? '卖出价格 (元/克)' : 'Sell Price (¥/g)'}</label>
-                  <input type="number" id="edit-sell-price-${t.id}" step="0.01" value="${t.actual_sell_price || t.price}" />
-                </div>
-              ` : ''}
-              <div class="tx-edit-field">
-                <label>${lang === 'zh' ? '数量 (克)' : 'Quantity (g)'}</label>
-                <input type="number" id="edit-qty-${t.id}" step="0.001" value="${t.quantity}" />
-              </div>
-            </div>
-            <div class="tx-edit-actions">
-              <button class="tx-edit-btn cancel" onclick="toggleEditPanel(${t.id})">${lang === 'zh' ? '取消' : 'Cancel'}</button>
-              <button class="tx-edit-btn save" onclick="saveEdit(${t.id}, '${t.type}')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                ${lang === 'zh' ? '保存' : 'Save'}
-              </button>
-            </div>
-          </div>
-          
-          ${showSellBtn ? `
-            <div class="tx-sell-panel hidden" id="sell-panel-${t.id}">
-              <div class="tx-sell-panel-header">
-                <div class="tx-sell-panel-title">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                  ${lang === 'zh' ? '卖出持仓' : 'Sell Position'}
-                </div>
-                <div class="tx-sell-close" onclick="toggleSellPanel(${t.id})">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </div>
-              </div>
-              <div class="tx-sell-form">
-                <div class="tx-sell-field">
-                  <label>${lang === 'zh' ? '卖出价格 (元/克)' : 'Sell Price (¥/g)'}</label>
-                  <input type="number" id="sell-price-${t.id}" step="0.01" placeholder="${lang === 'zh' ? '输入卖出价格' : 'Enter sell price'}" oninput="updateSellPreview(${t.id}, ${t.price})" />
-                </div>
-                <div class="tx-sell-field">
-                  <label>${lang === 'zh' ? '卖出数量 (克)' : 'Sell Quantity (g)'}</label>
-                  <input type="number" id="sell-qty-${t.id}" step="0.001" max="${t.remaining_quantity || t.quantity}" placeholder="${lang === 'zh' ? '最大' : 'Max'} ${t.remaining_quantity || t.quantity}g" oninput="updateSellPreview(${t.id}, ${t.price})" />
-                </div>
-              </div>
-              <div class="tx-sell-preview">
-                <div class="tx-sell-preview-item">
-                  <span class="tx-sell-preview-label">${lang === 'zh' ? '卖出总额' : 'Sell Total'}</span>
-                  <span class="tx-sell-preview-value" id="sell-total-${t.id}">¥0.00</span>
-                </div>
-                <div class="tx-sell-preview-item">
-                  <span class="tx-sell-preview-label">${lang === 'zh' ? '预期收益' : 'Expected Profit'}</span>
-                  <span class="tx-sell-preview-value profit" id="sell-profit-${t.id}">¥0.00</span>
-                </div>
-              </div>
-              <button class="tx-sell-submit" onclick="confirmSell(${t.id}, ${t.price})" id="sell-submit-${t.id}" disabled>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                ${lang === 'zh' ? '确认卖出' : 'Confirm Sell'}
-              </button>
-            </div>
-          ` : ''}
-        </div>
+          </td>
+        </tr>
       `;
     }).join('');
   }
 
-  function toggleEditPanel(id) {
-    const panel = document.getElementById(`edit-panel-${id}`);
-    if (panel) {
-      panel.classList.toggle('hidden');
-    }
+  function openDeleteModal(id) {
+    pendingDeleteId = id;
+    const modal = document.getElementById('delete-confirm-modal');
+    modal?.classList.remove('hidden');
   }
 
-  function toggleSellPanel(id) {
-    const panel = document.getElementById(`sell-panel-${id}`);
-    if (panel) {
-      panel.classList.toggle('hidden');
-    }
+  function closeDeleteModal() {
+    pendingDeleteId = null;
+    const modal = document.getElementById('delete-confirm-modal');
+    modal?.classList.add('hidden');
   }
 
-  function updateSellPreview(id, buyPrice) {
-    const sellPriceEl = document.getElementById(`sell-price-${id}`);
-    const sellQtyEl = document.getElementById(`sell-qty-${id}`);
-    const totalEl = document.getElementById(`sell-total-${id}`);
-    const profitEl = document.getElementById(`sell-profit-${id}`);
-    const submitBtn = document.getElementById(`sell-submit-${id}`);
-
-    if (!sellPriceEl || !sellQtyEl || !totalEl || !profitEl || !submitBtn) return;
-
-    const sellPrice = parseFloat(sellPriceEl.value) || 0;
-    const sellQty = parseFloat(sellQtyEl.value) || 0;
-    const total = sellPrice * sellQty;
-    const profit = (sellPrice - buyPrice) * sellQty;
-
-    totalEl.textContent = formatCurrency(total);
-    profitEl.textContent = formatCurrency(profit);
+  async function confirmDelete() {
+    if (!pendingDeleteId) return;
     
-    profitEl.classList.remove('positive', 'negative');
-    if (profit > 0) {
-      profitEl.classList.add('positive');
-    } else if (profit < 0) {
-      profitEl.classList.add('negative');
-    }
-
-    submitBtn.disabled = !(sellPrice > 0 && sellQty > 0);
-  }
-
-  async function saveEdit(id, type) {
-    const priceEl = document.getElementById(`edit-price-${id}`);
-    const qtyEl = document.getElementById(`edit-qty-${id}`);
-    const sellPriceEl = document.getElementById(`edit-sell-price-${id}`);
-
-    const newPrice = parseFloat(priceEl?.value) || 0;
-    const newQty = parseFloat(qtyEl?.value) || 0;
-    const newSellPrice = type === 'sell' ? parseFloat(sellPriceEl?.value) : null;
-
-    if (newPrice <= 0 || newQty <= 0) {
-      showNotification(lang === 'zh' ? '请输入有效的价格和数量' : 'Please enter valid price and quantity', 'error');
-      return;
+    const confirmBtn = document.getElementById('delete-confirm-btn');
+    if (confirmBtn) {
+      (confirmBtn as HTMLButtonElement).disabled = true;
+      confirmBtn.innerHTML = `<span class="loading-spinner" style="width: 16px; height: 16px; border-width: 2px;"></span>`;
     }
 
     try {
+      const result = await apiRequest(`/api/trading/transaction?id=${pendingDeleteId}`, { method: 'DELETE' });
+      if (result.success) {
+        closeDeleteModal();
+        loadDashboard();
+      } else {
+        alert(result.error || (lang === 'zh' ? '删除失败' : 'Delete failed'));
+      }
+    } catch (error) {
+      console.error('Delete failed:', error);
+      alert(lang === 'zh' ? '删除失败' : 'Delete failed');
+    } finally {
+      if (confirmBtn) {
+        (confirmBtn as HTMLButtonElement).disabled = false;
+        confirmBtn.textContent = lang === 'zh' ? '删除' : 'Delete';
+      }
+    }
+  }
+
+  let currentEditTransaction = null;
+
+  async function openEditModal(id) {
+    try {
+      const result = await apiRequest(`/api/trading/transactions?page=1&limit=100`);
+      if (result.success && result.transactions) {
+        currentEditTransaction = result.transactions.find(t => t.id === id);
+        if (currentEditTransaction) {
+          const t = currentEditTransaction;
+          const isBuy = t.type === 'buy';
+          
+          (document.getElementById('edit-tx-id') as HTMLInputElement).value = String(t.id);
+          (document.getElementById('edit-tx-type') as HTMLInputElement).value = t.type;
+          
+          const date = new Date(t.created_at);
+          (document.getElementById('edit-tx-date') as HTMLInputElement).value = date.toISOString().slice(0, 16);
+          
+          if (isBuy) {
+            (document.getElementById('edit-tx-buy-price') as HTMLInputElement).value = String(t.price);
+            (document.getElementById('edit-tx-buy-qty') as HTMLInputElement).value = String(t.quantity);
+            (document.getElementById('edit-tx-sell-price') as HTMLInputElement).value = '';
+            (document.getElementById('edit-tx-sell-qty') as HTMLInputElement).value = '';
+          } else {
+            (document.getElementById('edit-tx-buy-price') as HTMLInputElement).value = String(t.original_buy_price || t.price);
+            (document.getElementById('edit-tx-buy-qty') as HTMLInputElement).value = String(t.original_quantity || t.quantity);
+            (document.getElementById('edit-tx-sell-price') as HTMLInputElement).value = String(t.actual_sell_price || t.price);
+            (document.getElementById('edit-tx-sell-qty') as HTMLInputElement).value = String(t.quantity);
+          }
+          (document.getElementById('edit-tx-platform') as HTMLInputElement).value = t.platform || '';
+          
+          const modal = document.getElementById('edit-transaction-modal');
+          modal?.classList.remove('hidden');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load transaction for edit:', error);
+    }
+  }
+
+  function closeEditModal() {
+    currentEditTransaction = null;
+    const modal = document.getElementById('edit-transaction-modal');
+    modal?.classList.add('hidden');
+  }
+
+  async function saveTransactionEdit(e) {
+    e.preventDefault();
+    
+    const id = (document.getElementById('edit-tx-id') as HTMLInputElement).value;
+    const type = (document.getElementById('edit-tx-type') as HTMLInputElement).value;
+    const date = (document.getElementById('edit-tx-date') as HTMLInputElement).value;
+    const buyPrice = parseFloat((document.getElementById('edit-tx-buy-price') as HTMLInputElement).value) || 0;
+    const buyQty = parseFloat((document.getElementById('edit-tx-buy-qty') as HTMLInputElement).value) || 0;
+    const sellPrice = parseFloat((document.getElementById('edit-tx-sell-price') as HTMLInputElement).value) || 0;
+    const sellQty = parseFloat((document.getElementById('edit-tx-sell-qty') as HTMLInputElement).value) || 0;
+    const platform = (document.getElementById('edit-tx-platform') as HTMLInputElement).value;
+
+    const submitBtn = document.querySelector('.edit-form-btn.save') as HTMLButtonElement;
+    const originalContent = submitBtn?.innerHTML;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span class="loading-spinner" style="width: 16px; height: 16px; border-width: 2px;"></span>`;
+    }
+
+    try {
+      const payload: any = {
+        date: new Date(date).toISOString(),
+        platform
+      };
+
+      if (type === 'buy') {
+        payload.price = buyPrice;
+        payload.quantity = buyQty;
+      } else {
+        payload.price = buyPrice;
+        payload.quantity = sellQty;
+        payload.actualSellPrice = sellPrice;
+      }
+
       const result = await apiRequest(`/api/trading/transaction?id=${id}`, {
         method: 'PUT',
-        body: JSON.stringify({
-          price: newPrice,
-          quantity: newQty,
-          actualSellPrice: newSellPrice
-        })
+        body: JSON.stringify(payload)
       });
 
       if (result.success) {
-        showNotification(lang === 'zh' ? '修改成功' : 'Updated successfully', 'success');
-        toggleEditPanel(id);
-        setTimeout(() => loadDashboard(), 300);
+        closeEditModal();
+        loadDashboard();
       } else {
-        showNotification(result.error || (lang === 'zh' ? '修改失败' : 'Update failed'), 'error');
+        alert(result.error || (lang === 'zh' ? '修改失败' : 'Update failed'));
       }
     } catch (error) {
       console.error('Save edit failed:', error);
-      showNotification(lang === 'zh' ? '修改失败' : 'Update failed', 'error');
-    }
-  }
-
-  async function confirmSell(id, buyPrice) {
-    const sellPriceEl = document.getElementById(`sell-price-${id}`);
-    const sellQtyEl = document.getElementById(`sell-qty-${id}`);
-
-    const sellPrice = parseFloat(sellPriceEl?.value) || 0;
-    const sellQty = parseFloat(sellQtyEl?.value) || 0;
-
-    if (sellPrice <= 0 || sellQty <= 0) {
-      showNotification(lang === 'zh' ? '请输入有效的卖出价格和数量' : 'Please enter valid sell price and quantity', 'error');
-      return;
-    }
-
-    const profit = (sellPrice - buyPrice) * sellQty;
-    const confirmMsg = lang === 'zh' 
-      ? `确认卖出 ${sellQty.toFixed(3)}g，价格 ¥${sellPrice.toFixed(2)}？\n预期收益: ${formatCurrency(profit)}`
-      : `Confirm selling ${sellQty.toFixed(3)}g at ¥${sellPrice.toFixed(2)}?\nExpected profit: ${formatCurrency(profit)}`;
-
-    if (!confirm(confirmMsg)) return;
-
-    try {
-      const result = await apiRequest('/api/trading/sell', {
-        method: 'POST',
-        body: JSON.stringify({
-          buyTransactionId: id,
-          actualSellPrice: sellPrice,
-          quantity: sellQty
-        })
-      });
-
-      if (result.success) {
-        showNotification(lang === 'zh' ? '卖出成功' : 'Sold successfully', 'success');
-        toggleSellPanel(id);
-        setTimeout(() => loadDashboard(), 300);
-      } else {
-        showNotification(result.error || (lang === 'zh' ? '卖出失败' : 'Sell failed'), 'error');
+      alert(lang === 'zh' ? '修改失败' : 'Update failed');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalContent;
       }
-    } catch (error) {
-      console.error('Sell failed:', error);
-      showNotification(lang === 'zh' ? '卖出失败' : 'Sell failed', 'error');
     }
   }
 
@@ -3883,16 +4379,29 @@ const API_BASE = 'https://api.ustc.dev';
     }
   });
 
-  document.getElementById('filter-type')?.addEventListener('change', () => loadTransactions(1));
+  document.querySelectorAll('.segment-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilterType = btn.getAttribute('data-value') || '';
+      loadTransactions(1);
+    });
+  });
+
   document.getElementById('filter-sort')?.addEventListener('change', () => loadTransactions(1));
 
+  document.getElementById('delete-modal-backdrop')?.addEventListener('click', closeDeleteModal);
+  document.getElementById('delete-cancel-btn')?.addEventListener('click', closeDeleteModal);
+  document.getElementById('delete-confirm-btn')?.addEventListener('click', confirmDelete);
+
+  document.getElementById('edit-modal-backdrop')?.addEventListener('click', closeEditModal);
+  document.getElementById('edit-modal-close')?.addEventListener('click', closeEditModal);
+  document.getElementById('edit-cancel-btn')?.addEventListener('click', closeEditModal);
+  document.getElementById('edit-transaction-form')?.addEventListener('submit', saveTransactionEdit);
+
   (window as any).loadTransactions = loadTransactions;
-  (window as any).deleteTransaction = deleteTransaction;
-  (window as any).toggleEditPanel = toggleEditPanel;
-  (window as any).toggleSellPanel = toggleSellPanel;
-  (window as any).saveEdit = saveEdit;
-  (window as any).confirmSell = confirmSell;
-  (window as any).updateSellPreview = updateSellPreview;
+  (window as any).openDeleteModal = openDeleteModal;
+  (window as any).openEditModal = openEditModal;
   (window as any).deleteAlert = deleteAlert;
 
   // Initialize view based on client-side authentication status
