@@ -140,6 +140,58 @@
   --header-margin: var(--space-4);
   --header-total-height: calc(var(--header-height) + var(--header-margin) * 2 + var(--space-4));
   --footer-height: auto;
+
+  /* ==================== Default Theme Variables (Light) ==================== */
+  /* Background Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f7;
+  --bg-tertiary: #e8e8ed;
+  --bg-elevated: #ffffff;
+  --bg-overlay: rgba(0, 0, 0, 0.5);
+  
+  /* Text Colors */
+  --text-primary: #1d1d1f;
+  --text-secondary: #424245;
+  --text-tertiary: #6e6e73;
+  --text-quaternary: #86868b;
+  --text-inverse: #ffffff;
+  
+  /* Border Colors */
+  --border-primary: rgba(0, 0, 0, 0.1);
+  --border-secondary: rgba(0, 0, 0, 0.06);
+  --border-focus: var(--color-primary);
+  --border-hover: rgba(0, 0, 0, 0.15);
+  
+  /* Interactive Colors */
+  --interactive-primary: var(--color-primary);
+  --interactive-primary-hover: var(--color-primary-hover);
+  --interactive-primary-active: var(--color-primary-active);
+  
+  /* Surface Colors */
+  --surface-primary: rgba(255, 255, 255, 0.8);
+  --surface-secondary: rgba(245, 245, 247, 0.8);
+  --surface-blur: blur(20px);
+  --surface-blur-heavy: blur(40px);
+  
+  /* Card Styles */
+  --card-bg: #ffffff;
+  --card-border: rgba(0, 0, 0, 0.08);
+  --card-shadow: var(--shadow-sm);
+  --card-hover-shadow: var(--shadow-md);
+  
+  /* Glass Effect */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-hover: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-border-hover: rgba(0, 0, 0, 0.1);
+  
+  /* Contribution Graph Colors */
+  --contribution-0: #ebedf0;
+  --contribution-1: #9be9a8;
+  --contribution-2: #40c463;
+  --contribution-3: #30a14e;
+  --contribution-4: #216e39;
+  --contribution-5: #0a3d1e;
 }
 
 @media (min-width: 768px) {
