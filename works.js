@@ -5134,28 +5134,25 @@ async function handleTradingLogout(request, env) {
 
 async function handleInitSuperAdmin(request, env) {
   if (request.method !== 'POST') {
-    return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+    return jsonResponse({ success: false, error: 'Method not allowed' }, 405, request);
   }
 
   try {
     const { secret } = await request.json();
 
-    // 验证初始化密钥（应该使用环境变量中的密钥）
     const initSecret = env.INIT_SECRET || env.JWT_SECRET || 'default-init-secret';
     if (secret !== initSecret) {
-      return jsonResponse({ success: false, error: 'Invalid initialization secret' }, 403);
+      return jsonResponse({ success: false, error: 'Invalid initialization secret' }, 403, request);
     }
 
     const username = 'YangHao';
     const password = 'YangHao@Trading.com';
 
-    // 检查用户是否已存在
     const existingUser = await env.DB.prepare(
       'SELECT id, password_hash FROM admin_users WHERE username = ?'
     ).bind(username).first();
 
     if (existingUser) {
-      // 如果用户存在但密码格式是旧的（不包含冒号），则更新密码
       if (!existingUser.password_hash.includes(':')) {
         const newPasswordHash = await hashAdminPasswordWithSalt(password);
         await env.DB.prepare(
@@ -5166,20 +5163,18 @@ async function handleInitSuperAdmin(request, env) {
           success: true,
           message: 'Super admin password updated to new format',
           username
-        });
+        }, 200, request);
       }
 
       return jsonResponse({
         success: true,
         message: 'Super admin user already exists with valid password format',
         username
-      });
+      }, 200, request);
     }
 
-    // 生成带salt的密码哈希
     const passwordHash = await hashAdminPasswordWithSalt(password);
 
-    // 创建超级管理员用户
     await env.DB.prepare(
       `INSERT INTO admin_users (username, password_hash, role, created_at, last_login)
        VALUES (?, ?, 'super_admin', datetime('now'), NULL)`
@@ -5190,17 +5185,17 @@ async function handleInitSuperAdmin(request, env) {
       message: 'Super admin user created successfully',
       username,
       password: 'YangHao@Trading.com'
-    });
+    }, 200, request);
   } catch (error) {
     console.error('[Init SuperAdmin Error]', error);
-    return jsonResponse({ success: false, error: 'Initialization failed: ' + error.message }, 500);
+    return jsonResponse({ success: false, error: 'Initialization failed: ' + error.message }, 500, request);
   }
 }
 
 async function handleTradingVerify(request, env) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ success: false, error: 'No token provided' }, 401);
+    return jsonResponse({ success: false, error: 'No token provided' }, 401, request);
   }
 
   const token = authHeader.substring(7);
@@ -5208,10 +5203,10 @@ async function handleTradingVerify(request, env) {
   const verification = await verifyAdminToken(token, secret);
   
   if (!verification) {
-    return jsonResponse({ success: false, error: 'Invalid token' }, 401);
+    return jsonResponse({ success: false, error: 'Invalid token' }, 401, request);
   }
 
-  return jsonResponse({ success: true, user: verification });
+  return jsonResponse({ success: true, user: verification }, 200, request);
 }
 
 async function handleBuyTransaction(request, env) {
@@ -5221,7 +5216,7 @@ async function handleBuyTransaction(request, env) {
   }
 
   if (request.method !== 'POST') {
-    return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+    return jsonResponse({ success: false, error: 'Method not allowed' }, 405, request);
   }
 
   try {
@@ -5229,12 +5224,12 @@ async function handleBuyTransaction(request, env) {
 
     const priceValidation = validateNumber(price, TRADING_CONFIG.MIN_PRICE, TRADING_CONFIG.MAX_PRICE, 'Buy price');
     if (!priceValidation.valid) {
-      return jsonResponse({ success: false, error: priceValidation.error }, 400);
+      return jsonResponse({ success: false, error: priceValidation.error }, 400, request);
     }
 
     const quantityValidation = validateNumber(quantity, TRADING_CONFIG.MIN_QUANTITY, TRADING_CONFIG.MAX_QUANTITY, 'Quantity');
     if (!quantityValidation.valid) {
-      return jsonResponse({ success: false, error: quantityValidation.error }, 400);
+      return jsonResponse({ success: false, error: quantityValidation.error }, 400, request);
     }
 
     const buyPrice = priceValidation.value;
@@ -5260,10 +5255,10 @@ async function handleBuyTransaction(request, env) {
         notes,
         createdAt: now
       }
-    });
+    }, 200, request);
   } catch (error) {
     console.error('[Buy Transaction Error]', error);
-    return jsonResponse({ success: false, error: 'Failed to create buy transaction' }, 500);
+    return jsonResponse({ success: false, error: 'Failed to create buy transaction' }, 500, request);
   }
 }
 
@@ -5274,7 +5269,7 @@ async function handleSellTransaction(request, env) {
   }
 
   if (request.method !== 'POST') {
-    return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+    return jsonResponse({ success: false, error: 'Method not allowed' }, 405, request);
   }
 
   try {
@@ -5283,12 +5278,12 @@ async function handleSellTransaction(request, env) {
 
     const priceValidation = validateNumber(sellPriceInput, TRADING_CONFIG.MIN_PRICE, TRADING_CONFIG.MAX_PRICE, 'Sell price');
     if (!priceValidation.valid) {
-      return jsonResponse({ success: false, error: priceValidation.error }, 400);
+      return jsonResponse({ success: false, error: priceValidation.error }, 400, request);
     }
 
     const quantityValidation = validateNumber(quantity, TRADING_CONFIG.MIN_QUANTITY, TRADING_CONFIG.MAX_QUANTITY, 'Quantity');
     if (!quantityValidation.valid) {
-      return jsonResponse({ success: false, error: quantityValidation.error }, 400);
+      return jsonResponse({ success: false, error: quantityValidation.error }, 400, request);
     }
 
     const sellPrice = priceValidation.value;
@@ -5352,10 +5347,10 @@ async function handleSellTransaction(request, env) {
         notes,
         createdAt: now
       }
-    });
+    }, 200, request);
   } catch (error) {
     console.error('[Sell Transaction Error]', error);
-    return jsonResponse({ success: false, error: 'Failed to create sell transaction' }, 500);
+    return jsonResponse({ success: false, error: 'Failed to create sell transaction' }, 500, request);
   }
 }
 
@@ -5404,10 +5399,10 @@ async function handleGetTransactions(request, env) {
       success: true,
       transactions: dataResult.results,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
-    });
+    }, 200, request);
   } catch (error) {
     console.error('[Get Transactions Error]', error);
-    return jsonResponse({ success: false, error: 'Failed to fetch transactions' }, 500);
+    return jsonResponse({ success: false, error: 'Failed to fetch transactions' }, 500, request);
   }
 }
 
@@ -5421,17 +5416,17 @@ async function handleTransactionOperation(request, env) {
   const id = url.searchParams.get('id');
 
   if (!id) {
-    return jsonResponse({ success: false, error: 'Transaction ID is required' }, 400);
+    return jsonResponse({ success: false, error: 'Transaction ID is required' }, 400, request);
   }
 
   if (request.method === 'DELETE') {
     try {
       const stmt = env.DB.prepare('DELETE FROM gold_transactions WHERE id = ?');
       await stmt.bind(id).run();
-      return jsonResponse({ success: true, message: 'Transaction deleted' });
+      return jsonResponse({ success: true, message: 'Transaction deleted' }, 200, request);
     } catch (error) {
       console.error('[Delete Transaction Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to delete transaction' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to delete transaction' }, 500, request);
     }
   }
 
@@ -5491,14 +5486,14 @@ async function handleTransactionOperation(request, env) {
           profit: newProfit,
           notes: newNotes
         }
-      });
+      }, 200, request);
     } catch (error) {
       console.error('[Update Transaction Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to update transaction' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to update transaction' }, 500, request);
     }
   }
 
-  return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+  return jsonResponse({ success: false, error: 'Method not allowed' }, 405, request);
 }
 
 async function handleGetTransactionStats(request, env) {
@@ -5602,10 +5597,10 @@ async function handleGetTransactionStats(request, env) {
         monthly: monthlyResult.results || [],
         weekly: weeklyResult.results || []
       }
-    });
+    }, 200, request);
   } catch (error) {
     console.error('[Get Transaction Stats Error]', error);
-    return jsonResponse({ success: false, error: 'Failed to fetch statistics' }, 500);
+    return jsonResponse({ success: false, error: 'Failed to fetch statistics' }, 500, request);
   }
 }
 
@@ -5615,18 +5610,17 @@ async function handleAlertOperation(request, env) {
     return jsonResponse({ success: false, error: authResult.message }, 401, request);
   }
 
-  // POST - 创建预警
   if (request.method === 'POST') {
     try {
       const { alertType, targetPrice } = await request.json();
 
       if (!['buy', 'sell'].includes(alertType)) {
-        return jsonResponse({ success: false, error: 'Invalid alert type' }, 400);
+        return jsonResponse({ success: false, error: 'Invalid alert type' }, 400, request);
       }
 
       const priceValidation = validateNumber(targetPrice, TRADING_CONFIG.MIN_PRICE, TRADING_CONFIG.MAX_PRICE, 'Target price');
       if (!priceValidation.valid) {
-        return jsonResponse({ success: false, error: priceValidation.error }, 400);
+        return jsonResponse({ success: false, error: priceValidation.error }, 400, request);
       }
 
       const stmt = env.DB.prepare(`INSERT INTO price_alerts (alert_type, target_price, created_at) VALUES (?, ?, ?)`);
@@ -5636,34 +5630,33 @@ async function handleAlertOperation(request, env) {
       return jsonResponse({
         success: true,
         alert: { id: result.meta.last_row_id, alertType, targetPrice: priceValidation.value, createdAt: now }
-      });
+      }, 200, request);
     } catch (error) {
       console.error('[Create Alert Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to create alert' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to create alert' }, 500, request);
     }
   }
 
-  // DELETE - 删除单个预警
   if (request.method === 'DELETE') {
     try {
       const url = new URL(request.url);
       const id = url.searchParams.get('id');
 
       if (!id) {
-        return jsonResponse({ success: false, error: 'Alert ID required' }, 400);
+        return jsonResponse({ success: false, error: 'Alert ID required' }, 400, request);
       }
 
       const stmt = env.DB.prepare(`DELETE FROM price_alerts WHERE id = ?`);
       await stmt.bind(id).run();
 
-      return jsonResponse({ success: true, message: 'Alert deleted' });
+      return jsonResponse({ success: true, message: 'Alert deleted' }, 200, request);
     } catch (error) {
       console.error('[Delete Alert Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to delete alert' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to delete alert' }, 500, request);
     }
   }
 
-  return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+  return jsonResponse({ success: false, error: 'Method not allowed' }, 405, request);
 }
 
 async function handleAlertsOperation(request, env) {
@@ -5672,20 +5665,18 @@ async function handleAlertsOperation(request, env) {
     return jsonResponse({ success: false, error: authResult.message }, 401, request);
   }
 
-  // GET - 获取所有预警
   if (request.method === 'GET') {
     try {
       const stmt = env.DB.prepare(`SELECT * FROM price_alerts ORDER BY created_at DESC`);
       const result = await stmt.all();
 
-      return jsonResponse({ success: true, alerts: result.results });
+      return jsonResponse({ success: true, alerts: result.results }, 200, request);
     } catch (error) {
       console.error('[Get Alerts Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to fetch alerts' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to fetch alerts' }, 500, request);
     }
   }
 
-  // DELETE - 批量删除所有预警
   if (request.method === 'DELETE') {
     try {
       const stmt = env.DB.prepare(`DELETE FROM price_alerts`);
@@ -5695,14 +5686,14 @@ async function handleAlertsOperation(request, env) {
         success: true,
         message: 'All alerts deleted',
         deletedCount: result.meta?.changes || 0
-      });
+      }, 200, request);
     } catch (error) {
       console.error('[Delete All Alerts Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to delete alerts' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to delete alerts' }, 500, request);
     }
   }
 
-  return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+  return jsonResponse({ success: false, error: 'Method not allowed' }, 405, request);
 }
 
 async function handleGetNotifications(request, env) {
@@ -5715,16 +5706,12 @@ async function handleGetNotifications(request, env) {
     const stmt = env.DB.prepare(`SELECT * FROM notification_queue WHERE status = 'pending' ORDER BY created_at DESC LIMIT 50`);
     const result = await stmt.all();
 
-    return jsonResponse({ success: true, notifications: result.results });
+    return jsonResponse({ success: true, notifications: result.results }, 200, request);
   } catch (error) {
     console.error('[Get Notifications Error]', error);
-    return jsonResponse({ success: false, error: 'Failed to fetch notifications' }, 500);
+    return jsonResponse({ success: false, error: 'Failed to fetch notifications' }, 500, request);
   }
 }
-
-// ================================================================================
-// 容错阈值设置管理
-// ================================================================================
 
 async function handleToleranceSettings(request, env) {
   const authResult = await verifyAdminAuth(request, env);
@@ -5732,20 +5719,18 @@ async function handleToleranceSettings(request, env) {
     return jsonResponse({ success: false, error: authResult.message }, 401, request);
   }
 
-  // GET - 获取当前容错设置
   if (request.method === 'GET') {
     try {
       const stmt = env.DB.prepare(`SELECT buy_tolerance, sell_tolerance, updated_at FROM alert_tolerance_settings ORDER BY id DESC LIMIT 1`);
       const result = await stmt.first();
 
       if (!result) {
-        // 如果没有设置，创建默认设置
         const insertStmt = env.DB.prepare(`INSERT INTO alert_tolerance_settings (buy_tolerance, sell_tolerance) VALUES (?, ?)`);
         await insertStmt.bind(2.0, 2.0).run();
         return jsonResponse({
           success: true,
           settings: { buyTolerance: 2.0, sellTolerance: 2.0, updatedAt: new Date().toISOString() }
-        });
+        }, 200, request);
       }
 
       return jsonResponse({
@@ -5755,32 +5740,30 @@ async function handleToleranceSettings(request, env) {
           sellTolerance: result.sell_tolerance,
           updatedAt: result.updated_at
         }
-      });
+      }, 200, request);
     } catch (error) {
       console.error('[Get Tolerance Settings Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to fetch tolerance settings' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to fetch tolerance settings' }, 500, request);
     }
   }
 
-  // POST - 保存容错设置
   if (request.method === 'POST') {
     try {
       const { buyTolerance, sellTolerance } = await request.json();
 
-      // 验证输入
       const buyToleranceNum = parseFloat(buyTolerance);
       const sellToleranceNum = parseFloat(sellTolerance);
 
       if (isNaN(buyToleranceNum) || isNaN(sellToleranceNum)) {
-        return jsonResponse({ success: false, error: '容错值必须是有效数字' }, 400);
+        return jsonResponse({ success: false, error: '容错值必须是有效数字' }, 400, request);
       }
 
       if (buyToleranceNum < 0.1 || buyToleranceNum > 100) {
-        return jsonResponse({ success: false, error: '买入容错值必须在 0.1-100 之间' }, 400);
+        return jsonResponse({ success: false, error: '买入容错值必须在 0.1-100 之间' }, 400, request);
       }
 
       if (sellToleranceNum < 0.1 || sellToleranceNum > 100) {
-        return jsonResponse({ success: false, error: '卖出容错值必须在 0.1-100 之间' }, 400);
+        return jsonResponse({ success: false, error: '卖出容错值必须在 0.1-100 之间' }, 400, request);
       }
 
       const now = new Date().toISOString();
@@ -5812,14 +5795,14 @@ async function handleToleranceSettings(request, env) {
           sellTolerance: sellToleranceNum,
           updatedAt: now
         }
-      });
+      }, 200, request);
     } catch (error) {
       console.error('[Save Tolerance Settings Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to save tolerance settings' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to save tolerance settings' }, 500, request);
     }
   }
 
-  return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+  return jsonResponse({ success: false, error: 'Method not allowed' }, 405, request);
 }
 
 // ================================================================================
