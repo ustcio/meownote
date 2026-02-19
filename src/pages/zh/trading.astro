@@ -1364,6 +1364,27 @@ import Layout from '@layouts/Layout.astro';
 
   .transactions-list {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Table Loading State */
+  .table-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-12);
+    color: var(--text-tertiary);
+    gap: var(--space-3);
+  }
+
+  .table-loading .spinner {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--border-primary);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
   }
 
   /* Transaction Records - Modern Table Design */
@@ -1646,6 +1667,101 @@ import Layout from '@layouts/Layout.astro';
     transform: scale(1.1);
     border-color: #ff375f;
     box-shadow: 0 2px 8px rgba(255, 55, 95, 0.3);
+  }
+
+  /* Responsive Table Styles */
+  @media (max-width: 768px) {
+    .transactions-container {
+      border-radius: var(--radius-lg);
+      margin: 0 calc(var(--space-2) * -1);
+      border-left: none;
+      border-right: none;
+    }
+
+    .transactions-table {
+      font-size: var(--text-xs);
+    }
+
+    .transactions-table th {
+      padding: var(--space-3) var(--space-2);
+      font-size: 10px;
+      letter-spacing: 0.04em;
+    }
+
+    .transactions-table th:first-child {
+      padding-left: var(--space-3);
+    }
+
+    .transactions-table th:last-child {
+      padding-right: var(--space-3);
+    }
+
+    .transactions-table td {
+      padding: var(--space-2) var(--space-1);
+    }
+
+    .transactions-table td:first-child {
+      padding-left: var(--space-2);
+      border-radius: var(--radius-md) 0 0 var(--radius-md);
+    }
+
+    .transactions-table td:last-child {
+      padding-right: var(--space-2);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    }
+
+    .type-badge {
+      padding: 4px 8px;
+      font-size: 10px;
+      min-width: 48px;
+    }
+
+    .type-badge::before {
+      width: 4px;
+      height: 4px;
+    }
+
+    .price-cell .display-value,
+    .quantity-cell,
+    .amount-cell,
+    .profit-cell,
+    .time-cell {
+      padding: 4px 8px;
+      font-size: var(--text-xs);
+      min-width: auto;
+    }
+
+    .action-btn {
+      width: 28px;
+      height: 28px;
+      margin: 0 1px;
+    }
+
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-3);
+    }
+
+    .filter-row {
+      width: 100%;
+    }
+
+    .filter-row select {
+      flex: 1;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .transactions-table th:nth-child(6),
+    .transactions-table td:nth-child(6) {
+      display: none;
+    }
+
+    .transactions-table th:nth-child(3),
+    .transactions-table td:nth-child(3) {
+      display: none;
+    }
   }
 
   .edit-modal {
@@ -2597,10 +2713,24 @@ import Layout from '@layouts/Layout.astro';
   }
 
   async function loadTransactions(page = 1) {
+    const list = document.getElementById('transactions-list');
+    const pagination = document.getElementById('pagination');
+
+    // Show loading state
+    if (list) {
+      list.innerHTML = `
+        <div class="table-loading">
+          <div class="spinner"></div>
+          <span>加载交易记录中...</span>
+        </div>
+      `;
+    }
+    if (pagination) pagination.innerHTML = '';
+
     try {
       const type = document.getElementById('filter-type')?.value || '';
       const sort = document.getElementById('filter-sort')?.value || 'desc';
-      
+
       let url = `/api/trading/transactions?page=${page}&limit=10&sortOrder=${sort}`;
       if (type) url += `&type=${type}`;
 
@@ -2608,9 +2738,38 @@ import Layout from '@layouts/Layout.astro';
       if (result.success) {
         renderTransactions(result.transactions);
         renderPagination(result.pagination);
+      } else {
+        // Handle API error
+        if (list) {
+          list.innerHTML = `
+            <div class="empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <p>加载失败: ${result.error || '未知错误'}</p>
+              <button onclick="loadTransactions(${page})" style="margin-top: var(--space-4); padding: var(--space-2) var(--space-4); background: var(--color-primary); color: white; border-radius: var(--radius-lg); border: none; cursor: pointer;">重试</button>
+            </div>
+          `;
+        }
       }
     } catch (error) {
       console.error('Failed to load transactions:', error);
+      // Handle network error
+      if (list) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <p>网络错误，请检查连接后重试</p>
+            <button onclick="loadTransactions(${page})" style="margin-top: var(--space-4); padding: var(--space-2) var(--space-4); background: var(--color-primary); color: white; border-radius: var(--radius-lg); border: none; cursor: pointer;">重试</button>
+          </div>
+        `;
+      }
     }
   }
 
@@ -2840,7 +2999,8 @@ import Layout from '@layouts/Layout.astro';
     try {
       const result = await apiRequest(`/api/trading/transaction?id=${id}`, { method: 'DELETE' });
       if (result.success) {
-        loadDashboard();
+        // 延迟刷新，确保后端数据已更新
+        setTimeout(() => loadDashboard(), 300);
       } else {
         alert(result.error || '删除失败');
       }
@@ -2917,7 +3077,8 @@ import Layout from '@layouts/Layout.astro';
 
         if (result.success) {
           modal.remove();
-          loadDashboard();
+          // 延迟刷新，确保后端数据已更新
+          setTimeout(() => loadDashboard(), 300);
         } else {
           alert(result.error || '更新失败');
         }
@@ -3078,7 +3239,8 @@ import Layout from '@layouts/Layout.astro';
       if (result.success) {
         (buyForm as HTMLFormElement).reset();
         (document.getElementById('buy-total') as HTMLElement).textContent = '¥0.00';
-        loadDashboard();
+        // 延迟刷新，确保后端数据已更新
+        setTimeout(() => loadDashboard(), 300);
         alert('买入记录已保存');
       } else {
         alert(result.error || '保存失败');
@@ -3105,7 +3267,8 @@ import Layout from '@layouts/Layout.astro';
       if (result.success) {
         (sellForm as HTMLFormElement).reset();
         (document.getElementById('sell-total') as HTMLElement).textContent = '¥0.00';
-        loadDashboard();
+        // 延迟刷新，确保后端数据已更新
+        setTimeout(() => loadDashboard(), 300);
         alert('卖出记录已保存');
       } else {
         alert(result.error || '保存失败');

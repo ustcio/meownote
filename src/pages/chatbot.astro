@@ -14,19 +14,25 @@ const t = useTranslations(lang);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="generator" content={Astro.generator} />
-    
+
     <title>{t('chatbot.title')} - Meow Note</title>
     <meta name="title" content={`${t('chatbot.title')} - Meow Note`} />
     <meta name="description" content={lang === 'zh' ? '智能 AI 对话助手，支持通义千问、豆包 2.0 Pro、豆包 2.0 Code 多模型' : 'Intelligent AI chat assistant with Qwen and Doubao models support'} />
-    
+
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    
+
+    <!-- Local Fonts -->
+    <link rel="stylesheet" href="/fonts/fonts.css" />
+
+    <!-- Preload Brand Font for Chatbot Logo -->
+    <link rel="preload" href="/fonts/Limelight-Regular.woff2" as="font" type="font/woff2" crossorigin />
+
     <meta name="theme-color" content="#ffffff" />
     <meta name="color-scheme" content="light dark" />
-    
+
     <script is:inline>
       (function() {
         try {
@@ -90,7 +96,7 @@ const t = useTranslations(lang);
                 <video class="welcome-logo" autoplay loop muted playsinline preload="auto" aria-hidden="true">
                   <source src="/logo.mp4" type="video/mp4" />
                 </video>
-                <h1 class="welcome-title" style="font-family: var(--font-brand);">{t('chatbot.welcomeTitle')}</h1>
+                <h1 class="welcome-title">{t('chatbot.welcomeTitle')}</h1>
                 <p class="welcome-subtitle">{t('chatbot.welcomeSubtitle')}</p>
               </div>
 
