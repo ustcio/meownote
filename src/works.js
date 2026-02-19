@@ -4887,13 +4887,28 @@ async function verifyAdminToken(token, secret) {
 // ================================================================================
 
 async function verifyAdminAuth(request, env) {
+  // Try to get token from Authorization header first
   const authHeader = request.headers.get('Authorization');
+  let token = null;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.slice(7);
+  } else {
+    // Try to get token from cookie
+    const cookieHeader = request.headers.get('Cookie');
+    if (cookieHeader) {
+      const cookies = cookieHeader.split(';').map(c => c.trim());
+      const tokenCookie = cookies.find(c => c.startsWith('trading_token='));
+      if (tokenCookie) {
+        token = tokenCookie.substring('trading_token='.length);
+      }
+    }
+  }
+
+  if (!token) {
     return { success: false, message: '请先登录' };
   }
 
-  const token = authHeader.slice(7);
   const payload = await verifyAdminToken(token, env.JWT_SECRET || 'agiera-default-jwt-secret-2024');
 
   if (!payload) {
