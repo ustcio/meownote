@@ -62,7 +62,7 @@ async function initializeSuperAdmin(env) {
 export default {
   async fetch(request, env, ctx) {
     if (request.method === 'OPTIONS') {
-      return handleCORS();
+      return handleCORS(request);
     }
 
     const url = new URL(request.url);
@@ -90,11 +90,11 @@ export default {
         return await handleAdminFolderAction(request, env, path);
       }
 
-      return jsonResponse({ error: 'Not Found' }, 404);
+      return jsonResponse({ error: 'Not Found' }, 404, request);
       
     } catch (error) {
       console.error('Server Error:', error);
-      return jsonResponse({ error: 'Internal Server Error', message: error.message }, 500);
+      return jsonResponse({ error: 'Internal Server Error', message: error.message }, 500, request);
     }
   },
   
@@ -177,31 +177,50 @@ const ALLOWED_ORIGINS = [
   'https://ustc.dev',
   'https://www.ustc.dev',
   'https://meow-note.com',
+  'https://api.ustc.dev',
   'http://localhost:4321',
   'http://localhost:4322',
   'http://localhost:4323',
   'http://localhost:4324',
+  'http://localhost:3000',
 ];
 
-function handleCORS() {
-  return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Cache-Control',
-      'Access-Control-Max-Age': '86400',
-    }
-  });
+function handleCORS(request) {
+  const origin = request?.headers?.get('Origin') || '*';
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : '*';
+  
+  const headers = {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Cache-Control',
+    'Access-Control-Max-Age': '86400',
+  };
+  
+  if (allowedOrigin !== '*') {
+    headers['Access-Control-Allow-Credentials'] = 'true';
+  }
+  
+  return new Response(null, { headers });
 }
 
-function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
+function jsonResponse(data, status = 200, request = null) {
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (request) {
+    const origin = request.headers.get('Origin');
+    if (origin && ALLOWED_ORIGINS.includes(origin)) {
+      headers['Access-Control-Allow-Origin'] = origin;
+      headers['Access-Control-Allow-Credentials'] = 'true';
+    } else {
+      headers['Access-Control-Allow-Origin'] = '*';
     }
-  });
+  } else {
+    headers['Access-Control-Allow-Origin'] = '*';
+  }
+  
+  return new Response(JSON.stringify(data), { status, headers });
 }
 
 // ================================================================================
@@ -5003,29 +5022,32 @@ function formatDateForTrading(date) {
 
 async function handleTradingLogin(request, env) {
   if (request.method !== 'POST') {
-    return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+    return jsonResponse({ success: false, error: 'Method not allowed' }, 405, request);
   }
 
   try {
-    const { username, password } = await request.json();
+    const body = await request.json();
+    const username = body.username;
+    const password = body.password;
+
+    console.log('[Trading Login] Attempt for user:', username);
 
     if (!username || !password) {
-      return jsonResponse({ success: false, error: 'Username and password are required' }, 400);
+      return jsonResponse({ success: false, error: 'Username and password are required' }, 400, request);
     }
 
     const stmt = env.DB.prepare('SELECT * FROM admin_users WHERE username = ?');
     const result = await stmt.bind(username).first();
 
     if (!result) {
-      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
+      console.log('[Trading Login] User not found:', username);
+      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401, request);
     }
 
-    // 支持两种密码格式：salt:hash（新格式）和 base64（旧格式）
     let isPasswordValid = false;
     const passwordHash = result.password_hash;
 
     if (passwordHash.includes(':')) {
-      // 新格式: salt:hash
       const [salt, storedHash] = passwordHash.split(':');
       const encoder = new TextEncoder();
       const data = encoder.encode(salt + password);
@@ -5034,13 +5056,13 @@ async function handleTradingLogin(request, env) {
       const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
       isPasswordValid = hash === storedHash;
     } else {
-      // 旧格式: base64(SHA-256(password))
       const inputHash = await hashAdminPassword(password);
       isPasswordValid = inputHash === passwordHash;
     }
 
     if (!isPasswordValid) {
-      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
+      console.log('[Trading Login] Invalid password for user:', username);
+      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401, request);
     }
 
     const secret = env.JWT_SECRET || 'agiera-default-jwt-secret-2024';
@@ -5053,42 +5075,61 @@ async function handleTradingLogin(request, env) {
     await env.DB.prepare('UPDATE admin_users SET last_login = ? WHERE id = ?')
       .bind(new Date().toISOString(), result.id).run();
 
-    // Set cookie for server-side authentication
-    const cookieValue = `trading_token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`;
+    const origin = request.headers.get('Origin');
+    const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : '*';
+    
+    const isProduction = origin && origin.includes('ustc.dev');
+    const cookieValue = isProduction 
+      ? `trading_token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400`
+      : `trading_token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`;
+
+    console.log('[Trading Login] Success for user:', username);
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'Set-Cookie': cookieValue
+    };
+    
+    if (allowedOrigin !== '*') {
+      headers['Access-Control-Allow-Origin'] = allowedOrigin;
+      headers['Access-Control-Allow-Credentials'] = 'true';
+    } else {
+      headers['Access-Control-Allow-Origin'] = '*';
+    }
 
     return new Response(JSON.stringify({
       success: true,
       token,
       user: { id: result.id, username: result.username, role: result.role }
-    }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Set-Cookie': cookieValue
-      }
-    });
+    }), { status: 200, headers });
   } catch (error) {
     console.error('[Trading Login Error]', error);
-    return jsonResponse({ success: false, error: 'Login failed' }, 500);
+    return jsonResponse({ success: false, error: 'Login failed: ' + error.message }, 500, request);
   }
 }
 
 async function handleTradingLogout(request, env) {
-  // Clear the trading_token cookie
   const clearCookie = 'trading_token=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  
+  const origin = request.headers.get('Origin');
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : '*';
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    'Set-Cookie': clearCookie
+  };
+  
+  if (allowedOrigin !== '*') {
+    headers['Access-Control-Allow-Origin'] = allowedOrigin;
+    headers['Access-Control-Allow-Credentials'] = 'true';
+  } else {
+    headers['Access-Control-Allow-Origin'] = '*';
+  }
 
   return new Response(JSON.stringify({
     success: true,
     message: 'Logged out successfully'
-  }), {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Set-Cookie': clearCookie
-    }
-  });
+  }), { status: 200, headers });
 }
 
 async function handleInitSuperAdmin(request, env) {
@@ -5176,7 +5217,7 @@ async function handleTradingVerify(request, env) {
 async function handleBuyTransaction(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, request);
   }
 
   if (request.method !== 'POST') {
@@ -5229,7 +5270,7 @@ async function handleBuyTransaction(request, env) {
 async function handleSellTransaction(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, request);
   }
 
   if (request.method !== 'POST') {
@@ -5321,7 +5362,7 @@ async function handleSellTransaction(request, env) {
 async function handleGetTransactions(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, request);
   }
 
   const url = new URL(request.url);
@@ -5373,7 +5414,7 @@ async function handleGetTransactions(request, env) {
 async function handleTransactionOperation(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, request);
   }
 
   const url = new URL(request.url);
@@ -5463,7 +5504,7 @@ async function handleTransactionOperation(request, env) {
 async function handleGetTransactionStats(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, request);
   }
 
   try {
@@ -5571,7 +5612,7 @@ async function handleGetTransactionStats(request, env) {
 async function handleAlertOperation(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, request);
   }
 
   // POST - 创建预警
@@ -5628,7 +5669,7 @@ async function handleAlertOperation(request, env) {
 async function handleAlertsOperation(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, request);
   }
 
   // GET - 获取所有预警
@@ -5667,7 +5708,7 @@ async function handleAlertsOperation(request, env) {
 async function handleGetNotifications(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, request);
   }
 
   try {
@@ -5688,7 +5729,7 @@ async function handleGetNotifications(request, env) {
 async function handleToleranceSettings(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, request);
   }
 
   // GET - 获取当前容错设置

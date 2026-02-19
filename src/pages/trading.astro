@@ -2216,8 +2216,11 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   async function apiRequest(endpoint, options = {}) {
+    const url = `${API_BASE}${endpoint}`;
+    console.log(`[API] ${options.method || 'GET'} ${url}`);
+    
     try {
-      const response = await fetch(`${API_BASE}${endpoint}`, {
+      const response = await fetch(url, {
         ...options,
         credentials: 'include',
         headers: {
@@ -2226,17 +2229,25 @@ const API_BASE = 'https://api.ustc.dev';
         }
       });
       
+      console.log(`[API] Response status: ${response.status}`);
+      
       if (!response.ok) {
-        return { success: false, error: `HTTP Error: ${response.status}` };
+        const errorText = await response.text();
+        console.error(`[API] HTTP Error ${response.status}:`, errorText);
+        return { success: false, error: `HTTP Error: ${response.status}`, details: errorText };
       }
       
       const text = await response.text();
       try {
-        return JSON.parse(text);
+        const data = JSON.parse(text);
+        console.log(`[API] Response data:`, data);
+        return data;
       } catch (e) {
-        return { success: false, error: 'Invalid JSON response' };
+        console.error(`[API] Invalid JSON response:`, text);
+        return { success: false, error: 'Invalid JSON response', details: text };
       }
     } catch (error) {
+      console.error(`[API] Network error:`, error);
       return { success: false, error: error.message || 'Network error' };
     }
   }
@@ -2262,13 +2273,12 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   function validateStatsData(stats) {
-    if (!stats) return false;
+    if (!stats) return { valid: false, reason: 'stats is null or undefined' };
     
     const requiredFields = ['total', 'week', 'month', 'weekly', 'monthly'];
     for (const field of requiredFields) {
       if (stats[field] === undefined) {
-        console.warn(`Stats validation: missing field ${field}`);
-        return false;
+        return { valid: false, reason: `missing field: ${field}` };
       }
     }
 
@@ -2276,13 +2286,19 @@ const API_BASE = 'https://api.ustc.dev';
       const totalFields = ['buy', 'sell', 'profit', 'quantityBought', 'quantitySold'];
       for (const field of totalFields) {
         if (typeof stats.total[field] !== 'number') {
-          console.warn(`Stats validation: invalid total.${field}`);
-          return false;
+          return { valid: false, reason: `invalid total.${field}: expected number, got ${typeof stats.total[field]}` };
         }
       }
     }
 
-    return true;
+    return { valid: true };
+  }
+
+  function renderEmptyStats() {
+    document.getElementById('stat-total-profit').textContent = '¥0.00';
+    document.getElementById('stat-month-profit').textContent = '¥0.00';
+    document.getElementById('stat-week-profit').textContent = '¥0.00';
+    document.getElementById('stat-total-quantity').textContent = '0.000g';
   }
 
   async function loadStats() {
@@ -2296,50 +2312,46 @@ const API_BASE = 'https://api.ustc.dev';
       if (monthlyLoading) monthlyLoading.classList.remove('hidden');
       
       const result = await apiRequest('/api/trading/stats');
-      if (result.success) {
-        const stats = result.stats;
+      
+      if (!result.success) {
+        const errorMsg = result.error || 'Unknown error';
+        console.error('[loadStats] API returned error:', errorMsg);
         
-        if (!validateStatsData(stats)) {
-          console.error('Stats data validation failed');
-          throw new Error(lang === 'zh' ? '数据验证失败' : 'Data validation failed');
+        if (errorMsg.includes('登录') || errorMsg.includes('Token') || errorMsg.includes('auth')) {
+          console.warn('[loadStats] Authentication error, redirecting to login...');
+          showLogin();
+          return;
         }
-
-        document.getElementById('stat-total-profit').textContent = formatCurrency(stats.total.profit);
-        document.getElementById('stat-month-profit').textContent = formatCurrency(stats.month.profit);
-        document.getElementById('stat-week-profit').textContent = formatCurrency(stats.week.profit);
         
-        const holdings = stats.total.quantityBought - stats.total.quantitySold;
-        document.getElementById('stat-total-quantity').textContent = `${holdings.toFixed(3)}g`;
+        renderEmptyStats();
+        renderCharts({ total: { profit: 0, buy: 0, sell: 0, quantityBought: 0, quantitySold: 0 }, week: { profit: 0 }, month: { profit: 0 }, weekly: [], monthly: [] });
+        return;
+      }
+      
+      const stats = result.stats;
+      const validation = validateStatsData(stats);
+      
+      if (!validation.valid) {
+        console.warn('[loadStats] Data validation failed:', validation.reason);
+        console.warn('[loadStats] Received stats:', JSON.stringify(stats, null, 2));
+        renderEmptyStats();
+        renderCharts({ total: { profit: 0, buy: 0, sell: 0, quantityBought: 0, quantitySold: 0 }, week: { profit: 0 }, month: { profit: 0 }, weekly: [], monthly: [] });
+        return;
+      }
 
-        renderCharts(stats);
-      }
+      document.getElementById('stat-total-profit').textContent = formatCurrency(stats.total.profit);
+      document.getElementById('stat-month-profit').textContent = formatCurrency(stats.month.profit);
+      document.getElementById('stat-week-profit').textContent = formatCurrency(stats.week.profit);
+      
+      const holdings = stats.total.quantityBought - stats.total.quantitySold;
+      document.getElementById('stat-total-quantity').textContent = `${holdings.toFixed(3)}g`;
+
+      renderCharts(stats);
     } catch (error) {
-      console.error('Failed to load stats:', error);
-      const errorMsg = lang === 'zh' ? '加载失败' : 'Load failed';
-      if (weeklyChart) {
-        weeklyChart.innerHTML = `
-          <div class="chart-error">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span>${errorMsg}</span>
-          </div>
-        `;
-      }
-      if (monthlyChart) {
-        monthlyChart.innerHTML = `
-          <div class="chart-error">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span>${errorMsg}</span>
-          </div>
-        `;
-      }
+      console.error('[loadStats] Exception:', error);
+      renderEmptyStats();
+      const emptyStats = { total: { profit: 0, buy: 0, sell: 0, quantityBought: 0, quantitySold: 0 }, week: { profit: 0 }, month: { profit: 0 }, weekly: [], monthly: [] };
+      renderCharts(emptyStats);
     } finally {
       if (weeklyLoading) weeklyLoading.classList.add('hidden');
       if (monthlyLoading) monthlyLoading.classList.add('hidden');
@@ -3097,19 +3109,25 @@ const API_BASE = 'https://api.ustc.dev';
         return;
       }
 
+      console.log('[Login] Attempting login for user:', username);
+      
       const result = await apiRequest('/api/trading/login', {
         method: 'POST',
         body: JSON.stringify({ username, password })
       });
 
+      console.log('[Login] API response:', result);
+
       if (result.success) {
+        console.log('[Login] Login successful, showing dashboard...');
         showDashboard();
       } else {
         const errorMsg = result.error || (lang === 'zh' ? '登录失败' : 'Login failed');
+        console.error('[Login] Login failed:', errorMsg);
         alert(errorMsg);
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('[Login] Exception:', error);
       alert(lang === 'zh' ? '登录请求失败，请检查网络连接' : 'Login request failed, please check network connection');
     } finally {
       btnText?.classList.remove('hidden');
