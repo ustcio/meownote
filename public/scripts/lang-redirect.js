@@ -27,13 +27,23 @@
       console.warn('Failed to read language preference:', e);
     }
     
-    // If no stored preference, default to 'en' and exit
-    if (!storedLang || storedLang === 'en') {
+    // If no stored preference, default to 'zh' (Chinese)
+    if (!storedLang) {
+      storedLang = 'zh';
+      try {
+        localStorage.setItem('preferred-lang', 'zh');
+      } catch (e) {
+        console.warn('Failed to save default language preference:', e);
+      }
+    }
+    
+    // If stored language is 'en', set lang attribute and exit (root path is English)
+    if (storedLang === 'en') {
       document.documentElement.setAttribute('lang', 'en');
       return;
     }
     
-    // If stored language is not 'en', redirect to language-prefixed URL
+    // If stored language is 'zh', redirect to Chinese version
     if (storedLang === 'zh') {
       const newPath = `/zh${path === '/' ? '' : path}`;
       // Prevent redirect loops
@@ -48,7 +58,7 @@
   } catch (error) {
     // Global error boundary - don't break the page
     console.error('Language redirect script failed:', error);
-    // Default to English on error
-    document.documentElement.setAttribute('lang', 'en');
+    // Default to Chinese on error
+    document.documentElement.setAttribute('lang', 'zh');
   }
 })();

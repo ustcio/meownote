@@ -19,6 +19,36 @@ html {
   font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+/* Chinese font for zh language pages */
+html[lang="zh"] {
+  font-family: var(--font-chinese);
+}
+
+html[lang="zh"] body {
+  font-family: var(--font-chinese);
+}
+
+html[lang="zh"] h1,
+html[lang="zh"] h2,
+html[lang="zh"] h3,
+html[lang="zh"] h4,
+html[lang="zh"] h5,
+html[lang="zh"] h6 {
+  font-family: var(--font-chinese);
+}
+
+html[lang="zh"] p,
+html[lang="zh"] span,
+html[lang="zh"] a,
+html[lang="zh"] li,
+html[lang="zh"] label,
+html[lang="zh"] button,
+html[lang="zh"] input,
+html[lang="zh"] textarea,
+html[lang="zh"] select {
+  font-family: var(--font-chinese);
+}
+
 body {
   font-family: var(--font-sans);
   font-size: var(--text-base);
