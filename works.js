@@ -4772,34 +4772,34 @@ async function handleTradingVerify(request, env) {
   }
 
   if (!token) {
-    return jsonResponse({ success: false, error: 'No token provided' }, 401);
+    return jsonResponse({ success: false, error: 'No token provided' }, 401, [], request);
   }
 
   const secret = getJwtSecret(env);
   const verification = await verifyAdminToken(token, secret);
   
   if (!verification) {
-    return jsonResponse({ success: false, error: 'Invalid token' }, 401);
+    return jsonResponse({ success: false, error: 'Invalid token' }, 401, [], request);
   }
 
-  return jsonResponse({ success: true, user: verification });
+  return jsonResponse({ success: true, user: verification }, 200, [], request);
 }
 
 async function handleTradingLogout(request, env) {
   const isProduction = request.url.startsWith('https://');
   const cookieValue = `trading_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0${isProduction ? '; Domain=.ustc.dev' : ''}`;
   
-  return jsonResponse({ success: true }, 200, [cookieValue]);
+  return jsonResponse({ success: true }, 200, [cookieValue], request);
 }
 
 async function handleBuyTransaction(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, [], request);
   }
 
   if (request.method !== 'POST') {
-    return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+    return jsonResponse({ success: false, error: 'Method not allowed' }, 405, [], request);
   }
 
   try {
@@ -4807,12 +4807,12 @@ async function handleBuyTransaction(request, env) {
 
     const priceValidation = validateNumber(price, TRADING_CONFIG.MIN_PRICE, TRADING_CONFIG.MAX_PRICE, 'Buy price');
     if (!priceValidation.valid) {
-      return jsonResponse({ success: false, error: priceValidation.error }, 400);
+      return jsonResponse({ success: false, error: priceValidation.error }, 400, [], request);
     }
 
     const quantityValidation = validateNumber(quantity, TRADING_CONFIG.MIN_QUANTITY, TRADING_CONFIG.MAX_QUANTITY, 'Quantity');
     if (!quantityValidation.valid) {
-      return jsonResponse({ success: false, error: quantityValidation.error }, 400);
+      return jsonResponse({ success: false, error: quantityValidation.error }, 400, [], request);
     }
 
     const buyPrice = priceValidation.value;
@@ -4838,21 +4838,21 @@ async function handleBuyTransaction(request, env) {
         notes,
         createdAt: now
       }
-    });
+    }, 200, [], request);
   } catch (error) {
     console.error('[Buy Transaction Error]', error);
-    return jsonResponse({ success: false, error: 'Failed to create buy transaction' }, 500);
+    return jsonResponse({ success: false, error: 'Failed to create buy transaction' }, 500, [], request);
   }
 }
 
 async function handleSellTransaction(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, [], request);
   }
 
   if (request.method !== 'POST') {
-    return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+    return jsonResponse({ success: false, error: 'Method not allowed' }, 405, [], request);
   }
 
   try {
@@ -4861,12 +4861,12 @@ async function handleSellTransaction(request, env) {
 
     const priceValidation = validateNumber(sellPriceInput, TRADING_CONFIG.MIN_PRICE, TRADING_CONFIG.MAX_PRICE, 'Sell price');
     if (!priceValidation.valid) {
-      return jsonResponse({ success: false, error: priceValidation.error }, 400);
+      return jsonResponse({ success: false, error: priceValidation.error }, 400, [], request);
     }
 
     const quantityValidation = validateNumber(quantity, TRADING_CONFIG.MIN_QUANTITY, TRADING_CONFIG.MAX_QUANTITY, 'Quantity');
     if (!quantityValidation.valid) {
-      return jsonResponse({ success: false, error: quantityValidation.error }, 400);
+      return jsonResponse({ success: false, error: quantityValidation.error }, 400, [], request);
     }
 
     const sellPrice = priceValidation.value;
@@ -4930,17 +4930,17 @@ async function handleSellTransaction(request, env) {
         notes,
         createdAt: now
       }
-    });
+    }, 200, [], request);
   } catch (error) {
     console.error('[Sell Transaction Error]', error);
-    return jsonResponse({ success: false, error: 'Failed to create sell transaction' }, 500);
+    return jsonResponse({ success: false, error: 'Failed to create sell transaction' }, 500, [], request);
   }
 }
 
 async function handleGetTransactions(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, [], request);
   }
 
   const url = new URL(request.url);
@@ -4982,34 +4982,34 @@ async function handleGetTransactions(request, env) {
       success: true,
       transactions: dataResult.results,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
-    });
+    }, 200, [], request);
   } catch (error) {
     console.error('[Get Transactions Error]', error);
-    return jsonResponse({ success: false, error: 'Failed to fetch transactions' }, 500);
+    return jsonResponse({ success: false, error: 'Failed to fetch transactions' }, 500, [], request);
   }
 }
 
 async function handleTransactionOperation(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, [], request);
   }
 
   const url = new URL(request.url);
   const id = url.searchParams.get('id');
 
   if (!id) {
-    return jsonResponse({ success: false, error: 'Transaction ID is required' }, 400);
+    return jsonResponse({ success: false, error: 'Transaction ID is required' }, 400, [], request);
   }
 
   if (request.method === 'DELETE') {
     try {
       const stmt = env.DB.prepare('DELETE FROM gold_transactions WHERE id = ?');
       await stmt.bind(id).run();
-      return jsonResponse({ success: true, message: 'Transaction deleted' });
+      return jsonResponse({ success: true, message: 'Transaction deleted' }, 200, [], request);
     } catch (error) {
       console.error('[Delete Transaction Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to delete transaction' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to delete transaction' }, 500, [], request);
     }
   }
 
@@ -5021,7 +5021,7 @@ async function handleTransactionOperation(request, env) {
       const existing = await checkStmt.bind(id).first();
       
       if (!existing) {
-        return jsonResponse({ success: false, error: 'Transaction not found' }, 404);
+        return jsonResponse({ success: false, error: 'Transaction not found' }, 404, [], request);
       }
 
       const newPrice = price !== undefined ? parseFloat(price) : existing.price;
@@ -5034,7 +5034,7 @@ async function handleTransactionOperation(request, env) {
       if (existing.type === 'sell' && newActualSellPrice !== null && newActualSellPrice !== undefined) {
         const avgBuyStmt = env.DB.prepare(`
           SELECT 
-            COALESCE(SUM(CASE WHEN type = 'buy' THEN quantity ELSE 0 END), 0) as total_bought,
+            COALESCE(SUM(CASE WHEN type = 'buy' THEN quantity ELSE 0 END),0) as total_bought,
             COALESCE(SUM(CASE WHEN type = 'buy' THEN total_amount ELSE 0 END), 0) as total_cost
           FROM gold_transactions 
           WHERE type = 'buy' AND status = 'completed'
@@ -5069,20 +5069,20 @@ async function handleTransactionOperation(request, env) {
           profit: newProfit,
           notes: newNotes
         }
-      });
+      }, 200, [], request);
     } catch (error) {
       console.error('[Update Transaction Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to update transaction' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to update transaction' }, 500, [], request);
     }
   }
 
-  return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+  return jsonResponse({ success: false, error: 'Method not allowed' }, 405, [], request);
 }
 
 async function handleGetTransactionStats(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, [], request);
   }
 
   try {
@@ -5180,17 +5180,17 @@ async function handleGetTransactionStats(request, env) {
         monthly: monthlyResult.results || [],
         weekly: weeklyResult.results || []
       }
-    });
+    }, 200, [], request);
   } catch (error) {
     console.error('[Get Transaction Stats Error]', error);
-    return jsonResponse({ success: false, error: 'Failed to fetch statistics' }, 500);
+    return jsonResponse({ success: false, error: 'Failed to fetch statistics' }, 500, [], request);
   }
 }
 
 async function handleAlertOperation(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, [], request);
   }
 
   // POST - 创建预警
@@ -5199,12 +5199,12 @@ async function handleAlertOperation(request, env) {
       const { alertType, targetPrice } = await request.json();
 
       if (!['buy', 'sell'].includes(alertType)) {
-        return jsonResponse({ success: false, error: 'Invalid alert type' }, 400);
+        return jsonResponse({ success: false, error: 'Invalid alert type' }, 400, [], request);
       }
 
       const priceValidation = validateNumber(targetPrice, TRADING_CONFIG.MIN_PRICE, TRADING_CONFIG.MAX_PRICE, 'Target price');
       if (!priceValidation.valid) {
-        return jsonResponse({ success: false, error: priceValidation.error }, 400);
+        return jsonResponse({ success: false, error: priceValidation.error }, 400, [], request);
       }
 
       const stmt = env.DB.prepare(`INSERT INTO price_alerts (alert_type, target_price, created_at) VALUES (?, ?, ?)`);
@@ -5214,10 +5214,10 @@ async function handleAlertOperation(request, env) {
       return jsonResponse({
         success: true,
         alert: { id: result.meta.last_row_id, alertType, targetPrice: priceValidation.value, createdAt: now }
-      });
+      }, 200, [], request);
     } catch (error) {
       console.error('[Create Alert Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to create alert' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to create alert' }, 500, [], request);
     }
   }
 
@@ -5228,26 +5228,26 @@ async function handleAlertOperation(request, env) {
       const id = url.searchParams.get('id');
 
       if (!id) {
-        return jsonResponse({ success: false, error: 'Alert ID required' }, 400);
+        return jsonResponse({ success: false, error: 'Alert ID required' }, 400, [], request);
       }
 
       const stmt = env.DB.prepare(`DELETE FROM price_alerts WHERE id = ?`);
       await stmt.bind(id).run();
 
-      return jsonResponse({ success: true, message: 'Alert deleted' });
+      return jsonResponse({ success: true, message: 'Alert deleted' }, 200, [], request);
     } catch (error) {
       console.error('[Delete Alert Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to delete alert' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to delete alert' }, 500, [], request);
     }
   }
 
-  return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+  return jsonResponse({ success: false, error: 'Method not allowed' }, 405, [], request);
 }
 
 async function handleAlertsOperation(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, [], request);
   }
 
   // GET - 获取所有预警
@@ -5256,10 +5256,10 @@ async function handleAlertsOperation(request, env) {
       const stmt = env.DB.prepare(`SELECT * FROM price_alerts ORDER BY created_at DESC`);
       const result = await stmt.all();
 
-      return jsonResponse({ success: true, alerts: result.results });
+      return jsonResponse({ success: true, alerts: result.results }, 200, [], request);
     } catch (error) {
       console.error('[Get Alerts Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to fetch alerts' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to fetch alerts' }, 500, [], request);
     }
   }
 
@@ -5273,30 +5273,30 @@ async function handleAlertsOperation(request, env) {
         success: true,
         message: 'All alerts deleted',
         deletedCount: result.meta?.changes || 0
-      });
+      }, 200, [], request);
     } catch (error) {
       console.error('[Delete All Alerts Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to delete alerts' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to delete alerts' }, 500, [], request);
     }
   }
 
-  return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+  return jsonResponse({ success: false, error: 'Method not allowed' }, 405, [], request);
 }
 
 async function handleGetNotifications(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, [], request);
   }
 
   try {
     const stmt = env.DB.prepare(`SELECT * FROM notification_queue WHERE status = 'pending' ORDER BY created_at DESC LIMIT 50`);
     const result = await stmt.all();
 
-    return jsonResponse({ success: true, notifications: result.results });
+    return jsonResponse({ success: true, notifications: result.results }, 200, [], request);
   } catch (error) {
     console.error('[Get Notifications Error]', error);
-    return jsonResponse({ success: false, error: 'Failed to fetch notifications' }, 500);
+    return jsonResponse({ success: false, error: 'Failed to fetch notifications' }, 500, [], request);
   }
 }
 
@@ -5307,7 +5307,7 @@ async function handleGetNotifications(request, env) {
 async function handleToleranceSettings(request, env) {
   const authResult = await verifyAdminAuth(request, env);
   if (!authResult.success) {
-    return jsonResponse({ success: false, error: authResult.message }, 401);
+    return jsonResponse({ success: false, error: authResult.message }, 401, [], request);
   }
 
   // GET - 获取当前容错设置
@@ -5323,7 +5323,7 @@ async function handleToleranceSettings(request, env) {
         return jsonResponse({
           success: true,
           settings: { buyTolerance: 2.0, sellTolerance: 2.0, updatedAt: new Date().toISOString() }
-        });
+        }, 200, [], request);
       }
 
       return jsonResponse({
@@ -5333,10 +5333,10 @@ async function handleToleranceSettings(request, env) {
           sellTolerance: result.sell_tolerance,
           updatedAt: result.updated_at
         }
-      });
+      }, 200, [], request);
     } catch (error) {
       console.error('[Get Tolerance Settings Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to fetch tolerance settings' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to fetch tolerance settings' }, 500, [], request);
     }
   }
 
@@ -5350,15 +5350,15 @@ async function handleToleranceSettings(request, env) {
       const sellToleranceNum = parseFloat(sellTolerance);
 
       if (isNaN(buyToleranceNum) || isNaN(sellToleranceNum)) {
-        return jsonResponse({ success: false, error: '容错值必须是有效数字' }, 400);
+        return jsonResponse({ success: false, error: '容错值必须是有效数字' }, 400, [], request);
       }
 
       if (buyToleranceNum < 0.1 || buyToleranceNum > 100) {
-        return jsonResponse({ success: false, error: '买入容错值必须在 0.1-100 之间' }, 400);
+        return jsonResponse({ success: false, error: '买入容错值必须在 0.1-100 之间' }, 400, [], request);
       }
 
       if (sellToleranceNum < 0.1 || sellToleranceNum > 100) {
-        return jsonResponse({ success: false, error: '卖出容错值必须在 0.1-100 之间' }, 400);
+        return jsonResponse({ success: false, error: '卖出容错值必须在 0.1-100 之间' }, 400, [], request);
       }
 
       const now = new Date().toISOString();
@@ -5390,14 +5390,14 @@ async function handleToleranceSettings(request, env) {
           sellTolerance: sellToleranceNum,
           updatedAt: now
         }
-      });
+      }, 200, [], request);
     } catch (error) {
       console.error('[Save Tolerance Settings Error]', error);
-      return jsonResponse({ success: false, error: 'Failed to save tolerance settings' }, 500);
+      return jsonResponse({ success: false, error: 'Failed to save tolerance settings' }, 500, [], request);
     }
   }
 
-  return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+  return jsonResponse({ success: false, error: 'Method not allowed' }, 405, [], request);
 }
 
 // ================================================================================
