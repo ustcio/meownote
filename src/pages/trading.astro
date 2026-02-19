@@ -3,52 +3,11 @@ import Layout from '@layouts/Layout.astro';
 
 const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
 
+// Note: Static build doesn't support server-side auth check
+// Authentication is handled client-side via trading_token cookie
+// isAuthenticated is always false on server, determined client-side
+
 const API_BASE = 'https://api.ustc.dev';
-const JWT_SECRET = import.meta.env.JWT_SECRET;
-
-let isAuthenticated = false;
-let authUser = null;
-
-const cookieHeader = Astro.request.headers.get('Cookie') || '';
-const cookies = cookieHeader.split(';').map(c => c.trim());
-const tokenCookie = cookies.find(c => c.startsWith('trading_token='));
-
-if (tokenCookie && JWT_SECRET) {
-  const token = tokenCookie.substring('trading_token='.length);
-  
-  try {
-    const parts = token.split('.');
-    if (parts.length === 3) {
-      const [header, body, sig] = parts;
-      const payload = JSON.parse(atob(body));
-      
-      if (payload.exp && payload.exp > Date.now()) {
-        const key = await crypto.subtle.importKey(
-          'raw',
-          new TextEncoder().encode(JWT_SECRET),
-          { name: 'HMAC', hash: 'SHA-256' },
-          false,
-          ['verify']
-        );
-        
-        const signatureBuffer = Uint8Array.from(atob(sig), c => c.charCodeAt(0));
-        const isValid = await crypto.subtle.verify(
-          'HMAC',
-          key,
-          signatureBuffer,
-          new TextEncoder().encode(`${header}.${body}`)
-        );
-        
-        if (isValid) {
-          isAuthenticated = true;
-          authUser = payload;
-        }
-      }
-    }
-  } catch (e) {
-    isAuthenticated = false;
-  }
-}
 ---
 
 <Layout 
@@ -56,7 +15,6 @@ if (tokenCookie && JWT_SECRET) {
   description={lang === 'zh' ? '黄金交易管理与收益分析' : 'Gold trading management and profit analysis'}
 >
   <section class="trading" id="trading-app">
-    {!isAuthenticated && (
     <div class="trading-login" id="login-section">
       <div class="login-card">
         <div class="login-icon">
@@ -76,7 +34,7 @@ if (tokenCookie && JWT_SECRET) {
         </div>
         <h1 class="login-title">{lang === 'zh' ? '超级管理员' : 'Super Admin'}</h1>
         <p class="login-subtitle">{lang === 'zh' ? '登录以访问交易管理系统' : 'Sign in to access trading system'}</p>
-        
+
         <form class="login-form" id="trading-login-form">
           <div class="form-group">
             <label for="trading-username">{lang === 'zh' ? '用户名' : 'Username'}</label>
@@ -119,10 +77,8 @@ if (tokenCookie && JWT_SECRET) {
         </form>
       </div>
     </div>
-    )}
 
-    {isAuthenticated && (
-    <div class="trading-dashboard" id="dashboard-section">
+    <div class="trading-dashboard hidden" id="dashboard-section">
       <div class="dashboard-header">
         <div class="header-left">
           <h1 class="dashboard-title">{lang === 'zh' ? '黄金交易管理' : 'Gold Trading'}</h1>
@@ -395,7 +351,6 @@ if (tokenCookie && JWT_SECRET) {
         </div>
       </div>
     </div>
-    )}
   </section>
 </Layout>
 
@@ -2206,10 +2161,23 @@ if (tokenCookie && JWT_SECRET) {
   }
 </style>
 
-<script define:vars={{ isAuthenticated }}>
+<script>
   const API_BASE = 'https://api.ustc.dev';
   const lang = document.documentElement.lang === 'zh' ? 'zh' : 'en';
-  const serverAuthenticated = isAuthenticated;
+
+  // Client-side authentication check via cookie
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
+  function hasValidToken() {
+    return !!getCookie('trading_token');
+  }
+
+  const isClientAuthenticated = hasValidToken();
 
   const loginSection = document.getElementById('login-section');
   const dashboardSection = document.getElementById('dashboard-section');
@@ -2220,6 +2188,17 @@ if (tokenCookie && JWT_SECRET) {
 
   let currentPage = 1;
   let totalPages = 1;
+
+  function showLogin() {
+    loginSection?.classList.remove('hidden');
+    dashboardSection?.classList.add('hidden');
+  }
+
+  function showDashboard() {
+    loginSection?.classList.add('hidden');
+    dashboardSection?.classList.remove('hidden');
+    loadDashboard();
+  }
 
   function formatCurrency(value) {
     const num = parseFloat(value) || 0;
@@ -2260,17 +2239,6 @@ if (tokenCookie && JWT_SECRET) {
     } catch (error) {
       return { success: false, error: error.message || 'Network error' };
     }
-  }
-
-  function showLogin() {
-    loginSection?.classList.remove('hidden');
-    dashboardSection?.classList.add('hidden');
-  }
-
-  function showDashboard() {
-    loginSection?.classList.add('hidden');
-    dashboardSection?.classList.remove('hidden');
-    loadDashboard();
   }
 
   async function loadDashboard() {
@@ -3130,7 +3098,7 @@ if (tokenCookie && JWT_SECRET) {
       });
 
       if (result.success) {
-        window.location.reload();
+        showDashboard();
       } else {
         alert(result.error || 'Login failed');
       }
@@ -3267,7 +3235,10 @@ if (tokenCookie && JWT_SECRET) {
   (window as any).updateSellPreview = updateSellPreview;
   (window as any).deleteAlert = deleteAlert;
 
-  if (serverAuthenticated) {
-    loadDashboard();
+  // Initialize view based on client-side authentication status
+  if (isClientAuthenticated) {
+    showDashboard();
+  } else {
+    showLogin();
   }
 </script>

@@ -121,6 +121,7 @@ const ROUTES = {
   '/api/admin/upload/complete': { handler: handleUploadComplete },
   '/api/admin/upload/abort': { handler: handleUploadAbort },
   '/api/trading/login': { handler: handleTradingLogin },
+  '/api/trading/logout': { handler: handleTradingLogout },
   '/api/trading/verify': { handler: handleTradingVerify },
   '/api/trading/buy': { handler: handleBuyTransaction },
   '/api/trading/sell': { handler: handleSellTransaction },
@@ -4976,15 +4977,42 @@ async function handleTradingLogin(request, env) {
     await env.DB.prepare('UPDATE admin_users SET last_login = ? WHERE id = ?')
       .bind(new Date().toISOString(), result.id).run();
 
-    return jsonResponse({
+    // Set cookie for server-side authentication
+    const cookieValue = `trading_token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`;
+
+    return new Response(JSON.stringify({
       success: true,
       token,
       user: { id: result.id, username: result.username, role: result.role }
+    }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Set-Cookie': cookieValue
+      }
     });
   } catch (error) {
     console.error('[Trading Login Error]', error);
     return jsonResponse({ success: false, error: 'Login failed' }, 500);
   }
+}
+
+async function handleTradingLogout(request, env) {
+  // Clear the trading_token cookie
+  const clearCookie = 'trading_token=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+  return new Response(JSON.stringify({
+    success: true,
+    message: 'Logged out successfully'
+  }), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Set-Cookie': clearCookie
+    }
+  });
 }
 
 async function handleTradingVerify(request, env) {
