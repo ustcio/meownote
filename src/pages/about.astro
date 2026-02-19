@@ -1,69 +1,55 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import { getLangFromUrl, useTranslations } from '@i18n';
 import Icon from '@components/ui/Icon.astro';
-
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
 
 const features = [
   {
     icon: 'zap',
-    title: lang === 'zh' ? '高性能' : 'High Performance',
-    description: lang === 'zh' 
-      ? '极速响应，毫秒级延迟'
-      : 'Lightning fast response with millisecond latency'
+    title: '高性能',
+    description: '极速响应，毫秒级延迟'
   },
   {
     icon: 'shield',
-    title: lang === 'zh' ? '安全可靠' : 'Secure & Reliable',
-    description: lang === 'zh'
-      ? '企业级安全保障，数据加密传输'
-      : 'Enterprise-grade security with encrypted data transmission'
+    title: '安全可靠',
+    description: '企业级安全保障，数据加密传输'
   },
   {
     icon: 'cpu',
-    title: lang === 'zh' ? '智能理解' : 'Intelligent Understanding',
-    description: lang === 'zh'
-      ? '深度理解上下文，精准响应需求'
-      : 'Deep context understanding for precise responses'
+    title: '智能理解',
+    description: '深度理解上下文，精准响应需求'
   },
   {
     icon: 'globe',
-    title: lang === 'zh' ? '全球部署' : 'Global Deployment',
-    description: lang === 'zh'
-      ? '遍布全球的节点，就近访问'
-      : 'Global nodes for nearest access'
+    title: '全球部署',
+    description: '遍布全球的节点，就近访问'
   },
 ];
 
 const team = [
-  { name: 'Alex Chen', role: lang === 'zh' ? '创始人 & CEO' : 'Founder & CEO' },
-  { name: 'Sarah Kim', role: lang === 'zh' ? '技术总监' : 'CTO' },
-  { name: 'Mike Wang', role: lang === 'zh' ? '产品负责人' : 'Head of Product' },
+  { name: 'Alex Chen', role: '创始人 & CEO' },
+  { name: 'Sarah Kim', role: '技术总监' },
+  { name: 'Mike Wang', role: '产品负责人' },
 ];
 ---
 
 <Layout 
-  title={lang === 'zh' ? '关于 - Meow Note' : 'About - Meow Note'}
-  description={t('about.subtitle')}
+  title="关于 - Meow Note"
+  description="构建AI的未来"
 >
   <section class="about">
     <div class="about-container">
       <div class="about-hero">
-        <h1 class="about-title">{t('about.title')}</h1>
-        <p class="about-subtitle">{t('about.subtitle')}</p>
+        <h1 class="about-title">关于</h1>
+        <p class="about-subtitle">构建AI的未来</p>
       </div>
       
       <div class="about-content">
         <div class="about-section">
           <h2 class="section-title">
-            {lang === 'zh' ? '我们的使命' : 'Our Mission'}
+            我们的使命
           </h2>
           <p class="section-text">
-            {lang === 'zh'
-              ? '我们致力于构建安全、可靠、易用的AI工具，让每个人都能享受到人工智能带来的便利。'
-              : 'We are dedicated to building safe, reliable, and easy-to-use AI tools, making artificial intelligence accessible to everyone.'}
+            我们致力于构建安全、可靠、易用的AI工具，让每个人都能享受到人工智能带来的便利。
           </p>
         </div>
         
@@ -81,7 +67,7 @@ const team = [
         
         <div class="team-section">
           <h2 class="section-title">
-            {lang === 'zh' ? '核心团队' : 'Core Team'}
+            核心团队
           </h2>
           <div class="team-grid">
             {team.map((member) => (

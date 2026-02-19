@@ -1,97 +1,12 @@
 export const languages = {
-  en: 'English',
   zh: '中文',
 } as const;
 
-export const defaultLang = 'en';
+export const defaultLang = 'zh';
 
 export type Lang = keyof typeof languages;
 
 export const ui = {
-  en: {
-    'nav.home': 'Home',
-    'nav.research': 'Research',
-    'nav.chatbot': 'ChatBot',
-    'nav.kit': 'Kit',
-    'nav.about': 'About',
-    'nav.profile': 'Profile',
-    'hero.title': 'Build the future with',
-    'hero.gradient': 'AGI.',
-    'hero.subtitle': 'Powerful AI tools and intelligent assistants for developers and creators.',
-    'hero.cta.primary': 'Get Started',
-    'hero.cta.secondary': 'Learn More',
-    'stats.visitors': 'Visitors',
-    'stats.online': 'Online Now',
-    'footer.rights': 'All rights reserved.',
-    'footer.privacy': 'Privacy Policy',
-    'footer.terms': 'Terms of Service',
-    'theme.light': 'Light',
-    'theme.dark': 'Dark',
-    'chatbot.title': 'AI Assistant',
-    'chatbot.placeholder': 'Type your message...',
-    'chatbot.send': 'Send',
-    'chatbot.newChat': 'New Chat',
-    'chatbot.chatHistory': 'Chat History',
-    'chatbot.today': 'Today',
-    'chatbot.last7Days': 'Last 7 days',
-    'chatbot.earlier': 'Earlier',
-    'chatbot.search': 'Search chats...',
-    'chatbot.closeSidebar': 'Close sidebar',
-    'chatbot.searchHistory': 'Search chat history',
-    'kit.title': 'Super Kit',
-    'kit.subtitle': 'Professional tools for your workflow',
-    'kit.category.finance': 'Finance',
-    'kit.category.network': 'Network',
-    'kit.category.security': 'Security',
-    'kit.category.converter': 'Converter',
-    'research.title': 'AI Timeline',
-    'research.subtitle': 'Key moments in artificial intelligence history',
-    'about.title': 'About',
-    'about.subtitle': 'Building the future of AI',
-    'auth.login': 'Login',
-    'auth.signup': 'Sign Up',
-    'auth.logout': 'Logout',
-    'auth.email': 'Email',
-    'auth.password': 'Password',
-    'auth.username': 'Username',
-    'auth.confirmPassword': 'Confirm Password',
-    'auth.noAccount': "Don't have an account?",
-    'auth.hasAccount': 'Already have an account?',
-    'auth.loginSuccess': 'Login successful!',
-    'auth.signupSuccess': 'Registration successful!',
-    'auth.loginError': 'Login failed',
-    'auth.signupError': 'Registration failed',
-    'aria.toggleMenu': 'Toggle menu',
-    'aria.mainNav': 'Main navigation',
-    'aria.mobileNav': 'Mobile navigation',
-    'aria.selectModel': 'Select model',
-    'aria.modelList': 'Model list',
-    'aria.chatInput': 'Chat input',
-    'aria.sendMessage': 'Send message',
-    'aria.stopGeneration': 'Stop generation',
-    'aria.openMenu': 'Open menu',
-    'aria.chatHistory': 'Chat history',
-    'aria.closeSidebar': 'Close sidebar',
-    'aria.searchHistory': 'Search chat history',
-    'aria.messagesList': 'Messages list',
-    'aria.chatArea': 'Chat area',
-    'chatbot.settings': 'Settings',
-    'chatbot.clearChats': 'Clear chats',
-    'chatbot.exportChat': 'Export chat',
-    'chatbot.welcomeTitle': "Hello, I'm Meow",
-    'chatbot.welcomeSubtitle': 'Your intelligent AI assistant with Qwen and Doubao 2.0 models',
-    'chatbot.quickStart': 'Quick start',
-    'chatbot.writeCode': 'Write code',
-    'chatbot.answerQuestion': 'Answer question',
-    'chatbot.writeDocument': 'Write document',
-    'chatbot.brainstorm': 'Brainstorm',
-    'chatbot.inputHint': 'AI may produce inaccurate information, please verify important details',
-    'chatbot.writeCodePrompt': 'Write a Python function for quick sort algorithm',
-    'chatbot.answerQuestionPrompt': 'Explain the basic principles of quantum computing',
-    'chatbot.writeDocumentPrompt': 'Write a business email about project progress report',
-    'chatbot.brainstormPrompt': 'Give me some ideas on how to improve team efficiency',
-    'chatbot.inputPlaceholder': 'Type a message... (Shift+Enter for new line)',
-  },
   zh: {
     'nav.home': '首页',
     'nav.research': '研究',
@@ -178,14 +93,12 @@ export const ui = {
   },
 } as const;
 
-export function getLangFromUrl(url: URL): Lang {
-  const [, lang] = url.pathname.split('/');
-  if (lang in ui) return lang as Lang;
-  return defaultLang;
+export function getLangFromUrl(_url: URL): Lang {
+  return 'zh';
 }
 
-export function useTranslations(lang: Lang) {
+export function useTranslations(_lang: Lang) {
   return function t(key: keyof typeof ui[typeof defaultLang]): string {
-    return ui[lang][key] || ui[defaultLang][key];
+    return ui.zh[key] || '';
   };
 }

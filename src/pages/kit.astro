@@ -1,35 +1,33 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
-
 const tools = [
   {
     id: 'gold',
     href: '/kit/gold',
     icon: 'clock',
-    title: lang === 'zh' ? '黄金价格' : 'Gold Price',
-    desc: lang === 'zh' ? '实时追踪国内外黄金价格' : 'Track domestic and international gold prices'
+    title: '黄金价格',
+    desc: '实时追踪国内外黄金价格'
   },
   {
     id: 'academic',
     href: '/kit/academic',
     icon: 'book',
-    title: lang === 'zh' ? '学术工具' : 'Academic Tools',
-    desc: lang === 'zh' ? 'DOI引用转换、BibTeX生成等' : 'DOI citation, BibTeX generator & more'
+    title: '学术工具',
+    desc: 'DOI引用转换、BibTeX生成等'
   }
 ];
 ---
 
 <Layout 
-  title={lang === 'zh' ? '工具箱 - Meow Note' : 'Toolkit - Meow Note'}
-  description={lang === 'zh' ? '实用工具集合' : 'Useful tools collection'}
+  title="工具箱 - Meow Note"
+  description="实用工具集合"
 >
   <section class="kit">
     <div class="kit-container">
       <div class="kit-header">
-        <h1 class="kit-title">{lang === 'zh' ? '工具箱' : 'Toolkit'}</h1>
-        <p class="kit-desc">{lang === 'zh' ? '精选实用工具' : 'Curated useful tools'}</p>
+        <h1 class="kit-title">工具箱</h1>
+        <p class="kit-desc">精选实用工具</p>
       </div>
       
       <div class="tools-list">

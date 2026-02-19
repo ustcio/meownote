@@ -1,12 +1,10 @@
 ---
 import Layout from '@layouts/Layout.astro';
-
-const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
 ---
 
 <Layout 
-  title={lang === 'zh' ? '个人资料 - Meow Note' : 'Profile - Meow Note'}
-  description={lang === 'zh' ? '查看和管理您的个人资料' : 'View and manage your profile'}
+  title="个人资料 - Meow Note"
+  description="查看和管理您的个人资料"
 >
   <section class="profile">
     <div class="profile-container">
@@ -23,7 +21,7 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
           </svg>
-          <span>{lang === 'zh' ? '编辑资料' : 'Edit Profile'}</span>
+          <span>编辑资料</span>
         </button>
       </div>
       
@@ -36,7 +34,7 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
           </div>
           <div class="stat-content">
             <span class="stat-value" id="stat-login-count">0</span>
-            <span class="stat-label">{lang === 'zh' ? '登录次数' : 'Logins'}</span>
+            <span class="stat-label">登录次数</span>
           </div>
         </div>
         <div class="stat-card">
@@ -48,7 +46,7 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
           </div>
           <div class="stat-content">
             <span class="stat-value" id="stat-last-login">--</span>
-            <span class="stat-label">{lang === 'zh' ? '最后登录' : 'Last Login'}</span>
+            <span class="stat-label">最后登录</span>
           </div>
         </div>
         <div class="stat-card">
@@ -62,7 +60,7 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
           </div>
           <div class="stat-content">
             <span class="stat-value" id="stat-join-date">--</span>
-            <span class="stat-label">{lang === 'zh' ? '加入时间' : 'Joined'}</span>
+            <span class="stat-label">加入时间</span>
           </div>
         </div>
       </div>
@@ -74,19 +72,19 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-            {lang === 'zh' ? '账户信息' : 'Account Information'}
+            账户信息
           </h2>
           <div class="info-list">
             <div class="info-item">
-              <span class="info-label">{lang === 'zh' ? '用户名' : 'Username'}</span>
+              <span class="info-label">用户名</span>
               <span class="info-value" id="info-username">--</span>
             </div>
             <div class="info-item">
-              <span class="info-label">{lang === 'zh' ? '邮箱' : 'Email'}</span>
+              <span class="info-label">邮箱</span>
               <span class="info-value" id="info-email">--</span>
             </div>
             <div class="info-item">
-              <span class="info-label">{lang === 'zh' ? '用户ID' : 'User ID'}</span>
+              <span class="info-label">用户ID</span>
               <span class="info-value" id="info-userid">--</span>
             </div>
           </div>
@@ -98,13 +96,13 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
               <circle cx="12" cy="12" r="3"></circle>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
-            {lang === 'zh' ? '账户设置' : 'Account Settings'}
+            账户设置
           </h2>
           <div class="settings-list">
             <button class="setting-item" id="change-password-btn">
               <div class="setting-info">
-                <span class="setting-title">{lang === 'zh' ? '修改密码' : 'Change Password'}</span>
-                <span class="setting-desc">{lang === 'zh' ? '更新您的登录密码' : 'Update your login password'}</span>
+                <span class="setting-title">修改密码</span>
+                <span class="setting-desc">更新您的登录密码</span>
               </div>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -112,8 +110,8 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
             </button>
             <button class="setting-item danger" id="logout-btn">
               <div class="setting-info">
-                <span class="setting-title">{lang === 'zh' ? '退出登录' : 'Sign Out'}</span>
-                <span class="setting-desc">{lang === 'zh' ? '退出当前账户' : 'Sign out of your account'}</span>
+                <span class="setting-title">退出登录</span>
+                <span class="setting-desc">退出当前账户</span>
               </div>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -131,7 +129,7 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
     <div class="modal-backdrop" id="edit-backdrop"></div>
     <div class="modal-content">
       <div class="modal-header">
-        <h3>{lang === 'zh' ? '编辑资料' : 'Edit Profile'}</h3>
+        <h3>编辑资料</h3>
         <button class="modal-close" id="edit-modal-close">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -141,16 +139,16 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
       </div>
       <form class="modal-form" id="edit-form">
         <div class="form-group">
-          <label for="edit-username">{lang === 'zh' ? '用户名' : 'Username'}</label>
+          <label for="edit-username">用户名</label>
           <input type="text" id="edit-username" name="username" required minlength="3" maxlength="20" />
         </div>
         <div class="form-group">
-          <label for="edit-email">{lang === 'zh' ? '邮箱' : 'Email'}</label>
+          <label for="edit-email">邮箱</label>
           <input type="email" id="edit-email" name="email" required />
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" id="edit-cancel">{lang === 'zh' ? '取消' : 'Cancel'}</button>
-          <button type="submit" class="btn-primary">{lang === 'zh' ? '保存' : 'Save'}</button>
+          <button type="button" class="btn-secondary" id="edit-cancel">取消</button>
+          <button type="submit" class="btn-primary">保存</button>
         </div>
       </form>
     </div>
@@ -160,7 +158,7 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
     <div class="modal-backdrop" id="password-backdrop"></div>
     <div class="modal-content">
       <div class="modal-header">
-        <h3>{lang === 'zh' ? '修改密码' : 'Change Password'}</h3>
+        <h3>修改密码</h3>
         <button class="modal-close" id="password-modal-close">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -170,20 +168,20 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
       </div>
       <form class="modal-form" id="password-form">
         <div class="form-group">
-          <label for="current-password">{lang === 'zh' ? '当前密码' : 'Current Password'}</label>
+          <label for="current-password">当前密码</label>
           <input type="password" id="current-password" name="currentPassword" required />
         </div>
         <div class="form-group">
-          <label for="new-password">{lang === 'zh' ? '新密码' : 'New Password'}</label>
+          <label for="new-password">新密码</label>
           <input type="password" id="new-password" name="newPassword" required minlength="6" />
         </div>
         <div class="form-group">
-          <label for="confirm-new-password">{lang === 'zh' ? '确认新密码' : 'Confirm New Password'}</label>
+          <label for="confirm-new-password">确认新密码</label>
           <input type="password" id="confirm-new-password" name="confirmPassword" required />
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" id="password-cancel">{lang === 'zh' ? '取消' : 'Cancel'}</button>
-          <button type="submit" class="btn-primary">{lang === 'zh' ? '更新密码' : 'Update Password'}</button>
+          <button type="button" class="btn-secondary" id="password-cancel">取消</button>
+          <button type="submit" class="btn-primary">更新密码</button>
         </div>
       </form>
     </div>
@@ -549,7 +547,6 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
 
 <script>
   const API_BASE = 'https://api.ustc.dev';
-  const lang = document.documentElement.lang === 'zh' ? 'zh' : 'en';
   
   const editModal = document.getElementById('edit-modal');
   const passwordModal = document.getElementById('password-modal');
@@ -592,11 +589,11 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     
     if (days === 0) {
-      return lang === 'zh' ? '今天' : 'Today';
+      return '今天';
     } else if (days === 1) {
-      return lang === 'zh' ? '昨天' : 'Yesterday';
+      return '昨天';
     } else if (days < 7) {
-      return lang === 'zh' ? `${days}天前` : `${days} days ago`;
+      return `${days}天前`;
     } else {
       return date.toLocaleDateString();
     }
@@ -661,13 +658,13 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
         localStorage.setItem('user', JSON.stringify(currentUser));
         loadUserProfile();
         closeModal(editModal);
-        alert(lang === 'zh' ? '资料更新成功' : 'Profile updated successfully');
+        alert('资料更新成功');
       } else {
-        alert(result.message || 'Update failed');
+        alert(result.message || '更新失败');
       }
     } catch (error) {
       console.error('Update error:', error);
-      alert('Update failed. Please try again.');
+      alert('更新失败，请重试');
     }
   });
   
@@ -679,7 +676,7 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
     const confirmPassword = formData.get('confirmPassword');
     
     if (newPassword !== confirmPassword) {
-      alert(lang === 'zh' ? '两次输入的新密码不一致' : 'New passwords do not match');
+      alert('两次输入的新密码不一致');
       return;
     }
     
@@ -699,13 +696,13 @@ const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
       if (result.success) {
         closeModal(passwordModal);
         passwordForm.reset();
-        alert(lang === 'zh' ? '密码更新成功' : 'Password updated successfully');
+        alert('密码更新成功');
       } else {
-        alert(result.message || 'Password update failed');
+        alert(result.message || '密码更新失败');
       }
     } catch (error) {
       console.error('Password update error:', error);
-      alert('Password update failed. Please try again.');
+      alert('密码更新失败，请重试');
     }
   });
   

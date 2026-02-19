@@ -1,23 +1,21 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
-
 const tools = [
-  { id: 'doi', title: 'DOI ' + (lang === 'zh' ? '引用转换' : 'Citation'), desc: lang === 'zh' ? '转换为多种引用格式' : 'Convert to multiple formats' },
-  { id: 'bibtex', title: 'BibTeX', desc: lang === 'zh' ? '生成标准BibTeX格式' : 'Generate BibTeX format' },
-  { id: 'impact', title: lang === 'zh' ? '期刊查询' : 'Journal Lookup', desc: lang === 'zh' ? '查询影响因子和分区' : 'Impact factor & ranking' },
-  { id: 'latex', title: 'LaTeX', desc: lang === 'zh' ? '数学公式编辑器' : 'Equation editor' },
-  { id: 'translate', title: lang === 'zh' ? '学术翻译' : 'Translation', desc: lang === 'zh' ? '专业学术翻译' : 'Academic translation' },
-  { id: 'keywords', title: lang === 'zh' ? '关键词提取' : 'Keywords', desc: lang === 'zh' ? '自动提取关键词' : 'Extract keywords' }
+  { id: 'doi', title: 'DOI 引用转换', desc: '转换为多种引用格式' },
+  { id: 'bibtex', title: 'BibTeX', desc: '生成标准BibTeX格式' },
+  { id: 'impact', title: '期刊查询', desc: '查询影响因子和分区' },
+  { id: 'latex', title: 'LaTeX', desc: '数学公式编辑器' },
+  { id: 'translate', title: '学术翻译', desc: '专业学术翻译' },
+  { id: 'keywords', title: '关键词提取', desc: '自动提取关键词' }
 ];
 
 const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'BibTeX'];
 ---
 
 <Layout 
-  title={lang === 'zh' ? '学术工具 - Meow Note' : 'Academic Tools - Meow Note'}
-  description={lang === 'zh' ? '学术研究工具集' : 'Academic research tools'}
+  title="学术工具 - Meow Note"
+  description="学术研究工具集"
 >
   <section class="academic">
     <div class="container">
@@ -26,10 +24,10 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
-          <span>{lang === 'zh' ? '工具箱' : 'Toolkit'}</span>
+          <span>工具箱</span>
         </a>
-        <h1 class="title">{lang === 'zh' ? '学术工具' : 'Academic Tools'}</h1>
-        <p class="desc">{lang === 'zh' ? '为学术研究提供便捷工具' : 'Tools for academic research'}</p>
+        <h1 class="title">学术工具</h1>
+        <p class="desc">为学术研究提供便捷工具</p>
       </header>
       
       <div class="tools-grid" id="tools-grid">
@@ -49,13 +47,13 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
-          <h2 class="panel-title">DOI {lang === 'zh' ? '引用转换' : 'Citation'}</h2>
+          <h2 class="panel-title">DOI 引用转换</h2>
         </div>
         <div class="panel-body">
           <div class="field">
             <input type="text" id="doi-input" placeholder="10.1000/xyz123" />
           </div>
-          <button class="btn" id="fetch-doi">{lang === 'zh' ? '获取引用' : 'Fetch Citation'}</button>
+          <button class="btn" id="fetch-doi">获取引用</button>
           <div class="result hidden" id="doi-result">
             <div class="article-info" id="article-info"></div>
             <div class="format-tabs" id="format-tabs">
@@ -63,7 +61,7 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
             </div>
             <div class="output">
               <pre id="citation-output"></pre>
-              <button class="copy-btn" id="copy-doi">{lang === 'zh' ? '复制' : 'Copy'}</button>
+              <button class="copy-btn" id="copy-doi">复制</button>
             </div>
           </div>
         </div>
@@ -77,29 +75,29 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
-          <h2 class="panel-title">BibTeX {lang === 'zh' ? '生成器' : 'Generator'}</h2>
+          <h2 class="panel-title">BibTeX 生成器</h2>
         </div>
         <div class="panel-body">
           <div class="fields">
             <select id="bibtex-type">
-              <option value="article">{lang === 'zh' ? '期刊论文' : 'Article'}</option>
-              <option value="book">{lang === 'zh' ? '书籍' : 'Book'}</option>
-              <option value="inproceedings">{lang === 'zh' ? '会议论文' : 'Conference'}</option>
+              <option value="article">期刊论文</option>
+              <option value="book">书籍</option>
+              <option value="inproceedings">会议论文</option>
             </select>
-            <input type="text" id="bibtex-key" placeholder={lang === 'zh' ? '引用键 (如: Author2024)' : 'Citation key'} />
-            <input type="text" id="bibtex-title" placeholder={lang === 'zh' ? '标题' : 'Title'} />
-            <input type="text" id="bibtex-author" placeholder={lang === 'zh' ? '作者 (逗号分隔)' : 'Authors (comma separated)'} />
-            <input type="text" id="bibtex-journal" placeholder={lang === 'zh' ? '期刊/出版社' : 'Journal/Publisher'} />
+            <input type="text" id="bibtex-key" placeholder="引用键 (如: Author2024)" />
+            <input type="text" id="bibtex-title" placeholder="标题" />
+            <input type="text" id="bibtex-author" placeholder="作者 (逗号分隔)" />
+            <input type="text" id="bibtex-journal" placeholder="期刊/出版社" />
             <div class="row">
-              <input type="text" id="bibtex-year" placeholder={lang === 'zh' ? '年份' : 'Year'} />
-              <input type="text" id="bibtex-volume" placeholder={lang === 'zh' ? '卷' : 'Volume'} />
-              <input type="text" id="bibtex-pages" placeholder={lang === 'zh' ? '页码' : 'Pages'} />
+              <input type="text" id="bibtex-year" placeholder="年份" />
+              <input type="text" id="bibtex-volume" placeholder="卷" />
+              <input type="text" id="bibtex-pages" placeholder="页码" />
             </div>
           </div>
-          <button class="btn" id="gen-bibtex">{lang === 'zh' ? '生成' : 'Generate'}</button>
+          <button class="btn" id="gen-bibtex">生成</button>
           <div class="output hidden" id="bibtex-output">
             <pre id="bibtex-code"></pre>
-            <button class="copy-btn" id="copy-bibtex">{lang === 'zh' ? '复制' : 'Copy'}</button>
+            <button class="copy-btn" id="copy-bibtex">复制</button>
           </div>
         </div>
       </div>
@@ -112,13 +110,13 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
-          <h2 class="panel-title">{lang === 'zh' ? '期刊查询' : 'Journal Lookup'}</h2>
+          <h2 class="panel-title">期刊查询</h2>
         </div>
         <div class="panel-body">
           <div class="field">
-            <input type="text" id="journal-input" placeholder={lang === 'zh' ? '期刊名称或ISSN' : 'Journal name or ISSN'} />
+            <input type="text" id="journal-input" placeholder="期刊名称或ISSN" />
           </div>
-          <button class="btn" id="search-journal">{lang === 'zh' ? '查询' : 'Search'}</button>
+          <button class="btn" id="search-journal">查询</button>
           <div class="result hidden" id="journal-result">
             <div class="metrics">
               <div class="metric"><span class="val" id="if-value">--</span><span class="lbl">IF</span></div>
@@ -137,7 +135,7 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
-          <h2 class="panel-title">LaTeX {lang === 'zh' ? '公式' : 'Equation'}</h2>
+          <h2 class="panel-title">LaTeX 公式</h2>
         </div>
         <div class="panel-body">
           <div class="field">
@@ -154,7 +152,7 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
             <button data-sym="\beta">β</button>
             <button data-sym="\infty">∞</button>
           </div>
-          <button class="btn" id="render-latex">{lang === 'zh' ? '渲染' : 'Render'}</button>
+          <button class="btn" id="render-latex">渲染</button>
           <div class="preview" id="latex-preview"></div>
         </div>
       </div>
@@ -167,7 +165,7 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
-          <h2 class="panel-title">{lang === 'zh' ? '学术翻译' : 'Translation'}</h2>
+          <h2 class="panel-title">学术翻译</h2>
         </div>
         <div class="panel-body">
           <div class="translate-row">
@@ -175,9 +173,9 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
             <button class="swap-btn" id="swap-lang">⇄</button>
             <select id="tgt-lang"><option value="zh">中文</option><option value="en">English</option></select>
           </div>
-          <textarea id="src-text" rows="4" placeholder={lang === 'zh' ? '输入文本' : 'Enter text'}></textarea>
-          <button class="btn" id="do-translate">{lang === 'zh' ? '翻译' : 'Translate'}</button>
-          <textarea id="tgt-text" rows="4" readonly placeholder={lang === 'zh' ? '翻译结果' : 'Result'}></textarea>
+          <textarea id="src-text" rows="4" placeholder="输入文本"></textarea>
+          <button class="btn" id="do-translate">翻译</button>
+          <textarea id="tgt-text" rows="4" readonly placeholder="翻译结果"></textarea>
         </div>
       </div>
       
@@ -189,11 +187,11 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
-          <h2 class="panel-title">{lang === 'zh' ? '关键词提取' : 'Keywords'}</h2>
+          <h2 class="panel-title">关键词提取</h2>
         </div>
         <div class="panel-body">
           <div class="field">
-            <textarea id="kw-text" rows="6" placeholder={lang === 'zh' ? '粘贴文本...' : 'Paste text...'}></textarea>
+            <textarea id="kw-text" rows="6" placeholder="粘贴文本..."></textarea>
           </div>
           <div class="row">
             <select id="kw-count">
@@ -202,7 +200,7 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
               <option value="15">15</option>
             </select>
           </div>
-          <button class="btn" id="extract-kw">{lang === 'zh' ? '提取' : 'Extract'}</button>
+          <button class="btn" id="extract-kw">提取</button>
           <div class="tags hidden" id="kw-tags"></div>
         </div>
       </div>
@@ -278,7 +276,6 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
 </style>
 
 <script>
-  const lang = document.documentElement.lang === 'zh' ? 'zh' : 'en';
   const toolsGrid = document.getElementById('tools-grid');
   const panels = document.querySelectorAll('.panel');
   let article = null;
@@ -313,7 +310,7 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
         document.getElementById('doi-result').classList.remove('hidden');
         renderCitation();
       }
-    } catch (e) { alert(lang === 'zh' ? '获取失败' : 'Fetch failed'); }
+    } catch (e) { alert('获取失败'); }
   });
   
   document.querySelectorAll('#format-tabs .tab').forEach(tab => {

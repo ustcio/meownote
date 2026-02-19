@@ -1,72 +1,54 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import { getLangFromUrl, useTranslations } from '@i18n';
-
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
 
 const timeline = [
   {
     year: '2024',
-    title: lang === 'zh' ? 'GPT-4o 发布' : 'GPT-4o Released',
-    description: lang === 'zh' 
-      ? 'OpenAI 发布多模态模型 GPT-4o，实现文本、音频、图像的实时处理。'
-      : 'OpenAI released the multimodal model GPT-4o, enabling real-time processing of text, audio, and images.'
+    title: 'GPT-4o 发布',
+    description: 'OpenAI 发布多模态模型 GPT-4o，实现文本、音频、图像的实时处理。'
   },
   {
     year: '2023',
-    title: lang === 'zh' ? 'ChatGPT 爆发式增长' : 'ChatGPT Explosive Growth',
-    description: lang === 'zh'
-      ? 'ChatGPT 成为历史上增长最快的消费应用，推动AI技术普及。'
-      : 'ChatGPT became the fastest-growing consumer app in history, driving AI adoption.'
+    title: 'ChatGPT 爆发式增长',
+    description: 'ChatGPT 成为历史上增长最快的消费应用，推动AI技术普及。'
   },
   {
     year: '2022',
-    title: lang === 'zh' ? 'ChatGPT 发布' : 'ChatGPT Released',
-    description: lang === 'zh'
-      ? 'OpenAI 发布 ChatGPT，开启大语言模型时代。'
-      : 'OpenAI released ChatGPT, starting the era of large language models.'
+    title: 'ChatGPT 发布',
+    description: 'OpenAI 发布 ChatGPT，开启大语言模型时代。'
   },
   {
     year: '2020',
-    title: lang === 'zh' ? 'GPT-3 发布' : 'GPT-3 Released',
-    description: lang === 'zh'
-      ? 'OpenAI 发布 GPT-3，展示了大规模语言模型的惊人能力。'
-      : 'OpenAI released GPT-3, demonstrating the amazing capabilities of large-scale language models.'
+    title: 'GPT-3 发布',
+    description: 'OpenAI 发布 GPT-3，展示了大规模语言模型的惊人能力。'
   },
   {
     year: '2017',
-    title: lang === 'zh' ? 'Transformer 架构' : 'Transformer Architecture',
-    description: lang === 'zh'
-      ? 'Google 发布 "Attention Is All You Need" 论文，奠定现代AI基础。'
-      : 'Google published "Attention Is All You Need" paper, laying the foundation for modern AI.'
+    title: 'Transformer 架构',
+    description: 'Google 发布 "Attention Is All You Need" 论文，奠定现代AI基础。'
   },
   {
     year: '2016',
-    title: lang === 'zh' ? 'AlphaGo 战胜李世石' : 'AlphaGo Defeats Lee Sedol',
-    description: lang === 'zh'
-      ? 'DeepMind 的 AlphaGo 在围棋比赛中击败世界冠军李世石。'
-      : 'DeepMind\'s AlphaGo defeated world champion Lee Sedol in Go.'
+    title: 'AlphaGo 战胜李世石',
+    description: 'DeepMind 的 AlphaGo 在围棋比赛中击败世界冠军李世石。'
   },
   {
     year: '2012',
-    title: lang === 'zh' ? 'AlexNet 突破' : 'AlexNet Breakthrough',
-    description: lang === 'zh'
-      ? '深度学习在 ImageNet 竞赛中取得突破性进展，开启深度学习时代。'
-      : 'Deep learning achieved breakthrough progress in ImageNet competition, starting the deep learning era.'
+    title: 'AlexNet 突破',
+    description: '深度学习在 ImageNet 竞赛中取得突破性进展，开启深度学习时代。'
   },
 ];
 ---
 
 <Layout 
-  title={lang === 'zh' ? '研究 - Meow Note' : 'Research - Meow Note'}
-  description={t('research.subtitle')}
+  title="研究 - Meow Note"
+  description="人工智能发展史上的重要时刻"
 >
   <section class="research">
     <div class="research-container">
       <div class="research-header">
-        <h1 class="research-title">{t('research.title')}</h1>
-        <p class="research-subtitle">{t('research.subtitle')}</p>
+        <h1 class="research-title">AI 大事记</h1>
+        <p class="research-subtitle">人工智能发展史上的重要时刻</p>
       </div>
       
       <div class="timeline">

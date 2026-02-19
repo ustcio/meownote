@@ -2,22 +2,18 @@
 import '@styles/global.css';
 import '@styles/chatbot-new.css';
 import Header from '@components/layout/Header.astro';
-import { getLangFromUrl, useTranslations } from '@i18n';
-
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
 ---
 
 <!DOCTYPE html>
-<html lang={lang} data-theme="light">
+<html lang="zh" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="generator" content={Astro.generator} />
 
-    <title>{t('chatbot.title')} - Meow Note</title>
-    <meta name="title" content={`${t('chatbot.title')} - Meow Note`} />
-    <meta name="description" content={lang === 'zh' ? '智能 AI 对话助手，支持通义千问、豆包 2.0 Pro、豆包 2.0 Code 多模型' : 'Intelligent AI chat assistant with Qwen and Doubao models support'} />
+    <title>AI 助手 - Meow Note</title>
+    <meta name="title" content="AI 助手 - Meow Note" />
+    <meta name="description" content="智能 AI 对话助手，支持通义千问、豆包 2.0 Pro、豆包 2.0 Code 多模型" />
 
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -69,15 +65,15 @@ const t = useTranslations(lang);
               </svg>
             </button>
           </div>
-          <div class="window-title">{t('chatbot.title')}</div>
+          <div class="window-title">AI 助手</div>
           <div class="window-actions">
-            <button class="window-action-btn" id="new-chat-btn" title={t('chatbot.newChat')}>
+            <button class="window-action-btn" id="new-chat-btn" title="新对话">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
             </button>
-            <button class="window-action-btn" id="export-btn" title={t('chatbot.exportChat')}>
+            <button class="window-action-btn" id="export-btn" title="导出对话">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
@@ -96,23 +92,23 @@ const t = useTranslations(lang);
                 <video class="welcome-logo" autoplay loop muted playsinline preload="auto" aria-hidden="true">
                   <source src="/logo.mp4" type="video/mp4" />
                 </video>
-                <h1 class="welcome-title">{t('chatbot.welcomeTitle')}</h1>
-                <p class="welcome-subtitle">{t('chatbot.welcomeSubtitle')}</p>
+                <h1 class="welcome-title">你好，我是 Meow</h1>
+                <p class="welcome-subtitle">你的智能 AI 助手，支持通义千问和豆包 2.0 系列模型</p>
               </div>
 
               <div class="quick-actions">
-                <div class="quick-actions-title">{t('chatbot.quickStart')}</div>
+                <div class="quick-actions-title">快速开始</div>
                 <div class="quick-actions-grid">
-                  <button class="quick-action" data-prompt={t('chatbot.writeCodePrompt')} type="button">
+                  <button class="quick-action" data-prompt="帮我写一段 Python 代码，实现快速排序算法" type="button">
                     <div class="quick-action-icon">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="16 18 22 12 16 6"></polyline>
                         <polyline points="8 6 2 12 8 18"></polyline>
                       </svg>
                     </div>
-                    <span>{t('chatbot.writeCode')}</span>
+                    <span>编写代码</span>
                   </button>
-                  <button class="quick-action" data-prompt={t('chatbot.answerQuestionPrompt')} type="button">
+                  <button class="quick-action" data-prompt="帮我解释一下量子计算的基本原理" type="button">
                     <div class="quick-action-icon">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
@@ -120,25 +116,25 @@ const t = useTranslations(lang);
                         <path d="M12 8h.01"></path>
                       </svg>
                     </div>
-                    <span>{t('chatbot.answerQuestion')}</span>
+                    <span>解答问题</span>
                   </button>
-                  <button class="quick-action" data-prompt={t('chatbot.writeDocumentPrompt')} type="button">
+                  <button class="quick-action" data-prompt="帮我写一封商务邮件，主题是项目进度汇报" type="button">
                     <div class="quick-action-icon">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                         <polyline points="22,6 12,13 2,6"></polyline>
                       </svg>
                     </div>
-                    <span>{t('chatbot.writeDocument')}</span>
+                    <span>撰写文档</span>
                   </button>
-                  <button class="quick-action" data-prompt={t('chatbot.brainstormPrompt')} type="button">
+                  <button class="quick-action" data-prompt="帮我想一些创意，关于如何提升团队效率" type="button">
                     <div class="quick-action-icon">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
                         <path d="M9 21h6"></path>
                       </svg>
                     </div>
-                    <span>{t('chatbot.brainstorm')}</span>
+                    <span>头脑风暴</span>
                   </button>
                 </div>
               </div>
@@ -146,14 +142,14 @@ const t = useTranslations(lang);
           </div>
 
           <!-- Messages Container -->
-          <div class="messages-container" id="messages-container" aria-label={t('aria.messagesList')}></div>
+          <div class="messages-container" id="messages-container" aria-label="消息列表"></div>
         </div>
         
         <!-- Input Area -->
         <div class="window-input-area">
           <div class="input-container">
             <!-- Model Selector Button -->
-            <button class="model-selector-btn" id="model-selector-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label={t('aria.selectModel')} title={t('aria.selectModel')}>
+            <button class="model-selector-btn" id="model-selector-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="选择模型" title="选择模型">
               <span class="model-current-name" id="model-current-name">Qwen Turbo</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chevron-down">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -161,15 +157,15 @@ const t = useTranslations(lang);
             </button>
             
             <!-- Model Dropdown Panel -->
-            <div class="model-dropdown-panel" id="model-dropdown" role="listbox" aria-label={t('aria.modelList')}>
-              <div class="model-dropdown-header">{lang === 'zh' ? '选择模型' : 'Select Model'}</div>
+            <div class="model-dropdown-panel" id="model-dropdown" role="listbox" aria-label="模型列表">
+              <div class="model-dropdown-header">选择模型</div>
               
               <div class="model-group">
                 <div class="model-group-label">Doubao</div>
                 <button class="model-option" data-model="doubao-2.0-pro" data-name="Doubao 2.0 Pro" role="option" aria-selected="false" type="button">
                   <div class="model-option-info">
                     <span class="model-option-name">Doubao 2.0 Pro</span>
-                    <span class="model-option-desc">{lang === 'zh' ? '通用对话' : 'General Chat'}</span>
+                    <span class="model-option-desc">通用对话</span>
                   </div>
                   <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12"></polyline>
@@ -178,7 +174,7 @@ const t = useTranslations(lang);
                 <button class="model-option" data-model="doubao-2.0-code" data-name="Doubao 2.0 Code" role="option" aria-selected="false" type="button">
                   <div class="model-option-info">
                     <span class="model-option-name">Doubao 2.0 Code</span>
-                    <span class="model-option-desc">{lang === 'zh' ? '代码生成' : 'Code Generation'}</span>
+                    <span class="model-option-desc">代码生成</span>
                   </div>
                   <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12"></polyline>
@@ -191,7 +187,7 @@ const t = useTranslations(lang);
                 <button class="model-option active" data-model="qwen-turbo" data-name="Qwen Turbo" role="option" aria-selected="true" type="button">
                   <div class="model-option-info">
                     <span class="model-option-name">Qwen Turbo</span>
-                    <span class="model-option-desc">{lang === 'zh' ? '快速响应' : 'Fast Response'}</span>
+                    <span class="model-option-desc">快速响应</span>
                   </div>
                   <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12"></polyline>
@@ -200,7 +196,7 @@ const t = useTranslations(lang);
                 <button class="model-option" data-model="qwen-plus" data-name="Qwen Plus" role="option" aria-selected="false" type="button">
                   <div class="model-option-info">
                     <span class="model-option-name">Qwen Plus</span>
-                    <span class="model-option-desc">{lang === 'zh' ? '增强能力' : 'Enhanced'}</span>
+                    <span class="model-option-desc">增强能力</span>
                   </div>
                   <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12"></polyline>
@@ -213,7 +209,7 @@ const t = useTranslations(lang);
                 <button class="model-option" data-model="llama-3-8b" data-name="Llama 3 8B" role="option" aria-selected="false" type="button">
                   <div class="model-option-info">
                     <span class="model-option-name">Llama 3 8B</span>
-                    <span class="model-option-desc">{lang === 'zh' ? '边缘推理' : 'Edge Inference'}</span>
+                    <span class="model-option-desc">边缘推理</span>
                   </div>
                   <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12"></polyline>
@@ -222,7 +218,7 @@ const t = useTranslations(lang);
                 <button class="model-option" data-model="llama-3.1-8b" data-name="Llama 3.1 8B" role="option" aria-selected="false" type="button">
                   <div class="model-option-info">
                     <span class="model-option-name">Llama 3.1 8B</span>
-                    <span class="model-option-desc">{lang === 'zh' ? '最新版本' : 'Latest Version'}</span>
+                    <span class="model-option-desc">最新版本</span>
                   </div>
                   <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12"></polyline>
@@ -236,22 +232,22 @@ const t = useTranslations(lang);
               <textarea
                 id="chat-input"
                 class="chat-input"
-                placeholder={t('chatbot.inputPlaceholder')}
+                placeholder="输入消息...（Shift+Enter 换行）"
                 rows="1"
-                aria-label={t('aria.chatInput')}
+                aria-label="聊天输入框"
                 aria-describedby="input-hint"
               ></textarea>
             </div>
             
             <!-- Input Actions -->
             <div class="input-actions">
-              <button class="send-btn" id="send-btn" type="button" disabled aria-label={t('aria.sendMessage')}>
+              <button class="send-btn" id="send-btn" type="button" disabled aria-label="发送消息">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="22" y1="2" x2="11" y2="13"></line>
                   <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                 </svg>
               </button>
-              <button class="stop-btn" id="stop-btn" type="button" style="display: none;" aria-label={t('aria.stopGeneration')}>
+              <button class="stop-btn" id="stop-btn" type="button" style="display: none;" aria-label="停止生成">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                   <rect x="6" y="6" width="12" height="12" rx="2"></rect>
                 </svg>
@@ -260,7 +256,7 @@ const t = useTranslations(lang);
           </div>
           
           <div class="input-hint" id="input-hint">
-            <span>{t('chatbot.inputHint')}</span>
+            <span>AI 生成内容可能不准确，请核实重要信息</span>
           </div>
         </div>
       </div>

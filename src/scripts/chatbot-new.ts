@@ -28,7 +28,6 @@ let abortController: AbortController | null = null;
 let isWindowMaximized = false;
 
 // Constants
-const lang = document.documentElement.lang || 'en';
 const API_BASE = 'https://api.ustc.dev';
 
 // ================================================================================
@@ -99,7 +98,6 @@ function safeRemoveSessionItem(key: string): boolean {
 
 export function initChatbot(): void {
   console.log('[Chatbot] Initializing macOS window style chat...');
-  console.log('[Chatbot] Language:', lang);
   console.log('[Chatbot] DOM ready state:', document.readyState);
 
   if (!document.getElementById('chat-input')) {
@@ -141,7 +139,7 @@ function setupWindowControls(): void {
   closeBtn?.addEventListener('click', () => {
     console.log('[WindowControls] Close clicked');
     startNewChat();
-    showToast(lang === 'zh' ? '已重置对话' : 'Conversation reset', 'info');
+    showToast('已重置对话', 'info');
   });
 
   // Minimize button - minimize the chat window
@@ -151,10 +149,7 @@ function setupWindowControls(): void {
     const isMinimized = chatWindow.classList.contains('minimized');
 
     // Update button icon/tooltip based on state
-    minimizeBtn.setAttribute('aria-label', isMinimized
-      ? (lang === 'zh' ? '恢复' : 'Restore')
-      : (lang === 'zh' ? '最小化' : 'Minimize')
-    );
+    minimizeBtn.setAttribute('aria-label', isMinimized ? '恢复' : '最小化');
   });
 
   // Maximize button - toggle fullscreen/maximize
@@ -164,10 +159,7 @@ function setupWindowControls(): void {
     chatWindow.classList.toggle('maximized', isWindowMaximized);
 
     // Update button icon
-    maximizeBtn.setAttribute('aria-label', isWindowMaximized
-      ? (lang === 'zh' ? '还原' : 'Restore')
-      : (lang === 'zh' ? '最大化' : 'Maximize')
-    );
+    maximizeBtn.setAttribute('aria-label', isWindowMaximized ? '还原' : '最大化');
 
     // Scroll to bottom after resize animation
     setTimeout(() => {
@@ -314,7 +306,7 @@ function selectModel(model: string, name: string): void {
     modelCurrentName.textContent = shortName;
   }
 
-  showToast(`${lang === 'zh' ? '已切换到' : 'Switched to'} ${name}`, 'success');
+  showToast(`已切换到 ${name}`, 'success');
 }
 
 function getShortModelName(fullName: string): string {
@@ -410,7 +402,7 @@ function setupNewChat(): void {
   const newChatBtn = document.getElementById('new-chat-btn');
   newChatBtn?.addEventListener('click', () => {
     startNewChat();
-    showToast(lang === 'zh' ? '新对话已开始' : 'New conversation started', 'success');
+    showToast('新对话已开始', 'success');
   });
 }
 
@@ -422,16 +414,14 @@ function setupClearAll(): void {
   const clearAllBtn = document.getElementById('clear-all-btn');
 
   clearAllBtn?.addEventListener('click', () => {
-    const confirmMessage = lang === 'zh'
-      ? '确定要清除所有对话历史吗？此操作无法撤销。'
-      : 'Are you sure you want to clear all conversation history? This cannot be undone.';
+    const confirmMessage = '确定要清除所有对话历史吗？此操作无法撤销。';
 
     if (confirm(confirmMessage)) {
       conversations = [];
       safeRemoveItem('chatbot_conversations');
       safeRemoveSessionItem('chatbot_session_id');
       startNewChat();
-      showToast(lang === 'zh' ? '所有对话已清除' : 'All conversations cleared', 'success');
+      showToast('所有对话已清除', 'success');
     }
   });
 }
@@ -445,7 +435,7 @@ function setupExport(): void {
 
   exportBtn?.addEventListener('click', () => {
     if (chatHistory.length === 0) {
-      showToast(lang === 'zh' ? '没有可导出的对话' : 'No conversation to export', 'error');
+      showToast('没有可导出的对话', 'error');
       return;
     }
 
@@ -466,7 +456,7 @@ function setupExport(): void {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    showToast(lang === 'zh' ? '对话已导出' : 'Conversation exported', 'success');
+    showToast('对话已导出', 'success');
   });
 }
 
@@ -577,7 +567,7 @@ async function sendMessage(): Promise<void> {
         console.warn(`[Performance] Slow response detected: ${ttfb.toFixed(0)}ms`);
         // Only show toast for non-turbo models, and only once per session
         if (currentModel !== 'qwen-turbo' && !window.sessionStorage.getItem('slowWarningShown')) {
-          showToast(lang === 'zh' ? '响应较慢，建议切换到 Qwen Turbo 模型' : 'Slow response detected. Consider switching to Qwen Turbo', 'info');
+          showToast('响应较慢，建议切换到 Qwen Turbo 模型', 'info');
           window.sessionStorage.setItem('slowWarningShown', 'true');
         }
       }
@@ -587,18 +577,15 @@ async function sendMessage(): Promise<void> {
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
       removeTypingIndicator();
-      addMessage('assistant', lang === 'zh' ? '生成已停止。' : 'Generation stopped.');
+      addMessage('assistant', '生成已停止。');
     } else {
       console.error('[Chatbot] Fetch error:', error);
       removeTypingIndicator();
 
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      showToast(`${lang === 'zh' ? '网络错误' : 'Network error'}: ${errorMessage}`, 'error');
+      showToast(`网络错误: ${errorMessage}`, 'error');
 
-      addMessage('assistant', lang === 'zh'
-        ? `抱歉，发生了错误：${errorMessage}。请稍后重试。`
-        : `Sorry, an error occurred: ${errorMessage}. Please try again later.`
-      );
+      addMessage('assistant', `抱歉，发生了错误：${errorMessage}。请稍后重试。`);
     }
   } finally {
     // Reset streaming state
@@ -642,7 +629,7 @@ function addMessage(role: 'user' | 'assistant', content: string, shouldSave: boo
   if (!messagesContainer) return;
 
   const now = new Date();
-  const timeStr = now.toLocaleTimeString(lang === 'zh' ? 'zh-CN' : 'en-US', {
+  const timeStr = now.toLocaleTimeString('zh-CN', {
     hour: '2-digit',
     minute: '2-digit'
   });
@@ -670,7 +657,7 @@ function addMessage(role: 'user' | 'assistant', content: string, shouldSave: boo
         <p>${escapeHtml(content)}</p>
         <div class="message-footer">
           <span class="message-time">${timeStr}</span>
-          <button class="copy-btn" aria-label="${lang === 'zh' ? '复制消息' : 'Copy message'}" type="button">
+          <button class="copy-btn" aria-label="复制消息" type="button">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -688,9 +675,9 @@ function addMessage(role: 'user' | 'assistant', content: string, shouldSave: boo
   if (copyBtn) {
     copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(content).then(() => {
-        showToast(lang === 'zh' ? '已复制到剪贴板' : 'Copied to clipboard', 'success');
+        showToast('已复制到剪贴板', 'success');
       }).catch(() => {
-        showToast(lang === 'zh' ? '复制失败' : 'Copy failed', 'error');
+        showToast('复制失败', 'error');
       });
     });
   }
@@ -731,7 +718,7 @@ function showTypingIndicator(): void {
   typingDiv.id = 'typing-indicator';
 
   const modelDisplayName = getShortModelName(currentModelName);
-  const thinkingText = lang === 'zh' ? `${modelDisplayName} 正在思考` : `${modelDisplayName} is thinking`;
+  const thinkingText = `${modelDisplayName} 正在思考`;
 
   typingDiv.innerHTML = `
     <div class="typing-content">
@@ -844,7 +831,7 @@ function saveConversation(): void {
 
     conversations.unshift({
       id: currentConversationId,
-      title: chatHistory[0]?.content.slice(0, 50) || (lang === 'zh' ? '新对话' : 'New Chat'),
+      title: chatHistory[0]?.content.slice(0, 50) || '新对话',
       messages: [...chatHistory],
       model: currentModel,
       createdAt: new Date().toISOString(),
@@ -862,7 +849,7 @@ function saveConversation(): void {
     } else {
       conversations.unshift({
         id: sessionId,
-        title: chatHistory[0]?.content.slice(0, 50) || (lang === 'zh' ? '新对话' : 'New Chat'),
+        title: chatHistory[0]?.content.slice(0, 50) || '新对话',
         messages: [...chatHistory],
         model: currentModel,
         createdAt: new Date().toISOString(),
@@ -912,12 +899,12 @@ function escapeHtml(text: string): string {
 
 window.addEventListener('error', (e) => {
   console.error('[Chatbot] Global error:', e.error);
-  showToast(lang === 'zh' ? '发生错误，请刷新页面重试' : 'An error occurred, please refresh the page', 'error');
+  showToast('发生错误，请刷新页面重试', 'error');
 });
 
 window.addEventListener('unhandledrejection', (e) => {
   console.error('[Chatbot] Unhandled promise rejection:', e.reason);
-  showToast(lang === 'zh' ? '发生错误，请刷新页面重试' : 'An error occurred, please refresh the page', 'error');
+  showToast('发生错误，请刷新页面重试', 'error');
 });
 
 // Auto-initialize if DOM is ready

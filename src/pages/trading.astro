@@ -1,18 +1,12 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
-
-// Note: Static build doesn't support server-side auth check
-// Authentication is handled client-side via trading_token cookie
-// isAuthenticated is always false on server, determined client-side
-
 const API_BASE = 'https://api.ustc.dev';
 ---
 
 <Layout 
-  title={lang === 'zh' ? '黄金交易管理 - Meow Note' : 'Gold Trading - Meow Note'}
-  description={lang === 'zh' ? '黄金交易管理与收益分析' : 'Gold trading management and profit analysis'}
+  title="黄金交易管理 - Meow Note"
+  description="黄金交易管理与收益分析"
 >
   <section class="trading" id="trading-app">
     <div class="trading-login" id="login-section">
@@ -32,28 +26,28 @@ const API_BASE = 'https://api.ustc.dev';
             </defs>
           </svg>
         </div>
-        <h1 class="login-title">{lang === 'zh' ? '超级管理员' : 'Super Admin'}</h1>
-        <p class="login-subtitle">{lang === 'zh' ? '登录以访问交易管理系统' : 'Sign in to access trading system'}</p>
+        <h1 class="login-title">超级管理员</h1>
+        <p class="login-subtitle">登录以访问交易管理系统</p>
 
         <form class="login-form" id="trading-login-form">
           <div class="form-group">
-            <label for="trading-username">{lang === 'zh' ? '用户名' : 'Username'}</label>
+            <label for="trading-username">用户名</label>
             <div class="input-wrapper">
               <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
-              <input type="text" id="trading-username" name="username" required placeholder={lang === 'zh' ? '请输入用户名' : 'Enter username'} />
+              <input type="text" id="trading-username" name="username" required placeholder="请输入用户名" />
             </div>
           </div>
           <div class="form-group">
-            <label for="trading-password">{lang === 'zh' ? '密码' : 'Password'}</label>
+            <label for="trading-password">密码</label>
             <div class="input-wrapper">
               <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
               </svg>
-              <input type="password" id="trading-password" name="password" required placeholder={lang === 'zh' ? '请输入密码' : 'Enter password'} />
+              <input type="password" id="trading-password" name="password" required placeholder="请输入密码" />
               <button type="button" class="toggle-password" id="trading-toggle-pwd">
                 <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -67,7 +61,7 @@ const API_BASE = 'https://api.ustc.dev';
             </div>
           </div>
           <button type="submit" class="login-btn" id="trading-login-btn">
-            <span class="btn-text">{lang === 'zh' ? '登录' : 'Sign In'}</span>
+            <span class="btn-text">登录</span>
             <span class="btn-loading hidden">
               <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/>
@@ -81,14 +75,14 @@ const API_BASE = 'https://api.ustc.dev';
     <div class="trading-dashboard hidden" id="dashboard-section">
       <div class="dashboard-header">
         <div class="header-left">
-          <h1 class="dashboard-title">{lang === 'zh' ? '黄金交易管理' : 'Gold Trading'}</h1>
-          <p class="dashboard-subtitle">{lang === 'zh' ? '实时监控金价，智能管理交易' : 'Real-time monitoring and smart trading'}</p>
+          <h1 class="dashboard-title">黄金交易管理</h1>
+          <p class="dashboard-subtitle">实时监控金价，智能管理交易</p>
         </div>
         <div class="header-right">
           <div class="current-price-card" id="price-card">
-            <span class="price-label">{lang === 'zh' ? '当前金价' : 'Current Price'}</span>
+            <span class="price-label">当前金价</span>
             <span class="price-value loading" id="current-gold-price">--</span>
-            <span class="price-unit">{lang === 'zh' ? '元/克' : 'CNY/g'}</span>
+            <span class="price-unit">元/克</span>
             <span class="price-update-time" id="price-update-time"></span>
           </div>
           <button class="logout-btn" id="logout-btn">
@@ -97,7 +91,7 @@ const API_BASE = 'https://api.ustc.dev';
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
             </svg>
-            <span>{lang === 'zh' ? '退出' : 'Logout'}</span>
+            <span>退出</span>
           </button>
         </div>
       </div>
@@ -112,7 +106,7 @@ const API_BASE = 'https://api.ustc.dev';
           </div>
           <div class="stat-content">
             <span class="stat-value" id="stat-total-profit">¥0.00</span>
-            <span class="stat-label">{lang === 'zh' ? '累计收益' : 'Total Profit'}</span>
+            <span class="stat-label">累计收益</span>
           </div>
         </div>
         <div class="stat-card month">
@@ -126,7 +120,7 @@ const API_BASE = 'https://api.ustc.dev';
           </div>
           <div class="stat-content">
             <span class="stat-value" id="stat-month-profit">¥0.00</span>
-            <span class="stat-label">{lang === 'zh' ? '本月收益' : 'This Month'}</span>
+            <span class="stat-label">本月收益</span>
           </div>
         </div>
         <div class="stat-card week">
@@ -138,7 +132,7 @@ const API_BASE = 'https://api.ustc.dev';
           </div>
           <div class="stat-content">
             <span class="stat-value" id="stat-week-profit">¥0.00</span>
-            <span class="stat-label">{lang === 'zh' ? '本周收益' : 'This Week'}</span>
+            <span class="stat-label">本周收益</span>
           </div>
         </div>
         <div class="stat-card quantity">
@@ -149,7 +143,7 @@ const API_BASE = 'https://api.ustc.dev';
           </div>
           <div class="stat-content">
             <span class="stat-value" id="stat-total-quantity">0g</span>
-            <span class="stat-label">{lang === 'zh' ? '持仓克数' : 'Holdings'}</span>
+            <span class="stat-label">持仓克数</span>
           </div>
         </div>
       </div>
@@ -162,20 +156,20 @@ const API_BASE = 'https://api.ustc.dev';
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              {lang === 'zh' ? '买入设置' : 'Buy Settings'}
+              买入设置
             </h2>
           </div>
           <form class="panel-form" id="buy-form">
             <div class="form-row">
               <div class="form-group">
-                <label>{lang === 'zh' ? '买入金价' : 'Buy Price'}</label>
+                <label>买入金价</label>
                 <div class="input-with-unit">
                   <input type="number" id="buy-price" step="0.01" min="0" placeholder="0.00" required />
-                  <span class="unit">{lang === 'zh' ? '元/克' : 'CNY/g'}</span>
+                  <span class="unit">元/克</span>
                 </div>
               </div>
               <div class="form-group">
-                <label>{lang === 'zh' ? '买入克数' : 'Quantity'}</label>
+                <label>买入克数</label>
                 <div class="input-with-unit">
                   <input type="number" id="buy-quantity" step="0.001" min="0.001" placeholder="0.000" required />
                   <span class="unit">g</span>
@@ -183,19 +177,19 @@ const API_BASE = 'https://api.ustc.dev';
               </div>
             </div>
             <div class="calculated-row">
-              <span class="calc-label">{lang === 'zh' ? '买入总额' : 'Total Amount'}</span>
+              <span class="calc-label">买入总额</span>
               <span class="calc-value" id="buy-total">¥0.00</span>
             </div>
             <div class="form-group">
-              <label>{lang === 'zh' ? '备注' : 'Notes'}</label>
-              <input type="text" id="buy-notes" placeholder={lang === 'zh' ? '可选备注' : 'Optional notes'} />
+              <label>备注</label>
+              <input type="text" id="buy-notes" placeholder="可选备注" />
             </div>
             <button type="submit" class="submit-btn buy">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              {lang === 'zh' ? '确认买入' : 'Confirm Buy'}
+              确认买入
             </button>
           </form>
         </div>
@@ -206,20 +200,20 @@ const API_BASE = 'https://api.ustc.dev';
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              {lang === 'zh' ? '卖出设置' : 'Sell Settings'}
+              卖出设置
             </h2>
           </div>
           <form class="panel-form" id="sell-form">
             <div class="form-row">
               <div class="form-group">
-                <label>{lang === 'zh' ? '卖出价格' : 'Sell Price'}</label>
+                <label>卖出价格</label>
                 <div class="input-with-unit">
                   <input type="number" id="sell-price" step="0.01" min="0" placeholder="0.00" required />
-                  <span class="unit">{lang === 'zh' ? '元/克' : 'CNY/g'}</span>
+                  <span class="unit">元/克</span>
                 </div>
               </div>
               <div class="form-group">
-                <label>{lang === 'zh' ? '卖出克数' : 'Quantity'}</label>
+                <label>卖出克数</label>
                 <div class="input-with-unit">
                   <input type="number" id="sell-quantity" step="0.001" min="0.001" placeholder="0.000" required />
                   <span class="unit">g</span>
@@ -227,18 +221,18 @@ const API_BASE = 'https://api.ustc.dev';
               </div>
             </div>
             <div class="calculated-row">
-              <span class="calc-label">{lang === 'zh' ? '卖出总额' : 'Total Amount'}</span>
+              <span class="calc-label">卖出总额</span>
               <span class="calc-value" id="sell-total">¥0.00</span>
             </div>
             <div class="form-group">
-              <label>{lang === 'zh' ? '备注' : 'Notes'}</label>
-              <input type="text" id="sell-notes" placeholder={lang === 'zh' ? '可选备注' : 'Optional notes'} />
+              <label>备注</label>
+              <input type="text" id="sell-notes" placeholder="可选备注" />
             </div>
             <button type="submit" class="submit-btn sell">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              {lang === 'zh' ? '确认卖出' : 'Confirm Sell'}
+              确认卖出
             </button>
           </form>
         </div>
@@ -250,7 +244,7 @@ const API_BASE = 'https://api.ustc.dev';
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
               </svg>
-              {lang === 'zh' ? '价格预警' : 'Price Alerts'}
+              价格预警
             </h2>
           </div>
           <form class="panel-form" id="alert-form">
@@ -262,7 +256,7 @@ const API_BASE = 'https://api.ustc.dev';
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                   </svg>
-                  {lang === 'zh' ? '买入提醒' : 'Buy Alert'}
+                  买入提醒
                 </span>
               </label>
               <label class="alert-type-label">
@@ -271,15 +265,15 @@ const API_BASE = 'https://api.ustc.dev';
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                   </svg>
-                  {lang === 'zh' ? '卖出提醒' : 'Sell Alert'}
+                  卖出提醒
                 </span>
               </label>
             </div>
             <div class="form-group">
-              <label>{lang === 'zh' ? '目标价格' : 'Target Price'}</label>
+              <label>目标价格</label>
               <div class="input-with-unit">
                 <input type="number" id="alert-price" step="0.01" min="0" placeholder="0.00" required />
-                <span class="unit">{lang === 'zh' ? '元/克' : 'CNY/g'}</span>
+                <span class="unit">元/克</span>
               </div>
             </div>
             <button type="submit" class="submit-btn alert">
@@ -287,7 +281,7 @@ const API_BASE = 'https://api.ustc.dev';
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
               </svg>
-              {lang === 'zh' ? '添加预警' : 'Add Alert'}
+              添加预警
             </button>
           </form>
           <div class="alert-list" id="alert-list"></div>
@@ -304,27 +298,27 @@ const API_BASE = 'https://api.ustc.dev';
               <line x1="16" y1="17" x2="8" y2="17"></line>
               <polyline points="10 9 9 9 8 9"></polyline>
             </svg>
-            {lang === 'zh' ? '交易记录' : 'Transaction Records'}
+            交易记录
           </h2>
           <button class="add-transaction-btn" id="add-transaction-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            <span>{lang === 'zh' ? '增加记录' : 'Add Record'}</span>
+            <span>增加记录</span>
           </button>
         </div>
         <div class="filter-bar">
           <div class="filter-segment-control" id="filter-type-segment">
-            <button class="segment-btn active" data-value="">{lang === 'zh' ? '全部' : 'All'}</button>
-            <button class="segment-btn" data-value="buy">{lang === 'zh' ? '买入' : 'Buy'}</button>
-            <button class="segment-btn" data-value="sell">{lang === 'zh' ? '卖出' : 'Sell'}</button>
+            <button class="segment-btn active" data-value="">全部</button>
+            <button class="segment-btn" data-value="buy">买入</button>
+            <button class="segment-btn" data-value="sell">卖出</button>
           </div>
           <div class="filter-sort-wrapper">
-            <span class="sort-label">{lang === 'zh' ? '排序' : 'Sort'}</span>
-            <select id="filter-sort" class="sort-select">
-              <option value="desc">{lang === 'zh' ? '最新优先' : 'Newest First'}</option>
-              <option value="asc">{lang === 'zh' ? '最早优先' : 'Oldest First'}</option>
+            <span class="sort-label">排序</span>
+            <select class="sort-select" id="sort-order">
+              <option value="desc">最新优先</option>
+              <option value="asc">最早优先</option>
             </select>
           </div>
         </div>
@@ -342,11 +336,11 @@ const API_BASE = 'https://api.ustc.dev';
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
           </div>
-          <h3 class="delete-modal-title">{lang === 'zh' ? '确认删除' : 'Confirm Delete'}</h3>
-          <p class="delete-modal-desc">{lang === 'zh' ? '确定要删除这条交易记录吗？此操作无法撤销。' : 'Are you sure you want to delete this transaction? This action cannot be undone.'}</p>
+          <h3 class="delete-modal-title">确认删除</h3>
+          <p class="delete-modal-desc">确定要删除这条交易记录吗？此操作无法撤销。</p>
           <div class="delete-modal-actions">
-            <button class="delete-modal-btn cancel" id="delete-cancel-btn">{lang === 'zh' ? '取消' : 'Cancel'}</button>
-            <button class="delete-modal-btn confirm" id="delete-confirm-btn">{lang === 'zh' ? '删除' : 'Delete'}</button>
+            <button class="delete-modal-btn cancel" id="delete-cancel-btn">取消</button>
+            <button class="delete-modal-btn confirm" id="delete-confirm-btn">删除</button>
           </div>
         </div>
       </div>
@@ -355,7 +349,7 @@ const API_BASE = 'https://api.ustc.dev';
         <div class="edit-modal-backdrop" id="edit-modal-backdrop"></div>
         <div class="edit-modal-content">
           <div class="edit-modal-header">
-            <h3>{lang === 'zh' ? '编辑交易记录' : 'Edit Transaction'}</h3>
+            <h3>编辑交易记录</h3>
             <button class="modal-close" id="edit-modal-close">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -368,37 +362,37 @@ const API_BASE = 'https://api.ustc.dev';
             <input type="hidden" id="edit-tx-type" />
             <div class="edit-form-grid">
               <div class="edit-form-group">
-                <label>{lang === 'zh' ? '交易时间' : 'Transaction Time'}</label>
+                <label>交易时间</label>
                 <input type="datetime-local" id="edit-tx-date" required />
               </div>
               <div class="edit-form-group">
-                <label>{lang === 'zh' ? '买入价格 (元/克)' : 'Buy Price (¥/g)'}</label>
+                <label>买入价格 (元/克)</label>
                 <input type="number" id="edit-tx-buy-price" step="0.01" min="0" placeholder="0.00" />
               </div>
               <div class="edit-form-group">
-                <label>{lang === 'zh' ? '买入数量 (克)' : 'Buy Quantity (g)'}</label>
+                <label>买入数量 (克)</label>
                 <input type="number" id="edit-tx-buy-qty" step="0.001" min="0" placeholder="0.000" />
               </div>
               <div class="edit-form-group">
-                <label>{lang === 'zh' ? '卖出价格 (元/克)' : 'Sell Price (¥/g)'}</label>
+                <label>卖出价格 (元/克)</label>
                 <input type="number" id="edit-tx-sell-price" step="0.01" min="0" placeholder="0.00" />
               </div>
               <div class="edit-form-group">
-                <label>{lang === 'zh' ? '卖出数量 (克)' : 'Sell Quantity (g)'}</label>
+                <label>卖出数量 (克)</label>
                 <input type="number" id="edit-tx-sell-qty" step="0.001" min="0" placeholder="0.000" />
               </div>
               <div class="edit-form-group">
-                <label>{lang === 'zh' ? '交易平台' : 'Platform'}</label>
-                <input type="text" id="edit-tx-platform" placeholder={lang === 'zh' ? '例如：银行纸黄金' : 'e.g., Bank Paper Gold'} />
+                <label>交易平台</label>
+                <input type="text" id="edit-tx-platform" placeholder="例如：银行纸黄金" />
               </div>
             </div>
             <div class="edit-form-actions">
-              <button type="button" class="edit-form-btn cancel" id="edit-cancel-btn">{lang === 'zh' ? '取消' : 'Cancel'}</button>
+              <button type="button" class="edit-form-btn cancel" id="edit-cancel-btn">取消</button>
               <button type="submit" class="edit-form-btn save">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
-                {lang === 'zh' ? '保存更改' : 'Save Changes'}
+                保存更改
               </button>
             </div>
           </form>
@@ -409,7 +403,7 @@ const API_BASE = 'https://api.ustc.dev';
         <div class="modal-backdrop" id="add-modal-backdrop"></div>
         <div class="modal-content">
           <div class="modal-header">
-            <h3>{lang === 'zh' ? '新增交易记录' : 'Add Transaction'}</h3>
+            <h3>新增交易记录</h3>
             <button class="modal-close" id="add-modal-close">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -420,54 +414,54 @@ const API_BASE = 'https://api.ustc.dev';
           <form id="add-transaction-form">
             <div class="form-row">
               <div class="form-group">
-                <label>{lang === 'zh' ? '交易类型' : 'Type'}</label>
+                <label>交易类型</label>
                 <div class="type-toggle">
                   <button type="button" class="type-btn active" data-type="buy">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                       <line x1="12" y1="5" x2="12" y2="19"></line>
                       <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    {lang === 'zh' ? '买入' : 'Buy'}
+                    买入
                   </button>
                   <button type="button" class="type-btn" data-type="sell">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                       <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    {lang === 'zh' ? '卖出' : 'Sell'}
+                    卖出
                   </button>
                 </div>
                 <input type="hidden" id="add-type" name="type" value="buy" />
               </div>
               <div class="form-group">
-                <label>{lang === 'zh' ? '交易时间' : 'Date'}</label>
+                <label>交易时间</label>
                 <input type="datetime-local" id="add-date" name="date" required />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label>{lang === 'zh' ? '买入价格 (元/克)' : 'Buy Price (¥/g)'}</label>
+                <label>买入价格 (元/克)</label>
                 <input type="number" id="add-buy-price" name="buyPrice" step="0.01" min="0" placeholder="0.00" required />
               </div>
               <div class="form-group">
-                <label>{lang === 'zh' ? '卖出价格 (元/克)' : 'Sell Price (¥/g)'}</label>
+                <label>卖出价格 (元/克)</label>
                 <input type="number" id="add-sell-price" name="sellPrice" step="0.01" min="0" placeholder="0.00" />
               </div>
             </div>
             <div class="form-group">
-              <label>{lang === 'zh' ? '数量 (克)' : 'Quantity (g)'}</label>
+              <label>数量 (克)</label>
               <input type="number" id="add-quantity" name="quantity" step="0.001" min="0" placeholder="0.000" required />
             </div>
             <div class="form-group">
-              <label>{lang === 'zh' ? '交易平台' : 'Platform'}</label>
-              <input type="text" id="add-platform" name="platform" placeholder={lang === 'zh' ? '例如：银行纸黄金' : 'e.g., Bank Paper Gold'} />
+              <label>交易平台</label>
+              <input type="text" id="add-platform" name="platform" placeholder="例如：银行纸黄金" />
             </div>
             <div class="form-actions">
-              <button type="button" class="btn-cancel" id="add-cancel-btn">{lang === 'zh' ? '取消' : 'Cancel'}</button>
+              <button type="button" class="btn-cancel" id="add-cancel-btn">取消</button>
               <button type="submit" class="btn-submit">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
-                {lang === 'zh' ? '保存' : 'Save'}
+                保存
               </button>
             </div>
           </form>
@@ -477,29 +471,29 @@ const API_BASE = 'https://api.ustc.dev';
       <div class="charts-section">
         <div class="chart-card">
           <div class="chart-header">
-            <h3 class="chart-title">{lang === 'zh' ? '每周收益' : 'Weekly Profit'}</h3>
+            <h3 class="chart-title">每周收益</h3>
             <div class="chart-legend">
-              <span class="legend-item"><span class="legend-dot buy"></span>{lang === 'zh' ? '买入' : 'Buy'}</span>
-              <span class="legend-item"><span class="legend-dot sell"></span>{lang === 'zh' ? '卖出' : 'Sell'}</span>
+              <span class="legend-item"><span class="legend-dot buy"></span>买入</span>
+              <span class="legend-item"><span class="legend-dot sell"></span>卖出</span>
             </div>
           </div>
           <div class="chart-container" id="weekly-chart"></div>
           <div class="chart-tooltip" id="weekly-tooltip"></div>
           <div class="chart-loading" id="weekly-loading">
             <div class="loading-spinner"></div>
-            <span>{lang === 'zh' ? '加载中...' : 'Loading...'}</span>
+            <span>加载中...</span>
           </div>
         </div>
         <div class="chart-card">
           <div class="chart-header">
-            <h3 class="chart-title">{lang === 'zh' ? '月度收益' : 'Monthly Profit'}</h3>
-            <span class="chart-subtitle">{lang === 'zh' ? '最近4周完整数据' : 'Last 4 weeks data'}</span>
+            <h3 class="chart-title">月度收益</h3>
+            <span class="chart-subtitle">最近4周完整数据</span>
           </div>
           <div class="chart-container" id="monthly-chart"></div>
           <div class="chart-tooltip" id="monthly-tooltip"></div>
           <div class="chart-loading" id="monthly-loading">
             <div class="loading-spinner"></div>
-            <span>{lang === 'zh' ? '加载中...' : 'Loading...'}</span>
+            <span>加载中...</span>
           </div>
         </div>
       </div>
@@ -3489,7 +3483,6 @@ const API_BASE = 'https://api.ustc.dev';
 
 <script>
   const API_BASE = 'https://api.ustc.dev';
-  const lang = document.documentElement.lang === 'zh' ? 'zh' : 'en';
 
   // Client-side authentication check via cookie
   function getCookie(name) {
@@ -3659,7 +3652,7 @@ const API_BASE = 'https://api.ustc.dev';
     } catch (error) {
       console.error('Failed to load gold price:', error);
       if (priceEl) {
-        priceEl.textContent = lang === 'zh' ? '获取失败' : 'Error';
+        priceEl.textContent = '获取失败';
         priceEl.classList.add('error');
         priceEl.classList.remove('loading');
       }
@@ -3782,7 +3775,7 @@ const API_BASE = 'https://api.ustc.dev';
     if (!container) return;
 
     if (!weeklyData || weeklyData.length === 0) {
-      const emptyMsg = lang === 'zh' ? '暂无本周数据' : 'No weekly data';
+      const emptyMsg = '暂无本周数据';
       container.innerHTML = `
         <div class="chart-empty">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -3805,10 +3798,9 @@ const API_BASE = 'https://api.ustc.dev';
     container.innerHTML = reversedData.map(d => {
       const buyHeight = ((d.buy_amount || 0) / maxAmount) * 160;
       const sellHeight = ((d.sell_amount || 0) / maxAmount) * 160;
-      const dateLabel = d.date ? new Date(d.date).toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric' }) : '';
-      
-      const buyLabel = lang === 'zh' ? '买入' : 'Buy';
-      const sellLabel = lang === 'zh' ? '卖出' : 'Sell';
+      const dateLabel = d.date ? new Date(d.date).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }) : '';
+      const buyLabel = '买入';
+      const sellLabel = '卖出';
       
       return `
         <div class="chart-bar-wrapper">
@@ -3836,9 +3828,9 @@ const API_BASE = 'https://api.ustc.dev';
     const tooltip = document.getElementById('weekly-tooltip');
     if (!tooltip) return;
 
-    const buyLabel = lang === 'zh' ? '买入金额' : 'Buy Amount';
-    const sellLabel = lang === 'zh' ? '卖出金额' : 'Sell Amount';
-    const profitLabel = lang === 'zh' ? '收益' : 'Profit';
+    const buyLabel = '买入金额';
+    const sellLabel = '卖出金额';
+    const profitLabel = '收益';
 
     tooltip.innerHTML = `
       <div class="tooltip-title">${info.date || '-'}</div>
@@ -3868,7 +3860,7 @@ const API_BASE = 'https://api.ustc.dev';
     if (!container) return;
 
     if (!monthlyData || monthlyData.length === 0) {
-      const emptyMsg = lang === 'zh' ? '暂无月度数据' : 'No monthly data';
+      const emptyMsg = '暂无月度数据';
       container.innerHTML = `
         <div class="chart-empty">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -3890,7 +3882,7 @@ const API_BASE = 'https://api.ustc.dev';
         ${reversedData.map(d => {
           const profit = d.profit || 0;
           const profitClass = profit >= 0 ? 'positive' : 'negative';
-          const weekLabel = lang === 'zh' ? `第${d.week}周` : `Week ${d.week}`;
+          const weekLabel = `第${d.week}周`;
           const dateRange = d.week_start ? `${new Date(d.week_start).getMonth() + 1}/${new Date(d.week_start).getDate()}` : '';
           
           return `
@@ -3918,13 +3910,13 @@ const API_BASE = 'https://api.ustc.dev';
     const tooltip = document.getElementById('monthly-tooltip');
     if (!tooltip) return;
 
-    const weekLabel = lang === 'zh' ? `第${info.week}周` : `Week ${info.week}`;
-    const buyLabel = lang === 'zh' ? '买入金额' : 'Buy Amount';
-    const sellLabel = lang === 'zh' ? '卖出金额' : 'Sell Amount';
-    const profitLabel = lang === 'zh' ? '收益' : 'Profit';
-    const buyCountLabel = lang === 'zh' ? '买入次数' : 'Buy Count';
-    const sellCountLabel = lang === 'zh' ? '卖出次数' : 'Sell Count';
-    const timesLabel = lang === 'zh' ? '次' : 'times';
+    const weekLabel = `第${info.week}周`;
+    const buyLabel = '买入金额';
+    const sellLabel = '卖出金额';
+    const profitLabel = '收益';
+    const buyCountLabel = '买入次数';
+    const sellCountLabel = '卖出次数';
+    const timesLabel = '次';
 
     tooltip.innerHTML = `
       <div class="tooltip-title">${weekLabel} (${info.week_start || '-'})</div>
@@ -4004,7 +3996,7 @@ const API_BASE = 'https://api.ustc.dev';
         renderTransactions(result.transactions, page);
         renderPagination(result.pagination);
       } else {
-        const errorMsg = lang === 'zh' ? '加载失败' : 'Load failed';
+        const errorMsg = '加载失败';
         if (list) {
           list.innerHTML = `
             <div class="tx-empty-table">
@@ -4014,14 +4006,14 @@ const API_BASE = 'https://api.ustc.dev';
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
               <div class="tx-empty-table-title">${errorMsg}</div>
-              <div class="tx-empty-table-desc">${result.error || (lang === 'zh' ? '未知错误' : 'Unknown error')}</div>
+              <div class="tx-empty-table-desc">${result.error || '未知错误'}</div>
             </div>
           `;
         }
       }
     } catch (error) {
       console.error('Failed to load transactions:', error);
-      const errorMsg = lang === 'zh' ? '网络错误' : 'Network Error';
+      const errorMsg = '网络错误';
       if (list) {
         list.innerHTML = `
           <div class="tx-empty-table">
@@ -4031,7 +4023,7 @@ const API_BASE = 'https://api.ustc.dev';
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
             <div class="tx-empty-table-title">${errorMsg}</div>
-            <div class="tx-empty-table-desc">${lang === 'zh' ? '请检查连接后重试' : 'Please check connection and retry'}</div>
+            <div class="tx-empty-table-desc">请检查连接后重试</div>
           </div>
         `;
       }
@@ -4070,8 +4062,8 @@ const API_BASE = 'https://api.ustc.dev';
             <line x1="16" y1="13" x2="8" y2="13"></line>
             <line x1="16" y1="17" x2="8" y2="17"></line>
           </svg>
-          <div class="tx-empty-table-title">${lang === 'zh' ? '暂无交易记录' : 'No Transactions'}</div>
-          <div class="tx-empty-table-desc">${lang === 'zh' ? '开始记录您的第一笔交易吧' : 'Start recording your first trade'}</div>
+          <div class="tx-empty-table-title">暂无交易记录</div>
+          <div class="tx-empty-table-desc">开始记录您的第一笔交易吧</div>
         </div>
       `;
       return;
@@ -4107,58 +4099,58 @@ const API_BASE = 'https://api.ustc.dev';
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                   </svg>
                 `}
-                ${isBuy ? (lang === 'zh' ? '买入' : 'Buy') : (lang === 'zh' ? '卖出' : 'Sell')}
+                ${isBuy ? '买入' : '卖出'}
               </span>
             </div>
           </div>
           
           <div class="tx-card-body">
             <div class="tx-data-item">
-              <span class="tx-data-label">${lang === 'zh' ? '时间' : 'Time'}</span>
+              <span class="tx-data-label">时间</span>
               ${isEditing ? 
                 `<input type="datetime-local" class="tx-inline-edit" value="${formatDateTimeLocal(t.created_at)}" data-field="created_at" data-id="${t.id}">` :
                 `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'created_at')">${formatTableDate(t.created_at)}</span>`
               }
             </div>
             <div class="tx-data-item">
-              <span class="tx-data-label">${lang === 'zh' ? '买入价格' : 'Buy Price'}</span>
+              <span class="tx-data-label">买入价格</span>
               ${isEditing ? 
                 `<input type="number" step="0.01" class="tx-inline-edit tx-number" value="${buyPrice !== '-' ? parseFloat(buyPrice).toFixed(2) : ''}" data-field="buy_price" data-id="${t.id}" placeholder="0.00">` :
                 `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'buy_price')">${isBuy ? `¥${t.price.toFixed(2)}` : (buyPrice !== '-' ? `¥${parseFloat(buyPrice).toFixed(2)}` : '-')}</span>`
               }
             </div>
             <div class="tx-data-item">
-              <span class="tx-data-label">${lang === 'zh' ? '买入数量' : 'Buy Qty'}</span>
+              <span class="tx-data-label">买入数量</span>
               ${isEditing ? 
                 `<input type="number" step="0.001" class="tx-inline-edit tx-number" value="${buyQty !== '-' ? parseFloat(buyQty).toFixed(3) : ''}" data-field="buy_qty" data-id="${t.id}" placeholder="0.000">` :
                 `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'buy_qty')">${buyQty !== '-' ? `${parseFloat(buyQty).toFixed(3)}g` : '-'}</span>`
               }
             </div>
             <div class="tx-data-item">
-              <span class="tx-data-label">${lang === 'zh' ? '卖出价格' : 'Sell Price'}</span>
+              <span class="tx-data-label">卖出价格</span>
               ${isEditing ? 
                 `<input type="number" step="0.01" class="tx-inline-edit tx-number" value="${sellPrice !== '-' ? parseFloat(sellPrice).toFixed(2) : ''}" data-field="sell_price" data-id="${t.id}" placeholder="0.00">` :
                 `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'sell_price')">${sellPrice !== '-' ? `¥${parseFloat(sellPrice).toFixed(2)}` : '-'}</span>`
               }
             </div>
             <div class="tx-data-item">
-              <span class="tx-data-label">${lang === 'zh' ? '卖出数量' : 'Sell Qty'}</span>
+              <span class="tx-data-label">卖出数量</span>
               ${isEditing ? 
                 `<input type="number" step="0.001" class="tx-inline-edit tx-number" value="${sellQty !== '-' ? parseFloat(sellQty).toFixed(3) : ''}" data-field="sell_qty" data-id="${t.id}" placeholder="0.000">` :
                 `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'sell_qty')">${sellQty !== '-' ? `${parseFloat(sellQty).toFixed(3)}g` : '-'}</span>`
               }
             </div>
             <div class="tx-data-item">
-              <span class="tx-data-label">${lang === 'zh' ? '收益' : 'Profit'}</span>
+              <span class="tx-data-label">收益</span>
               ${isEditing ? 
                 `<input type="number" step="0.01" class="tx-inline-edit tx-number" value="${!isBuy && t.profit ? parseFloat(t.profit).toFixed(2) : ''}" data-field="profit" data-id="${t.id}" placeholder="0.00">` :
                 `<span class="tx-data-value profit ${profitClass}" onclick="startInlineEdit(${t.id}, 'profit')">${isBuy ? '-' : formatCurrency(t.profit)}</span>`
               }
             </div>
             <div class="tx-data-item full-width">
-              <span class="tx-data-label">${lang === 'zh' ? '平台' : 'Platform'}</span>
+              <span class="tx-data-label">平台</span>
               ${isEditing ? 
-                `<input type="text" class="tx-inline-edit" value="${platform !== '-' ? platform : ''}" data-field="platform" data-id="${t.id}" placeholder="${lang === 'zh' ? '平台' : 'Platform'}">` :
+                `<input type="text" class="tx-inline-edit" value="${platform !== '-' ? platform : ''}" data-field="platform" data-id="${t.id}" placeholder="平台">` :
                 `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'platform')}" title="${platform}">${platform}</span>`
               }
             </div>
@@ -4174,19 +4166,19 @@ const API_BASE = 'https://api.ustc.dev';
             </div>
             <div class="tx-actions">
               ${isEditing ? `
-                <button class="tx-action-btn save" onclick="saveInlineEdit(${t.id})" title="${lang === 'zh' ? '保存' : 'Save'}">
+                <button class="tx-action-btn save" onclick="saveInlineEdit(${t.id})" title="保存">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
-                  <span>${lang === 'zh' ? '保存' : 'Save'}</span>
+                  <span>保存</span>
                 </button>
               ` : ''}
-              <button class="tx-action-btn delete" onclick="openDeleteModal(${t.id})" title="${lang === 'zh' ? '删除' : 'Delete'}">
+              <button class="tx-action-btn delete" onclick="openDeleteModal(${t.id})" title="删除">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
-                <span>${lang === 'zh' ? '删除' : 'Delete'}</span>
+                <span>删除</span>
               </button>
             </div>
           </div>
@@ -4291,7 +4283,7 @@ const API_BASE = 'https://api.ustc.dev';
     const saveBtn = card.querySelector('.tx-action-btn.save');
     if (saveBtn) {
       saveBtn.disabled = true;
-      saveBtn.innerHTML = `<svg class="spinner" width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg><span>${lang === 'zh' ? '保存中' : 'Saving'}</span>`;
+      saveBtn.innerHTML = `<svg class="spinner" width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg><span>保存中</span>`;
     }
 
     try {
@@ -4315,18 +4307,18 @@ const API_BASE = 'https://api.ustc.dev';
         // Reload stats to reflect changes
         await loadStats();
       } else {
-        alert(result.error || (lang === 'zh' ? '保存失败' : 'Save failed'));
+        alert(result.error || '保存失败');
         if (saveBtn) {
           saveBtn.disabled = false;
-          saveBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg><span>${lang === 'zh' ? '保存' : 'Save'}</span>`;
+          saveBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg><span>保存</span>`;
         }
       }
     } catch (error) {
       console.error('Save failed:', error);
-      alert(lang === 'zh' ? '保存失败' : 'Save failed');
+      alert('保存失败');
       if (saveBtn) {
         saveBtn.disabled = false;
-        saveBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg><span>${lang === 'zh' ? '保存' : 'Save'}</span>`;
+        saveBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg><span>保存</span>`;
       }
     }
   }
@@ -4363,15 +4355,15 @@ const API_BASE = 'https://api.ustc.dev';
         closeDeleteModal();
         loadDashboard();
       } else {
-        alert(result.error || (lang === 'zh' ? '删除失败' : 'Delete failed'));
+        alert(result.error || '删除失败');
       }
     } catch (error) {
       console.error('Delete failed:', error);
-      alert(lang === 'zh' ? '删除失败' : 'Delete failed');
+      alert('删除失败');
     } finally {
       if (confirmBtn) {
         (confirmBtn as HTMLButtonElement).disabled = false;
-        confirmBtn.textContent = lang === 'zh' ? '删除' : 'Delete';
+        confirmBtn.textContent = '删除';
       }
     }
   }
@@ -4464,11 +4456,11 @@ const API_BASE = 'https://api.ustc.dev';
         closeEditModal();
         loadDashboard();
       } else {
-        alert(result.error || (lang === 'zh' ? '修改失败' : 'Update failed'));
+        alert(result.error || '修改失败');
       }
     } catch (error) {
       console.error('Save edit failed:', error);
-      alert(lang === 'zh' ? '修改失败' : 'Update failed');
+      alert('修改失败');
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
@@ -4491,7 +4483,7 @@ const API_BASE = 'https://api.ustc.dev';
 
     let html = '';
     
-    html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="loadTransactions(${currentPage - 1})">${lang === 'zh' ? '上一页' : 'Prev'}</button>`;
+    html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="loadTransactions(${currentPage - 1})">上一页</button>`;
     
     for (let i = 1; i <= totalPages; i++) {
       if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
@@ -4501,7 +4493,7 @@ const API_BASE = 'https://api.ustc.dev';
       }
     }
 
-    html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="loadTransactions(${currentPage + 1})">${lang === 'zh' ? '下一页' : 'Next'}</button>`;
+    html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="loadTransactions(${currentPage + 1})">下一页</button>`;
 
     container.innerHTML = html;
   }
@@ -4529,7 +4521,7 @@ const API_BASE = 'https://api.ustc.dev';
     list.innerHTML = alerts.map(a => `
       <div class="alert-item" data-id="${a.id}">
         <div class="alert-info">
-          <span class="alert-type ${a.alert_type}">${a.alert_type === 'buy' ? (lang === 'zh' ? '买' : 'Buy') : (lang === 'zh' ? '卖' : 'Sell')}</span>
+          <span class="alert-type ${a.alert_type}">${a.alert_type === 'buy' ? '买' : '卖'}</span>
           <span>¥${a.target_price}/g</span>
         </div>
         <button class="delete-alert" onclick="deleteAlert(${a.id})">
@@ -4543,7 +4535,7 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   async function deleteTransaction(id) {
-    if (!confirm(lang === 'zh' ? '确定删除此交易记录？' : 'Delete this transaction?')) return;
+    if (!confirm('确定删除此交易记录？')) return;
 
     try {
       const result = await apiRequest(`/api/trading/transaction?id=${id}`, { method: 'DELETE' });
@@ -4604,7 +4596,7 @@ const API_BASE = 'https://api.ustc.dev';
     const platform = document.getElementById('add-platform').value;
 
     if (!date || !buyPrice || !quantity) {
-      alert(lang === 'zh' ? '请填写必填字段' : 'Please fill in required fields');
+      alert('请填写必填字段');
       return;
     }
 
@@ -4632,11 +4624,11 @@ const API_BASE = 'https://api.ustc.dev';
         document.getElementById('add-transaction-modal')?.classList.add('hidden');
         loadDashboard();
       } else {
-        alert(result.error || (lang === 'zh' ? '保存失败' : 'Save failed'));
+        alert(result.error || '保存失败');
       }
     } catch (error) {
-      console.error('Save transaction failed:', error);
-      alert(lang === 'zh' ? '保存失败' : 'Save failed');
+      console.error('Add transaction failed:', error);
+      alert('保存失败');
     } finally {
       submitBtn.innerHTML = originalText;
       (submitBtn as HTMLButtonElement).disabled = false;
@@ -4710,7 +4702,7 @@ const API_BASE = 'https://api.ustc.dev';
       const password = formData.get('password') as string;
 
       if (!username || !password) {
-        alert(lang === 'zh' ? '请输入用户名和密码' : 'Please enter username and password');
+        alert('请输入用户名和密码');
         return;
       }
 
@@ -4727,13 +4719,13 @@ const API_BASE = 'https://api.ustc.dev';
         console.log('[Login] Login successful, showing dashboard...');
         showDashboard();
       } else {
-        const errorMsg = result.error || (lang === 'zh' ? '登录失败' : 'Login failed');
+        const errorMsg = result.error || '登录失败';
         console.error('[Login] Login failed:', errorMsg);
         alert(errorMsg);
       }
     } catch (error) {
       console.error('[Login] Exception:', error);
-      alert(lang === 'zh' ? '登录请求失败，请检查网络连接' : 'Login request failed, please check network connection');
+      alert('登录请求失败，请检查网络连接');
     } finally {
       btnText?.classList.remove('hidden');
       btnLoading?.classList.add('hidden');
@@ -4777,7 +4769,7 @@ const API_BASE = 'https://api.ustc.dev';
         (buyForm as HTMLFormElement).reset();
         (document.getElementById('buy-total') as HTMLElement).textContent = '¥0.00';
         loadDashboard();
-        alert(lang === 'zh' ? '买入记录已保存' : 'Buy record saved');
+        alert('买入记录已保存');
       } else {
         alert(result.error || 'Failed to save');
       }
@@ -4804,7 +4796,7 @@ const API_BASE = 'https://api.ustc.dev';
         (sellForm as HTMLFormElement).reset();
         (document.getElementById('sell-total') as HTMLElement).textContent = '¥0.00';
         loadDashboard();
-        alert(lang === 'zh' ? '卖出记录已保存' : 'Sell record saved');
+        alert('卖出记录已保存');
       } else {
         alert(result.error || 'Failed to save');
       }
@@ -4821,7 +4813,7 @@ const API_BASE = 'https://api.ustc.dev';
     const targetPrice = parseFloat((document.getElementById('alert-price') as HTMLInputElement)?.value);
 
     if (!targetPrice) {
-      alert(lang === 'zh' ? '请输入目标价格' : 'Please enter target price');
+      alert('请输入目标价格');
       return;
     }
 
@@ -4834,7 +4826,7 @@ const API_BASE = 'https://api.ustc.dev';
       if (result.success) {
         (document.getElementById('alert-price') as HTMLInputElement).value = '';
         loadAlerts();
-        alert(lang === 'zh' ? '预警已设置' : 'Alert created');
+        alert('预警已设置');
       } else {
         alert(result.error || 'Failed to create alert');
       }

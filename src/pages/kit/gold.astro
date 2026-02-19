@@ -1,17 +1,15 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const lang = Astro.url.pathname.startsWith('/zh') ? 'zh' : 'en';
-
 const dayTabs = [
-  { id: 'today', label: lang === 'zh' ? '今日金价' : 'Today' },
-  { id: 'yesterday', label: lang === 'zh' ? '昨日金价' : 'Yesterday' },
+  { id: 'today', label: '今日金价' },
+  { id: 'yesterday', label: '昨日金价' },
 ];
 ---
 
 <Layout 
-  title={lang === 'zh' ? '黄金价格 - Meow Note' : 'Gold Price - Meow Note'}
-  description={lang === 'zh' ? '追踪国内外黄金价格' : 'Track domestic and international gold prices'}
+  title="黄金价格 - Meow Note"
+  description="追踪国内外黄金价格"
 >
   <!-- Preload Chart.js for faster rendering -->
   <link rel="preload" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" as="script" />
@@ -23,10 +21,10 @@ const dayTabs = [
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
-          <span>{lang === 'zh' ? '工具箱' : 'Toolkit'}</span>
+          <span>工具箱</span>
         </a>
-        <h1 class="title">{lang === 'zh' ? '黄金价格' : 'Gold Price'}</h1>
-        <p class="desc">{lang === 'zh' ? '追踪国内外黄金价格走势' : 'Track domestic and international gold prices'}</p>
+        <h1 class="title">黄金价格</h1>
+        <p class="desc">追踪国内外黄金价格走势</p>
       </header>
       
       <div class="tabs" id="day-tabs">
@@ -40,41 +38,41 @@ const dayTabs = [
       <div class="cards">
         <div class="card">
           <div class="card-head">
-            <h2 class="card-title">{lang === 'zh' ? '国内黄金' : 'Domestic Gold'}</h2>
-            <span class="unit">{lang === 'zh' ? '元/克' : 'CNY/g'}</span>
+            <h2 class="card-title">国内黄金</h2>
+            <span class="unit">元/克</span>
           </div>
           <div class="price-row">
             <span class="price" id="domestic-price">--</span>
             <span class="change" id="domestic-change">--</span>
           </div>
           <div class="stats">
-            <div class="stat"><span class="lbl">{lang === 'zh' ? '最高' : 'High'}</span><span class="val" id="domestic-high">--</span></div>
-            <div class="stat"><span class="lbl">{lang === 'zh' ? '最低' : 'Low'}</span><span class="val" id="domestic-low">--</span></div>
-            <div class="stat"><span class="lbl">{lang === 'zh' ? '开盘' : 'Open'}</span><span class="val" id="domestic-open">--</span></div>
+            <div class="stat"><span class="lbl">最高</span><span class="val" id="domestic-high">--</span></div>
+            <div class="stat"><span class="lbl">最低</span><span class="val" id="domestic-low">--</span></div>
+            <div class="stat"><span class="lbl">开盘</span><span class="val" id="domestic-open">--</span></div>
           </div>
           <div class="chart"><canvas id="domestic-chart"></canvas><div class="chart-empty" id="domestic-empty">数据采集中...</div></div>
         </div>
         
         <div class="card">
           <div class="card-head">
-            <h2 class="card-title">{lang === 'zh' ? '国际黄金' : 'International Gold'}</h2>
-            <span class="unit">{lang === 'zh' ? '美元/盎司' : 'USD/oz'}</span>
+            <h2 class="card-title">国际黄金</h2>
+            <span class="unit">美元/盎司</span>
           </div>
           <div class="price-row">
             <span class="price" id="international-price">--</span>
             <span class="change" id="international-change">--</span>
           </div>
           <div class="stats">
-            <div class="stat"><span class="lbl">{lang === 'zh' ? '最高' : 'High'}</span><span class="val" id="international-high">--</span></div>
-            <div class="stat"><span class="lbl">{lang === 'zh' ? '最低' : 'Low'}</span><span class="val" id="international-low">--</span></div>
-            <div class="stat"><span class="lbl">{lang === 'zh' ? '开盘' : 'Open'}</span><span class="val" id="international-open">--</span></div>
+            <div class="stat"><span class="lbl">最高</span><span class="val" id="international-high">--</span></div>
+            <div class="stat"><span class="lbl">最低</span><span class="val" id="international-low">--</span></div>
+            <div class="stat"><span class="lbl">开盘</span><span class="val" id="international-open">--</span></div>
           </div>
           <div class="chart"><canvas id="international-chart"></canvas><div class="chart-empty" id="international-empty">数据采集中...</div></div>
         </div>
       </div>
       
       <div class="update">
-        <span id="update-time">{lang === 'zh' ? '更新中...' : 'Updating...'}</span>
+        <span id="update-time">更新中...</span>
       </div>
     </div>
   </section>
@@ -146,8 +144,7 @@ const dayTabs = [
 
 <script>
   const API_BASE = 'https://api.ustc.dev';
-  const REFRESH_INTERVAL = 10000; // 10秒刷新一次
-  const lang = window.location.pathname.startsWith('/zh') ? 'zh' : 'en';
+  const REFRESH_INTERVAL = 10000;
   
   function showLoading() {
     const ids = ['domestic-price', 'international-price'];
@@ -208,7 +205,7 @@ const dayTabs = [
             },
             title: {
               display: true,
-              text: lang === 'zh' ? '时间' : 'Time',
+              text: '时间',
               color: '#666',
               font: { family: SF_PRO_FONT, size: 11 }
             }
@@ -273,7 +270,7 @@ const dayTabs = [
               ...chartConfig.options.scales.y,
               title: {
                 display: true,
-                text: lang === 'zh' ? '价格 (元/克)' : 'Price (CNY/g)',
+                text: '价格 (元/克)',
                 color: '#f97316',
                 font: { family: SF_PRO_FONT, size: 11, weight: 'bold' }
               }
@@ -304,7 +301,7 @@ const dayTabs = [
               ...chartConfig.options.scales.y,
               title: {
                 display: true,
-                text: lang === 'zh' ? '价格 (美元/盎司)' : 'Price (USD/oz)',
+                text: '价格 (美元/盎司)',
                 color: '#3b82f6',
                 font: { family: SF_PRO_FONT, size: 11, weight: 'bold' }
               }

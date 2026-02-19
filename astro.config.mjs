@@ -24,12 +24,5 @@ export default defineConfig({
         '@content': path.resolve('./src/content'),
       }
     }
-  },
-  i18n: {
-    defaultLocale: 'en',
-    locales: ['en', 'zh'],
-    routing: {
-      prefixDefaultLocale: false
-    }
   }
 });
