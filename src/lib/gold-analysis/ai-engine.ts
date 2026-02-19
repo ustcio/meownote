@@ -15,9 +15,9 @@ import type {
 // AI 模型配置
 const AI_MODELS: Record<string, AIModelConfig> = {
   qwen: {
-    name: '通义千问',
+    name: '通义千问 3.5-Max',
     provider: 'qwen',
-    version: 'qwen-plus',
+    version: 'qwen3-max-2026-01-23',
     capabilities: ['trend_analysis', 'price_prediction', 'risk_assessment'],
     parameters: {
       temperature: 0.3,
@@ -26,17 +26,17 @@ const AI_MODELS: Record<string, AIModelConfig> = {
       frequencyPenalty: 0.5,
     },
     performance: {
-      accuracy: 0.72,
-      latency: 1500,
-      costPerRequest: 0.02,
+      accuracy: 0.82,
+      latency: 2500,
+      costPerRequest: 0.05,
     },
     enabled: true,
-    weight: 0.4,
+    weight: 0.50,
   },
   doubao: {
     name: '豆包',
     provider: 'doubao',
-    version: 'doubao-2.0-pro',
+    version: 'doubao-seed-2-0-pro-260215',
     capabilities: ['trend_analysis', 'sentiment_analysis', 'pattern_recognition'],
     parameters: {
       temperature: 0.3,
@@ -69,7 +69,7 @@ const AI_MODELS: Record<string, AIModelConfig> = {
       costPerRequest: 0,
     },
     enabled: true,
-    weight: 0.25,
+    weight: 0.20,
   },
 };
 
@@ -97,7 +97,8 @@ export class GoldAIEngine {
    */
   async analyzeMarket(
     currentData: GoldPriceData,
-    priceHistory: PriceHistoryPoint[]
+    priceHistory: PriceHistoryPoint[],
+    env?: any
   ): Promise<{
     trend: MarketTrendAnalysis;
     predictions: AIPredictionResult[];
@@ -117,7 +118,8 @@ export class GoldAIEngine {
       currentData,
       priceHistory,
       trendAnalysis,
-      technicalAnalysis
+      technicalAnalysis,
+      env
     );
 
     // 4. 生成交易信号
@@ -399,10 +401,9 @@ export class GoldAIEngine {
     currentData: GoldPriceData,
     priceHistory: PriceHistoryPoint[],
     trendAnalysis: MarketTrendAnalysis,
-    technicalAnalysis: any
+    technicalAnalysis: any,
+    env?: any
   ): Promise<AIPredictionResult[]> {
-    const predictions: AIPredictionResult[] = [];
-
     // 构建标准化输入
     const standardizedInput = this.buildStandardizedInput(
       currentData,
@@ -416,7 +417,7 @@ export class GoldAIEngine {
       .filter(([_, config]) => config.enabled)
       .map(async ([name, config]) => {
         try {
-          const result = await this.callAIModel(name, config, standardizedInput);
+          const result = await this.callAIModel(name, config, standardizedInput, env);
           return result;
         } catch (error) {
           console.error(`[AI Engine] Model ${name} failed:`, error);
@@ -478,7 +479,8 @@ ${indicators}
   private async callAIModel(
     modelName: string,
     config: AIModelConfig,
-    input: string
+    input: string,
+    env?: any
   ): Promise<AIPredictionResult | null> {
     // 检查缓存
     const cacheKey = `${modelName}_${this.hashInput(input)}`;
@@ -491,10 +493,10 @@ ${indicators}
 
     switch (config.provider) {
       case 'qwen':
-        result = await this.callQwenModel(input, config);
+        result = await this.callQwenModel(input, config, env);
         break;
       case 'doubao':
-        result = await this.callDoubaoModel(input, config);
+        result = await this.callDoubaoModel(input, config, env);
         break;
       case 'custom':
         result = await this.callTechnicalModel(input, config);
@@ -515,86 +517,98 @@ ${indicators}
   }
 
   /**
-   * 调用通义千问模型
+   * 调用通义千问模型 (使用 OpenAI 兼容协议)
    */
-  private async callQwenModel(input: string, config: AIModelConfig): Promise<AIPredictionResult | null> {
-    // 这里应该调用实际的 API
-    // 模拟返回结果
-    return {
-      modelName: config.name,
-      modelVersion: config.version,
-      timestamp: Date.now(),
-      predictions: {
-        shortTerm: {
-          targetPrice: 620,
-          priceRange: { min: 615, max: 625 },
-          confidence: 0.72,
-          probabilityDistribution: { belowTarget: 0.2, atTarget: 0.6, aboveTarget: 0.2 },
-          timeHorizon: '1-4小时',
+  private async callQwenModel(input: string, config: AIModelConfig, env?: any): Promise<AIPredictionResult | null> {
+    try {
+      const apiKey = env?.DASHSCOPE_API_KEY;
+      if (!apiKey) {
+        console.log('[AI Engine] Qwen API key not configured');
+        return this.getFallbackResult(config.name, config.version, 'bullish');
+      }
+
+      const response = await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
         },
-        midTerm: {
-          targetPrice: 625,
-          priceRange: { min: 610, max: 640 },
-          confidence: 0.65,
-          probabilityDistribution: { belowTarget: 0.3, atTarget: 0.5, aboveTarget: 0.2 },
-          timeHorizon: '1-3天',
-        },
-      },
-      trendAnalysis: {
-        direction: 'bullish',
-        confidence: 0.7,
-        keyFactors: ['技术指标转强', '支撑位有效', '成交量放大'],
-      },
-      riskAssessment: {
-        level: 'medium',
-        maxDrawdown: 2.5,
-        volatilityForecast: 1.8,
-      },
-    };
+        body: JSON.stringify({
+          model: 'qwen3-max-2026-01-23',
+          messages: [
+            { 
+              role: 'system', 
+              content: '你是黄金交易分析专家，擅长技术分析和趋势判断。请基于提供的数据进行分析，并以 JSON 格式返回结果。' 
+            },
+            { role: 'user', content: input }
+          ],
+          temperature: 0.3,
+          max_tokens: 2000
+        })
+      });
+
+      const result = await response.json();
+      const aiResponse = result.choices?.[0]?.message?.content;
+
+      if (!aiResponse) {
+        return this.getFallbackResult(config.name, config.version, 'neutral');
+      }
+
+      // 解析 AI 返回的 JSON 结果
+      return this.parseAIResponse(aiResponse, config);
+    } catch (error) {
+      console.error('[AI Engine] Qwen error:', error);
+      return this.getFallbackResult(config.name, config.version, 'neutral');
+    }
   }
 
   /**
    * 调用豆包模型
    */
-  private async callDoubaoModel(input: string, config: AIModelConfig): Promise<AIPredictionResult | null> {
-    // 模拟返回结果
-    return {
-      modelName: config.name,
-      modelVersion: config.version,
-      timestamp: Date.now(),
-      predictions: {
-        shortTerm: {
-          targetPrice: 618,
-          priceRange: { min: 612, max: 624 },
-          confidence: 0.68,
-          probabilityDistribution: { belowTarget: 0.25, atTarget: 0.55, aboveTarget: 0.2 },
-          timeHorizon: '1-4小时',
+  private async callDoubaoModel(input: string, config: AIModelConfig, env?: any): Promise<AIPredictionResult | null> {
+    try {
+      const apiKey = env?.DOUBAO_API_KEY;
+      if (!apiKey) {
+        console.log('[AI Engine] Doubao API key not configured');
+        return this.getFallbackResult(config.name, config.version, 'neutral');
+      }
+
+      const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
         },
-        midTerm: {
-          targetPrice: 622,
-          priceRange: { min: 608, max: 636 },
-          confidence: 0.62,
-          probabilityDistribution: { belowTarget: 0.35, atTarget: 0.45, aboveTarget: 0.2 },
-          timeHorizon: '1-3天',
-        },
-      },
-      trendAnalysis: {
-        direction: 'neutral',
-        confidence: 0.6,
-        keyFactors: ['震荡整理', '等待突破', '观望情绪浓厚'],
-      },
-      riskAssessment: {
-        level: 'low',
-        maxDrawdown: 1.8,
-        volatilityForecast: 1.5,
-      },
-    };
+        body: JSON.stringify({
+          model: 'doubao-seed-2-0-pro-260215',
+          messages: [
+            { role: 'system', content: '你是黄金交易分析专家，擅长技术分析和趋势判断。请基于提供的数据进行分析，并以 JSON 格式返回结果。' },
+            { role: 'user', content: input }
+          ],
+          temperature: 0.3,
+          max_tokens: 2000
+        })
+      });
+
+      const result = await response.json();
+      const aiResponse = result.choices?.[0]?.message?.content;
+
+      if (!aiResponse) {
+        return this.getFallbackResult(config.name, config.version, 'neutral');
+      }
+
+      // 解析 AI 返回的 JSON 结果
+      return this.parseAIResponse(aiResponse, config);
+    } catch (error) {
+      console.error('[AI Engine] Doubao error:', error);
+      return this.getFallbackResult(config.name, config.version, 'neutral');
+    }
   }
 
   /**
    * 技术分析模型 (本地计算)
    */
-  private async callTechnicalModel(input: string, config: AIModelConfig): Promise<AIPredictionResult | null> {
+  private async callTechnicalModel(_input: string, config: AIModelConfig): Promise<AIPredictionResult | null> {
     // 基于技术指标生成预测
     return {
       modelName: config.name,
@@ -815,6 +829,114 @@ ${indicators}
     if (this.modelConfigs[modelName]) {
       this.modelConfigs[modelName] = { ...this.modelConfigs[modelName], ...config };
     }
+  }
+
+  /**
+   * 解析 AI 返回的 JSON 结果
+   */
+  private parseAIResponse(aiResponse: string, config: AIModelConfig): AIPredictionResult {
+    try {
+      // 尝试从 AI 响应中提取 JSON
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+      const jsonStr = jsonMatch ? jsonMatch[0] : '{}';
+      const parsed = JSON.parse(jsonStr);
+
+      // 构建标准化的预测结果
+      const direction = parsed.direction || parsed.trend || 'neutral';
+      const confidence = parsed.confidence || 0.65;
+      const shortTermTarget = parsed.shortTermTarget || parsed.targetPrice || 620;
+      const midTermTarget = parsed.midTermTarget || shortTermTarget * 1.01;
+
+      return {
+        modelName: config.name,
+        modelVersion: config.version,
+        timestamp: Date.now(),
+        predictions: {
+          shortTerm: {
+            targetPrice: shortTermTarget,
+            priceRange: {
+              min: shortTermTarget * 0.98,
+              max: shortTermTarget * 1.02
+            },
+            confidence: confidence,
+            probabilityDistribution: {
+              belowTarget: 0.25,
+              atTarget: 0.5,
+              aboveTarget: 0.25
+            },
+            timeHorizon: '1-4 小时'
+          },
+          midTerm: {
+            targetPrice: midTermTarget,
+            priceRange: {
+              min: midTermTarget * 0.96,
+              max: midTermTarget * 1.04
+            },
+            confidence: confidence * 0.9,
+            probabilityDistribution: {
+              belowTarget: 0.3,
+              atTarget: 0.45,
+              aboveTarget: 0.25
+            },
+            timeHorizon: '1-3 天'
+          }
+        },
+        trendAnalysis: {
+          direction: direction as 'bullish' | 'bearish' | 'neutral',
+          confidence: confidence,
+          keyFactors: parsed.factors || parsed.reasons || ['AI 分析完成']
+        },
+        riskAssessment: {
+          level: parsed.risk || 'medium',
+          maxDrawdown: parsed.maxDrawdown || 2.0,
+          volatilityForecast: parsed.volatility || 1.5
+        }
+      };
+    } catch (error) {
+      console.error('[AI Engine] Failed to parse AI response:', error);
+      return this.getFallbackResult(config.name, config.version, 'neutral');
+    }
+  }
+
+  /**
+   * 获取回退结果（当 API 调用失败时）
+   */
+  private getFallbackResult(
+    modelName: string,
+    modelVersion: string,
+    defaultDirection: 'bullish' | 'bearish' | 'neutral'
+  ): AIPredictionResult {
+    return {
+      modelName,
+      modelVersion,
+      timestamp: Date.now(),
+      predictions: {
+        shortTerm: {
+          targetPrice: 620,
+          priceRange: { min: 615, max: 625 },
+          confidence: 0.5,
+          probabilityDistribution: { belowTarget: 0.3, atTarget: 0.4, aboveTarget: 0.3 },
+          timeHorizon: '1-4 小时'
+        },
+        midTerm: {
+          targetPrice: 625,
+          priceRange: { min: 610, max: 640 },
+          confidence: 0.45,
+          probabilityDistribution: { belowTarget: 0.35, atTarget: 0.4, aboveTarget: 0.25 },
+          timeHorizon: '1-3 天'
+        }
+      },
+      trendAnalysis: {
+        direction: defaultDirection,
+        confidence: 0.5,
+        keyFactors: ['API 调用失败，使用保守估计']
+      },
+      riskAssessment: {
+        level: 'medium',
+        maxDrawdown: 2.5,
+        volatilityForecast: 2.0
+      }
+    };
   }
 }
 

@@ -249,7 +249,8 @@ export class UserFeedbackManager {
           .map(f => ({
             position: f.signalSnapshot.suggestedPosition,
             profit: f.profitLossPercent || 0,
-          }));
+          }))
+      : [];
 
     if (avgPositionFeedback && avgPositionFeedback.length > 10) {
       const highPosition = avgPositionFeedback.filter(p => p.position > 0.7);

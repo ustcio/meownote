@@ -1,0 +1,430 @@
+---
+// AI API 测试页面
+---
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI API 集成测试</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+    
+    .test-section {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .test-section h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+    
+    .status {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    
+    .status.success {
+      background: #10b981;
+      color: white;
+    }
+    
+    .status.error {
+      background: #ef4444;
+      color: white;
+    }
+    
+    .status.running {
+      background: #f59e0b;
+      color: white;
+    }
+    
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .data-display {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .result {
+      margin-top: 20px;
+    }
+    
+    .result-item {
+      padding: 10px;
+      border-left: 4px solid #667eea;
+      background: #f8fafc;
+      margin: 10px 0;
+    }
+    
+    .result-item strong {
+      color: #667eea;
+    }
+    
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .metric-card {
+      background: #f8fafc;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .metric-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .metric-label {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🧪 AI API 集成测试</h1>
+      <p>验证所有数据真实传递给 AI 并返回真实结果</p>
+    </div>
+    
+    <!-- 测试数据展示 -->
+    <div class="test-section">
+      <h2>📊 测试数据</h2>
+      <div class="data-display" id="testData"></div>
+    </div>
+    
+    <!-- 通义千问测试 -->
+    <div class="test-section">
+      <h2>
+        🔵 通义千问 3.5-Max
+        <span class="status" id="qwenStatus">等待测试</span>
+      </h2>
+      <button onclick="testQwen()" id="qwenButton">开始测试</button>
+      
+      <div class="metrics" id="qwenMetrics" style="display: none;">
+        <div class="metric-card">
+          <div class="metric-value" id="qwenTime">-</div>
+          <div class="metric-label">响应时间 (ms)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" id="qwenConfidence">-</div>
+          <div class="metric-label">置信度</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" id="qwenTarget">-</div>
+          <div class="metric-label">目标价格</div>
+        </div>
+      </div>
+      
+      <div class="result" id="qwenResult"></div>
+    </div>
+    
+    <!-- 豆包测试 -->
+    <div class="test-section">
+      <h2>
+        🟢 豆包
+        <span class="status" id="doubaoStatus">等待测试</span>
+      </h2>
+      <button onclick="testDoubao()" id="doubaoButton">开始测试</button>
+      
+      <div class="metrics" id="doubaoMetrics" style="display: none;">
+        <div class="metric-card">
+          <div class="metric-value" id="doubaoTime">-</div>
+          <div class="metric-label">响应时间 (ms)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" id="doubaoConfidence">-</div>
+          <div class="metric-label">置信度</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" id="doubaoTarget">-</div>
+          <div class="metric-label">目标价格</div>
+        </div>
+      </div>
+      
+      <div class="result" id="doubaoResult"></div>
+    </div>
+  </div>
+  
+  <script>
+    // 测试数据
+    const testData = {
+      currentPrice: 618.5,
+      openPrice: 615.0,
+      high: 620.0,
+      low: 614.0,
+      changePercent: 0.57,
+      priceHistory: [
+        { timestamp: Date.now() - 3600000, price: 615.0 },
+        { timestamp: Date.now() - 1800000, price: 616.5 },
+        { timestamp: Date.now() - 900000, price: 617.0 },
+        { timestamp: Date.now() - 600000, price: 618.0 },
+        { timestamp: Date.now() - 300000, price: 618.5 }
+      ]
+    };
+    
+    // 显示测试数据
+    document.getElementById('testData').textContent = JSON.stringify(testData, null, 2);
+    
+    // 构建提示词
+    function buildPrompt() {
+      const priceList = testData.priceHistory
+        .map(p => `${new Date(p.timestamp).toLocaleTimeString('zh-CN')}: ¥${p.price.toFixed(2)}`)
+        .join('\n');
+      
+      return `【市场数据】
+当前价格：¥${testData.currentPrice}/克
+今日开盘：¥${testData.openPrice}/克
+今日最高：¥${testData.high}/克
+今日最低：¥${testData.low}/克
+日内涨跌：${testData.changePercent.toFixed(2)}%
+
+【近期价格走势】
+${priceList}
+
+【技术指标】
+RSI: 55.2 (neutral)
+MACD: 0.35 (buy)
+Bollinger: 0.65 (neutral)
+MA Cross: 0.2 (buy)
+
+【趋势分析】
+当前趋势：up
+趋势强度：6.5
+波动率：1.8%
+支撑位：¥614.00
+阻力位：¥620.00
+
+请分析以上数据并提供：
+1. 短期价格预测 (1-4 小时)
+2. 中期价格预测 (1-3 天)
+3. 趋势判断及置信度
+4. 关键风险因素
+5. 交易建议
+
+请以 JSON 格式返回：
+{
+  "direction": "bullish/bearish/neutral",
+  "confidence": 0.0-1.0,
+  "shortTermTarget": 目标价格，
+  "midTermTarget": 目标价格，
+  "factors": ["因素 1", "因素 2", "因素 3"],
+  "risk": "low/medium/high",
+  "maxDrawdown": 数值，
+  "volatility": 数值
+}`;
+    }
+    
+    // 测试通义千问
+    async function testQwen() {
+      const button = document.getElementById('qwenButton');
+      const status = document.getElementById('qwenStatus');
+      const metrics = document.getElementById('qwenMetrics');
+      const resultDiv = document.getElementById('qwenResult');
+      
+      button.disabled = true;
+      status.textContent = '测试中...';
+      status.className = 'status running';
+      metrics.style.display = 'none';
+      resultDiv.innerHTML = '';
+      
+      const startTime = Date.now();
+      
+      try {
+        const response = await fetch('/api/test-qwen', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: buildPrompt() })
+        });
+        
+        const elapsed = Date.now() - startTime;
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          status.textContent = '✅ 成功';
+          status.className = 'status success';
+          
+          // 显示指标
+          document.getElementById('qwenTime').textContent = elapsed;
+          document.getElementById('qwenConfidence').textContent = data.confidence?.toFixed(2) || '-';
+          document.getElementById('qwenTarget').textContent = data.targetPrice || '-';
+          metrics.style.display = 'grid';
+          
+          // 显示结果
+          resultDiv.innerHTML = `
+            <div class="result-item">
+              <strong>⏱️ 响应时间:</strong> ${elapsed}ms
+            </div>
+            <div class="result-item">
+              <strong>📡 状态码:</strong> ${response.status}
+            </div>
+            <div class="result-item">
+              <strong>🤖 AI 回复:</strong>
+              <div class="data-display">${data.rawResponse || '无'}</div>
+            </div>
+            <div class="result-item">
+              <strong>📊 解析结果:</strong>
+              <div class="data-display">${JSON.stringify(data.parsed, null, 2)}</div>
+            </div>
+          `;
+        } else {
+          throw new Error(data.error || '测试失败');
+        }
+      } catch (error) {
+        status.textContent = '❌ 失败';
+        status.className = 'status error';
+        resultDiv.innerHTML = `
+          <div class="result-item" style="border-left-color: #ef4444;">
+            <strong>❌ 错误:</strong> ${error.message}
+          </div>
+        `;
+      } finally {
+        button.disabled = false;
+      }
+    }
+    
+    // 测试豆包
+    async function testDoubao() {
+      const button = document.getElementById('doubaoButton');
+      const status = document.getElementById('doubaoStatus');
+      const metrics = document.getElementById('doubaoMetrics');
+      const resultDiv = document.getElementById('doubaoResult');
+      
+      button.disabled = true;
+      status.textContent = '测试中...';
+      status.className = 'status running';
+      metrics.style.display = 'none';
+      resultDiv.innerHTML = '';
+      
+      const startTime = Date.now();
+      
+      try {
+        const response = await fetch('/api/test-doubao', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: buildPrompt() })
+        });
+        
+        const elapsed = Date.now() - startTime;
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          status.textContent = '✅ 成功';
+          status.className = 'status success';
+          
+          // 显示指标
+          document.getElementById('doubaoTime').textContent = elapsed;
+          document.getElementById('doubaoConfidence').textContent = data.confidence?.toFixed(2) || '-';
+          document.getElementById('doubaoTarget').textContent = data.targetPrice || '-';
+          metrics.style.display = 'grid';
+          
+          // 显示结果
+          resultDiv.innerHTML = `
+            <div class="result-item">
+              <strong>⏱️ 响应时间:</strong> ${elapsed}ms
+            </div>
+            <div class="result-item">
+              <strong>📡 状态码:</strong> ${response.status}
+            </div>
+            <div class="result-item">
+              <strong>🤖 AI 回复:</strong>
+              <div class="data-display">${data.rawResponse || '无'}</div>
+            </div>
+            <div class="result-item">
+              <strong>📊 解析结果:</strong>
+              <div class="data-display">${JSON.stringify(data.parsed, null, 2)}</div>
+            </div>
+          `;
+        } else {
+          throw new Error(data.error || '测试失败');
+        }
+      } catch (error) {
+        status.textContent = '❌ 失败';
+        status.className = 'status error';
+        resultDiv.innerHTML = `
+          <div class="result-item" style="border-left-color: #ef4444;">
+            <strong>❌ 错误:</strong> ${error.message}
+          </div>
+        `;
+      } finally {
+        button.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

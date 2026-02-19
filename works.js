@@ -64,19 +64,15 @@ export default {
     }
   },
   
-  // Cron Trigger - 每60秒执行一次金价爬取
+  // Cron Trigger - 每60秒执行一次金价爬取和AI分析
   async scheduled(event, env, ctx) {
     const now = Date.now();
     console.log('[Cron] Triggered at:', now);
     
     switch (event.cron) {
-      case '*/1 * * * *': // 每分钟执行金价爬取
-        console.log('[Cron] Starting gold price crawl...');
-        ctx.waitUntil(scheduledGoldCrawlWithRetry(event, env, ctx));
-        break;
-      case '*/2 * * * *': // 每2分钟执行智能分析
-        console.log('[Cron] Starting intelligent gold analysis...');
-        ctx.waitUntil(scheduledIntelligentGoldAnalysis(env, ctx));
+      case '*/1 * * * *': // 每分钟执行金价爬取和AI数据提交
+        console.log('[Cron] Starting gold price crawl and AI data submission...');
+        ctx.waitUntil(scheduledGoldCrawlWithAI(event, env, ctx));
         break;
       case '*/5 * * * *': // 每5分钟执行趋势分析
         console.log('[Cron] Starting gold price trend analysis...');
@@ -88,7 +84,7 @@ export default {
         break;
       default:
         console.log('[Cron] Unknown cron pattern:', event.cron);
-        ctx.waitUntil(scheduledGoldCrawlWithRetry(event, env, ctx));
+        ctx.waitUntil(scheduledGoldCrawlWithAI(event, env, ctx));
     }
   }
 };
@@ -107,6 +103,10 @@ const ROUTES = {
   '/api/gold/history': { handler: handleGoldHistory },
   '/api/gold/alert/test': { handler: handleGoldAlertTest },
   '/api/gold/analysis': { handler: handleGoldAnalysis },
+  '/api/gold/ai-analysis': { handler: handleGoldAIAnalysis },
+  '/api/gold/ai-signals': { handler: handleGoldAISignals },
+  '/api/test-qwen': { handler: handleTestQwen },
+  '/api/test-doubao': { handler: handleTestDoubao },
   '/api/user/profile': { handler: handleUserProfile },
   '/api/user/password': { handler: handleUserPassword },
   '/stats/visit': { handler: handleStatsVisit },
@@ -855,11 +855,12 @@ async function handleHeatmap(request, env, ctx) {
 // 黄金价格 API - 增强版（带定时爬取和缓存）
 // ================================================================================
 
-// 金价数据缓存
+// 金价数据缓存 - 统一缓存管理
 let goldPriceCache = {
   data: null,
   timestamp: 0,
-  isCrawling: false
+  isCrawling: false,
+  promise: null
 };
 
 // 爬取国内金价（黄金T+D）
@@ -1230,43 +1231,36 @@ async function handleGoldPrice(request, env, ctx) {
   }
 }
 
-// 内存缓存，用于减少重复爬取
-let realtimeCache = {
-  data: null,
-  timestamp: 0,
-  promise: null
-};
-
-const REALTIME_CACHE_TTL = 8000; // 8秒内存缓存
+const REALTIME_CACHE_TTL = 8000;
 
 async function handleTodayGoldPrice(env, ctx, forceRefresh) {
   const today = getBeijingDate();
   const now = Date.now();
   
   // 检查内存缓存（用于高频请求去重）
-  if (!forceRefresh && realtimeCache.data && (now - realtimeCache.timestamp) < REALTIME_CACHE_TTL) {
-    console.log('[Gold Price] Returning memory cache, age:', now - realtimeCache.timestamp, 'ms');
+  if (!forceRefresh && goldPriceCache.data && (now - goldPriceCache.timestamp) < REALTIME_CACHE_TTL) {
+    console.log('[Gold Price] Returning memory cache, age:', now - goldPriceCache.timestamp, 'ms');
     const history = await getDayHistory(env, today);
     return jsonResponse({
-      ...realtimeCache.data,
+      ...goldPriceCache.data,
       history: history,
       fromCache: true,
-      cacheAge: now - realtimeCache.timestamp,
+      cacheAge: now - goldPriceCache.timestamp,
       cacheType: 'memory'
     });
   }
   
   // 如果有正在进行的爬取请求，等待它完成
-  if (realtimeCache.promise && (now - realtimeCache.timestamp) < REALTIME_CACHE_TTL + 2000) {
+  if (goldPriceCache.promise && (now - goldPriceCache.timestamp) < REALTIME_CACHE_TTL + 2000) {
     console.log('[Gold Price] Waiting for in-progress crawl...');
     try {
-      const data = await realtimeCache.promise;
+      const data = await goldPriceCache.promise;
       const history = await getDayHistory(env, today);
       return jsonResponse({
         ...data,
         history: history,
         fromCache: true,
-        cacheAge: Date.now() - realtimeCache.timestamp,
+        cacheAge: Date.now() - goldPriceCache.timestamp,
         cacheType: 'memory-shared'
       });
     } catch (e) {
@@ -1285,8 +1279,8 @@ async function handleTodayGoldPrice(env, ctx, forceRefresh) {
         // 如果KV缓存小于8秒，直接返回
         if (cacheAge < REALTIME_CACHE_TTL) {
           console.log('[Gold Price] Returning KV cache, age:', cacheAge, 'ms');
-          realtimeCache.data = data;
-          realtimeCache.timestamp = now;
+          goldPriceCache.data = data;
+          goldPriceCache.timestamp = now;
           const history = await getDayHistory(env, today);
           return jsonResponse({
             ...data,
@@ -1307,7 +1301,7 @@ async function handleTodayGoldPrice(env, ctx, forceRefresh) {
   
   // 创建爬取Promise并缓存，防止并发重复爬取
   const crawlPromise = performCrawl(env);
-  realtimeCache.promise = crawlPromise;
+  goldPriceCache.promise = crawlPromise;
   
   const data = await crawlPromise;
   
@@ -1343,9 +1337,9 @@ async function handleTodayGoldPrice(env, ctx, forceRefresh) {
   }
   
   // 更新缓存
-  realtimeCache.data = data;
-  realtimeCache.timestamp = now;
-  realtimeCache.promise = null;
+  goldPriceCache.data = data;
+  goldPriceCache.timestamp = now;
+  goldPriceCache.promise = null;
   
   // 异步存储到KV和D1
   if (env?.GOLD_PRICE_CACHE) {
@@ -1566,28 +1560,62 @@ async function handleGoldPriceStream(request, env, ctx) {
   });
 }
 
-// 定时爬取入口（用于 Cron Trigger）- 带重试机制
-async function scheduledGoldCrawlWithRetry(event, env, ctx) {
+// 定时爬取入口（用于 Cron Trigger）- 带重试机制和AI数据提交
+async function scheduledGoldCrawlWithAI(event, env, ctx) {
   const MAX_RETRIES = 3;
-  const RETRY_DELAY = 5000; // 5秒
+  const RETRY_DELAY = 3000;
+  const pipelineStartTime = Date.now();
+  
+  console.log('[Pipeline] Starting gold price pipeline at', new Date().toISOString());
   
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     console.log(`[Scheduled] Attempt ${attempt}/${MAX_RETRIES} at`, new Date().toISOString());
     
     try {
+      const crawlStartTime = Date.now();
       const result = await performCrawl(env);
+      const crawlLatency = Date.now() - crawlStartTime;
       
       if (result.success) {
-        console.log('[Scheduled] Crawl successful');
+        console.log('[Scheduled] Crawl successful in', crawlLatency, 'ms');
         
+        const storeStartTime = Date.now();
         await storeGoldPriceData(env, result);
+        const storeLatency = Date.now() - storeStartTime;
+        
         await logCrawlStatus(env, 'success', result);
         
-        // 检查并发送交易价格预警
-        if (result.domesticPrice) {
+        const alertStartTime = Date.now();
+        if (result.domestic?.price) {
           console.log('[Scheduled] Checking trading price alerts...');
-          await checkAndSendTradingAlerts(result.domesticPrice, env);
+          await checkAndSendTradingAlerts(result.domestic.price, env);
         }
+        
+        const today = getBeijingDate();
+        const history = await getDayHistory(env, today);
+        if (result.domestic && result.international) {
+          await sendGoldPriceAlert(result.domestic, result.international, history, env);
+        }
+        const alertLatency = Date.now() - alertStartTime;
+        
+        ctx.waitUntil(submitDataToAIAnalysis(env, result));
+        
+        const totalLatency = Date.now() - pipelineStartTime;
+        console.log('[Pipeline] Completed in', totalLatency, 'ms', {
+          crawl: crawlLatency,
+          store: storeLatency,
+          alert: alertLatency,
+          total: totalLatency
+        });
+        
+        await logPipelineMetrics(env, {
+          crawlLatency,
+          storeLatency,
+          alertLatency,
+          totalLatency,
+          success: true,
+          timestamp: Date.now()
+        });
         
         return result;
       } else {
@@ -1616,6 +1644,271 @@ async function scheduledGoldCrawlWithRetry(event, env, ctx) {
   }
 }
 
+async function logPipelineMetrics(env, metrics) {
+  if (!env?.GOLD_PRICE_CACHE) return;
+  
+  try {
+    const today = getBeijingDate();
+    const key = `pipeline_metrics:${today}`;
+    
+    let metricsHistory = [];
+    try {
+      const existing = await env.GOLD_PRICE_CACHE.get(key);
+      if (existing) {
+        metricsHistory = JSON.parse(existing);
+      }
+    } catch (e) {}
+    
+    metricsHistory.push(metrics);
+    
+    if (metricsHistory.length > 1440) {
+      metricsHistory = metricsHistory.slice(-1440);
+    }
+    
+    await env.GOLD_PRICE_CACHE.put(key, JSON.stringify(metricsHistory), {
+      expirationTtl: 86400 * 3
+    });
+  } catch (e) {
+    console.error('[Pipeline Metrics] Failed to log:', e);
+  }
+}
+
+// 提交数据到AI智能分析系统
+async function submitDataToAIAnalysis(env, crawlResult) {
+  try {
+    const today = getBeijingDate();
+    
+    // 获取今日历史数据
+    const historyData = await getTodayGoldPriceHistory(env, today);
+    
+    if (!historyData || historyData.length === 0) {
+      console.log('[AI Submit] No history data available');
+      return;
+    }
+    
+    console.log(`[AI Submit] Retrieved ${historyData.length} data points for analysis`);
+    
+    // 获取交易参数
+    const tradingParams = await getTradingParameters(env);
+    
+    // 分析市场趋势
+    const marketAnalysis = analyzeMarketTrend(historyData);
+    
+    // 构建AI分析提示
+    const analysisPrompt = buildAIAnalysisPrompt(historyData, tradingParams, marketAnalysis, crawlResult);
+    
+    // 并行调用多个AI服务
+    const [qwenResult, doubaoResult] = await Promise.allSettled([
+      callQwenForAnalysis(env, analysisPrompt),
+      callDoubaoForAnalysis(env, analysisPrompt)
+    ]);
+    
+    // 处理结果
+    const qwenAnalysis = qwenResult.status === 'fulfilled' ? qwenResult.value : null;
+    const doubaoAnalysis = doubaoResult.status === 'fulfilled' ? doubaoResult.value : null;
+    
+    // 合并AI结果
+    const combinedAnalysis = combineAIResults(qwenAnalysis, doubaoAnalysis, marketAnalysis);
+    
+    // 存储分析结果
+    await storeAIAnalysisResult(env, today, {
+      timestamp: Date.now(),
+      currentPrice: crawlResult.domestic?.price || crawlResult.international?.price,
+      marketAnalysis,
+      aiAnalysis: combinedAnalysis,
+      tradingParams,
+      dataPoints: historyData.length
+    });
+    
+    console.log('[AI Submit] Analysis completed and stored successfully');
+    
+    // 如果有交易信号，发送通知
+    if (combinedAnalysis.hasValue && combinedAnalysis.signals) {
+      const hasActiveAlerts = tradingParams.alerts && tradingParams.alerts.length > 0;
+      if (hasActiveAlerts) {
+        await sendAITradingSignal(env, combinedAnalysis, crawlResult.domestic?.price, tradingParams);
+      }
+    }
+    
+  } catch (error) {
+    console.error('[AI Submit] Error submitting data to AI analysis:', error);
+    // 记录错误但不影响主流程
+    await logAIAnalysisError(env, error);
+  }
+}
+
+// 构建AI分析提示（增强版）
+function buildAIAnalysisPrompt(historyData, tradingParams, marketAnalysis, crawlResult) {
+  const recentPrices = historyData.slice(-30).map(h => ({
+    time: new Date(h.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+    price: h.price
+  }));
+  
+  const currentPrice = crawlResult.domestic?.price || crawlResult.international?.price || marketAnalysis.currentPrice;
+  
+  return `作为黄金交易专家，请基于以下实时数据给出专业的交易分析和建议：
+
+【实时行情数据】
+当前价格: ¥${currentPrice}/克
+今日开盘: ¥${marketAnalysis.openPrice}/克
+今日最高: ¥${marketAnalysis.high}/克
+今日最低: ¥${marketAnalysis.low}/克
+日内涨跌: ${marketAnalysis.dayChange.toFixed(2)}%
+波动率: ${marketAnalysis.volatility.toFixed(2)}%
+
+【近期价格走势】(最近30个数据点)
+${recentPrices.map(p => `${p.time}: ¥${p.price}/克`).join('\n')}
+
+【市场趋势分析】
+趋势方向: ${marketAnalysis.trend}
+趋势强度: ${marketAnalysis.strength.toFixed(2)}%
+
+【交易参数】
+平均持仓成本: ¥${tradingParams.avgBuyPrice.toFixed(2)}/克
+持仓总量: ${tradingParams.totalHoldings.toFixed(3)}克
+买入目标价: ${tradingParams.buyTargets.map(p => `¥${p}`).join(', ') || '未设置'}
+卖出目标价: ${tradingParams.sellTargets.map(p => `¥${p}`).join(', ') || '未设置'}
+活跃预警数: ${tradingParams.alerts?.length || 0}
+
+请提供以下分析（用JSON格式返回）:
+{
+  "trend": "上涨/下跌/震荡",
+  "trendConfidence": 0-100,
+  "recommendation": "买入/卖出/持有",
+  "recommendationConfidence": 0-100,
+  "targetPrice": 目标价格,
+  "stopLoss": 止损价格,
+  "takeProfit": 止盈价格,
+  "riskLevel": "低/中/高",
+  "reasoning": "分析理由",
+  "expectedReturn": "预期收益率"
+}`;
+}
+
+// 存储AI分析结果
+async function storeAIAnalysisResult(env, date, analysisData) {
+  try {
+    if (!env.GOLD_PRICE_CACHE) {
+      console.warn('[AI Store] GOLD_PRICE_CACHE not available');
+      return;
+    }
+    
+    const key = `ai_analysis:${date}`;
+    
+    // 获取现有分析记录
+    let analyses = [];
+    try {
+      const existing = await env.GOLD_PRICE_CACHE.get(key);
+      if (existing) {
+        analyses = JSON.parse(existing);
+      }
+    } catch (e) {
+      console.log('[AI Store] No existing analysis data');
+    }
+    
+    // 添加新的分析结果
+    analyses.push(analysisData);
+    
+    // 只保留最近1440条记录（24小时，每分钟一条）
+    if (analyses.length > 1440) {
+      analyses = analyses.slice(-1440);
+    }
+    
+    // 存储到KV
+    await env.GOLD_PRICE_CACHE.put(key, JSON.stringify(analyses), {
+      expirationTtl: 3 * 24 * 60 * 60 // 3天
+    });
+    
+    console.log(`[AI Store] Stored analysis result. Total records: ${analyses.length}`);
+    
+  } catch (error) {
+    console.error('[AI Store] Error storing analysis result:', error);
+  }
+}
+
+// 发送AI交易信号通知
+async function sendAITradingSignal(env, analysis, currentPrice, tradingParams) {
+  try {
+    const { recommendation, signals } = analysis;
+    
+    if (!recommendation || recommendation === 'hold') {
+      return;
+    }
+    
+    // 检查冷却期
+    const cooldownKey = 'last_ai_signal_notify';
+    const lastNotify = await env.GOLD_PRICE_CACHE.get(cooldownKey);
+    const now = Date.now();
+    const COOLDOWN = 2 * 60 * 1000; // 2分钟冷却期（AI分析信号）
+
+    if (lastNotify && (now - parseInt(lastNotify)) < COOLDOWN) {
+      console.log('[AI Signal] In cooldown period, skipping notification');
+      return;
+    }
+    
+    // 构建通知消息
+    const signalType = recommendation === 'buy' ? '买入' : '卖出';
+    const confidence = signals.buy > signals.sell ? signals.buy : signals.sell;
+    
+    const message = `🤖 AI交易信号\n\n` +
+      `信号类型: ${signalType}\n` +
+      `当前价格: ¥${currentPrice}/克\n` +
+      `置信度: ${confidence}/10\n` +
+      `分析依据: ${analysis.combinedAnalysis?.substring(0, 100)}...\n\n` +
+      `请登录系统查看详细分析。`;
+    
+    // 发送到Resend（如果配置了）
+    if (env.RESEND_API_KEY) {
+      // 这里可以实现邮件通知逻辑
+      console.log('[AI Signal] Would send email notification:', message);
+    }
+    
+    // 更新冷却时间
+    await env.GOLD_PRICE_CACHE.put(cooldownKey, String(now), { expirationTtl: 3600 });
+    
+    console.log('[AI Signal] Trading signal notification sent');
+    
+  } catch (error) {
+    console.error('[AI Signal] Error sending notification:', error);
+  }
+}
+
+// 记录AI分析错误
+async function logAIAnalysisError(env, error) {
+  try {
+    if (!env.GOLD_PRICE_CACHE) return;
+    
+    const today = getBeijingDate();
+    const key = `ai_analysis_errors:${today}`;
+    
+    let errors = [];
+    try {
+      const existing = await env.GOLD_PRICE_CACHE.get(key);
+      if (existing) {
+        errors = JSON.parse(existing);
+      }
+    } catch (e) {}
+    
+    errors.push({
+      timestamp: Date.now(),
+      error: error.message,
+      stack: error.stack
+    });
+    
+    // 只保留最近100条错误记录
+    if (errors.length > 100) {
+      errors = errors.slice(-100);
+    }
+    
+    await env.GOLD_PRICE_CACHE.put(key, JSON.stringify(errors), {
+      expirationTtl: 7 * 24 * 60 * 60 // 7天
+    });
+    
+  } catch (e) {
+    console.error('[AI Error Log] Failed to log error:', e);
+  }
+}
+
 async function scheduledGoldAnalysis(env, ctx) {
   console.log('[Scheduled Analysis] Starting gold price analysis...');
   
@@ -1638,8 +1931,8 @@ async function scheduledGoldAnalysis(env, ctx) {
       const lastNotifyKey = 'last_analysis_notify';
       const lastNotify = await env.GOLD_PRICE_CACHE.get(lastNotifyKey);
       const now = Date.now();
-      const COOLDOWN = 30 * 60 * 1000;
-      
+      const COOLDOWN = 5 * 60 * 1000; // 5分钟冷却期（智能分析买入信号）
+
       if (!lastNotify || (now - parseInt(lastNotify)) > COOLDOWN) {
         console.log('[Scheduled Analysis] Buy signal detected, sending notifications...');
         await sendAnalysisNotification(result.analysis, env);
@@ -2959,12 +3252,14 @@ async function sendRegistrationEmail(username, email, ip, env) {
 // ================================================================================
 
 const ALERT_CONFIG = {
-  WINDOW_SIZE: 5,
+  WINDOW_SIZE: 3,
   SHORT_TERM_MINUTES: 1,
-  DOMESTIC_THRESHOLD: 5,
-  INTERNATIONAL_THRESHOLD: 10,
-  COOLDOWN_MINUTES: 1,
-  ALERT_ON_RISE: false
+  DOMESTIC_THRESHOLD: 3,
+  INTERNATIONAL_THRESHOLD: 5,
+  COOLDOWN_MINUTES: 0.5,
+  ALERT_ON_RISE: true,
+  INSTANT_CHANGE_THRESHOLD: 2,
+  INSTANT_CHANGE_PERCENT: 0.3
 };
 
 async function sendGoldPriceAlert(domestic, international, history, env) {
@@ -2976,6 +3271,32 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   }
 
   const alerts = [];
+  const now = Date.now();
+  
+  const domesticInstant = analyzeInstantChange(history?.domestic || [], domestic?.price, ALERT_CONFIG.INSTANT_CHANGE_THRESHOLD, ALERT_CONFIG.INSTANT_CHANGE_PERCENT);
+  const internationalInstant = analyzeInstantChange(history?.international || [], international?.price, ALERT_CONFIG.INSTANT_CHANGE_THRESHOLD, ALERT_CONFIG.INSTANT_CHANGE_PERCENT);
+  
+  if (domesticInstant.triggered) {
+    alerts.push({
+      type: 'instant',
+      name: '国内黄金 (mAuT+D)',
+      price: domestic.price,
+      unit: '元/克',
+      ...domesticInstant
+    });
+    console.log('[Gold Alert] INSTANT domestic price change detected:', domesticInstant.message);
+  }
+  
+  if (internationalInstant.triggered) {
+    alerts.push({
+      type: 'instant',
+      name: '国际黄金 (XAU)',
+      price: international.price,
+      unit: '美元/盎司',
+      ...internationalInstant
+    });
+    console.log('[Gold Alert] INSTANT international price change detected:', internationalInstant.message);
+  }
   
   const domesticWindow = analyzeWindow(history?.domestic || [], ALERT_CONFIG.DOMESTIC_THRESHOLD);
   const internationalWindow = analyzeWindow(history?.international || [], ALERT_CONFIG.INTERNATIONAL_THRESHOLD);
@@ -3028,14 +3349,18 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
     return;
   }
   
+  const hasInstantAlert = alerts.some(a => a.type === 'instant');
+  const cooldownMs = hasInstantAlert 
+    ? ALERT_CONFIG.COOLDOWN_MINUTES * 30 * 1000 
+    : ALERT_CONFIG.COOLDOWN_MINUTES * 60 * 1000;
+  
   if (env?.GOLD_PRICE_CACHE) {
     try {
       const lastAlert = await env.GOLD_PRICE_CACHE.get('last_alert');
       if (lastAlert) {
         const lastAlertTime = parseInt(lastAlert);
-        const cooldownMs = ALERT_CONFIG.COOLDOWN_MINUTES * 60 * 1000;
-        if (Date.now() - lastAlertTime < cooldownMs) {
-          console.log('[Gold Alert] Alert already sent within', ALERT_CONFIG.COOLDOWN_MINUTES, 'minutes, skipping');
+        if (now - lastAlertTime < cooldownMs) {
+          console.log('[Gold Alert] Alert already sent within cooldown period, skipping');
           return;
         }
       }
@@ -3044,8 +3369,54 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
     }
   }
   
-  console.log('[Gold Alert] Price movement detected!', alerts.length, 'alerts');
-  await sendAlertEmail(alerts, env);
+  console.log('[Gold Alert] Price movement detected!', alerts.length, 'alerts, instant:', hasInstantAlert);
+
+  const result = await sendUnifiedNotification(alerts, env, {
+    notificationType: hasInstantAlert ? 'instant_price_change' : 'price_movement',
+    skipCooldown: true
+  });
+  
+  if (result.success && env?.GOLD_PRICE_CACHE) {
+    await env.GOLD_PRICE_CACHE.put('last_alert', String(now), { expirationTtl: 300 });
+  }
+
+  console.log('[Gold Alert] Unified notification result:', {
+    success: result.success,
+    email: result.results.email?.success,
+    feishu: result.results.feishu?.success,
+    meow: result.results.meow?.success
+  });
+}
+
+function analyzeInstantChange(prices, currentPrice, absoluteThreshold, percentThreshold) {
+  if (!currentPrice || prices.length < 2) {
+    return { triggered: false, reason: 'insufficient_data' };
+  }
+  
+  const previousPrice = prices[prices.length - 1];
+  if (!previousPrice || previousPrice <= 0) {
+    return { triggered: false, reason: 'invalid_previous_price' };
+  }
+  
+  const absoluteChange = Math.abs(currentPrice - previousPrice);
+  const percentChange = Math.abs((currentPrice - previousPrice) / previousPrice) * 100;
+  
+  const isSignificant = absoluteChange >= absoluteThreshold || percentChange >= percentThreshold;
+  
+  if (isSignificant) {
+    const direction = currentPrice > previousPrice ? 'up' : 'down';
+    return {
+      triggered: true,
+      previousPrice: previousPrice.toFixed(2),
+      currentPrice: currentPrice.toFixed(2),
+      absoluteChange: absoluteChange.toFixed(2),
+      percentChange: percentChange.toFixed(2),
+      direction,
+      message: `即时变化: ${direction === 'down' ? '下跌' : '上涨'} ${absoluteChange.toFixed(2)} (${percentChange.toFixed(2)}%)`
+    };
+  }
+  
+  return { triggered: false };
 }
 
 function analyzeWindow(prices, threshold) {
@@ -3125,10 +3496,6 @@ function analyzeShortTerm(prices, threshold) {
 
 async function sendAlertEmail(alerts, env) {
   const RESEND_API_KEY = env.RESEND_API_KEY;
-  
-  sendFeishuAlert(alerts, env);
-  sendWeComAlert(alerts, env);
-  sendMeoWAlert(alerts, env);
   
   const hasDownward = alerts.some(a => a.direction === 'down');
   const hasVolatile = alerts.some(a => a.direction === 'volatile');
@@ -3246,31 +3613,277 @@ async function sendAlertEmail(alerts, env) {
   }
 }
 
+// ================================================================================
+// 统一通知系统 - 确保三端同步推送
+// ================================================================================
+
+const NOTIFICATION_CONFIG = {
+  COOLDOWN_MINUTES: 0.5,
+  MAX_RETRIES: 3,
+  RETRY_DELAY: 500,
+  INSTANT_COOLDOWN_SECONDS: 15,
+  PARALLEL_SEND: true
+};
+
+// 统一发送通知到所有渠道（Email + Feishu + MeoW）
+async function sendUnifiedNotification(alerts, env, options = {}) {
+  const {
+    skipCooldown = false,
+    notificationType = 'price_alert',
+    customMessage = null
+  } = options;
+
+  console.log('[Unified Notification] Starting unified notification send...');
+  console.log('[Unified Notification] Alert count:', alerts.length);
+  console.log('[Unified Notification] Type:', notificationType);
+
+  // 检查冷却期（除非跳过）
+  if (!skipCooldown) {
+    const cooldownKey = `notification_cooldown:${notificationType}`;
+    const lastNotify = await env.GOLD_PRICE_CACHE?.get(cooldownKey);
+    const now = Date.now();
+    const cooldownMs = NOTIFICATION_CONFIG.COOLDOWN_MINUTES * 60 * 1000;
+
+    if (lastNotify && (now - parseInt(lastNotify)) < cooldownMs) {
+      const remainingMinutes = Math.ceil((cooldownMs - (now - parseInt(lastNotify))) / 60000);
+      console.log(`[Unified Notification] In cooldown period. ${remainingMinutes} minutes remaining.`);
+      return {
+        success: false,
+        reason: 'cooldown',
+        remainingMinutes,
+        results: {}
+      };
+    }
+  }
+
+  // 准备通知内容
+  const notificationContent = customMessage || formatAlertMessage(alerts);
+
+  // 并行发送所有通知
+  const results = await Promise.allSettled([
+    // Email通知
+    sendAlertEmailWithTracking(alerts, env, notificationContent).catch(err => {
+      console.error('[Unified Notification] Email failed:', err);
+      return { channel: 'email', success: false, error: err.message };
+    }),
+
+    // 飞书通知
+    sendFeishuAlertWithTracking(alerts, env, notificationContent).catch(err => {
+      console.error('[Unified Notification] Feishu failed:', err);
+      return { channel: 'feishu', success: false, error: err.message };
+    }),
+
+    // MeoW通知
+    sendMeoWAlertWithTracking(alerts, env, notificationContent).catch(err => {
+      console.error('[Unified Notification] MeoW failed:', err);
+      return { channel: 'meow', success: false, error: err.message };
+    })
+  ]);
+
+  // 处理结果
+  const resultMap = {
+    email: results[0].status === 'fulfilled' ? results[0].value : { success: false, error: results[0].reason },
+    feishu: results[1].status === 'fulfilled' ? results[1].value : { success: false, error: results[1].reason },
+    meow: results[2].status === 'fulfilled' ? results[2].value : { success: false, error: results[2].reason }
+  };
+
+  // 记录发送历史
+  const sendRecord = {
+    timestamp: Date.now(),
+    type: notificationType,
+    alertCount: alerts.length,
+    results: resultMap
+  };
+
+  await recordNotificationHistory(env, sendRecord);
+
+  // 更新冷却时间（如果至少有一个成功）
+  const anySuccess = Object.values(resultMap).some(r => r.success);
+  if (anySuccess && !skipCooldown) {
+    const cooldownKey = `notification_cooldown:${notificationType}`;
+    await env.GOLD_PRICE_CACHE?.put(cooldownKey, String(Date.now()), {
+      expirationTtl: NOTIFICATION_CONFIG.COOLDOWN_MINUTES * 60
+    });
+    console.log('[Unified Notification] Cooldown timer updated');
+  }
+
+  console.log('[Unified Notification] Send completed:', {
+    email: resultMap.email.success,
+    feishu: resultMap.feishu.success,
+    meow: resultMap.meow.success
+  });
+
+  return {
+    success: anySuccess,
+    results: resultMap,
+    timestamp: Date.now()
+  };
+}
+
+// 格式化预警消息
+function formatAlertMessage(alerts) {
+  const hasDownward = alerts.some(a => a.direction === 'down');
+  const hasVolatile = alerts.some(a => a.direction === 'volatile');
+  const alertEmoji = hasDownward ? '🚨' : (hasVolatile ? '⚡' : '📈');
+  const alertTitle = hasDownward ? '金价暴跌预警' : (hasVolatile ? '金价剧烈波动' : '金价快速上涨');
+
+  let message = `${alertEmoji} ${alertTitle}\n\n`;
+  message += `时间: ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}\n\n`;
+
+  alerts.forEach(alert => {
+    message += `${alert.name}: ${alert.current} ${alert.unit}`;
+    if (alert.range) {
+      message += ` (波动${alert.range})`;
+    }
+    message += '\n';
+  });
+
+  message += '\n[查看详情](https://ustc.dev/kit/gold/)';
+
+  return { title: `${alertEmoji} ${alertTitle}`, content: message, emoji: alertEmoji };
+}
+
+// 带追踪的Email发送
+async function sendAlertEmailWithTracking(alerts, env, messageContent) {
+  const RESEND_API_KEY = env.RESEND_API_KEY;
+
+  if (!RESEND_API_KEY) {
+    console.log('[Email Tracking] RESEND_API_KEY not configured');
+    return { channel: 'email', success: false, reason: 'not_configured' };
+  }
+
+  try {
+    console.log('[Email Tracking] Sending email notification...');
+    await sendAlertEmail(alerts, env);
+    console.log('[Email Tracking] Email sent successfully');
+    return { channel: 'email', success: true };
+  } catch (error) {
+    console.error('[Email Tracking] Email failed:', error);
+    return { channel: 'email', success: false, error: error.message };
+  }
+}
+
+// 带追踪的飞书发送
+async function sendFeishuAlertWithTracking(alerts, env, messageContent) {
+  const FEISHU_WEBHOOK = env.FEISHU_WEBHOOK;
+  const FEISHU_APP_ID = env.FEISHU_APP_ID;
+  const FEISHU_APP_SECRET = env.FEISHU_APP_SECRET;
+  const FEISHU_CHAT_ID = env.FEISHU_CHAT_ID;
+
+  const hasConfig = FEISHU_WEBHOOK || (FEISHU_APP_ID && FEISHU_APP_SECRET && FEISHU_CHAT_ID);
+
+  if (!hasConfig) {
+    console.log('[Feishu Tracking] Feishu not configured');
+    return { channel: 'feishu', success: false, reason: 'not_configured' };
+  }
+
+  try {
+    console.log('[Feishu Tracking] Sending Feishu notification...');
+    const result = await sendFeishuAlert(alerts, env);
+    console.log('[Feishu Tracking] Feishu sent:', result.method);
+    return { channel: 'feishu', success: result.method !== 'none', method: result.method };
+  } catch (error) {
+    console.error('[Feishu Tracking] Feishu failed:', error);
+    return { channel: 'feishu', success: false, error: error.message };
+  }
+}
+
+// 带追踪的MeoW发送
+async function sendMeoWAlertWithTracking(alerts, env, messageContent) {
+  const MEOW_USER_ID = env.MEOW_USER_ID || '5bf48882';
+
+  if (!MEOW_USER_ID) {
+    console.log('[MeoW Tracking] MEOW_USER_ID not configured');
+    return { channel: 'meow', success: false, reason: 'not_configured' };
+  }
+
+  try {
+    console.log('[MeoW Tracking] Sending MeoW notification...');
+    const result = await sendMeoWAlert(alerts, env);
+    console.log('[MeoW Tracking] MeoW sent:', result.success);
+    return { channel: 'meow', success: result.success, response: result.response };
+  } catch (error) {
+    console.error('[MeoW Tracking] MeoW failed:', error);
+    return { channel: 'meow', success: false, error: error.message };
+  }
+}
+
+// 记录通知历史
+async function recordNotificationHistory(env, record) {
+  try {
+    if (!env.GOLD_PRICE_CACHE) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const key = `notification_history:${today}`;
+
+    let history = [];
+    const existing = await env.GOLD_PRICE_CACHE.get(key);
+    if (existing) {
+      history = JSON.parse(existing);
+    }
+
+    history.push(record);
+
+    // 只保留最近100条记录
+    if (history.length > 100) {
+      history = history.slice(-100);
+    }
+
+    await env.GOLD_PRICE_CACHE.put(key, JSON.stringify(history), {
+      expirationTtl: 7 * 24 * 60 * 60 // 7天
+    });
+
+  } catch (error) {
+    console.error('[Notification History] Failed to record:', error);
+  }
+}
+
+// 获取通知历史
+async function getNotificationHistory(env, date = null) {
+  try {
+    if (!env.GOLD_PRICE_CACHE) return [];
+
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    const key = `notification_history:${targetDate}`;
+
+    const data = await env.GOLD_PRICE_CACHE.get(key);
+    return data ? JSON.parse(data) : [];
+
+  } catch (error) {
+    console.error('[Notification History] Failed to get:', error);
+    return [];
+  }
+}
+
+// ================================================================================
+// 原有通知函数（保留用于兼容）
+// ================================================================================
+
 async function sendFeishuAlert(alerts, env) {
   const FEISHU_WEBHOOK = env.FEISHU_WEBHOOK;
   const FEISHU_APP_ID = env.FEISHU_APP_ID;
   const FEISHU_APP_SECRET = env.FEISHU_APP_SECRET;
   const FEISHU_CHAT_ID = env.FEISHU_CHAT_ID;
-  
+
   console.log('[Gold Alert] Feishu config check:', {
     hasWebhook: !!FEISHU_WEBHOOK,
     hasAppId: !!FEISHU_APP_ID,
     hasAppSecret: !!FEISHU_APP_SECRET,
     hasChatId: !!FEISHU_CHAT_ID
   });
-  
+
   if (FEISHU_WEBHOOK) {
     console.log('[Gold Alert] Using webhook mode');
     const result = await sendFeishuWebhook(FEISHU_WEBHOOK, alerts);
     return { method: 'webhook', result };
   }
-  
+
   if (FEISHU_APP_ID && FEISHU_APP_SECRET && FEISHU_CHAT_ID) {
     console.log('[Gold Alert] Using app message mode');
     const result = await sendFeishuAppMessage(FEISHU_APP_ID, FEISHU_APP_SECRET, FEISHU_CHAT_ID, alerts);
     return { method: 'app', result };
   }
-  
+
   console.log('[Gold Alert] No Feishu configuration found');
   return { method: 'none', error: 'No Feishu configuration found' };
 }
@@ -3733,7 +4346,7 @@ async function performGoldAnalysis(env) {
   const domesticAnalysis = {
     currentPrice: latestData.domestic,
     previousPrice: previousData.domestic,
-    priceChange: ((latestData.domestic - previousData.domestic) / previousData.domestic * 100),
+    priceChange: previousData.domestic > 0 ? ((latestData.domestic - previousData.domestic) / previousData.domestic * 100) : 0,
     high: Math.max(...domesticPrices),
     low: Math.min(...domesticPrices),
     rsi: calculateRSI(domesticPrices),
@@ -3747,7 +4360,7 @@ async function performGoldAnalysis(env) {
   const internationalAnalysis = {
     currentPrice: latestData.international,
     previousPrice: previousData.international,
-    priceChange: ((latestData.international - previousData.international) / previousData.international * 100),
+    priceChange: previousData.international > 0 ? ((latestData.international - previousData.international) / previousData.international * 100) : 0,
     high: Math.max(...internationalPrices),
     low: Math.min(...internationalPrices),
     rsi: calculateRSI(internationalPrices),
@@ -3837,16 +4450,146 @@ async function handleGoldAnalysis(request, env, ctx) {
   return jsonResponse({ success: false, error: 'Invalid action' }, 400);
 }
 
+// 获取AI智能分析结果
+async function handleGoldAIAnalysis(request, env, ctx) {
+  try {
+    const url = new URL(request.url);
+    const date = url.searchParams.get('date') || getBeijingDate();
+    const limit = parseInt(url.searchParams.get('limit') || '10');
+    
+    console.log('[Gold AI Analysis API] Getting AI analysis for date:', date);
+    
+    if (!env.GOLD_PRICE_CACHE) {
+      return jsonResponse({
+        success: false,
+        error: 'GOLD_PRICE_CACHE not configured'
+      }, 500);
+    }
+    
+    // 获取AI分析结果
+    const key = `ai_analysis:${date}`;
+    const data = await env.GOLD_PRICE_CACHE.get(key);
+    
+    if (!data) {
+      return jsonResponse({
+        success: true,
+        data: [],
+        message: 'No AI analysis data available for this date'
+      });
+    }
+    
+    const analyses = JSON.parse(data);
+    const recentAnalyses = analyses.slice(-limit);
+    
+    // 获取最新的完整分析
+    const latestAnalysis = recentAnalyses[recentAnalyses.length - 1];
+    
+    return jsonResponse({
+      success: true,
+      date: date,
+      totalRecords: analyses.length,
+      latestAnalysis: latestAnalysis ? {
+        timestamp: latestAnalysis.timestamp,
+        currentPrice: latestAnalysis.currentPrice,
+        marketTrend: latestAnalysis.marketAnalysis?.trend,
+        trendStrength: latestAnalysis.marketAnalysis?.strength,
+        dayChange: latestAnalysis.marketAnalysis?.dayChange,
+        volatility: latestAnalysis.marketAnalysis?.volatility,
+        aiRecommendation: latestAnalysis.aiAnalysis?.recommendation,
+        aiConfidence: latestAnalysis.aiAnalysis?.signals ? 
+          Math.max(latestAnalysis.aiAnalysis.signals.buy, latestAnalysis.aiAnalysis.signals.sell) : 0,
+        hasValue: latestAnalysis.aiAnalysis?.hasValue
+      } : null,
+      recentAnalyses: recentAnalyses.map(a => ({
+        timestamp: a.timestamp,
+        price: a.currentPrice,
+        recommendation: a.aiAnalysis?.recommendation,
+        trend: a.marketAnalysis?.trend
+      })),
+      timestamp: Date.now()
+    });
+    
+  } catch (error) {
+    console.error('[Gold AI Analysis API] Error:', error);
+    return jsonResponse({
+      success: false,
+      error: error.message
+    }, 500);
+  }
+}
+
+// 获取AI交易信号
+async function handleGoldAISignals(request, env, ctx) {
+  try {
+    const url = new URL(request.url);
+    const date = url.searchParams.get('date') || getBeijingDate();
+    
+    console.log('[Gold AI Signals API] Getting AI signals for date:', date);
+    
+    if (!env.GOLD_PRICE_CACHE) {
+      return jsonResponse({
+        success: false,
+        error: 'GOLD_PRICE_CACHE not configured'
+      }, 500);
+    }
+    
+    // 获取AI分析结果
+    const key = `ai_analysis:${date}`;
+    const data = await env.GOLD_PRICE_CACHE.get(key);
+    
+    if (!data) {
+      return jsonResponse({
+        success: true,
+        signals: [],
+        message: 'No AI signals available for this date'
+      });
+    }
+    
+    const analyses = JSON.parse(data);
+    
+    // 提取交易信号
+    const signals = analyses
+      .filter(a => a.aiAnalysis?.hasValue && a.aiAnalysis?.recommendation !== 'hold')
+      .map(a => ({
+        timestamp: a.timestamp,
+        time: new Date(a.timestamp).toLocaleTimeString('zh-CN'),
+        price: a.currentPrice,
+        recommendation: a.aiAnalysis.recommendation,
+        confidence: a.aiAnalysis.signals ? 
+          (a.aiAnalysis.recommendation === 'buy' ? a.aiAnalysis.signals.buy : a.aiAnalysis.signals.sell) : 0,
+        trend: a.marketAnalysis?.trend,
+        trendStrength: a.marketAnalysis?.strength
+      }));
+    
+    // 获取最新信号
+    const latestSignal = signals.length > 0 ? signals[signals.length - 1] : null;
+    
+    return jsonResponse({
+      success: true,
+      date: date,
+      totalSignals: signals.length,
+      latestSignal: latestSignal,
+      signals: signals.slice(-20), // 只返回最近20个信号
+      timestamp: Date.now()
+    });
+    
+  } catch (error) {
+    console.error('[Gold AI Signals API] Error:', error);
+    return jsonResponse({
+      success: false,
+      error: error.message
+    }, 500);
+  }
+}
+
 async function sendAnalysisNotification(analysis, env) {
   console.log('[Gold Analysis] Sending notification for buy signal...');
-  
+
   const hasDomesticSignal = analysis.domestic.signal.isBuySignal;
   const hasInternationalSignal = analysis.international.signal.isBuySignal;
-  
-  const title = `📊 金价分析：${analysis.overallRecommendation}`;
-  
+
   let content = `时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}\n\n`;
-  
+
   if (hasDomesticSignal) {
     content += `🇨🇳 国内金价 (mAuT+D)\n`;
     content += `当前：${analysis.domestic.currentPrice.toFixed(2)} 元/克\n`;
@@ -3854,7 +4597,7 @@ async function sendAnalysisNotification(analysis, env) {
     content += `建议：${analysis.domestic.signal.recommendation}\n`;
     content += `买入评分：${analysis.domestic.signal.buyScore.toFixed(1)}\n\n`;
   }
-  
+
   if (hasInternationalSignal) {
     content += `🌍 国际金价 (XAU)\n`;
     content += `当前：${analysis.international.currentPrice.toFixed(2)} 美元/盎司\n`;
@@ -3862,7 +4605,7 @@ async function sendAnalysisNotification(analysis, env) {
     content += `建议：${analysis.international.signal.recommendation}\n`;
     content += `买入评分：${analysis.international.signal.buyScore.toFixed(1)}\n\n`;
   }
-  
+
   content += `📈 技术指标详情\n`;
   if (analysis.domestic.macd) {
     content += `MACD：${analysis.domestic.macd.histogram > 0 ? '金叉' : '死叉'}\n`;
@@ -3870,7 +4613,7 @@ async function sendAnalysisNotification(analysis, env) {
   if (analysis.domestic.bollinger) {
     content += `布林带：${analysis.domestic.currentPrice < analysis.domestic.bollinger.lower ? '触及下轨' : analysis.domestic.currentPrice > analysis.domestic.bollinger.upper ? '触及上轨' : '中轨附近'}\n`;
   }
-  
+
   const alerts = [{
     type: 'analysis',
     name: '金价智能分析',
@@ -3879,12 +4622,23 @@ async function sendAnalysisNotification(analysis, env) {
     direction: 'analysis',
     content
   }];
-  
-  await sendFeishuAlert(alerts, env);
-  await sendMeoWAlert(alerts, env);
-  await sendAlertEmail(alerts, env);
-  
-  console.log('[Gold Analysis] Notification sent successfully');
+
+  // 使用统一通知系统，确保三端同步推送
+  const result = await sendUnifiedNotification(alerts, env, {
+    notificationType: 'analysis_buy_signal',
+    customMessage: {
+      title: `📊 金价分析：${analysis.overallRecommendation}`,
+      content: content,
+      emoji: '📊'
+    }
+  });
+
+  console.log('[Gold Analysis] Notification sent:', {
+    success: result.success,
+    email: result.results.email?.success,
+    feishu: result.results.feishu?.success,
+    meow: result.results.meow?.success
+  });
 }
 
 // 工具函数 - 密码哈希（增强安全）
@@ -3959,15 +4713,21 @@ async function handleGoldAlertTest(request, env, ctx) {
     }
     
     if (type === 'all') {
-      await sendAlertEmail(testAlerts, env);
-      const feishuResult = await sendFeishuAlert(testAlerts, env);
-      const meowResult = await sendMeoWAlert(testAlerts, env);
-      return new Response(JSON.stringify({ 
-        success: true, 
-        message: 'All alerts test sent',
+      // 使用统一通知系统测试所有渠道
+      const unifiedResult = await sendUnifiedNotification(testAlerts, env, {
+        notificationType: 'test',
+        skipCooldown: true
+      });
+
+      return new Response(JSON.stringify({
+        success: unifiedResult.success,
+        message: 'Unified notification test completed',
         config,
-        feishuResult,
-        meowResult
+        unifiedResult: {
+          email: unifiedResult.results.email,
+          feishu: unifiedResult.results.feishu,
+          meow: unifiedResult.results.meow
+        }
       }), {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
@@ -4468,8 +5228,22 @@ async function handleTransactionOperation(request, env) {
       const newTotalAmount = newPrice * newQuantity;
 
       let newProfit = existing.profit;
-      if (existing.type === 'sell' && newActualSellPrice) {
-        newProfit = (newActualSellPrice - newPrice) * newQuantity;
+      if (existing.type === 'sell' && newActualSellPrice !== null && newActualSellPrice !== undefined) {
+        const avgBuyStmt = env.DB.prepare(`
+          SELECT 
+            COALESCE(SUM(CASE WHEN type = 'buy' THEN quantity ELSE 0 END), 0) as total_bought,
+            COALESCE(SUM(CASE WHEN type = 'buy' THEN total_amount ELSE 0 END), 0) as total_cost
+          FROM gold_transactions 
+          WHERE type = 'buy' AND status = 'completed'
+        `);
+        const avgBuyResult = await avgBuyStmt.first();
+        
+        if (avgBuyResult && avgBuyResult.total_bought > 0 && avgBuyResult.total_cost > 0) {
+          const avgBuyPrice = avgBuyResult.total_cost / avgBuyResult.total_bought;
+          newProfit = (newActualSellPrice - avgBuyPrice) * newQuantity;
+        } else {
+          newProfit = (newActualSellPrice - newPrice) * newQuantity;
+        }
       }
 
       const updateStmt = env.DB.prepare(`
@@ -4714,7 +5488,7 @@ async function handleGetNotifications(request, env) {
 
   try {
     const stmt = env.DB.prepare(`SELECT * FROM notification_queue WHERE status = 'pending' ORDER BY created_at DESC LIMIT 50`);
-    result = await stmt.all();
+    const result = await stmt.all();
 
     return jsonResponse({ success: true, notifications: result.results });
   } catch (error) {
@@ -4784,14 +5558,27 @@ async function handleToleranceSettings(request, env) {
         return jsonResponse({ success: false, error: '卖出容错值必须在 0.1-100 之间' }, 400);
       }
 
-      // 更新设置
-      const updateStmt = env.DB.prepare(`
-        UPDATE alert_tolerance_settings 
-        SET buy_tolerance = ?, sell_tolerance = ?, updated_at = ?
-        WHERE id = (SELECT id FROM alert_tolerance_settings ORDER BY id DESC LIMIT 1)
-      `);
       const now = new Date().toISOString();
-      await updateStmt.bind(buyToleranceNum, sellToleranceNum, now).run();
+      
+      // 检查是否存在设置记录
+      const checkStmt = env.DB.prepare(`SELECT id FROM alert_tolerance_settings ORDER BY id DESC LIMIT 1`);
+      const existing = await checkStmt.first();
+      
+      if (existing) {
+        // 更新现有设置
+        const updateStmt = env.DB.prepare(`
+          UPDATE alert_tolerance_settings 
+          SET buy_tolerance = ?, sell_tolerance = ?, updated_at = ?
+          WHERE id = ?
+        `);
+        await updateStmt.bind(buyToleranceNum, sellToleranceNum, now, existing.id).run();
+      } else {
+        // 创建新设置
+        const insertStmt = env.DB.prepare(`
+          INSERT INTO alert_tolerance_settings (buy_tolerance, sell_tolerance, updated_at) VALUES (?, ?, ?)
+        `);
+        await insertStmt.bind(buyToleranceNum, sellToleranceNum, now).run();
+      }
 
       return jsonResponse({
         success: true,
@@ -5102,52 +5889,8 @@ const INTELLIGENT_ANALYSIS_CONFIG = {
   STOP_LOSS_PCT: -1.5
 };
 
-async function scheduledIntelligentGoldAnalysis(env, ctx) {
-  console.log('[Intelligent Analysis] Starting comprehensive gold price analysis...');
-
-  try {
-    const today = getBeijingDate();
-
-    const historyData = await getTodayGoldPriceHistory(env, today);
-    if (!historyData || historyData.length < INTELLIGENT_ANALYSIS_CONFIG.MIN_DATA_POINTS) {
-      console.log('[Intelligent Analysis] Insufficient data points:', historyData?.length || 0);
-      return;
-    }
-
-    const currentPrice = historyData[historyData.length - 1].price;
-    console.log('[Intelligent Analysis] Current price:', currentPrice);
-
-    const tradingParams = await getTradingParameters(env);
-    console.log('[Intelligent Analysis] Trading params:', tradingParams);
-
-    const marketAnalysis = analyzeMarketTrend(historyData);
-    console.log('[Intelligent Analysis] Market trend:', marketAnalysis);
-
-    const tradingAlerts = await checkAndSendTradingAlerts(currentPrice, env);
-
-    const aiAnalysis = await performAIAnalysis(env, historyData, tradingParams, marketAnalysis);
-
-    // 只在有活跃价格预警时才发送AI持仓建议
-    const hasActiveAlerts = tradingParams.alerts && tradingParams.alerts.length > 0;
-    
-    if (aiAnalysis.hasValue && hasActiveAlerts) {
-      console.log('[Intelligent Analysis] Sending AI advice - active alerts:', tradingParams.alerts.length);
-      await sendIntelligentTradingAdvice(env, aiAnalysis, currentPrice, tradingParams);
-    } else {
-      console.log('[Intelligent Analysis] Skipping AI advice - no active alerts');
-    }
-
-    const profitOpportunities = await calculateProfitOpportunities(currentPrice, tradingParams, marketAnalysis, env);
-    if (profitOpportunities.length > 0) {
-      await sendProfitOpportunityAlerts(env, profitOpportunities, currentPrice);
-    }
-
-    console.log('[Intelligent Analysis] Completed successfully');
-
-  } catch (error) {
-    console.error('[Intelligent Analysis] Error:', error);
-  }
-}
+// 注意：scheduledIntelligentGoldAnalysis 功能已整合到 scheduledGoldCrawlWithAI 中
+// 现在每分钟执行一次数据爬取和AI分析提交
 
 async function getTodayGoldPriceHistory(env, date) {
   try {
@@ -5779,5 +6522,171 @@ async function cleanupDailyPriceAlerts(env) {
   } catch (error) {
     console.error('[Cleanup] Error during daily cleanup:', error);
     return { success: false, error: error.message };
+  }
+}
+
+// ================================================================================
+// AI API 测试端点
+// ================================================================================
+
+async function handleTestQwen(request, env, ctx) {
+  if (request.method !== 'POST') {
+    return jsonResponse({ error: 'Method not allowed' }, 405);
+  }
+
+  try {
+    const body = await request.json();
+    const prompt = body.prompt;
+
+    if (!prompt) {
+      return jsonResponse({ error: 'Prompt required' }, 400);
+    }
+
+    const apiKey = env.DASHSCOPE_API_KEY;
+    if (!apiKey) {
+      return jsonResponse({ error: 'API key not configured', success: false }, 500);
+    }
+
+    const startTime = Date.now();
+    const response = await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'qwen3-max-2026-01-23',
+        messages: [
+          { 
+            role: 'system', 
+            content: '你是黄金交易分析专家，擅长技术分析和趋势判断。请基于提供的数据进行分析，并以 JSON 格式返回结果。' 
+          },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 2000
+      })
+    });
+
+    const elapsed = Date.now() - startTime;
+    const result = await response.json();
+    const aiResponse = result.choices?.[0]?.message?.content;
+
+    if (!aiResponse) {
+      return jsonResponse({ 
+        error: 'No AI response', 
+        success: false,
+        rawResult: result 
+      }, 500);
+    }
+
+    // 解析 JSON
+    let parsed = {};
+    try {
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        parsed = JSON.parse(jsonMatch[0]);
+      }
+    } catch (e) {
+      console.log('JSON parse error:', e);
+    }
+
+    return jsonResponse({
+      success: true,
+      elapsed,
+      rawResponse: aiResponse,
+      parsed: parsed,
+      confidence: parsed.confidence,
+      targetPrice: parsed.shortTermTarget,
+      direction: parsed.direction
+    });
+
+  } catch (error) {
+    console.error('[Test Qwen] Error:', error);
+    return jsonResponse({ 
+      error: error.message, 
+      success: false 
+    }, 500);
+  }
+}
+
+async function handleTestDoubao(request, env, ctx) {
+  if (request.method !== 'POST') {
+    return jsonResponse({ error: 'Method not allowed' }, 405);
+  }
+
+  try {
+    const body = await request.json();
+    const prompt = body.prompt;
+
+    if (!prompt) {
+      return jsonResponse({ error: 'Prompt required' }, 400);
+    }
+
+    const apiKey = env.DOUBAO_API_KEY;
+    if (!apiKey) {
+      return jsonResponse({ error: 'API key not configured', success: false }, 500);
+    }
+
+    const startTime = Date.now();
+    const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'doubao-seed-2-0-pro-260215',
+        messages: [
+          { 
+            role: 'system', 
+            content: '你是黄金交易分析专家，擅长技术分析和趋势判断。请基于提供的数据进行分析，并以 JSON 格式返回结果。' 
+          },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 2000
+      })
+    });
+
+    const elapsed = Date.now() - startTime;
+    const result = await response.json();
+    const aiResponse = result.choices?.[0]?.message?.content;
+
+    if (!aiResponse) {
+      return jsonResponse({ 
+        error: 'No AI response', 
+        success: false,
+        rawResult: result 
+      }, 500);
+    }
+
+    // 解析 JSON
+    let parsed = {};
+    try {
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        parsed = JSON.parse(jsonMatch[0]);
+      }
+    } catch (e) {
+      console.log('JSON parse error:', e);
+    }
+
+    return jsonResponse({
+      success: true,
+      elapsed,
+      rawResponse: aiResponse,
+      parsed: parsed,
+      confidence: parsed.confidence,
+      targetPrice: parsed.shortTermTarget,
+      direction: parsed.direction
+    });
+
+  } catch (error) {
+    console.error('[Test Doubao] Error:', error);
+    return jsonResponse({ 
+      error: error.message, 
+      success: false 
+    }, 500);
   }
 }
