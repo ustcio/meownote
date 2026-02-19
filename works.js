@@ -64,15 +64,15 @@ export default {
     }
   },
   
-  // Cron Trigger - 每60秒执行一次金价爬取和AI分析
+  // Cron Trigger - 每60秒执行一次金价爬取
   async scheduled(event, env, ctx) {
     const now = Date.now();
     console.log('[Cron] Triggered at:', now);
     
     switch (event.cron) {
-      case '*/1 * * * *': // 每分钟执行金价爬取和AI数据提交
-        console.log('[Cron] Starting gold price crawl and AI data submission...');
-        ctx.waitUntil(scheduledGoldCrawlWithAI(event, env, ctx));
+      case '*/1 * * * *': // 每分钟执行金价爬取
+        console.log('[Cron] Starting gold price crawl...');
+        ctx.waitUntil(scheduledGoldCrawl(event, env, ctx));
         break;
       case '*/5 * * * *': // 每5分钟执行趋势分析
         console.log('[Cron] Starting gold price trend analysis...');
@@ -84,7 +84,7 @@ export default {
         break;
       default:
         console.log('[Cron] Unknown cron pattern:', event.cron);
-        ctx.waitUntil(scheduledGoldCrawlWithAI(event, env, ctx));
+        ctx.waitUntil(scheduledGoldCrawl(event, env, ctx));
     }
   }
 };
@@ -103,10 +103,7 @@ const ROUTES = {
   '/api/gold/history': { handler: handleGoldHistory },
   '/api/gold/alert/test': { handler: handleGoldAlertTest },
   '/api/gold/analysis': { handler: handleGoldAnalysis },
-  '/api/gold/ai-analysis': { handler: handleGoldAIAnalysis },
-  '/api/gold/ai-signals': { handler: handleGoldAISignals },
-  '/api/test-qwen': { handler: handleTestQwen },
-  '/api/test-doubao': { handler: handleTestDoubao },
+  '/api/gold/crawl-status': { handler: handleCrawlStatus },
   '/api/user/profile': { handler: handleUserProfile },
   '/api/user/password': { handler: handleUserPassword },
   '/stats/visit': { handler: handleStatsVisit },
@@ -123,6 +120,7 @@ const ROUTES = {
   '/api/admin/upload/complete': { handler: handleUploadComplete },
   '/api/admin/upload/abort': { handler: handleUploadAbort },
   '/api/trading/login': { handler: handleTradingLogin },
+  '/api/trading/logout': { handler: handleTradingLogout },
   '/api/trading/verify': { handler: handleTradingVerify },
   '/api/trading/buy': { handler: handleBuyTransaction },
   '/api/trading/sell': { handler: handleSellTransaction },
@@ -160,14 +158,25 @@ function handleCORS() {
   });
 }
 
-function jsonResponse(data, status = 200) {
+function jsonResponse(data, status = 200, cookies = []) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+  };
+  if (cookies.length > 0) {
+    headers['Set-Cookie'] = cookies.join(', ');
+  }
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    }
+    headers
   });
+}
+
+function getJwtSecret(env) {
+  if (!env.JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is required');
+  }
+  return env.JWT_SECRET;
 }
 
 // ================================================================================
@@ -1096,6 +1105,43 @@ async function performCrawl(env) {
     if (!sgeData) console.error('[Gold Crawler] SGE data fetch failed');
     if (!intlData) console.error('[Gold Crawler] International data fetch failed');
     
+    // 记录数据采集状态用于监控
+    const crawlStatus = {
+      sgeSuccess: !!sgeData,
+      intlSuccess: !!intlData,
+      exchangeRateSuccess: !!exchangeRate,
+      timestamp: Date.now()
+    };
+    
+    // 存储采集状态到 KV 用于监控
+    if (env?.GOLD_PRICE_CACHE) {
+      try {
+        const statusKey = `crawl_status:${getBeijingDate()}`;
+        let statusHistory = [];
+        const existing = await env.GOLD_PRICE_CACHE.get(statusKey);
+        if (existing) {
+          statusHistory = JSON.parse(existing);
+        }
+        statusHistory.push(crawlStatus);
+        // 只保留最近 100 条记录
+        if (statusHistory.length > 100) {
+          statusHistory = statusHistory.slice(-100);
+        }
+        await env.GOLD_PRICE_CACHE.put(statusKey, JSON.stringify(statusHistory), {
+          expirationTtl: 86400
+        });
+        
+        // 检测连续失败告警
+        const recentFailures = statusHistory.slice(-5).filter(s => !s.sgeSuccess && !s.intlSuccess);
+        if (recentFailures.length >= 3) {
+          console.error('[Gold Crawler] ALERT: Consecutive crawl failures detected!');
+          // 可以在这里添加通知逻辑
+        }
+      } catch (e) {
+        console.warn('[Gold Crawler] Failed to store crawl status:', e.message);
+      }
+    }
+    
     const OZ_TO_G = 31.1035;
     
     // 构建结果
@@ -1231,7 +1277,8 @@ async function handleGoldPrice(request, env, ctx) {
   }
 }
 
-const REALTIME_CACHE_TTL = 8000;
+const REALTIME_CACHE_TTL = 30000;
+const STALE_CACHE_TTL = 120000;
 
 async function handleTodayGoldPrice(env, ctx, forceRefresh) {
   const today = getBeijingDate();
@@ -1314,7 +1361,7 @@ async function handleTodayGoldPrice(env, ctx, forceRefresh) {
           const cachedData = JSON.parse(cached);
           const cacheAge = now - (cachedData.cachedAt || 0);
           // 允许使用30秒内的过期缓存
-          if (cacheAge < 30000) {
+          if (cacheAge < STALE_CACHE_TTL) {
             console.log('[Gold Price] Using stale cache, age:', cacheAge, 'ms');
             const history = await getDayHistory(env, today);
             return jsonResponse({
@@ -1560,8 +1607,8 @@ async function handleGoldPriceStream(request, env, ctx) {
   });
 }
 
-// 定时爬取入口（用于 Cron Trigger）- 带重试机制和AI数据提交
-async function scheduledGoldCrawlWithAI(event, env, ctx) {
+// 定时爬取入口（用于 Cron Trigger）- 带重试机制
+async function scheduledGoldCrawl(event, env, ctx) {
   const MAX_RETRIES = 3;
   const RETRY_DELAY = 3000;
   const pipelineStartTime = Date.now();
@@ -1597,8 +1644,6 @@ async function scheduledGoldCrawlWithAI(event, env, ctx) {
           await sendGoldPriceAlert(result.domestic, result.international, history, env);
         }
         const alertLatency = Date.now() - alertStartTime;
-        
-        ctx.waitUntil(submitDataToAIAnalysis(env, result));
         
         const totalLatency = Date.now() - pipelineStartTime;
         console.log('[Pipeline] Completed in', totalLatency, 'ms', {
@@ -1670,242 +1715,6 @@ async function logPipelineMetrics(env, metrics) {
     });
   } catch (e) {
     console.error('[Pipeline Metrics] Failed to log:', e);
-  }
-}
-
-// 提交数据到AI智能分析系统
-async function submitDataToAIAnalysis(env, crawlResult) {
-  try {
-    const today = getBeijingDate();
-    
-    // 获取今日历史数据
-    const historyData = await getTodayGoldPriceHistory(env, today);
-    
-    if (!historyData || historyData.length === 0) {
-      console.log('[AI Submit] No history data available');
-      return;
-    }
-    
-    console.log(`[AI Submit] Retrieved ${historyData.length} data points for analysis`);
-    
-    // 获取交易参数
-    const tradingParams = await getTradingParameters(env);
-    
-    // 分析市场趋势
-    const marketAnalysis = analyzeMarketTrend(historyData);
-    
-    // 构建AI分析提示
-    const analysisPrompt = buildAIAnalysisPrompt(historyData, tradingParams, marketAnalysis, crawlResult);
-    
-    // 并行调用多个AI服务
-    const [qwenResult, doubaoResult] = await Promise.allSettled([
-      callQwenForAnalysis(env, analysisPrompt),
-      callDoubaoForAnalysis(env, analysisPrompt)
-    ]);
-    
-    // 处理结果
-    const qwenAnalysis = qwenResult.status === 'fulfilled' ? qwenResult.value : null;
-    const doubaoAnalysis = doubaoResult.status === 'fulfilled' ? doubaoResult.value : null;
-    
-    // 合并AI结果
-    const combinedAnalysis = combineAIResults(qwenAnalysis, doubaoAnalysis, marketAnalysis);
-    
-    // 存储分析结果
-    await storeAIAnalysisResult(env, today, {
-      timestamp: Date.now(),
-      currentPrice: crawlResult.domestic?.price || crawlResult.international?.price,
-      marketAnalysis,
-      aiAnalysis: combinedAnalysis,
-      tradingParams,
-      dataPoints: historyData.length
-    });
-    
-    console.log('[AI Submit] Analysis completed and stored successfully');
-    
-    // 如果有交易信号，发送通知
-    if (combinedAnalysis.hasValue && combinedAnalysis.signals) {
-      const hasActiveAlerts = tradingParams.alerts && tradingParams.alerts.length > 0;
-      if (hasActiveAlerts) {
-        await sendAITradingSignal(env, combinedAnalysis, crawlResult.domestic?.price, tradingParams);
-      }
-    }
-    
-  } catch (error) {
-    console.error('[AI Submit] Error submitting data to AI analysis:', error);
-    // 记录错误但不影响主流程
-    await logAIAnalysisError(env, error);
-  }
-}
-
-// 构建AI分析提示（增强版）
-function buildAIAnalysisPrompt(historyData, tradingParams, marketAnalysis, crawlResult) {
-  const recentPrices = historyData.slice(-30).map(h => ({
-    time: new Date(h.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
-    price: h.price
-  }));
-  
-  const currentPrice = crawlResult.domestic?.price || crawlResult.international?.price || marketAnalysis.currentPrice;
-  
-  return `作为黄金交易专家，请基于以下实时数据给出专业的交易分析和建议：
-
-【实时行情数据】
-当前价格: ¥${currentPrice}/克
-今日开盘: ¥${marketAnalysis.openPrice}/克
-今日最高: ¥${marketAnalysis.high}/克
-今日最低: ¥${marketAnalysis.low}/克
-日内涨跌: ${marketAnalysis.dayChange.toFixed(2)}%
-波动率: ${marketAnalysis.volatility.toFixed(2)}%
-
-【近期价格走势】(最近30个数据点)
-${recentPrices.map(p => `${p.time}: ¥${p.price}/克`).join('\n')}
-
-【市场趋势分析】
-趋势方向: ${marketAnalysis.trend}
-趋势强度: ${marketAnalysis.strength.toFixed(2)}%
-
-【交易参数】
-平均持仓成本: ¥${tradingParams.avgBuyPrice.toFixed(2)}/克
-持仓总量: ${tradingParams.totalHoldings.toFixed(3)}克
-买入目标价: ${tradingParams.buyTargets.map(p => `¥${p}`).join(', ') || '未设置'}
-卖出目标价: ${tradingParams.sellTargets.map(p => `¥${p}`).join(', ') || '未设置'}
-活跃预警数: ${tradingParams.alerts?.length || 0}
-
-请提供以下分析（用JSON格式返回）:
-{
-  "trend": "上涨/下跌/震荡",
-  "trendConfidence": 0-100,
-  "recommendation": "买入/卖出/持有",
-  "recommendationConfidence": 0-100,
-  "targetPrice": 目标价格,
-  "stopLoss": 止损价格,
-  "takeProfit": 止盈价格,
-  "riskLevel": "低/中/高",
-  "reasoning": "分析理由",
-  "expectedReturn": "预期收益率"
-}`;
-}
-
-// 存储AI分析结果
-async function storeAIAnalysisResult(env, date, analysisData) {
-  try {
-    if (!env.GOLD_PRICE_CACHE) {
-      console.warn('[AI Store] GOLD_PRICE_CACHE not available');
-      return;
-    }
-    
-    const key = `ai_analysis:${date}`;
-    
-    // 获取现有分析记录
-    let analyses = [];
-    try {
-      const existing = await env.GOLD_PRICE_CACHE.get(key);
-      if (existing) {
-        analyses = JSON.parse(existing);
-      }
-    } catch (e) {
-      console.log('[AI Store] No existing analysis data');
-    }
-    
-    // 添加新的分析结果
-    analyses.push(analysisData);
-    
-    // 只保留最近1440条记录（24小时，每分钟一条）
-    if (analyses.length > 1440) {
-      analyses = analyses.slice(-1440);
-    }
-    
-    // 存储到KV
-    await env.GOLD_PRICE_CACHE.put(key, JSON.stringify(analyses), {
-      expirationTtl: 3 * 24 * 60 * 60 // 3天
-    });
-    
-    console.log(`[AI Store] Stored analysis result. Total records: ${analyses.length}`);
-    
-  } catch (error) {
-    console.error('[AI Store] Error storing analysis result:', error);
-  }
-}
-
-// 发送AI交易信号通知
-async function sendAITradingSignal(env, analysis, currentPrice, tradingParams) {
-  try {
-    const { recommendation, signals } = analysis;
-    
-    if (!recommendation || recommendation === 'hold') {
-      return;
-    }
-    
-    // 检查冷却期
-    const cooldownKey = 'last_ai_signal_notify';
-    const lastNotify = await env.GOLD_PRICE_CACHE.get(cooldownKey);
-    const now = Date.now();
-    const COOLDOWN = 2 * 60 * 1000; // 2分钟冷却期（AI分析信号）
-
-    if (lastNotify && (now - parseInt(lastNotify)) < COOLDOWN) {
-      console.log('[AI Signal] In cooldown period, skipping notification');
-      return;
-    }
-    
-    // 构建通知消息
-    const signalType = recommendation === 'buy' ? '买入' : '卖出';
-    const confidence = signals.buy > signals.sell ? signals.buy : signals.sell;
-    
-    const message = `🤖 AI交易信号\n\n` +
-      `信号类型: ${signalType}\n` +
-      `当前价格: ¥${currentPrice}/克\n` +
-      `置信度: ${confidence}/10\n` +
-      `分析依据: ${analysis.combinedAnalysis?.substring(0, 100)}...\n\n` +
-      `请登录系统查看详细分析。`;
-    
-    // 发送到Resend（如果配置了）
-    if (env.RESEND_API_KEY) {
-      // 这里可以实现邮件通知逻辑
-      console.log('[AI Signal] Would send email notification:', message);
-    }
-    
-    // 更新冷却时间
-    await env.GOLD_PRICE_CACHE.put(cooldownKey, String(now), { expirationTtl: 3600 });
-    
-    console.log('[AI Signal] Trading signal notification sent');
-    
-  } catch (error) {
-    console.error('[AI Signal] Error sending notification:', error);
-  }
-}
-
-// 记录AI分析错误
-async function logAIAnalysisError(env, error) {
-  try {
-    if (!env.GOLD_PRICE_CACHE) return;
-    
-    const today = getBeijingDate();
-    const key = `ai_analysis_errors:${today}`;
-    
-    let errors = [];
-    try {
-      const existing = await env.GOLD_PRICE_CACHE.get(key);
-      if (existing) {
-        errors = JSON.parse(existing);
-      }
-    } catch (e) {}
-    
-    errors.push({
-      timestamp: Date.now(),
-      error: error.message,
-      stack: error.stack
-    });
-    
-    // 只保留最近100条错误记录
-    if (errors.length > 100) {
-      errors = errors.slice(-100);
-    }
-    
-    await env.GOLD_PRICE_CACHE.put(key, JSON.stringify(errors), {
-      expirationTtl: 7 * 24 * 60 * 60 // 7天
-    });
-    
-  } catch (e) {
-    console.error('[AI Error Log] Failed to log error:', e);
   }
 }
 
@@ -2145,48 +1954,51 @@ async function logCrawlStatus(env, status, data) {
 async function handleGoldHistory(request, env, ctx) {
   try {
     const url = new URL(request.url);
-    const range = url.searchParams.get('range') || '1m';
-    
-    const now = Date.now();
+    const range = url.searchParams.get('range') || '1d';
+
     const labels = [];
     const domesticPrices = [];
     const internationalPrices = [];
-    
-    let days = 30;
-    switch (range) {
-      case '1m': days = 30; break;
-      case '3m': days = 90; break;
-      case '6m': days = 180; break;
-      case '1y': days = 365; break;
+
+    if (env.GOLD_PRICE_CACHE) {
+      try {
+        const dateKey = getBeijingDate();
+        const historyKey = `history:${dateKey}`;
+        const existing = await env.GOLD_PRICE_CACHE.get(historyKey);
+        if (existing) {
+          const history = JSON.parse(existing);
+          history.forEach(h => {
+            if (h.domestic) {
+              const time = new Date(h.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+              labels.push(time);
+              domesticPrices.push(h.domestic);
+            }
+          });
+          console.log(`[Gold History] Loaded ${history.length} points from KV`);
+        }
+      } catch (kvError) {
+        console.warn('[Gold History] KV query failed:', kvError.message);
+      }
     }
-    
-    const baseDomestic = 580;
-    const baseInternational = 2650;
-    
-    for (let i = days; i >= 0; i--) {
-      const date = new Date(now - i * 24 * 60 * 60 * 1000);
-      labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-      
-      const trend = Math.sin(i / 30) * 20;
-      const noise = (Math.random() - 0.5) * 10;
-      domesticPrices.push(Math.round((baseDomestic + trend + noise) * 100) / 100);
-      
-      const intTrend = Math.sin(i / 30) * 50;
-      const intNoise = (Math.random() - 0.5) * 30;
-      internationalPrices.push(Math.round((baseInternational + intTrend + intNoise) * 100) / 100);
-    }
-    
+
     return jsonResponse({
       success: true,
       range,
       labels,
       domestic: { prices: domesticPrices },
-      international: { prices: internationalPrices }
+      international: { prices: internationalPrices },
+      dataPoints: domesticPrices.length
     });
     
   } catch (error) {
     console.error('Gold history error:', error);
-    return jsonResponse({ success: false, labels: [], domestic: { prices: [] }, international: { prices: [] } });
+    return jsonResponse({
+      success: false,
+      error: error.message,
+      labels: [],
+      domestic: { prices: [] },
+      international: { prices: [] }
+    }, 500);
   }
 }
 
@@ -4450,14 +4262,10 @@ async function handleGoldAnalysis(request, env, ctx) {
   return jsonResponse({ success: false, error: 'Invalid action' }, 400);
 }
 
-// 获取AI智能分析结果
-async function handleGoldAIAnalysis(request, env, ctx) {
+async function handleCrawlStatus(request, env, ctx) {
   try {
     const url = new URL(request.url);
     const date = url.searchParams.get('date') || getBeijingDate();
-    const limit = parseInt(url.searchParams.get('limit') || '10');
-    
-    console.log('[Gold AI Analysis API] Getting AI analysis for date:', date);
     
     if (!env.GOLD_PRICE_CACHE) {
       return jsonResponse({
@@ -4466,115 +4274,56 @@ async function handleGoldAIAnalysis(request, env, ctx) {
       }, 500);
     }
     
-    // 获取AI分析结果
-    const key = `ai_analysis:${date}`;
-    const data = await env.GOLD_PRICE_CACHE.get(key);
+    const statusKey = `crawl_status:${date}`;
+    const data = await env.GOLD_PRICE_CACHE.get(statusKey);
     
     if (!data) {
       return jsonResponse({
         success: true,
-        data: [],
-        message: 'No AI analysis data available for this date'
+        date,
+        statusHistory: [],
+        summary: {
+          totalCrawls: 0,
+          successfulCrawls: 0,
+          failedCrawls: 0,
+          successRate: 0
+        },
+        message: 'No crawl status data available for this date'
       });
     }
     
-    const analyses = JSON.parse(data);
-    const recentAnalyses = analyses.slice(-limit);
+    const statusHistory = JSON.parse(data);
     
-    // 获取最新的完整分析
-    const latestAnalysis = recentAnalyses[recentAnalyses.length - 1];
+    const summary = {
+      totalCrawls: statusHistory.length,
+      successfulCrawls: statusHistory.filter(s => s.sgeSuccess || s.intlSuccess).length,
+      failedCrawls: statusHistory.filter(s => !s.sgeSuccess && !s.intlSuccess).length,
+      sgeSuccessRate: statusHistory.length > 0 
+        ? (statusHistory.filter(s => s.sgeSuccess).length / statusHistory.length * 100).toFixed(1)
+        : 0,
+      intlSuccessRate: statusHistory.length > 0 
+        ? (statusHistory.filter(s => s.intlSuccess).length / statusHistory.length * 100).toFixed(1)
+        : 0
+    };
     
-    return jsonResponse({
-      success: true,
-      date: date,
-      totalRecords: analyses.length,
-      latestAnalysis: latestAnalysis ? {
-        timestamp: latestAnalysis.timestamp,
-        currentPrice: latestAnalysis.currentPrice,
-        marketTrend: latestAnalysis.marketAnalysis?.trend,
-        trendStrength: latestAnalysis.marketAnalysis?.strength,
-        dayChange: latestAnalysis.marketAnalysis?.dayChange,
-        volatility: latestAnalysis.marketAnalysis?.volatility,
-        aiRecommendation: latestAnalysis.aiAnalysis?.recommendation,
-        aiConfidence: latestAnalysis.aiAnalysis?.signals ? 
-          Math.max(latestAnalysis.aiAnalysis.signals.buy, latestAnalysis.aiAnalysis.signals.sell) : 0,
-        hasValue: latestAnalysis.aiAnalysis?.hasValue
-      } : null,
-      recentAnalyses: recentAnalyses.map(a => ({
-        timestamp: a.timestamp,
-        price: a.currentPrice,
-        recommendation: a.aiAnalysis?.recommendation,
-        trend: a.marketAnalysis?.trend
-      })),
-      timestamp: Date.now()
-    });
+    summary.successRate = statusHistory.length > 0 
+      ? (summary.successfulCrawls / statusHistory.length * 100).toFixed(1)
+      : 0;
     
-  } catch (error) {
-    console.error('[Gold AI Analysis API] Error:', error);
-    return jsonResponse({
-      success: false,
-      error: error.message
-    }, 500);
-  }
-}
-
-// 获取AI交易信号
-async function handleGoldAISignals(request, env, ctx) {
-  try {
-    const url = new URL(request.url);
-    const date = url.searchParams.get('date') || getBeijingDate();
-    
-    console.log('[Gold AI Signals API] Getting AI signals for date:', date);
-    
-    if (!env.GOLD_PRICE_CACHE) {
-      return jsonResponse({
-        success: false,
-        error: 'GOLD_PRICE_CACHE not configured'
-      }, 500);
-    }
-    
-    // 获取AI分析结果
-    const key = `ai_analysis:${date}`;
-    const data = await env.GOLD_PRICE_CACHE.get(key);
-    
-    if (!data) {
-      return jsonResponse({
-        success: true,
-        signals: [],
-        message: 'No AI signals available for this date'
-      });
-    }
-    
-    const analyses = JSON.parse(data);
-    
-    // 提取交易信号
-    const signals = analyses
-      .filter(a => a.aiAnalysis?.hasValue && a.aiAnalysis?.recommendation !== 'hold')
-      .map(a => ({
-        timestamp: a.timestamp,
-        time: new Date(a.timestamp).toLocaleTimeString('zh-CN'),
-        price: a.currentPrice,
-        recommendation: a.aiAnalysis.recommendation,
-        confidence: a.aiAnalysis.signals ? 
-          (a.aiAnalysis.recommendation === 'buy' ? a.aiAnalysis.signals.buy : a.aiAnalysis.signals.sell) : 0,
-        trend: a.marketAnalysis?.trend,
-        trendStrength: a.marketAnalysis?.strength
-      }));
-    
-    // 获取最新信号
-    const latestSignal = signals.length > 0 ? signals[signals.length - 1] : null;
+    const recentFailures = statusHistory.slice(-5).filter(s => !s.sgeSuccess && !s.intlSuccess);
+    const alertStatus = recentFailures.length >= 3 ? 'ALERT' : 'OK';
     
     return jsonResponse({
       success: true,
-      date: date,
-      totalSignals: signals.length,
-      latestSignal: latestSignal,
-      signals: signals.slice(-20), // 只返回最近20个信号
-      timestamp: Date.now()
+      date,
+      statusHistory: statusHistory.slice(-20),
+      summary,
+      alertStatus,
+      lastCrawl: statusHistory[statusHistory.length - 1] || null
     });
     
   } catch (error) {
-    console.error('[Gold AI Signals API] Error:', error);
+    console.error('[Crawl Status] Error:', error);
     return jsonResponse({
       success: false,
       error: error.message
@@ -4871,14 +4620,29 @@ async function verifyAdminToken(token, secret) {
 // ================================================================================
 
 async function verifyAdminAuth(request, env) {
+  let token = null;
+  
   const authHeader = request.headers.get('Authorization');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.slice(7);
+  }
+  
+  if (!token) {
+    const cookieHeader = request.headers.get('Cookie');
+    if (cookieHeader) {
+      const cookies = cookieHeader.split(';').map(c => c.trim());
+      const tokenCookie = cookies.find(c => c.startsWith('trading_token='));
+      if (tokenCookie) {
+        token = tokenCookie.substring('trading_token='.length);
+      }
+    }
+  }
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!token) {
     return { success: false, message: '请先登录' };
   }
 
-  const token = authHeader.slice(7);
-  const payload = await verifyAdminToken(token, env.JWT_SECRET || 'agiera-default-jwt-secret-2024');
+  const payload = await verifyAdminToken(token, getJwtSecret(env));
 
   if (!payload) {
     return { success: false, message: 'Token 已过期或无效，请重新登录' };
@@ -4951,7 +4715,7 @@ async function handleTradingLogin(request, env) {
       return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
     }
 
-    const secret = env.JWT_SECRET || 'agiera-default-jwt-secret-2024';
+    const secret = getJwtSecret(env);
     const token = await createAdminToken({
       userId: result.id,
       username: result.username,
@@ -4961,11 +4725,13 @@ async function handleTradingLogin(request, env) {
     await env.DB.prepare('UPDATE admin_users SET last_login = ? WHERE id = ?')
       .bind(new Date().toISOString(), result.id).run();
 
+    const isProduction = request.url.startsWith('https://');
+    const cookieValue = `trading_token=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=86400${isProduction ? '; Domain=.ustc.dev' : ''}`;
+
     return jsonResponse({
       success: true,
-      token,
       user: { id: result.id, username: result.username, role: result.role }
-    });
+    }, 200, [cookieValue]);
   } catch (error) {
     console.error('[Trading Login Error]', error);
     return jsonResponse({ success: false, error: 'Login failed' }, 500);
@@ -4973,13 +4739,29 @@ async function handleTradingLogin(request, env) {
 }
 
 async function handleTradingVerify(request, env) {
+  let token = null;
+  
   const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.substring(7);
+  }
+  
+  if (!token) {
+    const cookieHeader = request.headers.get('Cookie');
+    if (cookieHeader) {
+      const cookies = cookieHeader.split(';').map(c => c.trim());
+      const tokenCookie = cookies.find(c => c.startsWith('trading_token='));
+      if (tokenCookie) {
+        token = tokenCookie.substring('trading_token='.length);
+      }
+    }
+  }
+
+  if (!token) {
     return jsonResponse({ success: false, error: 'No token provided' }, 401);
   }
 
-  const token = authHeader.substring(7);
-  const secret = env.JWT_SECRET || 'agiera-default-jwt-secret-2024';
+  const secret = getJwtSecret(env);
   const verification = await verifyAdminToken(token, secret);
   
   if (!verification) {
@@ -4987,6 +4769,13 @@ async function handleTradingVerify(request, env) {
   }
 
   return jsonResponse({ success: true, user: verification });
+}
+
+async function handleTradingLogout(request, env) {
+  const isProduction = request.url.startsWith('https://');
+  const cookieValue = `trading_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0${isProduction ? '; Domain=.ustc.dev' : ''}`;
+  
+  return jsonResponse({ success: true }, 200, [cookieValue]);
 }
 
 async function handleBuyTransaction(request, env) {
@@ -5983,157 +5772,6 @@ function analyzeMarketTrend(historyData) {
   };
 }
 
-async function performAIAnalysis(env, historyData, tradingParams, marketAnalysis) {
-  const analysisPrompt = buildAnalysisPrompt(historyData, tradingParams, marketAnalysis);
-
-  const qwenResult = await callQwenForAnalysis(env, analysisPrompt);
-  const doubaoResult = await callDoubaoForAnalysis(env, analysisPrompt);
-
-  const combinedAnalysis = combineAIResults(qwenResult, doubaoResult, marketAnalysis);
-
-  return combinedAnalysis;
-}
-
-function buildAnalysisPrompt(historyData, tradingParams, marketAnalysis) {
-  const recentPrices = historyData.slice(-20).map(h => ({
-    time: new Date(h.timestamp).toLocaleTimeString('zh-CN'),
-    price: h.price
-  }));
-
-  return `作为黄金交易专家，请分析以下数据并给出交易建议：
-
-【今日金价走势】
-${recentPrices.map(p => `${p.time}: ¥${p.price}/克`).join('\n')}
-
-【市场概况】
-- 当前趋势: ${marketAnalysis.trend}
-- 趋势强度: ${marketAnalysis.strength.toFixed(2)}%
-- 日内涨跌: ${marketAnalysis.dayChange.toFixed(2)}%
-- 波动率: ${marketAnalysis.volatility.toFixed(2)}%
-- 今日最高: ¥${marketAnalysis.high}/克
-- 今日最低: ¥${marketAnalysis.low}/克
-
-【交易参数】
-- 平均持仓成本: ¥${tradingParams.avgBuyPrice.toFixed(2)}/克
-- 持仓总量: ${tradingParams.totalHoldings.toFixed(3)}克
-- 买入目标价: ${tradingParams.buyTargets.map(p => `¥${p}`).join(', ') || '未设置'}
-- 卖出目标价: ${tradingParams.sellTargets.map(p => `¥${p}`).join(', ') || '未设置'}
-
-请提供：
-1. 趋势判断（上涨/下跌/震荡）及理由
-2. 买入建议（是否适合买入，目标价位）
-3. 卖出建议（是否适合卖出，目标价位）
-4. 风险提示
-5. 预期收益分析
-
-请用简洁专业的语言回答。`;
-}
-
-async function callQwenForAnalysis(env, prompt) {
-  try {
-    const apiKey = env.DASHSCOPE_API_KEY;
-    if (!apiKey) {
-      console.log('[AI Analysis] Qwen API key not configured');
-      return null;
-    }
-
-    const response = await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'qwen-turbo',
-        input: {
-          messages: [
-            { role: 'system', content: '你是黄金交易分析专家，擅长技术分析和趋势判断。' },
-            { role: 'user', content: prompt }
-          ]
-        },
-        parameters: {
-          temperature: 0.7,
-          max_tokens: 800
-        }
-      })
-    });
-
-    const result = await response.json();
-    return result.output?.text || null;
-  } catch (error) {
-    console.error('[AI Analysis] Qwen error:', error);
-    return null;
-  }
-}
-
-async function callDoubaoForAnalysis(env, prompt) {
-  try {
-    const apiKey = env.DOUBAO_API_KEY;
-    if (!apiKey) {
-      console.log('[AI Analysis] Doubao API key not configured');
-      return null;
-    }
-
-    const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'doubao-seed-2-0-pro-260215',
-        messages: [
-          { role: 'system', content: '你是黄金交易分析专家，擅长技术分析和趋势判断。' },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 800
-      })
-    });
-
-    const result = await response.json();
-    return result.choices?.[0]?.message?.content || null;
-  } catch (error) {
-    console.error('[AI Analysis] Doubao error:', error);
-    return null;
-  }
-}
-
-function combineAIResults(qwenResult, doubaoResult, marketAnalysis) {
-  const hasQwen = qwenResult && qwenResult.length > 50;
-  const hasDoubao = doubaoResult && doubaoResult.length > 50;
-
-  if (!hasQwen && !hasDoubao) {
-    return { hasValue: false, reason: 'AI分析未返回有效结果' };
-  }
-
-  const combinedText = [qwenResult, doubaoResult].filter(Boolean).join('\n\n---\n\n');
-
-  const buySignals = (combinedText.match(/买入|看多|建议买入|适合买入/gi) || []).length;
-  const sellSignals = (combinedText.match(/卖出|看空|建议卖出|适合卖出/gi) || []).length;
-  const holdSignals = (combinedText.match(/持有|观望|震荡|等待/gi) || []).length;
-
-  let recommendation;
-  if (buySignals > sellSignals && buySignals > holdSignals) {
-    recommendation = 'buy';
-  } else if (sellSignals > buySignals && sellSignals > holdSignals) {
-    recommendation = 'sell';
-  } else {
-    recommendation = 'hold';
-  }
-
-  const hasSignificantInsight = buySignals >= 2 || sellSignals >= 2 || combinedText.includes('预期收益') || combinedText.includes('目标价位');
-
-  return {
-    hasValue: hasSignificantInsight,
-    recommendation,
-    qwenResult,
-    doubaoResult,
-    combinedAnalysis: combinedText,
-    signals: { buy: buySignals, sell: sellSignals, hold: holdSignals }
-  };
-}
-
 async function calculateProfitOpportunities(currentPrice, tradingParams, marketAnalysis, env) {
   const opportunities = [];
 
@@ -6522,171 +6160,5 @@ async function cleanupDailyPriceAlerts(env) {
   } catch (error) {
     console.error('[Cleanup] Error during daily cleanup:', error);
     return { success: false, error: error.message };
-  }
-}
-
-// ================================================================================
-// AI API 测试端点
-// ================================================================================
-
-async function handleTestQwen(request, env, ctx) {
-  if (request.method !== 'POST') {
-    return jsonResponse({ error: 'Method not allowed' }, 405);
-  }
-
-  try {
-    const body = await request.json();
-    const prompt = body.prompt;
-
-    if (!prompt) {
-      return jsonResponse({ error: 'Prompt required' }, 400);
-    }
-
-    const apiKey = env.DASHSCOPE_API_KEY;
-    if (!apiKey) {
-      return jsonResponse({ error: 'API key not configured', success: false }, 500);
-    }
-
-    const startTime = Date.now();
-    const response = await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'qwen3-max-2026-01-23',
-        messages: [
-          { 
-            role: 'system', 
-            content: '你是黄金交易分析专家，擅长技术分析和趋势判断。请基于提供的数据进行分析，并以 JSON 格式返回结果。' 
-          },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.3,
-        max_tokens: 2000
-      })
-    });
-
-    const elapsed = Date.now() - startTime;
-    const result = await response.json();
-    const aiResponse = result.choices?.[0]?.message?.content;
-
-    if (!aiResponse) {
-      return jsonResponse({ 
-        error: 'No AI response', 
-        success: false,
-        rawResult: result 
-      }, 500);
-    }
-
-    // 解析 JSON
-    let parsed = {};
-    try {
-      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        parsed = JSON.parse(jsonMatch[0]);
-      }
-    } catch (e) {
-      console.log('JSON parse error:', e);
-    }
-
-    return jsonResponse({
-      success: true,
-      elapsed,
-      rawResponse: aiResponse,
-      parsed: parsed,
-      confidence: parsed.confidence,
-      targetPrice: parsed.shortTermTarget,
-      direction: parsed.direction
-    });
-
-  } catch (error) {
-    console.error('[Test Qwen] Error:', error);
-    return jsonResponse({ 
-      error: error.message, 
-      success: false 
-    }, 500);
-  }
-}
-
-async function handleTestDoubao(request, env, ctx) {
-  if (request.method !== 'POST') {
-    return jsonResponse({ error: 'Method not allowed' }, 405);
-  }
-
-  try {
-    const body = await request.json();
-    const prompt = body.prompt;
-
-    if (!prompt) {
-      return jsonResponse({ error: 'Prompt required' }, 400);
-    }
-
-    const apiKey = env.DOUBAO_API_KEY;
-    if (!apiKey) {
-      return jsonResponse({ error: 'API key not configured', success: false }, 500);
-    }
-
-    const startTime = Date.now();
-    const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'doubao-seed-2-0-pro-260215',
-        messages: [
-          { 
-            role: 'system', 
-            content: '你是黄金交易分析专家，擅长技术分析和趋势判断。请基于提供的数据进行分析，并以 JSON 格式返回结果。' 
-          },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.3,
-        max_tokens: 2000
-      })
-    });
-
-    const elapsed = Date.now() - startTime;
-    const result = await response.json();
-    const aiResponse = result.choices?.[0]?.message?.content;
-
-    if (!aiResponse) {
-      return jsonResponse({ 
-        error: 'No AI response', 
-        success: false,
-        rawResult: result 
-      }, 500);
-    }
-
-    // 解析 JSON
-    let parsed = {};
-    try {
-      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        parsed = JSON.parse(jsonMatch[0]);
-      }
-    } catch (e) {
-      console.log('JSON parse error:', e);
-    }
-
-    return jsonResponse({
-      success: true,
-      elapsed,
-      rawResponse: aiResponse,
-      parsed: parsed,
-      confidence: parsed.confidence,
-      targetPrice: parsed.shortTermTarget,
-      direction: parsed.direction
-    });
-
-  } catch (error) {
-    console.error('[Test Doubao] Error:', error);
-    return jsonResponse({ 
-      error: error.message, 
-      success: false 
-    }, 500);
   }
 }

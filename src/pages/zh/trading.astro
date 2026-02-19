@@ -1,5 +1,52 @@
 ---
 import Layout from '@layouts/Layout.astro';
+
+const API_BASE = 'https://api.ustc.dev';
+const JWT_SECRET = import.meta.env.JWT_SECRET;
+
+let isAuthenticated = false;
+let authUser = null;
+
+const cookieHeader = Astro.request.headers.get('Cookie') || '';
+const cookies = cookieHeader.split(';').map(c => c.trim());
+const tokenCookie = cookies.find(c => c.startsWith('trading_token='));
+
+if (tokenCookie && JWT_SECRET) {
+  const token = tokenCookie.substring('trading_token='.length);
+  
+  try {
+    const parts = token.split('.');
+    if (parts.length === 3) {
+      const [header, body, sig] = parts;
+      const payload = JSON.parse(atob(body));
+      
+      if (payload.exp && payload.exp > Date.now()) {
+        const key = await crypto.subtle.importKey(
+          'raw',
+          new TextEncoder().encode(JWT_SECRET),
+          { name: 'HMAC', hash: 'SHA-256' },
+          false,
+          ['verify']
+        );
+        
+        const signatureBuffer = Uint8Array.from(atob(sig), c => c.charCodeAt(0));
+        const isValid = await crypto.subtle.verify(
+          'HMAC',
+          key,
+          signatureBuffer,
+          new TextEncoder().encode(`${header}.${body}`)
+        );
+        
+        if (isValid) {
+          isAuthenticated = true;
+          authUser = payload;
+        }
+      }
+    }
+  } catch (e) {
+    isAuthenticated = false;
+  }
+}
 ---
 
 <Layout 
@@ -7,6 +54,7 @@ import Layout from '@layouts/Layout.astro';
   description="黄金交易管理与收益分析"
 >
   <section class="trading" id="trading-app">
+    {!isAuthenticated && (
     <div class="trading-login" id="login-section">
       <div class="login-card">
         <div class="login-icon">
@@ -30,11 +78,7 @@ import Layout from '@layouts/Layout.astro';
         <form class="login-form" id="trading-login-form">
           <div class="form-group">
             <label for="trading-username">用户名</label>
-            <div class="input-wrapper">
-              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
+            <div class="input-wrapper password-wrapper">
               <input type="text" id="trading-username" name="username" required placeholder="请输入用户名" />
             </div>
           </div>
@@ -65,8 +109,10 @@ import Layout from '@layouts/Layout.astro';
         </form>
       </div>
     </div>
+    )}
 
-    <div class="trading-dashboard hidden" id="dashboard-section">
+    {isAuthenticated && (
+    <div class="trading-dashboard" id="dashboard-section">
       <div class="dashboard-header">
         <div class="header-left">
           <h1 class="dashboard-title">黄金交易管理</h1>
@@ -241,7 +287,6 @@ import Layout from '@layouts/Layout.astro';
             </h2>
           </div>
 
-          <!-- 容错阈值设置 -->
           <div class="tolerance-settings" id="tolerance-settings">
             <div class="tolerance-header">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -387,6 +432,7 @@ import Layout from '@layouts/Layout.astro';
         </div>
       </div>
     </div>
+    )}
   </section>
 </Layout>
 
@@ -466,17 +512,10 @@ import Layout from '@layouts/Layout.astro';
     align-items: center;
   }
 
-  .input-icon {
-    position: absolute;
-    left: var(--space-3);
-    color: var(--text-tertiary);
-    pointer-events: none;
-  }
-
-  .input-wrapper input {
+  .input-wrapper.password-wrapper input {
     width: 100%;
     padding: var(--space-3) var(--space-4);
-    padding-left: calc(var(--space-3) + 26px);
+    padding-right: 44px;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-primary);
     border-radius: var(--radius-xl);
@@ -490,11 +529,6 @@ import Layout from '@layouts/Layout.astro';
     border-color: var(--color-accent-blue);
     box-shadow: 0 0 0 3px rgba(100, 210, 255, 0.15);
     background: var(--bg-primary);
-  }
-
-  .input-wrapper.password-wrapper input {
-    padding-left: var(--space-4);
-    padding-right: 44px;
   }
 
   .toggle-password {
@@ -850,7 +884,6 @@ import Layout from '@layouts/Layout.astro';
     padding: var(--space-5);
   }
 
-  /* Tolerance Settings */
   .tolerance-settings {
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     border: 2px solid var(--accent-primary);
@@ -1047,7 +1080,6 @@ import Layout from '@layouts/Layout.astro';
     box-shadow: 0 4px 12px rgba(191, 90, 242, 0.3);
   }
 
-  /* Alert List - New Design */
   .alert-list {
     display: flex;
     flex-direction: column;
@@ -1064,7 +1096,6 @@ import Layout from '@layouts/Layout.astro';
     font-size: var(--text-sm);
   }
 
-  /* Alert Section */
   .alert-section {
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
@@ -1100,7 +1131,6 @@ import Layout from '@layouts/Layout.astro';
     padding: var(--space-2);
   }
 
-  /* Alert Item */
   .alert-item {
     display: flex;
     align-items: center;
@@ -1226,7 +1256,6 @@ import Layout from '@layouts/Layout.astro';
     background: rgba(255, 55, 95, 0.1);
   }
 
-  /* Alert Actions */
   .alert-actions {
     display: flex;
     justify-content: center;
@@ -1258,7 +1287,6 @@ import Layout from '@layouts/Layout.astro';
     background: rgba(255, 55, 95, 0.2);
   }
 
-  /* Notification */
   .notification {
     position: fixed;
     top: 20px;
@@ -2070,99 +2098,6 @@ import Layout from '@layouts/Layout.astro';
     }
   }
 
-  .edit-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(4px);
-  }
-
-  .edit-modal-content {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-xl);
-    padding: var(--space-6);
-    width: 100%;
-    max-width: 400px;
-    box-shadow: var(--shadow-xl);
-  }
-
-  .edit-modal-content h3 {
-    margin: 0 0 var(--space-4);
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
-  }
-
-  .edit-modal-content .form-group {
-    margin-bottom: var(--space-4);
-  }
-
-  .edit-modal-content label {
-    display: block;
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--text-secondary);
-    margin-bottom: var(--space-2);
-  }
-
-  .edit-modal-content input {
-    width: 100%;
-    padding: var(--space-3);
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
-    font-size: var(--text-base);
-  }
-
-  .edit-modal-content input:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-  }
-
-  .edit-actions {
-    display: flex;
-    gap: var(--space-3);
-    margin-top: var(--space-5);
-  }
-
-  .edit-actions button {
-    flex: 1;
-    padding: var(--space-3);
-    border: none;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .btn-cancel {
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-  }
-
-  .btn-cancel:hover {
-    background: var(--border-primary);
-  }
-
-  .btn-save {
-    background: var(--color-accent-blue);
-    color: white;
-  }
-
-  .btn-save:hover {
-    background: #1a8cff;
-  }
-
   .pagination {
     display: flex;
     justify-content: center;
@@ -2547,8 +2482,9 @@ import Layout from '@layouts/Layout.astro';
   }
 </style>
 
-<script>
+<script define:vars={{ isAuthenticated }}>
   const API_BASE = 'https://api.ustc.dev';
+  const serverAuthenticated = isAuthenticated;
 
   const loginSection = document.getElementById('login-section');
   const dashboardSection = document.getElementById('dashboard-section');
@@ -2557,7 +2493,6 @@ import Layout from '@layouts/Layout.astro';
   const sellForm = document.getElementById('sell-form');
   const alertForm = document.getElementById('alert-form');
 
-  let authToken = localStorage.getItem('trading_token') || '';
   let currentPage = 1;
   let totalPages = 1;
 
@@ -2577,119 +2512,83 @@ import Layout from '@layouts/Layout.astro';
   }
 
   async function apiRequest(endpoint, options = {}) {
-    const maxRetries = 3;
-    const retryDelay = 1000;
-    let lastError = null;
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
-        
-        const response = await fetch(`${API_BASE}${endpoint}`, {
-          ...options,
-          signal: controller.signal,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`,
-            ...options.headers
-          }
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (response.status === 401) {
-          localStorage.removeItem('trading_token');
-          authToken = '';
-          showLogin();
-          return { success: false, error: '登录已过期，请重新登录', needLogin: true };
-        }
-        
-        if (!response.ok) {
-          console.error('API Error:', response.status, response.statusText);
-          lastError = `HTTP Error: ${response.status}`;
-          if (attempt < maxRetries) {
-            await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
-            continue;
-          }
-          return { success: false, error: lastError };
-        }
-        
-        const text = await response.text();
-        try {
-          const data = JSON.parse(text);
-          return data;
-        } catch (e) {
-          console.error('JSON Parse Error:', text);
-          return { success: false, error: 'Invalid JSON response' };
-        }
-      } catch (error) {
-        console.error(`API Request Error (attempt ${attempt}/${maxRetries}):`, error);
-        lastError = error.name === 'AbortError' ? '请求超时' : (error.message || 'Network error');
-        
-        if (attempt < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
-          continue;
-        }
-      }
-    }
-    
-    return { success: false, error: lastError || '请求失败，请稍后重试' };
-  }
-
-  function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-
-  function validateNumber(value, min, max, fieldName) {
-    const num = parseFloat(value);
-    if (isNaN(num)) {
-      return { valid: false, error: `${fieldName}必须是有效数字` };
-    }
-    if (num < min) {
-      return { valid: false, error: `${fieldName}不能小于${min}` };
-    }
-    if (num > max) {
-      return { valid: false, error: `${fieldName}不能大于${max}` };
-    }
-    return { valid: true, value: num };
-  }
-
-  function formatNumber(num, decimals = 2) {
-    if (num === null || num === undefined || isNaN(num)) return '0.00';
-    return num.toFixed(decimals);
-  }
-
-  async function checkAuth() {
-    if (!authToken) {
-      showLogin();
-      return false;
-    }
-
     try {
-      const result = await apiRequest('/api/trading/verify');
-      if (result.success) {
-        showDashboard();
-        return true;
-      } else {
-        localStorage.removeItem('trading_token');
-        authToken = '';
-        showLogin();
-        return false;
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        ...options,
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers
+        }
+      });
+      
+      if (!response.ok) {
+        return { success: false, error: `HTTP Error: ${response.status}` };
+      }
+      
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        return { success: false, error: 'Invalid JSON response' };
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
-      showLogin();
-      return false;
+      return { success: false, error: error.message || 'Network error' };
     }
+  }
+
+  async function handleLogin(event) {
+    event.preventDefault();
+    
+    const username = document.getElementById('trading-username').value;
+    const password = document.getElementById('trading-password').value;
+    const loginBtn = document.getElementById('trading-login-btn');
+    const btnText = loginBtn.querySelector('.btn-text');
+    const btnLoading = loginBtn.querySelector('.btn-loading');
+    
+    if (!username || !password) {
+      alert('请输入用户名和密码');
+      return;
+    }
+    
+    btnText.classList.add('hidden');
+    btnLoading.classList.remove('hidden');
+    loginBtn.disabled = true;
+    
+    try {
+      const result = await apiRequest('/api/trading/login', {
+        method: 'POST',
+        body: JSON.stringify({ username, password })
+      });
+      
+      if (result.success) {
+        showDashboard();
+      } else {
+        alert(result.error || '登录失败');
+      }
+    } catch (error) {
+      alert('登录请求失败: ' + error.message);
+    } finally {
+      btnText.classList.remove('hidden');
+      btnLoading.classList.add('hidden');
+      loginBtn.disabled = false;
+    }
+  }
+
+  if (loginForm) {
+    loginForm.addEventListener('submit', handleLogin);
+  }
+
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await apiRequest('/api/trading/logout', { method: 'POST' });
+        window.location.reload();
+      } catch (error) {
+        window.location.reload();
+      }
+    });
   }
 
   function showLogin() {
@@ -2720,7 +2619,6 @@ import Layout from '@layouts/Layout.astro';
         document.getElementById('current-gold-price').textContent = result.data.domestic.price.toFixed(2);
       }
     } catch (error) {
-      console.error('Failed to load gold price:', error);
     }
   }
 
@@ -2730,7 +2628,6 @@ import Layout from '@layouts/Layout.astro';
     const requiredFields = ['total', 'week', 'month', 'weekly', 'monthly'];
     for (const field of requiredFields) {
       if (stats[field] === undefined) {
-        console.warn(`Stats validation: missing field ${field}`);
         return false;
       }
     }
@@ -2739,7 +2636,6 @@ import Layout from '@layouts/Layout.astro';
       const totalFields = ['buy', 'sell', 'profit', 'quantityBought', 'quantitySold'];
       for (const field of totalFields) {
         if (typeof stats.total[field] !== 'number') {
-          console.warn(`Stats validation: invalid total.${field}`);
           return false;
         }
       }
@@ -2763,7 +2659,6 @@ import Layout from '@layouts/Layout.astro';
         const stats = result.stats;
         
         if (!validateStatsData(stats)) {
-          console.error('Stats data validation failed');
           throw new Error('数据验证失败');
         }
 
@@ -2777,7 +2672,6 @@ import Layout from '@layouts/Layout.astro';
         renderCharts(stats);
       }
     } catch (error) {
-      console.error('Failed to load stats:', error);
       if (weeklyChart) {
         weeklyChart.innerHTML = `
           <div class="chart-error">
@@ -3003,30 +2897,6 @@ import Layout from '@layouts/Layout.astro';
             <div class="tx-skeleton-item"></div>
           </div>
         </div>
-        <div class="tx-skeleton">
-          <div class="tx-skeleton-header">
-            <div class="tx-skeleton-badge"></div>
-            <div class="tx-skeleton-status"></div>
-          </div>
-          <div class="tx-skeleton-grid">
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-          </div>
-        </div>
-        <div class="tx-skeleton">
-          <div class="tx-skeleton-header">
-            <div class="tx-skeleton-badge"></div>
-            <div class="tx-skeleton-status"></div>
-          </div>
-          <div class="tx-skeleton-grid">
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-            <div class="tx-skeleton-item"></div>
-          </div>
-        </div>
       `;
     }
     if (pagination) pagination.innerHTML = '';
@@ -3060,7 +2930,6 @@ import Layout from '@layouts/Layout.astro';
         }
       }
     } catch (error) {
-      console.error('Failed to load transactions:', error);
       if (list) {
         list.innerHTML = `
           <div class="tx-empty-state">
@@ -3206,745 +3075,4 @@ import Layout from '@layouts/Layout.astro';
               <button class="tx-action-btn delete" onclick="deleteTransaction(${t.id})">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-          
-          <div class="tx-edit-inline hidden" id="edit-panel-${t.id}">
-            <div class="tx-edit-grid">
-              <div class="tx-edit-field">
-                <label>买入价格 (元/克)</label>
-                <input type="number" id="edit-price-${t.id}" step="0.01" value="${t.price}" />
-              </div>
-              ${!isBuy ? `
-                <div class="tx-edit-field">
-                  <label>卖出价格 (元/克)</label>
-                  <input type="number" id="edit-sell-price-${t.id}" step="0.01" value="${t.actual_sell_price || t.price}" />
-                </div>
-              ` : ''}
-              <div class="tx-edit-field">
-                <label>数量 (克)</label>
-                <input type="number" id="edit-qty-${t.id}" step="0.001" value="${t.quantity}" />
-              </div>
-            </div>
-            <div class="tx-edit-actions">
-              <button class="tx-edit-btn cancel" onclick="toggleEditPanel(${t.id})">取消</button>
-              <button class="tx-edit-btn save" onclick="saveEdit(${t.id}, '${t.type}')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                保存
-              </button>
-            </div>
-          </div>
-          
-          ${showSellBtn ? `
-            <div class="tx-sell-panel hidden" id="sell-panel-${t.id}">
-              <div class="tx-sell-panel-header">
-                <div class="tx-sell-panel-title">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                  卖出持仓
-                </div>
-                <div class="tx-sell-close" onclick="toggleSellPanel(${t.id})">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </div>
-              </div>
-              <div class="tx-sell-form">
-                <div class="tx-sell-field">
-                  <label>卖出价格 (元/克)</label>
-                  <input type="number" id="sell-price-${t.id}" step="0.01" placeholder="输入卖出价格" oninput="updateSellPreview(${t.id}, ${t.price})" />
-                </div>
-                <div class="tx-sell-field">
-                  <label>卖出数量 (克)</label>
-                  <input type="number" id="sell-qty-${t.id}" step="0.001" max="${t.remaining_quantity || t.quantity}" placeholder="最大 ${t.remaining_quantity || t.quantity}g" oninput="updateSellPreview(${t.id}, ${t.price})" />
-                </div>
-              </div>
-              <div class="tx-sell-preview">
-                <div class="tx-sell-preview-item">
-                  <span class="tx-sell-preview-label">卖出总额</span>
-                  <span class="tx-sell-preview-value" id="sell-total-${t.id}">¥0.00</span>
-                </div>
-                <div class="tx-sell-preview-item">
-                  <span class="tx-sell-preview-label">预期收益</span>
-                  <span class="tx-sell-preview-value profit" id="sell-profit-${t.id}">¥0.00</span>
-                </div>
-              </div>
-              <button class="tx-sell-submit" onclick="confirmSell(${t.id}, ${t.price})" id="sell-submit-${t.id}" disabled>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                确认卖出
-              </button>
-            </div>
-          ` : ''}
-        </div>
-      `;
-    }).join('');
-  }
-
-  function toggleEditPanel(id) {
-    const panel = document.getElementById(`edit-panel-${id}`);
-    if (panel) {
-      panel.classList.toggle('hidden');
-    }
-  }
-
-  function toggleSellPanel(id) {
-    const panel = document.getElementById(`sell-panel-${id}`);
-    if (panel) {
-      panel.classList.toggle('hidden');
-    }
-  }
-
-  function updateSellPreview(id, buyPrice) {
-    const sellPriceEl = document.getElementById(`sell-price-${id}`);
-    const sellQtyEl = document.getElementById(`sell-qty-${id}`);
-    const totalEl = document.getElementById(`sell-total-${id}`);
-    const profitEl = document.getElementById(`sell-profit-${id}`);
-    const submitBtn = document.getElementById(`sell-submit-${id}`);
-
-    if (!sellPriceEl || !sellQtyEl || !totalEl || !profitEl || !submitBtn) return;
-
-    const sellPrice = parseFloat(sellPriceEl.value) || 0;
-    const sellQty = parseFloat(sellQtyEl.value) || 0;
-    const total = sellPrice * sellQty;
-    const profit = (sellPrice - buyPrice) * sellQty;
-
-    totalEl.textContent = formatCurrency(total);
-    profitEl.textContent = formatCurrency(profit);
-    
-    profitEl.classList.remove('positive', 'negative');
-    if (profit > 0) {
-      profitEl.classList.add('positive');
-    } else if (profit < 0) {
-      profitEl.classList.add('negative');
-    }
-
-    submitBtn.disabled = !(sellPrice > 0 && sellQty > 0);
-  }
-
-  async function saveEdit(id, type) {
-    const priceEl = document.getElementById(`edit-price-${id}`);
-    const qtyEl = document.getElementById(`edit-qty-${id}`);
-    const sellPriceEl = document.getElementById(`edit-sell-price-${id}`);
-
-    const newPrice = parseFloat(priceEl?.value) || 0;
-    const newQty = parseFloat(qtyEl?.value) || 0;
-    const newSellPrice = type === 'sell' ? parseFloat(sellPriceEl?.value) : null;
-
-    if (newPrice <= 0 || newQty <= 0) {
-      showNotification('请输入有效的价格和数量', 'error');
-      return;
-    }
-
-    try {
-      const result = await apiRequest(`/api/trading/transaction?id=${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          price: newPrice,
-          quantity: newQty,
-          actualSellPrice: newSellPrice
-        })
-      });
-
-      if (result.success) {
-        showNotification('修改成功', 'success');
-        toggleEditPanel(id);
-        setTimeout(() => loadDashboard(), 300);
-      } else {
-        showNotification(result.error || '修改失败', 'error');
-      }
-    } catch (error) {
-      console.error('Save edit failed:', error);
-      showNotification('修改失败', 'error');
-    }
-  }
-
-  async function confirmSell(id, buyPrice) {
-    const sellPriceEl = document.getElementById(`sell-price-${id}`);
-    const sellQtyEl = document.getElementById(`sell-qty-${id}`);
-
-    const sellPrice = parseFloat(sellPriceEl?.value) || 0;
-    const sellQty = parseFloat(sellQtyEl?.value) || 0;
-
-    if (sellPrice <= 0 || sellQty <= 0) {
-      showNotification('请输入有效的卖出价格和数量', 'error');
-      return;
-    }
-
-    const profit = (sellPrice - buyPrice) * sellQty;
-    const confirmMsg = `确认卖出 ${sellQty.toFixed(3)}g，价格 ¥${sellPrice.toFixed(2)}？\n预期收益: ${formatCurrency(profit)}`;
-
-    if (!confirm(confirmMsg)) return;
-
-    try {
-      const result = await apiRequest('/api/trading/sell', {
-        method: 'POST',
-        body: JSON.stringify({
-          buyTransactionId: id,
-          actualSellPrice: sellPrice,
-          quantity: sellQty
-        })
-      });
-
-      if (result.success) {
-        showNotification('卖出成功', 'success');
-        toggleSellPanel(id);
-        setTimeout(() => loadDashboard(), 300);
-      } else {
-        showNotification(result.error || '卖出失败', 'error');
-      }
-    } catch (error) {
-      console.error('Sell failed:', error);
-      showNotification('卖出失败', 'error');
-    }
-  }
-
-  function renderPagination(pagination) {
-    const container = document.getElementById('pagination');
-    if (!container) return;
-
-    currentPage = pagination.page;
-    totalPages = pagination.totalPages;
-
-    if (totalPages <= 1) {
-      container.innerHTML = '';
-      return;
-    }
-
-    let html = '';
-    
-    html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="loadTransactions(${currentPage - 1})">上一页</button>`;
-    
-    for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-        html += `<button class="${i === currentPage ? 'active' : ''}" onclick="loadTransactions(${i})">${i}</button>`;
-      } else if (i === currentPage - 2 || i === currentPage + 2) {
-        html += '<span>...</span>';
-      }
-    }
-
-    html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="loadTransactions(${currentPage + 1})">下一页</button>`;
-
-    container.innerHTML = html;
-  }
-
-  async function loadAlerts() {
-    try {
-      const result = await apiRequest('/api/trading/alerts');
-      if (result.success) {
-        renderAlerts(result.alerts);
-      }
-    } catch (error) {
-      console.error('Failed to load alerts:', error);
-    }
-  }
-
-  function renderAlerts(alerts) {
-    const list = document.getElementById('alert-list');
-    if (!list) return;
-
-    if (!alerts?.length) {
-      list.innerHTML = '<div class="alert-empty">暂无价格预警</div>';
-      return;
-    }
-
-    // 分类预警数据
-    const buyAlerts = alerts.filter(a => a.alert_type === 'buy' && a.is_active);
-    const sellAlerts = alerts.filter(a => a.alert_type === 'sell' && a.is_active);
-    const triggeredAlerts = alerts.filter(a => a.is_triggered);
-
-    let html = '';
-
-    // 买入预警区域
-    if (buyAlerts.length > 0) {
-      html += `
-        <div class="alert-section">
-          <div class="alert-section-header">
-            <span class="alert-section-icon">🟢</span>
-            <span class="alert-section-title">买入预警 (${buyAlerts.length})</span>
-          </div>
-          <div class="alert-section-content">
-            ${buyAlerts.map(a => renderAlertItem(a)).join('')}
-          </div>
-        </div>
-      `;
-    }
-
-    // 卖出预警区域
-    if (sellAlerts.length > 0) {
-      html += `
-        <div class="alert-section">
-          <div class="alert-section-header">
-            <span class="alert-section-icon">🔴</span>
-            <span class="alert-section-title">卖出预警 (${sellAlerts.length})</span>
-          </div>
-          <div class="alert-section-content">
-            ${sellAlerts.map(a => renderAlertItem(a)).join('')}
-          </div>
-        </div>
-      `;
-    }
-
-    // 已触发预警区域
-    if (triggeredAlerts.length > 0) {
-      html += `
-        <div class="alert-section triggered">
-          <div class="alert-section-header">
-            <span class="alert-section-icon">✅</span>
-            <span class="alert-section-title">已触发预警 (${triggeredAlerts.length})</span>
-          </div>
-          <div class="alert-section-content">
-            ${triggeredAlerts.map(a => renderAlertItem(a, true)).join('')}
-          </div>
-        </div>
-      `;
-    }
-
-    // 添加批量删除按钮
-    html += `
-      <div class="alert-actions">
-        <button class="alert-action-btn delete-all" onclick="deleteAllAlerts()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-          </svg>
-          清空所有预警
-        </button>
-      </div>
-    `;
-
-    list.innerHTML = html;
-  }
-
-  function renderAlertItem(alert, isTriggered = false) {
-    const statusClass = isTriggered ? 'triggered' : alert.is_active ? 'active' : 'inactive';
-    const statusText = isTriggered ? '已触发' : alert.is_active ? '监控中' : '已暂停';
-
-    return `
-      <div class="alert-item ${statusClass}" data-id="${alert.id}">
-        <div class="alert-main">
-          <div class="alert-type-badge ${alert.alert_type}">
-            ${alert.alert_type === 'buy' ? '买入' : '卖出'}
-          </div>
-          <div class="alert-price">
-            <span class="alert-price-value">¥${alert.target_price}</span>
-            <span class="alert-price-unit">/克</span>
-          </div>
-        </div>
-        <div class="alert-meta">
-          <span class="alert-status ${statusClass}">${statusText}</span>
-          ${alert.triggered_at ? `<span class="alert-time">${new Date(alert.triggered_at).toLocaleString('zh-CN')}</span>` : ''}
-        </div>
-        <button class="delete-alert-btn" onclick="deleteAlert(${alert.id})" title="删除预警">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-    `;
-  }
-
-  async function deleteTransaction(id) {
-    if (!confirm('确定删除此交易记录？')) return;
-
-    try {
-      const result = await apiRequest(`/api/trading/transaction?id=${id}`, { method: 'DELETE' });
-      if (result.success) {
-        // 延迟刷新，确保后端数据已更新
-        setTimeout(() => loadDashboard(), 300);
-      } else {
-        alert(result.error || '删除失败');
-      }
-    } catch (error) {
-      console.error('Delete failed:', error);
-      alert('删除失败');
-    }
-  }
-
-  async function deleteAlert(id) {
-    if (!confirm('确定删除此价格预警？')) return;
-
-    try {
-      const result = await apiRequest(`/api/trading/alert?id=${id}`, { method: 'DELETE' });
-      if (result.success) {
-        loadAlerts();
-        showNotification('预警已删除', 'success');
-      } else {
-        console.error('Delete alert failed:', result.error);
-        showNotification(result.error || '删除失败', 'error');
-      }
-    } catch (error) {
-      console.error('Delete alert failed:', error);
-      showNotification('删除失败', 'error');
-    }
-  }
-
-  async function deleteAllAlerts() {
-    if (!confirm('确定清空所有价格预警？此操作不可恢复。')) return;
-
-    try {
-      const result = await apiRequest('/api/trading/alerts', { method: 'DELETE' });
-      if (result.success) {
-        loadAlerts();
-        showNotification('所有预警已清空', 'success');
-      } else {
-        console.error('Delete all alerts failed:', result.error);
-        showNotification(result.error || '清空失败', 'error');
-      }
-    } catch (error) {
-      console.error('Delete all alerts failed:', error);
-      showNotification('清空失败', 'error');
-    }
-  }
-
-  function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `
-      <span class="notification-icon">${type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ'}</span>
-      <span class="notification-message">${message}</span>
-    `;
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-      notification.classList.add('show');
-    }, 10);
-
-    setTimeout(() => {
-      notification.classList.remove('show');
-      setTimeout(() => notification.remove(), 300);
-    }, 3000);
-  }
-
-  document.getElementById('trading-toggle-pwd')?.addEventListener('click', () => {
-    const input = document.getElementById('trading-password') as HTMLInputElement;
-    const btn = document.getElementById('trading-toggle-pwd');
-    const eyeOpen = btn?.querySelector('.eye-open');
-    const eyeClosed = btn?.querySelector('.eye-closed');
-
-    if (input?.type === 'password') {
-      input.type = 'text';
-      eyeOpen?.classList.add('hidden');
-      eyeClosed?.classList.remove('hidden');
-    } else {
-      input.type = 'password';
-      eyeOpen?.classList.remove('hidden');
-      eyeClosed?.classList.add('hidden');
-    }
-  });
-
-  loginForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('trading-login-btn');
-    const btnText = btn?.querySelector('.btn-text');
-    const btnLoading = btn?.querySelector('.btn-loading');
-
-    btnText?.classList.add('hidden');
-    btnLoading?.classList.remove('hidden');
-    (btn as HTMLButtonElement).disabled = true;
-
-    try {
-      const formData = new FormData(loginForm as HTMLFormElement);
-      const username = formData.get('username') as string;
-      const password = formData.get('password') as string;
-      
-      console.log('Attempting login with username:', username);
-      
-      const result = await apiRequest('/api/trading/login', {
-        method: 'POST',
-        body: JSON.stringify({ username, password })
-      });
-
-      console.log('Login result:', result);
-
-      if (result.success) {
-        authToken = result.token;
-        localStorage.setItem('trading_token', authToken);
-        console.log('Login successful, showing dashboard');
-        showDashboard();
-      } else {
-        console.error('Login failed:', result.error);
-        alert(result.error || '登录失败');
-      }
-    } catch (error) {
-      console.error('Login failed:', error);
-      alert('登录失败');
-    } finally {
-      btnText?.classList.remove('hidden');
-      btnLoading?.classList.add('hidden');
-      (btn as HTMLButtonElement).disabled = false;
-    }
-  });
-
-  function updateBuyTotal() {
-    const priceEl = document.getElementById('buy-price');
-    const quantityEl = document.getElementById('buy-quantity');
-    const totalEl = document.getElementById('buy-total');
-    
-    const price = priceEl ? parseFloat(priceEl.value) || 0 : 0;
-    const quantity = quantityEl ? parseFloat(quantityEl.value) || 0 : 0;
-    const total = price * quantity;
-    if (totalEl) totalEl.textContent = formatCurrency(total);
-  }
-
-  function updateSellTotal() {
-    const priceEl = document.getElementById('sell-price');
-    const quantityEl = document.getElementById('sell-quantity');
-    const totalEl = document.getElementById('sell-total');
-    
-    const price = priceEl ? parseFloat(priceEl.value) || 0 : 0;
-    const quantity = quantityEl ? parseFloat(quantityEl.value) || 0 : 0;
-    const total = price * quantity;
-    if (totalEl) totalEl.textContent = formatCurrency(total);
-  }
-
-  document.getElementById('buy-price')?.addEventListener('input', updateBuyTotal);
-  document.getElementById('buy-quantity')?.addEventListener('input', updateBuyTotal);
-  document.getElementById('sell-price')?.addEventListener('input', updateSellTotal);
-  document.getElementById('sell-quantity')?.addEventListener('input', updateSellTotal);
-
-  buyForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const priceEl = document.getElementById('buy-price');
-    const quantityEl = document.getElementById('buy-quantity');
-    const notesEl = document.getElementById('buy-notes');
-    
-    const priceValidation = validateNumber(priceEl ? priceEl.value : '', 0.01, 100000, '买入价格');
-    if (!priceValidation.valid) {
-      showNotification(priceValidation.error, 'error');
-      return;
-    }
-    
-    const quantityValidation = validateNumber(quantityEl ? quantityEl.value : '', 0.001, 10000, '买入数量');
-    if (!quantityValidation.valid) {
-      showNotification(quantityValidation.error, 'error');
-      return;
-    }
-    
-    const price = priceValidation.value;
-    const quantity = quantityValidation.value;
-    const notes = notesEl ? notesEl.value.trim() : '';
-
-    try {
-      const result = await apiRequest('/api/trading/buy', {
-        method: 'POST',
-        body: JSON.stringify({ price, quantity, notes })
-      });
-
-      if (result.success) {
-        if (buyForm) buyForm.reset();
-        const buyTotalEl = document.getElementById('buy-total');
-        if (buyTotalEl) buyTotalEl.textContent = '¥0.00';
-        setTimeout(() => loadDashboard(), 300);
-        showNotification('买入记录已保存', 'success');
-      } else {
-        showNotification(result.error || '保存失败', 'error');
-      }
-    } catch (error) {
-      console.error('Buy failed:', error);
-      showNotification('保存失败', 'error');
-    }
-  });
-
-  sellForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const priceEl = document.getElementById('sell-price');
-    const quantityEl = document.getElementById('sell-quantity');
-    const notesEl = document.getElementById('sell-notes');
-    
-    const priceValidation = validateNumber(priceEl ? priceEl.value : '', 0.01, 100000, '卖出价格');
-    if (!priceValidation.valid) {
-      showNotification(priceValidation.error, 'error');
-      return;
-    }
-    
-    const quantityValidation = validateNumber(quantityEl ? quantityEl.value : '', 0.001, 10000, '卖出数量');
-    if (!quantityValidation.valid) {
-      showNotification(quantityValidation.error, 'error');
-      return;
-    }
-    
-    const price = priceValidation.value;
-    const quantity = quantityValidation.value;
-    const notes = notesEl ? notesEl.value.trim() : '';
-
-    try {
-      const result = await apiRequest('/api/trading/sell', {
-        method: 'POST',
-        body: JSON.stringify({ actualSellPrice: price, quantity, notes })
-      });
-
-      if (result.success) {
-        if (sellForm) sellForm.reset();
-        const sellTotalEl = document.getElementById('sell-total');
-        if (sellTotalEl) sellTotalEl.textContent = '¥0.00';
-        setTimeout(() => loadDashboard(), 300);
-        showNotification('卖出记录已保存', 'success');
-      } else {
-        showNotification(result.error || '保存失败', 'error');
-      }
-    } catch (error) {
-      console.error('Sell failed:', error);
-      showNotification('保存失败', 'error');
-    }
-  });
-
-  alertForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const alertTypeEl = document.querySelector('input[name="alert-type"]:checked');
-    const alertPriceEl = document.getElementById('alert-price');
-    
-    const alertType = alertTypeEl ? alertTypeEl.value : 'buy';
-    const targetPrice = alertPriceEl ? parseFloat(alertPriceEl.value) : 0;
-
-    if (!targetPrice) {
-      showNotification('请输入目标价格', 'error');
-      return;
-    }
-
-    try {
-      const result = await apiRequest('/api/trading/alert', {
-        method: 'POST',
-        body: JSON.stringify({ alertType, targetPrice })
-      });
-
-      if (result.success) {
-        if (alertPriceEl) alertPriceEl.value = '';
-        loadAlerts();
-        showNotification('预警已设置', 'success');
-      } else {
-        showNotification(result.error || '设置失败', 'error');
-      }
-    } catch (error) {
-      console.error('Alert creation failed:', error);
-      showNotification('设置失败', 'error');
-    }
-  });
-
-  // 容错阈值设置功能
-  const toleranceForm = document.getElementById('tolerance-form');
-  const buyToleranceInput = document.getElementById('buy-tolerance');
-  const sellToleranceInput = document.getElementById('sell-tolerance');
-  const toleranceStatus = document.getElementById('tolerance-status');
-
-  // 加载容错设置
-  async function loadToleranceSettings() {
-    try {
-      const result = await apiRequest('/api/trading/tolerance');
-      if (result.success && buyToleranceInput && sellToleranceInput) {
-        buyToleranceInput.value = result.settings.buyTolerance.toFixed(1);
-        sellToleranceInput.value = result.settings.sellTolerance.toFixed(1);
-        updateToleranceStatus('saved');
-      }
-    } catch (error) {
-      console.error('Failed to load tolerance settings:', error);
-      updateToleranceStatus('error');
-    }
-  }
-
-  // 更新状态显示
-  function updateToleranceStatus(status) {
-    if (!toleranceStatus) return;
-    
-    toleranceStatus.className = 'tolerance-status ' + status;
-    switch (status) {
-      case 'saved':
-        toleranceStatus.textContent = '已保存';
-        break;
-      case 'unsaved':
-        toleranceStatus.textContent = '未保存';
-        break;
-      case 'saving':
-        toleranceStatus.textContent = '保存中...';
-        break;
-      case 'error':
-        toleranceStatus.textContent = '加载失败';
-        break;
-    }
-  }
-
-  // 监听输入变化
-  function onToleranceChange() {
-    updateToleranceStatus('unsaved');
-  }
-
-  if (buyToleranceInput) buyToleranceInput.addEventListener('input', onToleranceChange);
-  if (sellToleranceInput) sellToleranceInput.addEventListener('input', onToleranceChange);
-
-  // 保存容错设置
-  toleranceForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const buyTolerance = buyToleranceInput ? parseFloat(buyToleranceInput.value) : NaN;
-    const sellTolerance = sellToleranceInput ? parseFloat(sellToleranceInput.value) : NaN;
-
-    // 输入验证
-    if (isNaN(buyTolerance) || isNaN(sellTolerance)) {
-      showNotification('容错值必须是有效数字', 'error');
-      return;
-    }
-
-    if (buyTolerance < 0.1 || buyTolerance > 100) {
-      showNotification('买入容错值必须在 0.1-100 之间', 'error');
-      return;
-    }
-
-    if (sellTolerance < 0.1 || sellTolerance > 100) {
-      showNotification('卖出容错值必须在 0.1-100 之间', 'error');
-      return;
-    }
-
-    updateToleranceStatus('saving');
-
-    try {
-      const result = await apiRequest('/api/trading/tolerance', {
-        method: 'POST',
-        body: JSON.stringify({ buyTolerance, sellTolerance })
-      });
-
-      if (result.success) {
-        updateToleranceStatus('saved');
-        showNotification('容错设置已保存', 'success');
-      } else {
-        updateToleranceStatus('unsaved');
-        showNotification(result.error || '保存失败', 'error');
-      }
-    } catch (error) {
-      console.error('Save tolerance settings failed:', error);
-      updateToleranceStatus('unsaved');
-      showNotification('保存失败', 'error');
-    }
-  });
-
-  document.getElementById('logout-btn')?.addEventListener('click', () => {
-    localStorage.removeItem('trading_token');
-    authToken = '';
-    showLogin();
-  });
-
-  document.getElementById('filter-type')?.addEventListener('change', () => loadTransactions(1));
-  document.getElementById('filter-sort')?.addEventListener('change', () => loadTransactions(1));
-
-  (window as any).loadTransactions = loadTransactions;
-  (window as any).deleteTransaction = deleteTransaction;
-  (window as any).toggleEditPanel = toggleEditPanel;
-  (window as any).toggleSellPanel = toggleSellPanel;
-  (window as any).saveEdit = saveEdit;
-  (window as any).confirmSell = confirmSell;
-  (window as any).updateSellPreview = updateSellPreview;
-  (window as any).deleteAlert = deleteAlert;
-
-  checkAuth();
-</script>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a
