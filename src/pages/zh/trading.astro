@@ -386,6 +386,15 @@ if (tokenCookie && JWT_SECRET) {
             </svg>
             交易记录
           </h2>
+          <button class="add-transaction-btn" id="add-transaction-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>增加记录</span>
+          </button>
+        </div>
+        <div class="filter-controls">
           <div class="filter-row">
             <select id="filter-type">
               <option value="">全部类型</option>
@@ -400,6 +409,75 @@ if (tokenCookie && JWT_SECRET) {
         </div>
         <div class="transactions-cards-container" id="transactions-list"></div>
         <div class="pagination" id="pagination"></div>
+      </div>
+
+      <div class="add-transaction-modal hidden" id="add-transaction-modal">
+        <div class="modal-backdrop" id="add-modal-backdrop"></div>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>新增交易记录</h3>
+            <button class="modal-close" id="add-modal-close">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <form id="add-transaction-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>交易类型</label>
+                <div class="type-toggle">
+                  <button type="button" class="type-btn active" data-type="buy">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    买入
+                  </button>
+                  <button type="button" class="type-btn" data-type="sell">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    卖出
+                  </button>
+                </div>
+                <input type="hidden" id="add-type" name="type" value="buy" />
+              </div>
+              <div class="form-group">
+                <label>交易时间</label>
+                <input type="datetime-local" id="add-date" name="date" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>买入价格 (元/克)</label>
+                <input type="number" id="add-buy-price" name="buyPrice" step="0.01" min="0" placeholder="0.00" required />
+              </div>
+              <div class="form-group">
+                <label>卖出价格 (元/克)</label>
+                <input type="number" id="add-sell-price" name="sellPrice" step="0.01" min="0" placeholder="0.00" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>数量 (克)</label>
+              <input type="number" id="add-quantity" name="quantity" step="0.001" min="0" placeholder="0.000" required />
+            </div>
+            <div class="form-group">
+              <label>交易平台</label>
+              <input type="text" id="add-platform" name="platform" placeholder="例如：银行纸黄金" />
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn-cancel" id="add-cancel-btn">取消</button>
+              <button type="submit" class="btn-submit">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                保存
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
 
       <div class="charts-section">
@@ -1357,6 +1435,301 @@ if (tokenCookie && JWT_SECRET) {
 
   .section-title svg {
     color: var(--color-primary);
+  }
+
+  .add-transaction-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    border: none;
+    border-radius: var(--radius-lg);
+    color: white;
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+  }
+
+  .add-transaction-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.4);
+  }
+
+  .add-transaction-btn:active {
+    transform: translateY(0);
+  }
+
+  .filter-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .add-transaction-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--space-4);
+  }
+
+  .add-transaction-modal.hidden {
+    display: none;
+  }
+
+  .modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    animation: fadeIn var(--duration-fast) var(--ease-default);
+  }
+
+  .modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-2xl);
+    animation: modalSlideIn var(--duration-normal) var(--ease-out);
+  }
+
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-5) var(--space-6);
+    border-bottom: 1px solid var(--border-primary);
+  }
+
+  .modal-header h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .modal-close:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  #add-transaction-form {
+    padding: var(--space-6);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+
+  #add-transaction-form .form-group {
+    margin-bottom: var(--space-4);
+  }
+
+  #add-transaction-form label {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+  }
+
+  #add-transaction-form input {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  #add-transaction-form input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+  }
+
+  #add-transaction-form input::placeholder {
+    color: var(--text-quaternary);
+  }
+
+  .type-toggle {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .type-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .type-btn:hover {
+    border-color: var(--text-tertiary);
+  }
+
+  .type-btn.active {
+    border-color: var(--color-primary);
+    background: rgba(0, 113, 227, 0.1);
+    color: var(--color-primary);
+  }
+
+  .type-btn[data-type="buy"].active {
+    border-color: #30d158;
+    background: rgba(48, 209, 88, 0.1);
+    color: #30d158;
+  }
+
+  .type-btn[data-type="sell"].active {
+    border-color: #ff375f;
+    background: rgba(255, 55, 95, 0.1);
+    color: #ff375f;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-primary);
+  }
+
+  .btn-cancel,
+  .btn-submit {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .btn-cancel {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-secondary);
+  }
+
+  .btn-cancel:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .btn-submit {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    border: none;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.4);
+  }
+
+  .btn-submit:active {
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    .add-transaction-btn span {
+      display: none;
+    }
+
+    .add-transaction-btn {
+      padding: var(--space-2) var(--space-3);
+    }
+
+    .filter-controls {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .filter-row {
+      width: 100%;
+    }
+
+    .filter-row select {
+      flex: 1;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+      max-width: 100%;
+      margin: var(--space-4);
+    }
+
+    .modal-header {
+      padding: var(--space-4);
+    }
+
+    #add-transaction-form {
+      padding: var(--space-4);
+    }
   }
 
   .filter-row {
