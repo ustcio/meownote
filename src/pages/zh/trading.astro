@@ -1,52 +1,13 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
+const lang = 'zh';
+
+// Note: Static build doesn't support server-side auth check
+// Authentication is handled client-side via trading_token cookie
+// isAuthenticated is always false on server, determined client-side
+
 const API_BASE = 'https://api.ustc.dev';
-const JWT_SECRET = import.meta.env.JWT_SECRET;
-
-let isAuthenticated = false;
-let authUser = null;
-
-const cookieHeader = Astro.request.headers.get('Cookie') || '';
-const cookies = cookieHeader.split(';').map(c => c.trim());
-const tokenCookie = cookies.find(c => c.startsWith('trading_token='));
-
-if (tokenCookie && JWT_SECRET) {
-  const token = tokenCookie.substring('trading_token='.length);
-  
-  try {
-    const parts = token.split('.');
-    if (parts.length === 3) {
-      const [header, body, sig] = parts;
-      const payload = JSON.parse(atob(body));
-      
-      if (payload.exp && payload.exp > Date.now()) {
-        const key = await crypto.subtle.importKey(
-          'raw',
-          new TextEncoder().encode(JWT_SECRET),
-          { name: 'HMAC', hash: 'SHA-256' },
-          false,
-          ['verify']
-        );
-        
-        const signatureBuffer = Uint8Array.from(atob(sig), c => c.charCodeAt(0));
-        const isValid = await crypto.subtle.verify(
-          'HMAC',
-          key,
-          signatureBuffer,
-          new TextEncoder().encode(`${header}.${body}`)
-        );
-        
-        if (isValid) {
-          isAuthenticated = true;
-          authUser = payload;
-        }
-      }
-    }
-  } catch (e) {
-    isAuthenticated = false;
-  }
-}
 ---
 
 <Layout 
@@ -54,7 +15,6 @@ if (tokenCookie && JWT_SECRET) {
   description="黄金交易管理与收益分析"
 >
   <section class="trading" id="trading-app">
-    {!isAuthenticated && (
     <div class="trading-login" id="login-section">
       <div class="login-card">
         <div class="login-icon">
@@ -109,10 +69,8 @@ if (tokenCookie && JWT_SECRET) {
         </form>
       </div>
     </div>
-    )}
 
-    {isAuthenticated && (
-    <div class="trading-dashboard" id="dashboard-section">
+    <div class="trading-dashboard hidden" id="dashboard-section">
       <div class="dashboard-header">
         <div class="header-left">
           <h1 class="dashboard-title">黄金交易管理</h1>
@@ -510,7 +468,6 @@ if (tokenCookie && JWT_SECRET) {
         </div>
       </div>
     </div>
-    )}
   </section>
 </Layout>
 
@@ -2855,9 +2812,23 @@ if (tokenCookie && JWT_SECRET) {
   }
 </style>
 
-<script define:vars={{ isAuthenticated }}>
+<script>
   const API_BASE = 'https://api.ustc.dev';
-  const serverAuthenticated = isAuthenticated;
+  const lang = 'zh';
+
+  // Client-side authentication check via cookie
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
+  function hasValidToken() {
+    return !!getCookie('trading_token');
+  }
+
+  const isClientAuthenticated = hasValidToken();
 
   const loginSection = document.getElementById('login-section');
   const dashboardSection = document.getElementById('dashboard-section');
@@ -2868,6 +2839,17 @@ if (tokenCookie && JWT_SECRET) {
 
   let currentPage = 1;
   let totalPages = 1;
+
+  function showLogin() {
+    loginSection?.classList.remove('hidden');
+    dashboardSection?.classList.add('hidden');
+  }
+
+  function showDashboard() {
+    loginSection?.classList.add('hidden');
+    dashboardSection?.classList.remove('hidden');
+    loadDashboard();
+  }
 
   function formatCurrency(value) {
     const num = parseFloat(value) || 0;
@@ -2962,17 +2944,6 @@ if (tokenCookie && JWT_SECRET) {
         window.location.reload();
       }
     });
-  }
-
-  function showLogin() {
-    loginSection?.classList.remove('hidden');
-    dashboardSection?.classList.add('hidden');
-  }
-
-  function showDashboard() {
-    loginSection?.classList.add('hidden');
-    dashboardSection?.classList.remove('hidden');
-    loadDashboard();
   }
 
   async function loadDashboard() {
@@ -3448,4 +3419,713 @@ if (tokenCookie && JWT_SECRET) {
               <button class="tx-action-btn delete" onclick="deleteTransaction(${t.id})">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                <span>删除</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Add event listeners to inputs
+    document.querySelectorAll('.tx-inline-edit').forEach(input => {
+      input.addEventListener('blur', handleInputBlur);
+      input.addEventListener('keydown', handleInputKeydown);
+    });
+  }
+
+  function formatDateTimeLocal(dateStr) {
+    const date = new Date(dateStr);
+    return date.toISOString().slice(0, 16);
+  }
+
+  function startInlineEdit(id, field) {
+    // If already editing another card, save it first
+    if (editingRows.size > 0 && !editingRows.has(id)) {
+      const currentEditingId = Array.from(editingRows.keys())[0];
+      saveInlineEdit(currentEditingId);
+    }
+    
+    editingRows.set(id, field);
+    // Reload current page to show edit mode
+    loadTransactions(currentPage);
+    
+    // Focus the input after render
+    setTimeout(() => {
+      const input = document.querySelector(`.tx-card[data-id="${id}"] .tx-inline-edit[data-field="${field}"]`);
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 10);
+  }
+
+  function handleInputBlur(e) {
+    const input = e.target;
+    const id = parseInt(input.dataset.id);
+    const field = input.dataset.field;
+    const value = input.value;
+    
+    // Store the edited value
+    if (!editedValues.has(id)) {
+      editedValues.set(id, {});
+    }
+    editedValues.get(id)[field] = value;
+  }
+
+  function handleInputKeydown(e) {
+    const input = e.target;
+    const id = parseInt(input.dataset.id);
+    
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveInlineEdit(id);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelInlineEdit(id);
+    }
+  }
+
+  function cancelInlineEdit(id) {
+    editingRows.delete(id);
+    editedValues.delete(id);
+    loadTransactions(currentPage);
+  }
+
+  async function saveInlineEdit(id) {
+    const card = document.querySelector(`.tx-card[data-id="${id}"]`);
+    if (!card) return;
+
+    const inputs = card.querySelectorAll('.tx-inline-edit');
+    const updates = { id };
+    
+    inputs.forEach(input => {
+      const field = input.dataset.field;
+      const value = input.value;
+      
+      if (field === 'created_at') {
+        updates.created_at = value;
+      } else if (field === 'buy_price') {
+        updates.buy_price = value ? parseFloat(value) : null;
+      } else if (field === 'buy_qty') {
+        updates.buy_qty = value ? parseFloat(value) : null;
+      } else if (field === 'sell_price') {
+        updates.sell_price = value ? parseFloat(value) : null;
+      } else if (field === 'sell_qty') {
+        updates.sell_qty = value ? parseFloat(value) : null;
+      } else if (field === 'profit') {
+        updates.profit = value ? parseFloat(value) : null;
+      } else if (field === 'platform') {
+        updates.platform = value || null;
+      }
+    });
+
+    // Show loading state on save button
+    const saveBtn = card.querySelector('.tx-action-btn.save');
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<svg class="spinner" width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg><span>保存中</span>`;
+    }
+
+    try {
+      const result = await apiRequest('/api/trading/transaction', {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      });
+
+      if (result.success) {
+        editingRows.delete(id);
+        editedValues.delete(id);
+        
+        // Update local data and refresh display
+        await loadTransactions(currentPage);
+        
+        // Sync profit updates to summary
+        if (updates.profit !== undefined) {
+          await syncProfitToSummary();
+        }
+        
+        // Reload stats to reflect changes
+        await loadStats();
+      } else {
+        alert(result.error || '保存失败');
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg><span>保存</span>`;
+        }
+      }
+    } catch (error) {
+      console.error('Save failed:', error);
+      alert('保存失败');
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg><span>保存</span>`;
+      }
+    }
+  }
+
+  async function syncProfitToSummary() {
+    // Trigger stats reload to update profit summary
+    await loadStats();
+  }
+
+  function openDeleteModal(id) {
+    pendingDeleteId = id;
+    const modal = document.getElementById('delete-confirm-modal');
+    modal?.classList.remove('hidden');
+  }
+
+  function closeDeleteModal() {
+    pendingDeleteId = null;
+    const modal = document.getElementById('delete-confirm-modal');
+    modal?.classList.add('hidden');
+  }
+
+  async function confirmDelete() {
+    if (!pendingDeleteId) return;
+    
+    const confirmBtn = document.getElementById('delete-confirm-btn');
+    if (confirmBtn) {
+      (confirmBtn as HTMLButtonElement).disabled = true;
+      confirmBtn.innerHTML = `<span class="loading-spinner" style="width: 16px; height: 16px; border-width: 2px;"></span>`;
+    }
+
+    try {
+      const result = await apiRequest(`/api/trading/transaction?id=${pendingDeleteId}`, { method: 'DELETE' });
+      if (result.success) {
+        closeDeleteModal();
+        loadDashboard();
+      } else {
+        alert(result.error || '删除失败');
+      }
+    } catch (error) {
+      console.error('Delete failed:', error);
+      alert('删除失败');
+    } finally {
+      if (confirmBtn) {
+        (confirmBtn as HTMLButtonElement).disabled = false;
+        confirmBtn.textContent = '删除';
+      }
+    }
+  }
+
+  let currentEditTransaction = null;
+
+  async function openEditModal(id) {
+    try {
+      const result = await apiRequest(`/api/trading/transactions?page=1&limit=100`);
+      if (result.success && result.transactions) {
+        currentEditTransaction = result.transactions.find(t => t.id === id);
+        if (currentEditTransaction) {
+          const t = currentEditTransaction;
+          const isBuy = t.type === 'buy';
+          
+          (document.getElementById('edit-tx-id') as HTMLInputElement).value = String(t.id);
+          (document.getElementById('edit-tx-type') as HTMLInputElement).value = t.type;
+          
+          const date = new Date(t.created_at);
+          (document.getElementById('edit-tx-date') as HTMLInputElement).value = date.toISOString().slice(0, 16);
+          
+          if (isBuy) {
+            (document.getElementById('edit-tx-buy-price') as HTMLInputElement).value = String(t.price);
+            (document.getElementById('edit-tx-buy-qty') as HTMLInputElement).value = String(t.quantity);
+            (document.getElementById('edit-tx-sell-price') as HTMLInputElement).value = '';
+            (document.getElementById('edit-tx-sell-qty') as HTMLInputElement).value = '';
+          } else {
+            (document.getElementById('edit-tx-buy-price') as HTMLInputElement).value = String(t.original_buy_price || t.price);
+            (document.getElementById('edit-tx-buy-qty') as HTMLInputElement).value = String(t.original_quantity || t.quantity);
+            (document.getElementById('edit-tx-sell-price') as HTMLInputElement).value = String(t.actual_sell_price || t.price);
+            (document.getElementById('edit-tx-sell-qty') as HTMLInputElement).value = String(t.quantity);
+          }
+          (document.getElementById('edit-tx-platform') as HTMLInputElement).value = t.platform || '';
+          
+          const modal = document.getElementById('edit-transaction-modal');
+          modal?.classList.remove('hidden');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load transaction for edit:', error);
+    }
+  }
+
+  function closeEditModal() {
+    currentEditTransaction = null;
+    const modal = document.getElementById('edit-transaction-modal');
+    modal?.classList.add('hidden');
+  }
+
+  async function saveTransactionEdit(e) {
+    e.preventDefault();
+    
+    const id = (document.getElementById('edit-tx-id') as HTMLInputElement).value;
+    const type = (document.getElementById('edit-tx-type') as HTMLInputElement).value;
+    const date = (document.getElementById('edit-tx-date') as HTMLInputElement).value;
+    const buyPrice = parseFloat((document.getElementById('edit-tx-buy-price') as HTMLInputElement).value) || 0;
+    const buyQty = parseFloat((document.getElementById('edit-tx-buy-qty') as HTMLInputElement).value) || 0;
+    const sellPrice = parseFloat((document.getElementById('edit-tx-sell-price') as HTMLInputElement).value) || 0;
+    const sellQty = parseFloat((document.getElementById('edit-tx-sell-qty') as HTMLInputElement).value) || 0;
+    const platform = (document.getElementById('edit-tx-platform') as HTMLInputElement).value;
+
+    const submitBtn = document.querySelector('.edit-form-btn.save') as HTMLButtonElement;
+    const originalContent = submitBtn?.innerHTML;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span class="loading-spinner" style="width: 16px; height: 16px; border-width: 2px;"></span>`;
+    }
+
+    try {
+      const payload = {
+        date: new Date(date).toISOString(),
+        platform
+      };
+
+      if (type === 'buy') {
+        payload.price = buyPrice;
+        payload.quantity = buyQty;
+      } else {
+        payload.price = buyPrice;
+        payload.quantity = sellQty;
+        payload.actualSellPrice = sellPrice;
+      }
+
+      const result = await apiRequest(`/api/trading/transaction?id=${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      });
+
+      if (result.success) {
+        closeEditModal();
+        loadDashboard();
+      } else {
+        alert(result.error || '修改失败');
+      }
+    } catch (error) {
+      console.error('Save edit failed:', error);
+      alert('修改失败');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalContent;
+      }
+    }
+  }
+
+  function renderPagination(pagination) {
+    const container = document.getElementById('pagination');
+    if (!container) return;
+
+    currentPage = pagination.page;
+    totalPages = pagination.totalPages;
+
+    if (totalPages <= 1) {
+      container.innerHTML = '';
+      return;
+    }
+
+    let html = '';
+    
+    html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="loadTransactions(${currentPage - 1})">上一页</button>`;
+    
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        html += `<button class="${i === currentPage ? 'active' : ''}" onclick="loadTransactions(${i})">${i}</button>`;
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        html += '<span>...</span>';
+      }
+    }
+
+    html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="loadTransactions(${currentPage + 1})">下一页</button>`;
+
+    container.innerHTML = html;
+  }
+
+  async function loadAlerts() {
+    try {
+      const result = await apiRequest('/api/trading/alerts');
+      if (result.success) {
+        renderAlerts(result.alerts);
+      }
+    } catch (error) {
+      console.error('Failed to load alerts:', error);
+    }
+  }
+
+  function renderAlerts(alerts) {
+    const list = document.getElementById('alert-list');
+    if (!list) return;
+
+    if (!alerts?.length) {
+      list.innerHTML = '';
+      return;
+    }
+
+    list.innerHTML = alerts.map(a => `
+      <div class="alert-item" data-id="${a.id}">
+        <div class="alert-info">
+          <span class="alert-type ${a.alert_type}">${a.alert_type === 'buy' ? '买' : '卖'}</span>
+          <span>¥${a.target_price}/g</span>
+        </div>
+        <button class="delete-alert" onclick="deleteAlert(${a.id})">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    `).join('');
+  }
+
+  async function deleteTransaction(id) {
+    if (!confirm('确定删除此交易记录？')) return;
+
+    try {
+      const result = await apiRequest(`/api/trading/transaction?id=${id}`, { method: 'DELETE' });
+      if (result.success) {
+        loadDashboard();
+      } else {
+        alert(result.error || '删除失败');
+      }
+    } catch (error) {
+      console.error('Delete failed:', error);
+      alert('删除失败');
+    }
+  }
+
+  document.getElementById('add-transaction-btn')?.addEventListener('click', () => {
+    const modal = document.getElementById('add-transaction-modal');
+    modal?.classList.remove('hidden');
+    document.getElementById('add-date').value = new Date().toISOString().slice(0, 16);
+    document.getElementById('add-type').value = 'buy';
+    document.querySelectorAll('.type-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-type') === 'buy');
+    });
+    document.getElementById('add-buy-price').value = '';
+    document.getElementById('add-sell-price').value = '';
+    document.getElementById('add-quantity').value = '';
+    document.getElementById('add-platform').value = '';
+  });
+
+  document.getElementById('add-modal-close')?.addEventListener('click', () => {
+    document.getElementById('add-transaction-modal')?.classList.add('hidden');
+  });
+
+  document.getElementById('add-modal-backdrop')?.addEventListener('click', () => {
+    document.getElementById('add-transaction-modal')?.classList.add('hidden');
+  });
+
+  document.getElementById('add-cancel-btn')?.addEventListener('click', () => {
+    document.getElementById('add-transaction-modal')?.classList.add('hidden');
+  });
+
+  document.querySelectorAll('.type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.getAttribute('data-type');
+      document.getElementById('add-type').value = type;
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  document.getElementById('add-transaction-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const type = document.getElementById('add-type').value;
+    const date = document.getElementById('add-date').value;
+    const buyPrice = parseFloat(document.getElementById('add-buy-price').value);
+    const sellPrice = parseFloat(document.getElementById('add-sell-price').value) || 0;
+    const quantity = parseFloat(document.getElementById('add-quantity').value);
+    const platform = document.getElementById('add-platform').value;
+
+    if (!date || !buyPrice || !quantity) {
+      alert('请填写必填字段');
+      return;
+    }
+
+    const submitBtn = e.target.querySelector('.btn-submit');
+    const originalText = submitBtn?.innerHTML;
+    submitBtn.innerHTML = `<span class="loading-spinner" style="width: 16px; height: 16px;"></span>`;
+    (submitBtn as HTMLButtonElement).disabled = true;
+
+    try {
+      const payload = {
+        type,
+        date: new Date(date).toISOString(),
+        price: type === 'buy' ? buyPrice : sellPrice,
+        actual_sell_price: type === 'sell' ? sellPrice : undefined,
+        quantity,
+        platform
+      };
+
+      const result = await apiRequest('/api/trading/transaction', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+
+      if (result.success) {
+        document.getElementById('add-transaction-modal')?.classList.add('hidden');
+        loadDashboard();
+      } else {
+        alert(result.error || '保存失败');
+      }
+    } catch (error) {
+      console.error('Save transaction failed:', error);
+      alert('保存失败');
+    } finally {
+      submitBtn.innerHTML = originalText;
+      (submitBtn as HTMLButtonElement).disabled = false;
+    }
+  });
+
+  (window as any).addTransaction = async function(type, date, buyPrice, sellPrice, quantity, platform) {
+    try {
+      const payload = {
+        type,
+        date: new Date(date).toISOString(),
+        price: type === 'buy' ? buyPrice : sellPrice,
+        actual_sell_price: type === 'sell' ? sellPrice : undefined,
+        quantity,
+        platform
+      };
+
+      const result = await apiRequest('/api/trading/transaction', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+
+      return result;
+    } catch (error) {
+      console.error('Add transaction failed:', error);
+      return { success: false, error: 'Add transaction failed' };
+    }
+  };
+
+  async function deleteAlert(id) {
+    try {
+      const result = await apiRequest(`/api/trading/alert?id=${id}`, { method: 'DELETE' });
+      if (result.success) {
+        loadAlerts();
+      }
+    } catch (error) {
+      console.error('Delete alert failed:', error);
+    }
+  }
+
+  document.getElementById('trading-toggle-pwd')?.addEventListener('click', () => {
+    const input = document.getElementById('trading-password') as HTMLInputElement;
+    const btn = document.getElementById('trading-toggle-pwd');
+    const eyeOpen = btn?.querySelector('.eye-open');
+    const eyeClosed = btn?.querySelector('.eye-closed');
+
+    if (input?.type === 'password') {
+      input.type = 'text';
+      eyeOpen?.classList.add('hidden');
+      eyeClosed?.classList.remove('hidden');
+    } else {
+      input.type = 'password';
+      eyeOpen?.classList.remove('hidden');
+      eyeClosed?.classList.add('hidden');
+    }
+  });
+
+  loginForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('trading-login-btn');
+    const btnText = btn?.querySelector('.btn-text');
+    const btnLoading = btn?.querySelector('.btn-loading');
+
+    btnText?.classList.add('hidden');
+    btnLoading?.classList.remove('hidden');
+    (btn as HTMLButtonElement).disabled = true;
+
+    try {
+      const formData = new FormData(loginForm as HTMLFormElement);
+      const username = formData.get('username') as string;
+      const password = formData.get('password') as string;
+
+      if (!username || !password) {
+        alert('请输入用户名和密码');
+        return;
+      }
+
+      console.log('[Login] Attempting login for user:', username);
+      
+      const result = await apiRequest('/api/trading/login', {
+        method: 'POST',
+        body: JSON.stringify({ username, password })
+      });
+
+      console.log('[Login] API response:', result);
+
+      if (result.success) {
+        console.log('[Login] Login successful, showing dashboard...');
+        showDashboard();
+      } else {
+        const errorMsg = result.error || '登录失败';
+        console.error('[Login] Login failed:', errorMsg);
+        alert(errorMsg);
+      }
+    } catch (error) {
+      console.error('[Login] Exception:', error);
+      alert('登录请求失败，请检查网络连接');
+    } finally {
+      btnText?.classList.remove('hidden');
+      btnLoading?.classList.add('hidden');
+      (btn as HTMLButtonElement).disabled = false;
+    }
+  });
+
+  function updateBuyTotal() {
+    const price = parseFloat((document.getElementById('buy-price') as HTMLInputElement)?.value) || 0;
+    const quantity = parseFloat((document.getElementById('buy-quantity') as HTMLInputElement)?.value) || 0;
+    const total = price * quantity;
+    (document.getElementById('buy-total') as HTMLElement).textContent = formatCurrency(total);
+  }
+
+  function updateSellTotal() {
+    const price = parseFloat((document.getElementById('sell-price') as HTMLInputElement)?.value) || 0;
+    const quantity = parseFloat((document.getElementById('sell-quantity') as HTMLInputElement)?.value) || 0;
+    const total = price * quantity;
+    (document.getElementById('sell-total') as HTMLElement).textContent = formatCurrency(total);
+  }
+
+  document.getElementById('buy-price')?.addEventListener('input', updateBuyTotal);
+  document.getElementById('buy-quantity')?.addEventListener('input', updateBuyTotal);
+  document.getElementById('sell-price')?.addEventListener('input', updateSellTotal);
+  document.getElementById('sell-quantity')?.addEventListener('input', updateSellTotal);
+
+  buyForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const price = parseFloat((document.getElementById('buy-price') as HTMLInputElement)?.value);
+    const quantity = parseFloat((document.getElementById('buy-quantity') as HTMLInputElement)?.value);
+    const notes = (document.getElementById('buy-notes') as HTMLInputElement)?.value;
+
+    try {
+      const result = await apiRequest('/api/trading/buy', {
+        method: 'POST',
+        body: JSON.stringify({ price, quantity, notes })
+      });
+
+      if (result.success) {
+        (buyForm as HTMLFormElement).reset();
+        (document.getElementById('buy-total') as HTMLElement).textContent = '¥0.00';
+        loadDashboard();
+        alert('买入记录已保存');
+      } else {
+        alert(result.error || '保存失败');
+      }
+    } catch (error) {
+      console.error('Buy failed:', error);
+      alert('保存失败');
+    }
+  });
+
+  sellForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const price = parseFloat((document.getElementById('sell-price') as HTMLInputElement)?.value);
+    const quantity = parseFloat((document.getElementById('sell-quantity') as HTMLInputElement)?.value);
+    const notes = (document.getElementById('sell-notes') as HTMLInputElement)?.value;
+
+    try {
+      const result = await apiRequest('/api/trading/sell', {
+        method: 'POST',
+        body: JSON.stringify({ actualSellPrice: price, quantity, notes })
+      });
+
+      if (result.success) {
+        (sellForm as HTMLFormElement).reset();
+        (document.getElementById('sell-total') as HTMLElement).textContent = '¥0.00';
+        loadDashboard();
+        alert('卖出记录已保存');
+      } else {
+        alert(result.error || '保存失败');
+      }
+    } catch (error) {
+      console.error('Sell failed:', error);
+      alert('保存失败');
+    }
+  });
+
+  alertForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const alertType = (document.querySelector('input[name="alert-type"]:checked') as HTMLInputElement)?.value || 'buy';
+    const targetPrice = parseFloat((document.getElementById('alert-price') as HTMLInputElement)?.value);
+
+    if (!targetPrice) {
+      alert('请输入目标价格');
+      return;
+    }
+
+    try {
+      const result = await apiRequest('/api/trading/alert', {
+        method: 'POST',
+        body: JSON.stringify({ alertType, targetPrice })
+      });
+
+      if (result.success) {
+        (document.getElementById('alert-price') as HTMLInputElement).value = '';
+        loadAlerts();
+        alert('预警已设置');
+      } else {
+        alert(result.error || '设置预警失败');
+      }
+    } catch (error) {
+      console.error('Alert creation failed:', error);
+      alert('设置预警失败');
+    }
+  });
+
+  document.getElementById('logout-btn')?.addEventListener('click', async () => {
+    try {
+      await apiRequest('/api/trading/logout', { method: 'POST' });
+      window.location.reload();
+    } catch (error) {
+      window.location.reload();
+    }
+  });
+
+  document.querySelectorAll('.segment-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilterType = btn.getAttribute('data-value') || '';
+      loadTransactions(1);
+    });
+  });
+
+  document.getElementById('filter-sort')?.addEventListener('change', () => loadTransactions(1));
+
+  document.getElementById('delete-modal-backdrop')?.addEventListener('click', closeDeleteModal);
+  document.getElementById('delete-cancel-btn')?.addEventListener('click', closeDeleteModal);
+  document.getElementById('delete-confirm-btn')?.addEventListener('click', confirmDelete);
+
+  document.getElementById('edit-modal-backdrop')?.addEventListener('click', closeEditModal);
+  document.getElementById('edit-modal-close')?.addEventListener('click', closeEditModal);
+  document.getElementById('edit-cancel-btn')?.addEventListener('click', closeEditModal);
+  document.getElementById('edit-transaction-form')?.addEventListener('submit', saveTransactionEdit);
+
+  (window as any).loadTransactions = loadTransactions;
+  (window as any).openDeleteModal = openDeleteModal;
+  (window as any).openEditModal = openEditModal;
+  (window as any).deleteAlert = deleteAlert;
+  (window as any).startInlineEdit = startInlineEdit;
+  (window as any).saveInlineEdit = saveInlineEdit;
+  (window as any).cancelInlineEdit = cancelInlineEdit;
+
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', () => {
+    stopGoldPriceAutoRefresh();
+  });
+
+  // Initialize view based on client-side authentication status
+  if (isClientAuthenticated) {
+    showDashboard();
+  } else {
+    showLogin();
+  }
+</script>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a
