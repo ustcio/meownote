@@ -3091,7 +3091,12 @@ const API_BASE = 'https://api.ustc.dev';
       const formData = new FormData(loginForm as HTMLFormElement);
       const username = formData.get('username') as string;
       const password = formData.get('password') as string;
-      
+
+      if (!username || !password) {
+        alert(lang === 'zh' ? '请输入用户名和密码' : 'Please enter username and password');
+        return;
+      }
+
       const result = await apiRequest('/api/trading/login', {
         method: 'POST',
         body: JSON.stringify({ username, password })
@@ -3100,10 +3105,12 @@ const API_BASE = 'https://api.ustc.dev';
       if (result.success) {
         showDashboard();
       } else {
-        alert(result.error || 'Login failed');
+        const errorMsg = result.error || (lang === 'zh' ? '登录失败' : 'Login failed');
+        alert(errorMsg);
       }
     } catch (error) {
-      alert('Login failed');
+      console.error('Login error:', error);
+      alert(lang === 'zh' ? '登录请求失败，请检查网络连接' : 'Login request failed, please check network connection');
     } finally {
       btnText?.classList.remove('hidden');
       btnLoading?.classList.add('hidden');

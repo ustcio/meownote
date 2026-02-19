@@ -17,12 +17,46 @@
 // ================================================================================
 
 function getBeijingDate(date = new Date()) {
-  return date.toLocaleDateString('zh-CN', { 
+  return date.toLocaleDateString('zh-CN', {
     timeZone: 'Asia/Shanghai',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit'
   }).replace(/\//g, '-');
+}
+
+// ================================================================================
+// 初始化超级管理员账户
+// ================================================================================
+
+async function initializeSuperAdmin(env) {
+  try {
+    const username = 'YangHao';
+    const password = 'YangHao@Trading.com';
+
+    // 检查用户是否已存在
+    const existingUser = await env.DB.prepare(
+      'SELECT id FROM admin_users WHERE username = ?'
+    ).bind(username).first();
+
+    if (existingUser) {
+      console.log('[Init] Super admin user already exists');
+      return;
+    }
+
+    // 生成带salt的密码哈希
+    const passwordHash = await hashAdminPasswordWithSalt(password);
+
+    // 创建超级管理员用户
+    await env.DB.prepare(
+      `INSERT INTO admin_users (username, password_hash, role, created_at, last_login)
+       VALUES (?, ?, 'super_admin', datetime('now'), NULL)`
+    ).bind(username, passwordHash).run();
+
+    console.log('[Init] Super admin user created successfully');
+  } catch (error) {
+    console.error('[Init] Failed to initialize super admin:', error);
+  }
 }
 
 export default {
@@ -122,6 +156,7 @@ const ROUTES = {
   '/api/admin/upload/abort': { handler: handleUploadAbort },
   '/api/trading/login': { handler: handleTradingLogin },
   '/api/trading/logout': { handler: handleTradingLogout },
+  '/api/trading/init-admin': { handler: handleInitSuperAdmin },
   '/api/trading/verify': { handler: handleTradingVerify },
   '/api/trading/buy': { handler: handleBuyTransaction },
   '/api/trading/sell': { handler: handleSellTransaction },
@@ -4822,6 +4857,20 @@ async function hashAdminPassword(password) {
   return btoa(String.fromCharCode(...hashArray));
 }
 
+// 生成带salt的密码哈希（新格式）
+async function hashAdminPasswordWithSalt(password, salt = null) {
+  const encoder = new TextEncoder();
+  // 生成随机salt（如果没有提供）
+  const useSalt = salt || Array.from(crypto.getRandomValues(new Uint8Array(16)))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+  const data = encoder.encode(useSalt + password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return `${useSalt}:${hash}`;
+}
+
 // ================================================================================
 // 工具函数 - 管理员 JWT Token（增强验证）
 // ================================================================================
@@ -4959,7 +5008,7 @@ async function handleTradingLogin(request, env) {
 
   try {
     const { username, password } = await request.json();
-    
+
     if (!username || !password) {
       return jsonResponse({ success: false, error: 'Username and password are required' }, 400);
     }
@@ -4971,14 +5020,26 @@ async function handleTradingLogin(request, env) {
       return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
     }
 
-    const [salt, storedHash] = result.password_hash.split(':');
-    const encoder = new TextEncoder();
-    const data = encoder.encode(salt + password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    // 支持两种密码格式：salt:hash（新格式）和 base64（旧格式）
+    let isPasswordValid = false;
+    const passwordHash = result.password_hash;
 
-    if (hash !== storedHash) {
+    if (passwordHash.includes(':')) {
+      // 新格式: salt:hash
+      const [salt, storedHash] = passwordHash.split(':');
+      const encoder = new TextEncoder();
+      const data = encoder.encode(salt + password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      isPasswordValid = hash === storedHash;
+    } else {
+      // 旧格式: base64(SHA-256(password))
+      const inputHash = await hashAdminPassword(password);
+      isPasswordValid = inputHash === passwordHash;
+    }
+
+    if (!isPasswordValid) {
       return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
     }
 
@@ -5028,6 +5089,71 @@ async function handleTradingLogout(request, env) {
       'Set-Cookie': clearCookie
     }
   });
+}
+
+async function handleInitSuperAdmin(request, env) {
+  if (request.method !== 'POST') {
+    return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+  }
+
+  try {
+    const { secret } = await request.json();
+
+    // 验证初始化密钥（应该使用环境变量中的密钥）
+    const initSecret = env.INIT_SECRET || env.JWT_SECRET || 'default-init-secret';
+    if (secret !== initSecret) {
+      return jsonResponse({ success: false, error: 'Invalid initialization secret' }, 403);
+    }
+
+    const username = 'YangHao';
+    const password = 'YangHao@Trading.com';
+
+    // 检查用户是否已存在
+    const existingUser = await env.DB.prepare(
+      'SELECT id, password_hash FROM admin_users WHERE username = ?'
+    ).bind(username).first();
+
+    if (existingUser) {
+      // 如果用户存在但密码格式是旧的（不包含冒号），则更新密码
+      if (!existingUser.password_hash.includes(':')) {
+        const newPasswordHash = await hashAdminPasswordWithSalt(password);
+        await env.DB.prepare(
+          'UPDATE admin_users SET password_hash = ? WHERE id = ?'
+        ).bind(newPasswordHash, existingUser.id).run();
+
+        return jsonResponse({
+          success: true,
+          message: 'Super admin password updated to new format',
+          username
+        });
+      }
+
+      return jsonResponse({
+        success: true,
+        message: 'Super admin user already exists with valid password format',
+        username
+      });
+    }
+
+    // 生成带salt的密码哈希
+    const passwordHash = await hashAdminPasswordWithSalt(password);
+
+    // 创建超级管理员用户
+    await env.DB.prepare(
+      `INSERT INTO admin_users (username, password_hash, role, created_at, last_login)
+       VALUES (?, ?, 'super_admin', datetime('now'), NULL)`
+    ).bind(username, passwordHash).run();
+
+    return jsonResponse({
+      success: true,
+      message: 'Super admin user created successfully',
+      username,
+      password: 'YangHao@Trading.com'
+    });
+  } catch (error) {
+    console.error('[Init SuperAdmin Error]', error);
+    return jsonResponse({ success: false, error: 'Initialization failed: ' + error.message }, 500);
+  }
 }
 
 async function handleTradingVerify(request, env) {
