@@ -19,7 +19,7 @@
     }
     
     // Check for stored language preference
-    let storedLang: string | null = null;
+    let storedLang = null;
     try {
       storedLang = localStorage.getItem('preferred-lang');
     } catch (e) {
