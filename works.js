@@ -28,7 +28,7 @@ function getBeijingDate(date = new Date()) {
 export default {
   async fetch(request, env, ctx) {
     if (request.method === 'OPTIONS') {
-      return handleCORS();
+      return handleCORS(request);
     }
 
     const url = new URL(request.url);
@@ -56,11 +56,11 @@ export default {
         return await handleAdminFolderAction(request, env, path);
       }
 
-      return jsonResponse({ error: 'Not Found' }, 404);
+      return jsonResponse({ error: 'Not Found' }, 404, [], request);
       
     } catch (error) {
       console.error('Server Error:', error);
-      return jsonResponse({ error: 'Internal Server Error', message: error.message }, 500);
+      return jsonResponse({ error: 'Internal Server Error', message: error.message }, 500, [], request);
     }
   },
   
@@ -147,21 +147,35 @@ const ALLOWED_ORIGINS = [
   'http://localhost:4324',
 ];
 
-function handleCORS() {
+function handleCORS(request) {
+  const origin = request?.headers?.get('Origin') || '*';
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': allowedOrigin,
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Cache-Control',
+      'Access-Control-Allow-Credentials': 'true',
       'Access-Control-Max-Age': '86400',
     }
   });
 }
 
-function jsonResponse(data, status = 200, cookies = []) {
+function jsonResponse(data, status = 200, cookies = [], request = null) {
+  const origin = request?.headers?.get('Origin');
+  let allowedOrigin;
+  
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    allowedOrigin = origin;
+  } else {
+    allowedOrigin = ALLOWED_ORIGINS[0];
+  }
+  
   const headers = {
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Credentials': 'true',
   };
   if (cookies.length > 0) {
     headers['Set-Cookie'] = cookies.join(', ');
@@ -4687,21 +4701,21 @@ function formatDateForTrading(date) {
 
 async function handleTradingLogin(request, env) {
   if (request.method !== 'POST') {
-    return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+    return jsonResponse({ success: false, error: 'Method not allowed' }, 405, [], request);
   }
 
   try {
     const { username, password } = await request.json();
     
     if (!username || !password) {
-      return jsonResponse({ success: false, error: 'Username and password are required' }, 400);
+      return jsonResponse({ success: false, error: 'Username and password are required' }, 400, [], request);
     }
 
     const stmt = env.DB.prepare('SELECT * FROM admin_users WHERE username = ?');
     const result = await stmt.bind(username).first();
 
     if (!result) {
-      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
+      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401, [], request);
     }
 
     const [salt, storedHash] = result.password_hash.split(':');
@@ -4712,7 +4726,7 @@ async function handleTradingLogin(request, env) {
     const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
     if (hash !== storedHash) {
-      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
+      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401, [], request);
     }
 
     const secret = getJwtSecret(env);
@@ -4731,10 +4745,10 @@ async function handleTradingLogin(request, env) {
     return jsonResponse({
       success: true,
       user: { id: result.id, username: result.username, role: result.role }
-    }, 200, [cookieValue]);
+    }, 200, [cookieValue], request);
   } catch (error) {
     console.error('[Trading Login Error]', error);
-    return jsonResponse({ success: false, error: 'Login failed' }, 500);
+    return jsonResponse({ success: false, error: 'Login failed' }, 500, [], request);
   }
 }
 
