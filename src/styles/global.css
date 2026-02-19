@@ -21,11 +21,11 @@ html {
 
 /* Chinese font for zh language pages */
 html[lang="zh"] {
-  font-family: var(--font-chinese);
+  font-family: "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 }
 
 html[lang="zh"] body {
-  font-family: var(--font-chinese);
+  font-family: "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 }
 
 html[lang="zh"] h1,
@@ -34,7 +34,7 @@ html[lang="zh"] h3,
 html[lang="zh"] h4,
 html[lang="zh"] h5,
 html[lang="zh"] h6 {
-  font-family: var(--font-chinese);
+  font-family: "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 }
 
 html[lang="zh"] p,
@@ -46,7 +46,7 @@ html[lang="zh"] button,
 html[lang="zh"] input,
 html[lang="zh"] textarea,
 html[lang="zh"] select {
-  font-family: var(--font-chinese);
+  font-family: "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 }
 
 body {

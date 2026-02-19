@@ -70,9 +70,14 @@ const imageURL = new URL(image, Astro.site);
     <!-- Local Fonts (optimized for China) -->
     <link rel="stylesheet" href="/fonts/fonts.css" />
     
+    <!-- HarmonyOS Sans SC for Chinese (CDN) -->
+    <link rel="stylesheet" href="https://cdn.hmos.dongs.xyz/css/harmonyos_sans_sc.css" />
+    
     <!-- Resource Hints for Performance -->
     <link rel="dns-prefetch" href="https://api.ustc.dev" />
     <link rel="preconnect" href="https://api.ustc.dev" crossorigin />
+    <link rel="dns-prefetch" href="https://cdn.hmos.dongs.xyz" />
+    <link rel="preconnect" href="https://cdn.hmos.dongs.xyz" crossorigin />
 
     <!-- Preload Critical Resources -->
     <link rel="preload" href="/fonts/poppins-v20-latin-regular.woff2" as="font" type="font/woff2" crossorigin />
