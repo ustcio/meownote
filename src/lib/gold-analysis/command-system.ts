@@ -66,7 +66,7 @@ export class CommandSystem {
   generateCommand(signal: TradingSignal, userConfig?: Partial<TradingCommand>): TradingCommand {
     const baseCommand: TradingCommand = {
       id: `cmd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      type: signal.type,
+      type: signal.type === 'HOLD' ? 'BUY' : signal.type,
       priceRange: {
         min: signal.targetPrice ? signal.targetPrice * 0.995 : signal.currentPrice * 0.995,
         max: signal.targetPrice ? signal.targetPrice * 1.005 : signal.currentPrice * 1.005,
@@ -286,7 +286,6 @@ export class CommandSystem {
     const stopLossMatch = text.match(/(?:止损|stop.?loss)[：:]?\s*¥?(\d+(?:\.\d+)?)/i);
     if (stopLossMatch) {
       extracted.conditions = {
-        ...extracted.conditions,
         triggerPrice: extracted.priceRange?.min || 0,
         stopLoss: parseFloat(stopLossMatch[1]),
       };
@@ -294,11 +293,8 @@ export class CommandSystem {
 
     // 提取止盈
     const takeProfitMatch = text.match(/(?:止盈|take.?profit)[：:]?\s*¥?(\d+(?:\.\d+)?)/i);
-    if (takeProfitMatch) {
-      extracted.conditions = {
-        ...extracted.conditions,
-        takeProfit: parseFloat(takeProfitMatch[1]),
-      };
+    if (takeProfitMatch && extracted.conditions) {
+      extracted.conditions.takeProfit = parseFloat(takeProfitMatch[1]);
     }
 
     return extracted;

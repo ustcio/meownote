@@ -107,7 +107,7 @@ export interface TradingSignal {
   stopLoss?: number;
   takeProfit?: number;
   confidence: number;
-  urgency: 'immediate' | 'high' | 'normal' | 'low';
+  urgency: 'immediate' | 'normal' | 'low';
   reasoning: string;
   riskLevel: 'low' | 'medium' | 'high';
   suggestedPosition: number; // 建议仓位比例 0-1

@@ -140,7 +140,7 @@ export class MonitoringSystem {
     const scores = Object.values(newStatus.components).map(c =>
       c.status === 'up' ? 100 : c.status === 'degraded' ? 50 : 0
     );
-    newStatus.overallScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+    newStatus.overallScore = scores.reduce((a: number, b: number) => a + b, 0) / scores.length;
 
     // 确定整体状态
     if (newStatus.overallScore < 50) {
@@ -385,7 +385,14 @@ export class MonitoringSystem {
    */
   getDashboardData(): {
     health: HealthStatus;
-    performance: ReturnType<typeof this.getPerformanceReport>;
+    performance: {
+      avgDataLatency: number;
+      avgAnalysisLatency: number;
+      avgSuccessRate: number;
+      totalErrors: number;
+      peakLatency: number;
+      latencyTrend: 'improving' | 'stable' | 'degrading';
+    };
     recentMetrics: MetricsHistory[];
     uptime: number;
   } {

@@ -681,7 +681,7 @@ ${indicators}
           stopLoss,
           takeProfit,
           confidence: ensemblePrediction.avgConfidence,
-          urgency: ensemblePrediction.avgConfidence > 0.75 ? 'high' : 'normal',
+          urgency: ensemblePrediction.avgConfidence > 0.75 ? 'immediate' : 'normal',
           reasoning: this.generateSignalReasoning(trendAnalysis, predictions, technicalAnalysis),
           riskLevel: this.assessRiskLevel(trendAnalysis, predictions),
           suggestedPosition: this.calculateSuggestedPosition(ensemblePrediction.avgConfidence),

@@ -371,9 +371,6 @@ export function resetCircuitBreaker(serviceName: string): void {
   }
 }
 
-// 导出错误类型枚举
-export { ErrorType, CircuitBreakerState };
-
 // 默认导出
 export default {
   fetchWithRetry,
