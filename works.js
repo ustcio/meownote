@@ -25,6 +25,200 @@ function getBeijingDate(date = new Date()) {
   }).replace(/\//g, '-');
 }
 
+function getBeijingHour() {
+  return parseInt(new Date().toLocaleString('zh-CN', {
+    timeZone: 'Asia/Shanghai',
+    hour: '2-digit',
+    hour12: false
+  }));
+}
+
+function calculateReliability(domestic, international, sgeData, intlData) {
+  let reliability = 0.5;
+  
+  if (sgeData && sgeData.price > 0) reliability += 0.25;
+  if (intlData && intlData.price > 0) reliability += 0.15;
+  if (domestic && domestic.price > 0) reliability += 0.05;
+  if (international && international.price > 0) reliability += 0.05;
+  
+  return Math.min(reliability, 1.0);
+}
+
+const SGE_ALERT_CONFIG = {
+  WINDOW_SIZE: 5,
+  SHORT_TERM_POINTS: 12,
+  VOL_WINDOW: 20,
+  BASE_THRESHOLD_YUAN: 2.0,
+  MIN_THRESHOLD_YUAN: 1.2,
+  INSTANT_ABS_THRESHOLD: 1.8,
+  INSTANT_PERCENT_THRESHOLD: 0.25,
+  INSTANT_CONFIRM_TICKS: 2,
+  ATR_PERIOD: 14,
+  ATR_MULTIPLIER: 1.8,
+  ZSCORE_THRESHOLD: 2.8,
+  EMA_FAST: 3,
+  EMA_SLOW: 8,
+  BASE_COOLDOWN_SECONDS: 120,
+  MAX_COOLDOWN_SECONDS: 600,
+  DEDUP_WINDOW_SECONDS: 180
+};
+
+function getSessionMultiplier(beijingHour) {
+  if (beijingHour >= 20 || beijingHour <= 2) return 1.25;
+  if (beijingHour >= 13 && beijingHour <= 15) return 1.1;
+  return 1.0;
+}
+
+function getSession(beijingHour) {
+  if (beijingHour >= 20 || beijingHour <= 2) return 'night';
+  if (beijingHour >= 13 && beijingHour <= 15) return 'afternoon';
+  return 'asian_morning';
+}
+
+function calculateStd(values) {
+  if (!values || values.length === 0) return 0;
+  const mean = values.reduce((a, b) => a + b, 0) / values.length;
+  const squaredDiffs = values.map(v => Math.pow(v - mean, 2));
+  return Math.sqrt(squaredDiffs.reduce((a, b) => a + b, 0) / values.length);
+}
+
+function calculateMean(values) {
+  if (!values || values.length === 0) return 0;
+  return values.reduce((a, b) => a + b, 0) / values.length;
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function calculateEMA(prev, price, period) {
+  const k = 2 / (period + 1);
+  return price * k + prev * (1 - k);
+}
+
+function calculateATR(prices, period) {
+  if (!prices || prices.length < 2) return 0;
+  
+  const trValues = [];
+  for (let i = 1; i < prices.length; i++) {
+    const high = prices[i];
+    const low = prices[i];
+    const prevClose = prices[i - 1];
+    const tr = Math.max(
+      high - low,
+      Math.abs(high - prevClose),
+      Math.abs(low - prevClose)
+    );
+    trValues.push(tr);
+  }
+  
+  if (trValues.length < period) return calculateMean(trValues);
+  return calculateMean(trValues.slice(-period));
+}
+
+function calculateZScore(price, mean, std) {
+  if (!std || std === 0) return 0;
+  return (price - mean) / std;
+}
+
+async function getLevel3State(env) {
+  try {
+    const stateJson = await env?.GOLD_PRICE_CACHE?.get('level3_state');
+    if (stateJson) {
+      return JSON.parse(stateJson);
+    }
+  } catch (e) {
+    console.error('[Level3] Failed to get state:', e);
+  }
+  return {
+    emaFast: 0,
+    emaSlow: 0,
+    lastPrice: 0,
+    instantConfirmCount: 0,
+    priceHistory: []
+  };
+}
+
+async function saveLevel3State(env, state) {
+  try {
+    await env?.GOLD_PRICE_CACHE?.put('level3_state', JSON.stringify(state), {
+      expirationTtl: 86400
+    });
+  } catch (e) {
+    console.error('[Level3] Failed to save state:', e);
+  }
+}
+
+function fuseSignals(price, prevPrice, state, atr, rollingStd, rollingMean) {
+  const signals = [];
+  let score = 0;
+  const timestamp = Date.now();
+
+  const absChange = Math.abs(price - prevPrice);
+  const pctChange = prevPrice > 0 ? (absChange / prevPrice) * 100 : 0;
+  const instantTriggered = absChange >= SGE_ALERT_CONFIG.INSTANT_ABS_THRESHOLD || 
+                           pctChange >= SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD;
+  
+  signals.push({
+    type: 'instant_move',
+    triggered: instantTriggered,
+    strength: instantTriggered ? 1 : 0,
+    direction: price > prevPrice ? 'up' : 'down'
+  });
+  if (instantTriggered) score += 1;
+
+  const atrSignal = atr > 0 && absChange >= SGE_ALERT_CONFIG.ATR_MULTIPLIER * atr;
+  signals.push({
+    type: 'atr_breakout',
+    triggered: atrSignal,
+    strength: atrSignal ? 2 : 0,
+    direction: price > prevPrice ? 'up' : 'down'
+  });
+  if (atrSignal) score += 2;
+
+  const zscore = calculateZScore(price, rollingMean, rollingStd);
+  const zSignal = Math.abs(zscore) >= SGE_ALERT_CONFIG.ZSCORE_THRESHOLD;
+  signals.push({
+    type: 'zscore_anomaly',
+    triggered: zSignal,
+    strength: zSignal ? 2 : 0,
+    direction: zscore > 0 ? 'up' : 'down',
+    value: zscore
+  });
+  if (zSignal) score += 2;
+
+  const emaDiff = state.emaFast - state.emaSlow;
+  const emaThreshold = rollingStd * 0.5;
+  const emaConfirmed = Math.abs(emaDiff) > emaThreshold;
+  signals.push({
+    type: 'ema_cross',
+    triggered: emaConfirmed,
+    strength: emaConfirmed ? 1 : 0,
+    direction: emaDiff > 0 ? 'up' : 'down'
+  });
+  if (emaConfirmed) score += 1;
+
+  const triggeredSignals = signals.filter(s => s.triggered);
+  const upVotes = triggeredSignals.filter(s => s.direction === 'up').length;
+  const downVotes = triggeredSignals.filter(s => s.direction === 'down').length;
+  
+  let direction = 'neutral';
+  if (upVotes > downVotes) direction = 'up';
+  else if (downVotes > upVotes) direction = 'down';
+
+  const confidence = triggeredSignals.length > 0 
+    ? triggeredSignals.reduce((sum, s) => sum + s.strength, 0) / 6 
+    : 0;
+
+  return {
+    score,
+    triggered: score >= 3,
+    signals,
+    direction,
+    confidence: clamp(confidence, 0, 1)
+  };
+}
+
 // ================================================================================
 // 初始化超级管理员账户
 // ================================================================================
@@ -167,6 +361,8 @@ const ROUTES = {
   '/api/trading/alert': { handler: handleAlertOperation },
   '/api/trading/notifications': { handler: handleGetNotifications },
   '/api/trading/tolerance': { handler: handleToleranceSettings },
+  '/api/trading/alerts/history': { handler: handleAlertHistory },
+  '/api/trading/market/status': { handler: handleMarketStatus },
 };
 
 // ================================================================================
@@ -1207,9 +1403,12 @@ async function performCrawl(env) {
     const result = {
       success: true,
       timestamp: Date.now(),
+      date: getBeijingDate(),
       exchangeRate: exchangeRate,
       domestic: domestic,
-      international: international
+      international: international,
+      source: `${domestic.source}+${international.source}`,
+      reliability: calculateReliability(domestic, international, sgeData, intlData)
     };
     
     // 更新缓存
@@ -3337,9 +3536,61 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
     return;
   }
 
-  const alerts = [];
   const now = Date.now();
-  // 即时：用「不含当前点」的历史，对比上一时刻 vs 当前价
+  const beijingHour = getBeijingHour();
+  const session = getSession(beijingHour);
+  const sessionMultiplier = getSessionMultiplier(beijingHour);
+  
+  const priceHistory = history?.domestic || [];
+  const rollingStd = calculateStd(priceHistory.slice(-SGE_ALERT_CONFIG.VOL_WINDOW));
+  const rollingMean = calculateMean(priceHistory.slice(-SGE_ALERT_CONFIG.VOL_WINDOW));
+  
+  const prevPrice = priceHistory.length > 0 ? priceHistory[priceHistory.length - 1] : domestic?.price;
+  const currentPrice = domestic?.price;
+  
+  let state = await getLevel3State(env);
+  
+  if (state.lastPrice === 0) {
+    state.emaFast = currentPrice;
+    state.emaSlow = currentPrice;
+  } else {
+    state.emaFast = calculateEMA(state.emaFast, currentPrice, SGE_ALERT_CONFIG.EMA_FAST);
+    state.emaSlow = calculateEMA(state.emaSlow, currentPrice, SGE_ALERT_CONFIG.EMA_SLOW);
+  }
+  state.lastPrice = currentPrice;
+  
+  state.priceHistory.push(currentPrice);
+  if (state.priceHistory.length > SGE_ALERT_CONFIG.VOL_WINDOW) {
+    state.priceHistory = state.priceHistory.slice(-SGE_ALERT_CONFIG.VOL_WINDOW);
+  }
+  
+  const atr = calculateATR(state.priceHistory, SGE_ALERT_CONFIG.ATR_PERIOD);
+  
+  const fusionResult = fuseSignals(currentPrice, prevPrice, state, atr, rollingStd, rollingMean);
+  
+  await saveLevel3State(env, state);
+  
+  console.log(`[Level3] Score: ${fusionResult.score}, Direction: ${fusionResult.direction}, Confidence: ${(fusionResult.confidence * 100).toFixed(1)}%`);
+  console.log(`[Level3] EMA Fast/Slow: ${state.emaFast.toFixed(2)}/${state.emaSlow.toFixed(2)}, ATR: ${atr.toFixed(2)}, Std: ${rollingStd.toFixed(2)}`);
+
+  const alerts = [];
+  
+  if (fusionResult.triggered) {
+    const sessionText = session === 'night' ? '夜盘' : session === 'afternoon' ? '午盘' : '早盘';
+    const directionText = fusionResult.direction === 'up' ? '上涨' : fusionResult.direction === 'down' ? '下跌' : '震荡';
+    
+    alerts.push({
+      type: 'level3_fusion',
+      name: `Level 3 预警 (${sessionText})`,
+      price: currentPrice,
+      unit: '元/克',
+      direction: fusionResult.direction,
+      score: fusionResult.score,
+      confidence: fusionResult.confidence,
+      message: `信号融合评分 ${fusionResult.score}，检测到${directionText}信号，置信度 ${(fusionResult.confidence * 100).toFixed(1)}%`
+    });
+  }
+  
   const domesticInstant = analyzeInstantChange(history?.domestic || [], domestic?.price, ALERT_CONFIG.INSTANT_CHANGE_THRESHOLD, ALERT_CONFIG.INSTANT_CHANGE_PERCENT);
   const internationalInstant = analyzeInstantChange(history?.international || [], international?.price, ALERT_CONFIG.INSTANT_CHANGE_THRESHOLD, ALERT_CONFIG.INSTANT_CHANGE_PERCENT);
   
@@ -3419,18 +3670,33 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
     return;
   }
   
-  const hasInstantAlert = alerts.some(a => a.type === 'instant');
-  const cooldownMs = hasInstantAlert 
-    ? ALERT_CONFIG.COOLDOWN_MINUTES * 30 * 1000 
-    : ALERT_CONFIG.COOLDOWN_MINUTES * 60 * 1000;
+  const volFactor = domestic?.price ? rollingStd / domestic.price : 0;
+  
+  let dynamicCooldown = SGE_ALERT_CONFIG.BASE_COOLDOWN_SECONDS * (1 + 5 * volFactor) * sessionMultiplier;
+  dynamicCooldown = clamp(dynamicCooldown, SGE_ALERT_CONFIG.BASE_COOLDOWN_SECONDS, SGE_ALERT_CONFIG.MAX_COOLDOWN_SECONDS);
+  
+  const cooldownMs = dynamicCooldown * 1000;
+  
+  console.log(`[Gold Alert] Dynamic cooldown: ${dynamicCooldown.toFixed(0)}s (volFactor: ${volFactor.toFixed(4)}, session: ${session})`);
   
   if (env?.GOLD_PRICE_CACHE) {
     try {
       const lastAlert = await env.GOLD_PRICE_CACHE.get('last_alert');
+      const lastAlertDirection = await env.GOLD_PRICE_CACHE.get('last_alert_direction');
+      
       if (lastAlert) {
         const lastAlertTime = parseInt(lastAlert);
-        if (now - lastAlertTime < cooldownMs) {
-          console.log('[Gold Alert] Alert already sent within cooldown period, skipping');
+        const timeSinceLastAlert = (now - lastAlertTime) / 1000;
+        
+        if (timeSinceLastAlert < dynamicCooldown) {
+          const alertDirection = alerts.some(a => a.direction === 'down') ? 'down' : 'up';
+          
+          if (lastAlertDirection === alertDirection && timeSinceLastAlert < SGE_ALERT_CONFIG.DEDUP_WINDOW_SECONDS) {
+            console.log(`[Gold Alert] Duplicate alert suppressed (same direction: ${alertDirection}, ${timeSinceLastAlert.toFixed(0)}s ago)`);
+            return;
+          }
+          
+          console.log(`[Gold Alert] Alert already sent ${timeSinceLastAlert.toFixed(0)}s ago, cooldown: ${dynamicCooldown.toFixed(0)}s`);
           return;
         }
       }
@@ -3439,6 +3705,7 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
     }
   }
   
+  const hasInstantAlert = alerts.some(a => a.type === 'instant');
   console.log('[Gold Alert] Price movement detected!', alerts.length, 'alerts, instant:', hasInstantAlert);
 
   const result = await sendUnifiedNotification(alerts, env, {
@@ -3447,7 +3714,41 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   });
   
   if (result.success && env?.GOLD_PRICE_CACHE) {
-    await env.GOLD_PRICE_CACHE.put('last_alert', String(now), { expirationTtl: 300 });
+    await env.GOLD_PRICE_CACHE.put('last_alert', String(now), { expirationTtl: 600 });
+    const alertDirection = alerts.some(a => a.direction === 'down') ? 'down' : 'up';
+    await env.GOLD_PRICE_CACHE.put('last_alert_direction', alertDirection, { expirationTtl: 600 });
+    
+    const historyJson = await env.GOLD_PRICE_CACHE.get('level3_alert_history');
+    let historyList = historyJson ? JSON.parse(historyJson) : [];
+    
+    historyList.push({
+      timestamp: now,
+      session,
+      direction: alertDirection,
+      price: domestic?.price,
+      alerts: alerts.map(a => ({
+        type: a.type,
+        name: a.name,
+        message: a.message,
+        score: a.score,
+        confidence: a.confidence
+      })),
+      level3Metadata: {
+        emaFast: state.emaFast,
+        emaSlow: state.emaSlow,
+        atr,
+        rollingStd,
+        signalScore: fusionResult?.score || 0
+      }
+    });
+    
+    if (historyList.length > 1000) {
+      historyList = historyList.slice(-1000);
+    }
+    
+    await env.GOLD_PRICE_CACHE.put('level3_alert_history', JSON.stringify(historyList), {
+      expirationTtl: 86400 * 7
+    });
   }
 
   console.log('[Gold Alert] Unified notification result:', {
@@ -5501,6 +5802,77 @@ async function handleTransactionOperation(request, env) {
   }
 
   return jsonResponse({ success: false, error: 'Method not allowed' }, 405, request);
+}
+
+async function handleAlertHistory(request, env) {
+  const authResult = await verifyAdminAuth(request, env);
+  if (!authResult.success) {
+    return jsonResponse({ success: false, error: authResult.message }, 401, request);
+  }
+
+  try {
+    const url = new URL(request.url);
+    const limit = parseInt(url.searchParams.get('limit') || '100');
+    const session = url.searchParams.get('session');
+    
+    const level3History = await env?.GOLD_PRICE_CACHE?.get('level3_alert_history');
+    let alerts = level3History ? JSON.parse(level3History) : [];
+    
+    if (session) {
+      alerts = alerts.filter(a => a.session === session);
+    }
+    
+    alerts = alerts.slice(-limit);
+    
+    return jsonResponse({
+      success: true,
+      alerts,
+      total: alerts.length,
+      timestamp: Date.now()
+    }, 200, request);
+  } catch (error) {
+    console.error('[Alert History Error]', error);
+    return jsonResponse({ success: false, error: 'Failed to fetch alert history' }, 500, request);
+  }
+}
+
+async function handleMarketStatus(request, env) {
+  try {
+    const state = await getLevel3State(env);
+    const beijingHour = getBeijingHour();
+    const session = getSession(beijingHour);
+    
+    const latestData = await env?.GOLD_PRICE_CACHE?.get('latest');
+    const priceData = latestData ? JSON.parse(latestData) : null;
+    
+    const priceHistory = state.priceHistory || [];
+    const rollingStd = calculateStd(priceHistory);
+    const rollingMean = calculateMean(priceHistory);
+    
+    const trend = state.emaFast > state.emaSlow ? 'up' : state.emaFast < state.emaSlow ? 'down' : 'neutral';
+    
+    return jsonResponse({
+      success: true,
+      status: {
+        price: priceData?.domestic?.price || null,
+        timestamp: priceData?.timestamp || null,
+        session,
+        beijingHour,
+        trend,
+        volatility: rollingStd,
+        emaFast: state.emaFast,
+        emaSlow: state.emaSlow,
+        atr: calculateATR(priceHistory, SGE_ALERT_CONFIG.ATR_PERIOD),
+        dynamicThreshold: Math.max(
+          SGE_ALERT_CONFIG.MIN_THRESHOLD_YUAN,
+          SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN + 2.2 * rollingStd
+        ) * getSessionMultiplier(beijingHour)
+      }
+    }, 200, request);
+  } catch (error) {
+    console.error('[Market Status Error]', error);
+    return jsonResponse({ success: false, error: 'Failed to fetch market status' }, 500, request);
+  }
 }
 
 async function handleGetTransactionStats(request, env) {
