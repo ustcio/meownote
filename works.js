@@ -112,8 +112,8 @@ export default {
         console.log('[Cron] Starting gold price trend analysis...');
         ctx.waitUntil(scheduledGoldAnalysis(env, ctx));
         break;
-      case '0 0 * * *': // 每日零点清理预设价格任务
-        console.log('[Cron] Starting daily price alerts cleanup...');
+      case '59 15 * * *': // UTC 15:59 = 北京时间 23:59 清理所有价格预警
+        console.log('[Cron] Starting daily price alerts cleanup at 23:59 Beijing time...');
         ctx.waitUntil(cleanupDailyPriceAlerts(env));
         break;
       default:
@@ -3243,7 +3243,7 @@ async function sendRegistrationEmail(username, email, ip, env) {
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0b; color: #fafafa;">
             <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #00d4ff; margin: 0;">USTC DEV</h1>
+              <h1 style="color: #00d4ff; margin: 0;">USTC Dev</h1>
               <p style="color: #71717a; margin-top: 5px;">新用户注册通知</p>
             </div>
             <div style="background: #18181b; padding: 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
@@ -4896,8 +4896,9 @@ async function hashAdminPasswordWithSalt(password, salt = null) {
 
 async function createAdminToken(payload, secret) {
   const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-  const exp = Date.now() + 7 * 24 * 60 * 60 * 1000;
-  const body = btoa(JSON.stringify({ ...payload, exp }));
+  const exp = Date.now() + 2 * 60 * 60 * 1000;
+  const iat = Date.now();
+  const body = btoa(JSON.stringify({ ...payload, exp, iat }));
 
   const key = await crypto.subtle.importKey(
     'raw',
@@ -5079,9 +5080,10 @@ async function handleTradingLogin(request, env) {
     const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : '*';
     
     const isProduction = origin && origin.includes('ustc.dev');
+    const maxAge = 2 * 60 * 60;
     const cookieValue = isProduction 
-      ? `trading_token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400`
-      : `trading_token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`;
+      ? `trading_token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`
+      : `trading_token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`;
 
     console.log('[Trading Login] Success for user:', username);
 
@@ -5865,12 +5867,17 @@ async function checkAndSendTradingAlerts(currentPrice, env) {
       }
 
       if (proximityAlert) {
-        await queueNotification(env, {
-          type: 'push',
-          title: `价格接近提醒`,
-          message: `金价已接近预设${alert.alert_type === 'buy' ? '买入' : '卖出'}价格，当前 ¥${currentPrice.toFixed(2)}/克，目标 ¥${alert.target_price.toFixed(2)}/克`,
-          data: JSON.stringify({ alertId: alert.id, currentPrice, targetPrice: alert.target_price, tolerance, proximity: true })
-        });
+        console.log(`[Trading Alert] Proximity alert for ${alert.alert_type} at ¥${currentPrice.toFixed(2)}/g, target ¥${alert.target_price.toFixed(2)}/g`);
+        
+        const proximityAlertData = {
+          ...alert,
+          currentPrice,
+          triggeredAt: new Date().toISOString(),
+          proximity: true
+        };
+        
+        const notificationResults = await sendTradingMultiChannelAlert(proximityAlertData, env);
+        console.log('[Trading Alert] Proximity notification results:', notificationResults);
       }
 
       if (shouldTrigger) {
@@ -5891,12 +5898,7 @@ async function checkAndSendTradingAlerts(currentPrice, env) {
 
         triggeredAlerts.push(triggeredAlert);
 
-        await queueNotification(env, {
-          type: 'push',
-          title: alert.alert_type === 'buy' ? '买入提醒' : '卖出提醒',
-          message: `金价已达到预设${alert.alert_type === 'buy' ? '买入' : '卖出'}价格 ¥${alert.target_price}/克`,
-          data: JSON.stringify({ alertId: alert.id, currentPrice, targetPrice: alert.target_price })
-        });
+        console.log(`[Trading Alert] Triggering ${alert.alert_type} alert at ¥${currentPrice.toFixed(2)}/g, target ¥${alert.target_price.toFixed(2)}/g`);
 
         const notificationResults = await sendTradingMultiChannelAlert(triggeredAlert, env);
         
@@ -5952,10 +5954,16 @@ async function sendTradingAlertEmail(alert, env) {
   }
   
   const isBuy = alert.alert_type === 'buy';
-  const emoji = isBuy ? '🟢' : '🔴';
-  const title = isBuy ? '买入提醒' : '卖出提醒';
+  const isProximity = alert.proximity === true;
+  const emoji = isProximity ? '⚠️' : (isBuy ? '🟢' : '🔴');
+  const title = isProximity ? '价格接近提醒' : (isBuy ? '买入提醒' : '卖出提醒');
   const action = isBuy ? '买入' : '卖出';
   const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+  const headerColor = isProximity ? '#ff9f0a' : (isBuy ? '#30d158' : '#ff375f');
+  
+  const messageText = isProximity 
+    ? `金价已接近您预设的${action}价格，请注意市场动态。`
+    : `金价已达到您预设的${action}价格，请及时关注市场动态。`;
   
   const htmlContent = `
 <!DOCTYPE html>
@@ -5965,10 +5973,10 @@ async function sendTradingAlertEmail(alert, env) {
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: ${isBuy ? '#30d158' : '#ff375f'}; color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; }
+    .header { background: ${headerColor}; color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; }
     .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
     .price-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .price { font-size: 32px; font-weight: bold; color: ${isBuy ? '#30d158' : '#ff375f'}; }
+    .price { font-size: 32px; font-weight: bold; color: ${headerColor}; }
     .label { color: #666; font-size: 14px; margin-bottom: 8px; }
     .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 12px; text-align: center; }
   </style>
@@ -5980,7 +5988,7 @@ async function sendTradingAlertEmail(alert, env) {
     </div>
     <div class="content">
       <p>您好，</p>
-      <p>金价已达到您预设的${action}价格，请及时关注市场动态。</p>
+      <p>${messageText}</p>
       
       <div class="price-box">
         <div class="label">目标${action}价格</div>
@@ -6037,12 +6045,18 @@ async function sendTradingFeishuAlert(alert, env) {
   }
   
   const isBuy = alert.alert_type === 'buy';
-  const emoji = isBuy ? '🟢' : '🔴';
-  const title = isBuy ? '买入提醒' : '卖出提醒';
+  const isProximity = alert.proximity === true;
+  const emoji = isProximity ? '⚠️' : (isBuy ? '🟢' : '🔴');
+  const title = isProximity ? '价格接近提醒' : (isBuy ? '买入提醒' : '卖出提醒');
   const action = isBuy ? '买入' : '卖出';
   const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+  const templateColor = isProximity ? 'orange' : (isBuy ? 'green' : 'red');
   
-  const content = `**${emoji} ${title}**\n\n> 时间：${timeStr}\n\n**目标${action}价格：** ¥${alert.target_price}/克\n**当前价格：** ¥${alert.currentPrice}/克\n\n💡 金价已达到您预设的${action}价格，请及时关注市场动态。\n\n[查看交易详情](https://ustc.dev/trading/)`;
+  const messageText = isProximity 
+    ? `💡 金价已接近您预设的${action}价格，请注意市场动态。`
+    : `💡 金价已达到您预设的${action}价格，请及时关注市场动态。`;
+  
+  const content = `**${emoji} ${title}**\n\n> 时间：${timeStr}\n\n**目标${action}价格：** ¥${alert.target_price}/克\n**当前价格：** ¥${alert.currentPrice}/克\n\n${messageText}\n\n[查看交易详情](https://ustc.dev/trading/)`;
   
   try {
     const response = await fetch(FEISHU_WEBHOOK, {
@@ -6053,7 +6067,7 @@ async function sendTradingFeishuAlert(alert, env) {
         card: {
           header: {
             title: { tag: 'plain_text', content: `${emoji} ${title}` },
-            template: isBuy ? 'green' : 'red'
+            template: templateColor
           },
           elements: [
             { tag: 'markdown', content: content }
@@ -6081,12 +6095,17 @@ async function sendTradingMeoWAlert(alert, env) {
   const MEOW_USER_ID = env.MEOW_USER_ID || '5bf48882';
 
   const isBuy = alert.alert_type === 'buy';
-  const emoji = isBuy ? '🟢' : '🔴';
-  const title = isBuy ? '买入提醒' : '卖出提醒';
+  const isProximity = alert.proximity === true;
+  const emoji = isProximity ? '⚠️' : (isBuy ? '🟢' : '🔴');
+  const title = isProximity ? '价格接近提醒' : (isBuy ? '买入提醒' : '卖出提醒');
   const action = isBuy ? '买入' : '卖出';
   const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
 
-  const msgContent = `时间: ${timeStr}\n\n目标${action}价格: ¥${alert.target_price}/克\n当前价格: ¥${alert.currentPrice}/克\n\n金价已达到您预设的${action}价格，请及时关注市场动态。`;
+  const messageText = isProximity 
+    ? `金价已接近您预设的${action}价格，请注意市场动态。`
+    : `金价已达到您预设的${action}价格，请及时关注市场动态。`;
+
+  const msgContent = `时间: ${timeStr}\n\n目标${action}价格: ¥${alert.target_price}/克\n当前价格: ¥${alert.currentPrice}/克\n\n${messageText}`;
 
   const meowUrl = `https://api.chuckfang.com/${MEOW_USER_ID}`;
 
@@ -6688,30 +6707,10 @@ async function cleanupDailyPriceAlerts(env) {
   console.log('[Cleanup] Starting daily price alerts cleanup at:', new Date().toISOString());
   
   try {
-    // 删除所有已触发或已取消的预警
-    const deleteTriggeredStmt = env.DB.prepare(`
-      DELETE FROM price_alerts 
-      WHERE is_triggered = 1 OR is_active = 0
-    `);
-    const triggeredResult = await deleteTriggeredStmt.run();
-    console.log('[Cleanup] Deleted triggered/inactive alerts:', triggeredResult.meta?.changes || 0);
+    const deleteAllStmt = env.DB.prepare(`DELETE FROM price_alerts`);
+    const result = await deleteAllStmt.run();
+    console.log('[Cleanup] Deleted all price alerts:', result.meta?.changes || 0);
     
-    // 重置所有活跃预警的触发状态（保留但重置状态）
-    const resetActiveStmt = env.DB.prepare(`
-      UPDATE price_alerts 
-      SET is_triggered = 0, 
-          triggered_at = NULL, 
-          current_price = NULL,
-          notification_sent = 0,
-          email_sent = 0,
-          feishu_sent = 0,
-          meow_sent = 0
-      WHERE is_active = 1
-    `);
-    const resetResult = await resetActiveStmt.run();
-    console.log('[Cleanup] Reset active alerts:', resetResult.meta?.changes || 0);
-    
-    // 发送清理完成通知
     await sendMultiChannelNotification(env, {
       title: '🧹 每日预警清理完成',
       emailSubject: '🧹 每日预警清理完成 - ' + new Date().toLocaleDateString('zh-CN'),

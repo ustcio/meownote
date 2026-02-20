@@ -1,9 +1,9 @@
 ---
 import Icon from '@components/ui/Icon.astro';
 
-const months = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const days = ['日', '一', '二', '三', '四', '五', '六'];
+const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const today = new Date();
 const currentYear = today.getFullYear();
@@ -79,7 +79,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
                     
                     const dateStr = cellDate.toISOString().split('T')[0];
                     const displayDateStr = cellDate.toLocaleDateString(
-                      'zh-CN',
+                      'en-US',
                       { month: 'short', day: 'numeric', year: 'numeric' }
                     );
                     

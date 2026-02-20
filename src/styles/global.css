@@ -16,7 +16,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* Chinese font for zh language pages */
@@ -47,6 +47,20 @@ html[lang="zh"] input,
 html[lang="zh"] textarea,
 html[lang="zh"] select {
   font-family: "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+}
+
+/* Numbers use SF Pro Display globally */
+.number,
+[data-number],
+.stat-value,
+.price,
+.amount,
+.quantity,
+.tx-data-value,
+.stat-card .value {
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
 }
 
 body {
