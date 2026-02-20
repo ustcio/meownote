@@ -23,7 +23,7 @@
   /* ==================== Typography Scale ==================== */
   
   /* Font Families */
-  --font-brand: "Limelight", cursive;
+  --font-brand: "Zalando Sans Expanded", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-sans: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;

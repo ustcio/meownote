@@ -15,7 +15,7 @@ export const ui = {
     'nav.about': '关于',
     'nav.profile': '个人资料',
     'hero.title': '构建未来，从',
-    'hero.gradient': 'AGI 开始',
+    'hero.gradient': 'USTC DEV',
     'hero.subtitle': '为开发者和创作者打造的强大AI工具和智能助手。',
     'hero.cta.primary': '开始使用',
     'hero.cta.secondary': '了解更多',

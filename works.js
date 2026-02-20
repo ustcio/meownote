@@ -1,5 +1,5 @@
 // ================================================================================
-// AGI Era Backend API - 重构优化版
+// USTC DEV Backend API - 重构优化版
 // ================================================================================
 // 
 // 功能模块：
@@ -3237,13 +3237,13 @@ async function sendRegistrationEmail(username, email, ip, env) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'AGI Era <noreply@ustc.dev>',
+        from: 'USTC DEV <noreply@ustc.dev>',
         to: ['metanext@foxmail.com'],
-        subject: '🎉 AGI Era 新用户注册通知',
+        subject: '🎉 USTC DEV 新用户注册通知',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0b; color: #fafafa;">
             <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #00d4ff; margin: 0;">AGI Era</h1>
+              <h1 style="color: #00d4ff; margin: 0;">USTC DEV</h1>
               <p style="color: #71717a; margin-top: 5px;">新用户注册通知</p>
             </div>
             <div style="background: #18181b; padding: 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
@@ -3285,24 +3285,24 @@ async function sendRegistrationEmail(username, email, ip, env) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'AGI Era <noreply@ustc.dev>',
+        from: 'USTC DEV <noreply@ustc.dev>',
         to: [sanitizedEmail],
-        subject: '🚀 欢迎加入 AGI Era',
+        subject: '🚀 欢迎加入 USTC DEV',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0b; color: #fafafa;">
             <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #00d4ff; margin: 0;">AGI Era</h1>
+              <h1 style="color: #00d4ff; margin: 0;">USTC DEV</h1>
               <p style="color: #71717a; margin-top: 5px;">欢迎加入我们</p>
             </div>
             <div style="background: #18181b; padding: 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
               <p style="color: #fafafa; font-size: 16px; margin: 0 0 16px 0;">Hi ${sanitizedUsername}，</p>
-              <p style="color: #a1a1aa; line-height: 1.6; margin: 0 0 16px 0;">感谢你注册 AGI Era！你的账号已创建成功。</p>
-              <p style="color: #a1a1aa; line-height: 1.6; margin: 0 0 24px 0;">现在你可以使用我们的 AI 助手、探索最新的 AGI 技术资讯，开启你的智能时代之旅。</p>
+              <p style="color: #a1a1aa; line-height: 1.6; margin: 0 0 16px 0;">感谢你注册 USTC DEV！你的账号已创建成功。</p>
+              <p style="color: #a1a1aa; line-height: 1.6; margin: 0 0 24px 0;">现在你可以使用我们的 AI 助手、探索最新的技术资讯，开启你的智能时代之旅。</p>
               <div style="text-align: center;">
                 <a href="https://ustc.dev" style="display: inline-block; background: linear-gradient(135deg, #00d4ff, #0099cc); color: #000; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">开始探索</a>
               </div>
             </div>
-            <p style="text-align: center; color: #71717a; font-size: 12px; margin-top: 24px;">如果你没有注册过 AGI Era，请忽略此邮件</p>
+            <p style="text-align: center; color: #71717a; font-size: 12px; margin-top: 24px;">如果你没有注册过 USTC DEV，请忽略此邮件</p>
           </div>
         `,
       }),
@@ -3583,7 +3583,7 @@ async function sendAlertEmail(alerts, env) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'AGI Era <noreply@ustc.dev>',
+        from: 'USTC DEV <noreply@ustc.dev>',
         to: ['metanext@foxmail.com'],
         subject: `${alertEmoji} ${alertTitle} - ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`,
         html: `
