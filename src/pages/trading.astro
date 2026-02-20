@@ -3579,7 +3579,6 @@ const API_BASE = 'https://api.ustc.dev';
         console.error(`[API] HTTP Error ${response.status}:`, errorText);
         
         if (response.status === 401) {
-          showLogin();
           return { success: false, error: '登录已过期，请重新登录', needLogin: true };
         }
         
@@ -3752,7 +3751,7 @@ const API_BASE = 'https://api.ustc.dev';
         const errorMsg = result.error || 'Unknown error';
         console.error('[loadStats] API returned error:', errorMsg);
         
-        if (errorMsg.includes('登录') || errorMsg.includes('Token') || errorMsg.includes('auth')) {
+        if (result.needLogin || errorMsg.includes('登录') || errorMsg.includes('Token') || errorMsg.includes('auth')) {
           console.warn('[loadStats] Authentication error, redirecting to login...');
           showLogin();
           return;
@@ -4025,6 +4024,9 @@ const API_BASE = 'https://api.ustc.dev';
         totalTransactionCount = result.pagination?.total || 0;
         renderTransactions(result.transactions, page);
         renderPagination(result.pagination);
+      } else if (result.needLogin) {
+        showLogin();
+        return;
       } else {
         const errorMsg = '加载失败';
         if (list) {
@@ -4181,7 +4183,7 @@ const API_BASE = 'https://api.ustc.dev';
               <span class="tx-data-label">平台</span>
               ${isEditing ? 
                 `<input type="text" class="tx-inline-edit" value="${platform !== '-' ? platform : ''}" data-field="platform" data-id="${t.id}" placeholder="平台">` :
-                `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'platform')}" title="${platform}">${platform}</span>`
+                `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'platform')" title="${platform}">${platform}</span>`
               }
             </div>
           </div>
@@ -4229,10 +4231,15 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   function startInlineEdit(id, field) {
-    // If already editing another card, save it first
+    // If already editing another card, cancel it first instead of saving
     if (editingRows.size > 0 && !editingRows.has(id)) {
       const currentEditingId = Array.from(editingRows.keys())[0];
-      saveInlineEdit(currentEditingId);
+      cancelInlineEdit(currentEditingId);
+    }
+    
+    // If clicking on the same card that's already in edit mode, do nothing
+    if (editingRows.has(id)) {
+      return;
     }
     
     editingRows.set(id, field);
@@ -4533,6 +4540,9 @@ const API_BASE = 'https://api.ustc.dev';
       const result = await apiRequest('/api/trading/alerts');
       if (result.success) {
         renderAlerts(result.alerts);
+      } else if (result.needLogin) {
+        showLogin();
+        return;
       }
     } catch (error) {
       console.error('Failed to load alerts:', error);
