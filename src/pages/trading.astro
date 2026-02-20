@@ -3484,16 +3484,21 @@ const API_BASE = 'https://api.ustc.dev';
 <script>
   const API_BASE = 'https://api.ustc.dev';
 
-  // Client-side authentication check via cookie
-  function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
+  // Client-side authentication check via localStorage (统一使用 localStorage)
+  function getTradingToken() {
+    return localStorage.getItem('trading_token');
   }
 
   function hasValidToken() {
-    return !!getCookie('trading_token');
+    return !!getTradingToken();
+  }
+
+  function setTradingToken(token) {
+    if (token) {
+      localStorage.setItem('trading_token', token);
+    } else {
+      localStorage.removeItem('trading_token');
+    }
   }
 
   async function verifyAuth() {
@@ -3562,14 +3567,22 @@ const API_BASE = 'https://api.ustc.dev';
     const url = `${API_BASE}${endpoint}`;
     console.log(`[API] ${options.method || 'GET'} ${url}`);
     
+    // 获取 token 并添加到请求头
+    const token = getTradingToken();
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     try {
       const response = await fetch(url, {
         ...options,
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers
-        }
+        headers
       });
       
       console.log(`[API] Response status: ${response.status}`);
@@ -4756,7 +4769,11 @@ const API_BASE = 'https://api.ustc.dev';
       console.log('[Login] API response:', result);
 
       if (result.success) {
-        console.log('[Login] Login successful, showing dashboard...');
+        console.log('[Login] Login successful, saving token and showing dashboard...');
+        // 保存 token 到 localStorage
+        if (result.token) {
+          setTradingToken(result.token);
+        }
         showDashboard();
       } else {
         const errorMsg = result.error || '登录失败';
@@ -4879,8 +4896,11 @@ const API_BASE = 'https://api.ustc.dev';
   document.getElementById('logout-btn')?.addEventListener('click', async () => {
     try {
       await apiRequest('/api/trading/logout', { method: 'POST' });
-      window.location.reload();
     } catch (error) {
+      console.error('[Logout] Error:', error);
+    } finally {
+      // 清除本地 token 并刷新页面
+      setTradingToken(null);
       window.location.reload();
     }
   });
