@@ -48,31 +48,31 @@ const SGE_ALERT_CONFIG = Object.freeze({
   WINDOW_SIZE: 5,
   SHORT_TERM_POINTS: 12,
   VOL_WINDOW: 20,
-  BASE_THRESHOLD_YUAN: 2.0,
-  MIN_THRESHOLD_YUAN: 1.2,
-  INSTANT_ABS_THRESHOLD: 1.8,
-  INSTANT_PERCENT_THRESHOLD: 0.25,
-  INSTANT_CONFIRM_TICKS: 2,
+  BASE_THRESHOLD_YUAN: 1.5,
+  MIN_THRESHOLD_YUAN: 1.0,
+  INSTANT_ABS_THRESHOLD: 1.2,
+  INSTANT_PERCENT_THRESHOLD: 0.15,
+  INSTANT_CONFIRM_TICKS: 1,
   ATR_PERIOD: 14,
-  ATR_MULTIPLIER: 1.8,
-  ZSCORE_THRESHOLD: 2.5,
+  ATR_MULTIPLIER: 1.5,
+  ZSCORE_THRESHOLD: 2.0,
   EMA_FAST: 3,
   EMA_SLOW: 8,
-  BASE_COOLDOWN_SECONDS: 120,
-  MAX_COOLDOWN_SECONDS: 600,
-  DEDUP_WINDOW_SECONDS: 180,
+  BASE_COOLDOWN_SECONDS: 45,
+  MAX_COOLDOWN_SECONDS: 120,
+  DEDUP_WINDOW_SECONDS: 90,
   STATE_CACHE_TTL: 86400,
   TOLERANCE_MIN: 0.5,
   TOLERANCE_MAX: 10.0,
   QUIET_HOURS_START: 1,
   QUIET_HOURS_END: 6,
-  TICK_NOISE_FILTER: 0.25,
-  MICRO_VOL_THRESHOLD: 0.6,
-  NIGHT_SCORE_BOOST: 1,
-  TREND_CONFIRM_BARS: 3,
-  MIN_DIRECTION_CONSENSUS: 0.55,
-  EMA_THRESHOLD_FACTOR: 0.8,
-  EMA_MIN_PERCENT: 0.00015
+  TICK_NOISE_FILTER: 0.15,
+  MICRO_VOL_THRESHOLD: 0.8,
+  NIGHT_SCORE_BOOST: 0,
+  TREND_CONFIRM_BARS: 2,
+  MIN_DIRECTION_CONSENSUS: 0.5,
+  EMA_THRESHOLD_FACTOR: 0.6,
+  EMA_MIN_PERCENT: 0.0001
 });
 
 function getSessionMultiplier(beijingHour) {
@@ -2101,27 +2101,6 @@ async function cleanupOldData(env) {
   }
 }
 
-// 清理过期数据
-async function cleanupOldData(env) {
-  if (!env?.DB) return;
-  
-  try {
-    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    
-    const alertResult = await env.DB.prepare(
-      'DELETE FROM alert_history WHERE timestamp < ?'
-    ).bind(sevenDaysAgo).run();
-    
-    const aiResult = await env.DB.prepare(
-      'DELETE FROM ai_analysis_results WHERE timestamp < ?'
-    ).bind(sevenDaysAgo).run();
-    
-    console.log(`[Cleanup] Deleted ${alertResult.changes || 0} old alerts, ${aiResult.changes || 0} old AI results`);
-  } catch (error) {
-    console.log('[Cleanup] Cleanup skipped:', error.message);
-  }
-}
-
 // 提交数据到AI智能分析系统
 async function submitDataToAIAnalysis(env, crawlResult) {
   try {
@@ -3917,15 +3896,18 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
       if (lastAlert) {
         const lastAlertTime = parseInt(lastAlert);
         const timeSinceLastAlert = (now - lastAlertTime) / 1000;
+        const alertDirection = alerts.some(a => a.direction === 'down') ? 'down' : 'up';
         
-        if (timeSinceLastAlert < dynamicCooldown) {
-          const alertDirection = alerts.some(a => a.direction === 'down') ? 'down' : 'up';
-          
-          if (lastAlertDirection === alertDirection && timeSinceLastAlert < SGE_ALERT_CONFIG.DEDUP_WINDOW_SECONDS) {
+        // 方向改变时立即允许通知（暴涨→暴跌 或 暴跌→暴涨）
+        if (lastAlertDirection && lastAlertDirection !== alertDirection) {
+          console.log(`[Gold Alert] Direction changed from ${lastAlertDirection} to ${alertDirection}, allowing immediate notification`);
+        }
+        // 方向相同：检查冷却期和去重窗口
+        else if (timeSinceLastAlert < dynamicCooldown) {
+          if (timeSinceLastAlert < SGE_ALERT_CONFIG.DEDUP_WINDOW_SECONDS) {
             console.log(`[Gold Alert] Duplicate alert suppressed (same direction: ${alertDirection}, ${timeSinceLastAlert.toFixed(0)}s ago)`);
             return;
           }
-          
           console.log(`[Gold Alert] Alert already sent ${timeSinceLastAlert.toFixed(0)}s ago, cooldown: ${dynamicCooldown.toFixed(0)}s`);
           return;
         }
@@ -4224,15 +4206,14 @@ async function sendAlertEmail(alerts, env) {
     
     if (response.ok) {
       console.log('[Gold Alert] Alert email sent successfully');
-      if (env?.GOLD_PRICE_CACHE) {
-        await env.GOLD_PRICE_CACHE.put('last_alert', Date.now().toString(), { expirationTtl: 3600 });
-      }
     } else {
       const error = await response.text();
       console.error('[Gold Alert] Failed to send email:', error);
+      throw new Error(`Email send failed: ${error}`);
     }
   } catch (error) {
     console.error('[Gold Alert] Exception:', error);
+    throw error;
   }
 }
 
@@ -4829,7 +4810,7 @@ function calculateSMA(prices, period) {
   return slice.reduce((a, b) => a + b, 0) / period;
 }
 
-function calculateEMA(prices, period) {
+function calculateEMAFromArray(prices, period) {
   if (prices.length < period) return null;
   const multiplier = 2 / (period + 1);
   let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
@@ -4860,8 +4841,8 @@ function calculateRSI(prices, period = 14) {
 function calculateMACD(prices) {
   if (prices.length < 26) return null;
   
-  const ema12 = calculateEMA(prices, 12);
-  const ema26 = calculateEMA(prices, 26);
+  const ema12 = calculateEMAFromArray(prices, 12);
+  const ema26 = calculateEMAFromArray(prices, 26);
   const macd = ema12 - ema26;
   
   const recentPrices = prices.slice(-35);
@@ -4878,7 +4859,7 @@ function calculateMACD(prices) {
     macdLine.push(e12 - e26);
   }
   
-  const signal = macdLine.length >= 9 ? calculateEMA(macdLine, 9) : macd;
+  const signal = macdLine.length >= 9 ? calculateEMAFromArray(macdLine, 9) : macd;
   const histogram = macd - signal;
   
   return { macd, signal, histogram };
@@ -5039,7 +5020,7 @@ async function performGoldAnalysis(env) {
     bollinger: calculateBollingerBands(domesticPrices),
     trend: analyzePriceTrend(domesticPrices),
     sma20: calculateSMA(domesticPrices, 20),
-    ema12: calculateEMA(domesticPrices, 12)
+    ema12: calculateEMAFromArray(domesticPrices, 12)
   };
   
   const internationalAnalysis = {
@@ -6611,6 +6592,16 @@ async function checkAndSendTradingAlerts(currentPrice, env) {
       }
 
       if (proximityAlert) {
+        const proximityKey = `proximity_alert:${alert.id}`;
+        const lastProximity = await env.GOLD_PRICE_CACHE?.get(proximityKey);
+        const now = Date.now();
+        const PROXIMITY_COOLDOWN = 5 * 60 * 1000;
+        
+        if (lastProximity && (now - parseInt(lastProximity)) < PROXIMITY_COOLDOWN) {
+          console.log(`[Trading Alert] Proximity alert ${alert.id} in cooldown, skipping`);
+          continue;
+        }
+        
         console.log(`[Trading Alert] Proximity alert for ${alert.alert_type} at ¥${currentPrice.toFixed(2)}/g, target ¥${alert.target_price.toFixed(2)}/g`);
         
         const proximityAlertData = {
@@ -6621,7 +6612,11 @@ async function checkAndSendTradingAlerts(currentPrice, env) {
         };
         
         const notificationResults = await sendTradingMultiChannelAlert(proximityAlertData, env);
-        console.log('[Trading Alert] Proximity notification results:', notificationResults);
+        console.log('[Trading Alert] Proximity notification results:', JSON.stringify(notificationResults));
+        
+        if (notificationResults.email?.success || notificationResults.feishu?.success || notificationResults.meow?.success) {
+          await env.GOLD_PRICE_CACHE?.put(proximityKey, String(now), { expirationTtl: 300 });
+        }
       }
 
       if (shouldTrigger) {
@@ -6753,6 +6748,7 @@ async function sendTradingAlertEmail(alert, env) {
 </html>`;
   
   try {
+    console.log('[Trading Alert] Sending email to metanext@foxmail.com...');
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -6767,13 +6763,15 @@ async function sendTradingAlertEmail(alert, env) {
       })
     });
     
+    const responseText = await response.text();
+    console.log('[Trading Alert] Email response status:', response.status, 'body:', responseText);
+    
     if (response.ok) {
       console.log('[Trading Alert] Email sent successfully');
       return { success: true };
     } else {
-      const error = await response.text();
-      console.error('[Trading Alert] Email failed:', error);
-      return { success: false, error };
+      console.error('[Trading Alert] Email failed:', responseText);
+      return { success: false, error: responseText };
     }
   } catch (error) {
     console.error('[Trading Alert] Email error:', error);
@@ -6783,9 +6781,14 @@ async function sendTradingAlertEmail(alert, env) {
 
 async function sendTradingFeishuAlert(alert, env) {
   const FEISHU_WEBHOOK = env.FEISHU_WEBHOOK;
-  if (!FEISHU_WEBHOOK) {
-    console.log('[Trading Alert] FEISHU_WEBHOOK not configured');
-    return { success: false, error: 'FEISHU_WEBHOOK not configured' };
+  const FEISHU_APP_ID = env.FEISHU_APP_ID;
+  const FEISHU_APP_SECRET = env.FEISHU_APP_SECRET;
+  const FEISHU_CHAT_ID = env.FEISHU_CHAT_ID;
+  
+  const hasConfig = FEISHU_WEBHOOK || (FEISHU_APP_ID && FEISHU_APP_SECRET && FEISHU_CHAT_ID);
+  if (!hasConfig) {
+    console.log('[Trading Alert] No Feishu configuration found');
+    return { success: false, error: 'No Feishu configuration found' };
   }
   
   const isBuy = alert.alert_type === 'buy';
@@ -6801,36 +6804,106 @@ async function sendTradingFeishuAlert(alert, env) {
     : `💡 金价已达到您预设的${action}价格，请及时关注市场动态。`;
   
   const content = `**${emoji} ${title}**\n\n> 时间：${timeStr}\n\n**目标${action}价格：** ¥${alert.target_price}/克\n**当前价格：** ¥${alert.currentPrice}/克\n\n${messageText}\n\n[查看交易详情](https://ustc.dev/trading/)`;
-  
+
+  // Webhook 模式
+  if (FEISHU_WEBHOOK) {
+    console.log('[Trading Alert] Using Feishu webhook mode');
+    try {
+      const response = await fetch(FEISHU_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          msg_type: 'interactive',
+          card: {
+            header: {
+              title: { tag: 'plain_text', content: `${emoji} ${title}` },
+              template: templateColor
+            },
+            elements: [
+              { tag: 'markdown', content: content }
+            ]
+          }
+        })
+      });
+      
+      const result = await response.json();
+      console.log('[Trading Alert] Feishu webhook response:', JSON.stringify(result));
+      
+      if (result.code === 0 || result.StatusCode === 0) {
+        console.log('[Trading Alert] Feishu webhook sent successfully');
+        return { success: true };
+      } else {
+        console.error('[Trading Alert] Feishu webhook failed:', JSON.stringify(result));
+        return { success: false, error: result };
+      }
+    } catch (error) {
+      console.error('[Trading Alert] Feishu webhook error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // 飞书应用消息模式
+  console.log('[Trading Alert] Using Feishu app message mode');
   try {
-    const response = await fetch(FEISHU_WEBHOOK, {
+    const tokenResponse = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        msg_type: 'interactive',
-        card: {
-          header: {
-            title: { tag: 'plain_text', content: `${emoji} ${title}` },
-            template: templateColor
-          },
-          elements: [
-            { tag: 'markdown', content: content }
-          ]
-        }
+        app_id: FEISHU_APP_ID,
+        app_secret: FEISHU_APP_SECRET
       })
     });
     
-    const result = await response.json();
+    const tokenData = await tokenResponse.json();
     
-    if (result.code === 0 || result.StatusCode === 0) {
-      console.log('[Trading Alert] Feishu webhook sent successfully');
+    if (tokenData.code !== 0) {
+      console.error('[Trading Alert] Feishu auth failed:', tokenData.msg);
+      return { success: false, error: tokenData.msg };
+    }
+    
+    const accessToken = tokenData.tenant_access_token;
+    
+    const contentElements = [
+      [{ tag: 'text', text: `时间：${timeStr}` }],
+      [{ tag: 'text', text: '' }],
+      [{ tag: 'text', text: `目标${action}价格: ¥${alert.target_price}/克` }],
+      [{ tag: 'text', text: `当前价格: ¥${alert.currentPrice}/克` }],
+      [{ tag: 'text', text: '' }],
+      [{ tag: 'text', text: messageText }],
+      [{ tag: 'text', text: '' }],
+      [{ tag: 'a', text: '查看交易详情', href: 'https://ustc.dev/trading/' }]
+    ];
+    
+    const messageResponse = await fetch('https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({
+        receive_id: FEISHU_CHAT_ID,
+        msg_type: 'post',
+        content: JSON.stringify({
+          zh_cn: {
+            title: `${emoji} ${title}`,
+            content: contentElements
+          }
+        })
+      })
+    });
+    
+    const messageData = await messageResponse.json();
+    console.log('[Trading Alert] Feishu app message response:', JSON.stringify(messageData));
+    
+    if (messageData.code === 0) {
+      console.log('[Trading Alert] Feishu app message sent successfully');
       return { success: true };
     } else {
-      console.error('[Trading Alert] Feishu webhook failed:', JSON.stringify(result));
-      return { success: false, error: result };
+      console.error('[Trading Alert] Feishu message failed:', messageData.msg);
+      return { success: false, error: messageData.msg };
     }
   } catch (error) {
-    console.error('[Trading Alert] Feishu webhook error:', error);
+    console.error('[Trading Alert] Feishu app error:', error);
     return { success: false, error: error.message };
   }
 }
@@ -6942,9 +7015,18 @@ async function getTradingParameters(env) {
 }
 
 function analyzeMarketTrend(historyData) {
-  if (historyData.length < 5) return { trend: 'unknown', strength: 0 };
+  if (!historyData || historyData.length < 5) return { trend: 'unknown', strength: 0 };
 
-  const prices = historyData.map(h => h.price);
+  // 兼容多种数据格式: { price }, { domestic }, 或直接数值
+  const prices = historyData.map(h => {
+    if (typeof h === 'number') return h;
+    if (h.price !== undefined) return h.price;
+    if (h.domestic !== undefined) return h.domestic;
+    return null;
+  }).filter(p => p !== null && p > 0);
+
+  if (prices.length < 5) return { trend: 'unknown', strength: 0, error: 'insufficient_valid_prices' };
+
   const recent = prices.slice(-5);
 
   const changes = [];

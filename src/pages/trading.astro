@@ -315,6 +315,10 @@ const API_BASE = 'https://api.ustc.dev';
             </button>
           </form>
           <div class="alert-list" id="alert-list"></div>
+          <div class="alert-history-section">
+            <h4 class="alert-history-title">预警历史</h4>
+            <div class="alert-list" id="alert-history-list"></div>
+          </div>
         </div>
       </div>
 
@@ -1296,6 +1300,26 @@ const API_BASE = 'https://api.ustc.dev';
     margin-top: var(--space-4);
     max-height: 200px;
     overflow-y: auto;
+  }
+
+  .alert-history-section {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-color);
+  }
+
+  .alert-history-title {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+    font-weight: var(--font-medium);
+  }
+
+  .alert-empty {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+    padding: var(--space-4);
   }
 
   .alert-item {
@@ -4037,7 +4061,7 @@ const API_BASE = 'https://api.ustc.dev';
     if (!list) return;
 
     if (!alerts?.length) {
-      list.innerHTML = '';
+      list.innerHTML = '<div class="alert-empty">暂无预设预警</div>';
       return;
     }
 
@@ -4059,11 +4083,11 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   function renderLevel3Alerts(alerts) {
-    const list = document.getElementById('alert-list');
+    const list = document.getElementById('alert-history-list');
     if (!list) return;
 
     if (!alerts?.length) {
-      list.innerHTML = '<div class="alert-empty">暂无预警</div>';
+      list.innerHTML = '<div class="alert-empty">暂无预警历史</div>';
       return;
     }
 
