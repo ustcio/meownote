@@ -315,10 +315,6 @@ const API_BASE = 'https://api.ustc.dev';
             </button>
           </form>
           <div class="alert-list" id="alert-list"></div>
-          <div class="alert-history-section">
-            <h4 class="alert-history-title">预警历史</h4>
-            <div class="alert-list" id="alert-history-list"></div>
-          </div>
         </div>
       </div>
 
@@ -1302,19 +1298,6 @@ const API_BASE = 'https://api.ustc.dev';
     overflow-y: auto;
   }
 
-  .alert-history-section {
-    margin-top: var(--space-4);
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--border-color);
-  }
-
-  .alert-history-title {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-    margin-bottom: var(--space-2);
-    font-weight: var(--font-medium);
-  }
-
   .alert-empty {
     text-align: center;
     color: var(--text-tertiary);
@@ -1379,87 +1362,6 @@ const API_BASE = 'https://api.ustc.dev';
 
   .alert-item .delete-alert:hover {
     color: #ff375f;
-  }
-
-  /* Level 3 Alert Styles */
-  .alert-item.level3 {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border-left: 3px solid var(--color-primary);
-  }
-
-  .alert-item.level3.critical {
-    border-left-color: #ff375f;
-    background: rgba(255, 55, 95, 0.08);
-  }
-
-  .alert-item.level3.warning {
-    border-left-color: #ff9f0a;
-    background: rgba(255, 159, 10, 0.08);
-  }
-
-  .alert-item.level3.info {
-    border-left-color: #64d2ff;
-    background: rgba(100, 210, 255, 0.08);
-  }
-
-  .alert-item.level3 .alert-info {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    width: 100%;
-  }
-
-  .alert-session {
-    font-size: 10px;
-    font-weight: var(--font-semibold);
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    background: var(--bg-tertiary);
-    padding: 2px 6px;
-    border-radius: var(--radius-sm);
-  }
-
-  .alert-score {
-    font-size: 11px;
-    font-weight: var(--font-bold);
-    color: var(--color-primary);
-    font-family: var(--font-number);
-  }
-
-  .alert-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    font-size: 11px;
-    color: var(--text-tertiary);
-  }
-
-  .alert-direction {
-    font-weight: var(--font-bold);
-    font-size: 14px;
-  }
-
-  .alert-direction.up {
-    color: #30d158;
-  }
-
-  .alert-direction.down {
-    color: #ff375f;
-  }
-
-  .alert-atr {
-    font-family: var(--font-number);
-  }
-
-  .alert-empty {
-    text-align: center;
-    padding: var(--space-4);
-    color: var(--text-tertiary);
-    font-size: var(--text-sm);
   }
 
   /* ============================================
@@ -3003,7 +2905,6 @@ const API_BASE = 'https://api.ustc.dev';
       loadStats(),
       loadTransactions(),
       loadAlerts(),
-      loadLevel3AlertHistory(),
       loadMarketStatus()
     ]);
     // Start gold price auto-refresh separately
@@ -4080,65 +3981,6 @@ const API_BASE = 'https://api.ustc.dev';
         </button>
       </div>
     `).join('');
-  }
-
-  function renderLevel3Alerts(alerts) {
-    const list = document.getElementById('alert-history-list');
-    if (!list) return;
-
-    if (!alerts?.length) {
-      list.innerHTML = '<div class="alert-empty">暂无预警历史</div>';
-      return;
-    }
-
-    list.innerHTML = alerts.map(a => {
-      const meta = a.level3Metadata || {};
-      const sessionText = meta.session === 'night' ? '夜盘' : meta.session === 'afternoon' ? '午盘' : '早盘';
-      const severityClass = a.severity === 'critical' ? 'critical' : a.severity === 'warning' ? 'warning' : 'info';
-      
-      return `
-        <div class="alert-item level3 ${severityClass}" data-id="${a.id}">
-          <div class="alert-info">
-            <span class="alert-session">${sessionText}</span>
-            <span class="alert-score">评分:${meta.signalScore || 0}</span>
-            <span class="alert-price">¥${a.triggeredPrice?.toFixed(2) || '--'}/g</span>
-          </div>
-          <div class="alert-meta">
-            <span class="alert-direction ${meta.emaFast > meta.emaSlow ? 'up' : 'down'}">
-              ${meta.emaFast > meta.emaSlow ? '↑' : '↓'}
-            </span>
-            <span class="alert-atr">ATR:${meta.atr?.toFixed(2) || '--'}</span>
-          </div>
-          <button class="delete-alert" onclick="acknowledgeAlert('${a.id}')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-          </button>
-        </div>
-      `;
-    }).join('');
-  }
-
-  async function acknowledgeAlert(id) {
-    try {
-      const result = await apiRequest(`/api/trading/alert/${id}/acknowledge`, { method: 'POST' });
-      if (result.success) {
-        loadAlerts();
-      }
-    } catch (error) {
-      console.error('Acknowledge alert failed:', error);
-    }
-  }
-
-  async function loadLevel3AlertHistory() {
-    try {
-      const result = await apiRequest('/api/trading/alerts/history?limit=20');
-      if (result.success && result.alerts?.length > 0) {
-        renderLevel3Alerts(result.alerts);
-      }
-    } catch (error) {
-      console.error('Load Level 3 alert history failed:', error);
-    }
   }
 
   async function loadMarketStatus() {
