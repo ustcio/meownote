@@ -3517,17 +3517,6 @@ async function sendRegistrationEmail(username, email, ip, env) {
 // 金价预警邮件 - 智能波动检测
 // ================================================================================
 
-const ALERT_CONFIG = {
-  WINDOW_SIZE: 3,
-  SHORT_TERM_MINUTES: 1,
-  DOMESTIC_THRESHOLD: 3,
-  INTERNATIONAL_THRESHOLD: 5,
-  COOLDOWN_MINUTES: 0.5,
-  ALERT_ON_RISE: true,
-  INSTANT_CHANGE_THRESHOLD: 2,
-  INSTANT_CHANGE_PERCENT: 0.3
-};
-
 async function sendGoldPriceAlert(domestic, international, history, env) {
   const RESEND_API_KEY = env.RESEND_API_KEY;
   
@@ -3591,8 +3580,8 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
     });
   }
   
-  const domesticInstant = analyzeInstantChange(history?.domestic || [], domestic?.price, ALERT_CONFIG.INSTANT_CHANGE_THRESHOLD, ALERT_CONFIG.INSTANT_CHANGE_PERCENT);
-  const internationalInstant = analyzeInstantChange(history?.international || [], international?.price, ALERT_CONFIG.INSTANT_CHANGE_THRESHOLD, ALERT_CONFIG.INSTANT_CHANGE_PERCENT);
+  const domesticInstant = analyzeInstantChange(history?.domestic || [], domestic?.price, SGE_ALERT_CONFIG.INSTANT_ABS_THRESHOLD, SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD);
+  const internationalInstant = analyzeInstantChange(history?.international || [], international?.price, SGE_ALERT_CONFIG.INSTANT_ABS_THRESHOLD, SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD);
   
   if (domesticInstant.triggered) {
     alerts.push({
@@ -3619,11 +3608,11 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   // 窗口/短期：用「含当前点」的序列，保证最近 N 个点包含最新价
   const domesticSeries = [...(history?.domestic || []), domestic?.price].filter(v => v != null && v > 0);
   const internationalSeries = [...(history?.international || []), international?.price].filter(v => v != null && v > 0);
-  const domesticWindow = analyzeWindow(domesticSeries, ALERT_CONFIG.DOMESTIC_THRESHOLD);
-  const internationalWindow = analyzeWindow(internationalSeries, ALERT_CONFIG.INTERNATIONAL_THRESHOLD);
+  const domesticWindow = analyzeWindow(domesticSeries, SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN);
+  const internationalWindow = analyzeWindow(internationalSeries, SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN);
   
-  const domesticShortTerm = analyzeShortTerm(domesticSeries, ALERT_CONFIG.DOMESTIC_THRESHOLD);
-  const internationalShortTerm = analyzeShortTerm(internationalSeries, ALERT_CONFIG.INTERNATIONAL_THRESHOLD);
+  const domesticShortTerm = analyzeShortTerm(domesticSeries, SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN);
+  const internationalShortTerm = analyzeShortTerm(internationalSeries, SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN);
   
   if (domesticWindow.triggered) {
     alerts.push({
@@ -3791,20 +3780,16 @@ function analyzeInstantChange(prices, currentPrice, absoluteThreshold, percentTh
 }
 
 function analyzeWindow(prices, threshold) {
-  if (prices.length < ALERT_CONFIG.WINDOW_SIZE) {
+  if (prices.length < SGE_ALERT_CONFIG.WINDOW_SIZE) {
     return { triggered: false, reason: 'insufficient_data' };
   }
   
-  const window = prices.slice(-ALERT_CONFIG.WINDOW_SIZE);
+  const window = prices.slice(-SGE_ALERT_CONFIG.WINDOW_SIZE);
   const max = Math.max(...window);
   const min = Math.min(...window);
   const range = max - min;
   const current = window[window.length - 1];
   const direction = current <= min ? 'down' : (current >= max ? 'up' : 'volatile');
-  
-  if (!ALERT_CONFIG.ALERT_ON_RISE && direction === 'up') {
-    return { triggered: false, reason: 'price_rising' };
-  }
   
   if (range >= threshold) {
     return {
@@ -3814,7 +3799,7 @@ function analyzeWindow(prices, threshold) {
       min: min.toFixed(2),
       current: current.toFixed(2),
       direction: direction,
-      message: `最近${ALERT_CONFIG.WINDOW_SIZE}个采集点波动 ${range.toFixed(2)}，超过阈值 ${threshold}`
+      message: `最近${SGE_ALERT_CONFIG.WINDOW_SIZE}个采集点波动 ${range.toFixed(2)}，超过阈值 ${threshold}`
     };
   }
   
@@ -3846,10 +3831,6 @@ function analyzeShortTerm(prices, threshold) {
   }
   
   const direction = current > deviationPoint ? 'up' : 'down';
-  
-  if (!ALERT_CONFIG.ALERT_ON_RISE && direction === 'up') {
-    return { triggered: false, reason: 'price_rising' };
-  }
   
   if (maxDeviation >= threshold) {
     return {
@@ -3896,7 +3877,7 @@ async function sendAlertEmail(alerts, env) {
             
             ${windowAlerts.length > 0 ? `
             <div style="background: #18181b; padding: 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;">
-              <h3 style="color: #fafafa; margin: 0 0 16px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">📊 滑动窗口检测 (最近${ALERT_CONFIG.WINDOW_SIZE}个采集点)</h3>
+              <h3 style="color: #fafafa; margin: 0 0 16px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">📊 滑动窗口检测 (最近${SGE_ALERT_CONFIG.WINDOW_SIZE}个采集点)</h3>
               ${windowAlerts.map(alert => `
                 <div style="margin-bottom: 16px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px;">
                   <h4 style="color: #fafafa; margin: 0 0 12px 0;">${alert.name}</h4>
@@ -3925,7 +3906,7 @@ async function sendAlertEmail(alerts, env) {
             
             ${shortTermAlerts.length > 0 ? `
             <div style="background: #18181b; padding: 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;">
-              <h3 style="color: #fafafa; margin: 0 0 16px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">⚡ 短期波动检测 (最近${ALERT_CONFIG.SHORT_TERM_MINUTES}分钟)</h3>
+              <h3 style="color: #fafafa; margin: 0 0 16px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">⚡ 短期波动检测 (最近${SGE_ALERT_CONFIG.SHORT_TERM_POINTS}分钟)</h3>
               ${shortTermAlerts.map(alert => `
                 <div style="margin-bottom: 16px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px;">
                   <h4 style="color: #fafafa; margin: 0 0 12px 0;">${alert.name}</h4>
@@ -3955,15 +3936,15 @@ async function sendAlertEmail(alerts, env) {
             <div style="margin-top: 20px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 13px;">
               <p style="color: #71717a; margin: 0 0 8px 0;"><strong>预警规则：</strong></p>
               <ul style="color: #a1a1aa; margin: 0; padding-left: 20px;">
-                <li>滑动窗口：最近${ALERT_CONFIG.WINDOW_SIZE}个采集点内，最高价与最低价差值超过阈值</li>
-                <li>短期波动：当前价格与最近${ALERT_CONFIG.SHORT_TERM_MINUTES}分钟内价格偏差超过阈值</li>
-                <li>国内黄金阈值：${ALERT_CONFIG.DOMESTIC_THRESHOLD} 元/克</li>
-                <li>国际黄金阈值：${ALERT_CONFIG.INTERNATIONAL_THRESHOLD} 美元/盎司</li>
+                <li>滑动窗口：最近${SGE_ALERT_CONFIG.WINDOW_SIZE}个采集点内，最高价与最低价差值超过阈值</li>
+                <li>短期波动：当前价格与最近${SGE_ALERT_CONFIG.SHORT_TERM_POINTS}分钟内价格偏差超过阈值</li>
+                <li>国内黄金阈值：${SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN} 元/克</li>
+                <li>国际黄金阈值：${SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN} 美元/盎司</li>
               </ul>
             </div>
             
             <p style="text-align: center; color: #71717a; font-size: 12px; margin-top: 24px;">
-              ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })} | 此邮件由系统自动发送 | ${ALERT_CONFIG.COOLDOWN_MINUTES}分钟内不会重复发送
+              ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })} | 此邮件由系统自动发送 | 动态冷却 ${SGE_ALERT_CONFIG.BASE_COOLDOWN_SECONDS}-${SGE_ALERT_CONFIG.MAX_COOLDOWN_SECONDS}秒
             </p>
           </div>
         `,
