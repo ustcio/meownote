@@ -277,3 +277,112 @@ export interface BacktestResult {
     avgReturn: number;
   }>;
 }
+
+// ================================================================================
+// SGE Level 3 预警系统类型定义
+// ================================================================================
+
+// SGE 交易时段
+export type SGESession = 'asian_morning' | 'afternoon' | 'night';
+
+// SGE 预警配置
+export interface SGEAlertConfig {
+  WINDOW_SIZE: number;
+  SHORT_TERM_POINTS: number;
+  VOL_WINDOW: number;
+  BASE_THRESHOLD_YUAN: number;
+  MIN_THRESHOLD_YUAN: number;
+  INSTANT_ABS_THRESHOLD: number;
+  INSTANT_PERCENT_THRESHOLD: number;
+  INSTANT_CONFIRM_TICKS: number;
+  ATR_PERIOD: number;
+  ATR_MULTIPLIER: number;
+  ZSCORE_THRESHOLD: number;
+  EMA_FAST: number;
+  EMA_SLOW: number;
+  BASE_COOLDOWN_SECONDS: number;
+  MAX_COOLDOWN_SECONDS: number;
+  DEDUP_WINDOW_SECONDS: number;
+}
+
+// EMA 状态
+export interface EMAState {
+  fast: number;
+  slow: number;
+  lastPrice: number;
+}
+
+// ATR 状态
+export interface ATRState {
+  values: number[];
+  trValues: number[];
+}
+
+// 预警信号类型
+export type AlertSignalType = 
+  | 'instant_move'
+  | 'atr_breakout'
+  | 'zscore_anomaly'
+  | 'ema_cross'
+  | 'price_target'
+  | 'trend_change';
+
+// 预警信号
+export interface AlertSignal {
+  type: AlertSignalType;
+  triggered: boolean;
+  strength: number;
+  direction: 'up' | 'down' | 'neutral';
+  value?: number;
+  threshold?: number;
+  timestamp: number;
+}
+
+// 信号融合结果
+export interface SignalFusionResult {
+  score: number;
+  triggered: boolean;
+  signals: AlertSignal[];
+  direction: 'up' | 'down' | 'neutral';
+  confidence: number;
+}
+
+// Level 3 预警事件
+export interface Level3AlertEvent extends AlertEvent {
+  level3Metadata: {
+    session: SGESession;
+    sessionMultiplier: number;
+    dynamicThreshold: number;
+    emaFast: number;
+    emaSlow: number;
+    atr: number;
+    zscore: number;
+    rollingStd: number;
+    signalScore: number;
+    signals: AlertSignal[];
+    cooldown: number;
+  };
+}
+
+// 价格穿越事件
+export interface PriceCrossEvent {
+  type: 'buy' | 'sell';
+  targetPrice: number;
+  prevPrice: number;
+  currentPrice: number;
+  timestamp: number;
+  configId: string;
+}
+
+// 预警状态缓存
+export interface AlertStateCache {
+  priceHistory: number[];
+  timestamps: number[];
+  emaState: EMAState;
+  atrState: ATRState;
+  instantConfirmCount: number;
+  lastAlertTime: number;
+  lastAlertDirection: 'up' | 'down' | 'neutral';
+  rollingMean: number;
+  rollingStd: number;
+}

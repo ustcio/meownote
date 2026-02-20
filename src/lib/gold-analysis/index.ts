@@ -11,21 +11,33 @@ export * from './alert-system';
 import { goldDataCollector } from './data-collector';
 import { goldAIEngine } from './ai-engine';
 import { commandSystem } from './command-system';
-import { alertSystem } from './alert-system';
+import { alertSystem, SGE_CONFIG } from './alert-system';
 import type {
   GoldPriceData,
   TradingSignal,
   AlertEvent,
   SystemMetrics,
   BacktestResult,
+  SGEAlertConfig,
+  SGESession,
+  Level3AlertEvent,
+  AlertSignal,
+  SignalFusionResult,
 } from './types';
 
-// 系统配置
-const SYSTEM_CONFIG = {
-  dataUpdateIntervalMs: 5 * 60 * 1000, // 5分钟
-  analysisIntervalMs: 2 * 60 * 1000, // 2分钟
-  alertCheckIntervalMs: 30 * 1000, // 30秒
-  maxSignalAgeMs: 4 * 60 * 60 * 1000, // 4小时
+export { SGE_CONFIG };
+
+const SYSTEM_CONFIG: SGEAlertConfig & {
+  dataUpdateIntervalMs: number;
+  analysisIntervalMs: number;
+  alertCheckIntervalMs: number;
+  maxSignalAgeMs: number;
+} = {
+  dataUpdateIntervalMs: 60 * 1000,
+  analysisIntervalMs: 2 * 60 * 1000,
+  alertCheckIntervalMs: 60 * 1000,
+  maxSignalAgeMs: 4 * 60 * 60 * 1000,
+  ...SGE_CONFIG,
 };
 
 /**
@@ -212,29 +224,18 @@ export class GoldAnalysisSystem {
     if (!this.currentData) return;
 
     try {
-      // 获取最新的市场分析
-      const priceHistory = goldDataCollector.getPriceHistory(24 * 60 * 60 * 1000);
-
-      // 简化：使用当前数据构建趋势分析
-      const marketAnalysis = {
-        trend: 'sideways' as const,
-        strength: 0,
-        dayChange: this.currentData.domestic.changePercent,
-        volatility: 0,
-        high: this.currentData.domestic.high,
-        low: this.currentData.domestic.low,
-        openPrice: this.currentData.domestic.open,
-        currentPrice: this.currentData.domestic.price,
-        supportLevel: this.currentData.domestic.low,
-        resistanceLevel: this.currentData.domestic.high,
-        movingAverages: { ma5: 0, ma10: 0, ma20: 0, ma60: 0 },
-      };
-
-      const alerts = alertSystem.checkPriceAlerts(this.currentData, marketAnalysis);
+      const alerts = alertSystem.updatePriceAndCheck(this.currentData);
 
       if (alerts.length > 0) {
         this.metrics.alertSystem.alertsGenerated += alerts.length;
-        console.log('[GoldAnalysisSystem] Alerts triggered:', alerts.length);
+        console.log('[GoldAnalysisSystem] Level 3 Alerts triggered:', alerts.length);
+        
+        alerts.forEach(alert => {
+          console.log(`[GoldAnalysisSystem] Alert: ${alert.message}`);
+          console.log(`  - Session: ${alert.level3Metadata.session}`);
+          console.log(`  - Signal Score: ${alert.level3Metadata.signalScore}`);
+          console.log(`  - EMA Fast/Slow: ${alert.level3Metadata.emaFast.toFixed(2)}/${alert.level3Metadata.emaSlow.toFixed(2)}`);
+        });
       }
     } catch (error) {
       console.error('[GoldAnalysisSystem] Alert check failed:', error);
@@ -347,6 +348,14 @@ export class GoldAnalysisSystem {
    */
   getAlertStatistics(userId?: string) {
     return alertSystem.getStatistics(userId);
+  }
+
+  getMarketStatus() {
+    return alertSystem.getMarketStatus();
+  }
+
+  getSGEConfig(): SGEAlertConfig {
+    return SGE_CONFIG;
   }
 }
 
