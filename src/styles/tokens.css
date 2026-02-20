@@ -23,7 +23,7 @@
   /* ==================== Typography Scale ==================== */
   
   /* Font Families */
-  --font-brand: "Young Serif", Georgia, serif;
+  --font-brand: "Cormorant SC", Georgia, serif;
   --font-sans: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
