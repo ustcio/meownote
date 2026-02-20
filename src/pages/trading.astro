@@ -2978,7 +2978,9 @@ const API_BASE = 'https://api.ustc.dev';
     await Promise.all([
       loadStats(),
       loadTransactions(),
-      loadAlerts()
+      loadAlerts(),
+      loadLevel3AlertHistory(),
+      loadMarketStatus()
     ]);
     // Start gold price auto-refresh separately
     startGoldPriceAutoRefresh();
@@ -3099,13 +3101,78 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   function startGoldPriceAutoRefresh() {
-    // Load immediately
+    // Load immediately via API first
     loadGoldPrice();
     
-    // Refresh every 10 seconds
-    if (goldPriceInterval) {
-      clearInterval(goldPriceInterval);
+    // Try to use SSE for real-time updates
+    if (typeof EventSource !== 'undefined') {
+      try {
+        const eventSource = new EventSource(`${API_BASE}/api/gold/stream`);
+        
+        eventSource.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data);
+            
+            if (message.type === 'price_update' && message.data) {
+              const priceEl = document.getElementById('current-gold-price');
+              const timeEl = document.getElementById('price-update-time');
+              
+              let price = null;
+              if (message.data.domestic?.price > 0) {
+                price = message.data.domestic.price.toFixed(2);
+              } else if (message.data.international?.price > 0 && message.data.exchangeRate) {
+                const cnyPrice = message.data.international.price * message.data.exchangeRate / 31.1035;
+                price = cnyPrice.toFixed(2);
+              }
+              
+              if (price && priceEl) {
+                if (lastGoldPrice !== null && lastGoldPrice !== price) {
+                  priceEl.style.transform = 'scale(1.05)';
+                  priceEl.style.color = parseFloat(price) > parseFloat(lastGoldPrice) ? '#30d158' : '#ff375f';
+                  setTimeout(() => {
+                    priceEl.style.transform = 'scale(1)';
+                    priceEl.style.color = '#ffb800';
+                  }, 500);
+                }
+                priceEl.textContent = price;
+                priceEl.classList.remove('loading', 'error');
+                lastGoldPrice = price;
+              }
+              
+              if (timeEl && message.timestamp) {
+                const updateTime = new Date(message.timestamp);
+                timeEl.textContent = updateTime.toLocaleTimeString('zh-CN', { 
+                  hour: '2-digit', 
+                  minute: '2-digit',
+                  second: '2-digit'
+                });
+              }
+              
+              // Update Level 3 status
+              if (message.level3) {
+                updateMarketStatusUI(message.level3);
+              }
+            }
+          } catch (parseError) {
+            console.log('[SSE] Parse error:', parseError);
+          }
+        };
+        
+        eventSource.onerror = (error) => {
+          console.log('[SSE] Connection error, falling back to polling');
+          eventSource.close();
+          // Fallback to polling
+          goldPriceInterval = setInterval(loadGoldPrice, 10000);
+        };
+        
+        console.log('[SSE] Connected to real-time stream');
+        return;
+      } catch (sseError) {
+        console.log('[SSE] Failed to connect:', sseError);
+      }
     }
+    
+    // Fallback to polling if SSE not available
     goldPriceInterval = setInterval(loadGoldPrice, 10000);
   }
 
@@ -4036,6 +4103,55 @@ const API_BASE = 'https://api.ustc.dev';
       }
     } catch (error) {
       console.error('Acknowledge alert failed:', error);
+    }
+  }
+
+  async function loadLevel3AlertHistory() {
+    try {
+      const result = await apiRequest('/api/trading/alerts/history?limit=20');
+      if (result.success && result.alerts?.length > 0) {
+        renderLevel3Alerts(result.alerts);
+      }
+    } catch (error) {
+      console.error('Load Level 3 alert history failed:', error);
+    }
+  }
+
+  async function loadMarketStatus() {
+    try {
+      const result = await apiRequest('/api/trading/market/status');
+      if (result.success && result.status) {
+        updateMarketStatusUI(result.status);
+      }
+    } catch (error) {
+      console.error('Load market status failed:', error);
+    }
+  }
+
+  function updateMarketStatusUI(status) {
+    const trendEl = document.getElementById('market-trend');
+    const sessionEl = document.getElementById('market-session');
+    const volatilityEl = document.getElementById('market-volatility');
+    const thresholdEl = document.getElementById('market-threshold');
+    
+    if (trendEl) {
+      const trendText = status.trend === 'up' ? '↑ 上涨' : status.trend === 'down' ? '↓ 下跌' : '→ 震荡';
+      const trendClass = status.trend === 'up' ? 'trend-up' : status.trend === 'down' ? 'trend-down' : 'trend-neutral';
+      trendEl.textContent = trendText;
+      trendEl.className = `market-indicator ${trendClass}`;
+    }
+    
+    if (sessionEl) {
+      const sessionText = status.session === 'night' ? '夜盘' : status.session === 'afternoon' ? '午盘' : '早盘';
+      sessionEl.textContent = sessionText;
+    }
+    
+    if (volatilityEl) {
+      volatilityEl.textContent = status.volatility?.toFixed(4) || '--';
+    }
+    
+    if (thresholdEl) {
+      thresholdEl.textContent = status.dynamicThreshold?.toFixed(2) || '--';
     }
   }
 

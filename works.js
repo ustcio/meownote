@@ -363,6 +363,7 @@ const ROUTES = {
   '/api/trading/tolerance': { handler: handleToleranceSettings },
   '/api/trading/alerts/history': { handler: handleAlertHistory },
   '/api/trading/market/status': { handler: handleMarketStatus },
+  '/api/trading/alert-config': { handler: handleAlertConfig },
 };
 
 // ================================================================================
@@ -1759,12 +1760,36 @@ async function handleGoldPriceStream(request, env, ctx) {
             fromCache = false;
           }
           
+          // 获取 Level 3 市场状态
+          let level3Status = null;
+          try {
+            const state = await getLevel3State(env);
+            const beijingHour = getBeijingHour();
+            const priceHistory = state.priceHistory || [];
+            const rollingStd = calculateStd(priceHistory);
+            
+            level3Status = {
+              session: getSession(beijingHour),
+              trend: state.emaFast > state.emaSlow ? 'up' : state.emaFast < state.emaSlow ? 'down' : 'neutral',
+              emaFast: state.emaFast,
+              emaSlow: state.emaSlow,
+              volatility: rollingStd,
+              dynamicThreshold: Math.max(
+                SGE_ALERT_CONFIG.MIN_THRESHOLD_YUAN,
+                SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN + 2.2 * rollingStd
+              ) * getSessionMultiplier(beijingHour)
+            };
+          } catch (statusError) {
+            console.log(`[SSE] Level 3 status error: ${statusError.message}`);
+          }
+          
           const message = `data: ${JSON.stringify({
             type: 'price_update',
             clientId: clientId,
             timestamp: Date.now(),
             fromCache: fromCache,
-            data: data
+            data: data,
+            level3: level3Status
           })}\n\n`;
           
           controller.enqueue(new TextEncoder().encode(message));
@@ -1853,6 +1878,12 @@ async function scheduledGoldCrawlWithAI(event, env, ctx) {
         
         ctx.waitUntil(submitDataToAIAnalysis(env, result));
         
+        // 每小时执行一次数据清理
+        const currentHour = new Date().getHours();
+        if (currentHour === 0) {
+          ctx.waitUntil(cleanupOldData(env));
+        }
+        
         const totalLatency = Date.now() - pipelineStartTime;
         console.log('[Pipeline] Completed in', totalLatency, 'ms', {
           crawl: crawlLatency,
@@ -1914,15 +1945,59 @@ async function logPipelineMetrics(env, metrics) {
     
     metricsHistory.push(metrics);
     
-    if (metricsHistory.length > 1440) {
-      metricsHistory = metricsHistory.slice(-1440);
+    // 自动清理：只保留最近7天的指标数据
+    if (metricsHistory.length > 1440 * 7) {
+      metricsHistory = metricsHistory.slice(-1440 * 7);
     }
     
     await env.GOLD_PRICE_CACHE.put(key, JSON.stringify(metricsHistory), {
-      expirationTtl: 86400 * 3
+      expirationTtl: 7 * 24 * 60 * 60
     });
-  } catch (e) {
-    console.error('[Pipeline Metrics] Failed to log:', e);
+  } catch (error) {
+    console.error('[Metrics] Failed to log pipeline metrics:', error);
+  }
+}
+
+async function cleanupOldData(env) {
+  if (!env?.DB) return;
+  
+  try {
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    
+    // 清理旧的预警历史
+    const alertResult = await env.DB.prepare(
+      'DELETE FROM alert_history WHERE timestamp < ?'
+    ).bind(sevenDaysAgo).run();
+    
+    // 清理旧的 AI 分析结果
+    const aiResult = await env.DB.prepare(
+      'DELETE FROM ai_analysis_results WHERE timestamp < ?'
+    ).bind(sevenDaysAgo).run();
+    
+    console.log(`[Cleanup] Deleted ${alertResult.changes || 0} old alerts, ${aiResult.changes || 0} old AI results`);
+  } catch (error) {
+    console.log('[Cleanup] Cleanup skipped:', error.message);
+  }
+}
+
+// 清理过期数据
+async function cleanupOldData(env) {
+  if (!env?.DB) return;
+  
+  try {
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    
+    const alertResult = await env.DB.prepare(
+      'DELETE FROM alert_history WHERE timestamp < ?'
+    ).bind(sevenDaysAgo).run();
+    
+    const aiResult = await env.DB.prepare(
+      'DELETE FROM ai_analysis_results WHERE timestamp < ?'
+    ).bind(sevenDaysAgo).run();
+    
+    console.log(`[Cleanup] Deleted ${alertResult.changes || 0} old alerts, ${aiResult.changes || 0} old AI results`);
+  } catch (error) {
+    console.log('[Cleanup] Cleanup skipped:', error.message);
   }
 }
 
@@ -2071,6 +2146,26 @@ async function storeAIAnalysisResult(env, date, analysisData) {
     await env.GOLD_PRICE_CACHE.put(key, JSON.stringify(analyses), {
       expirationTtl: 3 * 24 * 60 * 60 // 3天
     });
+    
+    // 同时存储到 D1 数据库
+    if (env.DB && analysisData.aiAnalysis) {
+      try {
+        await env.DB.prepare(`
+          INSERT INTO ai_analysis_results (timestamp, price, trend, confidence, signals, recommendation, risk_level)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          analysisData.timestamp,
+          analysisData.currentPrice,
+          analysisData.marketAnalysis?.trend || 'unknown',
+          analysisData.aiAnalysis?.confidence || 0,
+          JSON.stringify(analysisData.aiAnalysis?.signals || []),
+          analysisData.aiAnalysis?.recommendation || '',
+          analysisData.aiAnalysis?.riskLevel || 'medium'
+        ).run();
+      } catch (dbError) {
+        console.log('[AI Store] D1 insert skipped (table may not exist):', dbError.message);
+      }
+    }
     
     console.log(`[AI Store] Stored analysis result. Total records: ${analyses.length}`);
     
@@ -3530,6 +3625,21 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   const session = getSession(beijingHour);
   const sessionMultiplier = getSessionMultiplier(beijingHour);
   
+  let userTolerance = { buyTolerance: SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN, sellTolerance: SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN };
+  try {
+    const toleranceStmt = env.DB.prepare(`SELECT buy_tolerance, sell_tolerance FROM alert_tolerance_settings ORDER BY id DESC LIMIT 1`);
+    const toleranceResult = await toleranceStmt.first();
+    if (toleranceResult) {
+      userTolerance = {
+        buyTolerance: toleranceResult.buy_tolerance || SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN,
+        sellTolerance: toleranceResult.sell_tolerance || SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN
+      };
+      console.log(`[Level3] User tolerance loaded: buy=${userTolerance.buyTolerance}, sell=${userTolerance.sellTolerance}`);
+    }
+  } catch (e) {
+    console.log('[Level3] Failed to load tolerance settings, using defaults');
+  }
+  
   const priceHistory = history?.domestic || [];
   const rollingStd = calculateStd(priceHistory.slice(-SGE_ALERT_CONFIG.VOL_WINDOW));
   const rollingMean = calculateMean(priceHistory.slice(-SGE_ALERT_CONFIG.VOL_WINDOW));
@@ -3580,8 +3690,8 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
     });
   }
   
-  const domesticInstant = analyzeInstantChange(history?.domestic || [], domestic?.price, SGE_ALERT_CONFIG.INSTANT_ABS_THRESHOLD, SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD);
-  const internationalInstant = analyzeInstantChange(history?.international || [], international?.price, SGE_ALERT_CONFIG.INSTANT_ABS_THRESHOLD, SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD);
+  const domesticInstant = analyzeInstantChange(history?.domestic || [], domestic?.price, userTolerance.buyTolerance, SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD);
+  const internationalInstant = analyzeInstantChange(history?.international || [], international?.price, userTolerance.sellTolerance, SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD);
   
   if (domesticInstant.triggered) {
     alerts.push({
@@ -3608,11 +3718,11 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   // 窗口/短期：用「含当前点」的序列，保证最近 N 个点包含最新价
   const domesticSeries = [...(history?.domestic || []), domestic?.price].filter(v => v != null && v > 0);
   const internationalSeries = [...(history?.international || []), international?.price].filter(v => v != null && v > 0);
-  const domesticWindow = analyzeWindow(domesticSeries, SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN);
-  const internationalWindow = analyzeWindow(internationalSeries, SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN);
+  const domesticWindow = analyzeWindow(domesticSeries, userTolerance.buyTolerance);
+  const internationalWindow = analyzeWindow(internationalSeries, userTolerance.sellTolerance);
   
-  const domesticShortTerm = analyzeShortTerm(domesticSeries, SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN);
-  const internationalShortTerm = analyzeShortTerm(internationalSeries, SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN);
+  const domesticShortTerm = analyzeShortTerm(domesticSeries, userTolerance.buyTolerance);
+  const internationalShortTerm = analyzeShortTerm(internationalSeries, userTolerance.sellTolerance);
   
   if (domesticWindow.triggered) {
     alerts.push({
@@ -3738,6 +3848,36 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
     await env.GOLD_PRICE_CACHE.put('level3_alert_history', JSON.stringify(historyList), {
       expirationTtl: 86400 * 7
     });
+    
+    // 同时存储到 D1 数据库
+    if (env.DB) {
+      try {
+        for (const alert of alerts) {
+          await env.DB.prepare(`
+            INSERT INTO alert_history (timestamp, session, direction, price, alert_type, alert_message, score, confidence, level3_metadata)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            now,
+            session,
+            alertDirection,
+            domestic?.price,
+            alert.type,
+            alert.message || alert.name,
+            alert.score || 0,
+            alert.confidence || 0,
+            JSON.stringify({
+              emaFast: state.emaFast,
+              emaSlow: state.emaSlow,
+              atr,
+              rollingStd,
+              signalScore: fusionResult?.score || 0
+            })
+          ).run();
+        }
+      } catch (dbError) {
+        console.log('[Gold Alert] D1 insert skipped (table may not exist):', dbError.message);
+      }
+    }
   }
 
   console.log('[Gold Alert] Unified notification result:', {
@@ -5854,6 +5994,64 @@ async function handleMarketStatus(request, env) {
     console.error('[Market Status Error]', error);
     return jsonResponse({ success: false, error: 'Failed to fetch market status' }, 500, request);
   }
+}
+
+async function handleAlertConfig(request, env) {
+  const authResult = await verifyAdminAuth(request, env);
+  if (!authResult.success) {
+    return jsonResponse({ success: false, error: authResult.message }, 401, request);
+  }
+
+  if (request.method === 'GET') {
+    try {
+      const configJson = await env?.GOLD_PRICE_CACHE?.get('alert_config');
+      const config = configJson ? JSON.parse(configJson) : {
+        baseThresholdYuan: SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN,
+        minThresholdYuan: SGE_ALERT_CONFIG.MIN_THRESHOLD_YUAN,
+        instantAbsThreshold: SGE_ALERT_CONFIG.INSTANT_ABS_THRESHOLD,
+        instantPercentThreshold: SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD,
+        atrMultiplier: SGE_ALERT_CONFIG.ATR_MULTIPLIER,
+        zscoreThreshold: SGE_ALERT_CONFIG.ZSCORE_THRESHOLD,
+        baseCooldownSeconds: SGE_ALERT_CONFIG.BASE_COOLDOWN_SECONDS,
+        maxCooldownSeconds: SGE_ALERT_CONFIG.MAX_COOLDOWN_SECONDS,
+        dedupWindowSeconds: SGE_ALERT_CONFIG.DEDUP_WINDOW_SECONDS
+      };
+      
+      return jsonResponse({ success: true, config }, 200, request);
+    } catch (error) {
+      console.error('[Alert Config Error]', error);
+      return jsonResponse({ success: false, error: 'Failed to fetch config' }, 500, request);
+    }
+  }
+
+  if (request.method === 'POST') {
+    try {
+      const body = await request.json();
+      
+      const config = {
+        baseThresholdYuan: parseFloat(body.baseThresholdYuan) || SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN,
+        minThresholdYuan: parseFloat(body.minThresholdYuan) || SGE_ALERT_CONFIG.MIN_THRESHOLD_YUAN,
+        instantAbsThreshold: parseFloat(body.instantAbsThreshold) || SGE_ALERT_CONFIG.INSTANT_ABS_THRESHOLD,
+        instantPercentThreshold: parseFloat(body.instantPercentThreshold) || SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD,
+        atrMultiplier: parseFloat(body.atrMultiplier) || SGE_ALERT_CONFIG.ATR_MULTIPLIER,
+        zscoreThreshold: parseFloat(body.zscoreThreshold) || SGE_ALERT_CONFIG.ZSCORE_THRESHOLD,
+        baseCooldownSeconds: parseInt(body.baseCooldownSeconds) || SGE_ALERT_CONFIG.BASE_COOLDOWN_SECONDS,
+        maxCooldownSeconds: parseInt(body.maxCooldownSeconds) || SGE_ALERT_CONFIG.MAX_COOLDOWN_SECONDS,
+        dedupWindowSeconds: parseInt(body.dedupWindowSeconds) || SGE_ALERT_CONFIG.DEDUP_WINDOW_SECONDS
+      };
+      
+      await env?.GOLD_PRICE_CACHE?.put('alert_config', JSON.stringify(config), {
+        expirationTtl: 86400 * 30
+      });
+      
+      return jsonResponse({ success: true, config }, 200, request);
+    } catch (error) {
+      console.error('[Alert Config Update Error]', error);
+      return jsonResponse({ success: false, error: 'Failed to update config' }, 500, request);
+    }
+  }
+
+  return jsonResponse({ success: false, error: 'Method not allowed' }, 405, request);
 }
 
 async function handleGetTransactionStats(request, env) {
