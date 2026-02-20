@@ -303,6 +303,18 @@ export interface SGEAlertConfig {
   BASE_COOLDOWN_SECONDS: number;
   MAX_COOLDOWN_SECONDS: number;
   DEDUP_WINDOW_SECONDS: number;
+  STATE_CACHE_TTL: number;
+  TOLERANCE_MIN: number;
+  TOLERANCE_MAX: number;
+  QUIET_HOURS_START: number;
+  QUIET_HOURS_END: number;
+  TICK_NOISE_FILTER: number;
+  MICRO_VOL_THRESHOLD: number;
+  NIGHT_SCORE_BOOST: number;
+  TREND_CONFIRM_BARS: number;
+  MIN_DIRECTION_CONSENSUS: number;
+  EMA_THRESHOLD_FACTOR: number;
+  EMA_MIN_PERCENT: number;
 }
 
 // EMA 状态

@@ -65,7 +65,14 @@ const SGE_ALERT_CONFIG = {
   TOLERANCE_MIN: 0.5,
   TOLERANCE_MAX: 10.0,
   QUIET_HOURS_START: 1,
-  QUIET_HOURS_END: 6
+  QUIET_HOURS_END: 6,
+  TICK_NOISE_FILTER: 0.25,
+  MICRO_VOL_THRESHOLD: 0.6,
+  NIGHT_SCORE_BOOST: 1,
+  TREND_CONFIRM_BARS: 3,
+  MIN_DIRECTION_CONSENSUS: 0.55,
+  EMA_THRESHOLD_FACTOR: 0.8,
+  EMA_MIN_PERCENT: 0.00015
 };
 
 function getSessionMultiplier(beijingHour) {
@@ -140,7 +147,11 @@ async function getLevel3State(env) {
     emaSlow: 0,
     lastPrice: 0,
     instantConfirmCount: 0,
-    priceHistory: []
+    lastInstantDirection: 'neutral',
+    trendConfirmCount: 0,
+    lastTrendDirection: 'neutral',
+    priceHistory: [],
+    atrValues: []
   };
 }
 
@@ -154,33 +165,71 @@ async function saveLevel3State(env, state) {
   }
 }
 
-function fuseSignals(price, prevPrice, state, atr, rollingStd, rollingMean) {
+function fuseSignals(price, prevPrice, state, atr, rollingStd, rollingMean, session) {
   const signals = [];
   let score = 0;
   const timestamp = Date.now();
 
+  // === Tick Noise Filter ===
+  const rawChange = Math.abs(price - prevPrice);
+  if (rawChange < SGE_ALERT_CONFIG.TICK_NOISE_FILTER && rawChange > 0) {
+    return {
+      score: 0,
+      triggered: false,
+      signals: [{ type: 'noise_filtered', triggered: false, strength: 0, direction: 'neutral', message: 'Tick noise filtered' }],
+      direction: 'neutral',
+      confidence: 0
+    };
+  }
+
   const absChange = Math.abs(price - prevPrice);
   const pctChange = prevPrice > 0 ? (absChange / prevPrice) * 100 : 0;
-  const instantTriggered = absChange >= SGE_ALERT_CONFIG.INSTANT_ABS_THRESHOLD || 
-                           pctChange >= SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD;
+  
+  // === Adaptive Instant Threshold ===
+  const adaptiveAbsThreshold = Math.max(
+    SGE_ALERT_CONFIG.INSTANT_ABS_THRESHOLD,
+    (rollingStd || 0) * 1.1
+  );
+  
+  const isInstantMove = absChange >= adaptiveAbsThreshold || 
+                        pctChange >= SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD;
+  
+  // === Direction Memory for Instant Confirm ===
+  const direction = price > prevPrice ? 'up' : 'down';
+  let newConfirmCount = 0;
+  
+  if (isInstantMove && direction === state.lastInstantDirection) {
+    newConfirmCount = (state.instantConfirmCount || 0) + 1;
+  } else if (isInstantMove) {
+    newConfirmCount = 1;
+  } else {
+    newConfirmCount = 0;
+  }
+  state.lastInstantDirection = direction;
+  state.instantConfirmCount = newConfirmCount;
+  
+  const instantTriggered = newConfirmCount >= SGE_ALERT_CONFIG.INSTANT_CONFIRM_TICKS;
   
   signals.push({
     type: 'instant_move',
     triggered: instantTriggered,
     strength: instantTriggered ? 1 : 0,
-    direction: price > prevPrice ? 'up' : 'down'
+    direction: direction,
+    confirmCount: newConfirmCount
   });
   if (instantTriggered) score += 1;
 
+  // === ATR Breakout ===
   const atrSignal = atr > 0 && absChange >= SGE_ALERT_CONFIG.ATR_MULTIPLIER * atr;
   signals.push({
     type: 'atr_breakout',
     triggered: atrSignal,
     strength: atrSignal ? 2 : 0,
-    direction: price > prevPrice ? 'up' : 'down'
+    direction: direction
   });
   if (atrSignal) score += 2;
 
+  // === Z-score Anomaly ===
   const zscore = calculateZScore(price, rollingMean, rollingStd);
   const zSignal = Math.abs(zscore) >= SGE_ALERT_CONFIG.ZSCORE_THRESHOLD;
   signals.push({
@@ -192,35 +241,78 @@ function fuseSignals(price, prevPrice, state, atr, rollingStd, rollingMean) {
   });
   if (zSignal) score += 2;
 
+  // === EMA Trend Confirmation (Optimized Threshold) ===
   const emaDiff = state.emaFast - state.emaSlow;
-  const emaThreshold = rollingStd * 0.5;
-  const emaConfirmed = Math.abs(emaDiff) > emaThreshold;
+  const emaThreshold = Math.max(
+    (rollingStd || 1) * SGE_ALERT_CONFIG.EMA_THRESHOLD_FACTOR,
+    price * SGE_ALERT_CONFIG.EMA_MIN_PERCENT
+  );
+  const emaDirection = emaDiff > emaThreshold ? 'up' : emaDiff < -emaThreshold ? 'down' : 'neutral';
+  
+  // === Trend Confirm Count ===
+  if (emaDirection === state.lastTrendDirection && emaDirection !== 'neutral') {
+    state.trendConfirmCount = (state.trendConfirmCount || 0) + 1;
+  } else if (emaDirection !== 'neutral') {
+    state.trendConfirmCount = 1;
+  } else {
+    state.trendConfirmCount = 0;
+  }
+  state.lastTrendDirection = emaDirection;
+  
+  const emaConfirmed = state.trendConfirmCount >= SGE_ALERT_CONFIG.TREND_CONFIRM_BARS;
+  
   signals.push({
     type: 'ema_cross',
     triggered: emaConfirmed,
     strength: emaConfirmed ? 1 : 0,
-    direction: emaDiff > 0 ? 'up' : 'down'
+    direction: emaDirection,
+    confirmBars: state.trendConfirmCount
   });
   if (emaConfirmed) score += 1;
 
   const triggeredSignals = signals.filter(s => s.triggered);
   const upVotes = triggeredSignals.filter(s => s.direction === 'up').length;
   const downVotes = triggeredSignals.filter(s => s.direction === 'down').length;
+  const directionVotes = triggeredSignals.length;
   
-  let direction = 'neutral';
-  if (upVotes > downVotes) direction = 'up';
-  else if (downVotes > upVotes) direction = 'down';
+  let finalDirection = 'neutral';
+  if (upVotes > downVotes) finalDirection = 'up';
+  else if (downVotes > upVotes) finalDirection = 'down';
 
-  const confidence = triggeredSignals.length > 0 
+  // === Institution-grade Confidence Fusion ===
+  const directionConsensus = directionVotes > 0 
+    ? Math.abs(upVotes - downVotes) / directionVotes 
+    : 0;
+  
+  const rawConfidence = triggeredSignals.length > 0 
     ? triggeredSignals.reduce((sum, s) => sum + s.strength, 0) / 6 
     : 0;
+  
+  const confidence = clamp(
+    rawConfidence * (0.6 + 0.4 * directionConsensus),
+    0,
+    1
+  );
+
+  // === Dynamic Required Score (Night Session Suppression) ===
+  let requiredScore = 3;
+  
+  if (session === 'night') {
+    requiredScore += SGE_ALERT_CONFIG.NIGHT_SCORE_BOOST;
+  }
+  
+  if ((rollingStd || 1) < SGE_ALERT_CONFIG.MICRO_VOL_THRESHOLD) {
+    requiredScore += 1;
+  }
 
   return {
     score,
-    triggered: score >= 3,
+    triggered: score >= requiredScore,
     signals,
-    direction,
-    confidence: clamp(confidence, 0, 1)
+    direction: finalDirection,
+    confidence,
+    requiredScore,
+    directionConsensus
   };
 }
 
@@ -3678,12 +3770,12 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   
   const atr = calculateATR(state.priceHistory, SGE_ALERT_CONFIG.ATR_PERIOD);
   
-  const fusionResult = fuseSignals(currentPrice, prevPrice, state, atr, rollingStd, rollingMean);
+  const fusionResult = fuseSignals(currentPrice, prevPrice, state, atr, rollingStd, rollingMean, session);
   
   await saveLevel3State(env, state);
   
-  console.log(`[Level3] Score: ${fusionResult.score}, Direction: ${fusionResult.direction}, Confidence: ${(fusionResult.confidence * 100).toFixed(1)}%`);
-  console.log(`[Level3] EMA Fast/Slow: ${state.emaFast.toFixed(2)}/${state.emaSlow.toFixed(2)}, ATR: ${atr.toFixed(2)}, Std: ${rollingStd.toFixed(2)}`);
+  console.log(`[Level3] Score: ${fusionResult.score}/${fusionResult.requiredScore}, Direction: ${fusionResult.direction}, Confidence: ${(fusionResult.confidence * 100).toFixed(1)}%, Consensus: ${((fusionResult.directionConsensus || 0) * 100).toFixed(0)}%`);
+  console.log(`[Level3] EMA Fast/Slow: ${state.emaFast.toFixed(2)}/${state.emaSlow.toFixed(2)}, ATR: ${atr.toFixed(2)}, Std: ${rollingStd.toFixed(2)}, TrendConfirm: ${state.trendConfirmCount || 0}`);
 
   const alerts = [];
   
@@ -3698,8 +3790,10 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
       unit: '元/克',
       direction: fusionResult.direction,
       score: fusionResult.score,
+      requiredScore: fusionResult.requiredScore,
       confidence: fusionResult.confidence,
-      message: `信号融合评分 ${fusionResult.score}，检测到${directionText}信号，置信度 ${(fusionResult.confidence * 100).toFixed(1)}%`
+      directionConsensus: fusionResult.directionConsensus,
+      message: `信号融合评分 ${fusionResult.score}/${fusionResult.requiredScore}，检测到${directionText}信号，置信度 ${(fusionResult.confidence * 100).toFixed(1)}%，方向一致性 ${((fusionResult.directionConsensus || 0) * 100).toFixed(0)}%`
     });
   }
   

@@ -43,7 +43,14 @@ export const SGE_CONFIG: SGEAlertConfig = {
   TOLERANCE_MIN: 0.5,
   TOLERANCE_MAX: 10.0,
   QUIET_HOURS_START: 1,
-  QUIET_HOURS_END: 6
+  QUIET_HOURS_END: 6,
+  TICK_NOISE_FILTER: 0.25,
+  MICRO_VOL_THRESHOLD: 0.6,
+  NIGHT_SCORE_BOOST: 1,
+  TREND_CONFIRM_BARS: 3,
+  MIN_DIRECTION_CONSENSUS: 0.55,
+  EMA_THRESHOLD_FACTOR: 0.8,
+  EMA_MIN_PERCENT: 0.00015
 };
 
 // ================================================================================
