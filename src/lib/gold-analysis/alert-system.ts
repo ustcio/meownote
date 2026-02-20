@@ -22,7 +22,7 @@ import type {
 // ================================================================================
 // SGE Level 3 生产配置
 // ================================================================================
-export const SGE_CONFIG: SGEAlertConfig = {
+export const SGE_CONFIG: SGEAlertConfig = Object.freeze({
   WINDOW_SIZE: 5,
   SHORT_TERM_POINTS: 12,
   VOL_WINDOW: 20,
@@ -51,7 +51,7 @@ export const SGE_CONFIG: SGEAlertConfig = {
   MIN_DIRECTION_CONSENSUS: 0.55,
   EMA_THRESHOLD_FACTOR: 0.8,
   EMA_MIN_PERCENT: 0.00015
-};
+});
 
 // ================================================================================
 // 工具函数

@@ -44,7 +44,7 @@ function calculateReliability(domestic, international, sgeData, intlData) {
   return Math.min(reliability, 1.0);
 }
 
-const SGE_ALERT_CONFIG = {
+const SGE_ALERT_CONFIG = Object.freeze({
   WINDOW_SIZE: 5,
   SHORT_TERM_POINTS: 12,
   VOL_WINDOW: 20,
@@ -73,7 +73,7 @@ const SGE_ALERT_CONFIG = {
   MIN_DIRECTION_CONSENSUS: 0.55,
   EMA_THRESHOLD_FACTOR: 0.8,
   EMA_MIN_PERCENT: 0.00015
-};
+});
 
 function getSessionMultiplier(beijingHour) {
   if (beijingHour >= 20 || beijingHour <= 2) return 1.25;
@@ -151,7 +151,9 @@ async function getLevel3State(env) {
     trendConfirmCount: 0,
     lastTrendDirection: 'neutral',
     priceHistory: [],
-    atrValues: []
+    atrValues: [],
+    lastTriggeredScore: 0,
+    isInAlert: false
   };
 }
 
@@ -305,14 +307,36 @@ function fuseSignals(price, prevPrice, state, atr, rollingStd, rollingMean, sess
     requiredScore += 1;
   }
 
+  // === Score Hysteresis (Prevent threshold oscillation) ===
+  const releaseScore = requiredScore - 1;
+  let triggered = false;
+  
+  if (state.isInAlert) {
+    // 已在预警状态，需要降分才释放
+    triggered = score >= releaseScore;
+    if (!triggered) {
+      state.isInAlert = false;
+      state.lastTriggeredScore = 0;
+    }
+  } else {
+    // 未在预警状态，需要达到触发阈值
+    triggered = score >= requiredScore;
+    if (triggered) {
+      state.isInAlert = true;
+      state.lastTriggeredScore = score;
+    }
+  }
+
   return {
     score,
-    triggered: score >= requiredScore,
+    triggered,
     signals,
     direction: finalDirection,
     confidence,
     requiredScore,
-    directionConsensus
+    releaseScore,
+    directionConsensus,
+    hysteresisState: state.isInAlert ? 'armed' : 'idle'
   };
 }
 
@@ -3774,7 +3798,7 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   
   await saveLevel3State(env, state);
   
-  console.log(`[Level3] Score: ${fusionResult.score}/${fusionResult.requiredScore}, Direction: ${fusionResult.direction}, Confidence: ${(fusionResult.confidence * 100).toFixed(1)}%, Consensus: ${((fusionResult.directionConsensus || 0) * 100).toFixed(0)}%`);
+  console.log(`[Level3] Score: ${fusionResult.score}/${fusionResult.requiredScore} (release: ${fusionResult.releaseScore}), Direction: ${fusionResult.direction}, Confidence: ${(fusionResult.confidence * 100).toFixed(1)}%, Consensus: ${((fusionResult.directionConsensus || 0) * 100).toFixed(0)}%, State: ${fusionResult.hysteresisState}`);
   console.log(`[Level3] EMA Fast/Slow: ${state.emaFast.toFixed(2)}/${state.emaSlow.toFixed(2)}, ATR: ${atr.toFixed(2)}, Std: ${rollingStd.toFixed(2)}, TrendConfirm: ${state.trendConfirmCount || 0}`);
 
   const alerts = [];
@@ -4221,7 +4245,9 @@ const NOTIFICATION_CONFIG = {
   MAX_RETRIES: 3,
   RETRY_DELAY: 500,
   INSTANT_COOLDOWN_SECONDS: 15,
-  PARALLEL_SEND: true
+  PARALLEL_SEND: true,
+  MAX_EMAILS_PER_HOUR: 10,
+  MAX_EMAILS_PER_DAY: 50
 };
 
 // 统一发送通知到所有渠道（Email + Feishu + MeoW）
@@ -4253,6 +4279,45 @@ async function sendUnifiedNotification(alerts, env, options = {}) {
         results: {}
       };
     }
+  }
+
+  // 邮件风暴保护：检查发送频率
+  const now = Date.now();
+  const hourKey = `email_rate_limit:hour:${Math.floor(now / 3600000)}`;
+  const dayKey = `email_rate_limit:day:${Math.floor(now / 86400000)}`;
+  
+  try {
+    const [hourCount, dayCount] = await Promise.all([
+      env.GOLD_PRICE_CACHE?.get(hourKey),
+      env.GOLD_PRICE_CACHE?.get(dayKey)
+    ]);
+    
+    const hourlyEmails = parseInt(hourCount || '0');
+    const dailyEmails = parseInt(dayCount || '0');
+    
+    if (hourlyEmails >= NOTIFICATION_CONFIG.MAX_EMAILS_PER_HOUR) {
+      console.log(`[Unified Notification] Hourly rate limit reached: ${hourlyEmails}/${NOTIFICATION_CONFIG.MAX_EMAILS_PER_HOUR}`);
+      return {
+        success: false,
+        reason: 'rate_limit_hourly',
+        hourlyEmails,
+        maxPerHour: NOTIFICATION_CONFIG.MAX_EMAILS_PER_HOUR,
+        results: {}
+      };
+    }
+    
+    if (dailyEmails >= NOTIFICATION_CONFIG.MAX_EMAILS_PER_DAY) {
+      console.log(`[Unified Notification] Daily rate limit reached: ${dailyEmails}/${NOTIFICATION_CONFIG.MAX_EMAILS_PER_DAY}`);
+      return {
+        success: false,
+        reason: 'rate_limit_daily',
+        dailyEmails,
+        maxPerDay: NOTIFICATION_CONFIG.MAX_EMAILS_PER_DAY,
+        results: {}
+      };
+    }
+  } catch (rateLimitError) {
+    console.log('[Unified Notification] Rate limit check failed, continuing:', rateLimitError.message);
   }
 
   // 准备通知内容
@@ -4304,6 +4369,27 @@ async function sendUnifiedNotification(alerts, env, options = {}) {
       expirationTtl: NOTIFICATION_CONFIG.COOLDOWN_MINUTES * 60
     });
     console.log('[Unified Notification] Cooldown timer updated');
+    
+    // 更新速率限制计数器
+    if (resultMap.email?.success) {
+      try {
+        const sendNow = Date.now();
+        const hourKey = `email_rate_limit:hour:${Math.floor(sendNow / 3600000)}`;
+        const dayKey = `email_rate_limit:day:${Math.floor(sendNow / 86400000)}`;
+        
+        const [currentHour, currentDay] = await Promise.all([
+          env.GOLD_PRICE_CACHE?.get(hourKey),
+          env.GOLD_PRICE_CACHE?.get(dayKey)
+        ]);
+        
+        await Promise.all([
+          env.GOLD_PRICE_CACHE?.put(hourKey, String(parseInt(currentHour || '0') + 1), { expirationTtl: 3600 }),
+          env.GOLD_PRICE_CACHE?.put(dayKey, String(parseInt(currentDay || '0') + 1), { expirationTtl: 86400 })
+        ]);
+      } catch (counterError) {
+        console.log('[Unified Notification] Rate counter update failed:', counterError.message);
+      }
+    }
   }
 
   console.log('[Unified Notification] Send completed:', {
