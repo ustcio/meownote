@@ -1,38 +1,30 @@
----
-import { getLangFromUrl, useTranslations } from '@i18n';
-
-const lang = getLangFromUrl(Astro.url);
----
-
 <section class="hero">
   <div class="hero-container">
     <div class="hero-content">
       <div class="hero-badge">
         <span class="badge-dot"></span>
-        <span>{lang === 'zh' ? 'Astro 5.0 已升级 · 性能提升' : 'Astro 5.0 Upgraded · Better Performance'}</span>
+        <span>Astro 5.0 已升级 · 性能提升</span>
       </div>
       
       <h1 class="hero-title">
-        <span class="title-line">{lang === 'zh' ? '你的智能' : 'Your Intelligent'}</span>
-        <span class="title-gradient">{lang === 'zh' ? 'AI 助手' : 'AI Assistant'}</span>
+        <span class="title-line">你的智能</span>
+        <span class="title-gradient">AI 助手</span>
       </h1>
       
       <p class="hero-subtitle">
-        {lang === 'zh' 
-          ? '为开发者和创作者打造。智能对话、学术工具、实时数据 — 一个平台，无限可能。' 
-          : 'Built for developers and creators. Smart conversations, academic tools, real-time data — one platform, infinite possibilities.'}
+        为开发者和创作者打造。智能对话、学术工具、实时数据 — 一个平台，无限可能。
       </p>
       
       <div class="hero-actions">
         <a href="/chatbot" class="btn-primary">
-          <span>{lang === 'zh' ? '免费开始对话' : 'Start Chatting Free'}</span>
+          <span>免费开始对话</span>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>
             <polyline points="12 5 19 12 12 19"></polyline>
           </svg>
         </a>
         <a href="#features" class="btn-secondary">
-          {lang === 'zh' ? '了解更多' : 'Learn More'}
+          了解更多
         </a>
       </div>
       
@@ -41,19 +33,19 @@ const lang = getLangFromUrl(Astro.url);
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          <span>{lang === 'zh' ? '无需信用卡' : 'No credit card required'}</span>
+          <span>无需信用卡</span>
         </div>
         <div class="meta-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          <span>{lang === 'zh' ? '免费使用' : 'Free to use'}</span>
+          <span>免费使用</span>
         </div>
         <div class="meta-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          <span>{lang === 'zh' ? '隐私保护' : 'Privacy protected'}</span>
+          <span>隐私保护</span>
         </div>
       </div>
     </div>
@@ -70,10 +62,10 @@ const lang = getLangFromUrl(Astro.url);
         </div>
         <div class="card-content">
           <div class="chat-message user">
-            <span>{lang === 'zh' ? '帮我写一个 Python 爬虫' : 'Help me write a Python crawler'}</span>
+            <span>帮我写一个 Python 爬虫</span>
           </div>
           <div class="chat-message ai">
-            <span>{lang === 'zh' ? '好的，我来帮你...' : 'Sure, let me help you...'}</span>
+            <span>好的，我来帮你...</span>
             <span class="typing-indicator">
               <span></span><span></span><span></span>
             </span>

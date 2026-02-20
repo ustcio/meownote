@@ -3237,9 +3237,9 @@ async function sendRegistrationEmail(username, email, ip, env) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'USTC DEV <noreply@ustc.dev>',
+        from: 'USTC Dev <noreply@ustc.dev>',
         to: ['metanext@foxmail.com'],
-        subject: '🎉 USTC DEV 新用户注册通知',
+        subject: '🎉 USTC Dev 新用户注册通知',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0b; color: #fafafa;">
             <div style="text-align: center; margin-bottom: 30px;">
@@ -3285,24 +3285,24 @@ async function sendRegistrationEmail(username, email, ip, env) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'USTC DEV <noreply@ustc.dev>',
+        from: 'USTC Dev <noreply@ustc.dev>',
         to: [sanitizedEmail],
-        subject: '🚀 欢迎加入 USTC DEV',
+        subject: '🚀 欢迎加入 USTC Dev',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0b; color: #fafafa;">
             <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #00d4ff; margin: 0;">USTC DEV</h1>
+              <h1 style="color: #00d4ff; margin: 0;">USTC Dev</h1>
               <p style="color: #71717a; margin-top: 5px;">欢迎加入我们</p>
             </div>
             <div style="background: #18181b; padding: 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
               <p style="color: #fafafa; font-size: 16px; margin: 0 0 16px 0;">Hi ${sanitizedUsername}，</p>
-              <p style="color: #a1a1aa; line-height: 1.6; margin: 0 0 16px 0;">感谢你注册 USTC DEV！你的账号已创建成功。</p>
+              <p style="color: #a1a1aa; line-height: 1.6; margin: 0 0 16px 0;">感谢你注册 USTC Dev！你的账号已创建成功。</p>
               <p style="color: #a1a1aa; line-height: 1.6; margin: 0 0 24px 0;">现在你可以使用我们的 AI 助手、探索最新的技术资讯，开启你的智能时代之旅。</p>
               <div style="text-align: center;">
                 <a href="https://ustc.dev" style="display: inline-block; background: linear-gradient(135deg, #00d4ff, #0099cc); color: #000; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">开始探索</a>
               </div>
             </div>
-            <p style="text-align: center; color: #71717a; font-size: 12px; margin-top: 24px;">如果你没有注册过 USTC DEV，请忽略此邮件</p>
+            <p style="text-align: center; color: #71717a; font-size: 12px; margin-top: 24px;">如果你没有注册过 USTC Dev，请忽略此邮件</p>
           </div>
         `,
       }),
@@ -3583,7 +3583,7 @@ async function sendAlertEmail(alerts, env) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'USTC DEV <noreply@ustc.dev>',
+        from: 'USTC Dev <noreply@ustc.dev>',
         to: ['metanext@foxmail.com'],
         subject: `${alertEmoji} ${alertTitle} - ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`,
         html: `
@@ -5432,7 +5432,7 @@ async function handleTransactionOperation(request, env) {
 
   if (request.method === 'PUT') {
     try {
-      const { price, quantity, actualSellPrice, notes } = await request.json();
+      const { price, quantity, actualSellPrice, notes, createdAt, profit } = await request.json();
       
       const checkStmt = env.DB.prepare('SELECT * FROM gold_transactions WHERE id = ?');
       const existing = await checkStmt.bind(id).first();
@@ -5445,10 +5445,12 @@ async function handleTransactionOperation(request, env) {
       const newQuantity = quantity !== undefined ? parseFloat(quantity) : existing.quantity;
       const newActualSellPrice = actualSellPrice !== undefined ? parseFloat(actualSellPrice) : existing.actual_sell_price;
       const newNotes = notes !== undefined ? notes : existing.notes;
-      const newTotalAmount = newPrice * newQuantity;
-
+      const newCreatedAt = createdAt !== undefined ? new Date(createdAt).toISOString() : existing.created_at;
       let newProfit = existing.profit;
-      if (existing.type === 'sell' && newActualSellPrice !== null && newActualSellPrice !== undefined) {
+      
+      if (profit !== undefined) {
+        newProfit = parseFloat(profit);
+      } else if (existing.type === 'sell' && newActualSellPrice !== null && newActualSellPrice !== undefined) {
         const avgBuyStmt = env.DB.prepare(`
           SELECT 
             COALESCE(SUM(CASE WHEN type = 'buy' THEN quantity ELSE 0 END), 0) as total_bought,
@@ -5466,13 +5468,15 @@ async function handleTransactionOperation(request, env) {
         }
       }
 
+      const newTotalAmount = newPrice * newQuantity;
+
       const updateStmt = env.DB.prepare(`
         UPDATE gold_transactions 
-        SET price = ?, quantity = ?, total_amount = ?, actual_sell_price = ?, profit = ?, notes = ?
+        SET price = ?, quantity = ?, total_amount = ?, actual_sell_price = ?, profit = ?, notes = ?, created_at = ?
         WHERE id = ?
       `);
       
-      await updateStmt.bind(newPrice, newQuantity, newTotalAmount, newActualSellPrice, newProfit, newNotes, id).run();
+      await updateStmt.bind(newPrice, newQuantity, newTotalAmount, newActualSellPrice, newProfit, newNotes, newCreatedAt, id).run();
 
       return jsonResponse({
         success: true,
@@ -5484,7 +5488,8 @@ async function handleTransactionOperation(request, env) {
           totalAmount: newTotalAmount,
           actualSellPrice: newActualSellPrice,
           profit: newProfit,
-          notes: newNotes
+          notes: newNotes,
+          createdAt: newCreatedAt
         }
       }, 200, request);
     } catch (error) {
@@ -5612,7 +5617,7 @@ async function handleAlertOperation(request, env) {
 
   if (request.method === 'POST') {
     try {
-      const { alertType, targetPrice } = await request.json();
+      const { alertType, targetPrice, tolerance = 1.00 } = await request.json();
 
       if (!['buy', 'sell'].includes(alertType)) {
         return jsonResponse({ success: false, error: 'Invalid alert type' }, 400, request);
@@ -5623,13 +5628,18 @@ async function handleAlertOperation(request, env) {
         return jsonResponse({ success: false, error: priceValidation.error }, 400, request);
       }
 
-      const stmt = env.DB.prepare(`INSERT INTO price_alerts (alert_type, target_price, created_at) VALUES (?, ?, ?)`);
+      const toleranceValidation = validateNumber(tolerance, 0, 50, 'Tolerance');
+      if (!toleranceValidation.valid) {
+        return jsonResponse({ success: false, error: toleranceValidation.error }, 400, request);
+      }
+
+      const stmt = env.DB.prepare(`INSERT INTO price_alerts (alert_type, target_price, tolerance, created_at) VALUES (?, ?, ?, ?)`);
       const now = new Date().toISOString();
-      const result = await stmt.bind(alertType, priceValidation.value, now).run();
+      const result = await stmt.bind(alertType, priceValidation.value, toleranceValidation.value, now).run();
 
       return jsonResponse({
         success: true,
-        alert: { id: result.meta.last_row_id, alertType, targetPrice: priceValidation.value, createdAt: now }
+        alert: { id: result.meta.last_row_id, alertType, targetPrice: priceValidation.value, tolerance: toleranceValidation.value, createdAt: now }
       }, 200, request);
     } catch (error) {
       console.error('[Create Alert Error]', error);
@@ -5833,12 +5843,34 @@ async function checkAndSendTradingAlerts(currentPrice, env) {
     const triggeredAlerts = [];
 
     for (const alert of result.results) {
+      const tolerance = alert.tolerance || 1.00;
+      const minPrice = alert.target_price - tolerance;
+      const maxPrice = alert.target_price + tolerance;
+      
       let shouldTrigger = false;
+      let proximityAlert = false;
 
-      if (alert.alert_type === 'buy' && currentPrice <= alert.target_price) {
-        shouldTrigger = true;
-      } else if (alert.alert_type === 'sell' && currentPrice >= alert.target_price) {
-        shouldTrigger = true;
+      if (alert.alert_type === 'buy') {
+        if (currentPrice <= alert.target_price) {
+          shouldTrigger = true;
+        } else if (currentPrice <= maxPrice && currentPrice > alert.target_price) {
+          proximityAlert = true;
+        }
+      } else if (alert.alert_type === 'sell') {
+        if (currentPrice >= alert.target_price) {
+          shouldTrigger = true;
+        } else if (currentPrice >= minPrice && currentPrice < alert.target_price) {
+          proximityAlert = true;
+        }
+      }
+
+      if (proximityAlert) {
+        await queueNotification(env, {
+          type: 'push',
+          title: `价格接近提醒`,
+          message: `金价已接近预设${alert.alert_type === 'buy' ? '买入' : '卖出'}价格，当前 ¥${currentPrice.toFixed(2)}/克，目标 ¥${alert.target_price.toFixed(2)}/克`,
+          data: JSON.stringify({ alertId: alert.id, currentPrice, targetPrice: alert.target_price, tolerance, proximity: true })
+        });
       }
 
       if (shouldTrigger) {
@@ -5976,7 +6008,7 @@ async function sendTradingAlertEmail(alert, env) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Meow <noreply@ustc.dev>',
+        from: 'USTC Dev <noreply@ustc.dev>',
         to: ['metanext@foxmail.com'],
         subject: `${emoji} ${title} - 金价${action}提醒`,
         html: htmlContent
@@ -6591,7 +6623,7 @@ async function sendEmailNotification(env, subject, html) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'Meow <noreply@ustc.dev>',
+        from: 'USTC Dev <noreply@ustc.dev>',
         to: ['metanext@foxmail.com'],
         subject,
         html

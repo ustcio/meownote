@@ -1,9 +1,5 @@
 ---
-import { getLangFromUrl, useTranslations } from '@i18n';
 import Icon from '@components/ui/Icon.astro';
-
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
 ---
 
 <section class="stats">
@@ -18,7 +14,7 @@ const t = useTranslations(lang);
           <Icon name="users" size={20} />
         </div>
         <div class="stat-value" id="stat-online">--</div>
-        <div class="stat-label">{lang === 'zh' ? '当前在线' : 'Online Now'}</div>
+        <div class="stat-label">当前在线</div>
       </div>
       
       <div class="stat-card hover-lift">
@@ -26,7 +22,7 @@ const t = useTranslations(lang);
           <Icon name="trending" size={20} />
         </div>
         <div class="stat-value" id="stat-total">--</div>
-        <div class="stat-label">{lang === 'zh' ? '累计访问' : 'Total Visits'}</div>
+        <div class="stat-label">累计访问</div>
       </div>
       
       <div class="stat-card hover-lift">
@@ -34,7 +30,7 @@ const t = useTranslations(lang);
           <Icon name="zap" size={20} />
         </div>
         <div class="stat-value" id="stat-today">--</div>
-        <div class="stat-label">{lang === 'zh' ? '今日访问' : 'Today Visits'}</div>
+        <div class="stat-label">今日访问</div>
       </div>
     </div>
   </div>

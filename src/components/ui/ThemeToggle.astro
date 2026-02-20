@@ -1,13 +1,11 @@
 ---
-import { getLangFromUrl } from '@i18n';
 
-const lang = getLangFromUrl(Astro.url);
 ---
 
 <button 
   class="theme-toggle" 
-  aria-label={lang === 'zh' ? '切换主题' : 'Toggle theme'}
-  title={lang === 'zh' ? '切换主题' : 'Toggle theme'}
+  aria-label="切换主题"
+  title="切换主题"
 >
   <span class="icon-sun">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -74,7 +72,6 @@ const lang = getLangFromUrl(Astro.url);
                 transform var(--duration-fast) var(--ease-default);
   }
   
-  /* 默认显示太阳图标（深色模式） */
   .icon-sun {
     opacity: 1;
     transform: scale(1);
@@ -86,7 +83,6 @@ const lang = getLangFromUrl(Astro.url);
     pointer-events: none;
   }
   
-  /* 浅色模式：显示月牙图标 */
   :global([data-theme="light"]) .icon-sun {
     opacity: 0;
     transform: scale(0.5);

@@ -1,38 +1,26 @@
 ---
-import { getLangFromUrl, useTranslations } from '@i18n';
 import Icon from '@components/ui/Icon.astro';
-
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
 
 const features = [
   {
     icon: 'zap',
-    title: lang === 'zh' ? '智能对话' : 'Smart Conversation',
-    description: lang === 'zh' 
-      ? '基于先进大语言模型，理解上下文，提供精准回答' 
-      : 'Powered by advanced LLMs, understands context and delivers precise answers',
+    title: '智能对话',
+    description: '基于先进大语言模型，理解上下文，提供精准回答',
   },
   {
     icon: 'shield',
-    title: lang === 'zh' ? '隐私优先' : 'Privacy First',
-    description: lang === 'zh' 
-      ? '端到端加密，您的数据只属于您自己' 
-      : 'End-to-end encryption. Your data belongs only to you.',
+    title: '隐私优先',
+    description: '端到端加密，您的数据只属于您自己',
   },
   {
     icon: 'rocket',
-    title: lang === 'zh' ? '极速响应' : 'Lightning Fast',
-    description: lang === 'zh' 
-      ? '毫秒级响应速度，流畅的对话体验' 
-      : 'Millisecond response time for seamless conversations.',
+    title: '极速响应',
+    description: '毫秒级响应速度，流畅的对话体验',
   },
   {
     icon: 'code',
-    title: lang === 'zh' ? '开发者友好' : 'Developer Friendly',
-    description: lang === 'zh' 
-      ? '丰富的工具集，助力学术研究与日常开发' 
-      : 'Rich toolkit for academic research and daily development.',
+    title: '开发者友好',
+    description: '丰富的工具集，助力学术研究与日常开发',
   },
 ];
 ---
@@ -40,15 +28,13 @@ const features = [
 <section class="features" id="features">
   <div class="features-container">
     <div class="features-header">
-      <span class="features-label">{lang === 'zh' ? '核心能力' : 'Core Features'}</span>
+      <span class="features-label">核心能力</span>
       <h2 class="features-title">
-        {lang === 'zh' ? '为创造者打造的' : 'Built for '}
-        <span class="gradient-text">{lang === 'zh' ? 'AI 工作台' : 'Creators'}</span>
+        为创造者打造的
+        <span class="gradient-text">AI 工作台</span>
       </h2>
       <p class="features-subtitle">
-        {lang === 'zh' 
-          ? '集成多种AI能力，一站式解决您的智能需求' 
-          : 'Integrating multiple AI capabilities to solve your intelligent needs in one place'}
+        集成多种AI能力，一站式解决您的智能需求
       </p>
     </div>
     

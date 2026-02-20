@@ -1,24 +1,20 @@
 ---
-import { getLangFromUrl, useTranslations } from '@i18n';
-
-const lang = getLangFromUrl(Astro.url);
-
 const stats = [
   {
     value: '10K+',
-    label: lang === 'zh' ? '活跃用户' : 'Active Users',
+    label: '活跃用户',
   },
   {
     value: '1M+',
-    label: lang === 'zh' ? '对话次数' : 'Conversations',
+    label: '对话次数',
   },
   {
     value: '99.9%',
-    label: lang === 'zh' ? '服务可用性' : 'Uptime',
+    label: '服务可用性',
   },
   {
     value: '<100ms',
-    label: lang === 'zh' ? '平均响应' : 'Response Time',
+    label: '平均响应',
   },
 ];
 ---

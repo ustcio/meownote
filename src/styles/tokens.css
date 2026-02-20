@@ -16,8 +16,11 @@
   
   /* Semantic Colors */
   --color-success: #30d158;
+  --color-success-light: #34c759;
   --color-warning: #ff9f0a;
   --color-error: #ff375f;
+  --color-danger: #ff375f;
+  --color-danger-light: #ff453a;
   --color-info: #64d2ff;
   
   /* ==================== Typography Scale ==================== */
@@ -177,8 +180,14 @@
   /* Card Styles */
   --card-bg: #ffffff;
   --card-border: rgba(0, 0, 0, 0.08);
+  --card-border-hover: rgba(0, 0, 0, 0.12);
   --card-shadow: var(--shadow-sm);
   --card-hover-shadow: var(--shadow-md);
+  
+  /* Input Styles */
+  --input-bg: #ffffff;
+  --input-border: rgba(0, 0, 0, 0.1);
+  --input-focus-border: var(--color-primary);
   
   /* Glass Effect */
   --glass-bg: rgba(255, 255, 255, 0.72);
@@ -245,8 +254,14 @@
   /* Card Styles */
   --card-bg: #ffffff;
   --card-border: rgba(0, 0, 0, 0.08);
+  --card-border-hover: rgba(0, 0, 0, 0.12);
   --card-shadow: var(--shadow-sm);
   --card-hover-shadow: var(--shadow-md);
+  
+  /* Input Styles */
+  --input-bg: #ffffff;
+  --input-border: rgba(0, 0, 0, 0.1);
+  --input-focus-border: var(--color-primary);
   
   /* Glass Effect - Liquid Glass */
   --glass-bg: rgba(255, 255, 255, 0.72);
@@ -299,8 +314,14 @@
   /* Card Styles */
   --card-bg: rgba(28, 28, 30, 0.6);
   --card-border: rgba(255, 255, 255, 0.08);
+  --card-border-hover: rgba(255, 255, 255, 0.12);
   --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   --card-hover-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  
+  /* Input Styles */
+  --input-bg: rgba(44, 44, 46, 0.8);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --input-focus-border: var(--color-primary);
   
   /* Glass Effect - Liquid Glass */
   --glass-bg: rgba(30, 30, 30, 0.72);

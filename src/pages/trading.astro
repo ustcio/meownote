@@ -78,14 +78,27 @@ const API_BASE = 'https://api.ustc.dev';
           <h1 class="dashboard-title">黄金交易管理</h1>
           <p class="dashboard-subtitle">实时监控金价，智能管理交易</p>
         </div>
-        <div class="header-right">
-          <div class="current-price-card" id="price-card">
-            <span class="price-label">当前金价</span>
-            <span class="price-value loading" id="current-gold-price">--</span>
-            <span class="price-unit">元/克</span>
-            <span class="price-update-time" id="price-update-time"></span>
+        <div class="header-actions">
+          <div class="gold-price-widget" id="price-card">
+            <div class="gold-price-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v12M8 10h8M8 14h8"></path>
+              </svg>
+            </div>
+            <div class="gold-price-content">
+              <span class="gold-price-label">实时金价</span>
+              <div class="gold-price-value-row">
+                <span class="gold-price-value loading" id="current-gold-price">--</span>
+                <span class="gold-price-unit">元/克</span>
+              </div>
+              <span class="gold-price-time" id="price-update-time">--</span>
+            </div>
+            <div class="gold-price-indicator">
+              <span class="pulse-dot"></span>
+            </div>
           </div>
-          <button class="logout-btn" id="logout-btn">
+          <button class="action-btn logout-btn" id="logout-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
@@ -269,12 +282,29 @@ const API_BASE = 'https://api.ustc.dev';
                 </span>
               </label>
             </div>
-            <div class="form-group">
-              <label>目标价格</label>
-              <div class="input-with-unit">
-                <input type="number" id="alert-price" step="0.01" min="0" placeholder="0.00" required />
-                <span class="unit">元/克</span>
+            <div class="form-row">
+              <div class="form-group">
+                <label>目标价格</label>
+                <div class="input-with-unit">
+                  <input type="number" id="alert-price" step="0.01" min="0" placeholder="0.00" required />
+                  <span class="unit">元/克</span>
+                </div>
               </div>
+              <div class="form-group">
+                <label>容错范围</label>
+                <div class="input-with-unit">
+                  <input type="number" id="alert-tolerance" step="0.01" min="0" max="50" placeholder="1.00" value="1.00" />
+                  <span class="unit">元/克</span>
+                </div>
+              </div>
+            </div>
+            <div class="tolerance-hint">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span id="tolerance-hint-text">当价格在目标价格 ±1.00 元范围内时发送提醒</span>
             </div>
             <button type="submit" class="submit-btn alert">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -289,8 +319,8 @@ const API_BASE = 'https://api.ustc.dev';
       </div>
 
       <div class="transactions-section" id="transactions-section">
-        <div class="section-header">
-          <h2 class="section-title">
+        <div class="tx-section-header">
+          <h2 class="tx-section-title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
               <polyline points="14 2 14 8 20 8"></polyline>
@@ -438,18 +468,18 @@ const API_BASE = 'https://api.ustc.dev';
               </div>
             </div>
             <div class="form-row">
-              <div class="form-group">
-                <label>买入价格 (元/克)</label>
-                <input type="number" id="add-buy-price" name="buyPrice" step="0.01" min="0" placeholder="0.00" required />
+              <div class="form-group" id="buy-price-group">
+                <label>买入价格 (元/克) <span class="required-hint">*</span></label>
+                <input type="number" id="add-buy-price" name="buyPrice" step="0.01" min="0" placeholder="例如：580.00" />
               </div>
-              <div class="form-group">
+              <div class="form-group" id="sell-price-group">
                 <label>卖出价格 (元/克)</label>
-                <input type="number" id="add-sell-price" name="sellPrice" step="0.01" min="0" placeholder="0.00" />
+                <input type="number" id="add-sell-price" name="sellPrice" step="0.01" min="0" placeholder="卖出时填写" />
               </div>
             </div>
             <div class="form-group">
-              <label>数量 (克)</label>
-              <input type="number" id="add-quantity" name="quantity" step="0.001" min="0" placeholder="0.000" required />
+              <label>数量 (克) <span class="required-hint">*</span></label>
+              <input type="number" id="add-quantity" name="quantity" step="0.001" min="0" placeholder="例如：1.000" required />
             </div>
             <div class="form-group">
               <label>交易平台</label>
@@ -501,7 +531,7 @@ const API_BASE = 'https://api.ustc.dev';
   </section>
 </Layout>
 
-<style>
+<style is:global>
   .trading {
     min-height: 100vh;
     padding: calc(var(--header-total-height) + var(--space-4)) var(--space-4) var(--space-12);
@@ -660,7 +690,7 @@ const API_BASE = 'https://api.ustc.dev';
     margin-bottom: var(--space-6);
     flex-wrap: wrap;
     padding: var(--space-5);
-    background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-secondary) 100%);
+    background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-sm);
@@ -678,72 +708,67 @@ const API_BASE = 'https://api.ustc.dev';
     color: var(--text-tertiary);
   }
 
-  .header-right {
+  .header-actions {
     display: flex;
     align-items: center;
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 
-  .current-price-card {
+  /* Gold Price Widget - 统一设计 */
+  .gold-price-widget {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    padding: var(--space-3) var(--space-5);
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(255, 165, 0, 0.08) 100%);
-    border: 1px solid rgba(255, 215, 0, 0.25);
-    border-radius: var(--radius-2xl);
-    text-align: center;
-    min-width: 140px;
-    box-shadow: 0 2px 12px rgba(255, 215, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: linear-gradient(135deg, rgba(255, 184, 0, 0.08) 0%, rgba(255, 215, 0, 0.04) 100%);
+    border: 1px solid rgba(255, 184, 0, 0.2);
+    border-radius: var(--radius-xl);
     transition: all var(--duration-fast) var(--ease-default);
     position: relative;
-    overflow: hidden;
+    min-width: 180px;
   }
 
-  .current-price-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.6), transparent);
+  .gold-price-widget:hover {
+    border-color: rgba(255, 184, 0, 0.35);
+    box-shadow: 0 2px 12px rgba(255, 184, 0, 0.12);
   }
 
-  .current-price-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 215, 0, 0.4);
+  .gold-price-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, rgba(255, 184, 0, 0.15) 0%, rgba(255, 215, 0, 0.1) 100%);
+    border-radius: var(--radius-lg);
+    color: #ffb800;
+    flex-shrink: 0;
   }
 
-  .price-label {
-    font-size: var(--text-xs);
+  .gold-price-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .gold-price-label {
+    font-size: 11px;
     color: var(--text-tertiary);
     font-weight: var(--font-semibold);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: var(--space-1);
+    letter-spacing: 0.05em;
+  }
+
+  .gold-price-value-row {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: 4px;
   }
 
-  .price-label::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: #30d158;
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(0.9); }
-  }
-
-  .price-value {
-    font-size: var(--text-3xl);
+  .gold-price-value {
+    font-size: var(--text-xl);
     font-weight: var(--font-bold);
     color: #ffb800;
     font-family: var(--font-number);
@@ -751,10 +776,9 @@ const API_BASE = 'https://api.ustc.dev';
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
     line-height: 1.2;
-    text-shadow: 0 2px 4px rgba(255, 184, 0, 0.2);
   }
 
-  .price-value.loading {
+  .gold-price-value.loading {
     animation: shimmer 1.5s infinite;
     background: linear-gradient(90deg, #ffb800 25%, #ffd700 50%, #ffb800 75%);
     background-size: 200% 100%;
@@ -763,43 +787,82 @@ const API_BASE = 'https://api.ustc.dev';
     background-clip: text;
   }
 
-  .price-value.error {
+  .gold-price-value.error {
     color: var(--text-tertiary);
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
   }
 
-  .price-unit {
-    font-size: var(--text-xs);
+  .gold-price-unit {
+    font-size: 11px;
     color: var(--text-quaternary);
-    margin-top: 2px;
     font-weight: var(--font-medium);
   }
 
-  .price-update-time {
+  .gold-price-time {
     font-size: 10px;
     color: var(--text-quaternary);
-    margin-top: 2px;
     font-family: var(--font-mono);
   }
 
-  .logout-btn {
+  .gold-price-indicator {
     display: flex;
     align-items: center;
+    padding-left: var(--space-2);
+    border-left: 1px solid var(--border-primary);
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #30d158;
+    border-radius: 50%;
+    animation: pulse-dot 2s infinite;
+    box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.4);
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { 
+      opacity: 1; 
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.4);
+    }
+    50% { 
+      opacity: 0.8; 
+      transform: scale(0.9);
+      box-shadow: 0 0 0 4px rgba(48, 209, 88, 0);
+    }
+  }
+
+  /* Action Button - 统一设计 */
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: var(--space-2);
-    padding: var(--space-2) var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-xl);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    white-space: nowrap;
+  }
+
+  .logout-btn {
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
     color: var(--text-secondary);
-    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .logout-btn:hover {
     background: var(--bg-tertiary);
     color: var(--text-primary);
-    border-color: var(--color-primary);
+    border-color: var(--border-hover);
     transform: translateY(-1px);
+  }
+
+  .logout-btn:active {
+    transform: translateY(0);
   }
 
   .stats-grid {
@@ -1139,6 +1202,17 @@ const API_BASE = 'https://api.ustc.dev';
     padding: var(--space-5);
   }
 
+  .alert-panel .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .alert-panel .form-group {
+    margin-bottom: 0;
+  }
+
   .alert-type-row {
     display: flex;
     gap: var(--space-3);
@@ -1187,6 +1261,24 @@ const API_BASE = 'https://api.ustc.dev';
     color: #ff375f;
   }
 
+  .tolerance-hint {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: rgba(0, 113, 227, 0.08);
+    border: 1px solid rgba(0, 113, 227, 0.15);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-4);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+
+  .tolerance-hint svg {
+    color: var(--color-primary);
+    flex-shrink: 0;
+  }
+
   .submit-btn.alert {
     background: linear-gradient(135deg, #bf5af2 0%, #5e5ce6 100%);
     box-shadow: 0 2px 8px rgba(191, 90, 242, 0.3);
@@ -1220,6 +1312,19 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     align-items: center;
     gap: var(--space-2);
+  }
+
+  .alert-item .alert-price {
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+  }
+
+  .alert-item .alert-tolerance {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    background: var(--bg-tertiary);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
   }
 
   .alert-item .alert-type {
@@ -1260,54 +1365,51 @@ const API_BASE = 'https://api.ustc.dev';
   .transactions-section {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 24px;
-    padding: 32px;
-    margin-bottom: 32px;
-    box-shadow: 
-      0 1px 3px rgba(0, 0, 0, 0.02),
-      0 4px 12px rgba(0, 0, 0, 0.04);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-5);
+    margin-bottom: var(--space-5);
   }
 
-  /* Section Header */
-  .section-header {
+  /* Section Header - 使用 tx- 前缀避免冲突 */
+  .tx-section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: var(--space-6);
     flex-wrap: wrap;
-    gap: 16px;
+    gap: var(--space-4);
   }
 
-  .section-title {
+  .tx-section-title {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 20px;
-    font-weight: 600;
+    gap: var(--space-2);
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
     color: var(--text-primary);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
   }
 
-  .section-title svg {
+  .tx-section-title svg {
     color: var(--color-primary);
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
 
   /* Add Transaction Button */
   .add-transaction-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%);
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-blue) 100%);
     border: none;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     color: white;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all var(--duration-fast) var(--ease-default);
     box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
   }
 
@@ -1410,20 +1512,16 @@ const API_BASE = 'https://api.ustc.dev';
     gap: 20px;
   }
 
-  /* Apple Style Transaction Card */
+  /* Apple Style Transaction Card - 简洁版 */
   .tx-card {
     position: relative;
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 20px;
-    padding: 24px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-4);
+    margin-bottom: var(--space-3);
+    transition: all var(--duration-fast) var(--ease-default);
     overflow: hidden;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 
-      0 1px 2px rgba(0, 0, 0, 0.02),
-      0 4px 12px rgba(0, 0, 0, 0.04);
   }
 
   .tx-card::before {
@@ -1432,18 +1530,14 @@ const API_BASE = 'https://api.ustc.dev';
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--color-accent-blue), var(--color-accent-purple));
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent-purple));
     opacity: 0;
-    transition: opacity 0.3s ease;
   }
 
   .tx-card:hover {
-    border-color: rgba(0, 0, 0, 0.1);
-    box-shadow: 
-      0 4px 16px rgba(0, 0, 0, 0.06),
-      0 16px 32px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
+    border-color: var(--card-border-hover);
+    box-shadow: var(--shadow-sm);
   }
 
   .tx-card:hover::before {
@@ -1451,16 +1545,15 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .tx-card.buy::before {
-    background: linear-gradient(90deg, #30d158, #34c759);
+    background: linear-gradient(90deg, var(--color-success), var(--color-success-light));
   }
 
   .tx-card.sell::before {
-    background: linear-gradient(90deg, #ff375f, #ff453a);
+    background: linear-gradient(90deg, var(--color-danger), var(--color-danger-light));
   }
 
   .tx-card.editing {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
   }
 
   .tx-card.editing::before {
@@ -1468,16 +1561,13 @@ const API_BASE = 'https://api.ustc.dev';
     background: linear-gradient(90deg, var(--color-primary), var(--color-accent-purple));
   }
 
-  /* Dark Mode Support */
-  @media (prefers-color-scheme: dark) {
-    .tx-card {
-      background: rgba(40, 40, 40, 0.9);
-      border-color: rgba(255, 255, 255, 0.08);
-    }
-    
-    .tx-card:hover {
-      border-color: rgba(255, 255, 255, 0.12);
-    }
+  [data-theme="dark"] .tx-card {
+    background: var(--card-bg);
+    border-color: var(--card-border);
+  }
+  
+  [data-theme="dark"] .tx-card:hover {
+    border-color: var(--card-border-hover);
   }
 
   /* Card Header */
@@ -1549,17 +1639,17 @@ const API_BASE = 'https://api.ustc.dev';
   .tx-data-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
-    padding: 16px 20px;
-    background: rgba(0, 0, 0, 0.02);
-    border-radius: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.04);
-    transition: all 0.2s ease;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-primary);
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .tx-data-row:hover {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.08);
+    background: var(--bg-tertiary);
+    border-color: var(--border-secondary);
   }
 
   .tx-data-item {
@@ -1608,43 +1698,43 @@ const API_BASE = 'https://api.ustc.dev';
   /* Clickable Cell Content */
   .tx-cell-content {
     font-family: var(--font-number);
-    font-size: 17px;
-    font-weight: 600;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
     color: var(--text-primary);
     cursor: pointer;
-    padding: 8px 14px;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.03);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-lg);
+    background: var(--bg-tertiary);
     border: 1px solid transparent;
-    transition: all 0.2s ease;
+    transition: all var(--duration-fast) var(--ease-default);
     display: inline-block;
     min-width: 100px;
   }
 
   .tx-cell-content:hover {
-    background: rgba(0, 0, 0, 0.06);
-    border-color: rgba(0, 0, 0, 0.1);
+    background: var(--bg-secondary);
+    border-color: var(--border-primary);
   }
 
   /* Inline Edit Input */
   .tx-inline-edit {
     font-family: var(--font-number);
-    font-size: 15px;
-    font-weight: 500;
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
     color: var(--text-primary);
-    background: white;
-    border: 2px solid #0071e3;
-    border-radius: 10px;
-    padding: 10px 14px;
+    background: var(--input-bg);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2) var(--space-3);
     width: 100%;
     min-width: 120px;
-    transition: all 0.2s ease;
+    transition: all var(--duration-fast) var(--ease-default);
     box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
   }
 
   .tx-inline-edit:focus {
     outline: none;
-    border-color: #0071e3;
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
   }
 
@@ -1659,19 +1749,19 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 16px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    margin-top: 4px;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-primary);
+    margin-top: var(--space-1);
   }
 
   .tx-time {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 12px;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
     color: var(--text-tertiary);
     font-family: var(--font-mono);
-    font-weight: 500;
+    font-weight: var(--font-medium);
   }
 
   .tx-time svg {
@@ -1682,7 +1772,7 @@ const API_BASE = 'https://api.ustc.dev';
 
   .tx-actions {
     display: flex;
-    gap: 10px;
+    gap: var(--space-2);
   }
 
   /* Action Buttons */
@@ -1690,22 +1780,22 @@ const API_BASE = 'https://api.ustc.dev';
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all var(--duration-fast) var(--ease-default);
     border: none;
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--bg-tertiary);
     color: var(--text-secondary);
     letter-spacing: -0.01em;
   }
 
   .tx-action-btn:hover {
     transform: scale(1.02);
-    background: rgba(0, 0, 0, 0.08);
+    background: var(--bg-secondary);
   }
 
   .tx-action-btn:active {
@@ -1714,7 +1804,7 @@ const API_BASE = 'https://api.ustc.dev';
 
   .tx-action-btn.save {
     background: linear-gradient(135deg, rgba(48, 209, 88, 0.12), rgba(48, 209, 88, 0.05));
-    color: #30d158;
+    color: var(--color-success);
   }
 
   .tx-action-btn.save:hover {
@@ -1724,7 +1814,7 @@ const API_BASE = 'https://api.ustc.dev';
 
   .tx-action-btn.delete {
     background: rgba(255, 55, 95, 0.08);
-    color: #ff375f;
+    color: var(--color-danger);
   }
 
   .tx-action-btn.delete:hover {
@@ -1739,38 +1829,38 @@ const API_BASE = 'https://api.ustc.dev';
 
   /* Empty State */
   .tx-empty-table {
-    padding: 64px 32px;
+    padding: var(--space-16) var(--space-8);
     text-align: center;
     background: var(--bg-secondary);
-    border-radius: 20px;
+    border-radius: var(--radius-2xl);
     border: 2px dashed var(--border-primary);
   }
 
   .tx-empty-table-icon {
     width: 64px;
     height: 64px;
-    margin: 0 auto 16px;
+    margin: 0 auto var(--space-4);
     color: var(--text-quaternary);
     opacity: 0.5;
   }
 
   .tx-empty-table-title {
-    font-size: 17px;
-    font-weight: 600;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
     color: var(--text-primary);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
   }
 
   .tx-empty-table-desc {
-    font-size: 14px;
+    font-size: var(--text-sm);
     color: var(--text-tertiary);
   }
 
   /* Skeleton Loading */
   .tx-skeleton {
     background: var(--bg-secondary);
-    border-radius: 20px;
-    padding: 24px;
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
     border: 1px solid var(--border-primary);
     animation: skeleton-pulse 1.5s ease-in-out infinite;
   }
@@ -1779,7 +1869,7 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: var(--space-5);
   }
 
   .tx-skeleton-badge {
@@ -1799,13 +1889,13 @@ const API_BASE = 'https://api.ustc.dev';
   .tx-skeleton-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: var(--space-4);
   }
 
   .tx-skeleton-item {
     height: 40px;
     background: var(--border-primary);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
   }
 
   @keyframes skeleton-pulse {
@@ -1824,7 +1914,7 @@ const API_BASE = 'https://api.ustc.dev';
     align-items: center;
     justify-content: center;
     z-index: 1100;
-    padding: 20px;
+    padding: var(--space-5);
   }
 
   .delete-confirm-modal.hidden {
@@ -1839,7 +1929,7 @@ const API_BASE = 'https://api.ustc.dev';
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(8px);
-    animation: fadeIn 0.2s ease;
+    animation: fadeIn var(--duration-fast) var(--ease-default);
   }
 
   .delete-modal-content {
@@ -1848,8 +1938,8 @@ const API_BASE = 'https://api.ustc.dev';
     max-width: 340px;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: 32px;
+    border-radius: var(--radius-2xl);
+    padding: var(--space-8);
     text-align: center;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     animation: modalSlideIn 0.3s ease;
@@ -1858,42 +1948,42 @@ const API_BASE = 'https://api.ustc.dev';
   .delete-modal-icon {
     width: 64px;
     height: 64px;
-    margin: 0 auto 16px;
+    margin: 0 auto var(--space-4);
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(255, 55, 95, 0.1);
     border-radius: 50%;
-    color: #ff375f;
+    color: var(--color-danger);
   }
 
   .delete-modal-title {
-    font-size: 17px;
-    font-weight: 600;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
     color: var(--text-primary);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
   }
 
   .delete-modal-desc {
-    font-size: 14px;
+    font-size: var(--text-sm);
     color: var(--text-secondary);
     line-height: 1.5;
-    margin-bottom: 24px;
+    margin-bottom: var(--space-6);
   }
 
   .delete-modal-actions {
     display: flex;
-    gap: 12px;
+    gap: var(--space-3);
   }
 
   .delete-modal-btn {
     flex: 1;
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--duration-fast) var(--ease-default);
     border: none;
   }
 
@@ -1907,7 +1997,7 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .delete-modal-btn.confirm {
-    background: #ff375f;
+    background: var(--color-danger);
     color: white;
   }
 
@@ -1927,7 +2017,7 @@ const API_BASE = 'https://api.ustc.dev';
     align-items: center;
     justify-content: center;
     z-index: 1100;
-    padding: 20px;
+    padding: var(--space-5);
   }
 
   .edit-transaction-modal.hidden {
@@ -1942,7 +2032,7 @@ const API_BASE = 'https://api.ustc.dev';
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(8px);
-    animation: fadeIn 0.2s ease;
+    animation: fadeIn var(--duration-fast) var(--ease-default);
   }
 
   .edit-modal-content {
@@ -1951,7 +2041,7 @@ const API_BASE = 'https://api.ustc.dev';
     max-width: 480px;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 20px;
+    border-radius: var(--radius-2xl);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     animation: modalSlideIn 0.3s ease;
     overflow: hidden;
@@ -1961,48 +2051,48 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 24px;
+    padding: var(--space-5) var(--space-6);
     border-bottom: 1px solid var(--border-primary);
   }
 
   .edit-modal-header h3 {
-    font-size: 17px;
-    font-weight: 600;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
     color: var(--text-primary);
     margin: 0;
   }
 
   #edit-transaction-form {
-    padding: 24px;
+    padding: var(--space-6);
   }
 
   .edit-form-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
   }
 
   .edit-form-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--space-2);
   }
 
   .edit-form-group label {
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     color: var(--text-secondary);
   }
 
   .edit-form-group input {
-    padding: 12px 16px;
+    padding: var(--space-3) var(--space-4);
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     color: var(--text-primary);
-    font-size: 14px;
-    transition: all 0.2s ease;
+    font-size: var(--text-sm);
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .edit-form-group input:focus {
@@ -2013,8 +2103,8 @@ const API_BASE = 'https://api.ustc.dev';
 
   .edit-form-actions {
     display: flex;
-    gap: 12px;
-    padding-top: 16px;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
     border-top: 1px solid var(--border-primary);
   }
 
@@ -2023,13 +2113,13 @@ const API_BASE = 'https://api.ustc.dev';
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--duration-fast) var(--ease-default);
     border: none;
   }
 
@@ -2043,7 +2133,7 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .edit-form-btn.save {
-    background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-blue) 100%);
     color: white;
     box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
   }
@@ -2072,15 +2162,38 @@ const API_BASE = 'https://api.ustc.dev';
 
   /* Responsive Design */
   @media (max-width: 768px) {
+    .dashboard-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-4);
+      padding: var(--space-4);
+    }
+
+    .header-actions {
+      width: 100%;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .gold-price-widget {
+      width: 100%;
+      min-width: unset;
+    }
+
+    .logout-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
     .transactions-section {
-      padding: 20px;
-      border-radius: 16px;
+      padding: var(--space-5);
+      border-radius: var(--radius-2xl);
     }
 
     .filter-bar {
       flex-direction: column;
       align-items: stretch;
-      padding: 12px 16px;
+      padding: var(--space-3) var(--space-4);
     }
 
     .filter-segment-control {
@@ -2094,17 +2207,17 @@ const API_BASE = 'https://api.ustc.dev';
     }
 
     .tx-card {
-      padding: 16px;
-      border-radius: 16px;
+      padding: var(--space-4);
+      border-radius: var(--radius-2xl);
     }
 
     .tx-data-row {
-      padding: 12px 16px;
+      padding: var(--space-3) var(--space-4);
     }
 
     .tx-card-footer {
       flex-direction: column;
-      gap: 12px;
+      gap: var(--space-3);
       align-items: stretch;
     }
 
@@ -2116,10 +2229,10 @@ const API_BASE = 'https://api.ustc.dev';
       grid-template-columns: 1fr;
     }
 
-    .section-header {
+    .tx-section-header {
       flex-direction: column;
       align-items: flex-start;
-      gap: 12px;
+      gap: var(--space-3);
     }
 
     .add-transaction-btn span {
@@ -2127,14 +2240,14 @@ const API_BASE = 'https://api.ustc.dev';
     }
 
     .add-transaction-btn {
-      padding: 10px;
+      padding: var(--space-2);
     }
   }
 
   @media (max-width: 480px) {
     .tx-data-row {
       flex-direction: column;
-      gap: 12px;
+      gap: var(--space-3);
     }
 
     .tx-data-item {
@@ -2143,11 +2256,11 @@ const API_BASE = 'https://api.ustc.dev';
 
     .tx-data-value,
     .tx-cell-content {
-      font-size: 15px;
+      font-size: var(--text-base);
     }
 
     .tx-action-btn {
-      padding: 8px 12px;
+      padding: var(--space-2) var(--space-3);
     }
 
     .tx-action-btn span {
@@ -2166,7 +2279,7 @@ const API_BASE = 'https://api.ustc.dev';
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    padding: 20px;
+    padding: var(--space-5);
   }
 
   .add-transaction-modal.hidden {
@@ -2181,7 +2294,7 @@ const API_BASE = 'https://api.ustc.dev';
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
-    animation: fadeIn 0.2s ease;
+    animation: fadeIn var(--duration-fast) var(--ease-default);
   }
 
   .modal-content {
@@ -2190,7 +2303,7 @@ const API_BASE = 'https://api.ustc.dev';
     max-width: 480px;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 20px;
+    border-radius: var(--radius-2xl);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     animation: modalSlideIn 0.3s ease;
   }
@@ -2199,13 +2312,13 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 24px;
+    padding: var(--space-5) var(--space-6);
     border-bottom: 1px solid var(--border-primary);
   }
 
   .modal-header h3 {
-    font-size: 17px;
-    font-weight: 600;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
     color: var(--text-primary);
     margin: 0;
   }
@@ -2218,10 +2331,10 @@ const API_BASE = 'https://api.ustc.dev';
     justify-content: center;
     background: transparent;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     color: var(--text-tertiary);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .modal-close:hover {
@@ -2230,36 +2343,36 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   #add-transaction-form {
-    padding: 24px;
+    padding: var(--space-6);
   }
 
   .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: var(--space-4);
   }
 
   #add-transaction-form .form-group {
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
   }
 
   #add-transaction-form label {
     display: block;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     color: var(--text-secondary);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
   }
 
   #add-transaction-form input {
     width: 100%;
-    padding: 12px 16px;
+    padding: var(--space-3) var(--space-4);
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     color: var(--text-primary);
-    font-size: 15px;
-    transition: all 0.2s ease;
+    font-size: var(--text-base);
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   #add-transaction-form input:focus {
@@ -2272,9 +2385,15 @@ const API_BASE = 'https://api.ustc.dev';
     color: var(--text-quaternary);
   }
 
+  .required-hint {
+    color: var(--color-danger);
+    font-weight: var(--font-bold);
+    margin-left: 2px;
+  }
+
   .type-toggle {
     display: flex;
-    gap: 8px;
+    gap: var(--space-2);
   }
 
   .type-btn {
@@ -2282,16 +2401,16 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px;
+    gap: var(--space-2);
+    padding: var(--space-3);
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 500;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .type-btn:hover {
@@ -2305,22 +2424,22 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .type-btn[data-type="buy"].active {
-    border-color: #30d158;
+    border-color: var(--color-success);
     background: rgba(48, 209, 88, 0.1);
-    color: #30d158;
+    color: var(--color-success);
   }
 
   .type-btn[data-type="sell"].active {
-    border-color: #ff375f;
+    border-color: var(--color-danger);
     background: rgba(255, 55, 95, 0.1);
-    color: #ff375f;
+    color: var(--color-danger);
   }
 
   .form-actions {
     display: flex;
-    gap: 12px;
-    margin-top: 24px;
-    padding-top: 16px;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
     border-top: 1px solid var(--border-primary);
   }
 
@@ -2330,13 +2449,13 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .btn-cancel {
@@ -2351,7 +2470,7 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .btn-submit {
-    background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-blue) 100%);
     border: none;
     color: white;
     box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
@@ -2370,19 +2489,19 @@ const API_BASE = 'https://api.ustc.dev';
   .pagination {
     display: flex;
     justify-content: center;
-    gap: 8px;
-    margin-top: 24px;
+    gap: var(--space-2);
+    margin-top: var(--space-6);
   }
 
   .pagination button {
-    padding: 8px 14px;
+    padding: var(--space-2) var(--space-3);
     background: var(--bg-tertiary);
     border: 1px solid var(--border-primary);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s ease;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    transition: all var(--duration-fast) var(--ease-default);
     cursor: pointer;
   }
 
@@ -2392,8 +2511,8 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .pagination button.active {
-    background: #0071e3;
-    border-color: #0071e3;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
     color: white;
   }
 
@@ -2406,7 +2525,7 @@ const API_BASE = 'https://api.ustc.dev';
   .charts-section {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
+    gap: var(--space-6);
   }
 
   @media (max-width: 768px) {
@@ -2418,9 +2537,9 @@ const API_BASE = 'https://api.ustc.dev';
   .chart-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: 24px;
-    transition: all 0.2s ease;
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    transition: all var(--duration-fast) var(--ease-default);
     position: relative;
     overflow: hidden;
   }
@@ -2434,11 +2553,11 @@ const API_BASE = 'https://api.ustc.dev';
     height: 3px;
     background: linear-gradient(90deg, var(--color-primary), var(--color-accent-purple));
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity var(--duration-fast) var(--ease-default);
   }
 
   .chart-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-sm);
     border-color: var(--border-hover);
   }
 
@@ -2715,8 +2834,10 @@ const API_BASE = 'https://api.ustc.dev';
   async function apiRequest(endpoint, options = {}) {
     const url = `${API_BASE}${endpoint}`;
     console.log(`[API] ${options.method || 'GET'} ${url}`);
+    if (options.body) {
+      console.log(`[API] Request body:`, options.body);
+    }
     
-    // 获取 token 并添加到请求头
     const token = getTradingToken();
     const headers = {
       'Content-Type': 'application/json',
@@ -2736,25 +2857,35 @@ const API_BASE = 'https://api.ustc.dev';
       
       console.log(`[API] Response status: ${response.status}`);
       
+      const text = await response.text();
+      console.log(`[API] Response body:`, text);
+      
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[API] HTTP Error ${response.status}:`, errorText);
+        let errorMessage = `HTTP Error: ${response.status}`;
+        try {
+          const errorData = JSON.parse(text);
+          if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (e) {
+          // Not JSON, use default message
+        }
+        
+        console.error(`[API] Error:`, errorMessage);
         
         if (response.status === 401) {
           return { success: false, error: '登录已过期，请重新登录', needLogin: true };
         }
         
-        return { success: false, error: `HTTP Error: ${response.status}`, details: errorText };
+        return { success: false, error: errorMessage };
       }
       
-      const text = await response.text();
       try {
         const data = JSON.parse(text);
-        console.log(`[API] Response data:`, data);
         return data;
       } catch (e) {
         console.error(`[API] Invalid JSON response:`, text);
-        return { success: false, error: 'Invalid JSON response', details: text };
+        return { success: false, error: 'Invalid JSON response' };
       }
     } catch (error) {
       console.error(`[API] Network error:`, error);
@@ -2779,29 +2910,49 @@ const API_BASE = 'https://api.ustc.dev';
     const priceEl = document.getElementById('current-gold-price');
     const timeEl = document.getElementById('price-update-time');
     
+    if (priceEl) {
+      priceEl.classList.add('loading');
+    }
+    
     try {
-      // 优先从KV缓存获取金价数据
+      const timestamp = Date.now();
+      const url = `${API_BASE}/api/gold?t=${timestamp}`;
+      
+      console.log('[Gold Price] Fetching from:', url);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await fetch(url, {
+        headers: { 
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        },
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const result = await response.json();
+      console.log('[Gold Price] API response:', result);
+      
       let price = null;
       let source = '';
       
-      // 调用后端API获取KV缓存的金价
-      const result = await apiRequest('/api/gold');
-      console.log('[Gold Price] API response:', result);
-      
       if (result.success) {
-        // 优先使用国内金价(SGE Au99.99)
         if (result.domestic?.price && result.domestic.price > 0) {
           price = result.domestic.price.toFixed(2);
           source = 'sge';
-        } 
-        // 如果没有国内金价，使用国际金价换算
-        else if (result.international?.price && result.international.price > 0 && result.exchangeRate) {
+        } else if (result.international?.price && result.international.price > 0 && result.exchangeRate) {
           const cnyPrice = result.international.price * result.exchangeRate / 31.1035;
           price = cnyPrice.toFixed(2);
           source = 'international';
         }
         
-        // 显示更新时间
         if (timeEl && result.timestamp) {
           const updateTime = new Date(result.timestamp);
           timeEl.textContent = updateTime.toLocaleTimeString('zh-CN', { 
@@ -2812,17 +2963,13 @@ const API_BASE = 'https://api.ustc.dev';
         }
       }
       
-      // 如果KV缓存获取失败，尝试备用API
       if (!price) {
-        console.log('[Gold Price] KV cache failed, trying backup API...');
+        console.log('[Gold Price] Primary API failed, trying backup...');
         try {
-          const response = await fetch('https://hq.sinajs.cn/list=hf_GC', {
-            method: 'GET',
-            headers: {
-              'Referer': 'https://finance.sina.com.cn'
-            }
+          const backupResponse = await fetch('https://hq.sinajs.cn/list=hf_GC', {
+            headers: { 'Referer': 'https://finance.sina.com.cn' }
           });
-          const text = await response.text();
+          const text = await backupResponse.text();
           const match = text.match(/"([^"]+)"/);
           if (match) {
             const data = match[1].split(',');
@@ -2833,14 +2980,12 @@ const API_BASE = 'https://api.ustc.dev';
             }
           }
         } catch (e) {
-          console.log('[Gold Price] Backup API also failed:', e);
+          console.log('[Gold Price] Backup API failed:', e);
         }
       }
       
       if (price && priceEl) {
-        // Check if price changed
         if (lastGoldPrice !== null && lastGoldPrice !== price) {
-          // Price changed - add animation
           priceEl.style.transform = 'scale(1.05)';
           priceEl.style.color = parseFloat(price) > parseFloat(lastGoldPrice) ? '#30d158' : '#ff375f';
           setTimeout(() => {
@@ -2855,12 +3000,11 @@ const API_BASE = 'https://api.ustc.dev';
         
         console.log(`[Gold Price] Loaded from ${source}: ¥${price}`);
       } else {
-        throw new Error('No price data available from any source');
+        throw new Error('No price data available');
       }
     } catch (error) {
       console.error('[Gold Price] Failed to load:', error);
       if (priceEl) {
-        // 如果有缓存的价格，继续显示缓存价格
         if (lastGoldPrice) {
           priceEl.textContent = lastGoldPrice;
           console.log('[Gold Price] Using cached price:', lastGoldPrice);
@@ -3178,20 +3322,13 @@ const API_BASE = 'https://api.ustc.dev';
 
     if (list) {
       list.innerHTML = Array(3).fill(0).map(() => `
-        <div class="tx-card" style="opacity: 0.7;">
-          <div class="tx-card-header">
-            <div class="tx-card-left">
-              <span class="tx-sequence" style="background: var(--bg-tertiary);">...</span>
-              <span class="tx-type-badge" style="background: var(--bg-tertiary); color: transparent;">Loading</span>
-            </div>
+        <div class="tx-skeleton">
+          <div class="tx-skeleton-header">
+            <div class="tx-skeleton-badge"></div>
+            <div class="tx-skeleton-status"></div>
           </div>
-          <div class="tx-card-body">
-            ${Array(6).fill(0).map(() => `
-              <div class="tx-data-item">
-                <span class="tx-data-label" style="background: var(--bg-tertiary); color: transparent;">Label</span>
-                <span class="tx-data-value" style="background: var(--bg-tertiary); color: transparent;">Value</span>
-              </div>
-            `).join('')}
+          <div class="tx-skeleton-grid">
+            ${Array(4).fill(0).map(() => `<div class="tx-skeleton-item"></div>`).join('')}
           </div>
         </div>
       `).join('');
@@ -3296,7 +3433,7 @@ const API_BASE = 'https://api.ustc.dev';
       const buyQty = isBuy ? t.quantity : (t.original_quantity || t.quantity);
       const sellPrice = isBuy ? '-' : (t.actual_sell_price || t.price);
       const sellQty = isBuy ? '-' : t.quantity;
-      const platform = t.platform || '-';
+      const platform = t.notes || t.platform || '-';
 
       const isEditing = editingRows.has(t.id);
 
@@ -3495,30 +3632,29 @@ const API_BASE = 'https://api.ustc.dev';
     if (!card) return;
 
     const inputs = card.querySelectorAll('.tx-inline-edit');
-    const updates = { id };
+    const updates = {};
     
     inputs.forEach(input => {
       const field = input.dataset.field;
       const value = input.value;
       
       if (field === 'created_at') {
-        updates.created_at = value;
+        if (value) updates.createdAt = value;
       } else if (field === 'buy_price') {
-        updates.buy_price = value ? parseFloat(value) : null;
+        if (value) updates.price = parseFloat(value);
       } else if (field === 'buy_qty') {
-        updates.buy_qty = value ? parseFloat(value) : null;
+        if (value) updates.quantity = parseFloat(value);
       } else if (field === 'sell_price') {
-        updates.sell_price = value ? parseFloat(value) : null;
+        if (value) updates.actualSellPrice = parseFloat(value);
       } else if (field === 'sell_qty') {
-        updates.sell_qty = value ? parseFloat(value) : null;
+        if (value) updates.quantity = parseFloat(value);
       } else if (field === 'profit') {
-        updates.profit = value ? parseFloat(value) : null;
+        if (value) updates.profit = parseFloat(value);
       } else if (field === 'platform') {
-        updates.platform = value || null;
+        updates.notes = value || null;
       }
     });
 
-    // Show loading state on save button
     const saveBtn = card.querySelector('.tx-action-btn.save');
     if (saveBtn) {
       saveBtn.disabled = true;
@@ -3526,7 +3662,7 @@ const API_BASE = 'https://api.ustc.dev';
     }
 
     try {
-      const result = await apiRequest('/api/trading/transaction', {
+      const result = await apiRequest(`/api/trading/transaction?id=${id}`, {
         method: 'PUT',
         body: JSON.stringify(updates)
       });
@@ -3535,15 +3671,12 @@ const API_BASE = 'https://api.ustc.dev';
         editingRows.delete(id);
         editedValues.delete(id);
         
-        // Update local data and refresh display
         await loadTransactions(currentPage);
         
-        // Sync profit updates to summary
         if (updates.profit !== undefined) {
           await syncProfitToSummary();
         }
         
-        // Reload stats to reflect changes
         await loadStats();
       } else {
         alert(result.error || '保存失败');
@@ -3764,7 +3897,8 @@ const API_BASE = 'https://api.ustc.dev';
       <div class="alert-item" data-id="${a.id}">
         <div class="alert-info">
           <span class="alert-type ${a.alert_type}">${a.alert_type === 'buy' ? '买' : '卖'}</span>
-          <span>¥${a.target_price}/g</span>
+          <span class="alert-price">¥${a.target_price}/g</span>
+          ${a.tolerance ? `<span class="alert-tolerance">±${a.tolerance}</span>` : ''}
         </div>
         <button class="delete-alert" onclick="deleteAlert(${a.id})">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -3824,6 +3958,20 @@ const API_BASE = 'https://api.ustc.dev';
       document.getElementById('add-type').value = type;
       document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      
+      const buyPriceGroup = document.getElementById('buy-price-group');
+      const sellPriceGroup = document.getElementById('sell-price-group');
+      const buyPriceLabel = buyPriceGroup?.querySelector('label');
+      const sellPriceLabel = sellPriceGroup?.querySelector('label');
+      
+      if (type === 'buy') {
+        if (buyPriceLabel) buyPriceLabel.innerHTML = '买入价格 (元/克) <span class="required-hint">*</span>';
+        if (sellPriceLabel) sellPriceLabel.textContent = '卖出价格 (元/克)';
+        (document.getElementById('add-sell-price') as HTMLInputElement).value = '';
+      } else {
+        if (buyPriceLabel) buyPriceLabel.textContent = '买入价格 (元/克)';
+        if (sellPriceLabel) sellPriceLabel.innerHTML = '卖出价格 (元/克) <span class="required-hint">*</span>';
+      }
     });
   });
 
@@ -3832,14 +3980,35 @@ const API_BASE = 'https://api.ustc.dev';
     
     const type = document.getElementById('add-type').value;
     const date = document.getElementById('add-date').value;
-    const buyPrice = parseFloat(document.getElementById('add-buy-price').value);
-    const sellPrice = parseFloat(document.getElementById('add-sell-price').value) || 0;
-    const quantity = parseFloat(document.getElementById('add-quantity').value);
+    const buyPriceInput = document.getElementById('add-buy-price').value;
+    const sellPriceInput = document.getElementById('add-sell-price').value;
+    const quantityInput = document.getElementById('add-quantity').value;
     const platform = document.getElementById('add-platform').value;
 
-    if (!date || !buyPrice || !quantity) {
-      alert('请填写必填字段');
+    const buyPrice = parseFloat(buyPriceInput);
+    const sellPrice = parseFloat(sellPriceInput);
+    const quantity = parseFloat(quantityInput);
+
+    if (!date) {
+      alert('请选择交易时间');
       return;
+    }
+
+    if (!quantityInput || isNaN(quantity) || quantity <= 0) {
+      alert('请输入有效的数量');
+      return;
+    }
+
+    if (type === 'buy') {
+      if (!buyPriceInput || isNaN(buyPrice) || buyPrice <= 0) {
+        alert('请输入有效的买入价格');
+        return;
+      }
+    } else {
+      if (!sellPriceInput || isNaN(sellPrice) || sellPrice <= 0) {
+        alert('请输入有效的卖出价格');
+        return;
+      }
     }
 
     const submitBtn = e.target.querySelector('.btn-submit');
@@ -3848,19 +4017,26 @@ const API_BASE = 'https://api.ustc.dev';
     (submitBtn as HTMLButtonElement).disabled = true;
 
     try {
-      const payload = {
-        type,
-        date: new Date(date).toISOString(),
-        price: type === 'buy' ? buyPrice : sellPrice,
-        actual_sell_price: type === 'sell' ? sellPrice : undefined,
-        quantity,
-        platform
-      };
-
-      const result = await apiRequest('/api/trading/transaction', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
+      let result;
+      if (type === 'buy') {
+        result = await apiRequest('/api/trading/buy', {
+          method: 'POST',
+          body: JSON.stringify({
+            price: buyPrice,
+            quantity: quantity,
+            notes: platform || null
+          })
+        });
+      } else {
+        result = await apiRequest('/api/trading/sell', {
+          method: 'POST',
+          body: JSON.stringify({
+            price: sellPrice,
+            quantity: quantity,
+            notes: platform || null
+          })
+        });
+      }
 
       if (result.success) {
         document.getElementById('add-transaction-modal')?.classList.add('hidden');
@@ -3879,19 +4055,36 @@ const API_BASE = 'https://api.ustc.dev';
 
   (window as any).addTransaction = async function(type, date, buyPrice, sellPrice, quantity, platform) {
     try {
-      const payload = {
-        type,
-        date: new Date(date).toISOString(),
-        price: type === 'buy' ? buyPrice : sellPrice,
-        actual_sell_price: type === 'sell' ? sellPrice : undefined,
-        quantity,
-        platform
-      };
-
-      const result = await apiRequest('/api/trading/transaction', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
+      const price = type === 'buy' ? parseFloat(buyPrice) : parseFloat(sellPrice);
+      const qty = parseFloat(quantity);
+      
+      if (isNaN(price) || price <= 0) {
+        return { success: false, error: '请输入有效的价格' };
+      }
+      if (isNaN(qty) || qty <= 0) {
+        return { success: false, error: '请输入有效的数量' };
+      }
+      
+      let result;
+      if (type === 'buy') {
+        result = await apiRequest('/api/trading/buy', {
+          method: 'POST',
+          body: JSON.stringify({
+            price: price,
+            quantity: qty,
+            notes: platform || null
+          })
+        });
+      } else {
+        result = await apiRequest('/api/trading/sell', {
+          method: 'POST',
+          body: JSON.stringify({
+            price: price,
+            quantity: qty,
+            notes: platform || null
+          })
+        });
+      }
 
       return result;
     } catch (error) {
@@ -4057,20 +4250,27 @@ const API_BASE = 'https://api.ustc.dev';
     
     const alertType = (document.querySelector('input[name="alert-type"]:checked') as HTMLInputElement)?.value || 'buy';
     const targetPrice = parseFloat((document.getElementById('alert-price') as HTMLInputElement)?.value);
+    const tolerance = parseFloat((document.getElementById('alert-tolerance') as HTMLInputElement)?.value) || 1.00;
 
-    if (!targetPrice) {
-      alert('请输入目标价格');
+    if (!targetPrice || isNaN(targetPrice) || targetPrice <= 0) {
+      alert('请输入有效的目标价格');
+      return;
+    }
+
+    if (isNaN(tolerance) || tolerance < 0) {
+      alert('请输入有效的容错范围');
       return;
     }
 
     try {
       const result = await apiRequest('/api/trading/alert', {
         method: 'POST',
-        body: JSON.stringify({ alertType, targetPrice })
+        body: JSON.stringify({ alertType, targetPrice, tolerance })
       });
 
       if (result.success) {
         (document.getElementById('alert-price') as HTMLInputElement).value = '';
+        (document.getElementById('alert-tolerance') as HTMLInputElement).value = '1.00';
         loadAlerts();
         alert('预警已设置');
       } else {
@@ -4079,6 +4279,25 @@ const API_BASE = 'https://api.ustc.dev';
     } catch (error) {
       console.error('Alert creation failed:', error);
       alert('Failed to create alert');
+    }
+  });
+
+  document.getElementById('alert-tolerance')?.addEventListener('input', (e) => {
+    const tolerance = parseFloat((e.target as HTMLInputElement).value) || 0;
+    const hintText = document.getElementById('tolerance-hint-text');
+    if (hintText) {
+      hintText.textContent = `当价格在目标价格 ±${tolerance.toFixed(2)} 元范围内时发送提醒`;
+    }
+  });
+
+  document.getElementById('alert-price')?.addEventListener('input', (e) => {
+    const price = parseFloat((e.target as HTMLInputElement).value) || 0;
+    const tolerance = parseFloat((document.getElementById('alert-tolerance') as HTMLInputElement)?.value) || 1.00;
+    const hintText = document.getElementById('tolerance-hint-text');
+    if (hintText && price > 0) {
+      const minPrice = (price - tolerance).toFixed(2);
+      const maxPrice = (price + tolerance).toFixed(2);
+      hintText.textContent = `当价格在 ${minPrice} - ${maxPrice} 元范围内时发送提醒`;
     }
   });
 

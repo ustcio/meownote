@@ -1,16 +1,9 @@
 ---
-import { getLangFromUrl, useTranslations } from '@i18n';
+import Icon from '@components/ui/Icon.astro';
 
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
+const months = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
 
-const months = lang === 'zh' 
-  ? ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
-  : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-const days = lang === 'zh' 
-  ? ['日', '一', '二', '三', '四', '五', '六']
-  : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const days = ['日', '一', '二', '三', '四', '五', '六'];
 
 const today = new Date();
 const currentYear = today.getFullYear();
@@ -49,7 +42,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
     <div class="contribution-card">
       <div class="contribution-header">
         <h2 class="contribution-title">
-          {lang === 'zh' ? '访问活动' : 'Visitor Activity'}
+          访问活动
         </h2>
         <p class="contribution-subtitle">{currentYear}</p>
       </div>
@@ -86,7 +79,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
                     
                     const dateStr = cellDate.toISOString().split('T')[0];
                     const displayDateStr = cellDate.toLocaleDateString(
-                      lang === 'zh' ? 'zh-CN' : 'en-US',
+                      'zh-CN',
                       { month: 'short', day: 'numeric', year: 'numeric' }
                     );
                     
@@ -108,7 +101,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
       
       <div class="contribution-legend">
         <span class="contribution-legend-text">
-          {lang === 'zh' ? '少' : 'Less'}
+          少
         </span>
         <div class="contribution-legend-cells">
           {[0, 1, 2, 3, 4, 5].map((level) => (
@@ -116,7 +109,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
           ))}
         </div>
         <span class="contribution-legend-text">
-          {lang === 'zh' ? '多' : 'More'}
+          多
         </span>
       </div>
     </div>
@@ -323,7 +316,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
         
         const existingTitle = cell.getAttribute('title') || '';
         const baseTitle = existingTitle.split(' - ')[0];
-        const countText = count === 1 ? '1 visit' : `${count} visits`;
+        const countText = count === 1 ? '1 次访问' : `${count} 次访问`;
         cell.setAttribute('title', `${baseTitle} - ${countText}`);
       }
     });
