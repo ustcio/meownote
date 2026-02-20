@@ -33,12 +33,17 @@ export const SGE_CONFIG: SGEAlertConfig = {
   INSTANT_CONFIRM_TICKS: 2,
   ATR_PERIOD: 14,
   ATR_MULTIPLIER: 1.8,
-  ZSCORE_THRESHOLD: 2.8,
+  ZSCORE_THRESHOLD: 2.5,
   EMA_FAST: 3,
   EMA_SLOW: 8,
   BASE_COOLDOWN_SECONDS: 120,
   MAX_COOLDOWN_SECONDS: 600,
   DEDUP_WINDOW_SECONDS: 180,
+  STATE_CACHE_TTL: 86400,
+  TOLERANCE_MIN: 0.5,
+  TOLERANCE_MAX: 10.0,
+  QUIET_HOURS_START: 1,
+  QUIET_HOURS_END: 6
 };
 
 // ================================================================================

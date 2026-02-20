@@ -55,12 +55,17 @@ const SGE_ALERT_CONFIG = {
   INSTANT_CONFIRM_TICKS: 2,
   ATR_PERIOD: 14,
   ATR_MULTIPLIER: 1.8,
-  ZSCORE_THRESHOLD: 2.8,
+  ZSCORE_THRESHOLD: 2.5,
   EMA_FAST: 3,
   EMA_SLOW: 8,
   BASE_COOLDOWN_SECONDS: 120,
   MAX_COOLDOWN_SECONDS: 600,
-  DEDUP_WINDOW_SECONDS: 180
+  DEDUP_WINDOW_SECONDS: 180,
+  STATE_CACHE_TTL: 86400,
+  TOLERANCE_MIN: 0.5,
+  TOLERANCE_MAX: 10.0,
+  QUIET_HOURS_START: 1,
+  QUIET_HOURS_END: 6
 };
 
 function getSessionMultiplier(beijingHour) {
@@ -142,7 +147,7 @@ async function getLevel3State(env) {
 async function saveLevel3State(env, state) {
   try {
     await env?.GOLD_PRICE_CACHE?.put('level3_state', JSON.stringify(state), {
-      expirationTtl: 86400
+      expirationTtl: SGE_ALERT_CONFIG.STATE_CACHE_TTL
     });
   } catch (e) {
     console.error('[Level3] Failed to save state:', e);
@@ -3631,13 +3636,19 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
     const toleranceResult = await toleranceStmt.first();
     if (toleranceResult) {
       userTolerance = {
-        buyTolerance: toleranceResult.buy_tolerance || SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN,
-        sellTolerance: toleranceResult.sell_tolerance || SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN
+        buyTolerance: clamp(parseFloat(toleranceResult.buy_tolerance) || SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN, SGE_ALERT_CONFIG.TOLERANCE_MIN, SGE_ALERT_CONFIG.TOLERANCE_MAX),
+        sellTolerance: clamp(parseFloat(toleranceResult.sell_tolerance) || SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN, SGE_ALERT_CONFIG.TOLERANCE_MIN, SGE_ALERT_CONFIG.TOLERANCE_MAX)
       };
       console.log(`[Level3] User tolerance loaded: buy=${userTolerance.buyTolerance}, sell=${userTolerance.sellTolerance}`);
     }
   } catch (e) {
     console.log('[Level3] Failed to load tolerance settings, using defaults');
+  }
+  
+  // 免打扰时段检查
+  if (beijingHour >= SGE_ALERT_CONFIG.QUIET_HOURS_START && beijingHour < SGE_ALERT_CONFIG.QUIET_HOURS_END) {
+    console.log(`[Level3] Quiet hours (${SGE_ALERT_CONFIG.QUIET_HOURS_START}:00-${SGE_ALERT_CONFIG.QUIET_HOURS_END}:00), skipping alerts`);
+    return;
   }
   
   const priceHistory = history?.domestic || [];
@@ -3649,9 +3660,11 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   
   let state = await getLevel3State(env);
   
-  if (state.lastPrice === 0) {
+  // EMA 初始化：首次运行或状态重置时使用当前价格初始化
+  if (!state.emaFast || state.emaFast === 0 || !state.emaSlow || state.emaSlow === 0 || state.lastPrice === 0) {
     state.emaFast = currentPrice;
     state.emaSlow = currentPrice;
+    console.log(`[Level3] EMA initialized with price: ${currentPrice}`);
   } else {
     state.emaFast = calculateEMA(state.emaFast, currentPrice, SGE_ALERT_CONFIG.EMA_FAST);
     state.emaSlow = calculateEMA(state.emaSlow, currentPrice, SGE_ALERT_CONFIG.EMA_SLOW);
