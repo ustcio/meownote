@@ -1723,6 +1723,66 @@ const API_BASE = 'https://api.ustc.dev';
     border-color: var(--border-primary);
   }
 
+  /* Recent Grid - 并排显示 */
+  .tx-recent-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+  }
+
+  .tx-recent-grid .tx-card {
+    margin-bottom: 0;
+  }
+
+  .tx-recent-grid .tx-card .tx-data-row {
+    padding: var(--space-3);
+  }
+
+  .tx-recent-grid .tx-card .tx-card-header {
+    margin-bottom: var(--space-3);
+  }
+
+  .tx-recent-grid .tx-card .tx-card-body {
+    margin-bottom: var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .tx-recent-grid .tx-card .tx-data-label {
+    font-size: 10px;
+  }
+
+  .tx-recent-grid .tx-card .tx-cell-content {
+    font-size: var(--text-base);
+    min-width: 80px;
+  }
+
+  .tx-recent-grid .tx-card .tx-sequence {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .tx-recent-grid .tx-card .tx-type-badge {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  /* History Section */
+  .tx-history-section {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-primary);
+  }
+
+  .tx-history-header {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    font-weight: var(--font-semibold);
+    margin-bottom: var(--space-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
   /* Recent Badge */
   .tx-recent-badge {
     position: absolute;
@@ -2389,6 +2449,11 @@ const API_BASE = 'https://api.ustc.dev';
     .tx-card {
       padding: var(--space-4);
       border-radius: var(--radius-2xl);
+    }
+
+    .tx-recent-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
     }
 
     .tx-data-row {
@@ -3656,10 +3721,8 @@ const API_BASE = 'https://api.ustc.dev';
     }
   }
 
-  function calculateSequence(index, page) {
-    const itemsPerPage = 10;
-    const globalIndex = (page - 1) * itemsPerPage + index + 1;
-    return `#${String(globalIndex).padStart(3, '0')}`;
+  function calculateSequence(index, total) {
+    return `#${String(total - index).padStart(3, '0')}`;
   }
 
   function formatTableDate(dateStr) {
@@ -3695,189 +3758,255 @@ const API_BASE = 'https://api.ustc.dev';
       return;
     }
 
-    // 按时间降序排序（最新在前）
     const sortedTransactions = [...transactions].sort((a, b) => {
       const dateA = new Date(a.created_at).getTime();
       const dateB = new Date(b.created_at).getTime();
       return dateB - dateA;
     });
 
-    list.innerHTML = sortedTransactions.map((t, index) => {
-      const isBuy = t.type === 'buy';
-      const profitValue = parseFloat(t.profit) || 0;
-      const profitClass = profitValue > 0 ? 'positive' : profitValue < 0 ? 'negative' : 'neutral';
-      const sequence = calculateSequence(index, page);
-      const isRecent = index < 2;
-      
-      const buyPrice = isBuy ? t.price : (t.original_buy_price || t.price);
-      const buyQty = isBuy ? t.quantity : (t.original_quantity || t.quantity);
-      const sellPrice = isBuy ? '-' : (t.actual_sell_price || t.price);
-      const sellQty = isBuy ? '-' : t.quantity;
-      const platform = t.notes || t.platform || '-';
+    const total = sortedTransactions.length;
+    const recentTransactions = sortedTransactions.slice(0, 2);
+    const historyTransactions = sortedTransactions.slice(2);
 
-      const isEditing = editingRows.has(t.id);
+    let html = '';
 
-      // 历史记录紧凑格式
-      if (!isRecent && !isEditing) {
-        return `
-          <div class="tx-compact ${t.type}" data-id="${t.id}" data-index="${index}">
-            <div class="tx-compact-left">
-              <span class="tx-compact-type ${t.type}">
-                ${isBuy ? '买' : '卖'}
-              </span>
-              <span class="tx-compact-seq">#${sequence}</span>
+    if (recentTransactions.length > 0) {
+      html += '<div class="tx-recent-grid">';
+      recentTransactions.forEach((t, index) => {
+        const isBuy = t.type === 'buy';
+        const profitValue = parseFloat(t.profit) || 0;
+        const profitClass = profitValue > 0 ? 'positive' : profitValue < 0 ? 'negative' : 'neutral';
+        const sequence = calculateSequence(index, total);
+        const isEditing = editingRows.has(t.id);
+        
+        const buyPrice = isBuy ? t.price : (t.original_buy_price || t.price);
+        const buyQty = isBuy ? t.quantity : (t.original_quantity || t.quantity);
+        const sellPrice = isBuy ? '-' : (t.actual_sell_price || t.price);
+        const sellQty = isBuy ? '-' : t.quantity;
+        const platform = t.notes || t.platform || '-';
+
+        html += `
+          <div class="tx-card ${t.type} ${isEditing ? 'editing' : ''} recent" data-id="${t.id}" data-index="${index}">
+            <div class="tx-recent-badge">${index === 0 ? '最新' : '次新'}</div>
+            <div class="tx-card-header">
+              <div class="tx-card-left">
+                <span class="tx-sequence">${sequence}</span>
+                <span class="tx-type-badge ${t.type}">
+                  ${isBuy ? `
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  ` : `
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  `}
+                  ${isBuy ? '买入' : '卖出'}
+                </span>
+              </div>
             </div>
-            <div class="tx-compact-main">
-              <div class="tx-compact-row">
-                <span class="tx-compact-label">时间</span>
-                <span class="tx-compact-value">${formatCompactDate(t.created_at)}</span>
+            
+            <div class="tx-card-body">
+              <div class="tx-data-row">
+                <div class="tx-data-item full-width">
+                  <span class="tx-data-label">交易时间</span>
+                  ${isEditing ? 
+                    `<input type="datetime-local" class="tx-inline-edit" value="${formatDateTimeLocal(t.created_at)}" data-field="created_at" data-id="${t.id}">` :
+                    `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'created_at')">${formatTableDate(t.created_at)}</span>`
+                  }
+                </div>
               </div>
-              <div class="tx-compact-row">
-                <span class="tx-compact-label">${isBuy ? '买入' : '卖出'}</span>
-                <span class="tx-compact-value">¥${t.price.toFixed(2)} × ${t.quantity.toFixed(3)}g</span>
+              
+              <div class="tx-data-row">
+                <div class="tx-data-item">
+                  <span class="tx-data-label">买入价格</span>
+                  ${isEditing ? 
+                    `<input type="number" step="0.01" class="tx-inline-edit tx-number" value="${buyPrice !== '-' ? parseFloat(buyPrice).toFixed(2) : ''}" data-field="buy_price" data-id="${t.id}" placeholder="0.00">` :
+                    `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'buy_price')">${isBuy ? `¥${t.price.toFixed(2)}` : (buyPrice !== '-' ? `¥${parseFloat(buyPrice).toFixed(2)}` : '-')}</span>`
+                  }
+                </div>
+                <div class="tx-data-item">
+                  <span class="tx-data-label">买入数量</span>
+                  ${isEditing ? 
+                    `<input type="number" step="0.001" class="tx-inline-edit tx-number" value="${buyQty !== '-' ? parseFloat(buyQty).toFixed(3) : ''}" data-field="buy_qty" data-id="${t.id}" placeholder="0.000">` :
+                    `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'buy_qty')">${buyQty !== '-' ? `${parseFloat(buyQty).toFixed(3)}g` : '-'}</span>`
+                  }
+                </div>
               </div>
+              
               ${!isBuy ? `
-              <div class="tx-compact-row">
-                <span class="tx-compact-label">收益</span>
-                <span class="tx-compact-value profit ${profitClass}">${formatCurrency(t.profit)}</span>
+              <div class="tx-data-row">
+                <div class="tx-data-item">
+                  <span class="tx-data-label">卖出价格</span>
+                  ${isEditing ? 
+                    `<input type="number" step="0.01" class="tx-inline-edit tx-number" value="${sellPrice !== '-' ? parseFloat(sellPrice).toFixed(2) : ''}" data-field="sell_price" data-id="${t.id}" placeholder="0.00">` :
+                    `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'sell_price')">${sellPrice !== '-' ? `¥${parseFloat(sellPrice).toFixed(2)}` : '-'}</span>`
+                  }
+                </div>
+                <div class="tx-data-item">
+                  <span class="tx-data-label">卖出数量</span>
+                  ${isEditing ? 
+                    `<input type="number" step="0.001" class="tx-inline-edit tx-number" value="${sellQty !== '-' ? parseFloat(sellQty).toFixed(3) : ''}" data-field="sell_qty" data-id="${t.id}" placeholder="0.000">` :
+                    `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'sell_qty')">${sellQty !== '-' ? `${parseFloat(sellQty).toFixed(3)}g` : '-'}</span>`
+                  }
+                </div>
               </div>
               ` : ''}
+              
+              <div class="tx-data-row">
+                <div class="tx-data-item">
+                  <span class="tx-data-label">收益</span>
+                  ${isEditing ? 
+                    `<input type="number" step="0.01" class="tx-inline-edit tx-number" value="${!isBuy && t.profit ? parseFloat(t.profit).toFixed(2) : ''}" data-field="profit" data-id="${t.id}" placeholder="0.00">` :
+                    `<span class="tx-data-value profit ${profitClass}" onclick="startInlineEdit(${t.id}, 'profit')">${isBuy ? '-' : formatCurrency(t.profit)}</span>`
+                  }
+                </div>
+                <div class="tx-data-item">
+                  <span class="tx-data-label">交易平台</span>
+                  ${isEditing ? 
+                    `<input type="text" class="tx-inline-edit" value="${platform !== '-' ? platform : ''}" data-field="platform" data-id="${t.id}" placeholder="平台">` :
+                    `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'platform')" title="${platform}">${platform}</span>`
+                  }
+                </div>
+              </div>
             </div>
-            <div class="tx-compact-right">
-              <button class="tx-compact-edit" onclick="startInlineEdit(${t.id}, 'price')" title="编辑">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-              </button>
-              <button class="tx-compact-delete" onclick="openDeleteModal(${t.id})" title="删除">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </button>
+            
+            <div class="tx-card-footer">
+              <div class="tx-actions">
+                ${isEditing ? `
+                  <button class="tx-action-btn save" onclick="saveInlineEdit(${t.id})" title="保存">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>保存</span>
+                  </button>
+                ` : ''}
+                <button class="tx-action-btn delete" onclick="openDeleteModal(${t.id})" title="删除">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                  <span>删除</span>
+                </button>
+              </div>
             </div>
           </div>
         `;
-      }
+      });
+      html += '</div>';
+    }
 
-      // 最近两条记录：详细卡片格式
-      return `
-        <div class="tx-card ${t.type} ${isEditing ? 'editing' : ''} ${isRecent ? 'recent' : ''}" data-id="${t.id}" data-index="${index}">
-          ${isRecent ? '<div class="tx-recent-badge">最新</div>' : ''}
-          <div class="tx-card-header">
-            <div class="tx-card-left">
-              <span class="tx-sequence">${sequence}</span>
-              <span class="tx-type-badge ${t.type}">
-                ${isBuy ? `
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
+    if (historyTransactions.length > 0) {
+      html += '<div class="tx-history-section"><div class="tx-history-header">历史记录</div>';
+      historyTransactions.forEach((t, index) => {
+        const isBuy = t.type === 'buy';
+        const profitValue = parseFloat(t.profit) || 0;
+        const profitClass = profitValue > 0 ? 'positive' : profitValue < 0 ? 'negative' : 'neutral';
+        const sequence = calculateSequence(index + 2, total);
+        const isEditing = editingRows.has(t.id);
+        
+        const buyPrice = isBuy ? t.price : (t.original_buy_price || t.price);
+        const buyQty = isBuy ? t.quantity : (t.original_quantity || t.quantity);
+        const sellPrice = isBuy ? '-' : (t.actual_sell_price || t.price);
+        const sellQty = isBuy ? '-' : t.quantity;
+
+        if (isEditing) {
+          html += `
+            <div class="tx-card ${t.type} editing" data-id="${t.id}" data-index="${index + 2}">
+              <div class="tx-card-body">
+                <div class="tx-data-row">
+                  <div class="tx-data-item">
+                    <span class="tx-data-label">交易时间</span>
+                    <input type="datetime-local" class="tx-inline-edit" value="${formatDateTimeLocal(t.created_at)}" data-field="created_at" data-id="${t.id}">
+                  </div>
+                  <div class="tx-data-item">
+                    <span class="tx-data-label">买入价格</span>
+                    <input type="number" step="0.01" class="tx-inline-edit tx-number" value="${buyPrice !== '-' ? parseFloat(buyPrice).toFixed(2) : ''}" data-field="buy_price" data-id="${t.id}">
+                  </div>
+                  <div class="tx-data-item">
+                    <span class="tx-data-label">买入数量</span>
+                    <input type="number" step="0.001" class="tx-inline-edit tx-number" value="${buyQty !== '-' ? parseFloat(buyQty).toFixed(3) : ''}" data-field="buy_qty" data-id="${t.id}">
+                  </div>
+                </div>
+                ${!isBuy ? `
+                <div class="tx-data-row">
+                  <div class="tx-data-item">
+                    <span class="tx-data-label">卖出价格</span>
+                    <input type="number" step="0.01" class="tx-inline-edit tx-number" value="${sellPrice !== '-' ? parseFloat(sellPrice).toFixed(2) : ''}" data-field="sell_price" data-id="${t.id}">
+                  </div>
+                  <div class="tx-data-item">
+                    <span class="tx-data-label">卖出数量</span>
+                    <input type="number" step="0.001" class="tx-inline-edit tx-number" value="${sellQty !== '-' ? parseFloat(sellQty).toFixed(3) : ''}" data-field="sell_qty" data-id="${t.id}">
+                  </div>
+                  <div class="tx-data-item">
+                    <span class="tx-data-label">收益</span>
+                    <input type="number" step="0.01" class="tx-inline-edit tx-number" value="${t.profit ? parseFloat(t.profit).toFixed(2) : ''}" data-field="profit" data-id="${t.id}">
+                  </div>
+                </div>
+                ` : ''}
+              </div>
+              <div class="tx-card-footer">
+                <div class="tx-actions">
+                  <button class="tx-action-btn save" onclick="saveInlineEdit(${t.id})" title="保存">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>保存</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="tx-compact ${t.type}" data-id="${t.id}" data-index="${index + 2}">
+              <div class="tx-compact-left">
+                <span class="tx-compact-type ${t.type}">${isBuy ? '买' : '卖'}</span>
+                <span class="tx-compact-seq">${sequence}</span>
+              </div>
+              <div class="tx-compact-main">
+                <div class="tx-compact-row">
+                  <span class="tx-compact-label">时间</span>
+                  <span class="tx-compact-value">${formatCompactDate(t.created_at)}</span>
+                </div>
+                <div class="tx-compact-row">
+                  <span class="tx-compact-label">买入</span>
+                  <span class="tx-compact-value">¥${parseFloat(buyPrice).toFixed(2)} × ${parseFloat(buyQty).toFixed(3)}g</span>
+                </div>
+                ${!isBuy ? `
+                <div class="tx-compact-row">
+                  <span class="tx-compact-label">卖出</span>
+                  <span class="tx-compact-value">¥${parseFloat(sellPrice).toFixed(2)} × ${parseFloat(sellQty).toFixed(3)}g</span>
+                </div>
+                <div class="tx-compact-row">
+                  <span class="tx-compact-label">收益</span>
+                  <span class="tx-compact-value profit ${profitClass}">${formatCurrency(t.profit)}</span>
+                </div>
+                ` : ''}
+              </div>
+              <div class="tx-compact-right">
+                <button class="tx-compact-edit" onclick="startInlineEdit(${t.id}, 'price')" title="编辑">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                   </svg>
-                ` : `
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                `}
-                ${isBuy ? '买入' : '卖出'}
-              </span>
-            </div>
-          </div>
-          
-          <div class="tx-card-body">
-            <div class="tx-data-row">
-              <div class="tx-data-item full-width">
-                <span class="tx-data-label">交易时间</span>
-                ${isEditing ? 
-                  `<input type="datetime-local" class="tx-inline-edit" value="${formatDateTimeLocal(t.created_at)}" data-field="created_at" data-id="${t.id}">` :
-                  `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'created_at')">${formatTableDate(t.created_at)}</span>`
-                }
-              </div>
-            </div>
-            
-            <div class="tx-data-row">
-              <div class="tx-data-item">
-                <span class="tx-data-label">买入价格</span>
-                ${isEditing ? 
-                  `<input type="number" step="0.01" class="tx-inline-edit tx-number" value="${buyPrice !== '-' ? parseFloat(buyPrice).toFixed(2) : ''}" data-field="buy_price" data-id="${t.id}" placeholder="0.00">` :
-                  `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'buy_price')">${isBuy ? `¥${t.price.toFixed(2)}` : (buyPrice !== '-' ? `¥${parseFloat(buyPrice).toFixed(2)}` : '-')}</span>`
-                }
-              </div>
-              <div class="tx-data-item">
-                <span class="tx-data-label">买入数量</span>
-                ${isEditing ? 
-                  `<input type="number" step="0.001" class="tx-inline-edit tx-number" value="${buyQty !== '-' ? parseFloat(buyQty).toFixed(3) : ''}" data-field="buy_qty" data-id="${t.id}" placeholder="0.000">` :
-                  `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'buy_qty')">${buyQty !== '-' ? `${parseFloat(buyQty).toFixed(3)}g` : '-'}</span>`
-                }
-              </div>
-            </div>
-            
-            ${!isBuy ? `
-            <div class="tx-data-row">
-              <div class="tx-data-item">
-                <span class="tx-data-label">卖出价格</span>
-                ${isEditing ? 
-                  `<input type="number" step="0.01" class="tx-inline-edit tx-number" value="${sellPrice !== '-' ? parseFloat(sellPrice).toFixed(2) : ''}" data-field="sell_price" data-id="${t.id}" placeholder="0.00">` :
-                  `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'sell_price')">${sellPrice !== '-' ? `¥${parseFloat(sellPrice).toFixed(2)}` : '-'}</span>`
-                }
-              </div>
-              <div class="tx-data-item">
-                <span class="tx-data-label">卖出数量</span>
-                ${isEditing ? 
-                  `<input type="number" step="0.001" class="tx-inline-edit tx-number" value="${sellQty !== '-' ? parseFloat(sellQty).toFixed(3) : ''}" data-field="sell_qty" data-id="${t.id}" placeholder="0.000">` :
-                  `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'sell_qty')">${sellQty !== '-' ? `${parseFloat(sellQty).toFixed(3)}g` : '-'}</span>`
-                }
-              </div>
-            </div>
-            ` : ''}
-            
-            <div class="tx-data-row">
-              <div class="tx-data-item">
-                <span class="tx-data-label">收益</span>
-                ${isEditing ? 
-                  `<input type="number" step="0.01" class="tx-inline-edit tx-number" value="${!isBuy && t.profit ? parseFloat(t.profit).toFixed(2) : ''}" data-field="profit" data-id="${t.id}" placeholder="0.00">` :
-                  `<span class="tx-data-value profit ${profitClass}" onclick="startInlineEdit(${t.id}, 'profit')">${isBuy ? '-' : formatCurrency(t.profit)}</span>`
-                }
-              </div>
-              <div class="tx-data-item">
-                <span class="tx-data-label">交易平台</span>
-                ${isEditing ? 
-                  `<input type="text" class="tx-inline-edit" value="${platform !== '-' ? platform : ''}" data-field="platform" data-id="${t.id}" placeholder="平台">` :
-                  `<span class="tx-cell-content" onclick="startInlineEdit(${t.id}, 'platform')" title="${platform}">${platform}</span>`
-                }
-              </div>
-            </div>
-          </div>
-          
-          <div class="tx-card-footer">
-            <div class="tx-time">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              ${formatTableDate(t.created_at)}
-            </div>
-            <div class="tx-actions">
-              ${isEditing ? `
-                <button class="tx-action-btn save" onclick="saveInlineEdit(${t.id})" title="保存">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  <span>保存</span>
                 </button>
-              ` : ''}
-              <button class="tx-action-btn delete" onclick="openDeleteModal(${t.id})" title="删除">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-                <span>删除</span>
-              </button>
+                <button class="tx-compact-delete" onclick="openDeleteModal(${t.id})" title="删除">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      `;
-    }).join('');
+          `;
+        }
+      });
+      html += '</div>';
+    }
+
+    list.innerHTML = html;
 
     document.querySelectorAll('.tx-inline-edit').forEach(input => {
       input.addEventListener('blur', handleInputBlur);
