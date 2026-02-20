@@ -1252,94 +1252,106 @@ const API_BASE = 'https://api.ustc.dev';
     color: #ff375f;
   }
 
+  /* ============================================
+     APPLE STYLE TRANSACTION RECORDS - NEW DESIGN
+     ============================================ */
+
+  /* Section Container */
   .transactions-section {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: var(--radius-xl);
-    padding: var(--space-5);
-    margin-bottom: var(--space-6);
+    border-radius: 24px;
+    padding: 32px;
+    margin-bottom: 32px;
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.02),
+      0 4px 12px rgba(0, 0, 0, 0.04);
   }
 
+  /* Section Header */
   .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-4);
+    margin-bottom: 24px;
     flex-wrap: wrap;
-    gap: var(--space-3);
+    gap: 16px;
   }
 
   .section-title {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    font-size: var(--text-xl);
-    font-weight: var(--font-semibold);
+    gap: 12px;
+    font-size: 20px;
+    font-weight: 600;
     color: var(--text-primary);
-    padding-bottom: var(--space-3);
-    border-bottom: 2px solid var(--color-primary);
+    letter-spacing: -0.02em;
   }
 
   .section-title svg {
     color: var(--color-primary);
+    width: 24px;
+    height: 24px;
   }
 
+  /* Add Transaction Button */
   .add-transaction-btn {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-4);
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%);
     border: none;
-    border-radius: var(--radius-lg);
+    border-radius: 12px;
     color: white;
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
   }
 
   .add-transaction-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.4);
+    box-shadow: 0 4px 16px rgba(0, 113, 227, 0.35);
   }
 
   .add-transaction-btn:active {
-    transform: translateY(0);
+    transform: scale(0.98);
   }
 
+  /* Filter Bar */
   .filter-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-5);
-    padding: var(--space-4);
+    margin-bottom: 24px;
+    padding: 16px 20px;
     background: var(--bg-secondary);
-    border-radius: var(--radius-xl);
+    border-radius: 16px;
     border: 1px solid var(--border-primary);
-    gap: var(--space-4);
+    gap: 16px;
     flex-wrap: wrap;
   }
 
   .filter-segment-control {
     display: inline-flex;
     background: var(--bg-tertiary);
-    border-radius: var(--radius-lg);
-    padding: 3px;
+    border-radius: 10px;
+    padding: 4px;
     gap: 2px;
   }
 
   .segment-btn {
-    padding: var(--space-2) var(--space-4);
+    padding: 8px 16px;
     background: transparent;
     border: none;
-    border-radius: var(--radius-md);
+    border-radius: 8px;
     color: var(--text-secondary);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    transition: all 0.2s ease;
     white-space: nowrap;
   }
 
@@ -1356,30 +1368,29 @@ const API_BASE = 'https://api.ustc.dev';
   .filter-sort-wrapper {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: 12px;
   }
 
   .sort-label {
-    font-size: var(--text-sm);
+    font-size: 13px;
     color: var(--text-tertiary);
-    font-weight: var(--font-medium);
+    font-weight: 500;
   }
 
   .sort-select {
-    padding: var(--space-2) var(--space-4);
-    padding-right: var(--space-8);
+    padding: 8px 32px 8px 12px;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
+    border-radius: 10px;
     color: var(--text-primary);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    transition: all 0.2s ease;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 12px center;
+    background-position: right 10px center;
   }
 
   .sort-select:hover {
@@ -1392,18 +1403,18 @@ const API_BASE = 'https://api.ustc.dev';
     box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
   }
 
-  /* Card-based Transaction List Styles */
+  /* Transaction List Container */
   .transactions-list-container {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: 20px;
   }
 
-  /* Apple Style Card Design */
+  /* Apple Style Transaction Card */
   .tx-card {
     position: relative;
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 20px;
     padding: 24px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1412,8 +1423,7 @@ const API_BASE = 'https://api.ustc.dev';
     -webkit-backdrop-filter: blur(20px);
     box-shadow: 
       0 1px 2px rgba(0, 0, 0, 0.02),
-      0 4px 8px rgba(0, 0, 0, 0.03),
-      0 8px 16px rgba(0, 0, 0, 0.03);
+      0 4px 12px rgba(0, 0, 0, 0.04);
   }
 
   .tx-card::before {
@@ -1429,679 +1439,10 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .tx-card:hover {
-    border-color: rgba(0, 0, 0, 0.12);
+    border-color: rgba(0, 0, 0, 0.1);
     box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.05),
+      0 4px 16px rgba(0, 0, 0, 0.06),
       0 16px 32px rgba(0, 0, 0, 0.08);
-    transform: translateY(-4px);
-  }
-
-  .tx-card:hover::before {
-    opacity: 1;
-  }
-
-  .tx-card.buy::before {
-    background: linear-gradient(90deg, #30d158, #34c759);
-  }
-
-  .tx-card.sell::before {
-    background: linear-gradient(90deg, #ff375f, #ff453a);
-  }
-
-  /* Dark mode support */
-  @media (prefers-color-scheme: dark) {
-    .tx-card {
-      background: rgba(30, 30, 30, 0.8);
-      border-color: rgba(255, 255, 255, 0.08);
-    }
-    
-    .tx-card:hover {
-      border-color: rgba(255, 255, 255, 0.12);
-    }
-  }
-
-  .tx-card.editing {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
-  }
-
-  .tx-card.editing::before {
-    opacity: 1;
-    background: linear-gradient(90deg, var(--color-primary), var(--color-accent-purple));
-  }
-
-  .tx-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--space-4);
-  }
-
-  .tx-card-left {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-  }
-
-  .tx-sequence {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 10px;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-full);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    font-weight: var(--font-medium);
-    color: var(--text-tertiary);
-    letter-spacing: 0.02em;
-  }
-
-  .tx-type-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
-    border: 1px solid transparent;
-  }
-
-  .tx-type-badge.buy {
-    background: linear-gradient(135deg, rgba(48, 209, 88, 0.15) 0%, rgba(48, 209, 88, 0.05) 100%);
-    color: #30d158;
-    border-color: rgba(48, 209, 88, 0.3);
-  }
-
-  .tx-type-badge.sell {
-    background: linear-gradient(135deg, rgba(255, 55, 95, 0.15) 0%, rgba(255, 55, 95, 0.05) 100%);
-    color: #ff375f;
-    border-color: rgba(255, 55, 95, 0.3);
-  }
-
-  .tx-type-badge svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  .tx-card-body {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-4);
-    margin-bottom: var(--space-4);
-  }
-
-  @media (max-width: 768px) {
-    .tx-card-body {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  .tx-data-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .tx-data-item.full-width {
-    grid-column: 1 / -1;
-  }
-
-  .tx-data-label {
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    font-weight: var(--font-medium);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .tx-data-value {
-    font-family: var(--font-number);
-    font-size: var(--text-lg);
-    font-weight: var(--font-bold);
-    color: var(--text-primary);
-    font-feature-settings: "tnum";
-    font-variant-numeric: tabular-nums;
-  }
-
-  .tx-data-value.price {
-    color: var(--text-primary);
-  }
-
-  .tx-data-value.profit {
-    transition: color var(--duration-fast) var(--ease-default);
-  }
-
-  .tx-data-value.profit.positive {
-    color: #30d158;
-  }
-
-  .tx-data-value.profit.negative {
-    color: #ff375f;
-  }
-
-  .tx-data-value.profit.neutral {
-    color: var(--text-tertiary);
-  }
-
-  .tx-data-sub {
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    margin-top: 2px;
-  }
-
-  .tx-card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--border-primary);
-  }
-
-  .tx-time {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    font-family: var(--font-mono);
-  }
-
-  .tx-time svg {
-    width: 14px;
-    height: 14px;
-    opacity: 0.6;
-  }
-
-  .tx-actions {
-    display: flex;
-    gap: var(--space-2);
-  }
-
-  .tx-action-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-lg);
-    font-size: var(--text-xs);
-    font-weight: var(--font-medium);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-    border: 1px solid var(--border-primary);
-    background: var(--bg-primary);
-    color: var(--text-secondary);
-  }
-
-  .tx-action-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .tx-action-btn.save {
-    border-color: rgba(48, 209, 88, 0.3);
-    color: #30d158;
-    background: rgba(48, 209, 88, 0.1);
-  }
-
-  .tx-action-btn.save:hover {
-    background: rgba(48, 209, 88, 0.15);
-    border-color: #30d158;
-  }
-
-  .tx-action-btn.delete {
-    border-color: rgba(255, 55, 95, 0.2);
-    color: var(--text-tertiary);
-  }
-
-  .tx-action-btn.delete:hover {
-    background: rgba(255, 55, 95, 0.1);
-    border-color: #ff375f;
-    color: #ff375f;
-  }
-
-  .tx-action-btn svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  /* Inline Edit Styles for Cards */
-  .tx-inline-edit {
-    width: 100%;
-    padding: 6px 10px;
-    border: 2px solid var(--color-primary);
-    border-radius: var(--radius-md);
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-size: var(--text-base);
-    font-family: var(--font-sans);
-    outline: none;
-    transition: all var(--duration-fast) var(--ease-default);
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
-  }
-
-  .tx-inline-edit:focus {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
-  }
-
-  .tx-inline-edit[type="datetime-local"] {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    padding: 5px 8px;
-  }
-
-  .tx-inline-edit.tx-number {
-    text-align: right;
-    font-family: var(--font-number);
-  }
-
-  .tx-type-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    border-radius: var(--radius-sm);
-    font-size: var(--text-xs);
-    font-weight: var(--font-medium);
-  }
-
-  .tx-type-indicator.buy {
-    background: rgba(48, 209, 88, 0.12);
-    color: #30d158;
-  }
-
-  .tx-type-indicator.sell {
-    background: rgba(255, 55, 95, 0.12);
-    color: #ff375f;
-  }
-
-  .tx-empty-table {
-    padding: var(--space-12) var(--space-8);
-    text-align: center;
-  }
-
-  .tx-empty-table-icon {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto var(--space-4);
-    color: var(--text-quaternary);
-    opacity: 0.5;
-  }
-
-  .tx-empty-table-title {
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-  }
-
-  .tx-empty-table-desc {
-    font-size: var(--text-sm);
-    color: var(--text-tertiary);
-  }
-
-  .tx-loading-row td {
-    padding: var(--space-4);
-  }
-
-  .tx-skeleton-row {
-    height: 48px;
-    background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-  }
-
-  @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-
-  .delete-confirm-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1100;
-    padding: var(--space-4);
-  }
-
-  .delete-confirm-modal.hidden {
-    display: none;
-  }
-
-  .delete-modal-backdrop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
-    animation: fadeIn var(--duration-fast) var(--ease-default);
-  }
-
-  .delete-modal-content {
-    position: relative;
-    width: 100%;
-    max-width: 340px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-2xl);
-    padding: var(--space-8);
-    text-align: center;
-    box-shadow: var(--shadow-2xl);
-    animation: modalSlideIn var(--duration-normal) var(--ease-out);
-  }
-
-  .delete-modal-icon {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto var(--space-4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 55, 95, 0.1);
-    border-radius: 50%;
-    color: #ff375f;
-  }
-
-  .delete-modal-title {
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-  }
-
-  .delete-modal-desc {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-    line-height: 1.5;
-    margin-bottom: var(--space-6);
-  }
-
-  .delete-modal-actions {
-    display: flex;
-    gap: var(--space-3);
-  }
-
-  .delete-modal-btn {
-    flex: 1;
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-    border: none;
-  }
-
-  .delete-modal-btn.cancel {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-  }
-
-  .delete-modal-btn.cancel:hover {
-    background: var(--bg-secondary);
-  }
-
-  .delete-modal-btn.confirm {
-    background: #ff375f;
-    color: white;
-  }
-
-  .delete-modal-btn.confirm:hover {
-    background: #ff453a;
-    transform: translateY(-1px);
-  }
-
-  .edit-transaction-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1100;
-    padding: var(--space-4);
-  }
-
-  .edit-transaction-modal.hidden {
-    display: none;
-  }
-
-  .edit-modal-backdrop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
-    animation: fadeIn var(--duration-fast) var(--ease-default);
-  }
-
-  .edit-modal-content {
-    position: relative;
-    width: 100%;
-    max-width: 480px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-2xl);
-    box-shadow: var(--shadow-2xl);
-    animation: modalSlideIn var(--duration-normal) var(--ease-out);
-    overflow: hidden;
-  }
-
-  .edit-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--space-5) var(--space-6);
-    border-bottom: 1px solid var(--border-primary);
-  }
-
-  .edit-modal-header h3 {
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
-    margin: 0;
-  }
-
-  #edit-transaction-form {
-    padding: var(--space-6);
-  }
-
-  .edit-form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-4);
-    margin-bottom: var(--space-6);
-  }
-
-  .edit-form-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .edit-form-group label {
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--text-secondary);
-  }
-
-  .edit-form-group input {
-    padding: var(--space-3) var(--space-4);
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
-    font-size: var(--text-sm);
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .edit-form-group input:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
-  }
-
-  .edit-form-actions {
-    display: flex;
-    gap: var(--space-3);
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--border-primary);
-  }
-
-  .edit-form-btn {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-    border: none;
-  }
-
-  .edit-form-btn.cancel {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-  }
-
-  .edit-form-btn.cancel:hover {
-    background: var(--bg-secondary);
-  }
-
-  .edit-form-btn.save {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
-    color: white;
-    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
-  }
-
-  .edit-form-btn.save:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.4);
-  }
-
-  @media (max-width: 768px) {
-    .filter-bar {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .filter-segment-control {
-      width: 100%;
-      justify-content: center;
-    }
-
-    .filter-sort-wrapper {
-      width: 100%;
-      justify-content: center;
-    }
-
-    .edit-form-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .transactions-table th,
-    .transactions-table td {
-      padding: var(--space-2) var(--space-3);
-    }
-
-    .segment-btn {
-      padding: var(--space-2) var(--space-3);
-      font-size: var(--text-xs);
-    }
-  }
-
-  .tx-skeleton {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-xl);
-    padding: var(--space-5);
-    border: 1px solid var(--border-primary);
-    animation: skeleton-pulse 1.5s ease-in-out infinite;
-  }
-
-  .tx-skeleton-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-4);
-  }
-
-  .tx-skeleton-badge {
-    width: 60px;
-    height: 24px;
-    background: var(--border-primary);
-    border-radius: var(--radius-full);
-  }
-
-  .tx-skeleton-status {
-    width: 48px;
-    height: 20px;
-    background: var(--border-primary);
-    border-radius: var(--radius-full);
-  }
-
-  .tx-skeleton-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-3);
-  }
-
-  .tx-skeleton-item {
-    height: 40px;
-    background: var(--border-primary);
-    border-radius: var(--radius-md);
-  }
-
-  @keyframes skeleton-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-
-  .tx-card {
-    position: relative;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-xl);
-    padding: var(--space-5);
-    transition: all var(--duration-normal) var(--ease-default);
-    overflow: hidden;
-  }
-
-  .tx-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--color-accent-blue), var(--color-accent-purple));
-    opacity: 0;
-    transition: opacity var(--duration-fast) var(--ease-default);
-  }
-
-  .tx-card:hover {
-    border-color: var(--border-hover);
-    box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
   }
 
@@ -2117,30 +1458,53 @@ const API_BASE = 'https://api.ustc.dev';
     background: linear-gradient(90deg, #ff375f, #ff453a);
   }
 
+  .tx-card.editing {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+  }
+
+  .tx-card.editing::before {
+    opacity: 1;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent-purple));
+  }
+
+  /* Dark Mode Support */
+  @media (prefers-color-scheme: dark) {
+    .tx-card {
+      background: rgba(40, 40, 40, 0.9);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+    
+    .tx-card:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+  }
+
+  /* Card Header */
   .tx-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: var(--space-4);
+    margin-bottom: 20px;
   }
 
   .tx-card-left {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: 12px;
   }
 
   .tx-sequence {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 4px 10px;
+    padding: 6px 12px;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-primary);
-    border-radius: var(--radius-full);
+    border-radius: 20px;
     font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    font-weight: var(--font-medium);
+    font-size: 12px;
+    font-weight: 600;
     color: var(--text-tertiary);
     letter-spacing: 0.02em;
   }
@@ -2149,23 +1513,24 @@ const API_BASE = 'https://api.ustc.dev';
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 14px;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
     border: 1px solid transparent;
+    letter-spacing: -0.01em;
   }
 
   .tx-type-badge.buy {
-    background: linear-gradient(135deg, rgba(48, 209, 88, 0.15) 0%, rgba(48, 209, 88, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(48, 209, 88, 0.12) 0%, rgba(48, 209, 88, 0.05) 100%);
     color: #30d158;
-    border-color: rgba(48, 209, 88, 0.3);
+    border-color: rgba(48, 209, 88, 0.25);
   }
 
   .tx-type-badge.sell {
-    background: linear-gradient(135deg, rgba(255, 55, 95, 0.15) 0%, rgba(255, 55, 95, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(255, 55, 95, 0.12) 0%, rgba(255, 55, 95, 0.05) 100%);
     color: #ff375f;
-    border-color: rgba(255, 55, 95, 0.3);
+    border-color: rgba(255, 55, 95, 0.25);
   }
 
   .tx-type-badge svg {
@@ -2173,43 +1538,7 @@ const API_BASE = 'https://api.ustc.dev';
     height: 14px;
   }
 
-  .tx-status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border-radius: var(--radius-full);
-    font-size: var(--text-xs);
-    font-weight: var(--font-medium);
-  }
-
-  .tx-status-badge.open {
-    background: rgba(48, 209, 88, 0.1);
-    color: #30d158;
-    border: 1px solid rgba(48, 209, 88, 0.2);
-  }
-
-  .tx-status-badge.partial {
-    background: rgba(255, 159, 10, 0.1);
-    color: #ff9f0a;
-    border: 1px solid rgba(255, 159, 10, 0.2);
-  }
-
-  .tx-status-badge.closed {
-    background: var(--bg-tertiary);
-    color: var(--text-tertiary);
-    border: 1px solid var(--border-primary);
-  }
-
-  .tx-status-badge::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-  }
-
-  /* Apple Style Card Body - Full Width Row Layout */
+  /* Card Body - Row Layout */
   .tx-card-body {
     display: flex;
     flex-direction: column;
@@ -2221,9 +1550,9 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
-    padding: 16px;
+    padding: 16px 20px;
     background: rgba(0, 0, 0, 0.02);
-    border-radius: 12px;
+    border-radius: 14px;
     border: 1px solid rgba(0, 0, 0, 0.04);
     transition: all 0.2s ease;
   }
@@ -2256,20 +1585,12 @@ const API_BASE = 'https://api.ustc.dev';
 
   .tx-data-value {
     font-family: var(--font-number);
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
     color: var(--text-primary);
     font-feature-settings: "tnum";
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
-  }
-
-  .tx-data-value.price {
-    color: var(--text-primary);
-  }
-
-  .tx-data-value.profit {
-    transition: color 0.2s ease;
   }
 
   .tx-data-value.profit.positive {
@@ -2284,26 +1605,16 @@ const API_BASE = 'https://api.ustc.dev';
     color: var(--text-tertiary);
   }
 
-  .tx-data-sub {
-    font-size: 11px;
-    color: var(--text-tertiary);
-    margin-top: 2px;
-  }
-
-  .tx-data-sub.sell-price {
-    color: #ff375f;
-  }
-
-  /* Cell content styling for clickable fields */
+  /* Clickable Cell Content */
   .tx-cell-content {
     font-family: var(--font-number);
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
     color: var(--text-primary);
     cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.02);
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.03);
     border: 1px solid transparent;
     transition: all 0.2s ease;
     display: inline-block;
@@ -2311,18 +1622,18 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .tx-cell-content:hover {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.1);
   }
 
-  /* Inline edit input styling */
+  /* Inline Edit Input */
   .tx-inline-edit {
     font-family: var(--font-number);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     color: var(--text-primary);
     background: white;
-    border: 2px solid var(--color-accent-blue);
+    border: 2px solid #0071e3;
     border-radius: 10px;
     padding: 10px 14px;
     width: 100%;
@@ -2333,7 +1644,7 @@ const API_BASE = 'https://api.ustc.dev';
 
   .tx-inline-edit:focus {
     outline: none;
-    border-color: var(--color-accent-blue);
+    border-color: #0071e3;
     box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
   }
 
@@ -2343,6 +1654,7 @@ const API_BASE = 'https://api.ustc.dev';
     font-variant-numeric: tabular-nums;
   }
 
+  /* Card Footer */
   .tx-card-footer {
     display: flex;
     justify-content: space-between;
@@ -2373,7 +1685,7 @@ const API_BASE = 'https://api.ustc.dev';
     gap: 10px;
   }
 
-  /* Apple Style Action Buttons */
+  /* Action Buttons */
   .tx-action-btn {
     display: inline-flex;
     align-items: center;
@@ -2400,24 +1712,14 @@ const API_BASE = 'https://api.ustc.dev';
     transform: scale(0.98);
   }
 
-  .tx-action-btn.edit {
-    background: linear-gradient(135deg, rgba(100, 210, 255, 0.15), rgba(100, 210, 255, 0.05));
-    color: #0071e3;
+  .tx-action-btn.save {
+    background: linear-gradient(135deg, rgba(48, 209, 88, 0.12), rgba(48, 209, 88, 0.05));
+    color: #30d158;
   }
 
-  .tx-action-btn.edit:hover {
-    background: linear-gradient(135deg, rgba(100, 210, 255, 0.25), rgba(100, 210, 255, 0.1));
-    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
-  }
-
-  .tx-action-btn.sell {
-    background: linear-gradient(135deg, rgba(255, 55, 95, 0.15), rgba(255, 55, 95, 0.05));
-    color: #ff375f;
-  }
-
-  .tx-action-btn.sell:hover {
-    background: linear-gradient(135deg, rgba(255, 55, 95, 0.25), rgba(255, 55, 95, 0.1));
-    box-shadow: 0 2px 8px rgba(255, 55, 95, 0.2);
+  .tx-action-btn.save:hover {
+    background: linear-gradient(135deg, rgba(48, 209, 88, 0.2), rgba(48, 209, 88, 0.1));
+    box-shadow: 0 2px 8px rgba(48, 209, 88, 0.2);
   }
 
   .tx-action-btn.delete {
@@ -2426,9 +1728,8 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .tx-action-btn.delete:hover {
-    background: rgba(255, 55, 95, 0.1);
-    border-color: #ff375f;
-    color: #ff375f;
+    background: rgba(255, 55, 95, 0.15);
+    box-shadow: 0 2px 8px rgba(255, 55, 95, 0.15);
   }
 
   .tx-action-btn svg {
@@ -2436,334 +1737,374 @@ const API_BASE = 'https://api.ustc.dev';
     height: 14px;
   }
 
-  .tx-sell-panel {
-    margin-top: var(--space-4);
-    padding: var(--space-4);
-    background: var(--bg-tertiary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-primary);
-    animation: slideDown var(--duration-normal) var(--ease-default);
-  }
-
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .tx-sell-panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-3);
-  }
-
-  .tx-sell-panel-title {
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .tx-sell-panel-title svg {
-    color: #ff375f;
-  }
-
-  .tx-sell-close {
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-md);
-    color: var(--text-tertiary);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .tx-sell-close:hover {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-  }
-
-  .tx-sell-form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-3);
-    margin-bottom: var(--space-3);
-  }
-
-  .tx-sell-field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-  }
-
-  .tx-sell-field label {
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    font-weight: var(--font-medium);
-  }
-
-  .tx-sell-field input {
-    padding: var(--space-2) var(--space-3);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-family: var(--font-number);
-    font-size: var(--text-sm);
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .tx-sell-field input:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-    box-shadow: 0 0 0 3px rgba(100, 210, 255, 0.15);
-  }
-
-  .tx-sell-preview {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--space-3);
-    background: var(--bg-primary);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-primary);
-    margin-bottom: var(--space-3);
-  }
-
-  .tx-sell-preview-item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .tx-sell-preview-label {
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-  }
-
-  .tx-sell-preview-value {
-    font-family: var(--font-number);
-    font-size: var(--text-base);
-    font-weight: var(--font-bold);
-  }
-
-  .tx-sell-preview-value.profit {
-    transition: color var(--duration-fast) var(--ease-default);
-  }
-
-  .tx-sell-preview-value.profit.positive {
-    color: #30d158;
-  }
-
-  .tx-sell-preview-value.profit.negative {
-    color: #ff375f;
-  }
-
-  .tx-sell-submit {
-    width: 100%;
-    padding: var(--space-3);
-    background: linear-gradient(135deg, #ff375f, #ff453a);
-    color: white;
-    border: none;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-  }
-
-  .tx-sell-submit:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(255, 55, 95, 0.3);
-  }
-
-  .tx-sell-submit:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  .tx-edit-inline {
-    margin-top: var(--space-4);
-    padding: var(--space-4);
-    background: var(--bg-tertiary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-primary);
-    animation: slideDown var(--duration-normal) var(--ease-default);
-  }
-
-  .tx-edit-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-3);
-    margin-bottom: var(--space-3);
-  }
-
-  .tx-edit-field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-  }
-
-  .tx-edit-field label {
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    font-weight: var(--font-medium);
-  }
-
-  .tx-edit-field input {
-    padding: var(--space-2) var(--space-3);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-family: var(--font-number);
-    font-size: var(--text-sm);
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .tx-edit-field input:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-    box-shadow: 0 0 0 3px rgba(100, 210, 255, 0.15);
-  }
-
-  .tx-edit-actions {
-    display: flex;
-    gap: var(--space-2);
-  }
-
-  .tx-edit-btn {
-    flex: 1;
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-  }
-
-  .tx-edit-btn.cancel {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    color: var(--text-secondary);
-  }
-
-  .tx-edit-btn.cancel:hover {
-    background: var(--bg-secondary);
-    border-color: var(--border-hover);
-  }
-
-  .tx-edit-btn.save {
-    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
-    border: none;
-    color: white;
-  }
-
-  .tx-edit-btn.save:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(100, 210, 255, 0.3);
-  }
-
-  .tx-edit-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  .tx-empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-12) var(--space-8);
+  /* Empty State */
+  .tx-empty-table {
+    padding: 64px 32px;
     text-align: center;
     background: var(--bg-secondary);
-    border-radius: var(--radius-xl);
+    border-radius: 20px;
     border: 2px dashed var(--border-primary);
   }
 
-  .tx-empty-icon {
+  .tx-empty-table-icon {
     width: 64px;
     height: 64px;
-    margin-bottom: var(--space-4);
+    margin: 0 auto 16px;
     color: var(--text-quaternary);
     opacity: 0.5;
   }
 
-  .tx-empty-title {
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
+  .tx-empty-table-title {
+    font-size: 17px;
+    font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: var(--space-2);
+    margin-bottom: 8px;
   }
 
-  .tx-empty-desc {
-    font-size: var(--text-sm);
+  .tx-empty-table-desc {
+    font-size: 14px;
     color: var(--text-tertiary);
-    max-width: 280px;
   }
 
-  .tx-profit-flash {
-    animation: profitFlash 0.6s ease-out;
+  /* Skeleton Loading */
+  .tx-skeleton {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    padding: 24px;
+    border: 1px solid var(--border-primary);
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
   }
 
-  @keyframes profitFlash {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+  .tx-skeleton-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
   }
 
-  .tx-profit-positive {
-    animation: profitPulse 1s ease-out;
+  .tx-skeleton-badge {
+    width: 60px;
+    height: 24px;
+    background: var(--border-primary);
+    border-radius: 20px;
   }
 
-  @keyframes profitPulse {
-    0% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(48, 209, 88, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0); }
+  .tx-skeleton-status {
+    width: 48px;
+    height: 20px;
+    background: var(--border-primary);
+    border-radius: 20px;
   }
 
-  .tx-number-animate {
-    display: inline-block;
-    transition: transform 0.3s ease-out;
+  .tx-skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 
-  .tx-number-animate.updating {
-    transform: translateY(-2px);
+  .tx-skeleton-item {
+    height: 40px;
+    background: var(--border-primary);
+    border-radius: 10px;
   }
 
+  @keyframes skeleton-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* Delete Confirm Modal */
+  .delete-confirm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    padding: 20px;
+  }
+
+  .delete-confirm-modal.hidden {
+    display: none;
+  }
+
+  .delete-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.2s ease;
+  }
+
+  .delete-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 340px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 32px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+  }
+
+  .delete-modal-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 55, 95, 0.1);
+    border-radius: 50%;
+    color: #ff375f;
+  }
+
+  .delete-modal-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .delete-modal-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+
+  .delete-modal-actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  .delete-modal-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+  }
+
+  .delete-modal-btn.cancel {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .delete-modal-btn.cancel:hover {
+    background: var(--bg-secondary);
+  }
+
+  .delete-modal-btn.confirm {
+    background: #ff375f;
+    color: white;
+  }
+
+  .delete-modal-btn.confirm:hover {
+    background: #ff453a;
+    transform: translateY(-1px);
+  }
+
+  /* Edit Transaction Modal */
+  .edit-transaction-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    padding: 20px;
+  }
+
+  .edit-transaction-modal.hidden {
+    display: none;
+  }
+
+  .edit-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.2s ease;
+  }
+
+  .edit-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+    overflow: hidden;
+  }
+
+  .edit-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-primary);
+  }
+
+  .edit-modal-header h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  #edit-transaction-form {
+    padding: 24px;
+  }
+
+  .edit-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .edit-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .edit-form-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .edit-form-group input {
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+
+  .edit-form-group input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+  }
+
+  .edit-form-actions {
+    display: flex;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-primary);
+  }
+
+  .edit-form-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+  }
+
+  .edit-form-btn.cancel {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .edit-form-btn.cancel:hover {
+    background: var(--bg-secondary);
+  }
+
+  .edit-form-btn.save {
+    background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+  }
+
+  .edit-form-btn.save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.4);
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Responsive Design */
   @media (max-width: 768px) {
-    .tx-card-body {
-      grid-template-columns: repeat(2, 1fr);
-      gap: var(--space-3);
+    .transactions-section {
+      padding: 20px;
+      border-radius: 16px;
     }
 
-    .tx-data-item:last-child {
-      grid-column: span 2;
+    .filter-bar {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 12px 16px;
+    }
+
+    .filter-segment-control {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .filter-sort-wrapper {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .tx-card {
+      padding: 16px;
+      border-radius: 16px;
+    }
+
+    .tx-data-row {
+      padding: 12px 16px;
     }
 
     .tx-card-footer {
       flex-direction: column;
-      gap: var(--space-3);
+      gap: 12px;
       align-items: stretch;
     }
 
@@ -2771,15 +2112,14 @@ const API_BASE = 'https://api.ustc.dev';
       justify-content: flex-end;
     }
 
-    .tx-sell-form,
-    .tx-edit-grid {
+    .edit-form-grid {
       grid-template-columns: 1fr;
     }
 
     .section-header {
       flex-direction: column;
       align-items: flex-start;
-      gap: var(--space-3);
+      gap: 12px;
     }
 
     .add-transaction-btn span {
@@ -2787,59 +2127,27 @@ const API_BASE = 'https://api.ustc.dev';
     }
 
     .add-transaction-btn {
-      padding: var(--space-2) var(--space-3);
-    }
-
-    .filter-controls {
-      flex-direction: column;
-      width: 100%;
-    }
-
-    .filter-row {
-      width: 100%;
-    }
-
-    .filter-row select {
-      flex: 1;
-    }
-
-    .form-row {
-      grid-template-columns: 1fr;
-    }
-
-    .modal-content {
-      max-width: 100%;
-      margin: var(--space-4);
-    }
-
-    .modal-header {
-      padding: var(--space-4);
-    }
-
-    #add-transaction-form {
-      padding: var(--space-4);
+      padding: 10px;
     }
   }
 
   @media (max-width: 480px) {
-    .tx-card {
-      padding: var(--space-4);
+    .tx-data-row {
+      flex-direction: column;
+      gap: 12px;
     }
 
-    .tx-card-body {
-      grid-template-columns: 1fr;
+    .tx-data-item {
+      min-width: 100%;
     }
 
-    .tx-data-item:last-child {
-      grid-column: span 1;
-    }
-
-    .tx-data-value {
-      font-size: var(--text-base);
+    .tx-data-value,
+    .tx-cell-content {
+      font-size: 15px;
     }
 
     .tx-action-btn {
-      padding: var(--space-2);
+      padding: 8px 12px;
     }
 
     .tx-action-btn span {
@@ -2847,64 +2155,7 @@ const API_BASE = 'https://api.ustc.dev';
     }
   }
 
-  .edit-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(4px);
-  }
-
-  .edit-modal-content {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-xl);
-    padding: var(--space-6);
-    width: 100%;
-    max-width: 400px;
-    box-shadow: var(--shadow-xl);
-  }
-
-  .edit-modal-content h3 {
-    margin: 0 0 var(--space-4);
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
-  }
-
-  .edit-modal-content .form-group {
-    margin-bottom: var(--space-4);
-  }
-
-  .edit-modal-content label {
-    display: block;
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--text-secondary);
-    margin-bottom: var(--space-2);
-  }
-
-  .edit-modal-content input {
-    width: 100%;
-    padding: var(--space-3);
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
-    font-size: var(--text-base);
-  }
-
-  .edit-modal-content input:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-  }
-
+  /* Add Transaction Modal */
   .add-transaction-modal {
     position: fixed;
     top: 0;
@@ -2915,7 +2166,7 @@ const API_BASE = 'https://api.ustc.dev';
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    padding: var(--space-4);
+    padding: 20px;
   }
 
   .add-transaction-modal.hidden {
@@ -2930,7 +2181,7 @@ const API_BASE = 'https://api.ustc.dev';
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
-    animation: fadeIn var(--duration-fast) var(--ease-default);
+    animation: fadeIn 0.2s ease;
   }
 
   .modal-content {
@@ -2939,33 +2190,22 @@ const API_BASE = 'https://api.ustc.dev';
     max-width: 480px;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: var(--radius-2xl);
-    box-shadow: var(--shadow-2xl);
-    animation: modalSlideIn var(--duration-normal) var(--ease-out);
-  }
-
-  @keyframes modalSlideIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
   }
 
   .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-5) var(--space-6);
+    padding: 20px 24px;
     border-bottom: 1px solid var(--border-primary);
   }
 
   .modal-header h3 {
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
+    font-size: 17px;
+    font-weight: 600;
     color: var(--text-primary);
     margin: 0;
   }
@@ -2978,10 +2218,10 @@ const API_BASE = 'https://api.ustc.dev';
     justify-content: center;
     background: transparent;
     border: none;
-    border-radius: var(--radius-md);
+    border-radius: 8px;
     color: var(--text-tertiary);
     cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    transition: all 0.2s ease;
   }
 
   .modal-close:hover {
@@ -2990,36 +2230,36 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   #add-transaction-form {
-    padding: var(--space-6);
+    padding: 24px;
   }
 
   .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-4);
+    gap: 16px;
   }
 
   #add-transaction-form .form-group {
-    margin-bottom: var(--space-4);
+    margin-bottom: 16px;
   }
 
   #add-transaction-form label {
     display: block;
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
+    font-size: 13px;
+    font-weight: 500;
     color: var(--text-secondary);
-    margin-bottom: var(--space-2);
+    margin-bottom: 8px;
   }
 
   #add-transaction-form input {
     width: 100%;
-    padding: var(--space-3) var(--space-4);
+    padding: 12px 16px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
+    border-radius: 10px;
     color: var(--text-primary);
-    font-size: var(--text-base);
-    transition: all var(--duration-fast) var(--ease-default);
+    font-size: 15px;
+    transition: all 0.2s ease;
   }
 
   #add-transaction-form input:focus {
@@ -3034,7 +2274,7 @@ const API_BASE = 'https://api.ustc.dev';
 
   .type-toggle {
     display: flex;
-    gap: var(--space-2);
+    gap: 8px;
   }
 
   .type-btn {
@@ -3042,16 +2282,16 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3);
+    gap: 8px;
+    padding: 12px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
+    border-radius: 10px;
     color: var(--text-secondary);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    transition: all 0.2s ease;
   }
 
   .type-btn:hover {
@@ -3078,9 +2318,9 @@ const API_BASE = 'https://api.ustc.dev';
 
   .form-actions {
     display: flex;
-    gap: var(--space-3);
-    margin-top: var(--space-6);
-    padding-top: var(--space-4);
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 16px;
     border-top: 1px solid var(--border-primary);
   }
 
@@ -3090,13 +2330,13 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    transition: all 0.2s ease;
   }
 
   .btn-cancel {
@@ -3111,7 +2351,7 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .btn-submit {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%);
     border: none;
     color: white;
     box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
@@ -3126,56 +2366,24 @@ const API_BASE = 'https://api.ustc.dev';
     transform: translateY(0);
   }
 
-  .edit-actions {
-    display: flex;
-    gap: var(--space-3);
-    margin-top: var(--space-5);
-  }
-
-  .edit-actions button {
-    flex: 1;
-    padding: var(--space-3);
-    border: none;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .btn-cancel {
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-  }
-
-  .btn-cancel:hover {
-    background: var(--border-primary);
-  }
-
-  .btn-save {
-    background: var(--color-accent-blue);
-    color: white;
-  }
-
-  .btn-save:hover {
-    background: #1a8cff;
-  }
-
+  /* Pagination */
   .pagination {
     display: flex;
     justify-content: center;
-    gap: var(--space-2);
-    margin-top: var(--space-4);
+    gap: 8px;
+    margin-top: 24px;
   }
 
   .pagination button {
-    padding: var(--space-2) var(--space-3);
+    padding: 8px 14px;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
+    border-radius: 10px;
     color: var(--text-primary);
-    font-size: var(--text-sm);
-    transition: all var(--duration-fast) var(--ease-default);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
   }
 
   .pagination button:hover:not(:disabled) {
@@ -3184,8 +2392,8 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .pagination button.active {
-    background: var(--color-accent-blue);
-    border-color: var(--color-accent-blue);
+    background: #0071e3;
+    border-color: #0071e3;
     color: white;
   }
 
@@ -3194,10 +2402,11 @@ const API_BASE = 'https://api.ustc.dev';
     cursor: not-allowed;
   }
 
+  /* Charts Section */
   .charts-section {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-4);
+    gap: 24px;
   }
 
   @media (max-width: 768px) {
@@ -3209,9 +2418,9 @@ const API_BASE = 'https://api.ustc.dev';
   .chart-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: var(--radius-xl);
-    padding: var(--space-5);
-    transition: all var(--duration-fast) var(--ease-default);
+    border-radius: 20px;
+    padding: 24px;
+    transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
   }
@@ -3225,11 +2434,11 @@ const API_BASE = 'https://api.ustc.dev';
     height: 3px;
     background: linear-gradient(90deg, var(--color-primary), var(--color-accent-purple));
     opacity: 0;
-    transition: opacity var(--duration-fast) var(--ease-default);
+    transition: opacity 0.2s ease;
   }
 
   .chart-card:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
     border-color: var(--border-hover);
   }
 
@@ -3241,35 +2450,35 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-4);
+    margin-bottom: 20px;
     flex-wrap: wrap;
-    gap: var(--space-2);
+    gap: 12px;
   }
 
   .chart-title {
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
+    font-size: 17px;
+    font-weight: 600;
     color: var(--text-primary);
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 8px;
   }
 
   .chart-subtitle {
-    font-size: var(--text-xs);
+    font-size: 12px;
     color: var(--text-tertiary);
   }
 
   .chart-legend {
     display: flex;
-    gap: var(--space-3);
+    gap: 16px;
   }
 
   .legend-item {
     display: flex;
     align-items: center;
-    gap: var(--space-1);
-    font-size: var(--text-xs);
+    gap: 6px;
+    font-size: 12px;
     color: var(--text-secondary);
   }
 
@@ -3281,12 +2490,10 @@ const API_BASE = 'https://api.ustc.dev';
 
   .legend-dot.buy {
     background: #30d158;
-    box-shadow: 0 0 4px #30d158;
   }
 
   .legend-dot.sell {
     background: #ff375f;
-    box-shadow: 0 0 4px #ff375f;
   }
 
   .chart-loading {
@@ -3297,9 +2504,9 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-2);
+    gap: 8px;
     color: var(--text-tertiary);
-    font-size: var(--text-sm);
+    font-size: 14px;
   }
 
   .chart-loading.hidden {
@@ -3324,7 +2531,7 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     align-items: flex-end;
     gap: 6px;
-    padding: var(--space-4) 0;
+    padding: 16px 0;
     position: relative;
   }
 
@@ -3349,16 +2556,15 @@ const API_BASE = 'https://api.ustc.dev';
 
   .chart-bar {
     width: 16px;
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    border-radius: 4px 4px 0 0;
     min-height: 4px;
-    transition: all var(--duration-fast) var(--ease-default);
+    transition: all 0.2s ease;
     position: relative;
     cursor: pointer;
   }
 
   .chart-bar:hover {
     opacity: 0.85;
-    transform: scaleY(1.02);
   }
 
   .chart-bar.buy {
@@ -3377,148 +2583,15 @@ const API_BASE = 'https://api.ustc.dev';
     background: linear-gradient(180deg, #ff375f, #ff453a);
   }
 
-  .chart-bar::after {
-    content: attr(data-value);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity var(--duration-fast) var(--ease-default);
-    background: var(--bg-elevated);
-    padding: 4px 8px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-primary);
-    z-index: 10;
-  }
-
-  .chart-bar:hover::after {
-    opacity: 1;
-  }
-
   .chart-bar-label {
-    font-size: var(--text-xs);
+    font-size: 11px;
     color: var(--text-tertiary);
-    margin-top: var(--space-2);
+    margin-top: 8px;
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
-  }
-
-  .chart-tooltip {
-    position: absolute;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    padding: var(--space-3);
-    box-shadow: var(--shadow-lg);
-    z-index: 100;
-    min-width: 150px;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity var(--duration-fast) var(--ease-default);
-  }
-
-  .chart-tooltip.visible {
-    opacity: 1;
-  }
-
-  .tooltip-title {
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-    border-bottom: 1px solid var(--border-primary);
-    padding-bottom: var(--space-1);
-  }
-
-  .tooltip-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: var(--text-xs);
-    margin: var(--space-1) 0;
-  }
-
-  .tooltip-label {
-    color: var(--text-tertiary);
-  }
-
-  .tooltip-value {
-    font-weight: var(--font-medium);
-    font-family: var(--font-number);
-  }
-
-  .tooltip-value.buy {
-    color: #30d158;
-  }
-
-  .tooltip-value.sell {
-    color: #ff375f;
-  }
-
-  .monthly-chart-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-3);
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-primary);
-    transition: all var(--duration-fast) var(--ease-default);
-    cursor: pointer;
-    min-width: 100px;
-  }
-
-  .monthly-chart-item:hover {
-    border-color: var(--color-primary);
-    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.15);
-    transform: translateY(-2px);
-  }
-
-  .monthly-week-label {
-    font-size: var(--text-xs);
-    color: var(--text-secondary);
-    font-weight: var(--font-medium);
-  }
-
-  .monthly-profit {
-    font-size: var(--text-lg);
-    font-weight: var(--font-bold);
-    font-family: var(--font-number);
-  }
-
-  .monthly-profit.positive {
-    color: #30d158;
-  }
-
-  .monthly-profit.negative {
-    color: #ff375f;
-  }
-
-  .monthly-stats {
-    display: flex;
-    gap: var(--space-3);
-    font-size: var(--text-xs);
-  }
-
-  .monthly-stat {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-  }
-
-  .monthly-stat.buy {
-    color: #30d158;
-  }
-
-  .monthly-stat.sell {
-    color: #ff375f;
   }
 
   .chart-empty {
@@ -3528,47 +2601,32 @@ const API_BASE = 'https://api.ustc.dev';
     justify-content: center;
     height: 100%;
     color: var(--text-tertiary);
-    gap: var(--space-2);
+    gap: 8px;
   }
 
   .chart-empty svg {
     opacity: 0.5;
   }
 
-  .chart-error {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--color-error);
-    gap: var(--space-2);
-  }
-
   .empty-state {
     text-align: center;
-    padding: var(--space-12) var(--space-8);
+    padding: 48px 32px;
     color: var(--text-tertiary);
     background: var(--bg-secondary);
-    border-radius: var(--radius-xl);
+    border-radius: 20px;
     border: 2px dashed var(--border-primary);
-    margin: var(--space-4);
+    margin: 16px;
   }
 
   .empty-state svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.4;
+    margin-bottom: 16px;
+    opacity: 0.5;
     color: var(--text-tertiary);
   }
 
   .empty-state p {
-    font-size: var(--text-base);
-    font-weight: var(--font-medium);
-  }
-
-  .empty-state svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
+    font-size: 15px;
+    font-weight: 500;
   }
 </style>
 
