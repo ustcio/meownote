@@ -2608,11 +2608,6 @@ async function handleGoldHistory(request, env, ctx) {
     const url = new URL(request.url);
     const range = url.searchParams.get('range') || '1m';
     
-    const now = Date.now();
-    const labels = [];
-    const domesticPrices = [];
-    const internationalPrices = [];
-    
     let days = 30;
     switch (range) {
       case '1m': days = 30; break;
@@ -2621,28 +2616,78 @@ async function handleGoldHistory(request, env, ctx) {
       case '1y': days = 365; break;
     }
     
-    const baseDomestic = 580;
-    const baseInternational = 2650;
+    const labels = [];
+    const domesticPrices = [];
+    const internationalPrices = [];
+    const now = Date.now();
     
-    for (let i = days; i >= 0; i--) {
-      const date = new Date(now - i * 24 * 60 * 60 * 1000);
-      labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    if (env?.GOLD_PRICE_CACHE) {
+      const dailyData = [];
       
-      const trend = Math.sin(i / 30) * 20;
-      const noise = (Math.random() - 0.5) * 10;
-      domesticPrices.push(Math.round((baseDomestic + trend + noise) * 100) / 100);
+      for (let i = days; i >= 0; i--) {
+        const date = new Date(now - i * 24 * 60 * 60 * 1000);
+        const dateStr = date.toISOString().split('T')[0];
+        labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+        
+        try {
+          const historyKey = `history:${dateStr}`;
+          const dayHistory = await env.GOLD_PRICE_CACHE.get(historyKey);
+          
+          if (dayHistory) {
+            const parsed = JSON.parse(dayHistory);
+            if (parsed && parsed.length > 0) {
+              const lastEntry = parsed[parsed.length - 1];
+              domesticPrices.push(lastEntry.domestic || 0);
+              internationalPrices.push(lastEntry.international || 0);
+              dailyData.push({ date: dateStr, domestic: lastEntry.domestic, international: lastEntry.international });
+            } else {
+              domesticPrices.push(null);
+              internationalPrices.push(null);
+            }
+          } else {
+            const statsKey = `stats:${dateStr}`;
+            const stats = await env.GOLD_PRICE_CACHE.get(statsKey);
+            if (stats) {
+              const parsedStats = JSON.parse(stats);
+              domesticPrices.push(parsedStats.domesticClose || parsedStats.domesticHigh || null);
+              internationalPrices.push(parsedStats.internationalClose || parsedStats.internationalHigh || null);
+            } else {
+              domesticPrices.push(null);
+              internationalPrices.push(null);
+            }
+          }
+        } catch (e) {
+          console.error(`[History] Error fetching data for ${dateStr}:`, e.message);
+          domesticPrices.push(null);
+          internationalPrices.push(null);
+        }
+      }
       
-      const intTrend = Math.sin(i / 30) * 50;
-      const intNoise = (Math.random() - 0.5) * 30;
-      internationalPrices.push(Math.round((baseInternational + intTrend + intNoise) * 100) / 100);
+      const validDomestic = domesticPrices.filter(p => p !== null);
+      const validInternational = internationalPrices.filter(p => p !== null);
+      
+      if (validDomestic.length > 0 || validInternational.length > 0) {
+        return jsonResponse({
+          success: true,
+          range,
+          labels,
+          domestic: { prices: domesticPrices },
+          international: { prices: internationalPrices },
+          dataSource: 'kv_storage',
+          dataPoints: { domestic: validDomestic.length, international: validInternational.length }
+        });
+      }
     }
     
+    console.log('[History] No KV data available, returning empty result');
     return jsonResponse({
       success: true,
       range,
       labels,
       domestic: { prices: domesticPrices },
-      international: { prices: internationalPrices }
+      international: { prices: internationalPrices },
+      dataSource: 'empty',
+      message: 'No historical data available yet. Data will be collected over time.'
     });
     
   } catch (error) {
