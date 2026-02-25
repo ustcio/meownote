@@ -3846,7 +3846,6 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   }
   
   const domesticInstant = analyzeInstantChange(history?.domestic || [], domestic?.price, userTolerance.buyTolerance, SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD);
-  const internationalInstant = analyzeInstantChange(history?.international || [], international?.price, userTolerance.sellTolerance, SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD);
   
   if (domesticInstant.triggered) {
     alerts.push({
@@ -3859,25 +3858,10 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
     console.log('[Gold Alert] INSTANT domestic price change detected:', domesticInstant.message);
   }
   
-  if (internationalInstant.triggered) {
-    alerts.push({
-      type: 'instant',
-      name: '国际黄金 (XAU)',
-      price: international.price,
-      unit: '美元/盎司',
-      ...internationalInstant
-    });
-    console.log('[Gold Alert] INSTANT international price change detected:', internationalInstant.message);
-  }
-  
-  // 窗口/短期：用「含当前点」的序列，保证最近 N 个点包含最新价
   const domesticSeries = [...(history?.domestic || []), domestic?.price].filter(v => v != null && v > 0);
-  const internationalSeries = [...(history?.international || []), international?.price].filter(v => v != null && v > 0);
   const domesticWindow = analyzeWindow(domesticSeries, userTolerance.buyTolerance);
-  const internationalWindow = analyzeWindow(internationalSeries, userTolerance.sellTolerance);
   
   const domesticShortTerm = analyzeShortTerm(domesticSeries, userTolerance.buyTolerance);
-  const internationalShortTerm = analyzeShortTerm(internationalSeries, userTolerance.sellTolerance);
   
   if (domesticWindow.triggered) {
     alerts.push({
@@ -3889,16 +3873,6 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
     });
   }
   
-  if (internationalWindow.triggered) {
-    alerts.push({
-      type: 'window',
-      name: '国际黄金 (XAU)',
-      price: international.price,
-      unit: '美元/盎司',
-      ...internationalWindow
-    });
-  }
-  
   if (domesticShortTerm.triggered) {
     alerts.push({
       type: 'short_term',
@@ -3906,16 +3880,6 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
       price: domestic.price,
       unit: '元/克',
       ...domesticShortTerm
-    });
-  }
-  
-  if (internationalShortTerm.triggered) {
-    alerts.push({
-      type: 'short_term',
-      name: '国际黄金 (XAU)',
-      price: international.price,
-      unit: '美元/盎司',
-      ...internationalShortTerm
     });
   }
   
@@ -4237,7 +4201,6 @@ async function sendAlertEmail(alerts, env) {
                 <li>滑动窗口：最近${SGE_ALERT_CONFIG.WINDOW_SIZE}个采集点内，最高价与最低价差值超过阈值</li>
                 <li>短期波动：当前价格与最近${SGE_ALERT_CONFIG.SHORT_TERM_POINTS}分钟内价格偏差超过阈值</li>
                 <li>国内黄金阈值：${SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN} 元/克</li>
-                <li>国际黄金阈值：${SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN} 美元/盎司</li>
               </ul>
             </div>
             
