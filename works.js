@@ -5935,9 +5935,41 @@ async function handleSellTransaction(request, env) {
     const sellQuantity = quantityValidation.value;
     const totalAmount = sellPrice * sellQuantity;
 
-    const FORCED_BUY_PRICE = 1136;
-    const buyPrice = FORCED_BUY_PRICE;
-    const profit = (sellPrice - buyPrice) * sellQuantity;
+    let profit = 0;
+    let buyPrice = 0;
+
+    if (buyTransactionId) {
+      const buyStmt = env.DB.prepare('SELECT * FROM gold_transactions WHERE id = ? AND type = ?');
+      const buyResult = await buyStmt.bind(buyTransactionId, 'buy').first();
+      
+      if (buyResult) {
+        buyPrice = buyResult.price;
+        profit = (sellPrice - buyPrice) * sellQuantity;
+      }
+    } else {
+      const avgStmt = env.DB.prepare(`
+        SELECT 
+          COALESCE(SUM(quantity), 0) as total_bought,
+          COALESCE(SUM(total_amount), 0) as total_cost
+        FROM gold_transactions 
+        WHERE type = 'buy' AND status = 'completed'
+      `);
+      const avgResult = await avgStmt.first();
+      
+      const avgStmtSell = env.DB.prepare(`
+        SELECT COALESCE(SUM(quantity), 0) as total_sold
+        FROM gold_transactions 
+        WHERE type = 'sell' AND status = 'completed'
+      `);
+      const avgResultSell = await avgStmtSell.first();
+      
+      const holdings = (avgResult?.total_bought || 0) - (avgResultSell?.total_sold || 0);
+      
+      if (holdings > 0 && avgResult?.total_cost > 0) {
+        buyPrice = avgResult.total_cost / avgResult.total_bought;
+        profit = (sellPrice - buyPrice) * sellQuantity;
+      }
+    }
 
     const stmt = env.DB.prepare(`
       INSERT INTO gold_transactions (type, price, quantity, total_amount, actual_sell_price, profit, notes, status, created_at, completed_at)
