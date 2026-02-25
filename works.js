@@ -5881,7 +5881,7 @@ async function handleSellTransaction(request, env) {
   }
 
   try {
-    const { buyTransactionId, actualSellPrice, price, quantity, notes } = await request.json();
+    const { buyTransactionId, actualSellPrice, price, quantity, notes, buyPrice: inputBuyPrice } = await request.json();
     const sellPriceInput = actualSellPrice || price;
 
     const priceValidation = validateNumber(sellPriceInput, TRADING_CONFIG.MIN_PRICE, TRADING_CONFIG.MAX_PRICE, 'Sell price');
@@ -5901,7 +5901,10 @@ async function handleSellTransaction(request, env) {
     let profit = 0;
     let buyPrice = 0;
 
-    if (buyTransactionId) {
+    if (inputBuyPrice && !isNaN(inputBuyPrice) && inputBuyPrice > 0) {
+      buyPrice = parseFloat(inputBuyPrice);
+      profit = (sellPrice - buyPrice) * sellQuantity;
+    } else if (buyTransactionId) {
       const buyStmt = env.DB.prepare('SELECT * FROM gold_transactions WHERE id = ? AND type = ?');
       const buyResult = await buyStmt.bind(buyTransactionId, 'buy').first();
       
