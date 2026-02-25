@@ -45,34 +45,34 @@ function calculateReliability(domestic, international, sgeData, intlData) {
 }
 
 const SGE_ALERT_CONFIG = Object.freeze({
-  WINDOW_SIZE: 5,
-  SHORT_TERM_POINTS: 12,
+  WINDOW_SIZE: 10,
+  SHORT_TERM_POINTS: 15,
   VOL_WINDOW: 20,
-  BASE_THRESHOLD_YUAN: 2.0,
-  MIN_THRESHOLD_YUAN: 1.2,
-  INSTANT_ABS_THRESHOLD: 1.5,
-  INSTANT_PERCENT_THRESHOLD: 0.20,
-  INSTANT_CONFIRM_TICKS: 2,
+  BASE_THRESHOLD_YUAN: 2.5,
+  MIN_THRESHOLD_YUAN: 1.5,
+  INSTANT_ABS_THRESHOLD: 2.0,
+  INSTANT_PERCENT_THRESHOLD: 0.30,
+  INSTANT_CONFIRM_TICKS: 3,
   ATR_PERIOD: 14,
-  ATR_MULTIPLIER: 1.8,
-  ZSCORE_THRESHOLD: 2.2,
+  ATR_MULTIPLIER: 2.0,
+  ZSCORE_THRESHOLD: 2.5,
   EMA_FAST: 3,
   EMA_SLOW: 8,
-  BASE_COOLDOWN_SECONDS: 90,
-  MAX_COOLDOWN_SECONDS: 180,
-  DEDUP_WINDOW_SECONDS: 120,
+  BASE_COOLDOWN_SECONDS: 180,
+  MAX_COOLDOWN_SECONDS: 300,
+  DEDUP_WINDOW_SECONDS: 240,
   STATE_CACHE_TTL: 86400,
   TOLERANCE_MIN: 0.5,
   TOLERANCE_MAX: 10.0,
   QUIET_HOURS_START: 1,
   QUIET_HOURS_END: 6,
-  TICK_NOISE_FILTER: 0.20,
-  MICRO_VOL_THRESHOLD: 0.7,
-  NIGHT_SCORE_BOOST: 0,
-  TREND_CONFIRM_BARS: 3,
-  MIN_DIRECTION_CONSENSUS: 0.55,
-  EMA_THRESHOLD_FACTOR: 0.7,
-  EMA_MIN_PERCENT: 0.00012
+  TICK_NOISE_FILTER: 0.30,
+  MICRO_VOL_THRESHOLD: 0.8,
+  NIGHT_SCORE_BOOST: 1,
+  TREND_CONFIRM_BARS: 4,
+  MIN_DIRECTION_CONSENSUS: 0.60,
+  EMA_THRESHOLD_FACTOR: 0.8,
+  EMA_MIN_PERCENT: 0.00015
 });
 
 function getSessionMultiplier(beijingHour) {
@@ -4267,13 +4267,15 @@ async function sendAlertEmail(alerts, env) {
 // ================================================================================
 
 const NOTIFICATION_CONFIG = {
-  COOLDOWN_MINUTES: 0.5,
+  COOLDOWN_MINUTES: 3,
   MAX_RETRIES: 3,
   RETRY_DELAY: 500,
-  INSTANT_COOLDOWN_SECONDS: 15,
+  INSTANT_COOLDOWN_SECONDS: 60,
   PARALLEL_SEND: true,
-  MAX_EMAILS_PER_HOUR: 10,
-  MAX_EMAILS_PER_DAY: 50
+  MAX_EMAILS_PER_HOUR: 5,
+  MAX_EMAILS_PER_DAY: 20,
+  ALERT_COOLDOWN_MINUTES: 5,
+  AI_SIGNAL_COOLDOWN_MINUTES: 10
 };
 
 // 统一发送通知到所有渠道（Email + Feishu + MeoW）
@@ -5933,41 +5935,9 @@ async function handleSellTransaction(request, env) {
     const sellQuantity = quantityValidation.value;
     const totalAmount = sellPrice * sellQuantity;
 
-    let profit = 0;
-    let buyPrice = 0;
-
-    if (buyTransactionId) {
-      const buyStmt = env.DB.prepare('SELECT * FROM gold_transactions WHERE id = ? AND type = ?');
-      const buyResult = await buyStmt.bind(buyTransactionId, 'buy').first();
-      
-      if (buyResult) {
-        buyPrice = buyResult.price;
-        profit = (sellPrice - buyPrice) * sellQuantity;
-      }
-    } else {
-      const avgStmt = env.DB.prepare(`
-        SELECT 
-          COALESCE(SUM(quantity), 0) as total_bought,
-          COALESCE(SUM(total_amount), 0) as total_cost
-        FROM gold_transactions 
-        WHERE type = 'buy' AND status = 'completed'
-      `);
-      const avgResult = await avgStmt.first();
-      
-      const avgStmtSell = env.DB.prepare(`
-        SELECT COALESCE(SUM(quantity), 0) as total_sold
-        FROM gold_transactions 
-        WHERE type = 'sell' AND status = 'completed'
-      `);
-      const avgResultSell = await avgStmtSell.first();
-      
-      const holdings = (avgResult?.total_bought || 0) - (avgResultSell?.total_sold || 0);
-      
-      if (holdings > 0 && avgResult?.total_cost > 0) {
-        buyPrice = avgResult.total_cost / avgResult.total_bought;
-        profit = (sellPrice - buyPrice) * sellQuantity;
-      }
-    }
+    const FORCED_BUY_PRICE = 1136;
+    const buyPrice = FORCED_BUY_PRICE;
+    const profit = (sellPrice - buyPrice) * sellQuantity;
 
     const stmt = env.DB.prepare(`
       INSERT INTO gold_transactions (type, price, quantity, total_amount, actual_sell_price, profit, notes, status, created_at, completed_at)
