@@ -10,65 +10,140 @@ const API_BASE = 'https://api.ustc.dev';
 >
   <section class="trading" id="trading-app">
     <div class="trading-login" id="login-section">
-      <div class="login-card">
-        <div class="login-icon">
-          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-            <circle cx="32" cy="32" r="28" stroke="url(#lockGradient)" stroke-width="3" fill="none"/>
-            <rect x="20" y="28" width="24" height="20" rx="3" fill="url(#lockGradient)"/>
-            <path d="M24 28V24C24 19.5817 27.5817 16 32 16C36.4183 16 40 19.5817 40 24V28" stroke="url(#lockGradient)" stroke-width="3" fill="none"/>
-            <circle cx="32" cy="38" r="3" fill="white"/>
-            <rect x="31" y="40" width="2" height="5" fill="white"/>
-            <defs>
-              <linearGradient id="lockGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#64d2ff"/>
-                <stop offset="100%" style="stop-color:#bf5af2"/>
-              </linearGradient>
-            </defs>
-          </svg>
+      <div class="login-split-container">
+        <div class="login-animation-side">
+          <div class="animation-content">
+            <div class="character-container" id="login-character">
+              <svg class="character-svg" viewBox="0 0 200 200" width="200" height="200">
+                <defs>
+                  <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#64d2ff"/>
+                    <stop offset="100%" style="stop-color:#bf5af2"/>
+                  </linearGradient>
+                  <linearGradient id="cheekGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ff6b9d"/>
+                    <stop offset="100%" style="stop-color:#ff8fab"/>
+                  </linearGradient>
+                </defs>
+                
+                <g class="character-body" transform="translate(100, 120)">
+                  <ellipse cx="0" cy="30" rx="50" ry="40" fill="url(#bodyGradient)" opacity="0.9"/>
+                </g>
+                
+                <g class="character-head" transform="translate(100, 80)">
+                  <circle cx="0" cy="0" r="55" fill="url(#bodyGradient)"/>
+                  
+                  <g class="character-ears">
+                    <ellipse cx="-50" cy="-30" rx="15" ry="20" fill="url(#bodyGradient)" transform="rotate(-20)"/>
+                    <ellipse cx="50" cy="-30" rx="15" ry="20" fill="url(#bodyGradient)" transform="rotate(20)"/>
+                  </g>
+                  
+                  <g class="character-eyes">
+                    <g class="eye left-eye" transform="translate(-20, -5)">
+                      <ellipse cx="0" cy="0" rx="12" ry="14" fill="white"/>
+                      <circle class="pupil" cx="0" cy="0" r="6" fill="#333"/>
+                      <circle class="eye-highlight" cx="3" cy="-3" r="3" fill="white" opacity="0.8"/>
+                    </g>
+                    <g class="eye right-eye" transform="translate(20, -5)">
+                      <ellipse cx="0" cy="0" rx="12" ry="14" fill="white"/>
+                      <circle class="pupil" cx="0" cy="0" r="6" fill="#333"/>
+                      <circle class="eye-highlight" cx="3" cy="-3" r="3" fill="white" opacity="0.8"/>
+                    </g>
+                  </g>
+                  
+                  <g class="character-eyebrows">
+                    <path class="eyebrow left-eyebrow" d="M-30 -25 Q-20 -30 -10 -25" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <path class="eyebrow right-eyebrow" d="M10 -25 Q20 -30 30 -25" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/>
+                  </g>
+                  
+                  <g class="character-nose">
+                    <ellipse cx="0" cy="10" rx="5" ry="3" fill="rgba(0,0,0,0.1)"/>
+                  </g>
+                  
+                  <g class="character-mouth">
+                    <path class="mouth" d="M-15 25 Q0 35 15 25" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/>
+                  </g>
+                  
+                  <g class="character-cheeks">
+                    <circle class="cheek left-cheek" cx="-35" cy="15" r="10" fill="url(#cheekGradient)" opacity="0.6"/>
+                    <circle class="cheek right-cheek" cx="35" cy="15" r="10" fill="url(#cheekGradient)" opacity="0.6"/>
+                  </g>
+                </g>
+                
+                <g class="character-arms">
+                  <ellipse class="arm left-arm" cx="55" cy="140" rx="12" ry="20" fill="url(#bodyGradient)" transform="rotate(-15, 55, 140)"/>
+                  <ellipse class="arm right-arm" cx="145" cy="140" rx="12" ry="20" fill="url(#bodyGradient)" transform="rotate(15, 145, 140)"/>
+                </g>
+              </svg>
+              
+              <div class="speech-bubble" id="speech-bubble">
+                <span class="speech-text" id="speech-text">嗨！准备好登录了吗？</span>
+              </div>
+            </div>
+            
+            <div class="animation-decoration">
+              <div class="floating-shape shape-1"></div>
+              <div class="floating-shape shape-2"></div>
+              <div class="floating-shape shape-3"></div>
+              <div class="floating-shape shape-4"></div>
+            </div>
+          </div>
+          
+          <div class="animation-info">
+            <h2 class="animation-title">黄金交易管理系统</h2>
+            <p class="animation-desc">实时监控金价波动，智能预警提醒，让您的投资决策更加从容</p>
+          </div>
         </div>
-        <h1 class="login-title">超级管理员</h1>
-        <p class="login-subtitle">登录以访问交易管理系统</p>
+        
+        <div class="login-form-side">
+          <div class="login-card">
+            <div class="login-header">
+              <h1 class="login-title">超级管理员</h1>
+              <p class="login-subtitle">登录以访问交易管理系统</p>
+            </div>
 
-        <form class="login-form" id="trading-login-form">
-          <div class="form-group">
-            <label for="trading-username">用户名</label>
-            <div class="input-wrapper">
-              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              <input type="text" id="trading-username" name="username" required placeholder="请输入用户名" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="trading-password">密码</label>
-            <div class="input-wrapper">
-              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-              <input type="password" id="trading-password" name="password" required placeholder="请输入密码" />
-              <button type="button" class="toggle-password" id="trading-toggle-pwd">
-                <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-                <svg class="eye-closed hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                  <line x1="1" y1="1" x2="23" y2="23"></line>
-                </svg>
+            <form class="login-form" id="trading-login-form">
+              <div class="form-group">
+                <label for="trading-username">用户名</label>
+                <div class="input-wrapper">
+                  <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  <input type="text" id="trading-username" name="username" required placeholder="请输入用户名" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="trading-password">密码</label>
+                <div class="input-wrapper">
+                  <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  <input type="password" id="trading-password" name="password" required placeholder="请输入密码" />
+                  <button type="button" class="toggle-password" id="trading-toggle-pwd">
+                    <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <svg class="eye-closed hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <button type="submit" class="login-btn" id="trading-login-btn">
+                <span class="btn-text">登录</span>
+                <span class="btn-loading hidden">
+                  <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/>
+                  </svg>
+                </span>
               </button>
-            </div>
+            </form>
           </div>
-          <button type="submit" class="login-btn" id="trading-login-btn">
-            <span class="btn-text">登录</span>
-            <span class="btn-loading hidden">
-              <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/>
-              </svg>
-            </span>
-          </button>
-        </form>
+        </div>
       </div>
     </div>
 
@@ -548,20 +623,207 @@ const API_BASE = 'https://api.ustc.dev';
 
   .trading-login {
     display: flex;
+    align-items: stretch;
+    justify-content: center;
+    min-height: calc(100vh - var(--header-total-height));
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-split-container {
+    display: flex;
+    width: 100%;
+    max-width: 1400px;
+    min-height: 100%;
+  }
+
+  .login-animation-side {
+    flex: 0 0 60%;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: calc(100vh - var(--header-total-height) - var(--space-16));
+    padding: var(--space-8);
+    background: linear-gradient(135deg, rgba(100, 210, 255, 0.05) 0%, rgba(191, 90, 242, 0.05) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .animation-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .character-container {
+    position: relative;
+    margin-bottom: var(--space-8);
+  }
+
+  .character-svg {
+    filter: drop-shadow(0 10px 30px rgba(100, 210, 255, 0.3));
+    animation: characterFloat 4s ease-in-out infinite;
+  }
+
+  @keyframes characterFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  .character-svg .pupil {
+    transition: transform 0.1s ease-out;
+  }
+
+  .character-svg .mouth {
+    transition: d 0.3s ease;
+  }
+
+  .character-svg .eyebrow {
+    transition: d 0.3s ease;
+  }
+
+  .speech-bubble {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-3) var(--space-4);
+    box-shadow: var(--shadow-lg);
+    white-space: nowrap;
+    animation: bubblePop 0.5s ease-out;
+  }
+
+  .speech-bubble::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid var(--card-bg);
+  }
+
+  .speech-text {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  @keyframes bubblePop {
+    0% { opacity: 0; transform: translateX(-50%) scale(0.8); }
+    100% { opacity: 1; transform: translateX(-50%) scale(1); }
+  }
+
+  .animation-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .floating-shape {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.1;
+    animation: floatShape 6s ease-in-out infinite;
+  }
+
+  .shape-1 {
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, #64d2ff, #bf5af2);
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+  }
+
+  .shape-2 {
+    width: 150px;
+    height: 150px;
+    background: linear-gradient(135deg, #bf5af2, #64d2ff);
+    top: 60%;
+    right: 15%;
+    animation-delay: 1.5s;
+  }
+
+  .shape-3 {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #ff6b9d, #64d2ff);
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 3s;
+  }
+
+  .shape-4 {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #64d2ff, #ff6b9d);
+    top: 30%;
+    right: 25%;
+    animation-delay: 4.5s;
+  }
+
+  @keyframes floatShape {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(10deg); }
+  }
+
+  .animation-info {
+    text-align: center;
+    z-index: 2;
+  }
+
+  .animation-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+    background: linear-gradient(135deg, #64d2ff, #bf5af2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .animation-desc {
+    font-size: var(--text-base);
+    color: var(--text-tertiary);
+    max-width: 400px;
+    line-height: 1.6;
+  }
+
+  .login-form-side {
+    flex: 0 0 40%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+    background: var(--bg-primary);
+    border-left: 1px solid var(--border-light);
   }
 
   .login-card {
     width: 100%;
-    max-width: 400px;
+    max-width: 380px;
     padding: var(--space-8);
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-xl);
+  }
+
+  .login-header {
     text-align: center;
+    margin-bottom: var(--space-6);
   }
 
   .login-icon {
@@ -584,7 +846,6 @@ const API_BASE = 'https://api.ustc.dev';
   .login-subtitle {
     font-size: var(--text-sm);
     color: var(--text-tertiary);
-    margin-bottom: var(--space-6);
   }
 
   .login-form {
@@ -622,6 +883,143 @@ const API_BASE = 'https://api.ustc.dev';
   .input-wrapper input {
     width: 100%;
     padding: var(--space-3) var(--space-4);
+    padding-left: var(--space-10);
+    font-size: var(--text-base);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+  }
+
+  .input-wrapper input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(100, 210, 255, 0.2);
+  }
+
+  .input-wrapper input::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: var(--space-3);
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    padding: var(--space-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+  }
+
+  .toggle-password:hover {
+    color: var(--text-secondary);
+  }
+
+  .login-btn {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: white;
+    background: linear-gradient(135deg, #64d2ff, #bf5af2);
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+  }
+
+  .login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(100, 210, 255, 0.4);
+  }
+
+  .login-btn:active {
+    transform: translateY(0);
+  }
+
+  .login-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .login-btn .spinner {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @media (max-width: 1024px) {
+    .login-split-container {
+      flex-direction: column;
+    }
+
+    .login-animation-side {
+      flex: none;
+      padding: var(--space-6);
+      min-height: 300px;
+    }
+
+    .login-form-side {
+      flex: none;
+      border-left: none;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .character-svg {
+      width: 150px;
+      height: 150px;
+    }
+
+    .animation-title {
+      font-size: var(--text-2xl);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .login-animation-side {
+      min-height: 250px;
+      padding: var(--space-4);
+    }
+
+    .login-form-side {
+      padding: var(--space-4);
+    }
+
+    .login-card {
+      padding: var(--space-6);
+    }
+
+    .character-svg {
+      width: 120px;
+      height: 120px;
+    }
+
+    .speech-bubble {
+      display: none;
+    }
+
+    .animation-title {
+      font-size: var(--text-xl);
+    }
+
+    .animation-desc {
+      font-size: var(--text-sm);
+    }
+  }
     padding-left: calc(var(--space-3) + 26px);
     background: var(--bg-tertiary);
     border: 1px solid var(--border-primary);
@@ -3065,6 +3463,183 @@ const API_BASE = 'https://api.ustc.dev';
   let currentPage = 1;
   let totalPages = 1;
 
+  const CharacterAnimator = {
+    leftPupil: null,
+    rightPupil: null,
+    leftEyebrow: null,
+    rightEyebrow: null,
+    mouth: null,
+    speechBubble: null,
+    speechText: null,
+    characterContainer: null,
+    
+    init() {
+      this.leftPupil = document.querySelector('.left-eye .pupil');
+      this.rightPupil = document.querySelector('.right-eye .pupil');
+      this.leftEyebrow = document.querySelector('.left-eyebrow');
+      this.rightEyebrow = document.querySelector('.right-eyebrow');
+      this.mouth = document.querySelector('.character-mouth .mouth');
+      this.speechBubble = document.getElementById('speech-bubble');
+      this.speechText = document.getElementById('speech-text');
+      this.characterContainer = document.getElementById('login-character');
+      
+      this.initEyeTracking();
+      this.initFormTracking();
+    },
+    
+    initEyeTracking() {
+      let rafId = null;
+      let targetX = 0;
+      let targetY = 0;
+      let currentX = 0;
+      let currentY = 0;
+      
+      const updateEyePosition = () => {
+        currentX += (targetX - currentX) * 0.15;
+        currentY += (targetY - currentY) * 0.15;
+        
+        const maxOffset = 4;
+        const offsetX = Math.max(-maxOffset, Math.min(maxOffset, currentX * maxOffset));
+        const offsetY = Math.max(-maxOffset, Math.min(maxOffset, currentY * maxOffset));
+        
+        if (this.leftPupil) {
+          this.leftPupil.setAttribute('cx', offsetX.toString());
+          this.leftPupil.setAttribute('cy', offsetY.toString());
+        }
+        if (this.rightPupil) {
+          this.rightPupil.setAttribute('cx', offsetX.toString());
+          this.rightPupil.setAttribute('cy', offsetY.toString());
+        }
+        
+        rafId = requestAnimationFrame(updateEyePosition);
+      };
+      
+      document.addEventListener('mousemove', (e) => {
+        if (!this.characterContainer) return;
+        
+        const rect = this.characterContainer.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        targetX = (e.clientX - centerX) / (window.innerWidth / 2);
+        targetY = (e.clientY - centerY) / (window.innerHeight / 2);
+      });
+      
+      updateEyePosition();
+    },
+    
+    initFormTracking() {
+      const usernameInput = document.getElementById('trading-username');
+      const passwordInput = document.getElementById('trading-password');
+      const loginBtn = document.getElementById('trading-login-btn');
+      
+      usernameInput?.addEventListener('focus', () => {
+        this.setExpression('curious');
+        this.setSpeech('好的，让我看看你的账号~');
+      });
+      
+      usernameInput?.addEventListener('input', () => {
+        this.setExpression('focused');
+      });
+      
+      passwordInput?.addEventListener('focus', () => {
+        this.setExpression('shy');
+        this.setSpeech('我会保护你的密码~');
+      });
+      
+      passwordInput?.addEventListener('input', () => {
+        this.setExpression('focused');
+      });
+      
+      loginBtn?.addEventListener('click', () => {
+        this.setExpression('anticipating');
+        this.setSpeech('正在验证...');
+      });
+    },
+    
+    setExpression(type) {
+      const expressions = {
+        neutral: {
+          eyebrows: ['M-30 -25 Q-20 -30 -10 -25', 'M10 -25 Q20 -30 30 -25'],
+          mouth: 'M-15 25 Q0 35 15 25'
+        },
+        curious: {
+          eyebrows: ['M-30 -30 Q-20 -35 -10 -25', 'M10 -25 Q20 -30 30 -25'],
+          mouth: 'M-10 25 Q0 30 10 25'
+        },
+        focused: {
+          eyebrows: ['M-30 -22 Q-20 -25 -10 -22', 'M10 -22 Q20 -25 30 -22'],
+          mouth: 'M-10 28 Q0 28 10 28'
+        },
+        shy: {
+          eyebrows: ['M-30 -25 Q-20 -30 -10 -25', 'M10 -25 Q20 -30 30 -25'],
+          mouth: 'M-12 28 Q0 32 12 28'
+        },
+        anticipating: {
+          eyebrows: ['M-30 -28 Q-20 -32 -10 -25', 'M10 -25 Q20 -32 30 -28'],
+          mouth: 'M-8 28 Q0 25 8 28'
+        },
+        happy: {
+          eyebrows: ['M-30 -25 Q-20 -28 -10 -25', 'M10 -25 Q20 -28 30 -25'],
+          mouth: 'M-18 25 Q0 40 18 25'
+        },
+        sad: {
+          eyebrows: ['M-30 -20 Q-20 -25 -10 -22', 'M10 -22 Q20 -25 30 -20'],
+          mouth: 'M-15 30 Q0 22 15 30'
+        },
+        confused: {
+          eyebrows: ['M-30 -30 Q-20 -32 -10 -25', 'M10 -22 Q20 -28 30 -25'],
+          mouth: 'M-10 28 Q5 32 10 25'
+        }
+      };
+      
+      const expr = expressions[type] || expressions.neutral;
+      
+      if (this.leftEyebrow) {
+        this.leftEyebrow.setAttribute('d', expr.eyebrows[0]);
+      }
+      if (this.rightEyebrow) {
+        this.rightEyebrow.setAttribute('d', expr.eyebrows[1]);
+      }
+      if (this.mouth) {
+        this.mouth.setAttribute('d', expr.mouth);
+      }
+    },
+    
+    setSpeech(text) {
+      if (this.speechText) {
+        this.speechText.textContent = text;
+      }
+      if (this.speechBubble) {
+        this.speechBubble.style.animation = 'none';
+        this.speechBubble.offsetHeight;
+        this.speechBubble.style.animation = 'bubblePop 0.5s ease-out';
+      }
+    },
+    
+    onLoginSuccess() {
+      this.setExpression('happy');
+      this.setSpeech('欢迎回来！');
+    },
+    
+    onLoginError(type) {
+      if (type === 'password') {
+        this.setExpression('sad');
+        this.setSpeech('密码好像不对哦~');
+      } else if (type === 'username') {
+        this.setExpression('confused');
+        this.setSpeech('这个账号我没见过~');
+      } else {
+        this.setExpression('sad');
+        this.setSpeech('出了点问题...');
+      }
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    CharacterAnimator.init();
+  });
+
   function showLogin() {
     loginSection?.classList.remove('hidden');
     dashboardSection?.classList.add('hidden');
@@ -4639,11 +5214,14 @@ const API_BASE = 'https://api.ustc.dev';
       const password = formData.get('password') as string;
 
       if (!username || !password) {
+        CharacterAnimator.onLoginError('username');
         alert('请输入用户名和密码');
         return;
       }
 
       console.log('[Login] Attempting login for user:', username);
+      CharacterAnimator.setExpression('anticipating');
+      CharacterAnimator.setSpeech('正在验证...');
       
       const result = await apiRequest('/api/trading/login', {
         method: 'POST',
@@ -4654,18 +5232,28 @@ const API_BASE = 'https://api.ustc.dev';
 
       if (result.success) {
         console.log('[Login] Login successful, saving token and showing dashboard...');
-        // 保存 token 到 localStorage
+        CharacterAnimator.onLoginSuccess();
         if (result.token) {
           setTradingToken(result.token);
         }
-        showDashboard();
+        setTimeout(() => showDashboard(), 800);
       } else {
         const errorMsg = result.error || '登录失败';
         console.error('[Login] Login failed:', errorMsg);
+        
+        if (errorMsg.includes('密码')) {
+          CharacterAnimator.onLoginError('password');
+        } else if (errorMsg.includes('用户') || errorMsg.includes('账号')) {
+          CharacterAnimator.onLoginError('username');
+        } else {
+          CharacterAnimator.onLoginError('network');
+        }
+        
         alert(errorMsg);
       }
     } catch (error) {
       console.error('[Login] Exception:', error);
+      CharacterAnimator.onLoginError('network');
       alert('登录请求失败，请检查网络连接');
     } finally {
       btnText?.classList.remove('hidden');
