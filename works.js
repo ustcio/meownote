@@ -2226,7 +2226,25 @@ async function submitDataToAIAnalysis(env, crawlResult) {
     if (combinedAnalysis.hasValue && combinedAnalysis.signals) {
       const hasActiveAlerts = tradingParams.alerts && tradingParams.alerts.length > 0;
       if (hasActiveAlerts) {
-        await sendAITradingSignal(env, combinedAnalysis, crawlResult.domestic?.price, tradingParams);
+        const lastPriceKey = 'last_ai_signal_price';
+        const lastPriceStr = await env.GOLD_PRICE_CACHE?.get(lastPriceKey);
+        const currentPrice = crawlResult.domestic?.price;
+        
+        if (lastPriceStr && currentPrice) {
+          const lastPrice = parseFloat(lastPriceStr);
+          const priceChange = Math.abs(currentPrice - lastPrice);
+          
+          if (priceChange < SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN) {
+            console.log(`[AI Signal] Price change (${priceChange.toFixed(2)}) below threshold, skipping notification`);
+            return;
+          }
+        }
+        
+        await sendAITradingSignal(env, combinedAnalysis, currentPrice, tradingParams);
+        
+        if (currentPrice) {
+          await env.GOLD_PRICE_CACHE?.put(lastPriceKey, String(currentPrice), { expirationTtl: 3600 });
+        }
       }
     }
     
@@ -2467,9 +2485,27 @@ async function scheduledGoldAnalysis(env, ctx) {
       const COOLDOWN = 5 * 60 * 1000; // 5分钟冷却期（智能分析买入信号）
 
       if (!lastNotify || (now - parseInt(lastNotify)) > COOLDOWN) {
+        const lastPriceKey = 'last_analysis_price';
+        const lastPriceStr = await env.GOLD_PRICE_CACHE.get(lastPriceKey);
+        const currentPrice = result.analysis.domestic?.currentPrice;
+        
+        if (lastPriceStr && currentPrice) {
+          const lastPrice = parseFloat(lastPriceStr);
+          const priceChange = Math.abs(currentPrice - lastPrice);
+          
+          if (priceChange < SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN) {
+            console.log(`[Scheduled Analysis] Price change (${priceChange.toFixed(2)}) below threshold, skipping notification`);
+            return;
+          }
+        }
+        
         console.log('[Scheduled Analysis] Buy signal detected, sending notifications...');
         await sendAnalysisNotification(result.analysis, env);
         await env.GOLD_PRICE_CACHE.put(lastNotifyKey, String(now), { expirationTtl: 3600 });
+        
+        if (currentPrice) {
+          await env.GOLD_PRICE_CACHE.put(lastPriceKey, String(currentPrice), { expirationTtl: 3600 });
+        }
       } else {
         console.log('[Scheduled Analysis] Buy signal detected but in cooldown period');
       }
@@ -3866,11 +3902,28 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   const rollingStd = calculateStd(priceHistory.slice(-SGE_ALERT_CONFIG.VOL_WINDOW));
   const rollingMean = calculateMean(priceHistory.slice(-SGE_ALERT_CONFIG.VOL_WINDOW));
   
-  const prevPrice = priceHistory.length > 0 ? priceHistory[priceHistory.length - 1] : domestic?.price;
+  const prevPrice = priceHistory.length > 0 ? priceHistory[priceHistory.length - 1] : null;
   const currentPrice = domestic?.price;
   
-  const priceChange = currentPrice && prevPrice ? Math.abs(currentPrice - prevPrice) : 0;
-  const priceChangePercent = prevPrice > 0 ? (priceChange / prevPrice) * 100 : 0;
+  if (!currentPrice || currentPrice <= 0) {
+    console.log('[Gold Alert] Invalid current price, skipping alert');
+    return;
+  }
+  
+  if (!prevPrice || prevPrice <= 0) {
+    console.log('[Gold Alert] No valid previous price, skipping alert');
+    return;
+  }
+  
+  const priceChange = Math.abs(currentPrice - prevPrice);
+  const priceChangePercent = (priceChange / prevPrice) * 100;
+  
+  console.log(`[Gold Alert] Price check: current=${currentPrice.toFixed(2)}, prev=${prevPrice.toFixed(2)}, change=${priceChange.toFixed(2)} (${priceChangePercent.toFixed(3)}%)`);
+  
+  if (priceChange < SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN) {
+    console.log(`[Gold Alert] Price change (${priceChange.toFixed(2)}) below threshold (${SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN}), skipping notification`);
+    return;
+  }
   
   const stabilityResult = checkPriceStability(
     priceHistory,
@@ -3913,11 +3966,6 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   
   console.log(`[Level3] Score: ${fusionResult.score}/${fusionResult.requiredScore} (release: ${fusionResult.releaseScore}), Direction: ${fusionResult.direction}, Confidence: ${(fusionResult.confidence * 100).toFixed(1)}%, Consensus: ${((fusionResult.directionConsensus || 0) * 100).toFixed(0)}%, State: ${fusionResult.hysteresisState}`);
   console.log(`[Level3] EMA Fast/Slow: ${state.emaFast.toFixed(2)}/${state.emaSlow.toFixed(2)}, ATR: ${atr.toFixed(2)}, Std: ${rollingStd.toFixed(2)}, TrendConfirm: ${state.trendConfirmCount || 0}`);
-
-  if (priceChange < SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN) {
-    console.log(`[Gold Alert] Price change (${priceChange.toFixed(2)}) below threshold (${SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN}), skipping notification`);
-    return;
-  }
 
   const alerts = [];
   
