@@ -165,29 +165,6 @@ a:hover {
   color: var(--interactive-primary-hover);
 }
 
-/* ==================== Brand Font ==================== */
-.brand-text {
-  font-family: var(--font-brand);
-  font-weight: var(--font-regular);
-  letter-spacing: 0.02em;
-}
-
-/* ==================== Labels & Small Text ==================== */
-.label {
-  font-family: var(--font-sans);
-  font-weight: var(--font-medium);
-  font-size: var(--text-sm);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-}
-
-.caption {
-  font-family: var(--font-sans);
-  font-weight: var(--font-regular);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-}
-
 /* ==================== Interactive Elements ==================== */
 button {
   font-family: var(--font-sans);
@@ -493,22 +470,6 @@ textarea::placeholder {
   }
 }
 
-.animate-fade-in {
-  animation: fadeIn var(--duration-normal) var(--ease-default);
-}
-
-.animate-slide-up {
-  animation: slideUp var(--duration-normal) var(--ease-default);
-}
-
-.animate-slide-down {
-  animation: slideDown var(--duration-normal) var(--ease-default);
-}
-
-.animate-scale-in {
-  animation: scaleIn var(--duration-normal) var(--ease-default);
-}
-
 /* ==================== Hover Card Effect ==================== */
 .hover-lift {
   transition: transform var(--duration-normal) var(--ease-default),
@@ -528,12 +489,4 @@ textarea::placeholder {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-
-/* ==================== Glass Effect ==================== */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: var(--surface-blur);
-  -webkit-backdrop-filter: var(--surface-blur);
-  border: 1px solid var(--glass-border);
 }
