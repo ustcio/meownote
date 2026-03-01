@@ -3990,14 +3990,19 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   const domesticInstant = analyzeInstantChange(history?.domestic || [], domestic?.price, userTolerance.buyTolerance, SGE_ALERT_CONFIG.INSTANT_PERCENT_THRESHOLD);
   
   if (domesticInstant.triggered) {
-    alerts.push({
-      type: 'instant',
-      name: '国内黄金 (mAuT+D)',
-      price: domestic.price,
-      unit: '元/克',
-      ...domesticInstant
-    });
-    console.log('[Gold Alert] INSTANT domestic price change detected:', domesticInstant.message);
+    const instantPriceChange = Math.abs(parseFloat(domesticInstant.currentPrice) - parseFloat(domesticInstant.previousPrice));
+    if (instantPriceChange >= SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN) {
+      alerts.push({
+        type: 'instant',
+        name: '国内黄金 (mAuT+D)',
+        price: domestic.price,
+        unit: '元/克',
+        ...domesticInstant
+      });
+      console.log('[Gold Alert] INSTANT domestic price change detected:', domesticInstant.message);
+    } else {
+      console.log(`[Gold Alert] Instant change (${instantPriceChange.toFixed(2)}) below threshold, skipping`);
+    }
   }
   
   const domesticSeries = [...(history?.domestic || []), domestic?.price].filter(v => v != null && v > 0);
@@ -4006,23 +4011,37 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   const domesticShortTerm = analyzeShortTerm(domesticSeries, userTolerance.buyTolerance);
   
   if (domesticWindow.triggered) {
-    alerts.push({
-      type: 'window',
-      name: '国内黄金 (mAuT+D)',
-      price: domestic.price,
-      unit: '元/克',
-      ...domesticWindow
-    });
+    const windowCurrentPrice = parseFloat(domesticWindow.current);
+    const windowPrevPrice = priceHistory.length > 1 ? priceHistory[priceHistory.length - 2] : windowCurrentPrice;
+    const windowPriceChange = Math.abs(windowCurrentPrice - windowPrevPrice);
+    
+    if (windowPriceChange >= SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN) {
+      alerts.push({
+        type: 'window',
+        name: '国内黄金 (mAuT+D)',
+        price: domestic.price,
+        unit: '元/克',
+        ...domesticWindow
+      });
+    } else {
+      console.log(`[Gold Alert] Window change (${windowPriceChange.toFixed(2)}) below threshold, skipping`);
+    }
   }
   
   if (domesticShortTerm.triggered) {
-    alerts.push({
-      type: 'short_term',
-      name: '国内黄金 (mAuT+D)',
-      price: domestic.price,
-      unit: '元/克',
-      ...domesticShortTerm
-    });
+    const shortTermPriceChange = Math.abs(parseFloat(domesticShortTerm.current) - parseFloat(domesticShortTerm.comparedTo));
+    
+    if (shortTermPriceChange >= SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN) {
+      alerts.push({
+        type: 'short_term',
+        name: '国内黄金 (mAuT+D)',
+        price: domestic.price,
+        unit: '元/克',
+        ...domesticShortTerm
+      });
+    } else {
+      console.log(`[Gold Alert] Short-term change (${shortTermPriceChange.toFixed(2)}) below threshold, skipping`);
+    }
   }
   
   if (alerts.length === 0) {
