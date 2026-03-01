@@ -3914,8 +3914,8 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   console.log(`[Level3] Score: ${fusionResult.score}/${fusionResult.requiredScore} (release: ${fusionResult.releaseScore}), Direction: ${fusionResult.direction}, Confidence: ${(fusionResult.confidence * 100).toFixed(1)}%, Consensus: ${((fusionResult.directionConsensus || 0) * 100).toFixed(0)}%, State: ${fusionResult.hysteresisState}`);
   console.log(`[Level3] EMA Fast/Slow: ${state.emaFast.toFixed(2)}/${state.emaSlow.toFixed(2)}, ATR: ${atr.toFixed(2)}, Std: ${rollingStd.toFixed(2)}, TrendConfirm: ${state.trendConfirmCount || 0}`);
 
-  if (stabilityResult.isStable && priceChange < SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN) {
-    console.log(`[Gold Alert] Price stable (change: ${priceChange.toFixed(2)} < threshold: ${SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN}), skipping notification`);
+  if (priceChange < SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN) {
+    console.log(`[Gold Alert] Price change (${priceChange.toFixed(2)}) below threshold (${SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN}), skipping notification`);
     return;
   }
 
