@@ -23,34 +23,37 @@ import type {
 // SGE Level 3 生产配置
 // ================================================================================
 export const SGE_CONFIG: SGEAlertConfig = Object.freeze({
-  WINDOW_SIZE: 5,
-  SHORT_TERM_POINTS: 12,
+  WINDOW_SIZE: 10,
+  SHORT_TERM_POINTS: 15,
   VOL_WINDOW: 20,
-  BASE_THRESHOLD_YUAN: 2.0,
-  MIN_THRESHOLD_YUAN: 1.2,
-  INSTANT_ABS_THRESHOLD: 1.8,
-  INSTANT_PERCENT_THRESHOLD: 0.25,
-  INSTANT_CONFIRM_TICKS: 2,
+  BASE_THRESHOLD_YUAN: 4.0,
+  MIN_THRESHOLD_YUAN: 1.5,
+  INSTANT_ABS_THRESHOLD: 4.0,
+  INSTANT_PERCENT_THRESHOLD: 0.35,
+  INSTANT_CONFIRM_TICKS: 3,
   ATR_PERIOD: 14,
-  ATR_MULTIPLIER: 1.8,
+  ATR_MULTIPLIER: 2.0,
   ZSCORE_THRESHOLD: 2.5,
   EMA_FAST: 3,
   EMA_SLOW: 8,
-  BASE_COOLDOWN_SECONDS: 120,
-  MAX_COOLDOWN_SECONDS: 600,
-  DEDUP_WINDOW_SECONDS: 180,
+  BASE_COOLDOWN_SECONDS: 180,
+  MAX_COOLDOWN_SECONDS: 300,
+  DEDUP_WINDOW_SECONDS: 240,
   STATE_CACHE_TTL: 86400,
   TOLERANCE_MIN: 0.5,
   TOLERANCE_MAX: 10.0,
   QUIET_HOURS_START: 1,
   QUIET_HOURS_END: 6,
-  TICK_NOISE_FILTER: 0.25,
-  MICRO_VOL_THRESHOLD: 0.6,
+  TICK_NOISE_FILTER: 0.30,
+  MICRO_VOL_THRESHOLD: 0.8,
   NIGHT_SCORE_BOOST: 1,
-  TREND_CONFIRM_BARS: 3,
-  MIN_DIRECTION_CONSENSUS: 0.55,
+  TREND_CONFIRM_BARS: 4,
+  MIN_DIRECTION_CONSENSUS: 0.60,
   EMA_THRESHOLD_FACTOR: 0.8,
-  EMA_MIN_PERCENT: 0.00015
+  EMA_MIN_PERCENT: 0.00015,
+  PRICE_STABILITY_THRESHOLD: 4.0,
+  PRICE_STABILITY_WINDOW: 5,
+  PRICE_STABILITY_MAX_DEVIATION: 1.0
 });
 
 // ================================================================================
@@ -93,6 +96,38 @@ function getSession(beijingHour: number): SGESession {
   if (beijingHour >= 20 || beijingHour <= 2) return 'night';
   if (beijingHour >= 13 && beijingHour <= 15) return 'afternoon';
   return 'asian_morning';
+}
+
+function checkPriceStability(
+  priceHistory: number[],
+  threshold: number,
+  window: number,
+  maxDeviation: number
+): { isStable: boolean; range: number; stdDev: number; deviationFromMean: number; reason: string } {
+  if (!priceHistory || priceHistory.length < window) {
+    return { isStable: true, range: 0, stdDev: 0, deviationFromMean: 0, reason: 'insufficient_data' };
+  }
+  
+  const recentPrices = priceHistory.slice(-window);
+  const currentPrice = recentPrices[recentPrices.length - 1];
+  const meanPrice = mean(recentPrices);
+  const stdDev = std(recentPrices);
+  
+  const maxPrice = Math.max(...recentPrices);
+  const minPrice = Math.min(...recentPrices);
+  const range = maxPrice - minPrice;
+  
+  const deviationFromMean = Math.abs(currentPrice - meanPrice);
+  
+  const isStable = range < threshold && deviationFromMean < maxDeviation && stdDev < maxDeviation;
+  
+  return {
+    isStable,
+    range,
+    stdDev,
+    deviationFromMean,
+    reason: isStable ? 'price_stable' : 'price_volatile'
+  };
 }
 
 // ================================================================================
@@ -232,24 +267,42 @@ export class AlertSystem {
     let score = 0;
     const timestamp = Date.now();
 
-    const instantResult = this.checkInstantMove(price, prevPrice, state);
-    signals.push({
-      type: 'instant_move',
-      triggered: instantResult.triggered,
-      strength: instantResult.triggered ? 1 : 0,
-      direction: price > prevPrice ? 'up' : price < prevPrice ? 'down' : 'neutral',
-      timestamp,
-    });
-    if (instantResult.triggered) score += 1;
+    const priceChange = Math.abs(price - prevPrice);
+    const pctChange = prevPrice > 0 ? (priceChange / prevPrice) * 100 : 0;
+    
+    const significantChange = priceChange >= SGE_CONFIG.BASE_THRESHOLD_YUAN || pctChange >= 0.5;
+    
+    if (significantChange) {
+      score += 2;
+      signals.push({
+        type: 'instant_move',
+        triggered: true,
+        strength: 2,
+        direction: price > prevPrice ? 'up' : 'down',
+        value: priceChange,
+        threshold: SGE_CONFIG.BASE_THRESHOLD_YUAN,
+        timestamp,
+      });
+    } else {
+      const instantResult = this.checkInstantMove(price, prevPrice, state);
+      signals.push({
+        type: 'instant_move',
+        triggered: instantResult.triggered,
+        strength: instantResult.triggered ? 1 : 0,
+        direction: price > prevPrice ? 'up' : price < prevPrice ? 'down' : 'neutral',
+        timestamp,
+      });
+      if (instantResult.triggered) score += 1;
+    }
 
-    const atrSignal = Math.abs(price - prevPrice) >= SGE_CONFIG.ATR_MULTIPLIER * atr;
+    const atrSignal = atr > 0 && priceChange >= SGE_CONFIG.ATR_MULTIPLIER * atr;
     signals.push({
       type: 'atr_breakout',
       triggered: atrSignal,
       strength: atrSignal ? 2 : 0,
       direction: price > prevPrice ? 'up' : 'down',
-      value: Math.abs(price - prevPrice),
-      threshold: SGE_CONFIG.ATR_MULTIPLIER * atr,
+      value: priceChange,
+      threshold: atr > 0 ? SGE_CONFIG.ATR_MULTIPLIER * atr : 0,
       timestamp,
     });
     if (atrSignal) score += 2;
@@ -284,6 +337,8 @@ export class AlertSystem {
     let finalDirection: 'up' | 'down' | 'neutral' = 'neutral';
     if (upVotes > downVotes) finalDirection = 'up';
     else if (downVotes > upVotes) finalDirection = 'down';
+    else if (price > prevPrice) finalDirection = 'up';
+    else if (price < prevPrice) finalDirection = 'down';
 
     const triggeredSignals = signals.filter(s => s.triggered);
     const confidence = triggeredSignals.length > 0 
@@ -394,6 +449,21 @@ export class AlertSystem {
     state.rollingMean = mean(state.priceHistory);
     state.rollingStd = std(state.priceHistory);
 
+    const stabilityResult = checkPriceStability(
+      state.priceHistory,
+      SGE_CONFIG.PRICE_STABILITY_THRESHOLD,
+      SGE_CONFIG.PRICE_STABILITY_WINDOW,
+      SGE_CONFIG.PRICE_STABILITY_MAX_DEVIATION
+    );
+
+    const priceChange = Math.abs(price - prevPrice);
+    
+    if (priceChange < SGE_CONFIG.BASE_THRESHOLD_YUAN) {
+      this.prevPrices.set('global', price);
+      this.stateCache.set('global', state);
+      return [];
+    }
+
     state.emaState = this.updateEMA(state, price);
 
     const atr = this.calculateATR(
@@ -428,6 +498,8 @@ export class AlertSystem {
           score: fusionResult.score,
           direction: fusionResult.direction,
           confidence: fusionResult.confidence,
+          stability: stabilityResult,
+          priceChange,
         },
         level3Metadata: {
           session,
@@ -474,6 +546,7 @@ export class AlertSystem {
           metadata: {
             crossType: crossEvent.type,
             targetPrice: config.conditions.targetPrice,
+            stability: stabilityResult,
           },
           level3Metadata: {
             session,

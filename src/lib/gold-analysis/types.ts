@@ -315,6 +315,9 @@ export interface SGEAlertConfig {
   MIN_DIRECTION_CONSENSUS: number;
   EMA_THRESHOLD_FACTOR: number;
   EMA_MIN_PERCENT: number;
+  PRICE_STABILITY_THRESHOLD: number;
+  PRICE_STABILITY_WINDOW: number;
+  PRICE_STABILITY_MAX_DEVIATION: number;
 }
 
 // EMA 状态

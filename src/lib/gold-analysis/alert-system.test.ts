@@ -134,7 +134,7 @@ test('动态阈值计算', () => {
   // 阈值应该在合理范围内
   assertGreaterThanOrEqual(status.dynamicThreshold, SGE_CONFIG.MIN_THRESHOLD_YUAN, 
     'Threshold should be >= MIN_THRESHOLD_YUAN');
-  assertLessThanOrEqual(status.dynamicThreshold, SGE_CONFIG.MAX_THRESHOLD_YUAN + 10, 
+  assertLessThanOrEqual(status.dynamicThreshold, SGE_CONFIG.BASE_THRESHOLD_YUAN + 10, 
     'Threshold should be reasonable');
   
   return true;

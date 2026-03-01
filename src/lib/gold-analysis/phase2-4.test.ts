@@ -2,9 +2,9 @@
 // Phase 2-4 迭代优化 - 单元测试
 // ================================================================================
 
-const testResults = [];
+const testResults: { name: string; passed: boolean; message: string; duration: number }[] = [];
 
-function test(name, fn) {
+function test(name: string, fn: () => boolean | void) {
   const startTime = Date.now();
   try {
     const result = fn();
@@ -209,7 +209,7 @@ test('配置默认值', () => {
 });
 
 test('配置参数验证', () => {
-  const validateConfig = (config) => {
+  const validateConfig = (config: { baseThresholdYuan: number; zscoreThreshold: number; baseCooldownSeconds: number }) => {
     const errors = [];
     
     if (config.baseThresholdYuan < 0.5 || config.baseThresholdYuan > 20) {

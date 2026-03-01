@@ -50,8 +50,8 @@ const SGE_ALERT_CONFIG = Object.freeze({
   VOL_WINDOW: 20,
   BASE_THRESHOLD_YUAN: 4.0,
   MIN_THRESHOLD_YUAN: 1.5,
-  INSTANT_ABS_THRESHOLD: 2.0,
-  INSTANT_PERCENT_THRESHOLD: 0.30,
+  INSTANT_ABS_THRESHOLD: 4.0,
+  INSTANT_PERCENT_THRESHOLD: 0.35,
   INSTANT_CONFIRM_TICKS: 3,
   ATR_PERIOD: 14,
   ATR_MULTIPLIER: 2.0,
@@ -72,7 +72,10 @@ const SGE_ALERT_CONFIG = Object.freeze({
   TREND_CONFIRM_BARS: 4,
   MIN_DIRECTION_CONSENSUS: 0.60,
   EMA_THRESHOLD_FACTOR: 0.8,
-  EMA_MIN_PERCENT: 0.00015
+  EMA_MIN_PERCENT: 0.00015,
+  PRICE_STABILITY_THRESHOLD: 4.0,
+  PRICE_STABILITY_WINDOW: 5,
+  PRICE_STABILITY_MAX_DEVIATION: 1.0
 });
 
 function getSessionMultiplier(beijingHour) {
@@ -131,6 +134,75 @@ function calculateATR(prices, period) {
 function calculateZScore(price, mean, std) {
   if (!std || std === 0) return 0;
   return (price - mean) / std;
+}
+
+function checkPriceStability(priceHistory, threshold, window, maxDeviation) {
+  if (!priceHistory || priceHistory.length < window) {
+    return { isStable: true, reason: 'insufficient_data', deviation: 0 };
+  }
+  
+  const recentPrices = priceHistory.slice(-window);
+  const currentPrice = recentPrices[recentPrices.length - 1];
+  const meanPrice = calculateMean(recentPrices);
+  const stdDev = calculateStd(recentPrices);
+  
+  const maxPrice = Math.max(...recentPrices);
+  const minPrice = Math.min(...recentPrices);
+  const range = maxPrice - minPrice;
+  
+  const deviationFromMean = Math.abs(currentPrice - meanPrice);
+  
+  const isStable = range < threshold && deviationFromMean < maxDeviation && stdDev < maxDeviation;
+  
+  return {
+    isStable,
+    range: range.toFixed(3),
+    stdDev: stdDev.toFixed(3),
+    deviationFromMean: deviationFromMean.toFixed(3),
+    meanPrice: meanPrice.toFixed(2),
+    currentPrice: currentPrice.toFixed(2),
+    threshold,
+    maxDeviation,
+    reason: isStable ? 'price_stable' : 'price_volatile'
+  };
+}
+
+async function logPriceChange(env, priceData, stabilityResult, fusionResult) {
+  if (!env?.GOLD_PRICE_CACHE) return;
+  
+  try {
+    const now = Date.now();
+    const logKey = `price_change_log:${getBeijingDate()}`;
+    
+    let logHistory = [];
+    const existing = await env.GOLD_PRICE_CACHE.get(logKey);
+    if (existing) {
+      logHistory = JSON.parse(existing);
+    }
+    
+    logHistory.push({
+      timestamp: now,
+      time: new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }),
+      price: priceData.price,
+      prevPrice: priceData.prevPrice,
+      change: priceData.change,
+      changePercent: priceData.changePercent,
+      stability: stabilityResult,
+      fusionScore: fusionResult?.score || 0,
+      fusionTriggered: fusionResult?.triggered || false,
+      direction: fusionResult?.direction || 'neutral'
+    });
+    
+    if (logHistory.length > 1440) {
+      logHistory = logHistory.slice(-1440);
+    }
+    
+    await env.GOLD_PRICE_CACHE.put(logKey, JSON.stringify(logHistory), {
+      expirationTtl: 86400 * 3
+    });
+  } catch (e) {
+    console.error('[Price Log] Failed to log price change:', e);
+  }
 }
 
 async function getLevel3State(env) {
@@ -3785,7 +3857,6 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
     console.log('[Level3] Failed to load tolerance settings, using defaults');
   }
   
-  // 免打扰时段检查
   if (beijingHour >= SGE_ALERT_CONFIG.QUIET_HOURS_START && beijingHour < SGE_ALERT_CONFIG.QUIET_HOURS_END) {
     console.log(`[Level3] Quiet hours (${SGE_ALERT_CONFIG.QUIET_HOURS_START}:00-${SGE_ALERT_CONFIG.QUIET_HOURS_END}:00), skipping alerts`);
     return;
@@ -3798,9 +3869,20 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   const prevPrice = priceHistory.length > 0 ? priceHistory[priceHistory.length - 1] : domestic?.price;
   const currentPrice = domestic?.price;
   
+  const priceChange = currentPrice && prevPrice ? Math.abs(currentPrice - prevPrice) : 0;
+  const priceChangePercent = prevPrice > 0 ? (priceChange / prevPrice) * 100 : 0;
+  
+  const stabilityResult = checkPriceStability(
+    priceHistory,
+    SGE_ALERT_CONFIG.PRICE_STABILITY_THRESHOLD,
+    SGE_ALERT_CONFIG.PRICE_STABILITY_WINDOW,
+    SGE_ALERT_CONFIG.PRICE_STABILITY_MAX_DEVIATION
+  );
+  
+  console.log(`[Stability] Range: ${stabilityResult.range}, StdDev: ${stabilityResult.stdDev}, Deviation: ${stabilityResult.deviationFromMean}, IsStable: ${stabilityResult.isStable}`);
+  
   let state = await getLevel3State(env);
   
-  // EMA 初始化：首次运行或状态重置时使用当前价格初始化
   if (!state.emaFast || state.emaFast === 0 || !state.emaSlow || state.emaSlow === 0 || state.lastPrice === 0) {
     state.emaFast = currentPrice;
     state.emaSlow = currentPrice;
@@ -3820,10 +3902,22 @@ async function sendGoldPriceAlert(domestic, international, history, env) {
   
   const fusionResult = fuseSignals(currentPrice, prevPrice, state, atr, rollingStd, rollingMean, session);
   
+  await logPriceChange(env, {
+    price: currentPrice,
+    prevPrice: prevPrice,
+    change: priceChange,
+    changePercent: priceChangePercent
+  }, stabilityResult, fusionResult);
+  
   await saveLevel3State(env, state);
   
   console.log(`[Level3] Score: ${fusionResult.score}/${fusionResult.requiredScore} (release: ${fusionResult.releaseScore}), Direction: ${fusionResult.direction}, Confidence: ${(fusionResult.confidence * 100).toFixed(1)}%, Consensus: ${((fusionResult.directionConsensus || 0) * 100).toFixed(0)}%, State: ${fusionResult.hysteresisState}`);
   console.log(`[Level3] EMA Fast/Slow: ${state.emaFast.toFixed(2)}/${state.emaSlow.toFixed(2)}, ATR: ${atr.toFixed(2)}, Std: ${rollingStd.toFixed(2)}, TrendConfirm: ${state.trendConfirmCount || 0}`);
+
+  if (stabilityResult.isStable && priceChange < SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN) {
+    console.log(`[Gold Alert] Price stable (change: ${priceChange.toFixed(2)} < threshold: ${SGE_ALERT_CONFIG.BASE_THRESHOLD_YUAN}), skipping notification`);
+    return;
+  }
 
   const alerts = [];
   
@@ -4252,6 +4346,35 @@ async function sendUnifiedNotification(alerts, env, options = {}) {
   console.log('[Unified Notification] Starting unified notification send...');
   console.log('[Unified Notification] Alert count:', alerts.length);
   console.log('[Unified Notification] Type:', notificationType);
+
+  // 国际金价推送时间限制：日间（8:00-24:00）只推送国内金价
+  const beijingHour = (new Date().getUTCHours() + 8) % 24;
+  const isDaytime = beijingHour >= 8 && beijingHour < 24;
+  
+  if (isDaytime) {
+    const originalAlertCount = alerts.length;
+    const filteredAlerts = alerts.filter(alert => 
+      !alert.name || !alert.name.includes('国际金价')
+    );
+    
+    if (filteredAlerts.length < originalAlertCount) {
+      console.log(`[Unified Notification] Filtered out international gold alerts during daytime (8:00-24:00)`);
+      console.log(`[Unified Notification] Original: ${originalAlertCount}, Filtered: ${filteredAlerts.length}`);
+      
+      if (filteredAlerts.length === 0) {
+        console.log('[Unified Notification] No alerts remaining after filtering');
+        return {
+          success: false,
+          reason: 'no_domestic_alerts',
+          currentHour: beijingHour,
+          message: '日间仅推送国内金价，当前无国内金价预警',
+          results: {}
+        };
+      }
+      
+      return await sendUnifiedNotification(filteredAlerts, env, { ...options, skipCooldown: true });
+    }
+  }
 
   // 检查冷却期（除非跳过）
   if (!skipCooldown) {
@@ -5264,6 +5387,16 @@ async function sendAnalysisNotification(analysis, env) {
   const hasDomesticSignal = analysis.domestic.signal.isBuySignal;
   const hasInternationalSignal = analysis.international.signal.isBuySignal;
 
+  // 国际金价推送时间限制：仅在 0:00-8:00 推送
+  const beijingHour = (new Date().getUTCHours() + 8) % 24;
+  const isInternationalQuietHours = beijingHour >= 8 && beijingHour < 24;
+
+  // 如果只有国际金价信号且在 8:00-24:00 时间段，跳过通知
+  if (!hasDomesticSignal && hasInternationalSignal && isInternationalQuietHours) {
+    console.log(`[Gold Analysis] Skipping international-only alert during 8:00-24:00 (current: ${beijingHour}:00)`);
+    return;
+  }
+
   let content = `时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}\n\n`;
 
   if (hasDomesticSignal) {
@@ -5274,7 +5407,8 @@ async function sendAnalysisNotification(analysis, env) {
     content += `买入评分：${analysis.domestic.signal.buyScore.toFixed(1)}\n\n`;
   }
 
-  if (hasInternationalSignal) {
+  // 国际金价信号仅在 0:00-8:00 时间段包含
+  if (hasInternationalSignal && !isInternationalQuietHours) {
     content += `🌍 国际金价 (XAU)\n`;
     content += `当前：${analysis.international.currentPrice.toFixed(2)} 美元/盎司\n`;
     content += `RSI：${analysis.international.rsi?.toFixed(2) || 'N/A'}\n`;
