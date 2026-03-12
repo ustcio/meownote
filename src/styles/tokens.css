@@ -13,6 +13,14 @@
   --color-accent-orange: #ff9f0a;
   --color-accent-green: #30d158;
   --color-accent-teal: #64d2ff;
+  --color-accent-cyan: #06b6d4;
+  
+  /* Glow Colors - Refik Anadol Style */
+  --glow-primary: rgba(0, 113, 227, 0.6);
+  --glow-blue: rgba(41, 151, 255, 0.5);
+  --glow-cyan: rgba(6, 182, 212, 0.5);
+  --glow-purple: rgba(191, 90, 242, 0.5);
+  --glow-pink: rgba(255, 55, 95, 0.4);
   
   /* Semantic Colors */
   --color-success: #30d158;
@@ -28,6 +36,10 @@
   --gradient-accent: linear-gradient(135deg, var(--color-accent-purple), var(--color-accent-pink));
   --gradient-success: linear-gradient(135deg, #30d158, #34c759);
   --gradient-hero: linear-gradient(135deg, #0071e3 0%, #2997ff 50%, #bf5af2 100%);
+  
+  /* Glow Gradient - Refik Anadol Style */
+  --gradient-glow: linear-gradient(135deg, var(--glow-cyan), var(--glow-purple));
+  --gradient-aurora: linear-gradient(90deg, var(--glow-blue), var(--glow-cyan), var(--glow-purple));
   
   /* State Color Scales */
   --color-info-bg: rgba(100, 210, 255, 0.1);
