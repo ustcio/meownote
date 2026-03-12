@@ -1,0 +1,203 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class:list={['particle-canvas-wrapper', className]}>
+  <canvas id="global-particle-canvas"></canvas>
+</div>
+
+<style>
+  .particle-canvas-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+  }
+
+  .particle-canvas-wrapper canvas {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<script>
+  class ParticleSystem {
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
+    particles: any[] = [];
+    mouseX: number = 0;
+    mouseY: number = 0;
+    animationId: number = 0;
+
+    constructor(canvasId: string) {
+      this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+      if (!this.canvas) return;
+      
+      this.ctx = this.canvas.getContext('2d')!;
+      this.init();
+    }
+
+    init() {
+      this.resize();
+      this.createParticles();
+      this.bindEvents();
+      this.animate();
+    }
+
+    resize() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = this.canvas.getBoundingClientRect();
+      this.canvas.width = rect.width * dpr;
+      this.canvas.height = rect.height * dpr;
+      this.ctx.scale(dpr, dpr);
+    }
+
+    createParticles() {
+      const count = Math.floor((window.innerWidth * window.innerHeight) / 15000);
+      this.particles = [];
+      
+      for (let i = 0; i < count; i++) {
+        this.particles.push({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          size: Math.random() * 2 + 1,
+          color: this.getRandomColor()
+        });
+      }
+    }
+
+    getRandomColor() {
+      const colors = [
+        'rgba(6, 182, 212, 0.8)',
+        'rgba(191, 90, 242, 0.8)',
+        'rgba(0, 113, 227, 0.8)',
+        'rgba(41, 151, 255, 0.8)',
+      ];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    bindEvents() {
+      window.addEventListener('resize', () => {
+        this.resize();
+        this.createParticles();
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        this.mouseX = e.clientX;
+        this.mouseY = e.clientY;
+      });
+    }
+
+    animate() {
+      const rect = this.canvas.getBoundingClientRect();
+      this.ctx.clearRect(0, 0, rect.width, rect.height);
+
+      this.particles.forEach(p => {
+        this.updateParticle(p);
+        this.drawParticle(p);
+      });
+
+      this.drawConnections();
+
+      this.animationId = requestAnimationFrame(() => this.animate());
+    }
+
+    updateParticle(p: any) {
+      p.x += p.vx;
+      p.y += p.vy;
+
+      const dx = this.mouseX - p.x;
+      const dy = this.mouseY - p.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance < 100) {
+        const angle = Math.atan2(dy, dx);
+        const force = (100 - distance) / 100;
+        p.x -= Math.cos(angle) * force * 2;
+        p.y -= Math.sin(angle) * force * 2;
+      }
+
+      if (p.x < 0 || p.x > window.innerWidth) p.vx *= -1;
+      if (p.y < 0 || p.y > window.innerHeight) p.vy *= -1;
+
+      p.x = Math.max(0, Math.min(window.innerWidth, p.x));
+      p.y = Math.max(0, Math.min(window.innerHeight, p.y));
+    }
+
+    drawParticle(p: any) {
+      this.ctx.beginPath();
+      this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      this.ctx.fillStyle = p.color;
+      this.ctx.fill();
+
+      const gradient = this.ctx.createRadialGradient(
+        p.x, p.y, 0,
+        p.x, p.y, p.size * 3
+      );
+      gradient.addColorStop(0, p.color);
+      gradient.addColorStop(1, 'transparent');
+      this.ctx.fillStyle = gradient;
+      this.ctx.beginPath();
+      this.ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+
+    drawConnections() {
+      const maxDistance = 150;
+      
+      for (let i = 0; i < this.particles.length; i++) {
+        for (let j = i + 1; j < this.particles.length; j++) {
+          const dx = this.particles[i].x - this.particles[j].x;
+          const dy = this.particles[i].y - this.particles[j].y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < maxDistance) {
+            const opacity = (1 - distance / maxDistance) * 0.12;
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = `rgba(6, 182, 212, ${opacity})`;
+            this.ctx.lineWidth = 0.5;
+            this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
+            this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
+            this.ctx.stroke();
+          }
+        }
+      }
+    }
+
+    destroy() {
+      if (this.animationId) {
+        cancelAnimationFrame(this.animationId);
+      }
+    }
+  }
+
+  let particleSystem: ParticleSystem | null = null;
+
+  function initParticles() {
+    const existing = document.getElementById('global-particle-canvas');
+    if (!existing) return;
+    
+    if (particleSystem) {
+      particleSystem.destroy();
+    }
+    particleSystem = new ParticleSystem('global-particle-canvas');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initParticles);
+  } else {
+    initParticles();
+  }
+
+  document.addEventListener('astro:page-load', initParticles);
+</script>
