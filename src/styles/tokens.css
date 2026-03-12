@@ -1,64 +1,78 @@
 :root {
-  /* ==================== Color System ==================== */
+  /* ==================== Color System - Refik Anadol Bioluminescent Style ==================== */
   
-  /* Primary Colors */
-  --color-primary: #0071e3;
-  --color-primary-hover: #0077ed;
-  --color-primary-active: #006edb;
+  /* Primary Colors - Electric Bioluminescent */
+  --color-primary: #00d4ff;
+  --color-primary-hover: #33ddff;
+  --color-primary-active: #00a8cc;
   
-  /* Accent Colors */
-  --color-accent-blue: #2997ff;
-  --color-accent-purple: #bf5af2;
-  --color-accent-pink: #ff375f;
-  --color-accent-orange: #ff9f0a;
-  --color-accent-green: #30d158;
-  --color-accent-teal: #64d2ff;
+  /* Accent Colors - Bioluminescent Palette */
+  --color-accent-blue: #00d4ff;
+  --color-accent-purple: #b829dd;
+  --color-accent-pink: #ff6b9d;
+  --color-accent-orange: #ffb347;
+  --color-accent-green: #06ffa5;
+  --color-accent-teal: #00f5d4;
   --color-accent-cyan: #06b6d4;
   
-  /* Glow Colors - Refik Anadol Style */
-  --glow-primary: rgba(0, 113, 227, 0.6);
-  --glow-blue: rgba(41, 151, 255, 0.5);
-  --glow-cyan: rgba(6, 182, 212, 0.5);
-  --glow-purple: rgba(191, 90, 242, 0.5);
-  --glow-pink: rgba(255, 55, 95, 0.4);
+  /* Bio-Glow Colors - Refik Anadol Style */
+  --glow-primary: rgba(0, 212, 255, 0.6);
+  --glow-blue: rgba(0, 212, 255, 0.5);
+  --glow-cyan: rgba(6, 255, 165, 0.5);
+  --glow-purple: rgba(184, 41, 221, 0.5);
+  --glow-pink: rgba(255, 107, 157, 0.4);
+  --glow-amber: rgba(255, 179, 71, 0.4);
   
   /* Semantic Colors */
-  --color-success: #30d158;
-  --color-success-light: #34c759;
-  --color-warning: #ff9f0a;
-  --color-error: #ff375f;
-  --color-danger: #ff375f;
-  --color-danger-light: #ff453a;
-  --color-info: #64d2ff;
+  --color-success: #06ffa5;
+  --color-success-light: #33ffb8;
+  --color-warning: #ffb347;
+  --color-error: #ff6b6d;
+  --color-danger: #ff6b6d;
+  --color-danger-light: #ff8a8c;
+  --color-info: #00d4ff;
   
-  /* Gradient System */
+  /* Gradient System - Fluid Bioluminescent */
   --gradient-primary: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
   --gradient-accent: linear-gradient(135deg, var(--color-accent-purple), var(--color-accent-pink));
-  --gradient-success: linear-gradient(135deg, #30d158, #34c759);
-  --gradient-hero: linear-gradient(135deg, #0071e3 0%, #2997ff 50%, #bf5af2 100%);
+  --gradient-success: linear-gradient(135deg, #06ffa5, #00f5d4);
+  --gradient-hero: linear-gradient(135deg, #00d4ff 0%, #b829dd 50%, #ff6b9d 100%);
   
-  /* Glow Gradient - Refik Anadol Style */
+  /* Fluid Glow Gradients - Refik Anadol Style */
   --gradient-glow: linear-gradient(135deg, var(--glow-cyan), var(--glow-purple));
-  --gradient-aurora: linear-gradient(90deg, var(--glow-blue), var(--glow-cyan), var(--glow-purple));
+  --gradient-aurora: linear-gradient(90deg, var(--glow-blue), var(--glow-cyan), var(--glow-purple), var(--glow-pink));
+  --gradient-dreamscape: linear-gradient(180deg, 
+    rgba(26, 11, 46, 0.95) 0%, 
+    rgba(0, 212, 255, 0.15) 40%, 
+    rgba(184, 41, 221, 0.2) 60%,
+    rgba(255, 107, 157, 0.1) 100%
+  );
+  --gradient-fluid: linear-gradient(135deg,
+    rgba(0, 212, 255, 0.3) 0%,
+    rgba(184, 41, 221, 0.2) 25%,
+    rgba(255, 107, 157, 0.15) 50%,
+    rgba(6, 255, 165, 0.2) 75%,
+    rgba(0, 212, 255, 0.3) 100%
+  );
   
   /* State Color Scales */
-  --color-info-bg: rgba(100, 210, 255, 0.1);
-  --color-info-border: rgba(100, 210, 255, 0.2);
-  --color-warning-bg: rgba(255, 159, 10, 0.1);
-  --color-warning-border: rgba(255, 159, 10, 0.2);
-  --color-success-bg: rgba(48, 209, 88, 0.1);
-  --color-success-border: rgba(48, 209, 88, 0.2);
-  --color-error-bg: rgba(255, 55, 95, 0.1);
-  --color-error-border: rgba(255, 55, 95, 0.2);
+  --color-info-bg: rgba(0, 212, 255, 0.1);
+  --color-info-border: rgba(0, 212, 255, 0.2);
+  --color-warning-bg: rgba(255, 179, 71, 0.1);
+  --color-warning-border: rgba(255, 179, 71, 0.2);
+  --color-success-bg: rgba(6, 255, 165, 0.1);
+  --color-success-border: rgba(6, 255, 165, 0.2);
+  --color-error-bg: rgba(255, 107, 109, 0.1);
+  --color-error-border: rgba(255, 107, 109, 0.2);
   
   /* ==================== Typography Scale ==================== */
   
-  /* Font Families */
-  --font-brand: "Libre Baskerville", Georgia, serif;
-  --font-sans: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-  --font-number: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Font Families - Refik Anadol Style */
+  --font-brand: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "Space Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
+  --font-number: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-chinese: "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   
   /* Global Font Settings */
@@ -332,77 +346,89 @@
   --contribution-5: #0a3d1e;
 }
 
-/* ==================== Dark Theme ==================== */
+/* ==================== Dark Theme - Refik Anadol Dreamscape ==================== */
 [data-theme="dark"] {
-  /* Background Colors */
-  --bg-primary: #000000;
-  --bg-secondary: #0a0a0a;
-  --bg-tertiary: #141414;
-  --bg-elevated: #1c1c1e;
-  --bg-overlay: rgba(0, 0, 0, 0.75);
+  /* Background Colors - Deep Space with Bioluminescent Tint */
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #0f0f1a;
+  --bg-tertiary: #1a1a2e;
+  --bg-elevated: #16162a;
+  --bg-overlay: rgba(10, 10, 15, 0.85);
   
-  /* Text Colors - Improved Contrast (WCAG AA compliant) */
-  --text-primary: #f5f5f7;
-  --text-secondary: #d1d1d6;
-  --text-tertiary: #b1b1b6;
-  --text-quaternary: #8e8e93;
-  --text-inverse: #1d1d1f;
+  /* Text Colors - Ethereal Glow */
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0b8;
+  --text-tertiary: #707088;
+  --text-quaternary: #505068;
+  --text-inverse: #0a0a0f;
   
-  /* Border Colors */
-  --border-primary: rgba(255, 255, 255, 0.1);
-  --border-secondary: rgba(255, 255, 255, 0.06);
+  /* Border Colors - Subtle Bioluminescent */
+  --border-primary: rgba(0, 212, 255, 0.15);
+  --border-secondary: rgba(184, 41, 221, 0.1);
   --border-focus: var(--color-primary);
-  --border-hover: rgba(255, 255, 255, 0.15);
+  --border-hover: rgba(0, 212, 255, 0.25);
   
-  /* Interactive Colors */
+  /* Interactive Colors - Electric Glow */
   --interactive-primary: var(--color-primary);
-  --interactive-primary-hover: #1a8cff;
-  --interactive-primary-active: #0066cc;
+  --interactive-primary-hover: #33ddff;
+  --interactive-primary-active: #00a8cc;
   
-  /* Surface Colors */
-  --surface-primary: rgba(28, 28, 30, 0.8);
-  --surface-secondary: rgba(44, 44, 46, 0.8);
+  /* Surface Colors - Deep Space Glass */
+  --surface-primary: rgba(26, 26, 46, 0.8);
+  --surface-secondary: rgba(22, 22, 42, 0.8);
   --surface-blur: blur(20px);
   --surface-blur-heavy: blur(40px);
   
-  /* Card Styles */
-  --card-bg: rgba(28, 28, 30, 0.6);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --card-border-hover: rgba(255, 255, 255, 0.12);
-  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-  --card-hover-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  /* Card Styles - Bioluminescent Glass */
+  --card-bg: rgba(22, 22, 42, 0.6);
+  --card-border: rgba(0, 212, 255, 0.1);
+  --card-border-hover: rgba(184, 41, 221, 0.2);
+  --card-shadow: 
+    0 4px 24px rgba(0, 0, 0, 0.4),
+    0 0 40px rgba(0, 212, 255, 0.05);
+  --card-hover-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 60px rgba(0, 212, 255, 0.1);
   
-  /* Input Styles */
-  --input-bg: rgba(44, 44, 46, 0.8);
-  --input-border: rgba(255, 255, 255, 0.1);
+  /* Input Styles - Glowing Borders */
+  --input-bg: rgba(26, 26, 46, 0.8);
+  --input-border: rgba(0, 212, 255, 0.15);
   --input-focus-border: var(--color-primary);
   
-  /* Glass Effect - Liquid Glass */
-  --glass-bg: rgba(30, 30, 30, 0.72);
-  --glass-bg-hover: rgba(40, 40, 40, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-border-hover: rgba(255, 255, 255, 0.12);
+  /* Glass Effect - Bioluminescent Glass */
+  --glass-bg: rgba(22, 22, 42, 0.72);
+  --glass-bg-hover: rgba(30, 30, 55, 0.85);
+  --glass-border: rgba(0, 212, 255, 0.12);
+  --glass-border-hover: rgba(184, 41, 221, 0.2);
   
-  /* Liquid Glass Effect - Apple Style (Dark) */
-  --liquid-glass-bg: rgba(40, 40, 40, 0.55);
-  --liquid-glass-bg-hover: rgba(50, 50, 50, 0.68);
-  --liquid-glass-bg-active: rgba(60, 60, 60, 0.75);
-  --liquid-glass-border: rgba(255, 255, 255, 0.12);
-  --liquid-glass-border-subtle: rgba(255, 255, 255, 0.06);
-  --liquid-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --liquid-glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  /* Liquid Glass Effect - Dreamscape Style */
+  --liquid-glass-bg: rgba(26, 26, 46, 0.65);
+  --liquid-glass-bg-hover: rgba(35, 35, 60, 0.78);
+  --liquid-glass-bg-active: rgba(45, 45, 70, 0.85);
+  --liquid-glass-border: rgba(0, 212, 255, 0.15);
+  --liquid-glass-border-subtle: rgba(184, 41, 221, 0.08);
+  --liquid-glass-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.35), 
+    0 0 40px rgba(0, 212, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --liquid-glass-shadow-hover: 
+    0 12px 40px rgba(0, 0, 0, 0.45), 
+    0 0 60px rgba(0, 212, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   --liquid-glass-blur: blur(24px) saturate(180%);
   --liquid-glass-blur-heavy: blur(40px) saturate(200%);
-  --liquid-glass-highlight: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
-  --liquid-glass-inner-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.1), inset 0 -0.5px 0 rgba(0, 0, 0, 0.1);
+  --liquid-glass-highlight: linear-gradient(135deg, rgba(0, 212, 255, 0.08) 0%, transparent 50%);
+  --liquid-glass-inner-shadow: 
+    inset 0 0.5px 0 rgba(0, 212, 255, 0.1), 
+    inset 0 -0.5px 0 rgba(0, 0, 0, 0.15);
   
-  /* Contribution Graph Colors */
-  --contribution-0: #161b22;
-  --contribution-1: #0e4429;
-  --contribution-2: #006d32;
-  --contribution-3: #26a641;
-  --contribution-4: #39d353;
-  --contribution-5: #7ee787;
+  /* Contribution Graph Colors - Bioluminescent */
+  --contribution-0: #0f0f1a;
+  --contribution-1: #1a3a4a;
+  --contribution-2: #006d8a;
+  --contribution-3: #00a8cc;
+  --contribution-4: #00d4ff;
+  --contribution-5: #33ddff;
 }
 
 /* ==================== Responsive Typography ==================== */

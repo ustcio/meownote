@@ -2,7 +2,7 @@
 import '@styles/global.css';
 import Header from '@components/layout/Header.astro';
 import Footer from '@components/layout/Footer.astro';
-import ParticleBackground from '@components/ui/ParticleBackground.astro';
+import FluidBackground from '@components/effects/FluidBackground.astro';
 
 interface Props {
   title: string;
@@ -55,10 +55,10 @@ const imageURL = new URL(image, Astro.site);
     <link rel="manifest" href="/site.webmanifest" />
     
     <!-- Safari pinned tab -->
-    <link rel="mask-icon" href="/favicon-32x32.png" color="#0071e3" />
+    <link rel="mask-icon" href="/favicon-32x32.png" color="#00d4ff" />
     
     <!-- MS Application -->
-    <meta name="msapplication-TileColor" content="#0071e3" />
+    <meta name="msapplication-TileColor" content="#00d4ff" />
     <meta name="msapplication-config" content="/browserconfig.xml" />
     
     <meta name="theme-color" content="#ffffff" />
@@ -67,10 +67,10 @@ const imageURL = new URL(image, Astro.site);
     <!-- Local Fonts (optimized for China) -->
     <link rel="stylesheet" href="/fonts/fonts.css" />
     
-    <!-- Google Fonts - Libre Baskerville for Logo -->
+    <!-- Google Fonts - Refik Anadol Style -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <!-- HarmonyOS Sans SC for Chinese (CDN) -->
     <link rel="stylesheet" href="https://cdn.hmos.dongs.xyz/css/harmonyos_sans_sc.css" />
@@ -87,14 +87,14 @@ const imageURL = new URL(image, Astro.site);
 
     <script is:inline>
       (function() {
-        const theme = localStorage.getItem('theme') || 'light';
+        const theme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
   </head>
   <body>
-    <!-- Particle Background -->
-    <ParticleBackground />
+    <!-- Fluid Background - Refik Anadol Style -->
+    <FluidBackground intensity="medium" colorScheme="dreamscape" />
     
     <div class="layout">
       <Header />
