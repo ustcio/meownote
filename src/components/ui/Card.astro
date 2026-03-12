@@ -1,0 +1,88 @@
+---
+export interface Props {
+  variant?: 'default' | 'elevated' | 'outlined' | 'glass';
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  hoverable?: boolean;
+  clickable?: boolean;
+  class?: string;
+}
+
+const {
+  variant = 'default',
+  padding = 'md',
+  hoverable = false,
+  clickable = false,
+  class: className,
+} = Astro.props;
+
+const classes = [
+  'card',
+  `card-${variant}`,
+  `card-padding-${padding}`,
+  hoverable && 'card-hoverable',
+  clickable && 'card-clickable',
+  className,
+].filter(Boolean).join(' ');
+---
+
+<div class={classes}>
+  <slot />
+</div>
+
+<style>
+  .card {
+    border-radius: var(--radius-xl);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .card-default {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+  }
+  
+  .card-elevated {
+    background: var(--card-bg);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .card-outlined {
+    background: transparent;
+    border: 1px solid var(--border-primary);
+  }
+  
+  .card-glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--surface-blur);
+    border: 1px solid var(--glass-border);
+  }
+  
+  .card-padding-none {
+    padding: 0;
+  }
+  
+  .card-padding-sm {
+    padding: var(--space-3);
+  }
+  
+  .card-padding-md {
+    padding: var(--space-5);
+  }
+  
+  .card-padding-lg {
+    padding: var(--space-8);
+  }
+  
+  .card-hoverable:hover {
+    border-color: var(--card-border-hover);
+    box-shadow: var(--card-hover-shadow);
+    transform: translateY(-2px);
+  }
+  
+  .card-clickable {
+    cursor: pointer;
+  }
+  
+  .card-clickable:active {
+    transform: scale(0.99);
+  }
+</style>

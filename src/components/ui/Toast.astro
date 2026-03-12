@@ -1,0 +1,143 @@
+---
+export interface Props {
+  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
+}
+
+const { position = 'top-right' } = Astro.props;
+---
+
+<div 
+  id="toast-container" 
+  class:list={['toast-container', `toast-${position}`]}
+  role="region"
+  aria-label="通知"
+  aria-live="polite"
+></div>
+
+<style>
+  .toast-container {
+    position: fixed;
+    z-index: var(--z-tooltip);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    pointer-events: none;
+    max-width: 400px;
+  }
+  
+  .toast-top-right {
+    top: calc(var(--header-total-height) + var(--space-4));
+    right: var(--space-4);
+  }
+  
+  .toast-top-left {
+    top: calc(var(--header-total-height) + var(--space-4));
+    left: var(--space-4);
+  }
+  
+  .toast-bottom-right {
+    bottom: var(--space-4);
+    right: var(--space-4);
+  }
+  
+  .toast-bottom-left {
+    bottom: var(--space-4);
+    left: var(--space-4);
+  }
+  
+  .toast-top-center {
+    top: calc(var(--header-total-height) + var(--space-4));
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .toast-bottom-center {
+    bottom: var(--space-4);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  :global(.toast) {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    pointer-events: auto;
+    animation: toastIn 0.3s var(--ease-out);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+  }
+  
+  :global(.toast.toast-success) {
+    border-left: 3px solid var(--color-success);
+  }
+  
+  :global(.toast.toast-error) {
+    border-left: 3px solid var(--color-error);
+  }
+  
+  :global(.toast.toast-warning) {
+    border-left: 3px solid var(--color-warning);
+  }
+  
+  :global(.toast.toast-info) {
+    border-left: 3px solid var(--color-info);
+  }
+  
+  @keyframes toastIn {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .toast-container {
+      left: var(--space-4);
+      right: var(--space-4);
+      max-width: none;
+    }
+    
+    .toast-top-center,
+    .toast-bottom-center {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  export interface ToastOptions {
+    duration?: number;
+    type?: 'success' | 'error' | 'warning' | 'info';
+  }
+  
+  export function showToast(message: string, options: ToastOptions = {}): void {
+    const { duration = 3000, type = 'info' } = options;
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.setAttribute('role', 'alert');
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(100%)';
+      toast.style.transition = 'all 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+  
+  (window as any).showToast = showToast;
+</script>

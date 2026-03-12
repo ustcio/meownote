@@ -23,6 +23,22 @@
   --color-danger-light: #ff453a;
   --color-info: #64d2ff;
   
+  /* Gradient System */
+  --gradient-primary: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+  --gradient-accent: linear-gradient(135deg, var(--color-accent-purple), var(--color-accent-pink));
+  --gradient-success: linear-gradient(135deg, #30d158, #34c759);
+  --gradient-hero: linear-gradient(135deg, #0071e3 0%, #2997ff 50%, #bf5af2 100%);
+  
+  /* State Color Scales */
+  --color-info-bg: rgba(100, 210, 255, 0.1);
+  --color-info-border: rgba(100, 210, 255, 0.2);
+  --color-warning-bg: rgba(255, 159, 10, 0.1);
+  --color-warning-border: rgba(255, 159, 10, 0.2);
+  --color-success-bg: rgba(48, 209, 88, 0.1);
+  --color-success-border: rgba(48, 209, 88, 0.2);
+  --color-error-bg: rgba(255, 55, 95, 0.1);
+  --color-error-border: rgba(255, 55, 95, 0.2);
+  
   /* ==================== Typography Scale ==================== */
   
   /* Font Families */
@@ -287,11 +303,11 @@
   --bg-elevated: #1c1c1e;
   --bg-overlay: rgba(0, 0, 0, 0.75);
   
-  /* Text Colors - Improved Contrast */
+  /* Text Colors - Improved Contrast (WCAG AA compliant) */
   --text-primary: #f5f5f7;
   --text-secondary: #d1d1d6;
-  --text-tertiary: #a1a1a6;
-  --text-quaternary: #6e6e73;
+  --text-tertiary: #b1b1b6;
+  --text-quaternary: #8e8e93;
   --text-inverse: #1d1d1f;
   
   /* Border Colors */

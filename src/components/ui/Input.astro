@@ -1,0 +1,163 @@
+---
+export interface Props {
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
+  name: string;
+  label?: string;
+  placeholder?: string;
+  value?: string;
+  required?: boolean;
+  disabled?: boolean;
+  error?: string;
+  hint?: string;
+  icon?: string;
+  class?: string;
+}
+
+const {
+  type = 'text',
+  name,
+  label,
+  placeholder,
+  value = '',
+  required = false,
+  disabled = false,
+  error,
+  hint,
+  icon,
+  class: className,
+} = Astro.props;
+
+const inputId = `input-${name}`;
+const hasError = Boolean(error);
+---
+
+<div class:list={['input-group', { 'has-error': hasError }, className]}>
+  {label && (
+    <label for={inputId} class="input-label">
+      {label}
+      {required && <span class="required">*</span>}
+    </label>
+  )}
+  
+  <div class="input-wrapper">
+    {icon && (
+      <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <slot name="icon" />
+      </svg>
+    )}
+    
+    <input
+      id={inputId}
+      type={type}
+      name={name}
+      placeholder={placeholder}
+      value={value}
+      required={required}
+      disabled={disabled}
+      class:list={['input', { 'has-icon': icon }]}
+      aria-invalid={hasError}
+      aria-describedby={hasError ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
+    />
+    
+    <slot name="suffix" />
+  </div>
+  
+  {error && (
+    <p id={`${inputId}-error`} class="input-error" role="alert">
+      {error}
+    </p>
+  )}
+  
+  {hint && !error && (
+    <p id={`${inputId}-hint`} class="input-hint">
+      {hint}
+    </p>
+  )}
+</div>
+
+<style>
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  
+  .input-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+  }
+  
+  .required {
+    color: var(--color-error);
+    margin-left: var(--space-1);
+  }
+  
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .input-icon {
+    position: absolute;
+    left: var(--space-3);
+    color: var(--text-tertiary);
+    pointer-events: none;
+  }
+  
+  .input {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .input.has-icon {
+    padding-left: calc(var(--space-3) + 26px);
+  }
+  
+  .input::placeholder {
+    color: var(--text-tertiary);
+  }
+  
+  .input:hover:not(:disabled) {
+    border-color: var(--border-hover);
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: var(--color-accent-blue);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+    background: var(--bg-primary);
+  }
+  
+  .input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .has-error .input {
+    border-color: var(--color-error);
+  }
+  
+  .has-error .input:focus {
+    box-shadow: 0 0 0 3px rgba(255, 55, 95, 0.15);
+  }
+  
+  .input-error {
+    font-size: var(--text-xs);
+    color: var(--color-error);
+    margin: 0;
+  }
+  
+  .input-hint {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    margin: 0;
+  }
+</style>

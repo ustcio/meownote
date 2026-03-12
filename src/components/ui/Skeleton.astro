@@ -1,0 +1,80 @@
+---
+export interface Props {
+  variant?: 'default' | 'success' | 'error' | 'warning' | 'info';
+  size?: 'sm' | 'md';
+  class?: string;
+}
+
+const {
+  variant = 'default',
+  size = 'md',
+  class: className,
+} = Astro.props;
+
+const classes = [
+  'skeleton',
+  `skeleton-${variant}`,
+  `skeleton-${size}`,
+  className,
+].filter(Boolean).join(' ');
+---
+
+<div class={classes} aria-hidden="true"></div>
+
+<style>
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--bg-secondary) 25%,
+      var(--bg-tertiary) 50%,
+      var(--bg-secondary) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-md);
+  }
+  
+  .skeleton-sm {
+    height: 12px;
+  }
+  
+  .skeleton-md {
+    height: 16px;
+  }
+  
+  .skeleton-default {
+    width: 100%;
+  }
+  
+  .skeleton-success {
+    width: 60%;
+  }
+  
+  .skeleton-error {
+    width: 40%;
+  }
+  
+  .skeleton-warning {
+    width: 80%;
+  }
+  
+  .skeleton-info {
+    width: 50%;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton {
+      animation: none;
+      background: var(--bg-secondary);
+    }
+  }
+</style>
