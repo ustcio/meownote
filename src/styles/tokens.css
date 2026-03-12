@@ -205,11 +205,24 @@
   --input-border: rgba(0, 0, 0, 0.1);
   --input-focus-border: var(--color-primary);
   
-  /* Glass Effect */
+  /* Glass Effect - Apple Liquid Glass */
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-bg-hover: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(0, 0, 0, 0.06);
   --glass-border-hover: rgba(0, 0, 0, 0.1);
+  
+  /* Liquid Glass Effect - Apple Style */
+  --liquid-glass-bg: rgba(255, 255, 255, 0.65);
+  --liquid-glass-bg-hover: rgba(255, 255, 255, 0.78);
+  --liquid-glass-bg-active: rgba(255, 255, 255, 0.85);
+  --liquid-glass-border: rgba(255, 255, 255, 0.25);
+  --liquid-glass-border-subtle: rgba(255, 255, 255, 0.15);
+  --liquid-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  --liquid-glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --liquid-glass-blur: blur(24px) saturate(180%);
+  --liquid-glass-blur-heavy: blur(40px) saturate(200%);
+  --liquid-glass-highlight: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+  --liquid-glass-inner-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.35), inset 0 -0.5px 0 rgba(0, 0, 0, 0.02);
   
   /* Contribution Graph Colors */
   --contribution-0: #ebedf0;
@@ -285,6 +298,19 @@
   --glass-border: rgba(0, 0, 0, 0.06);
   --glass-border-hover: rgba(0, 0, 0, 0.1);
   
+  /* Liquid Glass Effect - Apple Style */
+  --liquid-glass-bg: rgba(255, 255, 255, 0.65);
+  --liquid-glass-bg-hover: rgba(255, 255, 255, 0.78);
+  --liquid-glass-bg-active: rgba(255, 255, 255, 0.85);
+  --liquid-glass-border: rgba(255, 255, 255, 0.25);
+  --liquid-glass-border-subtle: rgba(255, 255, 255, 0.15);
+  --liquid-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  --liquid-glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --liquid-glass-blur: blur(24px) saturate(180%);
+  --liquid-glass-blur-heavy: blur(40px) saturate(200%);
+  --liquid-glass-highlight: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+  --liquid-glass-inner-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.35), inset 0 -0.5px 0 rgba(0, 0, 0, 0.02);
+  
   /* Contribution Graph Colors */
   --contribution-0: #ebedf0;
   --contribution-1: #9be9a8;
@@ -344,6 +370,19 @@
   --glass-bg-hover: rgba(40, 40, 40, 0.85);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-border-hover: rgba(255, 255, 255, 0.12);
+  
+  /* Liquid Glass Effect - Apple Style (Dark) */
+  --liquid-glass-bg: rgba(40, 40, 40, 0.55);
+  --liquid-glass-bg-hover: rgba(50, 50, 50, 0.68);
+  --liquid-glass-bg-active: rgba(60, 60, 60, 0.75);
+  --liquid-glass-border: rgba(255, 255, 255, 0.12);
+  --liquid-glass-border-subtle: rgba(255, 255, 255, 0.06);
+  --liquid-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --liquid-glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --liquid-glass-blur: blur(24px) saturate(180%);
+  --liquid-glass-blur-heavy: blur(40px) saturate(200%);
+  --liquid-glass-highlight: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+  --liquid-glass-inner-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.1), inset 0 -0.5px 0 rgba(0, 0, 0, 0.1);
   
   /* Contribution Graph Colors */
   --contribution-0: #161b22;

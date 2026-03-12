@@ -14,9 +14,10 @@ const navItems = [
 const currentPath = Astro.url.pathname;
 ---
 
-<header class="header">
+<header class="header" id="main-header">
+  <div class="header-glass"></div>
   <div class="header-container">
-      <a href="/" class="logo">
+    <a href="/" class="logo">
       <video 
         class="logo-video" 
         autoplay 
@@ -31,9 +32,9 @@ const currentPath = Astro.url.pathname;
       <span class="logo-text">USTC Dev</span>
     </a>
     
-    <nav class="nav" aria-label="主导航">
+    <nav class="nav-desktop" aria-label="桌面端导航">
       <ul class="nav-list">
-        {navItems.map((item) => (
+        {navItems.slice(0, 4).map((item) => (
           <li>
             <a 
               href={item.href}
@@ -43,17 +44,31 @@ const currentPath = Astro.url.pathname;
             </a>
           </li>
         ))}
-        <li>
-          <a 
-            href="/trading"
-            class:list={['nav-link admin-nav-link', { active: currentPath.startsWith('/trading') }]}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        <li class="nav-more-wrapper">
+          <button class="nav-more-btn" aria-label="更多菜单" aria-expanded="false">
+            <span>更多</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="nav-more-icon">
+              <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
-            交易管理
-          </a>
+          </button>
+          <div class="nav-more-dropdown">
+            <a 
+              href="/about"
+              class:list={['dropdown-link', { active: currentPath === '/about' }]}
+            >
+              关于
+            </a>
+            <a 
+              href="/trading"
+              class:list={['dropdown-link', 'dropdown-link--admin', { active: currentPath.startsWith('/trading') }]}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <span>交易管理</span>
+            </a>
+          </div>
         </li>
       </ul>
     </nav>
@@ -81,14 +96,14 @@ const currentPath = Astro.url.pathname;
               </svg>
               <span>个人资料</span>
             </a>
-            <a href="/trading" class="dropdown-item admin-link" id="admin-link">
+            <a href="/trading" class="dropdown-item dropdown-item--admin" id="admin-link">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
               </svg>
               <span>交易管理</span>
             </a>
-            <button class="dropdown-item logout" id="dropdown-logout">
+            <button class="dropdown-item dropdown-item--logout" id="dropdown-logout">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                 <polyline points="16 17 21 12 16 7"></polyline>
@@ -102,81 +117,118 @@ const currentPath = Astro.url.pathname;
       
       <button
         class="mobile-menu-btn"
+        id="mobile-menu-btn"
         aria-label="切换菜单"
         aria-expanded="false"
         aria-controls="mobile-nav"
       >
-        <Icon name="menu" size={18} />
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
       </button>
     </div>
   </div>
   
   <nav id="mobile-nav" class="mobile-nav" aria-label="移动端导航">
-    <ul class="mobile-nav-list">
-      {navItems.map((item) => (
+    <div class="mobile-nav-content">
+      <ul class="mobile-nav-list">
+        {navItems.map((item) => (
+          <li>
+            <a 
+              href={item.href}
+              class:list={['mobile-nav-link', { active: currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) }]}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
         <li>
           <a 
-            href={item.href}
-            class:list={['mobile-nav-link', { active: currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) }]}
+            href="/trading"
+            class:list={['mobile-nav-link', 'mobile-nav-link--admin', { active: currentPath.startsWith('/trading') }]}
           >
-            {item.label}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>交易管理</span>
           </a>
         </li>
-      ))}
-      <li>
-        <a 
-          href="/trading"
-          class:list={['mobile-nav-link admin-mobile-link', { active: currentPath.startsWith('/trading') }]}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </ul>
+      <div class="mobile-nav-footer">
+        <button class="mobile-auth-btn" id="mobile-auth-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
           </svg>
-          交易管理
-        </a>
-      </li>
-    </ul>
-    <div class="mobile-nav-actions">
-      <button class="mobile-auth-btn" id="mobile-auth-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-        <span>登录</span>
-      </button>
+          <span>登录</span>
+        </button>
+      </div>
     </div>
   </nav>
 </header>
 
+<div class="header-backdrop" id="header-backdrop"></div>
+
 <AuthModal />
 
 <script>
-  const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileNav = document.getElementById('mobile-nav');
+  const headerBackdrop = document.getElementById('header-backdrop');
   const authBtn = document.getElementById('auth-btn');
   const mobileAuthBtn = document.getElementById('mobile-auth-btn');
   const userMenu = document.getElementById('user-menu');
   const dropdownLogout = document.getElementById('dropdown-logout');
   const dropdownUsername = document.getElementById('dropdown-username');
+  const navMoreBtn = document.querySelector('.nav-more-btn');
+  const navMoreDropdown = document.querySelector('.nav-more-dropdown');
+  
+  function toggleMobileMenu(open: boolean) {
+    mobileMenuBtn?.setAttribute('aria-expanded', String(open));
+    mobileNav?.classList.toggle('open', open);
+    headerBackdrop?.classList.toggle('active', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
   
   mobileMenuBtn?.addEventListener('click', () => {
-    const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
-    mobileMenuBtn.setAttribute('aria-expanded', String(!isExpanded));
-    mobileNav?.classList.toggle('open');
+    const isOpen = mobileNav?.classList.contains('open');
+    toggleMobileMenu(!isOpen);
+  });
+  
+  headerBackdrop?.addEventListener('click', () => {
+    toggleMobileMenu(false);
   });
   
   document.querySelectorAll('.mobile-nav-link').forEach(link => {
     link.addEventListener('click', () => {
-      mobileMenuBtn?.setAttribute('aria-expanded', 'false');
-      mobileNav?.classList.remove('open');
+      toggleMobileMenu(false);
     });
+  });
+  
+  navMoreBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isExpanded = navMoreBtn.getAttribute('aria-expanded') === 'true';
+    navMoreBtn.setAttribute('aria-expanded', String(!isExpanded));
+    navMoreDropdown?.classList.toggle('open', !isExpanded);
+  });
+  
+  document.addEventListener('click', (e) => {
+    if (!navMoreBtn?.contains(e.target as Node)) {
+      navMoreBtn?.setAttribute('aria-expanded', 'false');
+      navMoreDropdown?.classList.remove('open');
+    }
+    if (!userMenu?.contains(e.target as Node)) {
+      userMenu?.classList.remove('open');
+    }
   });
   
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      mobileMenuBtn?.setAttribute('aria-expanded', 'false');
-      mobileNav?.classList.remove('open');
+      toggleMobileMenu(false);
       userMenu?.classList.remove('open');
+      navMoreBtn?.setAttribute('aria-expanded', 'false');
+      navMoreDropdown?.classList.remove('open');
     }
   });
   
@@ -194,19 +246,12 @@ const currentPath = Astro.url.pathname;
     }
   });
   
-  document.addEventListener('click', (e) => {
-    if (!userMenu?.contains(e.target as Node)) {
-      userMenu?.classList.remove('open');
-    }
-  });
-  
   mobileAuthBtn?.addEventListener('click', () => {
     const user = localStorage.getItem('user');
     if (user) {
       window.location.href = '/profile';
     } else {
-      mobileNav?.classList.remove('open');
-      mobileMenuBtn?.setAttribute('aria-expanded', 'false');
+      toggleMobileMenu(false);
       openAuthModal();
     }
   });
@@ -247,27 +292,51 @@ const currentPath = Astro.url.pathname;
 <style>
   .header {
     position: fixed;
-    top: var(--space-4);
-    left: var(--space-4);
-    right: var(--space-4);
+    top: var(--space-3);
+    left: var(--space-3);
+    right: var(--space-3);
     z-index: var(--z-fixed);
-    background: var(--glass-bg);
-    backdrop-filter: var(--surface-blur-heavy);
-    -webkit-backdrop-filter: var(--surface-blur-heavy);
-    border: 1px solid var(--glass-border);
     border-radius: var(--radius-2xl);
-    box-shadow: var(--shadow-float);
+    overflow: hidden;
+    transition: transform var(--duration-normal) var(--ease-default);
+  }
+  
+  .header-glass {
+    position: absolute;
+    inset: 0;
+    background: var(--liquid-glass-bg);
+    backdrop-filter: var(--liquid-glass-blur);
+    -webkit-backdrop-filter: var(--liquid-glass-blur);
+    border: 1px solid var(--liquid-glass-border);
+    box-shadow: var(--liquid-glass-shadow);
     transition: background var(--duration-normal) var(--ease-default),
                 border-color var(--duration-normal) var(--ease-default),
                 box-shadow var(--duration-normal) var(--ease-default);
   }
   
-  .header:hover {
-    background: var(--glass-bg-hover);
-    border-color: var(--glass-border-hover);
+  .header-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--liquid-glass-highlight);
+    pointer-events: none;
+  }
+  
+  .header:hover .header-glass {
+    background: var(--liquid-glass-bg-hover);
+    border-color: var(--liquid-glass-border);
+    box-shadow: var(--liquid-glass-shadow-hover);
   }
   
   @media (min-width: 768px) {
+    .header {
+      top: var(--space-4);
+      left: var(--space-4);
+      right: var(--space-4);
+    }
+  }
+  
+  @media (min-width: 1024px) {
     .header {
       top: var(--space-5);
       left: var(--space-6);
@@ -275,27 +344,29 @@ const currentPath = Astro.url.pathname;
     }
   }
   
-  @media (min-width: 1024px) {
-    .header {
-      top: var(--space-6);
-      left: var(--space-8);
-      right: var(--space-8);
-    }
-  }
-  
   .header-container {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
     max-width: var(--container-xl);
     margin: 0 auto;
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-2) var(--space-3);
     height: var(--header-height);
+    gap: var(--space-2);
   }
   
   @media (min-width: 768px) {
     .header-container {
-      padding: var(--space-3) var(--space-5);
+      padding: var(--space-2) var(--space-4);
+      gap: var(--space-4);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .header-container {
+      padding: var(--space-2) var(--space-5);
+      gap: var(--space-6);
     }
   }
   
@@ -306,11 +377,12 @@ const currentPath = Astro.url.pathname;
     text-decoration: none;
     color: var(--text-primary);
     flex-shrink: 0;
+    z-index: 1;
   }
   
   .logo-video {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: var(--radius-lg);
     object-fit: cover;
     object-position: center;
@@ -320,24 +392,26 @@ const currentPath = Astro.url.pathname;
   .logo-text {
     display: none;
     font-family: var(--font-brand);
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     font-weight: 600;
     letter-spacing: 0.02em;
   }
   
-  @media (min-width: 640px) {
+  @media (min-width: 480px) {
     .logo-text {
       display: block;
     }
   }
   
-  .nav {
+  .nav-desktop {
     display: none;
+    flex: 1;
+    justify-content: center;
   }
   
   @media (min-width: 1024px) {
-    .nav {
-      display: block;
+    .nav-desktop {
+      display: flex;
     }
   }
   
@@ -346,53 +420,132 @@ const currentPath = Astro.url.pathname;
     align-items: center;
     gap: var(--space-1);
     list-style: none;
+    margin: 0;
+    padding: 0;
   }
   
   .nav-link {
     position: relative;
     display: block;
-    padding: var(--space-2) var(--space-4);
+    padding: var(--space-2) var(--space-3);
     color: var(--text-secondary);
     font-family: var(--font-sans);
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
     text-decoration: none;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     transition: color var(--duration-fast) var(--ease-default),
                 background-color var(--duration-fast) var(--ease-default);
+    z-index: 1;
   }
   
   .nav-link:hover {
     color: var(--text-primary);
-    background-color: var(--bg-tertiary);
+    background-color: var(--liquid-glass-bg-active);
   }
   
   .nav-link.active {
     color: var(--text-primary);
-    background-color: var(--bg-tertiary);
+    background-color: var(--liquid-glass-bg-active);
   }
   
-  .nav-link.admin-nav-link {
+  .nav-more-wrapper {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .nav-more-btn {
     display: flex;
     align-items: center;
-    color: var(--color-accent-purple);
-    background: rgba(191, 90, 242, 0.08);
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    background: none;
+    border: none;
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-default),
+                background-color var(--duration-fast) var(--ease-default);
   }
   
-  .nav-link.admin-nav-link:hover {
-    background: rgba(191, 90, 242, 0.15);
+  .nav-more-btn:hover {
+    color: var(--text-primary);
+    background-color: var(--liquid-glass-bg-active);
   }
   
-  .nav-link.admin-nav-link.active {
-    background: rgba(191, 90, 242, 0.15);
+  .nav-more-icon {
+    transition: transform var(--duration-fast) var(--ease-default);
+  }
+  
+  .nav-more-btn[aria-expanded="true"] .nav-more-icon {
+    transform: rotate(180deg);
+  }
+  
+  .nav-more-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: var(--space-2);
+    min-width: 160px;
+    padding: var(--space-2);
+    background: var(--liquid-glass-bg);
+    backdrop-filter: var(--liquid-glass-blur);
+    -webkit-backdrop-filter: var(--liquid-glass-blur);
+    border: 1px solid var(--liquid-glass-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--liquid-glass-shadow-hover);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.95);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .nav-more-dropdown.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+  }
+  
+  .dropdown-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    text-decoration: none;
+    border-radius: var(--radius-lg);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .dropdown-link:hover {
+    color: var(--text-primary);
+    background-color: var(--liquid-glass-bg-active);
+  }
+  
+  .dropdown-link.active {
+    color: var(--text-primary);
+    background-color: var(--liquid-glass-bg-active);
+  }
+  
+  .dropdown-link--admin {
     color: var(--color-accent-purple);
+  }
+  
+  .dropdown-link--admin:hover {
+    background-color: rgba(191, 90, 242, 0.12);
   }
   
   .header-actions {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: var(--space-2);
     flex-shrink: 0;
+    z-index: 1;
   }
   
   .header-utils {
@@ -408,14 +561,17 @@ const currentPath = Astro.url.pathname;
     width: 36px;
     height: 36px;
     color: var(--text-tertiary);
-    border-radius: var(--radius-lg);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-xl);
+    cursor: pointer;
     transition: color var(--duration-fast) var(--ease-default),
                 background-color var(--duration-fast) var(--ease-default);
   }
   
   .auth-btn:hover {
     color: var(--text-primary);
-    background-color: var(--bg-tertiary);
+    background-color: var(--liquid-glass-bg-active);
   }
   
   .user-menu {
@@ -432,14 +588,16 @@ const currentPath = Astro.url.pathname;
     right: 0;
     margin-top: var(--space-2);
     min-width: 180px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-float);
     padding: var(--space-2);
+    background: var(--liquid-glass-bg);
+    backdrop-filter: var(--liquid-glass-blur);
+    -webkit-backdrop-filter: var(--liquid-glass-blur);
+    border: 1px solid var(--liquid-glass-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--liquid-glass-shadow-hover);
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px);
+    transform: translateY(-8px) scale(0.95);
     transition: all var(--duration-fast) var(--ease-default);
     z-index: var(--z-dropdown);
   }
@@ -448,7 +606,7 @@ const currentPath = Astro.url.pathname;
   .user-menu.open .user-dropdown {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
   
   .dropdown-header {
@@ -464,7 +622,7 @@ const currentPath = Astro.url.pathname;
   .dropdown-divider {
     height: 1px;
     background: var(--border-primary);
-    margin: var(--space-2) 0;
+    margin: var(--space-1) 0;
   }
   
   .dropdown-item {
@@ -484,41 +642,43 @@ const currentPath = Astro.url.pathname;
   }
   
   .dropdown-item:hover {
-    background: var(--bg-tertiary);
+    background: var(--liquid-glass-bg-active);
     color: var(--text-primary);
   }
   
-  .dropdown-item.logout {
-    color: #ef4444;
+  .dropdown-item--logout {
+    color: var(--color-error);
   }
   
-  .dropdown-item.logout:hover {
-    background: rgba(239, 68, 68, 0.1);
+  .dropdown-item--logout:hover {
+    background: rgba(255, 55, 95, 0.1);
   }
   
-  .dropdown-item.admin-link {
+  .dropdown-item--admin {
     color: var(--color-accent-purple);
   }
   
-  .dropdown-item.admin-link:hover {
+  .dropdown-item--admin:hover {
     background: rgba(191, 90, 242, 0.1);
   }
   
   .mobile-menu-btn {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
     width: 40px;
     height: 40px;
-    color: var(--text-secondary);
-    border-radius: var(--radius-lg);
-    transition: color var(--duration-fast) var(--ease-default),
-                background-color var(--duration-fast) var(--ease-default);
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease-default);
   }
   
   .mobile-menu-btn:hover {
-    color: var(--text-primary);
-    background-color: var(--bg-tertiary);
+    background-color: var(--liquid-glass-bg-active);
   }
   
   @media (min-width: 1024px) {
@@ -527,30 +687,88 @@ const currentPath = Astro.url.pathname;
     }
   }
   
+  .hamburger-line {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--text-secondary);
+    border-radius: var(--radius-full);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .hamburger-line + .hamburger-line {
+    margin-top: 4px;
+  }
+  
+  .mobile-menu-btn[aria-expanded="true"] .hamburger-line:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+  
+  .mobile-menu-btn[aria-expanded="true"] .hamburger-line:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  
+  .mobile-menu-btn[aria-expanded="true"] .hamburger-line:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+  
+  .header-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--duration-normal) var(--ease-default);
+    z-index: calc(var(--z-fixed) - 1);
+  }
+  
+  .header-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  @media (min-width: 1024px) {
+    .header-backdrop {
+      display: none;
+    }
+  }
+  
   .mobile-nav {
-    display: none;
-    position: absolute;
-    top: calc(100% + var(--space-2));
-    left: 0;
+    position: fixed;
+    top: 0;
     right: 0;
-    background: var(--glass-bg);
-    backdrop-filter: var(--surface-blur-heavy);
-    -webkit-backdrop-filter: var(--surface-blur-heavy);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-2xl);
-    padding: var(--space-4);
-    animation: slideDown var(--duration-fast) var(--ease-default);
-    box-shadow: var(--shadow-float);
+    bottom: 0;
+    width: 280px;
+    max-width: 85vw;
+    background: var(--liquid-glass-bg);
+    backdrop-filter: var(--liquid-glass-blur-heavy);
+    -webkit-backdrop-filter: var(--liquid-glass-blur-heavy);
+    border-left: 1px solid var(--liquid-glass-border);
+    box-shadow: var(--liquid-glass-shadow-hover);
+    transform: translateX(100%);
+    transition: transform var(--duration-normal) var(--ease-default);
+    z-index: calc(var(--z-fixed) + 1);
+    overflow-y: auto;
   }
   
   .mobile-nav.open {
-    display: block;
+    transform: translateX(0);
   }
   
   @media (min-width: 1024px) {
     .mobile-nav {
-      display: none !important;
+      display: none;
     }
+  }
+  
+  .mobile-nav-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    padding: var(--space-6) var(--space-4);
   }
   
   .mobile-nav-list {
@@ -558,17 +776,21 @@ const currentPath = Astro.url.pathname;
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
+    margin: 0;
+    padding: 0;
   }
   
   .mobile-nav-link {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
     padding: var(--space-3) var(--space-4);
     color: var(--text-secondary);
     font-family: var(--font-sans);
     font-weight: var(--font-medium);
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     text-decoration: none;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     transition: color var(--duration-fast) var(--ease-default),
                 background-color var(--duration-fast) var(--ease-default);
   }
@@ -576,28 +798,23 @@ const currentPath = Astro.url.pathname;
   .mobile-nav-link:hover,
   .mobile-nav-link.active {
     color: var(--text-primary);
-    background-color: var(--bg-tertiary);
+    background-color: var(--liquid-glass-bg-active);
   }
   
-  .mobile-nav-link.admin-mobile-link {
-    display: flex;
-    align-items: center;
+  .mobile-nav-link--admin {
     color: var(--color-accent-purple);
     background: rgba(191, 90, 242, 0.08);
   }
   
-  .mobile-nav-link.admin-mobile-link:hover,
-  .mobile-nav-link.admin-mobile-link.active {
+  .mobile-nav-link--admin:hover,
+  .mobile-nav-link--admin.active {
     background: rgba(191, 90, 242, 0.15);
     color: var(--color-accent-purple);
   }
   
-  .mobile-nav-actions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    margin-top: var(--space-4);
-    padding-top: var(--space-4);
+  .mobile-nav-footer {
+    margin-top: auto;
+    padding-top: var(--space-6);
     border-top: 1px solid var(--border-primary);
   }
   
@@ -608,30 +825,17 @@ const currentPath = Astro.url.pathname;
     gap: var(--space-2);
     width: 100%;
     padding: var(--space-3) var(--space-4);
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
+    color: var(--text-primary);
+    font-size: var(--text-base);
     font-weight: var(--font-medium);
-    border-radius: var(--radius-lg);
-    transition: color var(--duration-fast) var(--ease-default),
-                background-color var(--duration-fast) var(--ease-default);
-    background: none;
-    border: none;
+    background: var(--liquid-glass-bg-active);
+    border: 1px solid var(--liquid-glass-border);
+    border-radius: var(--radius-xl);
     cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
   }
   
   .mobile-auth-btn:hover {
-    color: var(--text-primary);
-    background-color: var(--bg-tertiary);
-  }
-  
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    background: var(--liquid-glass-bg-hover);
   }
 </style>
