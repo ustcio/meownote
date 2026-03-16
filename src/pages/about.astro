@@ -5,51 +5,51 @@ import Icon from '@components/ui/Icon.astro';
 const features = [
   {
     icon: 'zap',
-    title: '高性能',
-    description: '极速响应，毫秒级延迟'
+    title: 'High Performance',
+    description: 'Ultra-fast response with millisecond latency'
   },
   {
     icon: 'shield',
-    title: '安全可靠',
-    description: '企业级安全保障，数据加密传输'
+    title: 'Secure & Reliable',
+    description: 'Enterprise-grade security with encrypted data transmission'
   },
   {
     icon: 'cpu',
-    title: '智能理解',
-    description: '深度理解上下文，精准响应需求'
+    title: 'Intelligent Understanding',
+    description: 'Deep context understanding for precise responses'
   },
   {
     icon: 'globe',
-    title: '全球部署',
-    description: '遍布全球的节点，就近访问'
+    title: 'Global Deployment',
+    description: 'Worldwide nodes for nearest access'
   },
 ];
 
 const team = [
-  { name: 'Hao Yang', role: '创始人 & CEO' },
-  { name: 'Sarah Kim', role: '技术总监' },
-  { name: 'Mike Wang', role: '产品负责人' },
+  { name: 'Hao Yang', role: 'Founder & CEO' },
+  { name: 'Sarah Kim', role: 'CTO' },
+  { name: 'Mike Wang', role: 'Product Lead' },
 ];
 ---
 
 <Layout 
-  title="关于 - MeowClaw"
-  description="构建AI的未来"
+  title="About - MeowClaw"
+  description="Building the Future of AI"
 >
   <section class="about">
     <div class="about-container">
       <div class="about-hero">
-        <h1 class="about-title">关于</h1>
-        <p class="about-subtitle">构建AI的未来</p>
+        <h1 class="about-title">About</h1>
+        <p class="about-subtitle">Building the Future of AI</p>
       </div>
       
       <div class="about-content">
         <div class="about-section">
           <h2 class="section-title">
-            我们的使命
+            Our Mission
           </h2>
           <p class="section-text">
-            我们致力于构建安全、可靠、易用的AI工具，让每个人都能享受到人工智能带来的便利。
+            We are committed to building safe, reliable, and easy-to-use AI tools that make artificial intelligence accessible to everyone.
           </p>
         </div>
         
@@ -67,7 +67,7 @@ const team = [
         
         <div class="team-section">
           <h2 class="section-title">
-            核心团队
+            Core Team
           </h2>
           <div class="team-grid">
             {team.map((member) => (

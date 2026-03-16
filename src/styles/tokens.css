@@ -1,26 +1,26 @@
 :root {
   /* ==================== Color System - MeowClaw Modern Professional ==================== */
   
-  /* Primary Colors - Modern Teal */
-  --color-primary: #0D9488;
-  --color-primary-hover: #0F766E;
-  --color-primary-active: #115E59;
-  --color-primary-light: rgba(13, 148, 136, 0.1);
-  --color-primary-medium: rgba(13, 148, 136, 0.2);
+  /* Primary Colors - Claude Warm Orange */
+  --color-primary: #D97757;
+  --color-primary-hover: #C4634D;
+  --color-primary-active: #A8523E;
+  --color-primary-light: rgba(217, 119, 87, 0.1);
+  --color-primary-medium: rgba(217, 119, 87, 0.2);
   
-  /* Accent Colors - Modern Palette */
+  /* Accent Colors - Claude Palette */
   --color-accent-blue: #3B82F6;
   --color-accent-purple: #8B5CF6;
   --color-accent-pink: #EC4899;
-  --color-accent-orange: #F97316;
+  --color-accent-orange: #D97757;
   --color-accent-green: #10B981;
   --color-accent-teal: #14B8A6;
   --color-accent-cyan: #06B6D4;
   
-  /* Brand Colors - MeowClaw Identity */
-  --brand-light: #F0FDF4;
-  --brand-dark: #0D9488;
-  --brand-gradient: linear-gradient(135deg, #0D9488, #059669);
+  /* Brand Colors - Claude Identity */
+  --brand-light: #F5F0E8;
+  --brand-dark: #D97757;
+  --brand-gradient: linear-gradient(135deg, #D97757, #B4533E);
   
   /* Semantic Colors */
   --color-success: #10B981;
@@ -31,24 +31,24 @@
   --color-danger-light: #F87171;
   --color-info: #3B82F6;
   
-  /* Gradient System - Modern Professional */
-  --gradient-primary: linear-gradient(135deg, #0D9488, #059669);
+  /* Gradient System - Claude Warm Style */
+  --gradient-primary: linear-gradient(135deg, #D97757, #B4533E);
   --gradient-accent: linear-gradient(135deg, #8B5CF6, #EC4899);
   --gradient-success: linear-gradient(135deg, #10B981, #14B8A6);
-  --gradient-hero: linear-gradient(135deg, #0D9488 0%, #059669 100%);
+  --gradient-hero: linear-gradient(135deg, #D97757 0%, #B4533E 100%);
   
-  /* Modern Gradients */
-  --gradient-glow: linear-gradient(135deg, rgba(13, 148, 136, 0.15), rgba(13, 148, 136, 0.25));
-  --gradient-aurora: linear-gradient(90deg, #0D9488, #059669);
+  /* Claude Gradients */
+  --gradient-glow: linear-gradient(135deg, rgba(217, 119, 87, 0.15), rgba(217, 119, 87, 0.25));
+  --gradient-aurora: linear-gradient(90deg, #D97757, #B4533E);
   --gradient-dreamscape: linear-gradient(180deg, 
     #FAFAFA 0%, 
-    #F0FDF4 50%,
-    #ECFDF5 100%
+    #F5F0E8 50%,
+    #EDE6DB 100%
   );
   --gradient-fluid: linear-gradient(135deg,
-    rgba(13, 148, 136, 0.1) 0%,
-    rgba(13, 148, 136, 0.15) 50%,
-    rgba(13, 148, 136, 0.1) 100%
+    rgba(217, 119, 87, 0.1) 0%,
+    rgba(217, 119, 87, 0.15) 50%,
+    rgba(217, 119, 87, 0.1) 100%
   );
   
   /* State Color Scales */

@@ -5,11 +5,8 @@ export default defineConfig({
   site: 'https://ustc.dev',
   compressHTML: true,
   i18n: {
-    defaultLocale: 'zh-CN',
-    locales: ['zh-CN', 'en-US'],
-    routing: {
-      prefixDefaultLocale: false,
-    },
+    defaultLocale: 'en',
+    locales: ['en'],
   },
   build: {
     inlineStylesheets: 'auto',
