@@ -1,10 +1,11 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import { t } from '@i18n/translate';
 ---
 
 <Layout 
-  title="个人资料 - MeowClaw"
-  description="查看和管理您的个人资料"
+  title={`${t('profile.title')} - MeowClaw`}
+  description={t('profile.description')}
 >
   <section class="profile">
     <div class="profile-container">
@@ -21,7 +22,7 @@ import Layout from '@layouts/Layout.astro';
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
           </svg>
-          <span>编辑资料</span>
+          <span>{t('profile.edit')}</span>
         </button>
       </div>
       
@@ -34,7 +35,7 @@ import Layout from '@layouts/Layout.astro';
           </div>
           <div class="stat-content">
             <span class="stat-value" id="stat-login-count">0</span>
-            <span class="stat-label">登录次数</span>
+            <span class="stat-label">{t('profile.stats.logins')}</span>
           </div>
         </div>
         <div class="stat-card">
@@ -46,7 +47,7 @@ import Layout from '@layouts/Layout.astro';
           </div>
           <div class="stat-content">
             <span class="stat-value" id="stat-last-login">--</span>
-            <span class="stat-label">Last Login</span>
+            <span class="stat-label">{t('profile.stats.lastLogin')}</span>
           </div>
         </div>
         <div class="stat-card">
@@ -60,7 +61,7 @@ import Layout from '@layouts/Layout.astro';
           </div>
           <div class="stat-content">
             <span class="stat-value" id="stat-join-date">--</span>
-            <span class="stat-label">Joined</span>
+            <span class="stat-label">{t('profile.stats.joined')}</span>
           </div>
         </div>
       </div>
@@ -72,19 +73,19 @@ import Layout from '@layouts/Layout.astro';
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-            Account Information
+            {t('profile.sections.account')}
           </h2>
           <div class="info-list">
             <div class="info-item">
-              <span class="info-label">Username</span>
+              <span class="info-label">{t('profile.fields.username')}</span>
               <span class="info-value" id="info-username">--</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Email</span>
+              <span class="info-label">{t('profile.fields.email')}</span>
               <span class="info-value" id="info-email">--</span>
             </div>
             <div class="info-item">
-              <span class="info-label">User ID</span>
+              <span class="info-label">{t('profile.fields.userId')}</span>
               <span class="info-value" id="info-userid">--</span>
             </div>
           </div>
@@ -96,13 +97,13 @@ import Layout from '@layouts/Layout.astro';
               <circle cx="12" cy="12" r="3"></circle>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
-            Account Settings
+            {t('profile.sections.settings')}
           </h2>
           <div class="settings-list">
             <button class="setting-item" id="change-password-btn">
               <div class="setting-info">
-                <span class="setting-title">Change Password</span>
-                <span class="setting-desc">Update your login password</span>
+                <span class="setting-title">{t('profile.settings.password')}</span>
+                <span class="setting-desc">{t('profile.settings.passwordDesc')}</span>
               </div>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -110,8 +111,8 @@ import Layout from '@layouts/Layout.astro';
             </button>
             <button class="setting-item danger" id="logout-btn">
               <div class="setting-info">
-                <span class="setting-title">退出登录</span>
-                <span class="setting-desc">退出当前账户</span>
+                <span class="setting-title">{t('profile.settings.logout')}</span>
+                <span class="setting-desc">{t('profile.settings.logoutDesc')}</span>
               </div>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -129,7 +130,7 @@ import Layout from '@layouts/Layout.astro';
     <div class="modal-backdrop" id="edit-backdrop"></div>
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Edit Profile</h3>
+        <h3>{t('profile.modal.editTitle')}</h3>
         <button class="modal-close" id="edit-modal-close">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -139,16 +140,16 @@ import Layout from '@layouts/Layout.astro';
       </div>
       <form class="modal-form" id="edit-form">
         <div class="form-group">
-          <label for="edit-username">用户名</label>
+          <label for="edit-username">{t('profile.fields.username')}</label>
           <input type="text" id="edit-username" name="username" required minlength="3" maxlength="20" />
         </div>
         <div class="form-group">
-          <label for="edit-email">Email</label>
+          <label for="edit-email">{t('profile.fields.email')}</label>
           <input type="email" id="edit-email" name="email" required />
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" id="edit-cancel">取消</button>
-          <button type="submit" class="btn-primary">保存</button>
+          <button type="button" class="btn-secondary" id="edit-cancel">{t('common.cancel')}</button>
+          <button type="submit" class="btn-primary">{t('common.save')}</button>
         </div>
       </form>
     </div>
@@ -158,7 +159,7 @@ import Layout from '@layouts/Layout.astro';
     <div class="modal-backdrop" id="password-backdrop"></div>
     <div class="modal-content">
       <div class="modal-header">
-        <h3>修改密码</h3>
+        <h3>{t('profile.modal.passwordTitle')}</h3>
         <button class="modal-close" id="password-modal-close">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -168,20 +169,20 @@ import Layout from '@layouts/Layout.astro';
       </div>
       <form class="modal-form" id="password-form">
         <div class="form-group">
-          <label for="current-password">当前密码</label>
+          <label for="current-password">{t('profile.modal.currentPassword')}</label>
           <input type="password" id="current-password" name="currentPassword" required />
         </div>
         <div class="form-group">
-          <label for="new-password">新密码</label>
+          <label for="new-password">{t('profile.modal.newPassword')}</label>
           <input type="password" id="new-password" name="newPassword" required minlength="6" />
         </div>
         <div class="form-group">
-          <label for="confirm-new-password">确认新密码</label>
+          <label for="confirm-new-password">{t('profile.modal.confirmPassword')}</label>
           <input type="password" id="confirm-new-password" name="confirmPassword" required />
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" id="password-cancel">取消</button>
-          <button type="submit" class="btn-primary">更新密码</button>
+          <button type="button" class="btn-secondary" id="password-cancel">{t('common.cancel')}</button>
+          <button type="submit" class="btn-primary">{t('profile.modal.updatePassword')}</button>
         </div>
       </form>
     </div>
@@ -548,6 +549,41 @@ import Layout from '@layouts/Layout.astro';
 <script>
   const API_BASE = 'https://api.ustc.dev';
   
+  // Get language from localStorage or default to 'en'
+  const getLang = () => localStorage.getItem('lang') || 'en';
+  
+  // Translations for client-side
+  const i18n = {
+    en: {
+      today: 'Today',
+      yesterday: 'Yesterday',
+      daysAgo: (n: number) => `${n} days ago`,
+      profileUpdated: 'Profile updated successfully',
+      updateFailed: 'Update failed',
+      passwordMismatch: 'New passwords do not match',
+      passwordUpdated: 'Password updated successfully',
+      passwordUpdateFailed: 'Password update failed',
+      retryError: 'Update failed, please try again'
+    },
+    zh: {
+      today: '今天',
+      yesterday: '昨天',
+      daysAgo: (n: number) => `${n}天前`,
+      profileUpdated: '资料更新成功',
+      updateFailed: '更新失败',
+      passwordMismatch: '两次输入的新密码不一致',
+      passwordUpdated: '密码更新成功',
+      passwordUpdateFailed: '密码更新失败',
+      retryError: '更新失败，请重试'
+    }
+  };
+  
+  const t = (key: string, ...args: any[]) => {
+    const lang = getLang();
+    const value = (i18n as any)[lang]?.[key];
+    return typeof value === 'function' ? value(...args) : value;
+  };
+  
   const editModal = document.getElementById('edit-modal');
   const passwordModal = document.getElementById('password-modal');
   const editForm = document.getElementById('edit-form');
@@ -583,35 +619,35 @@ import Layout from '@layouts/Layout.astro';
     }
   }
   
-  function formatDate(date) {
+  function formatDate(date: Date) {
     const now = new Date();
-    const diff = now - date;
+    const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     
     if (days === 0) {
-      return '今天';
+      return t('today');
     } else if (days === 1) {
-      return '昨天';
+      return t('yesterday');
     } else if (days < 7) {
-      return `${days}天前`;
+      return t('daysAgo', days);
     } else {
       return date.toLocaleDateString();
     }
   }
   
-  function openModal(modal) {
+  function openModal(modal: HTMLElement | null) {
     modal?.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
   
-  function closeModal(modal) {
+  function closeModal(modal: HTMLElement | null) {
     modal?.classList.remove('open');
     document.body.style.overflow = '';
   }
   
   document.getElementById('edit-btn')?.addEventListener('click', () => {
-    document.getElementById('edit-username').value = currentUser?.username || '';
-    document.getElementById('edit-email').value = currentUser?.email || '';
+    (document.getElementById('edit-username') as HTMLInputElement).value = currentUser?.username || '';
+    (document.getElementById('edit-email') as HTMLInputElement).value = currentUser?.email || '';
     openModal(editModal);
   });
   
@@ -658,13 +694,13 @@ import Layout from '@layouts/Layout.astro';
         localStorage.setItem('user', JSON.stringify(currentUser));
         loadUserProfile();
         closeModal(editModal);
-        alert('资料更新成功');
+        alert(t('profileUpdated'));
       } else {
-        alert(result.message || '更新失败');
+        alert(result.message || t('updateFailed'));
       }
     } catch (error) {
       console.error('Update error:', error);
-      alert('更新失败，请重试');
+      alert(t('retryError'));
     }
   });
   
@@ -676,7 +712,7 @@ import Layout from '@layouts/Layout.astro';
     const confirmPassword = formData.get('confirmPassword');
     
     if (newPassword !== confirmPassword) {
-      alert('两次输入的新密码不一致');
+      alert(t('passwordMismatch'));
       return;
     }
     
@@ -696,13 +732,13 @@ import Layout from '@layouts/Layout.astro';
       if (result.success) {
         closeModal(passwordModal);
         passwordForm.reset();
-        alert('密码更新成功');
+        alert(t('passwordUpdated'));
       } else {
-        alert(result.message || '密码更新失败');
+        alert(result.message || t('passwordUpdateFailed'));
       }
     } catch (error) {
       console.error('Password update error:', error);
-      alert('密码更新失败，请重试');
+      alert(t('retryError'));
     }
   });
   

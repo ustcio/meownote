@@ -1,61 +1,79 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import { t } from '@i18n/translate';
 
 const timeline = [
   {
+    year: '2025',
+    title: 'Claude 4 & GPT-5 Era',
+    description: 'Anthropic Claude 4 和 OpenAI GPT-5 引领AGI探索，多模态能力达到新高度，AI代理开始大规模应用。',
+    highlight: true
+  },
+  {
     year: '2024',
-    title: 'GPT-4o 发布',
-    description: 'OpenAI 发布多模态模型 GPT-4o，实现文本、音频、图像的实时处理。'
+    title: 'Claude 3.5 & GPT-4o & Sora',
+    description: 'Anthropic发布Claude 3.5 Sonnet，OpenAI发布多模态GPT-4o和文生视频模型Sora，开启AI视频生成时代。'
   },
   {
     year: '2023',
-    title: 'ChatGPT 爆发式增长',
-    description: 'ChatGPT 成为历史上增长最快的消费应用，推动AI技术普及。'
+    title: 'GPT-4 & Claude 2 & Gemini',
+    description: 'OpenAI发布GPT-4，Anthropic推出Claude 2，Google发布Gemini，大模型百花齐放。'
   },
   {
     year: '2022',
     title: 'ChatGPT 发布',
-    description: 'OpenAI 发布 ChatGPT，开启大语言模型时代。'
+    description: 'OpenAI 发布 ChatGPT，两个月用户破亿，开启大语言模型时代。'
+  },
+  {
+    year: '2021',
+    title: 'DALL-E & GitHub Copilot',
+    description: 'OpenAI发布DALL-E开启AI绘画时代，GitHub Copilot改变编程方式。'
   },
   {
     year: '2020',
     title: 'GPT-3 发布',
-    description: 'OpenAI 发布 GPT-3，展示了大规模语言模型的惊人能力。'
+    description: 'OpenAI 发布 GPT-3，1750亿参数展示了大规模语言模型的惊人涌现能力。'
+  },
+  {
+    year: '2019',
+    title: 'GPT-2 & AlphaFold',
+    description: 'OpenAI发布GPT-2，DeepMind发布AlphaFold解决蛋白质折叠难题。'
   },
   {
     year: '2017',
     title: 'Transformer 架构',
-    description: 'Google 发布 "Attention Is All You Need" 论文，奠定现代AI基础。'
+    description: 'Google发布"Attention Is All You Need"论文，奠定现代大模型基础架构。'
   },
   {
     year: '2016',
     title: 'AlphaGo 战胜李世石',
-    description: 'DeepMind 的 AlphaGo 在围棋比赛中击败世界冠军李世石。'
+    description: 'DeepMind的AlphaGo在围棋比赛中4:1击败世界冠军李世石，震惊世界。'
   },
   {
     year: '2012',
     title: 'AlexNet 突破',
-    description: '深度学习在 ImageNet 竞赛中取得突破性进展，开启深度学习时代。'
+    description: 'AlexNet在ImageNet竞赛中将错误率从26%降至15%，开启深度学习时代。'
   },
 ];
 ---
 
 <Layout 
-  title="Research - MeowClaw"
-  description="Key moments in the history of artificial intelligence"
+  title={`${t('research.title')} - MeowClaw`}
+  description={t('research.subtitle')}
 >
   <section class="research">
     <div class="research-container">
       <div class="research-header">
-        <h1 class="research-title">AI Timeline</h1>
-        <p class="research-subtitle">Key moments in the history of artificial intelligence</p>
+        <span class="research-badge">{t('research.badge')}</span>
+        <h1 class="research-title">{t('research.title')}</h1>
+        <p class="research-subtitle">{t('research.subtitle')}</p>
       </div>
       
       <div class="timeline">
         {timeline.map((item, index) => (
-          <div class="timeline-item">
+          <div class:list={['timeline-item', { highlight: item.highlight }]}>
             <div class="timeline-marker">
-              <div class="timeline-dot"></div>
+              <div class:list={['timeline-dot', { pulse: item.highlight }]}></div>
               {index < timeline.length - 1 && <div class="timeline-line"></div>}
             </div>
             <div class="timeline-content hover-lift">
@@ -65,6 +83,10 @@ const timeline = [
             </div>
           </div>
         ))}
+      </div>
+      
+      <div class="research-footer">
+        <p class="research-footer-text">{t('research.footer')}</p>
       </div>
     </div>
   </section>
@@ -86,6 +108,19 @@ const timeline = [
     margin-bottom: var(--space-12);
   }
   
+  .research-badge {
+    display: inline-block;
+    padding: var(--space-1) var(--space-3);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    color: white;
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-4);
+  }
+  
   .research-title {
     font-size: var(--text-3xl);
     font-weight: var(--font-bold);
@@ -102,6 +137,8 @@ const timeline = [
   .research-subtitle {
     color: var(--text-secondary);
     font-size: var(--text-lg);
+    max-width: 600px;
+    margin: 0 auto;
   }
   
   .timeline {
@@ -113,6 +150,11 @@ const timeline = [
   .timeline-item {
     display: flex;
     gap: var(--space-4);
+  }
+  
+  .timeline-item.highlight .timeline-content {
+    background: linear-gradient(135deg, var(--color-primary-alpha-10), var(--color-accent-alpha-10));
+    border-color: var(--color-primary);
   }
   
   .timeline-marker {
@@ -128,13 +170,29 @@ const timeline = [
     border-radius: 50%;
     background: var(--color-primary);
     border: 2px solid var(--bg-primary);
-    box-shadow: 0 0 0 4px var(--color-primary);
+    box-shadow: 0 0 0 4px var(--color-primary-alpha-30);
+  }
+  
+  .timeline-dot.pulse {
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 4px var(--color-primary-alpha-30);
+    }
+    50% {
+      box-shadow: 0 0 0 8px var(--color-primary-alpha-20);
+    }
   }
   
   .timeline-line {
     width: 2px;
     flex: 1;
-    background: var(--border-primary);
+    background: linear-gradient(to bottom, var(--border-primary), var(--border-primary-alpha-50));
     margin-top: var(--space-2);
   }
   
@@ -146,6 +204,12 @@ const timeline = [
     border-radius: var(--radius-xl);
     box-shadow: var(--card-shadow);
     margin-bottom: var(--space-2);
+    transition: all 0.3s ease;
+  }
+  
+  .timeline-content:hover {
+    transform: translateX(4px);
+    box-shadow: var(--shadow-lg);
   }
   
   .timeline-year {
@@ -167,5 +231,17 @@ const timeline = [
     font-size: var(--text-base);
     color: var(--text-secondary);
     line-height: var(--leading-relaxed);
+  }
+  
+  .research-footer {
+    text-align: center;
+    margin-top: var(--space-12);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--border-primary);
+  }
+  
+  .research-footer-text {
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
   }
 </style>
