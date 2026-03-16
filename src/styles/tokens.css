@@ -1,25 +1,26 @@
 :root {
-  /* ==================== Color System - Claude Warm & Professional Style ==================== */
+  /* ==================== Color System - MeowClaw Modern Professional ==================== */
   
-  /* Primary Colors - Claude Orange */
-  --color-primary: #D97757;
-  --color-primary-hover: #C46A4A;
-  --color-primary-active: #B85E3E;
+  /* Primary Colors - Modern Teal */
+  --color-primary: #0D9488;
+  --color-primary-hover: #0F766E;
+  --color-primary-active: #115E59;
+  --color-primary-light: rgba(13, 148, 136, 0.1);
+  --color-primary-medium: rgba(13, 148, 136, 0.2);
   
-  /* Accent Colors - Claude Neutral Palette */
+  /* Accent Colors - Modern Palette */
   --color-accent-blue: #3B82F6;
   --color-accent-purple: #8B5CF6;
   --color-accent-pink: #EC4899;
-  --color-accent-orange: #D97757;
+  --color-accent-orange: #F97316;
   --color-accent-green: #10B981;
   --color-accent-teal: #14B8A6;
   --color-accent-cyan: #06B6D4;
   
-  /* Claude Cream & Warm Colors */
-  --claude-cream: #F5F0E8;
-  --claude-cream-dark: #E8E3DB;
-  --claude-orange-light: rgba(217, 119, 87, 0.1);
-  --claude-orange-medium: rgba(217, 119, 87, 0.2);
+  /* Brand Colors - MeowClaw Identity */
+  --brand-light: #F0FDF4;
+  --brand-dark: #0D9488;
+  --brand-gradient: linear-gradient(135deg, #0D9488, #059669);
   
   /* Semantic Colors */
   --color-success: #10B981;
@@ -30,24 +31,24 @@
   --color-danger-light: #F87171;
   --color-info: #3B82F6;
   
-  /* Gradient System - Simplified Claude Style */
-  --gradient-primary: linear-gradient(135deg, #D97757, #C46A4A);
+  /* Gradient System - Modern Professional */
+  --gradient-primary: linear-gradient(135deg, #0D9488, #059669);
   --gradient-accent: linear-gradient(135deg, #8B5CF6, #EC4899);
   --gradient-success: linear-gradient(135deg, #10B981, #14B8A6);
-  --gradient-hero: linear-gradient(135deg, #D97757 0%, #C46A4A 100%);
+  --gradient-hero: linear-gradient(135deg, #0D9488 0%, #059669 100%);
   
-  /* Claude Simplified Gradients */
-  --gradient-glow: linear-gradient(135deg, rgba(217, 119, 87, 0.15), rgba(217, 119, 87, 0.25));
-  --gradient-aurora: linear-gradient(90deg, #D97757, #C46A4A);
+  /* Modern Gradients */
+  --gradient-glow: linear-gradient(135deg, rgba(13, 148, 136, 0.15), rgba(13, 148, 136, 0.25));
+  --gradient-aurora: linear-gradient(90deg, #0D9488, #059669);
   --gradient-dreamscape: linear-gradient(180deg, 
     #FAFAFA 0%, 
-    #F5F0E8 50%,
-    #E8E3DB 100%
+    #F0FDF4 50%,
+    #ECFDF5 100%
   );
   --gradient-fluid: linear-gradient(135deg,
-    rgba(217, 119, 87, 0.1) 0%,
-    rgba(217, 119, 87, 0.15) 50%,
-    rgba(217, 119, 87, 0.1) 100%
+    rgba(13, 148, 136, 0.1) 0%,
+    rgba(13, 148, 136, 0.15) 50%,
+    rgba(13, 148, 136, 0.1) 100%
   );
   
   /* State Color Scales */
@@ -62,16 +63,16 @@
   
   /* ==================== Typography Scale ==================== */
   
-  /* Font Families - Refik Anadol Style */
-  --font-brand: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: "Space Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-  --font-number: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-chinese: "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  /* Font Families - Professional Modern Style */
+  --font-brand: "Plus Jakarta Sans", "Noto Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Noto Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
+  --font-number: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-chinese: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   
   /* Global Font Settings */
-  --font-feature-settings: "kern" 1, "liga" 1;
+  --font-feature-settings: "kern" 1, "liga" 1, "cv02" 1, "cv03" 1;
   --font-variant-numeric: tabular-nums;
   
   /* Font Sizes - Mobile First with Clear Hierarchy */
@@ -182,17 +183,17 @@
   --header-total-height: calc(var(--header-height) + var(--header-margin) * 2 + var(--space-4));
   --footer-height: auto;
 
-  /* ==================== Default Theme Variables (Light) - Claude Style ==================== */
-  /* Background Colors - Claude Warm & Cream */
+  /* ==================== Default Theme Variables (Light) - Modern Clean ==================== */
+  /* Background Colors - Modern Light */
   --bg-primary: #FAFAFA;
-  --bg-secondary: #F5F0E8;
-  --bg-tertiary: #E8E3DB;
+  --bg-secondary: #F5F5F5;
+  --bg-tertiary: #EBEBEB;
   --bg-elevated: #FFFFFF;
   --bg-overlay: rgba(0, 0, 0, 0.5);
   
-  /* Text Colors - Claude High Contrast */
-  --text-primary: #1A1A1A;
-  --text-secondary: #6B6B6B;
+  /* Text Colors - High Contrast Professional */
+  --text-primary: #171717;
+  --text-secondary: #525252;
   --text-tertiary: #A3A3A3;
   --text-quaternary: #D4D4D4;
   --text-inverse: #FFFFFF;
@@ -268,18 +269,18 @@
   }
 }
 
-/* ==================== Light Theme - Claude Style ==================== */
+/* ==================== Light Theme - Modern Clean ==================== */
 [data-theme="light"] {
   /* Background Colors */
   --bg-primary: #FAFAFA;
-  --bg-secondary: #F5F0E8;
-  --bg-tertiary: #E8E3DB;
+  --bg-secondary: #F5F5F5;
+  --bg-tertiary: #EBEBEB;
   --bg-elevated: #FFFFFF;
   --bg-overlay: rgba(0, 0, 0, 0.5);
   
-  /* Text Colors - Improved Contrast */
-  --text-primary: #1A1A1A;
-  --text-secondary: #6B6B6B;
+  /* Text Colors - High Contrast */
+  --text-primary: #171717;
+  --text-secondary: #525252;
   --text-tertiary: #A3A3A3;
   --text-quaternary: #D4D4D4;
   --text-inverse: #FFFFFF;
@@ -341,21 +342,21 @@
   --contribution-5: #0a3d1e;
 }
 
-/* ==================== Dark Theme - Claude Dark ==================== */
+/* ==================== Dark Theme - Modern Dark ==================== */
 [data-theme="dark"] {
-  /* Background Colors - Claude Deep Dark */
-  --bg-primary: #0D0D0D;
-  --bg-secondary: #1A1A1A;
+  /* Background Colors - Modern Dark */
+  --bg-primary: #0A0A0A;
+  --bg-secondary: #171717;
   --bg-tertiary: #262626;
-  --bg-elevated: #1A1A1A;
+  --bg-elevated: #171717;
   --bg-overlay: rgba(0, 0, 0, 0.8);
   
-  /* Text Colors - Claude Light Text */
-  --text-primary: #E5E5E5;
+  /* Text Colors - Modern Light */
+  --text-primary: #FAFAFA;
   --text-secondary: #A3A3A3;
-  --text-tertiary: #6B6B6B;
+  --text-tertiary: #737373;
   --text-quaternary: #404040;
-  --text-inverse: #0D0D0D;
+  --text-inverse: #0A0A0A;
   
   /* Border Colors - Subtle Claude */
   --border-primary: rgba(255, 255, 255, 0.1);

@@ -4,7 +4,7 @@
 
 export const translations = {
   // Meta
-  'meta.title': 'MaoMeme - 构建AI的未来',
+  'meta.title': 'MeowClaw - 构建AI的未来',
   'meta.description': '为开发者和创作者打造的强大AI工具和智能助手',
   
   // Navigation

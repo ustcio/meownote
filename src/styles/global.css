@@ -19,19 +19,19 @@ html {
   font-family: var(--font-sans);
 }
 
-/* Selection - Refik Anadol Style */
+/* Selection - Modern Professional */
 ::selection {
-  background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+  background: var(--color-primary);
   color: white;
 }
 
 /* Chinese font for zh language pages */
 html[lang="zh"] {
-  font-family: "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  font-family: var(--font-chinese);
 }
 
 html[lang="zh"] body {
-  font-family: "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  font-family: var(--font-chinese);
 }
 
 html[lang="zh"] h1,
@@ -40,7 +40,7 @@ html[lang="zh"] h3,
 html[lang="zh"] h4,
 html[lang="zh"] h5,
 html[lang="zh"] h6 {
-  font-family: "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  font-family: var(--font-chinese);
 }
 
 html[lang="zh"] p,
@@ -52,7 +52,7 @@ html[lang="zh"] button,
 html[lang="zh"] input,
 html[lang="zh"] textarea,
 html[lang="zh"] select {
-  font-family: "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  font-family: var(--font-chinese);
 }
 
 /* Numbers use Space Grotesk globally - Refik Anadol Style */
