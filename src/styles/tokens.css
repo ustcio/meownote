@@ -1,69 +1,64 @@
 :root {
-  /* ==================== Color System - Refik Anadol Bioluminescent Style ==================== */
+  /* ==================== Color System - Claude Warm & Professional Style ==================== */
   
-  /* Primary Colors - Electric Bioluminescent */
-  --color-primary: #00d4ff;
-  --color-primary-hover: #33ddff;
-  --color-primary-active: #00a8cc;
+  /* Primary Colors - Claude Orange */
+  --color-primary: #D97757;
+  --color-primary-hover: #C46A4A;
+  --color-primary-active: #B85E3E;
   
-  /* Accent Colors - Bioluminescent Palette */
-  --color-accent-blue: #00d4ff;
-  --color-accent-purple: #b829dd;
-  --color-accent-pink: #ff6b9d;
-  --color-accent-orange: #ffb347;
-  --color-accent-green: #06ffa5;
-  --color-accent-teal: #00f5d4;
-  --color-accent-cyan: #06b6d4;
+  /* Accent Colors - Claude Neutral Palette */
+  --color-accent-blue: #3B82F6;
+  --color-accent-purple: #8B5CF6;
+  --color-accent-pink: #EC4899;
+  --color-accent-orange: #D97757;
+  --color-accent-green: #10B981;
+  --color-accent-teal: #14B8A6;
+  --color-accent-cyan: #06B6D4;
   
-  /* Bio-Glow Colors - Refik Anadol Style */
-  --glow-primary: rgba(0, 212, 255, 0.6);
-  --glow-blue: rgba(0, 212, 255, 0.5);
-  --glow-cyan: rgba(6, 255, 165, 0.5);
-  --glow-purple: rgba(184, 41, 221, 0.5);
-  --glow-pink: rgba(255, 107, 157, 0.4);
-  --glow-amber: rgba(255, 179, 71, 0.4);
+  /* Claude Cream & Warm Colors */
+  --claude-cream: #F5F0E8;
+  --claude-cream-dark: #E8E3DB;
+  --claude-orange-light: rgba(217, 119, 87, 0.1);
+  --claude-orange-medium: rgba(217, 119, 87, 0.2);
   
   /* Semantic Colors */
-  --color-success: #06ffa5;
-  --color-success-light: #33ffb8;
-  --color-warning: #ffb347;
-  --color-error: #ff6b6d;
-  --color-danger: #ff6b6d;
-  --color-danger-light: #ff8a8c;
-  --color-info: #00d4ff;
+  --color-success: #10B981;
+  --color-success-light: #34D399;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-danger: #EF4444;
+  --color-danger-light: #F87171;
+  --color-info: #3B82F6;
   
-  /* Gradient System - Fluid Bioluminescent */
-  --gradient-primary: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
-  --gradient-accent: linear-gradient(135deg, var(--color-accent-purple), var(--color-accent-pink));
-  --gradient-success: linear-gradient(135deg, #06ffa5, #00f5d4);
-  --gradient-hero: linear-gradient(135deg, #00d4ff 0%, #b829dd 50%, #ff6b9d 100%);
+  /* Gradient System - Simplified Claude Style */
+  --gradient-primary: linear-gradient(135deg, #D97757, #C46A4A);
+  --gradient-accent: linear-gradient(135deg, #8B5CF6, #EC4899);
+  --gradient-success: linear-gradient(135deg, #10B981, #14B8A6);
+  --gradient-hero: linear-gradient(135deg, #D97757 0%, #C46A4A 100%);
   
-  /* Fluid Glow Gradients - Refik Anadol Style */
-  --gradient-glow: linear-gradient(135deg, var(--glow-cyan), var(--glow-purple));
-  --gradient-aurora: linear-gradient(90deg, var(--glow-blue), var(--glow-cyan), var(--glow-purple), var(--glow-pink));
+  /* Claude Simplified Gradients */
+  --gradient-glow: linear-gradient(135deg, rgba(217, 119, 87, 0.15), rgba(217, 119, 87, 0.25));
+  --gradient-aurora: linear-gradient(90deg, #D97757, #C46A4A);
   --gradient-dreamscape: linear-gradient(180deg, 
-    rgba(26, 11, 46, 0.95) 0%, 
-    rgba(0, 212, 255, 0.15) 40%, 
-    rgba(184, 41, 221, 0.2) 60%,
-    rgba(255, 107, 157, 0.1) 100%
+    #FAFAFA 0%, 
+    #F5F0E8 50%,
+    #E8E3DB 100%
   );
   --gradient-fluid: linear-gradient(135deg,
-    rgba(0, 212, 255, 0.3) 0%,
-    rgba(184, 41, 221, 0.2) 25%,
-    rgba(255, 107, 157, 0.15) 50%,
-    rgba(6, 255, 165, 0.2) 75%,
-    rgba(0, 212, 255, 0.3) 100%
+    rgba(217, 119, 87, 0.1) 0%,
+    rgba(217, 119, 87, 0.15) 50%,
+    rgba(217, 119, 87, 0.1) 100%
   );
   
   /* State Color Scales */
-  --color-info-bg: rgba(0, 212, 255, 0.1);
-  --color-info-border: rgba(0, 212, 255, 0.2);
-  --color-warning-bg: rgba(255, 179, 71, 0.1);
-  --color-warning-border: rgba(255, 179, 71, 0.2);
-  --color-success-bg: rgba(6, 255, 165, 0.1);
-  --color-success-border: rgba(6, 255, 165, 0.2);
-  --color-error-bg: rgba(255, 107, 109, 0.1);
-  --color-error-border: rgba(255, 107, 109, 0.2);
+  --color-info-bg: rgba(59, 130, 246, 0.1);
+  --color-info-border: rgba(59, 130, 246, 0.2);
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+  --color-warning-border: rgba(245, 158, 11, 0.2);
+  --color-success-bg: rgba(16, 185, 129, 0.1);
+  --color-success-border: rgba(16, 185, 129, 0.2);
+  --color-error-bg: rgba(239, 68, 68, 0.1);
+  --color-error-border: rgba(239, 68, 68, 0.2);
   
   /* ==================== Typography Scale ==================== */
   
@@ -148,11 +143,11 @@
   --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.15);
   --shadow-float: 0 8px 32px -8px rgb(0 0 0 / 0.12);
   
-  /* ==================== Transitions ==================== */
+  /* ==================== Transitions - Claude Faster & Smoother ==================== */
   --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --duration-slow: 350ms;
-  --duration-slower: 500ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 400ms;
   
   --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
@@ -187,20 +182,20 @@
   --header-total-height: calc(var(--header-height) + var(--header-margin) * 2 + var(--space-4));
   --footer-height: auto;
 
-  /* ==================== Default Theme Variables (Light) ==================== */
-  /* Background Colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f5f7;
-  --bg-tertiary: #e8e8ed;
-  --bg-elevated: #ffffff;
+  /* ==================== Default Theme Variables (Light) - Claude Style ==================== */
+  /* Background Colors - Claude Warm & Cream */
+  --bg-primary: #FAFAFA;
+  --bg-secondary: #F5F0E8;
+  --bg-tertiary: #E8E3DB;
+  --bg-elevated: #FFFFFF;
   --bg-overlay: rgba(0, 0, 0, 0.5);
   
-  /* Text Colors */
-  --text-primary: #1d1d1f;
-  --text-secondary: #424245;
-  --text-tertiary: #6e6e73;
-  --text-quaternary: #86868b;
-  --text-inverse: #ffffff;
+  /* Text Colors - Claude High Contrast */
+  --text-primary: #1A1A1A;
+  --text-secondary: #6B6B6B;
+  --text-tertiary: #A3A3A3;
+  --text-quaternary: #D4D4D4;
+  --text-inverse: #FFFFFF;
   
   /* Border Colors */
   --border-primary: rgba(0, 0, 0, 0.1);
@@ -237,18 +232,18 @@
   --glass-border: rgba(0, 0, 0, 0.06);
   --glass-border-hover: rgba(0, 0, 0, 0.1);
   
-  /* Liquid Glass Effect - Apple Style */
-  --liquid-glass-bg: rgba(255, 255, 255, 0.65);
-  --liquid-glass-bg-hover: rgba(255, 255, 255, 0.78);
-  --liquid-glass-bg-active: rgba(255, 255, 255, 0.85);
-  --liquid-glass-border: rgba(255, 255, 255, 0.25);
-  --liquid-glass-border-subtle: rgba(255, 255, 255, 0.15);
-  --liquid-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  --liquid-glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  --liquid-glass-blur: blur(24px) saturate(180%);
-  --liquid-glass-blur-heavy: blur(40px) saturate(200%);
-  --liquid-glass-highlight: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
-  --liquid-glass-inner-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.35), inset 0 -0.5px 0 rgba(0, 0, 0, 0.02);
+  /* Liquid Glass Effect - Simplified Claude Style */
+  --liquid-glass-bg: rgba(255, 255, 255, 0.95);
+  --liquid-glass-bg-hover: rgba(255, 255, 255, 0.98);
+  --liquid-glass-bg-active: rgba(250, 250, 250, 1);
+  --liquid-glass-border: rgba(0, 0, 0, 0.08);
+  --liquid-glass-border-subtle: rgba(0, 0, 0, 0.05);
+  --liquid-glass-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --liquid-glass-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --liquid-glass-blur: blur(12px);
+  --liquid-glass-blur-heavy: blur(20px);
+  --liquid-glass-highlight: none;
+  --liquid-glass-inner-shadow: none;
   
   /* Contribution Graph Colors */
   --contribution-0: #ebedf0;
@@ -273,21 +268,21 @@
   }
 }
 
-/* ==================== Light Theme ==================== */
+/* ==================== Light Theme - Claude Style ==================== */
 [data-theme="light"] {
   /* Background Colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f5f7;
-  --bg-tertiary: #e8e8ed;
-  --bg-elevated: #ffffff;
+  --bg-primary: #FAFAFA;
+  --bg-secondary: #F5F0E8;
+  --bg-tertiary: #E8E3DB;
+  --bg-elevated: #FFFFFF;
   --bg-overlay: rgba(0, 0, 0, 0.5);
   
   /* Text Colors - Improved Contrast */
-  --text-primary: #1d1d1f;
-  --text-secondary: #424245;
-  --text-tertiary: #6e6e73;
-  --text-quaternary: #86868b;
-  --text-inverse: #ffffff;
+  --text-primary: #1A1A1A;
+  --text-secondary: #6B6B6B;
+  --text-tertiary: #A3A3A3;
+  --text-quaternary: #D4D4D4;
+  --text-inverse: #FFFFFF;
   
   /* Border Colors */
   --border-primary: rgba(0, 0, 0, 0.1);
@@ -324,18 +319,18 @@
   --glass-border: rgba(0, 0, 0, 0.06);
   --glass-border-hover: rgba(0, 0, 0, 0.1);
   
-  /* Liquid Glass Effect - Apple Style */
-  --liquid-glass-bg: rgba(255, 255, 255, 0.65);
-  --liquid-glass-bg-hover: rgba(255, 255, 255, 0.78);
-  --liquid-glass-bg-active: rgba(255, 255, 255, 0.85);
-  --liquid-glass-border: rgba(255, 255, 255, 0.25);
-  --liquid-glass-border-subtle: rgba(255, 255, 255, 0.15);
-  --liquid-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  --liquid-glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  --liquid-glass-blur: blur(24px) saturate(180%);
-  --liquid-glass-blur-heavy: blur(40px) saturate(200%);
-  --liquid-glass-highlight: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
-  --liquid-glass-inner-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.35), inset 0 -0.5px 0 rgba(0, 0, 0, 0.02);
+  /* Liquid Glass Effect - Simplified Claude Style */
+  --liquid-glass-bg: rgba(255, 255, 255, 0.95);
+  --liquid-glass-bg-hover: rgba(255, 255, 255, 0.98);
+  --liquid-glass-bg-active: rgba(250, 250, 250, 1);
+  --liquid-glass-border: rgba(0, 0, 0, 0.08);
+  --liquid-glass-border-subtle: rgba(0, 0, 0, 0.05);
+  --liquid-glass-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --liquid-glass-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --liquid-glass-blur: blur(12px);
+  --liquid-glass-blur-heavy: blur(20px);
+  --liquid-glass-highlight: none;
+  --liquid-glass-inner-shadow: none;
   
   /* Contribution Graph Colors */
   --contribution-0: #ebedf0;
@@ -346,27 +341,27 @@
   --contribution-5: #0a3d1e;
 }
 
-/* ==================== Dark Theme - Refik Anadol Dreamscape ==================== */
+/* ==================== Dark Theme - Claude Dark ==================== */
 [data-theme="dark"] {
-  /* Background Colors - Deep Space with Bioluminescent Tint */
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #0f0f1a;
-  --bg-tertiary: #1a1a2e;
-  --bg-elevated: #16162a;
-  --bg-overlay: rgba(10, 10, 15, 0.85);
+  /* Background Colors - Claude Deep Dark */
+  --bg-primary: #0D0D0D;
+  --bg-secondary: #1A1A1A;
+  --bg-tertiary: #262626;
+  --bg-elevated: #1A1A1A;
+  --bg-overlay: rgba(0, 0, 0, 0.8);
   
-  /* Text Colors - Ethereal Glow */
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0b8;
-  --text-tertiary: #707088;
-  --text-quaternary: #505068;
-  --text-inverse: #0a0a0f;
+  /* Text Colors - Claude Light Text */
+  --text-primary: #E5E5E5;
+  --text-secondary: #A3A3A3;
+  --text-tertiary: #6B6B6B;
+  --text-quaternary: #404040;
+  --text-inverse: #0D0D0D;
   
-  /* Border Colors - Subtle Bioluminescent */
-  --border-primary: rgba(0, 212, 255, 0.15);
-  --border-secondary: rgba(184, 41, 221, 0.1);
+  /* Border Colors - Subtle Claude */
+  --border-primary: rgba(255, 255, 255, 0.1);
+  --border-secondary: rgba(255, 255, 255, 0.06);
   --border-focus: var(--color-primary);
-  --border-hover: rgba(0, 212, 255, 0.25);
+  --border-hover: rgba(255, 255, 255, 0.15);
   
   /* Interactive Colors - Electric Glow */
   --interactive-primary: var(--color-primary);
@@ -379,20 +374,16 @@
   --surface-blur: blur(20px);
   --surface-blur-heavy: blur(40px);
   
-  /* Card Styles - Bioluminescent Glass */
-  --card-bg: rgba(22, 22, 42, 0.6);
-  --card-border: rgba(0, 212, 255, 0.1);
-  --card-border-hover: rgba(184, 41, 221, 0.2);
-  --card-shadow: 
-    0 4px 24px rgba(0, 0, 0, 0.4),
-    0 0 40px rgba(0, 212, 255, 0.05);
-  --card-hover-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    0 0 60px rgba(0, 212, 255, 0.1);
+  /* Card Styles - Claude Dark Cards */
+  --card-bg: rgba(26, 26, 26, 0.6);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-border-hover: rgba(255, 255, 255, 0.12);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --card-hover-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
   
-  /* Input Styles - Glowing Borders */
-  --input-bg: rgba(26, 26, 46, 0.8);
-  --input-border: rgba(0, 212, 255, 0.15);
+  /* Input Styles - Claude Dark Inputs */
+  --input-bg: rgba(38, 38, 38, 0.8);
+  --input-border: rgba(255, 255, 255, 0.1);
   --input-focus-border: var(--color-primary);
   
   /* Glass Effect - Bioluminescent Glass */
@@ -401,34 +392,26 @@
   --glass-border: rgba(0, 212, 255, 0.12);
   --glass-border-hover: rgba(184, 41, 221, 0.2);
   
-  /* Liquid Glass Effect - Dreamscape Style */
-  --liquid-glass-bg: rgba(26, 26, 46, 0.65);
-  --liquid-glass-bg-hover: rgba(35, 35, 60, 0.78);
-  --liquid-glass-bg-active: rgba(45, 45, 70, 0.85);
-  --liquid-glass-border: rgba(0, 212, 255, 0.15);
-  --liquid-glass-border-subtle: rgba(184, 41, 221, 0.08);
-  --liquid-glass-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.35), 
-    0 0 40px rgba(0, 212, 255, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  --liquid-glass-shadow-hover: 
-    0 12px 40px rgba(0, 0, 0, 0.45), 
-    0 0 60px rgba(0, 212, 255, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --liquid-glass-blur: blur(24px) saturate(180%);
-  --liquid-glass-blur-heavy: blur(40px) saturate(200%);
-  --liquid-glass-highlight: linear-gradient(135deg, rgba(0, 212, 255, 0.08) 0%, transparent 50%);
-  --liquid-glass-inner-shadow: 
-    inset 0 0.5px 0 rgba(0, 212, 255, 0.1), 
-    inset 0 -0.5px 0 rgba(0, 0, 0, 0.15);
+  /* Liquid Glass Effect - Claude Dark Simplified */
+  --liquid-glass-bg: rgba(26, 26, 26, 0.95);
+  --liquid-glass-bg-hover: rgba(38, 38, 38, 0.98);
+  --liquid-glass-bg-active: rgba(45, 45, 45, 1);
+  --liquid-glass-border: rgba(255, 255, 255, 0.1);
+  --liquid-glass-border-subtle: rgba(255, 255, 255, 0.05);
+  --liquid-glass-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --liquid-glass-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --liquid-glass-blur: blur(12px);
+  --liquid-glass-blur-heavy: blur(20px);
+  --liquid-glass-highlight: none;
+  --liquid-glass-inner-shadow: none;
   
-  /* Contribution Graph Colors - Bioluminescent */
-  --contribution-0: #0f0f1a;
-  --contribution-1: #1a3a4a;
-  --contribution-2: #006d8a;
-  --contribution-3: #00a8cc;
-  --contribution-4: #00d4ff;
-  --contribution-5: #33ddff;
+  /* Contribution Graph Colors - Claude Dark */
+  --contribution-0: #1A1A1A;
+  --contribution-1: #2A1F1A;
+  --contribution-2: #4A3025;
+  --contribution-3: #6A4535;
+  --contribution-4: #8A5A45;
+  --contribution-5: #AA6F55;
 }
 
 /* ==================== Responsive Typography ==================== */

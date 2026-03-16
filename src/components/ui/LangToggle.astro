@@ -1,0 +1,75 @@
+---
+import { languages, getLangFromUrl, getAlternateLangPath } from '@i18n';
+
+const currentLang = getLangFromUrl(Astro.url);
+const currentPath = Astro.url.pathname;
+const otherLang: keyof typeof languages = currentLang === 'zh-CN' ? 'en-US' : 'zh-CN';
+const alternatePath = getAlternateLangPath(currentPath, currentLang);
+---
+
+<button 
+  class="lang-toggle" 
+  aria-label="Switch Language"
+  title="Switch Language"
+>
+  <span class="lang-current">{currentLang === 'zh-CN' ? 'EN' : '中文'}</span>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="2" y1="12" x2="22" y2="12"/>
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+  </svg>
+</button>
+
+<style>
+  .lang-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 40px;
+    padding: 0 var(--space-3);
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+  
+  .lang-toggle:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-hover);
+  }
+  
+  .lang-current {
+    font-family: var(--font-sans);
+    letter-spacing: 0.02em;
+  }
+</style>
+
+<script>
+  document.querySelector('.lang-toggle')?.addEventListener('click', () => {
+    const currentPath = window.location.pathname;
+    const currentLang = currentPath.startsWith('/en-US') ? 'zh-CN' : 'en-US';
+    
+    // Calculate alternate language path
+    let newPath: string;
+    if (currentPath.startsWith('/en-US')) {
+      // Switching from English to Chinese (default)
+      newPath = currentPath.replace('/en-US', '') || '/';
+    } else {
+      // Switching from Chinese to English
+      newPath = '/en-US' + (currentPath === '/' ? '' : currentPath);
+    }
+    
+    // Store preference
+    localStorage.setItem('preferred-lang', currentLang === 'zh-CN' ? 'en-US' : 'zh-CN');
+    
+    // Navigate to alternate language page
+    window.location.href = newPath;
+  });
+</script>

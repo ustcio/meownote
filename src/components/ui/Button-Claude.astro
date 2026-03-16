@@ -1,0 +1,237 @@
+---
+/**
+ * Button 组件 - Claude 风格改造示例
+ * 
+ * 对比原版本:
+ * - 原: 渐变背景 + 发光阴影 (科技感)
+ * - Claude: 纯色背景 + 微阴影 (温暖专业)
+ */
+export interface Props {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  disabled?: boolean;
+  loading?: boolean;
+  fullWidth?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  href?: string;
+  target?: string;
+  rel?: string;
+  class?: string;
+}
+
+const {
+  variant = 'primary',
+  size = 'md',
+  disabled = false,
+  loading = false,
+  fullWidth = false,
+  type = 'button',
+  href,
+  target,
+  rel,
+  class: className,
+} = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+
+const classes = [
+  'btn-claude',
+  `btn-claude-${variant}`,
+  `btn-claude-${size}`,
+  fullWidth && 'btn-claude-full',
+  loading && 'btn-claude-loading',
+  className,
+].filter(Boolean).join(' ');
+---
+
+<Tag
+  class={classes}
+  type={!href ? type : undefined}
+  href={href}
+  target={target}
+  rel={rel}
+  disabled={disabled || loading}
+  aria-busy={loading}
+>
+  {loading && (
+    <svg class="btn-claude-spinner" width="16" height="16" viewBox="0 0 24 24">
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        stroke-width="3"
+        fill="none"
+        stroke-dasharray="31.4 31.4"
+        stroke-linecap="round"
+      />
+    </svg>
+  )}
+  <span class:list={['btn-claude-content', { 'opacity-0': loading }]}
+    <slot />
+  </span>
+</Tag>
+
+<style>
+  /* ============================================
+     Claude 风格按钮基础样式
+     ============================================ */
+  .btn-claude {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: var(--font-sans, "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
+    font-weight: 500;  /* Claude 使用中等字重 */
+    border-radius: 0.5rem;  /* Claude: 8px 圆角 */
+    cursor: pointer;
+    transition: all 200ms ease;  /* Claude: 更柔和的过渡 */
+    text-decoration: none;
+    white-space: nowrap;
+    position: relative;
+    border: none;
+    line-height: 1.5;
+  }
+  
+  .btn-claude:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* Claude 风格焦点状态 - 橙色光环 */
+  .btn-claude:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #D97757;
+  }
+  
+  /* Claude 风格点击效果 - 轻微下沉 */
+  .btn-claude:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  
+  /* ============================================
+     尺寸变体
+     ============================================ */
+  .btn-claude-sm {
+    padding: 0.5rem 0.75rem;  /* Claude: 更紧凑 */
+    font-size: 0.875rem;
+    height: 2rem;
+  }
+  
+  .btn-claude-md {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    height: 2.25rem;
+  }
+  
+  .btn-claude-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    height: 2.75rem;
+  }
+  
+  .btn-claude-full {
+    width: 100%;
+  }
+  
+  /* ============================================
+     Primary 变体 - Claude 橙色风格
+     ============================================ */
+  .btn-claude-primary {
+    background-color: #D97757;  /* Claude 品牌橙 */
+    color: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);  /* Claude: 微阴影 */
+  }
+  
+  .btn-claude-primary:hover:not(:disabled) {
+    background-color: #C46A4A;  /* 深一点的橙色 */
+    transform: translateY(-1px);  /* 轻微上浮 */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);  /* 增强阴影 */
+  }
+  
+  /* ============================================
+     Secondary 变体 - Claude 描边风格
+     ============================================ */
+  .btn-claude-secondary {
+    background-color: transparent;
+    color: #1A1A1A;
+    border: 1px solid #E5E5E5;  /* Claude: 浅灰边框 */
+  }
+  
+  .btn-claude-secondary:hover:not(:disabled) {
+    background-color: #F5F5F5;  /* 浅灰背景 */
+    border-color: #D4D4D4;
+  }
+  
+  /* ============================================
+     Ghost 变体 - Claude 极简风格
+     ============================================ */
+  .btn-claude-ghost {
+    background-color: transparent;
+    color: #6B6B6B;
+  }
+  
+  .btn-claude-ghost:hover:not(:disabled) {
+    background-color: #F5F5F5;
+    color: #1A1A1A;
+  }
+  
+  /* ============================================
+     Danger 变体
+     ============================================ */
+  .btn-claude-danger {
+    background-color: #EF4444;
+    color: #ffffff;
+  }
+  
+  .btn-claude-danger:hover:not(:disabled) {
+    background-color: #DC2626;
+  }
+  
+  /* ============================================
+     加载状态
+     ============================================ */
+  .btn-claude-spinner {
+    position: absolute;
+    animation: spin 1s linear infinite;
+  }
+  
+  .btn-claude-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .opacity-0 {
+    opacity: 0;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  /* ============================================
+     深色模式适配
+     ============================================ */
+  @media (prefers-color-scheme: dark) {
+    .btn-claude-secondary {
+      color: #E5E5E5;
+      border-color: #404040;
+    }
+    
+    .btn-claude-secondary:hover:not(:disabled) {
+      background-color: #262626;
+      border-color: #525252;
+    }
+    
+    .btn-claude-ghost {
+      color: #A3A3A3;
+    }
+    
+    .btn-claude-ghost:hover:not(:disabled) {
+      background-color: #262626;
+      color: #E5E5E5;
+    }
+  }
+</style>

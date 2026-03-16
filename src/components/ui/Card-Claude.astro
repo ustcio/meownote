@@ -1,0 +1,172 @@
+---
+/**
+ * Card 组件 - Claude 风格改造示例
+ * 
+ * 对比原版本:
+ * - 原: 玻璃态 + 发光效果 (科技感)
+ * - Claude: 奶油色/白色 + 柔和阴影 (温暖专业)
+ */
+export interface Props {
+  variant?: 'default' | 'cream' | 'outlined' | 'elevated';
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  hoverable?: boolean;
+  clickable?: boolean;
+  class?: string;
+}
+
+const {
+  variant = 'default',
+  padding = 'md',
+  hoverable = false,
+  clickable = false,
+  class: className,
+} = Astro.props;
+
+const classes = [
+  'card-claude',
+  `card-claude-${variant}`,
+  `card-claude-padding-${padding}`,
+  hoverable && 'card-claude-hoverable',
+  clickable && 'card-claude-clickable',
+  className,
+].filter(Boolean).join(' ');
+---
+
+<div class={classes}>
+  <slot />
+</div>
+
+<style>
+  /* ============================================
+     Claude 风格卡片基础样式
+     ============================================ */
+  .card-claude {
+    border-radius: 0.75rem;  /* Claude: 12px 圆角 */
+    transition: all 200ms ease;
+    overflow: hidden;
+  }
+  
+  /* ============================================
+     默认变体 - 白色背景
+     ============================================ */
+  .card-claude-default {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);  /* Claude: 微阴影 */
+  }
+  
+  /* ============================================
+     Cream 变体 - Claude 标志性奶油色
+     ============================================ */
+  .card-claude-cream {
+    background-color: #F5F0E8;  /* Claude 奶油色 */
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  
+  .card-claude-cream:hover {
+    background-color: #E8E3DB;  /* 稍深的奶油色 */
+  }
+  
+  /* ============================================
+     Outlined 变体 - 极简边框
+     ============================================ */
+  .card-claude-outlined {
+    background-color: transparent;
+    border: 1px solid #E5E5E5;
+  }
+  
+  /* ============================================
+     Elevated 变体 - 悬浮效果
+     ============================================ */
+  .card-claude-elevated {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  /* ============================================
+     内边距变体
+     ============================================ */
+  .card-claude-padding-none {
+    padding: 0;
+  }
+  
+  .card-claude-padding-sm {
+    padding: 1rem;  /* 16px */
+  }
+  
+  .card-claude-padding-md {
+    padding: 1.5rem;  /* 24px - Claude 默认 */
+  }
+  
+  .card-claude-padding-lg {
+    padding: 2rem;  /* 32px */
+  }
+  
+  /* ============================================
+     悬停效果 - Claude 风格
+     ============================================ */
+  .card-claude-hoverable {
+    cursor: pointer;
+  }
+  
+  .card-claude-hoverable:hover {
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 
+      0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+  }
+  
+  /* ============================================
+     点击效果
+     ============================================ */
+  .card-claude-clickable {
+    cursor: pointer;
+  }
+  
+  .card-claude-clickable:active {
+    transform: scale(0.995);
+  }
+  
+  /* ============================================
+     深色模式适配
+     ============================================ */
+  @media (prefers-color-scheme: dark) {
+    .card-claude-default {
+      background-color: #1A1A1A;
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    .card-claude-cream {
+      background-color: #262626;
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+    
+    .card-claude-cream:hover {
+      background-color: #333333;
+    }
+    
+    .card-claude-outlined {
+      border-color: #404040;
+    }
+    
+    .card-claude-elevated {
+      background-color: #1A1A1A;
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.4),
+        0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    }
+    
+    .card-claude-hoverable:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 
+        0 10px 15px -3px rgba(0, 0, 0, 0.4),
+        0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    }
+  }
+</style>

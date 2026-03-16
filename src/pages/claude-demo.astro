@@ -1,0 +1,393 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ButtonClaude from '../components/ui/Button-Claude.astro';
+import CardClaude from '../components/ui/Card-Claude.astro';
+import HeroClaude from '../components/sections/Hero-Claude.astro';
+---
+
+<Layout title="Claude 风格演示">
+  <!-- Hero 区域 -->
+  <HeroClaude />
+
+  <!-- 组件展示区域 -->
+  <section class="demo-section">
+    <div class="demo-container">
+      <h2 class="demo-title">Claude 风格组件展示</h2>
+      <p class="demo-subtitle">以下是改造后的组件示例</p>
+
+      <!-- Button 展示 -->
+      <div class="demo-block">
+        <h3 class="demo-block-title">按钮组件</h3>
+        <div class="demo-buttons">
+          <ButtonClaude variant="primary" size="md">Primary 按钮</ButtonClaude>
+          <ButtonClaude variant="secondary" size="md">Secondary 按钮</ButtonClaude>
+          <ButtonClaude variant="ghost" size="md">Ghost 按钮</ButtonClaude>
+        </div>
+        <div class="demo-buttons" style="margin-top: 1rem;">
+          <ButtonClaude variant="primary" size="sm">Small</ButtonClaude>
+          <ButtonClaude variant="primary" size="md">Medium</ButtonClaude>
+          <ButtonClaude variant="primary" size="lg">Large</ButtonClaude>
+        </div>
+      </div>
+
+      <!-- Card 展示 -->
+      <div class="demo-block">
+        <h3 class="demo-block-title">卡片组件</h3>
+        <div class="demo-cards">
+          <CardClaude variant="default" padding="md" hoverable>
+            <h4>默认卡片</h4>
+            <p>白色背景，微阴影，适合主要内容展示</p>
+          </CardClaude>
+          
+          <CardClaude variant="cream" padding="md" hoverable>
+            <h4>奶油色卡片</h4>
+            <p>Claude 标志性奶油色背景，温暖舒适</p>
+          </CardClaude>
+          
+          <CardClaude variant="outlined" padding="md" hoverable>
+            <h4>描边卡片</h4>
+            <p>极简边框设计，适合次要内容</p>
+          </CardClaude>
+          
+          <CardClaude variant="elevated" padding="md" hoverable>
+            <h4>悬浮卡片</h4>
+            <p>更强的阴影，营造层次感</p>
+          </CardClaude>
+        </div>
+      </div>
+
+      <!-- 颜色展示 -->
+      <div class="demo-block">
+        <h3 class="demo-block-title">Claude 色彩系统</h3>
+        <div class="demo-colors">
+          <div class="color-item">
+            <div class="color-swatch" style="background-color: #D97757;"></div>
+            <span class="color-name">Claude Orange</span>
+            <span class="color-hex">#D97757</span>
+          </div>
+          <div class="color-item">
+            <div class="color-swatch" style="background-color: #F5F0E8;"></div>
+            <span class="color-name">Cream</span>
+            <span class="color-hex">#F5F0E8</span>
+          </div>
+          <div class="color-item">
+            <div class="color-swatch" style="background-color: #FAFAFA;"></div>
+            <span class="color-name">Light Gray</span>
+            <span class="color-hex">#FAFAFA</span>
+          </div>
+          <div class="color-item">
+            <div class="color-swatch" style="background-color: #1A1A1A;"></div>
+            <span class="color-name">Dark</span>
+            <span class="color-hex">#1A1A1A</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 排版展示 -->
+      <div class="demo-block">
+        <h3 class="demo-block-title">Claude 排版系统</h3>
+        <div class="demo-typography">
+          <h1 class="claude-h1">Heading 1 - 48px/3rem</h1>
+          <h2 class="claude-h2">Heading 2 - 36px/2.25rem</h2>
+          <h3 class="claude-h3">Heading 3 - 24px/1.5rem</h3>
+          <p class="claude-body">Body text - 16px/1rem. Claude 使用 Inter 字体，行高 1.6，适合长文阅读。</p>
+          <p class="claude-body-small">Body Small - 14px/0.875rem. 用于次要信息和注释。</p>
+        </div>
+      </div>
+
+      <!-- 对比说明 -->
+      <div class="demo-block">
+        <h3 class="demo-block-title">风格对比</h3>
+        <div class="comparison-table">
+          <div class="comparison-row comparison-header">
+            <span>特性</span>
+            <span>原风格 (Refik Anadol)</span>
+            <span>Claude 风格</span>
+          </div>
+          <div class="comparison-row">
+            <span>主色调</span>
+            <span style="color: #00d4ff;">电光蓝 #00d4ff</span>
+            <span style="color: #D97757;">暖橙 #D97757</span>
+          </div>
+          <div class="comparison-row">
+            <span>背景</span>
+            <span>深色 + 发光效果</span>
+            <span>浅色/奶油色</span>
+          </div>
+          <div class="comparison-row">
+            <span>动效</span>
+            <span>流体动画、发光脉冲</span>
+            <span>微交互、淡入淡出</span>
+          </div>
+          <div class="comparison-row">
+            <span>氛围</span>
+            <span>科技感、未来感</span>
+            <span>温暖、专业、可信赖</span>
+          </div>
+          <div class="comparison-row">
+            <span>适用场景</span>
+            <span>创意展示、艺术项目</span>
+            <span>产品服务、内容阅读</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .demo-section {
+    padding: 80px 24px;
+    background-color: #FAFAFA;
+  }
+
+  .demo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .demo-title {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 36px;
+    font-weight: 600;
+    color: #1A1A1A;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .demo-subtitle {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 18px;
+    color: #6B6B6B;
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  .demo-block {
+    margin-bottom: 64px;
+    padding: 32px;
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .demo-block-title {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #E5E5E5;
+  }
+
+  .demo-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .demo-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+  }
+
+  .demo-cards h4 {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin-bottom: 8px;
+  }
+
+  .demo-cards p {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    color: #6B6B6B;
+    line-height: 1.5;
+  }
+
+  .demo-colors {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 24px;
+  }
+
+  .color-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .color-swatch {
+    width: 100%;
+    height: 80px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .color-name {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1A1A1A;
+  }
+
+  .color-hex {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: #6B6B6B;
+  }
+
+  .demo-typography {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .claude-h1 {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 48px;
+    font-weight: 600;
+    color: #1A1A1A;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .claude-h2 {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 36px;
+    font-weight: 600;
+    color: #1A1A1A;
+    line-height: 1.2;
+  }
+
+  .claude-h3 {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1A1A1A;
+    line-height: 1.3;
+  }
+
+  .claude-body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    color: #6B6B6B;
+    line-height: 1.6;
+  }
+
+  .claude-body-small {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    color: #6B6B6B;
+    line-height: 1.5;
+  }
+
+  .comparison-table {
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .comparison-row {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1.5fr;
+    gap: 16px;
+    padding: 16px;
+    border-bottom: 1px solid #E5E5E5;
+  }
+
+  .comparison-row:last-child {
+    border-bottom: none;
+  }
+
+  .comparison-header {
+    background-color: #F5F5F5;
+    font-weight: 600;
+    color: #1A1A1A;
+  }
+
+  .comparison-row span {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    color: #6B6B6B;
+  }
+
+  .comparison-header span {
+    color: #1A1A1A;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .demo-section {
+      background-color: #0D0D0D;
+    }
+
+    .demo-title {
+      color: #E5E5E5;
+    }
+
+    .demo-subtitle {
+      color: #A3A3A3;
+    }
+
+    .demo-block {
+      background-color: #1A1A1A;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .demo-block-title {
+      color: #E5E5E5;
+      border-color: #404040;
+    }
+
+    .demo-cards h4 {
+      color: #E5E5E5;
+    }
+
+    .demo-cards p {
+      color: #A3A3A3;
+    }
+
+    .color-name {
+      color: #E5E5E5;
+    }
+
+    .color-hex {
+      color: #A3A3A3;
+    }
+
+    .claude-h1,
+    .claude-h2,
+    .claude-h3 {
+      color: #E5E5E5;
+    }
+
+    .claude-body,
+    .claude-body-small {
+      color: #A3A3A3;
+    }
+
+    .comparison-table {
+      border-color: #404040;
+    }
+
+    .comparison-row {
+      border-color: #404040;
+    }
+
+    .comparison-header {
+      background-color: #262626;
+    }
+
+    .comparison-row span {
+      color: #A3A3A3;
+    }
+
+    .comparison-header span {
+      color: #E5E5E5;
+    }
+  }
+</style>

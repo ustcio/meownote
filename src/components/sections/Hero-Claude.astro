@@ -1,0 +1,458 @@
+---
+/**
+ * Hero 区域 - Claude 风格改造示例
+ * 
+ * 对比原版本:
+ * - 原: 深色背景 + 发光效果 + 流动动画 (科技感)
+ * - Claude: 浅色/奶油色背景 + 简约排版 + 微交互 (温暖专业)
+ */
+---
+
+<section class="hero-claude">
+  <div class="hero-claude-container">
+    <div class="hero-claude-content">
+      <!-- Badge - 简化版 -->
+      <div class="hero-claude-badge">
+        <span class="badge-dot"></span>
+        <span>AI 驱动的未来体验</span>
+      </div>
+      
+      <!-- Title - Claude 风格大标题 -->
+      <h1 class="hero-claude-title">
+        数据之梦觉醒
+      </h1>
+      
+      <!-- Subtitle - 更宽松的行高 -->
+      <p class="hero-claude-subtitle">
+        探索机器智能与人类想象力的交汇点。我们打造沉浸式 AI 体验，让数据化为流动的艺术。
+      </p>
+      
+      <!-- Actions - Claude 风格按钮 -->
+      <div class="hero-claude-actions">
+        <a href="/chatbot" class="hero-claude-btn-primary">
+          <span>开始探索</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+        <a href="#features" class="hero-claude-btn-secondary">
+          <span>了解更多</span>
+        </a>
+      </div>
+      
+      <!-- Stats - 简化设计 -->
+      <div class="hero-claude-stats">
+        <div class="stat-claude-item">
+          <span class="stat-claude-number">50+</span>
+          <span class="stat-claude-label">AI 模型</span>
+        </div>
+        <div class="stat-claude-divider"></div>
+        <div class="stat-claude-item">
+          <span class="stat-claude-number">100K+</span>
+          <span class="stat-claude-label">用户</span>
+        </div>
+        <div class="stat-claude-divider"></div>
+        <div class="stat-claude-item">
+          <span class="stat-claude-number">99%</span>
+          <span class="stat-claude-label">满意度</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Visual - 简化装饰 -->
+    <div class="hero-claude-visual">
+      <div class="visual-claude-container">
+        <!-- 使用简约几何图形替代发光球体 -->
+        <div class="claude-shape shape-1"></div>
+        <div class="claude-shape shape-2"></div>
+        <div class="claude-shape shape-3"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ============================================
+     Claude 风格 Hero 基础样式
+     ============================================ */
+  .hero-claude {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 24px 80px;  /* Claude: 更宽松的间距 */
+    background-color: #FAFAFA;  /* Claude: 浅灰白背景 */
+    position: relative;
+    overflow: hidden;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-claude {
+      padding: 140px 48px 100px;
+    }
+  }
+
+  .hero-claude-container {
+    width: 100%;
+    max-width: 1280px;  /* Claude: 标准容器宽度 */
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 64px;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-claude-container {
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 80px;
+    }
+  }
+
+  /* ============================================
+     内容区域
+     ============================================ */
+  .hero-claude-content {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-claude-content {
+      text-align: left;
+    }
+  }
+
+  /* ============================================
+     Badge - 简化版
+     ============================================ */
+  .hero-claude-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background-color: #F5F0E8;  /* Claude 奶油色 */
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6B6B6B;
+    margin-bottom: 32px;
+    animation: fadeInDown 0.6s ease forwards;
+  }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #10B981;  /* 绿色状态点 */
+    border-radius: 50%;
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ============================================
+     Title - Claude 风格
+     ============================================ */
+  .hero-claude-title {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4rem);  /* Claude: 更克制的尺寸 */
+    font-weight: 600;  /* Claude: 半粗体 */
+    line-height: 1.1;  /* Claude: 紧凑行高 */
+    letter-spacing: -0.02em;  /* Claude: 微负字距 */
+    color: #1A1A1A;
+    margin-bottom: 24px;
+    animation: fadeInUp 0.6s ease 0.1s forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ============================================
+     Subtitle - Claude 风格
+     ============================================ */
+  .hero-claude-subtitle {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 18px;
+    color: #6B6B6B;  /* Claude: 次要文字灰 */
+    line-height: 1.6;  /* Claude: 舒适行高 */
+    margin-bottom: 40px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: fadeInUp 0.6s ease 0.2s forwards;
+    opacity: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-claude-subtitle {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+
+  /* ============================================
+     Actions - Claude 风格按钮
+     ============================================ */
+  .hero-claude-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 48px;
+    animation: fadeInUp 0.6s ease 0.3s forwards;
+    opacity: 0;
+  }
+
+  @media (min-width: 480px) {
+    .hero-claude-actions {
+      flex-direction: row;
+      justify-content: center;
+      gap: 16px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-claude-actions {
+      justify-content: flex-start;
+    }
+  }
+
+  /* Primary Button - Claude 橙色 */
+  .hero-claude-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #ffffff;
+    background-color: #D97757;  /* Claude 橙 */
+    border-radius: 8px;  /* Claude: 8px 圆角 */
+    text-decoration: none;
+    transition: all 200ms ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .hero-claude-btn-primary:hover {
+    background-color: #C46A4A;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .hero-claude-btn-primary svg {
+    transition: transform 200ms ease;
+  }
+
+  .hero-claude-btn-primary:hover svg {
+    transform: translateX(4px);
+  }
+
+  /* Secondary Button - Claude 描边 */
+  .hero-claude-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #1A1A1A;
+    background-color: transparent;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 200ms ease;
+  }
+
+  .hero-claude-btn-secondary:hover {
+    background-color: #F5F5F5;
+    border-color: #D4D4D4;
+  }
+
+  /* ============================================
+     Stats - Claude 风格
+     ============================================ */
+  .hero-claude-stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    animation: fadeInUp 0.6s ease 0.4s forwards;
+    opacity: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-claude-stats {
+      justify-content: flex-start;
+    }
+  }
+
+  .stat-claude-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  @media (min-width: 1024px) {
+    .stat-claude-item {
+      align-items: flex-start;
+    }
+  }
+
+  .stat-claude-number {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1A1A1A;
+    line-height: 1;
+  }
+
+  .stat-claude-label {
+    font-size: 14px;
+    color: #6B6B6B;
+  }
+
+  .stat-claude-divider {
+    width: 1px;
+    height: 32px;
+    background-color: #E5E5E5;
+  }
+
+  /* ============================================
+     Visual - 简约几何装饰
+     ============================================ */
+  .hero-claude-visual {
+    display: none;
+    position: relative;
+    z-index: 2;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-claude-visual {
+      display: block;
+    }
+  }
+
+  .visual-claude-container {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    animation: fadeIn 0.8s ease 0.5s forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  /* 简约几何形状替代发光球体 */
+  .claude-shape {
+    position: absolute;
+    border-radius: 12px;  /* Claude: 圆角矩形 */
+    opacity: 0.6;
+  }
+
+  .shape-1 {
+    width: 200px;
+    height: 200px;
+    background-color: #F5F0E8;  /* 奶油色 */
+    top: 10%;
+    left: 10%;
+    transform: rotate(-15deg);
+  }
+
+  .shape-2 {
+    width: 150px;
+    height: 150px;
+    background-color: #D97757;  /* Claude 橙 */
+    opacity: 0.2;
+    top: 30%;
+    right: 20%;
+    transform: rotate(10deg);
+  }
+
+  .shape-3 {
+    width: 120px;
+    height: 120px;
+    background-color: #FAFAFA;
+    border: 2px solid #E5E5E5;
+    bottom: 20%;
+    left: 30%;
+    transform: rotate(-5deg);
+  }
+
+  /* ============================================
+     深色模式适配
+     ============================================ */
+  @media (prefers-color-scheme: dark) {
+    .hero-claude {
+      background-color: #0D0D0D;
+    }
+
+    .hero-claude-badge {
+      background-color: #1A1A1A;
+      color: #A3A3A3;
+    }
+
+    .hero-claude-title {
+      color: #E5E5E5;
+    }
+
+    .hero-claude-subtitle {
+      color: #A3A3A3;
+    }
+
+    .hero-claude-btn-secondary {
+      color: #E5E5E5;
+      border-color: #404040;
+    }
+
+    .hero-claude-btn-secondary:hover {
+      background-color: #262626;
+      border-color: #525252;
+    }
+
+    .stat-claude-number {
+      color: #E5E5E5;
+    }
+
+    .stat-claude-label {
+      color: #A3A3A3;
+    }
+
+    .stat-claude-divider {
+      background-color: #404040;
+    }
+
+    .shape-1 {
+      background-color: #1A1A1A;
+    }
+
+    .shape-3 {
+      background-color: #0D0D0D;
+      border-color: #404040;
+    }
+  }
+</style>

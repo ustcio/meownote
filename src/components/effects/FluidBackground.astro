@@ -13,20 +13,20 @@ const {
 
 const colorSchemes = {
   dreamscape: {
-    colors: ['#00d4ff', '#b829dd', '#ff6b9d', '#06ffa5'],
-    background: '#0a0a0f'
+    colors: ['#D97757', '#C46A4A', '#B85E3E', '#A85A3A'],
+    background: '#FAFAFA'
   },
   ocean: {
-    colors: ['#00d4ff', '#0066cc', '#00f5d4', '#66e0ff'],
-    background: '#050a14'
+    colors: ['#3B82F6', '#2563EB', '#1D4ED8', '#1E40AF'],
+    background: '#F5F0E8'
   },
   cosmic: {
-    colors: ['#b829dd', '#ff6b9d', '#ff8a5c', '#ffd93d'],
-    background: '#0f0a14'
+    colors: ['#8B5CF6', '#7C3AED', '#6D28D9', '#5B21B6'],
+    background: '#E8E3DB'
   },
   nature: {
-    colors: ['#06ffa5', '#00d4ff', '#7ee787', '#a8e6cf'],
-    background: '#0a140f'
+    colors: ['#10B981', '#059669', '#047857', '#065F46'],
+    background: '#F5F0E8'
   }
 };
 
@@ -69,21 +69,20 @@ const scheme = colorSchemes[colorScheme];
     height: 100%;
     background: var(--gradient-dreamscape);
     pointer-events: none;
-    mix-blend-mode: overlay;
-    opacity: 0.5;
+    opacity: 0.3;
   }
 
-  /* Intensity variations */
+  /* Intensity variations - Claude simplified */
   .intensity-low .fluid-canvas {
-    opacity: 0.4;
+    opacity: 0.2;
   }
 
   .intensity-medium .fluid-canvas {
-    opacity: 0.6;
+    opacity: 0.3;
   }
 
   .intensity-high .fluid-canvas {
-    opacity: 0.8;
+    opacity: 0.4;
   }
 </style>
 

@@ -1,0 +1,262 @@
+// ================================================================================
+// English (US) Translations
+// ================================================================================
+
+import type { TranslationKey } from './zh-CN';
+
+// Ensure all keys from zh-CN are translated
+const translations: Record<TranslationKey, string> = {
+  // Meta
+  'meta.title': 'MaoMeme - Building the Future of AI',
+  'meta.description': 'Powerful AI tools and intelligent assistants for developers and creators',
+  
+  // Navigation
+  'nav.home': 'Home',
+  'nav.chatbot': 'AI Assistant',
+  'nav.kit': 'Toolkit',
+  'nav.trading': 'Trading',
+  'nav.research': 'Research',
+  'nav.about': 'About',
+  'nav.more': 'More',
+  
+  // Hero Section
+  'hero.badge': 'AI-Powered Future Experience',
+  'hero.title.word1': 'Data',
+  'hero.title.word2': 'Dreams',
+  'hero.title.word3': 'Awakened',
+  'hero.subtitle': 'Exploring the intersection of machine intelligence and human imagination. We create immersive AI experiences, transforming data into flowing art.',
+  'hero.cta.primary': 'Start Exploring',
+  'hero.cta.secondary': 'Learn More',
+  'hero.stats.models': 'AI Models',
+  'hero.stats.users': 'Users',
+  'hero.stats.satisfaction': 'Satisfaction',
+  'hero.scroll': 'Scroll to Explore',
+  
+  // Features
+  'features.label': 'Core Capabilities',
+  'features.title': 'An AI Workbench Built for',
+  'features.title.highlight': 'Creators',
+  'features.subtitle': 'Integrating multiple AI capabilities, your one-stop solution for intelligent needs',
+  'features.chat.title': 'Smart Conversations',
+  'features.chat.desc': 'Powered by advanced LLMs, understanding context for precise responses',
+  'features.privacy.title': 'Privacy First',
+  'features.privacy.desc': 'End-to-end encryption, your data belongs only to you',
+  'features.speed.title': 'Lightning Fast',
+  'features.speed.desc': 'Millisecond response times for seamless conversations',
+  'features.developer.title': 'Developer Friendly',
+  'features.developer.desc': 'Rich toolkit for academic research and daily development',
+  
+  // Stats Section
+  'stats.online': 'Online Now',
+  'stats.total': 'Total Visits',
+  'stats.today': 'Today\'s Visits',
+  'stats.live': 'LIVE',
+  
+  // Contribution Graph
+  'contribution.title': 'Activity',
+  'contribution.less': 'Less',
+  'contribution.more': 'More',
+  
+  // Chatbot Page
+  'chatbot.title': 'AI Assistant',
+  'chatbot.welcome.title': 'Hello, I\'m Meow',
+  'chatbot.welcome.subtitle': 'Your intelligent AI assistant, supporting Qwen and Doubao 2.0 model series',
+  'chatbot.quickstart': 'Quick Start',
+  'chatbot.quickstart.code': 'Write Code',
+  'chatbot.quickstart.explain': 'Ask Questions',
+  'chatbot.quickstart.write': 'Write Documents',
+  'chatbot.quickstart.brainstorm': 'Brainstorm',
+  'chatbot.input.placeholder': 'Type a message... (Shift+Enter for new line)',
+  'chatbot.input.hint': 'AI-generated content may be inaccurate. Please verify important information.',
+  'chatbot.select_model': 'Select Model',
+  'chatbot.new_chat': 'New Chat',
+  'chatbot.export': 'Export Chat',
+  'chatbot.close': 'Close',
+  'chatbot.minimize': 'Minimize',
+  'chatbot.maximize': 'Maximize',
+  'chatbot.send': 'Send Message',
+  'chatbot.stop': 'Stop Generating',
+  'chatbot.copy': 'Copy',
+  'chatbot.copied': 'Copied',
+  
+  // Models
+  'model.doubao.group': 'Doubao',
+  'model.doubao.pro': 'Doubao 2.0 Pro',
+  'model.doubao.pro.desc': 'General Chat',
+  'model.doubao.code': 'Doubao 2.0 Code',
+  'model.doubao.code.desc': 'Code Generation',
+  'model.qwen.group': 'Qwen',
+  'model.qwen.turbo': 'Qwen Turbo',
+  'model.qwen.turbo.desc': 'Fast Response',
+  'model.qwen.plus': 'Qwen Plus',
+  'model.qwen.plus.desc': 'Enhanced',
+  'model.llama.group': 'Llama (Cloudflare)',
+  'model.llama.8b': 'Llama 3 8B',
+  'model.llama.8b.desc': 'Edge Inference',
+  'model.llama.3.1': 'Llama 3.1 8B',
+  'model.llama.3.1.desc': 'Latest Version',
+  
+  // Kit Page
+  'kit.title': 'Toolkit',
+  'kit.subtitle': 'Curated Practical Tools',
+  'kit.gold.title': 'Gold Prices',
+  'kit.gold.desc': 'Real-time domestic and international gold prices',
+  'kit.academic.title': 'Academic Tools',
+  'kit.academic.desc': 'DOI citation conversion, BibTeX generation, and more',
+  'kit.back': 'Back to Toolkit',
+  
+  // Gold Page
+  'gold.title': 'Gold Prices',
+  'gold.subtitle': 'Track domestic and international gold price trends',
+  'gold.today': 'Today',
+  'gold.yesterday': 'Yesterday',
+  'gold.domestic': 'Domestic Gold',
+  'gold.international': 'International Gold',
+  'gold.unit.domestic': 'CNY/g',
+  'gold.unit.international': 'USD/oz',
+  'gold.high': 'High',
+  'gold.low': 'Low',
+  'gold.open': 'Open',
+  'gold.updating': 'Updating...',
+  'gold.collecting': 'Collecting data...',
+  
+  // Academic Page
+  'academic.title': 'Academic Tools',
+  'academic.subtitle': 'Convenient tools for academic research',
+  'academic.doi.title': 'DOI Citation',
+  'academic.doi.desc': 'Convert to multiple citation formats',
+  'academic.bibtex.title': 'BibTeX',
+  'academic.bibtex.desc': 'Generate standard BibTeX format',
+  'academic.impact.title': 'Journal Lookup',
+  'academic.impact.desc': 'Query impact factor and quartile',
+  'academic.latex.title': 'LaTeX',
+  'academic.latex.desc': 'Math equation editor',
+  'academic.translate.title': 'Academic Translation',
+  'academic.translate.desc': 'Professional academic translation',
+  'academic.keywords.title': 'Keyword Extraction',
+  'academic.keywords.desc': 'Auto-extract keywords',
+  'academic.doi.fetch': 'Get Citation',
+  'academic.doi.placeholder': '10.1000/xyz123',
+  'academic.copy': 'Copy',
+  'academic.generate': 'Generate',
+  'academic.bibtex.type': 'Type',
+  'academic.bibtex.article': 'Journal Article',
+  'academic.bibtex.book': 'Book',
+  'academic.bibtex.inproceedings': 'Conference Paper',
+  'academic.bibtex.key': 'Citation Key',
+  'academic.bibtex.title_field': 'Title',
+  'academic.bibtex.author': 'Author',
+  'academic.bibtex.journal': 'Journal/Publisher',
+  'academic.bibtex.year': 'Year',
+  'academic.bibtex.volume': 'Volume',
+  'academic.bibtex.pages': 'Pages',
+  
+  // Trading Page
+  'trading.title': 'Gold Trading Management',
+  'trading.subtitle': 'Real-time gold price monitoring with intelligent alerts for confident investment decisions',
+  'trading.login.welcome': 'Hi! Ready to log in?',
+  'trading.login.title': 'Login',
+  'trading.login.username': 'Username',
+  'trading.login.password': 'Password',
+  'trading.login.submit': 'Login',
+  'trading.login.forgot': 'Forgot password?',
+  'trading.login.register': 'Create Account',
+  
+  // Profile Page
+  'profile.title': 'Profile',
+  'profile.subtitle': 'View and manage your profile',
+  'profile.edit': 'Edit Profile',
+  'profile.stats.logins': 'Logins',
+  'profile.stats.last_login': 'Last Login',
+  'profile.stats.joined': 'Joined',
+  'profile.account.info': 'Account Information',
+  'profile.account.username': 'Username',
+  'profile.account.email': 'Email',
+  'profile.account.userid': 'User ID',
+  'profile.settings.title': 'Account Settings',
+  
+  // About Page
+  'about.title': 'About',
+  'about.subtitle': 'Building the Future of AI',
+  'about.mission.title': 'Our Mission',
+  'about.mission.text': 'We are committed to building safe, reliable, and easy-to-use AI tools that make artificial intelligence accessible to everyone.',
+  'about.team.title': 'Core Team',
+  'about.features.performance': 'High Performance',
+  'about.features.performance.desc': 'Ultra-fast response with millisecond latency',
+  'about.features.security': 'Secure & Reliable',
+  'about.features.security.desc': 'Enterprise-grade security with encrypted data transmission',
+  'about.features.intelligence': 'Intelligent Understanding',
+  'about.features.intelligence.desc': 'Deep context understanding for precise responses',
+  'about.features.global': 'Global Deployment',
+  'about.features.global.desc': 'Worldwide nodes for nearest access',
+  'about.team.ceo': 'Founder & CEO',
+  'about.team.cto': 'CTO',
+  'about.team.product': 'Product Lead',
+  
+  // Research Page
+  'research.title': 'AI Timeline',
+  'research.subtitle': 'Key moments in the history of artificial intelligence',
+  
+  // Auth Modal
+  'auth.welcome': 'Welcome Back',
+  'auth.login.subtitle': 'Sign in to continue',
+  'auth.login': 'Sign In',
+  'auth.signup': 'Sign Up',
+  'auth.username': 'Username or Email',
+  'auth.password': 'Password',
+  'auth.remember': 'Remember me',
+  'auth.forgot': 'Forgot password?',
+  'auth.no_account': 'Don\'t have an account?',
+  'auth.have_account': 'Already have an account?',
+  'auth.or': 'or',
+  'auth.continue_with': 'Continue with {provider}',
+  'auth.email': 'Email',
+  'auth.confirm_password': 'Confirm Password',
+  'auth.agree': 'I agree to the',
+  'auth.terms': 'Terms of Service',
+  'auth.and': 'and',
+  'auth.privacy': 'Privacy Policy',
+  
+  // Theme
+  'theme.toggle': 'Toggle Theme',
+  'theme.light': 'Light',
+  'theme.dark': 'Dark',
+  'theme.system': 'System',
+  
+  // Language
+  'language.switch': 'Switch Language',
+  'language.zh': '中文',
+  'language.en': 'English',
+  
+  // Common
+  'common.loading': 'Loading...',
+  'common.error': 'Error',
+  'common.retry': 'Retry',
+  'common.cancel': 'Cancel',
+  'common.confirm': 'Confirm',
+  'common.save': 'Save',
+  'common.delete': 'Delete',
+  'common.edit': 'Edit',
+  'common.back': 'Back',
+  'common.next': 'Next',
+  'common.previous': 'Previous',
+  'common.close': 'Close',
+  'common.search': 'Search',
+  'common.no_results': 'No results',
+  'common.all': 'All',
+  'common.recent': 'Recent',
+  'common.view_all': 'View All',
+  
+  // Footer
+  'footer.copyright': 'All rights reserved',
+  
+  // Errors
+  'error.404.title': 'Page Not Found',
+  'error.404.message': 'Sorry, the page you are looking for does not exist.',
+  'error.500.title': 'Server Error',
+  'error.500.message': 'Sorry, something went wrong. Please try again later.',
+  'error.network': 'Network connection failed. Please check your settings.',
+  'error.timeout': 'Request timed out. Please try again.',
+};
+
+export { translations };

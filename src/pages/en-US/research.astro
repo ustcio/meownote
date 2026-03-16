@@ -1,0 +1,174 @@
+---
+import Layout from '@layouts/Layout.astro';
+import { t } from '@i18n';
+
+const lang = 'en-US';
+
+const timeline = [
+  {
+    year: '2024',
+    title: 'GPT-4o Released',
+    description: 'OpenAI releases the multimodal model GPT-4o, enabling real-time processing of text, audio, and images.'
+  },
+  {
+    year: '2023',
+    title: 'ChatGPT Explosive Growth',
+    description: 'ChatGPT becomes the fastest-growing consumer app in history, driving widespread AI adoption.'
+  },
+  {
+    year: '2022',
+    title: 'ChatGPT Launched',
+    description: 'OpenAI launches ChatGPT, kicking off the large language model era.'
+  },
+  {
+    year: '2020',
+    title: 'GPT-3 Released',
+    description: 'OpenAI releases GPT-3, demonstrating the remarkable capabilities of large-scale language models.'
+  },
+  {
+    year: '2017',
+    title: 'Transformer Architecture',
+    description: 'Google publishes "Attention Is All You Need" paper, laying the foundation for modern AI.'
+  },
+  {
+    year: '2016',
+    title: 'AlphaGo Defeats Lee Sedol',
+    description: 'DeepMind\'s AlphaGo defeats world champion Lee Sedol in the game of Go.'
+  },
+  {
+    year: '2012',
+    title: 'AlexNet Breakthrough',
+    description: 'Deep learning achieves breakthrough progress in the ImageNet competition, kicking off the deep learning era.'
+  },
+];
+---
+
+<Layout 
+  title={`${t('research.title', lang)} - MaoMeme`}
+  description={t('research.subtitle', lang)}
+>
+  <section class="research">
+    <div class="research-container">
+      <div class="research-header">
+        <h1 class="research-title">{t('research.title', lang)}</h1>
+        <p class="research-subtitle">{t('research.subtitle', lang)}</p>
+      </div>
+      
+      <div class="timeline">
+        {timeline.map((item, index) => (
+          <div class="timeline-item">
+            <div class="timeline-marker">
+              <div class="timeline-dot"></div>
+              {index < timeline.length - 1 && <div class="timeline-line"></div>}
+            </div>
+            <div class="timeline-content hover-lift">
+              <span class="timeline-year">{item.year}</span>
+              <h3 class="timeline-item-title">{item.title}</h3>
+              <p class="timeline-description">{item.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .research {
+    min-height: 100vh;
+    padding: calc(var(--header-total-height) + var(--space-4)) var(--space-4) var(--space-12);
+  }
+  
+  .research-container {
+    max-width: var(--container-md);
+    margin: 0 auto;
+  }
+  
+  .research-header {
+    text-align: center;
+    margin-bottom: var(--space-12);
+  }
+  
+  .research-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+  }
+  
+  @media (min-width: 768px) {
+    .research-title {
+      font-size: var(--text-4xl);
+    }
+  }
+  
+  .research-subtitle {
+    color: var(--text-secondary);
+    font-size: var(--text-lg);
+  }
+  
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+  
+  .timeline-item {
+    display: flex;
+    gap: var(--space-4);
+  }
+  
+  .timeline-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  
+  .timeline-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    border: 2px solid var(--bg-primary);
+    box-shadow: 0 0 0 4px var(--color-primary);
+  }
+  
+  .timeline-line {
+    width: 2px;
+    flex: 1;
+    background: var(--border-primary);
+    margin-top: var(--space-2);
+  }
+  
+  .timeline-content {
+    flex: 1;
+    padding: var(--space-5);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--card-shadow);
+    margin-bottom: var(--space-2);
+  }
+  
+  .timeline-year {
+    display: inline-block;
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-primary);
+    margin-bottom: var(--space-2);
+  }
+  
+  .timeline-item-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+  }
+  
+  .timeline-description {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    line-height: var(--leading-relaxed);
+  }
+</style>
