@@ -14,6 +14,7 @@ export const translations = {
   'nav.trading': '交易',
   'nav.research': '研究',
   'nav.about': '关于',
+  'nav.claw': 'OpenClaw',
   'nav.more': '更多',
   
   // Hero Section
@@ -254,6 +255,29 @@ export const translations = {
   'error.500.message': '抱歉，服务器出现错误。请稍后重试。',
   'error.network': '网络连接失败，请检查网络设置',
   'error.timeout': '请求超时，请重试',
+  
+  // OpenClaw Page
+  'claw.subtitle': '轻量级云端应用部署平台，支持一键部署、自动扩缩容、多环境管理',
+  'claw.features.title': '核心特性',
+  'claw.feature.deploy.title': '一键部署',
+  'claw.feature.deploy.desc': '支持 Git 仓库直接部署，自动构建和发布，无需复杂配置',
+  'claw.feature.security.title': '安全可靠',
+  'claw.feature.security.desc': '内置 SSL 证书、环境变量加密、访问控制等多重安全机制',
+  'claw.feature.performance.title': '高性能',
+  'claw.feature.performance.desc': '全球 CDN 加速，智能负载均衡，毫秒级响应',
+  'claw.feature.opensource.title': '开源免费',
+  'claw.feature.opensource.desc': 'MIT 协议开源，社区驱动，可自由定制和扩展',
+  'claw.quickstart.title': '快速开始',
+  'claw.step1.title': '克隆仓库',
+  'claw.step1.desc': '从 GitHub 克隆 OpenClaw 仓库到本地',
+  'claw.step2.title': '安装依赖',
+  'claw.step2.desc': '运行 npm install 安装所有依赖包',
+  'claw.step3.title': '启动服务',
+  'claw.step3.desc': '执行 npm run dev 启动开发服务器',
+  'claw.example.title': '代码示例',
+  'claw.tech.title': '技术栈',
+  'claw.cta.github': 'GitHub 仓库',
+  'claw.cta.docs': '查看文档',
 } as const;
 
 export type TranslationKey = keyof typeof translations;

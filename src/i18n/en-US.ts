@@ -17,6 +17,7 @@ const translations: Record<TranslationKey, string> = {
   'nav.trading': 'Trading',
   'nav.research': 'Research',
   'nav.about': 'About',
+  'nav.claw': 'OpenClaw',
   'nav.more': 'More',
   
   // Hero Section
@@ -257,6 +258,29 @@ const translations: Record<TranslationKey, string> = {
   'error.500.message': 'Sorry, something went wrong. Please try again later.',
   'error.network': 'Network connection failed. Please check your settings.',
   'error.timeout': 'Request timed out. Please try again.',
+  
+  // OpenClaw Page
+  'claw.subtitle': 'Lightweight cloud application deployment platform with one-click deploy, auto-scaling, and multi-environment management',
+  'claw.features.title': 'Core Features',
+  'claw.feature.deploy.title': 'One-Click Deploy',
+  'claw.feature.deploy.desc': 'Deploy directly from Git repositories with automatic build and release, no complex configuration needed',
+  'claw.feature.security.title': 'Secure & Reliable',
+  'claw.feature.security.desc': 'Built-in SSL certificates, encrypted environment variables, access control, and more',
+  'claw.feature.performance.title': 'High Performance',
+  'claw.feature.performance.desc': 'Global CDN acceleration, intelligent load balancing, millisecond response',
+  'claw.feature.opensource.title': 'Open Source',
+  'claw.feature.opensource.desc': 'MIT licensed, community-driven, freely customizable and extensible',
+  'claw.quickstart.title': 'Quick Start',
+  'claw.step1.title': 'Clone Repository',
+  'claw.step1.desc': 'Clone the OpenClaw repository from GitHub to your local machine',
+  'claw.step2.title': 'Install Dependencies',
+  'claw.step2.desc': 'Run npm install to install all dependencies',
+  'claw.step3.title': 'Start Server',
+  'claw.step3.desc': 'Execute npm run dev to start the development server',
+  'claw.example.title': 'Code Example',
+  'claw.tech.title': 'Tech Stack',
+  'claw.cta.github': 'GitHub Repo',
+  'claw.cta.docs': 'View Docs',
 };
 
 export { translations };

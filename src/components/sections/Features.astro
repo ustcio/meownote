@@ -1,26 +1,37 @@
 ---
 import Icon from '@components/ui/Icon.astro';
+import { t, getLangFromUrl, type Language } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
 
 const features = [
   {
-    icon: 'zap',
-    title: '智能对话',
-    description: '基于先进大语言模型，理解上下文，提供精准回答',
+    icon: 'message-circle',
+    title: t('features.chat.title', lang),
+    description: t('features.chat.desc', lang),
+    link: '/chatbot',
+    linkText: t('hero.cta.primary', lang)
+  },
+  {
+    icon: 'server',
+    title: t('claw.feature.deploy.title', lang),
+    description: t('claw.feature.deploy.desc', lang),
+    link: '/claw',
+    linkText: t('hero.cta.primary', lang)
+  },
+  {
+    icon: 'box',
+    title: t('kit.title', lang),
+    description: t('kit.subtitle', lang),
+    link: '/kit',
+    linkText: t('hero.cta.primary', lang)
   },
   {
     icon: 'shield',
-    title: '隐私优先',
-    description: '端到端加密，您的数据只属于您自己',
-  },
-  {
-    icon: 'rocket',
-    title: '极速响应',
-    description: '毫秒级响应速度，流畅的对话体验',
-  },
-  {
-    icon: 'code',
-    title: '开发者友好',
-    description: '丰富的工具集，助力学术研究与日常开发',
+    title: t('features.privacy.title', lang),
+    description: t('features.privacy.desc', lang),
+    link: '/about',
+    linkText: t('hero.cta.secondary', lang)
   },
 ];
 ---
@@ -28,25 +39,30 @@ const features = [
 <section class="features" id="features">
   <div class="features-container">
     <div class="features-header">
-      <span class="features-label">核心能力</span>
+      <span class="features-label">{t('features.label', lang)}</span>
       <h2 class="features-title">
-        为创造者打造的
-        <span class="gradient-text">AI 工作台</span>
+        {t('features.title', lang)}
+        <span class="highlight">{t('features.title.highlight', lang)}</span>
       </h2>
-      <p class="features-subtitle">
-        集成多种AI能力，一站式解决您的智能需求
-      </p>
+      <p class="features-subtitle">{t('features.subtitle', lang)}</p>
     </div>
     
     <div class="features-grid">
-      {features.map((feature, index) => (
-        <article class="feature-card" style={`--delay: ${index * 0.1}s`}>
+      {features.map((feature) => (
+        <div class="feature-card hover-lift">
           <div class="feature-icon">
             <Icon name={feature.icon} size={24} />
           </div>
           <h3 class="feature-title">{feature.title}</h3>
           <p class="feature-description">{feature.description}</p>
-        </article>
+          <a href={feature.link} class="feature-link">
+            <span>{feature.linkText}</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
       ))}
     </div>
   </div>
@@ -54,36 +70,14 @@ const features = [
 
 <style>
   .features {
-    padding: var(--space-20) var(--space-4);
-    background: var(--bg-secondary);
-    position: relative;
-    overflow: hidden;
+    padding: var(--space-16) var(--space-4);
+    background: var(--bg-elevated);
   }
 
   @media (min-width: 768px) {
     .features {
-      padding: var(--space-24) var(--space-6);
+      padding: var(--space-20) var(--space-4);
     }
-  }
-
-  @media (min-width: 1024px) {
-    .features {
-      padding: var(--space-32) var(--space-8);
-    }
-  }
-
-  .features::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 800px;
-    height: 400px;
-    background: radial-gradient(ellipse at center, var(--color-primary) 0%, transparent 70%);
-    opacity: 0.03;
-    pointer-events: none;
   }
 
   .features-container {
@@ -93,127 +87,109 @@ const features = [
 
   .features-header {
     text-align: center;
-    max-width: 640px;
-    margin: 0 auto var(--space-16);
-  }
-
-  @media (min-width: 768px) {
-    .features-header {
-      margin-bottom: var(--space-20);
-    }
+    margin-bottom: var(--space-12);
   }
 
   .features-label {
     display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    background: var(--claude-cream);
+    border: 1px solid rgba(217, 119, 87, 0.2);
+    border-radius: var(--radius-full);
     font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
+    font-weight: var(--font-medium);
     color: var(--color-primary);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-wider);
     margin-bottom: var(--space-4);
   }
 
   .features-title {
-    font-size: var(--text-3xl);
-    font-weight: var(--font-bold);
-    line-height: var(--leading-tight);
+    font-size: clamp(var(--text-2xl), 4vw, var(--text-4xl));
+    font-weight: var(--font-semibold);
     color: var(--text-primary);
     margin-bottom: var(--space-4);
+    line-height: 1.2;
   }
 
-  @media (min-width: 768px) {
-    .features-title {
-      font-size: var(--text-4xl);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .features-title {
-      font-size: var(--text-5xl);
-    }
+  .features-title .highlight {
+    color: var(--color-primary);
   }
 
   .features-subtitle {
     font-size: var(--text-lg);
     color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
     line-height: var(--leading-relaxed);
   }
 
   .features-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--space-6);
   }
 
-  @media (min-width: 640px) {
-    .features-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .features-grid {
-      grid-template-columns: repeat(4, 1fr);
-      gap: var(--space-8);
-    }
-  }
-
   .feature-card {
+    padding: var(--space-6);
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: var(--radius-2xl);
-    padding: var(--space-8);
-    text-align: center;
+    border-radius: var(--radius-xl);
     transition: transform var(--duration-normal) var(--ease-default),
                 box-shadow var(--duration-normal) var(--ease-default),
                 border-color var(--duration-normal) var(--ease-default);
-    animation: fadeInUp 0.6s var(--ease-out) var(--delay) both;
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(24px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
   }
 
   .feature-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px);
+    box-shadow: var(--card-hover-shadow);
     border-color: var(--border-hover);
   }
 
   .feature-icon {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 56px;
-    height: 56px;
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-blue) 100%);
-    border-radius: var(--radius-xl);
+    width: 52px;
+    height: 52px;
+    margin-bottom: var(--space-4);
+    background: linear-gradient(135deg, var(--color-primary), var(--claude-orange-dark));
+    border-radius: var(--radius-lg);
     color: white;
-    margin-bottom: var(--space-5);
-    transition: transform var(--duration-normal) var(--ease-default);
-  }
-
-  .feature-card:hover .feature-icon {
-    transform: scale(1.1);
   }
 
   .feature-title {
     font-size: var(--text-lg);
     font-weight: var(--font-semibold);
     color: var(--text-primary);
-    margin-bottom: var(--space-3);
+    margin-bottom: var(--space-2);
   }
 
   .feature-description {
     font-size: var(--text-sm);
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-4);
+  }
+
+  .feature-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: gap var(--duration-fast) var(--ease-default);
+  }
+
+  .feature-link:hover {
+    gap: var(--space-3);
+  }
+
+  .feature-link svg {
+    transition: transform var(--duration-fast) var(--ease-default);
+  }
+
+  .feature-link:hover svg {
+    transform: translateX(2px);
   }
 </style>

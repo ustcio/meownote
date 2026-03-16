@@ -1,6 +1,7 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import Hero from '@components/sections/Hero.astro';
+import Features from '@components/sections/Features.astro';
 import ContributionGraph from '@components/sections/ContributionGraph.astro';
 import Stats from '@components/sections/Stats.astro';
 ---
@@ -11,6 +12,9 @@ import Stats from '@components/sections/Stats.astro';
 >
   <Hero />
   <div class="scroll-animate fade-in-up">
+    <Features />
+  </div>
+  <div class="scroll-animate fade-in-up delay-1">
     <ContributionGraph />
   </div>
   <div class="scroll-animate fade-in-up delay-2">
@@ -28,6 +32,10 @@ import Stats from '@components/sections/Stats.astro';
   .scroll-animate.visible {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  .delay-1 {
+    transition-delay: 0.1s;
   }
 
   .delay-2 {

@@ -12,6 +12,7 @@ const navItems = [
   { href: '/', label: t('nav.home', lang), id: 'home' },
   { href: '/chatbot', label: t('nav.chatbot', lang), id: 'chatbot' },
   { href: '/kit', label: t('nav.kit', lang), id: 'kit' },
+  { href: '/claw', label: t('nav.claw', lang), id: 'claw' },
   { href: '/trading', label: t('nav.trading', lang), id: 'trading', isAdmin: true },
   { href: '/about', label: t('nav.about', lang), id: 'about' },
 ];
@@ -36,7 +37,7 @@ const navItems = [
     
     <nav class="nav-desktop" aria-label="桌面端导航">
       <ul class="nav-list">
-        {navItems.slice(0, 4).map((item) => (
+        {navItems.slice(0, 3).map((item) => (
           <li>
             <a 
               href={item.href}
@@ -60,6 +61,12 @@ const navItems = [
             </svg>
           </button>
           <div class="nav-more-dropdown">
+            <a 
+              href={lang === 'en-US' ? '/en-US/claw' : '/claw'}
+              class:list={['dropdown-link', { active: currentPath.startsWith('/claw') || currentPath.startsWith('/en-US/claw') }]}
+            >
+              {t('nav.claw', lang)}
+            </a>
             <a 
               href={lang === 'en-US' ? '/en-US/research' : '/research'}
               class:list={['dropdown-link', { active: currentPath.startsWith('/research') || currentPath.startsWith('/en-US/research') }]}
