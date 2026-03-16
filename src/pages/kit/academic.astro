@@ -80,21 +80,21 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
         <div class="panel-body">
           <div class="fields">
             <select id="bibtex-type">
-              <option value="article">期刊论文</option>
-              <option value="book">书籍</option>
-              <option value="inproceedings">会议论文</option>
+              <option value="article">Journal Article</option>
+              <option value="book">Book</option>
+              <option value="inproceedings">Conference Paper</option>
             </select>
-            <input type="text" id="bibtex-key" placeholder="引用键 (如: Author2024)" />
-            <input type="text" id="bibtex-title" placeholder="标题" />
-            <input type="text" id="bibtex-author" placeholder="作者 (逗号分隔)" />
-            <input type="text" id="bibtex-journal" placeholder="期刊/出版社" />
+            <input type="text" id="bibtex-key" placeholder="Citation Key (e.g. Author2024)" />
+            <input type="text" id="bibtex-title" placeholder="Title" />
+            <input type="text" id="bibtex-author" placeholder="Authors (comma separated)" />
+            <input type="text" id="bibtex-journal" placeholder="Journal/Publisher" />
             <div class="row">
-              <input type="text" id="bibtex-year" placeholder="年份" />
-              <input type="text" id="bibtex-volume" placeholder="卷" />
-              <input type="text" id="bibtex-pages" placeholder="页码" />
+              <input type="text" id="bibtex-year" placeholder="Year" />
+              <input type="text" id="bibtex-volume" placeholder="Volume" />
+              <input type="text" id="bibtex-pages" placeholder="Pages" />
             </div>
           </div>
-          <button class="btn" id="gen-bibtex">生成</button>
+          <button class="btn" id="gen-bibtex">Generate</button>
           <div class="output hidden" id="bibtex-output">
             <pre id="bibtex-code"></pre>
             <button class="copy-btn" id="copy-bibtex">Copy</button>
@@ -169,9 +169,9 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
         </div>
         <div class="panel-body">
           <div class="translate-row">
-            <select id="src-lang"><option value="en">English</option><option value="zh">中文</option></select>
+            <select id="src-lang"><option value="en">English</option><option value="zh">Chinese</option></select>
             <button class="swap-btn" id="swap-lang">⇄</button>
-            <select id="tgt-lang"><option value="zh">中文</option><option value="en">English</option></select>
+            <select id="tgt-lang"><option value="zh">Chinese</option><option value="en">English</option></select>
           </div>
           <textarea id="src-text" rows="4" placeholder="Enter text"></textarea>
           <button class="btn" id="do-translate">Translate</button>
@@ -310,7 +310,7 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
         document.getElementById('doi-result').classList.remove('hidden');
         renderCitation();
       }
-    } catch (e) { alert('获取失败'); }
+    } catch (e) { alert('Fetch failed'); }
   });
   
   document.querySelectorAll('#format-tabs .tab').forEach(tab => {

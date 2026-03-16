@@ -2,14 +2,14 @@
 import Layout from '@layouts/Layout.astro';
 
 const dayTabs = [
-  { id: 'today', label: '今日金价' },
-  { id: 'yesterday', label: '昨日金价' },
+  { id: 'today', label: 'Today' },
+  { id: 'yesterday', label: 'Yesterday' },
 ];
 ---
 
 <Layout 
-  title="黄金价格 - LiveClaw"
-  description="追踪国内外黄金价格"
+  title="Gold Price - LiveClaw"
+  description="Track domestic and international gold prices"
 >
   <!-- Preload Chart.js for faster rendering -->
   <link rel="preload" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" as="script" />
@@ -21,10 +21,10 @@ const dayTabs = [
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
-          <span>工具箱</span>
+          <span>Toolkit</span>
         </a>
-        <h1 class="title">黄金价格</h1>
-        <p class="desc">追踪国内外黄金价格走势</p>
+        <h1 class="title">Gold Price</h1>
+        <p class="desc">Track domestic and international gold price trends</p>
       </header>
       
       <div class="tabs" id="day-tabs">
@@ -38,36 +38,36 @@ const dayTabs = [
       <div class="cards">
         <div class="card">
           <div class="card-head">
-            <h2 class="card-title">国内黄金</h2>
-            <span class="unit">元/克</span>
+            <h2 class="card-title">Domestic Gold</h2>
+            <span class="unit">CNY/g</span>
           </div>
           <div class="price-row">
             <span class="price" id="domestic-price">--</span>
             <span class="change" id="domestic-change">--</span>
           </div>
           <div class="stats">
-            <div class="stat"><span class="lbl">最高</span><span class="val" id="domestic-high">--</span></div>
-            <div class="stat"><span class="lbl">最低</span><span class="val" id="domestic-low">--</span></div>
-            <div class="stat"><span class="lbl">开盘</span><span class="val" id="domestic-open">--</span></div>
+            <div class="stat"><span class="lbl">High</span><span class="val" id="domestic-high">--</span></div>
+            <div class="stat"><span class="lbl">Low</span><span class="val" id="domestic-low">--</span></div>
+            <div class="stat"><span class="lbl">Open</span><span class="val" id="domestic-open">--</span></div>
           </div>
-          <div class="chart"><canvas id="domestic-chart"></canvas><div class="chart-empty" id="domestic-empty">数据采集中...</div></div>
+          <div class="chart"><canvas id="domestic-chart"></canvas><div class="chart-empty" id="domestic-empty">Loading data...</div></div>
         </div>
         
         <div class="card">
           <div class="card-head">
-            <h2 class="card-title">国际黄金</h2>
-            <span class="unit">美元/盎司</span>
+            <h2 class="card-title">International Gold</h2>
+            <span class="unit">USD/oz</span>
           </div>
           <div class="price-row">
             <span class="price" id="international-price">--</span>
             <span class="change" id="international-change">--</span>
           </div>
           <div class="stats">
-            <div class="stat"><span class="lbl">最高</span><span class="val" id="international-high">--</span></div>
-            <div class="stat"><span class="lbl">最低</span><span class="val" id="international-low">--</span></div>
-            <div class="stat"><span class="lbl">开盘</span><span class="val" id="international-open">--</span></div>
+            <div class="stat"><span class="lbl">High</span><span class="val" id="international-high">--</span></div>
+            <div class="stat"><span class="lbl">Low</span><span class="val" id="international-low">--</span></div>
+            <div class="stat"><span class="lbl">Open</span><span class="val" id="international-open">--</span></div>
           </div>
-          <div class="chart"><canvas id="international-chart"></canvas><div class="chart-empty" id="international-empty">数据采集中...</div></div>
+          <div class="chart"><canvas id="international-chart"></canvas><div class="chart-empty" id="international-empty">Loading data...</div></div>
         </div>
       </div>
       
@@ -205,7 +205,7 @@ const dayTabs = [
             },
             title: {
               display: true,
-              text: '时间',
+              text: 'Time',
               color: '#666',
               font: { family: SF_PRO_FONT, size: 11 }
             }
@@ -270,7 +270,7 @@ const dayTabs = [
               ...chartConfig.options.scales.y,
               title: {
                 display: true,
-                text: '价格 (元/克)',
+                text: 'Price (CNY/g)',
                 color: '#f97316',
                 font: { family: SF_PRO_FONT, size: 11, weight: 'bold' }
               }
@@ -301,7 +301,7 @@ const dayTabs = [
               ...chartConfig.options.scales.y,
               title: {
                 display: true,
-                text: '价格 (美元/盎司)',
+                text: 'Price (USD/oz)',
                 color: '#3b82f6',
                 font: { family: SF_PRO_FONT, size: 11, weight: 'bold' }
               }
@@ -578,8 +578,8 @@ const dayTabs = [
         console.error('[Gold] Failed to load Chart.js');
         const domesticEmpty = document.getElementById('domestic-empty');
         const internationalEmpty = document.getElementById('international-empty');
-        if (domesticEmpty) domesticEmpty.textContent = '图表加载失败';
-        if (internationalEmpty) internationalEmpty.textContent = '图表加载失败';
+        if (domesticEmpty) domesticEmpty.textContent = 'Chart failed to load';
+        if (internationalEmpty) internationalEmpty.textContent = 'Chart failed to load';
       };
       document.head.appendChild(script);
     }
