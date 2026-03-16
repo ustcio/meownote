@@ -7,7 +7,7 @@ import type { TranslationKey } from './zh-CN';
 // Ensure all keys from zh-CN are translated
 const translations: Record<TranslationKey, string> = {
   // Meta
-  'meta.title': 'MeowClaw - Building the Future of AI',
+  'meta.title': 'LiveClaw - Building the Future of AI',
   'meta.description': 'Powerful AI tools and intelligent assistants for developers and creators',
   
   // Navigation
@@ -212,7 +212,7 @@ const translations: Record<TranslationKey, string> = {
   'about.milestones.m3.desc': 'Started building AI tools for developers',
   'about.tech.title': 'Built With',
   'about.cta.title': 'Ready to Get Started?',
-  'about.cta.desc': 'Experience the power of AI with MeowClaw today',
+  'about.cta.desc': 'Experience the power of AI with LiveClaw today',
   'about.cta.primary': 'Try AI Assistant',
   'about.cta.secondary': 'View on GitHub',
   

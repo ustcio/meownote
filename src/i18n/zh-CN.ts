@@ -4,7 +4,7 @@
 
 export const translations = {
   // Meta
-  'meta.title': 'MeowClaw - 构建AI的未来',
+  'meta.title': 'LiveClaw - 构建AI的未来',
   'meta.description': '为开发者和创作者打造的强大AI工具和智能助手',
   
   // Navigation
@@ -211,7 +211,7 @@ export const translations = {
   'about.subtitle': '构建AI的未来',
   'about.badge': '我们的故事',
   'about.story.title': '为什么开始',
-  'about.story.p1': 'MeowClaw 源于一个简单的想法：让 AI 人人可用。我们相信，人工智能的力量不应局限于科技巨头和研究实验室。',
+  'about.story.p1': 'LiveClaw 源于一个简单的想法：让 AI 人人可用。我们相信，人工智能的力量不应局限于科技巨头和研究实验室。',
   'about.story.p2': '今天，我们正在构建一套 AI 驱动的工具，帮助开发者、创作者和企业轻松驾驭现代 AI 的力量。',
   'about.features.title': '我们的服务',
   'about.features.performance.title': '高性能',

@@ -1,4 +1,4 @@
-# 🚀 MeowClaw网站优化完成报告
+# 🚀 LiveClaw网站优化完成报告
 
 > 基于CodeBuddy官方标准和2024-2025年Web开发最佳实践
 
@@ -110,7 +110,7 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "MeowClaw",
+  "name": "LiveClaw",
   "applicationCategory": "DeveloperApplication"
 }
 ```
@@ -274,7 +274,7 @@
 
 ## 🎉 总结
 
-通过本次全面优化，MeowClaw网站在以下方面获得显著提升：
+通过本次全面优化，LiveClaw网站在以下方面获得显著提升：
 
 1. **可访问性**: 从WCAG不合规提升至AA级合规
 2. **性能**: 动画流畅度提升，加载速度优化
