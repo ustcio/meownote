@@ -54,6 +54,7 @@ export const translations = {
   'contribution.title': '访问活动',
   'contribution.less': '少',
   'contribution.more': '多',
+  'contribution.visits': '次访问',
   
   // Chatbot Page
   'chatbot.title': 'AI 助手',
@@ -214,6 +215,21 @@ export const translations = {
   'auth.terms': '服务条款',
   'auth.and': '和',
   'auth.privacy': '隐私政策',
+  'auth.create_account': '创建账户',
+  'auth.create_subtitle': '注册一个新账户',
+  'auth.username_label': '用户名',
+  'auth.username_placeholder': '3-20个字符',
+  'auth.email_placeholder': '请输入邮箱地址',
+  'auth.password_placeholder': '请输入密码',
+  'auth.password_min': '至少6个字符',
+  'auth.confirm_placeholder': '再次输入密码',
+  'auth.password_weak': '弱',
+  'auth.password_medium': '中等',
+  'auth.password_strong': '强',
+  'auth.login_failed': '登录失败',
+  'auth.signup_failed': '注册失败',
+  'auth.password_mismatch': '两次输入的密码不一致',
+  'auth.retry': '请重试',
   
   // Theme
   'theme.toggle': '切换主题',
@@ -247,6 +263,18 @@ export const translations = {
   
   // Footer
   'footer.copyright': '版权所有',
+  
+  // Social Proof
+  'social.active_users': '活跃用户',
+  'social.conversations': '对话次数',
+  'social.availability': '服务可用性',
+  'social.avg_response': '平均响应',
+  
+  // CTA Section
+  'cta.title': '准备好开始了吗？',
+  'cta.subtitle': '立即体验 AI 驱动的智能服务',
+  'cta.primary': '免费开始',
+  'cta.secondary': '了解更多',
   
   // Errors
   'error.404.title': '页面未找到',

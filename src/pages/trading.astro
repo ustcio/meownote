@@ -17,12 +17,12 @@ const API_BASE = 'https://api.ustc.dev';
               <svg class="character-svg" viewBox="0 0 200 200" width="200" height="200">
                 <defs>
                   <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#64d2ff"/>
-                    <stop offset="100%" style="stop-color:#bf5af2"/>
+                    <stop offset="0%" style="stop-color:#D97757"/>
+                    <stop offset="100%" style="stop-color:#C46A4A"/>
                   </linearGradient>
                   <linearGradient id="cheekGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#ff6b9d"/>
-                    <stop offset="100%" style="stop-color:#ff8fab"/>
+                    <stop offset="0%" style="stop-color:#EC4899"/>
+                    <stop offset="100%" style="stop-color:#F472B6"/>
                   </linearGradient>
                 </defs>
                 
@@ -749,7 +749,7 @@ const API_BASE = 'https://api.ustc.dev';
   .shape-2 {
     width: 150px;
     height: 150px;
-    background: linear-gradient(135deg, #bf5af2, #64d2ff);
+    background: linear-gradient(135deg, var(--claude-orange-dark), var(--color-primary));
     top: 60%;
     right: 15%;
     animation-delay: 1.5s;
@@ -758,7 +758,7 @@ const API_BASE = 'https://api.ustc.dev';
   .shape-3 {
     width: 100px;
     height: 100px;
-    background: linear-gradient(135deg, #ff6b9d, #64d2ff);
+    background: linear-gradient(135deg, var(--color-accent-pink), var(--color-primary));
     bottom: 20%;
     left: 20%;
     animation-delay: 3s;
@@ -767,7 +767,7 @@ const API_BASE = 'https://api.ustc.dev';
   .shape-4 {
     width: 80px;
     height: 80px;
-    background: linear-gradient(135deg, #64d2ff, #ff6b9d);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent-pink));
     top: 30%;
     right: 25%;
     animation-delay: 4.5s;

@@ -1,20 +1,24 @@
 ---
+import { t, getLangFromUrl, type Language } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
+
 const stats = [
   {
     value: '10K+',
-    label: '活跃用户',
+    label: t('social.active_users', lang),
   },
   {
     value: '1M+',
-    label: '对话次数',
+    label: t('social.conversations', lang),
   },
   {
     value: '99.9%',
-    label: '服务可用性',
+    label: t('social.availability', lang),
   },
   {
     value: '<100ms',
-    label: '平均响应',
+    label: t('social.avg_response', lang),
   },
 ];
 ---
@@ -89,7 +93,7 @@ const stats = [
     font-weight: var(--font-bold);
     color: var(--text-primary);
     line-height: 1;
-    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--claude-orange-dark) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

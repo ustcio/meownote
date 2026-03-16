@@ -57,6 +57,7 @@ const translations: Record<TranslationKey, string> = {
   'contribution.title': 'Activity',
   'contribution.less': 'Less',
   'contribution.more': 'More',
+  'contribution.visits': 'visits',
   
   // Chatbot Page
   'chatbot.title': 'AI Assistant',
@@ -217,6 +218,21 @@ const translations: Record<TranslationKey, string> = {
   'auth.terms': 'Terms of Service',
   'auth.and': 'and',
   'auth.privacy': 'Privacy Policy',
+  'auth.create_account': 'Create Account',
+  'auth.create_subtitle': 'Register a new account',
+  'auth.username_label': 'Username',
+  'auth.username_placeholder': '3-20 characters',
+  'auth.email_placeholder': 'Enter your email',
+  'auth.password_placeholder': 'Enter your password',
+  'auth.password_min': 'At least 6 characters',
+  'auth.confirm_placeholder': 'Enter password again',
+  'auth.password_weak': 'Weak',
+  'auth.password_medium': 'Medium',
+  'auth.password_strong': 'Strong',
+  'auth.login_failed': 'Login failed',
+  'auth.signup_failed': 'Sign up failed',
+  'auth.password_mismatch': 'Passwords do not match',
+  'auth.retry': 'Please try again',
   
   // Theme
   'theme.toggle': 'Toggle Theme',
@@ -250,6 +266,18 @@ const translations: Record<TranslationKey, string> = {
   
   // Footer
   'footer.copyright': 'All rights reserved',
+  
+  // Social Proof
+  'social.active_users': 'Active Users',
+  'social.conversations': 'Conversations',
+  'social.availability': 'Availability',
+  'social.avg_response': 'Avg Response',
+  
+  // CTA Section
+  'cta.title': 'Ready to Get Started?',
+  'cta.subtitle': 'Experience AI-powered intelligent services now',
+  'cta.primary': 'Get Started Free',
+  'cta.secondary': 'Learn More',
   
   // Errors
   'error.404.title': 'Page Not Found',

@@ -1,5 +1,8 @@
 ---
 import Icon from '@components/ui/Icon.astro';
+import { t, getLangFromUrl, type Language } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
 ---
 
 <section class="stats">
@@ -8,13 +11,13 @@ import Icon from '@components/ui/Icon.astro';
       <div class="stat-card hover-lift">
         <div class="live-badge">
           <span class="live-dot"></span>
-          <span class="live-text">LIVE</span>
+          <span class="live-text">{t('stats.live', lang)}</span>
         </div>
         <div class="stat-icon">
           <Icon name="users" size={20} />
         </div>
         <div class="stat-value" id="stat-online">--</div>
-        <div class="stat-label">当前在线</div>
+        <div class="stat-label">{t('stats.online', lang)}</div>
       </div>
       
       <div class="stat-card hover-lift">
@@ -22,7 +25,7 @@ import Icon from '@components/ui/Icon.astro';
           <Icon name="trending" size={20} />
         </div>
         <div class="stat-value" id="stat-total">--</div>
-        <div class="stat-label">累计访问</div>
+        <div class="stat-label">{t('stats.total', lang)}</div>
       </div>
       
       <div class="stat-card hover-lift">
@@ -30,7 +33,7 @@ import Icon from '@components/ui/Icon.astro';
           <Icon name="zap" size={20} />
         </div>
         <div class="stat-value" id="stat-today">--</div>
-        <div class="stat-label">今日访问</div>
+        <div class="stat-label">{t('stats.today', lang)}</div>
       </div>
     </div>
   </div>
@@ -99,7 +102,7 @@ import Icon from '@components/ui/Icon.astro';
     align-items: center;
     gap: 4px;
     padding: 2px 8px;
-    background: rgba(34, 197, 94, 0.15);
+    background: var(--color-success-bg);
     border-radius: var(--radius-full);
     font-size: 10px;
     font-weight: var(--font-semibold);
@@ -109,13 +112,13 @@ import Icon from '@components/ui/Icon.astro';
   .live-dot {
     width: 6px;
     height: 6px;
-    background: #22c55e;
+    background: var(--color-success);
     border-radius: 50%;
     animation: pulse 2s ease-in-out infinite;
   }
   
   .live-text {
-    color: #22c55e;
+    color: var(--color-success);
   }
   
   @keyframes pulse {
@@ -142,7 +145,7 @@ import Icon from '@components/ui/Icon.astro';
     width: 44px;
     height: 44px;
     margin-bottom: var(--space-3);
-    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+    background: linear-gradient(135deg, var(--color-primary), var(--claude-orange-dark));
     border-radius: var(--radius-lg);
     color: white;
   }

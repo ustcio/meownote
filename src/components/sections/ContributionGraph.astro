@@ -1,5 +1,8 @@
 ---
 import Icon from '@components/ui/Icon.astro';
+import { t, getLangFromUrl, type Language } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -35,6 +38,9 @@ function getMonthPositions() {
 const monthPositions = getMonthPositions();
 const totalDays = Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 const totalWeeks = Math.ceil(totalDays / 7);
+
+// Get the "visits" translation for the script
+const visitsText = t('contribution.visits', lang);
 ---
 
 <section class="contribution">
@@ -42,13 +48,13 @@ const totalWeeks = Math.ceil(totalDays / 7);
     <div class="contribution-card">
       <div class="contribution-header">
         <h2 class="contribution-title">
-          访问活动
+          {t('contribution.title', lang)}
         </h2>
         <p class="contribution-subtitle">{currentYear}</p>
       </div>
       
       <div class="contribution-graph-wrapper">
-        <div class="contribution-graph" id="contribution-graph" data-year={currentYear}>
+        <div class="contribution-graph" id="contribution-graph" data-year={currentYear} data-visits={visitsText}>
           <div class="contribution-months">
             {monthPositions.map(({ month, week }) => (
               <span 
@@ -79,7 +85,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
                     
                     const dateStr = cellDate.toISOString().split('T')[0];
                     const displayDateStr = cellDate.toLocaleDateString(
-                      'en-US',
+                      lang === 'en-US' ? 'en-US' : 'zh-CN',
                       { month: 'short', day: 'numeric', year: 'numeric' }
                     );
                     
@@ -101,7 +107,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
       
       <div class="contribution-legend">
         <span class="contribution-legend-text">
-          少
+          {t('contribution.less', lang)}
         </span>
         <div class="contribution-legend-cells">
           {[0, 1, 2, 3, 4, 5].map((level) => (
@@ -109,7 +115,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
           ))}
         </div>
         <span class="contribution-legend-text">
-          多
+          {t('contribution.more', lang)}
         </span>
       </div>
     </div>
@@ -292,19 +298,20 @@ const totalWeeks = Math.ceil(totalDays / 7);
     try {
       const graph = document.getElementById('contribution-graph');
       const year = graph?.getAttribute('data-year') || 2026;
+      const visitsText = graph?.getAttribute('data-visits') || 'visits';
       
       const response = await fetch(`${API_BASE}/stats/heatmap?year=${year}`);
       const result = await response.json();
       
       if (result.success && result.data) {
-        updateHeatmap(result.data, result.maxCount);
+        updateHeatmap(result.data, result.maxCount, visitsText);
       }
     } catch (error) {
       console.warn('Failed to fetch heatmap data:', error);
     }
   }
   
-  function updateHeatmap(data: Record<string, number>, maxCount: number) {
+  function updateHeatmap(data: Record<string, number>, maxCount: number, visitsText: string) {
     const cells = document.querySelectorAll('.contribution-cell[data-date]');
     
     cells.forEach(cell => {
@@ -316,8 +323,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
         
         const existingTitle = cell.getAttribute('title') || '';
         const baseTitle = existingTitle.split(' - ')[0];
-        const countText = count === 1 ? '1 次访问' : `${count} 次访问`;
-        cell.setAttribute('title', `${baseTitle} - ${countText}`);
+        cell.setAttribute('title', `${baseTitle} - ${count} ${visitsText}`);
       }
     });
   }

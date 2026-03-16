@@ -13,7 +13,7 @@ const navItems = [
   { href: '/chatbot', label: t('nav.chatbot', lang), id: 'chatbot' },
   { href: '/kit', label: t('nav.kit', lang), id: 'kit' },
   { href: '/claw', label: t('nav.claw', lang), id: 'claw' },
-  { href: '/trading', label: t('nav.trading', lang), id: 'trading', isAdmin: true },
+  { href: '/trading', label: t('nav.trading', lang), id: 'trading', highlight: true },
   { href: '/about', label: t('nav.about', lang), id: 'about' },
 ];
 ---
@@ -37,7 +37,7 @@ const navItems = [
     
     <nav class="nav-desktop" aria-label="桌面端导航">
       <ul class="nav-list">
-        {navItems.slice(0, 3).map((item) => (
+        {navItems.map((item) => (
           <li>
             <a 
               href={item.href}
@@ -45,7 +45,7 @@ const navItems = [
                 'nav-link', 
                 { 
                   active: currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)),
-                  'nav-link--admin': item.isAdmin
+                  'nav-link--highlight': item.highlight
                 }
               ]}
             >
@@ -53,34 +53,6 @@ const navItems = [
             </a>
           </li>
         ))}
-        <li class="nav-more-wrapper">
-          <button class="nav-more-btn" aria-label={t('nav.more', lang)} aria-expanded="false">
-            <span>{t('nav.more', lang)}</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="nav-more-icon">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <div class="nav-more-dropdown">
-            <a 
-              href={lang === 'en-US' ? '/en-US/claw' : '/claw'}
-              class:list={['dropdown-link', { active: currentPath.startsWith('/claw') || currentPath.startsWith('/en-US/claw') }]}
-            >
-              {t('nav.claw', lang)}
-            </a>
-            <a 
-              href={lang === 'en-US' ? '/en-US/research' : '/research'}
-              class:list={['dropdown-link', { active: currentPath.startsWith('/research') || currentPath.startsWith('/en-US/research') }]}
-            >
-              {t('nav.research', lang)}
-            </a>
-            <a 
-              href={lang === 'en-US' ? '/en-US/about' : '/about'}
-              class:list={['dropdown-link', { active: currentPath === '/about' || currentPath === '/en-US/about' }]}
-            >
-              {t('nav.about', lang)}
-            </a>
-          </div>
-        </li>
       </ul>
     </nav>
     
@@ -145,7 +117,7 @@ const navItems = [
                 'mobile-nav-link', 
                 { 
                   active: currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)),
-                  'mobile-nav-link--admin': item.isAdmin
+                  'mobile-nav-link--highlight': item.highlight
                 }
               ]}
             >
@@ -153,14 +125,6 @@ const navItems = [
             </a>
           </li>
         ))}
-        <li>
-          <a 
-            href={lang === 'en-US' ? '/en-US/research' : '/research'}
-            class:list={['mobile-nav-link', { active: currentPath.startsWith('/research') || currentPath.startsWith('/en-US/research') }]}
-          >
-            {t('nav.research', lang)}
-          </a>
-        </li>
       </ul>
       <div class="mobile-nav-footer">
         <button class="mobile-auth-btn" id="mobile-auth-btn">
@@ -188,8 +152,6 @@ const navItems = [
   const userMenu = document.getElementById('user-menu');
   const dropdownLogout = document.getElementById('dropdown-logout');
   const dropdownUsername = document.getElementById('dropdown-username');
-  const navMoreBtn = document.querySelector('.nav-more-btn');
-  const navMoreDropdown = document.querySelector('.nav-more-dropdown');
   
   function toggleMobileMenu(open: boolean) {
     mobileMenuBtn?.setAttribute('aria-expanded', String(open));
@@ -213,18 +175,7 @@ const navItems = [
     });
   });
   
-  navMoreBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isExpanded = navMoreBtn.getAttribute('aria-expanded') === 'true';
-    navMoreBtn.setAttribute('aria-expanded', String(!isExpanded));
-    navMoreDropdown?.classList.toggle('open', !isExpanded);
-  });
-  
   document.addEventListener('click', (e) => {
-    if (!navMoreBtn?.contains(e.target as Node)) {
-      navMoreBtn?.setAttribute('aria-expanded', 'false');
-      navMoreDropdown?.classList.remove('open');
-    }
     if (!userMenu?.contains(e.target as Node)) {
       userMenu?.classList.remove('open');
     }
@@ -234,8 +185,6 @@ const navItems = [
     if (e.key === 'Escape') {
       toggleMobileMenu(false);
       userMenu?.classList.remove('open');
-      navMoreBtn?.setAttribute('aria-expanded', 'false');
-      navMoreDropdown?.classList.remove('open');
     }
   });
   
@@ -427,104 +376,17 @@ const navItems = [
     background-color: rgba(0, 0, 0, 0.05);
   }
   
-  .nav-link--admin {
-    color: var(--color-accent-purple);
+  .nav-link--highlight {
+    color: var(--color-primary);
+    background: rgba(217, 119, 87, 0.08);
   }
-  
-  .nav-link--admin:hover,
-  .nav-link--admin.active {
-    background-color: rgba(139, 92, 246, 0.12);
-    color: var(--color-accent-purple);
+
+  .nav-link--highlight:hover,
+  .nav-link--highlight.active {
+    background: rgba(217, 119, 87, 0.15);
+    color: var(--color-primary);
   }
-  
-  .nav-more-wrapper {
-    position: relative;
-  }
-  
-  .nav-more-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    padding: var(--space-2) var(--space-3);
-    color: var(--text-secondary);
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    background: none;
-    border: none;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: color var(--duration-fast) var(--ease-default),
-                background-color var(--duration-fast) var(--ease-default);
-  }
-  
-  .nav-more-btn:hover {
-    color: var(--text-primary);
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-  
-  .nav-more-icon {
-    transition: transform var(--duration-fast) var(--ease-default);
-  }
-  
-  .nav-more-btn[aria-expanded="true"] .nav-more-icon {
-    transform: rotate(180deg);
-  }
-  
-  .nav-more-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: var(--space-2);
-    min-width: 160px;
-    padding: var(--space-2);
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-8px) scale(0.95);
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-  
-  .nav-more-dropdown.open {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0) scale(1);
-  }
-  
-  .dropdown-link {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    text-decoration: none;
-    border-radius: var(--radius-md);
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-  
-  .dropdown-link:hover {
-    color: var(--text-primary);
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-  
-  .dropdown-link.active {
-    color: var(--text-primary);
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-  
-  .dropdown-link--admin {
-    color: var(--color-accent-purple);
-  }
-  
-  .dropdown-link--admin:hover {
-    background-color: rgba(191, 90, 242, 0.12);
-  }
-  
+
   .header-actions {
     display: flex;
     align-items: center;
@@ -781,17 +643,17 @@ const navItems = [
     background-color: rgba(0, 0, 0, 0.05);
   }
   
-  .mobile-nav-link--admin {
-    color: var(--color-accent-purple);
-    background: rgba(191, 90, 242, 0.08);
+  .mobile-nav-link--highlight {
+    color: var(--color-primary);
+    background: rgba(217, 119, 87, 0.08);
   }
-  
-  .mobile-nav-link--admin:hover,
-  .mobile-nav-link--admin.active {
-    background: rgba(191, 90, 242, 0.15);
-    color: var(--color-accent-purple);
+
+  .mobile-nav-link--highlight:hover,
+  .mobile-nav-link--highlight.active {
+    background: rgba(217, 119, 87, 0.15);
+    color: var(--color-primary);
   }
-  
+
   .mobile-nav-footer {
     margin-top: auto;
     padding-top: var(--space-6);
