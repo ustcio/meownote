@@ -182,30 +182,7 @@ const translations: Record<TranslationKey, string> = {
   'trading.login.submit': 'Login',
   'trading.login.forgot': 'Forgot password?',
   'trading.login.register': 'Create Account',
-  
-  // About Page
-  'about.title': 'About',
-  'about.subtitle': 'Building the Future of AI',
-  'about.mission.title': 'Our Mission',
-  'about.mission.text': 'We are committed to building safe, reliable, and easy-to-use AI tools that make artificial intelligence accessible to everyone.',
-  'about.team.title': 'Core Team',
-  'about.features.performance': 'High Performance',
-  'about.features.performance.desc': 'Ultra-fast response with millisecond latency',
-  'about.features.security': 'Secure & Reliable',
-  'about.features.security.desc': 'Enterprise-grade security with encrypted data transmission',
-  'about.features.intelligence': 'Intelligent Understanding',
-  'about.features.intelligence.desc': 'Deep context understanding for precise responses',
-  'about.features.global': 'Global Deployment',
-  'about.features.global.desc': 'Worldwide nodes for nearest access',
-  'about.team.ceo': 'Founder & CEO',
-  'about.team.cto': 'CTO',
-  'about.team.product': 'Product Lead',
-  
-  // Research Page
-  'research.title': 'AI Timeline',
-'research.title': 'AI Timeline',
-  'research.subtitle': 'Key moments in the history of artificial intelligence',
-  'research.badge': 'History of AI',
+
   // About Page
   'about.title': 'About',
   'about.subtitle': 'Building the Future of AI',
@@ -232,7 +209,7 @@ const translations: Record<TranslationKey, string> = {
   'about.milestones.m2.title': 'Toolkit Expansion',
   'about.milestones.m2.desc': 'Added gold prices, academic tools, and more',
   'about.milestones.m3.title': 'Project Founded',
-  'about.milestones.m2.desc': 'Started building AI tools for developers',
+  'about.milestones.m3.desc': 'Started building AI tools for developers',
   'about.tech.title': 'Built With',
   'about.cta.title': 'Ready to Get Started?',
   'about.cta.desc': 'Experience the power of AI with MeowClaw today',

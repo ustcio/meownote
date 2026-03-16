@@ -25,7 +25,12 @@ const classes = [
 ].filter(Boolean).join(' ');
 ---
 
-<div class={classes}>
+<div 
+  class={classes}
+  role={clickable ? 'button' : undefined}
+  tabindex={clickable ? 0 : undefined}
+  aria-label={clickable ? 'Click to view details' : undefined}
+>
   <slot />
 </div>
 
@@ -80,6 +85,13 @@ const classes = [
   
   .card-clickable {
     cursor: pointer;
+    user-select: none;
+  }
+
+  .card-clickable:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+    box-shadow: var(--focus-ring-offset-box-shadow), 0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset)) rgba(217, 119, 87, 0.2);
   }
   
   .card-clickable:active {

@@ -44,7 +44,9 @@ const classes = [
   target={target}
   rel={rel}
   disabled={disabled || loading}
-  aria-busy={loading}
+  aria-disabled={disabled || loading ? 'true' : undefined}
+  aria-busy={loading ? 'true' : undefined}
+  aria-label={loading ? 'Loading, please wait' : undefined}
 >
   {loading && (
     <svg class="btn-spinner" width="16" height="16" viewBox="0 0 24 24">
@@ -86,8 +88,9 @@ const classes = [
   }
   
   .btn:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+    box-shadow: var(--focus-ring-offset-box-shadow), 0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset)) rgba(217, 119, 87, 0.2);
   }
   
   .btn:active:not(:disabled) {

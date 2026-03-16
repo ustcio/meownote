@@ -63,6 +63,27 @@ const imageURL = new URL(image, Astro.site);
     <meta name="theme-color" content="#FAFAFA" />
     <meta name="color-scheme" content="light dark" />
 
+    <!-- Structured Data - Schema.org -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": title,
+      "description": description,
+      "url": canonicalURL,
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "MeowClaw",
+        "url": "https://ustc.dev"
+      }
+    })} />
+
     <!-- Google Fonts - Claude Style + Brand Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -94,11 +115,15 @@ const imageURL = new URL(image, Astro.site);
     </div>
     
     <script>
+      // Theme switching with smooth transition
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
         if (!localStorage.getItem('theme')) {
           document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
         }
       });
+      
+      // Smooth theme transition
+      document.documentElement.style.setProperty('--theme-transition', 'background-color 0.3s ease, color 0.3s ease');
     </script>
   </body>
 </html>
