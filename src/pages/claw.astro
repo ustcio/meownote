@@ -7,24 +7,67 @@ const lang = getLangFromUrl(Astro.url);
 
 const features = [
   {
-    icon: 'server',
-    title: t('claw.feature.deploy.title', lang),
-    description: t('claw.feature.deploy.desc', lang)
+    icon: 'cpu',
+    title: t('claw.feature.agent.title', lang),
+    description: t('claw.feature.agent.desc', lang)
+  },
+  {
+    icon: 'message-circle',
+    title: t('claw.feature.platforms.title', lang),
+    description: t('claw.feature.platforms.desc', lang)
+  },
+  {
+    icon: 'brain',
+    title: t('claw.feature.memory.title', lang),
+    description: t('claw.feature.memory.desc', lang)
   },
   {
     icon: 'shield',
-    title: t('claw.feature.security.title', lang),
-    description: t('claw.feature.security.desc', lang)
+    title: t('claw.feature.privacy.title', lang),
+    description: t('claw.feature.privacy.desc', lang)
   },
   {
-    icon: 'zap',
-    title: t('claw.feature.performance.title', lang),
-    description: t('claw.feature.performance.desc', lang)
+    icon: 'sparkles',
+    title: t('claw.feature.evolve.title', lang),
+    description: t('claw.feature.evolve.desc', lang)
+  },
+  {
+    icon: 'plug',
+    title: t('claw.feature.integrations.title', lang),
+    description: t('claw.feature.integrations.desc', lang)
+  },
+];
+
+const useCases = [
+  {
+    icon: 'mail',
+    title: t('claw.usecase.inbox.title', lang),
+    description: t('claw.usecase.inbox.desc', lang)
+  },
+  {
+    icon: 'calendar',
+    title: t('claw.usecase.calendar.title', lang),
+    description: t('claw.usecase.calendar.desc', lang)
+  },
+  {
+    icon: 'search',
+    title: t('claw.usecase.research.title', lang),
+    description: t('claw.usecase.research.desc', lang)
+  },
+  {
+    icon: 'settings',
+    title: t('claw.usecase.automation.title', lang),
+    description: t('claw.usecase.automation.desc', lang)
   },
   {
     icon: 'code',
-    title: t('claw.feature.opensource.title', lang),
-    description: t('claw.feature.opensource.desc', lang)
+    title: t('claw.usecase.developer.title', lang),
+    description: t('claw.usecase.developer.desc', lang)
+  },
+  {
+    icon: 'home',
+    title: t('claw.usecase.home.title', lang),
+    description: t('claw.usecase.home.desc', lang)
   },
 ];
 
@@ -45,10 +88,30 @@ const steps = [
     description: t('claw.step3.desc', lang)
   },
 ];
+
+const platforms = [
+  { name: 'WhatsApp', icon: 'message-circle' },
+  { name: 'Telegram', icon: 'send' },
+  { name: 'Discord', icon: 'users' },
+  { name: 'Slack', icon: 'slack' },
+  { name: 'Signal', icon: 'shield' },
+  { name: 'iMessage', icon: 'message-square' },
+];
+
+const integrations = [
+  'Gmail', 'GitHub', 'Google Calendar', 'Notion', 'Obsidian', 
+  'Spotify', 'Hue Lights', 'Google Drive', 'Slack', 'Twitter'
+];
+
+const stats = [
+  { value: '10K+', label: t('claw.stats.users', lang) },
+  { value: '200+', label: t('claw.stats.skills', lang) },
+  { value: '50+', label: t('claw.stats.integrations', lang) },
+];
 ---
 
 <Layout 
-  title="OpenClaw - MeowClaw"
+  title="OpenClaw - AI Assistant That Takes Action"
   description={t('claw.subtitle', lang)}
 >
   <section class="claw">
@@ -60,7 +123,9 @@ const steps = [
           <span>Open Source</span>
         </div>
         <h1 class="hero-title">OpenClaw</h1>
+        <p class="hero-tagline">{t('claw.tagline', lang)}</p>
         <p class="hero-subtitle">{t('claw.subtitle', lang)}</p>
+        <p class="hero-description">{t('claw.description', lang)}</p>
         <div class="hero-actions">
           <a href="https://github.com/ustcio/openclaw" class="btn-primary" target="_blank" rel="noopener">
             <Icon name="github" size={18} />
@@ -70,6 +135,31 @@ const steps = [
             <Icon name="book" size={18} />
             <span>{t('claw.cta.docs', lang)}</span>
           </a>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-section">
+        <div class="stats-grid">
+          {stats.map((stat) => (
+            <div class="stat-item">
+              <span class="stat-value">{stat.value}</span>
+              <span class="stat-label">{stat.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Platforms -->
+      <div class="platforms-section">
+        <h2 class="section-label">Chat From Your Favorite Apps</h2>
+        <div class="platforms-grid">
+          {platforms.map((platform) => (
+            <div class="platform-item">
+              <Icon name={platform.icon} size={20} />
+              <span>{platform.name}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -84,6 +174,24 @@ const steps = [
               </div>
               <h3 class="feature-title">{feature.title}</h3>
               <p class="feature-description">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Use Cases -->
+      <div class="usecases-section">
+        <h2 class="section-title">{t('claw.usecases.title', lang)}</h2>
+        <div class="usecases-grid">
+          {useCases.map((useCase) => (
+            <div class="usecase-card">
+              <div class="usecase-icon">
+                <Icon name={useCase.icon} size={20} />
+              </div>
+              <div class="usecase-content">
+                <h3 class="usecase-title">{useCase.title}</h3>
+                <p class="usecase-description">{useCase.description}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -106,24 +214,45 @@ const steps = [
       <!-- Code Example -->
       <div class="code-section">
         <h2 class="section-title">{t('claw.example.title', lang)}</h2>
-        <div class="code-block">
-          <div class="code-header">
-            <span class="code-lang">bash</span>
-            <button class="code-copy" id="copy-btn">
-              <Icon name="copy" size={16} />
-            </button>
+        <div class="code-blocks">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">bash</span>
+              <span class="code-label">One-Line Install</span>
+            </div>
+            <pre class="code-content"><code>curl -fsSL https://openclaw.ai/install.sh | bash</code></pre>
           </div>
-          <pre class="code-content"><code># Clone the repository
-git clone https://github.com/ustcio/openclaw.git
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">bash</span>
+              <span class="code-label">Or via npm</span>
+            </div>
+            <pre class="code-content"><code>npm install -g openclaw</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">bash</span>
+              <span class="code-label">From Source</span>
+            </div>
+            <pre class="code-content"><code>git clone https://github.com/ustcio/openclaw.git
+cd openclaw && npm install && npm run dev</code></pre>
+          </div>
+        </div>
+      </div>
 
-# Navigate to directory
-cd openclaw
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev</code></pre>
+      <!-- Integrations -->
+      <div class="integrations-section">
+        <h2 class="section-title">Works With Your Tools</h2>
+        <p class="section-subtitle">Connect OpenClaw to the services you already use</p>
+        <div class="integrations-grid">
+          {integrations.map((name) => (
+            <div class="integration-item">
+              <span class="integration-name">{name}</span>
+            </div>
+          ))}
+          <div class="integration-item integration-more">
+            <span>+40 more</span>
+          </div>
         </div>
       </div>
 
@@ -140,13 +269,25 @@ npm run dev</code></pre>
             <span class="tech-desc">Language</span>
           </div>
           <div class="tech-item">
-            <span class="tech-name">Docker</span>
-            <span class="tech-desc">Container</span>
+            <span class="tech-name">Claude / GPT</span>
+            <span class="tech-desc">AI Models</span>
           </div>
           <div class="tech-item">
-            <span class="tech-name">PostgreSQL</span>
-            <span class="tech-desc">Database</span>
+            <span class="tech-name">Local LLM</span>
+            <span class="tech-desc">Privacy Mode</span>
           </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-section">
+        <h2 class="cta-title">Ready to Let AI Do the Work?</h2>
+        <p class="cta-subtitle">Install in seconds. Start getting things done in minutes.</p>
+        <div class="cta-actions">
+          <a href="https://github.com/ustcio/openclaw" class="btn-primary large" target="_blank" rel="noopener">
+            <Icon name="download" size={20} />
+            <span>Get Started Free</span>
+          </a>
         </div>
       </div>
     </div>
@@ -160,7 +301,7 @@ npm run dev</code></pre>
   }
 
   .claw-container {
-    max-width: var(--container-lg);
+    max-width: var(--container-xl);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -171,6 +312,8 @@ npm run dev</code></pre>
   .claw-hero {
     text-align: center;
     padding: var(--space-8) 0;
+    max-width: 800px;
+    margin: 0 auto;
   }
 
   .hero-badge {
@@ -188,18 +331,36 @@ npm run dev</code></pre>
   }
 
   .hero-title {
-    font-size: clamp(3rem, 8vw, 5rem);
+    font-size: clamp(3rem, 10vw, 5rem);
     font-weight: var(--font-bold);
     color: var(--text-primary);
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-3);
     letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--text-primary), var(--color-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-tagline {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--color-primary);
+    margin-bottom: var(--space-4);
   }
 
   .hero-subtitle {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
+    color: var(--text-primary);
+    font-weight: var(--font-medium);
+    margin-bottom: var(--space-4);
+    line-height: var(--leading-relaxed);
+  }
+
+  .hero-description {
+    font-size: var(--text-base);
     color: var(--text-secondary);
-    max-width: 600px;
-    margin: 0 auto var(--space-8);
+    margin-bottom: var(--space-8);
     line-height: var(--leading-relaxed);
   }
 
@@ -231,6 +392,12 @@ npm run dev</code></pre>
   .btn-primary:hover {
     background: var(--color-primary-hover);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3);
+  }
+
+  .btn-primary.large {
+    padding: var(--space-4) var(--space-8);
+    font-size: var(--text-lg);
   }
 
   .btn-secondary {
@@ -244,11 +411,86 @@ npm run dev</code></pre>
     border-color: var(--border-hover);
   }
 
+  /* Stats */
+  .stats-section {
+    padding: var(--space-8) 0;
+  }
+
+  .stats-grid {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-12);
+    flex-wrap: wrap;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--color-primary);
+    margin-bottom: var(--space-1);
+  }
+
+  .stat-label {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+  }
+
+  /* Platforms */
+  .platforms-section {
+    text-align: center;
+  }
+
+  .section-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--space-6);
+  }
+
+  .platforms-grid {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .platform-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .platform-item:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
   /* Section Title */
   .section-title {
     font-size: var(--text-2xl);
     font-weight: var(--font-semibold);
     color: var(--text-primary);
+    text-align: center;
+    margin-bottom: var(--space-4);
+  }
+
+  .section-subtitle {
+    font-size: var(--text-base);
+    color: var(--text-tertiary);
     text-align: center;
     margin-bottom: var(--space-8);
   }
@@ -262,7 +504,7 @@ npm run dev</code></pre>
   /* Features */
   .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: var(--space-4);
   }
 
@@ -271,7 +513,6 @@ npm run dev</code></pre>
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-xl);
-    text-align: center;
     transition: transform var(--duration-normal) var(--ease-default),
                 box-shadow var(--duration-normal) var(--ease-default);
   }
@@ -285,10 +526,10 @@ npm run dev</code></pre>
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 56px;
-    height: 56px;
-    margin: 0 auto var(--space-4);
-    background: linear-gradient(135deg, var(--color-primary), var(--claude-orange-dark));
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--space-4);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
     border-radius: var(--radius-lg);
     color: white;
   }
@@ -306,6 +547,53 @@ npm run dev</code></pre>
     line-height: var(--leading-relaxed);
   }
 
+  /* Use Cases */
+  .usecases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .usecase-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .usecase-card:hover {
+    border-color: var(--color-primary);
+  }
+
+  .usecase-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--color-primary-light);
+    border-radius: var(--radius-md);
+    color: var(--color-primary);
+  }
+
+  .usecase-title {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+  }
+
+  .usecase-description {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: var(--leading-relaxed);
+  }
+
   /* Steps */
   .steps-grid {
     display: grid;
@@ -318,6 +606,7 @@ npm run dev</code></pre>
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-xl);
+    text-align: center;
   }
 
   .step-number {
@@ -343,7 +632,15 @@ npm run dev</code></pre>
     line-height: var(--leading-relaxed);
   }
 
-  /* Code Block */
+  /* Code Blocks */
+  .code-blocks {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
   .code-block {
     background: var(--bg-elevated);
     border: 1px solid var(--card-border);
@@ -356,7 +653,7 @@ npm run dev</code></pre>
     justify-content: space-between;
     align-items: center;
     padding: var(--space-3) var(--space-4);
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(0, 0, 0, 0.03);
     border-bottom: 1px solid var(--card-border);
   }
 
@@ -368,22 +665,10 @@ npm run dev</code></pre>
     letter-spacing: 0.05em;
   }
 
-  .code-copy {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-1);
-    background: transparent;
-    border: none;
-    color: var(--text-tertiary);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .code-copy:hover {
-    background: rgba(0, 0, 0, 0.1);
-    color: var(--text-primary);
+  .code-label {
+    font-size: var(--text-xs);
+    color: var(--color-primary);
+    font-weight: var(--font-medium);
   }
 
   .code-content {
@@ -398,6 +683,36 @@ npm run dev</code></pre>
 
   .code-content code {
     color: inherit;
+  }
+
+  /* Integrations */
+  .integrations-grid {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .integration-item {
+    padding: var(--space-2) var(--space-4);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .integration-item:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .integration-more {
+    background: var(--color-primary-light);
+    border-color: rgba(217, 119, 87, 0.2);
+    color: var(--color-primary);
+    font-weight: var(--font-medium);
   }
 
   /* Tech Stack */
@@ -430,19 +745,32 @@ npm run dev</code></pre>
     color: var(--text-tertiary);
     margin-top: var(--space-1);
   }
-</style>
 
-<script>
-  const copyBtn = document.getElementById('copy-btn');
-  const codeContent = document.querySelector('.code-content code');
+  /* CTA */
+  .cta-section {
+    text-align: center;
+    padding: var(--space-12);
+    background: linear-gradient(135deg, var(--color-primary-light), transparent);
+    border-radius: var(--radius-2xl);
+    border: 1px solid rgba(217, 119, 87, 0.2);
+  }
 
-  copyBtn?.addEventListener('click', async () => {
-    if (codeContent) {
-      await navigator.clipboard.writeText(codeContent.textContent || '');
-      copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-      setTimeout(() => {
-        copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
-      }, 2000);
+  .cta-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+  }
+
+  .cta-subtitle {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-6);
+  }
+
+  @media (min-width: 768px) {
+    .cta-title {
+      font-size: var(--text-3xl);
     }
-  });
-</script>
+  }
+</style>
