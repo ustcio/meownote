@@ -38,7 +38,7 @@ const imageURL = new URL(image, Astro.site);
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={imageURL} />
-    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:locale" content="en_US" />
     
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={canonicalURL} />
@@ -63,13 +63,10 @@ const imageURL = new URL(image, Astro.site);
     <meta name="theme-color" content="#FAFAFA" />
     <meta name="color-scheme" content="light dark" />
 
-    <!-- Local Fonts (optimized for China) -->
-    <link rel="stylesheet" href="/fonts/fonts.css" />
-    
-    <!-- Google Fonts - Professional Modern Typography -->
+    <!-- Google Fonts - Claude Style Unified Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     
     <!-- Resource Hints for Performance -->
     <link rel="dns-prefetch" href="https://api.ustc.dev" />
@@ -77,9 +74,8 @@ const imageURL = new URL(image, Astro.site);
     <link rel="dns-prefetch" href="https://cdn.hmos.dongs.xyz" />
     <link rel="preconnect" href="https://cdn.hmos.dongs.xyz" crossorigin />
 
-    <!-- Preload Critical Resources -->
-    <link rel="preload" href="/fonts/poppins-v20-latin-regular.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/poppins-v20-latin-600.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Preload Critical Fonts -->
+    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2" as="font" type="font/woff2" crossorigin />
 
     <script is:inline>
       (function() {

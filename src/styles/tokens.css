@@ -63,13 +63,13 @@
   
   /* ==================== Typography Scale ==================== */
   
-  /* Font Families - Professional Modern Style */
-  --font-brand: "Plus Jakarta Sans", "Noto Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-sans: "Plus Jakarta Sans", "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: "Plus Jakarta Sans", "Noto Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-  --font-number: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-chinese: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  /* Font Families - Claude Style Unified */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-brand: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
+  --font-number: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-chinese: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   
   /* Global Font Settings */
   --font-feature-settings: "kern" 1, "liga" 1, "cv02" 1, "cv03" 1;
