@@ -51,7 +51,7 @@
   /* ==================== Typography - Anthropic Style ==================== */
   
   /* Font Families - Keep current design per user request */
-  --font-serif: "HarmonyOS Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-serif: "Times New Roman", Georgia, "Liberation Serif", serif;
   --font-sans: "Libre Baskerville", Georgia, "Times New Roman", serif;
   --font-mono: "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, monospace;
   --font-number: "SF Pro Display", var(--font-sans);
