@@ -28,4 +28,14 @@
   font-display: swap;
 }
 
+/* Richy Font - For Logo */
+@font-face {
+  font-family: 'Richy';
+  src: url('/fonts/Richy.woff2') format('woff2'),
+       url('/fonts/Richy.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Fallback system fonts will be used if Gotham is not available */
