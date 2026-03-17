@@ -1,29 +1,10 @@
-/* Gotham Font Family - Local Hosting */
-/* Place your Gotham font files in /public/fonts/ directory */
-
+/* Avenia Font - For Sans-serif Typography */
 @font-face {
-  font-family: 'Gotham';
-  src: url('/fonts/Gotham-Book.woff2') format('woff2'),
-       url('/fonts/Gotham-Book.woff') format('woff');
+  font-family: 'Avenia';
+  src: url('/fonts/Avenia.woff2') format('woff2'),
+       url('/fonts/Avenia.woff') format('woff'),
+       url('/fonts/Avenia.ttf') format('truetype');
   font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Gotham';
-  src: url('/fonts/Gotham-Medium.woff2') format('woff2'),
-       url('/fonts/Gotham-Medium.woff') format('woff');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Gotham';
-  src: url('/fonts/Gotham-Bold.woff2') format('woff2'),
-       url('/fonts/Gotham-Bold.woff') format('woff');
-  font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
