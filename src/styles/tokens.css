@@ -54,7 +54,7 @@
   --font-serif: "Doralice", cursive, Georgia, serif;
   --font-sans: "Doralice", cursive, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, monospace;
-  --font-number: "SF Pro Display", var(--font-sans);
+  --font-number: "Richy", cursive, var(--font-sans);
   
   /* Display Typography - Serif, Elegant */
   --font-display: var(--font-serif);
