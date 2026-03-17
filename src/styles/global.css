@@ -79,6 +79,11 @@ p {
   font-family: var(--font-body);
   color: var(--text-secondary);
   line-height: var(--leading-relaxed);
+  margin-bottom: 1.25em;
+}
+
+p:last-child {
+  margin-bottom: 0;
 }
 
 /* Links - Subtle */
