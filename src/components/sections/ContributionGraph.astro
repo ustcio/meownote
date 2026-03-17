@@ -43,7 +43,7 @@ const visitsText = t('contribution.visits', lang);
 <section class="contribution">
   <div class="contribution-container">
     <div class="contribution-header">
-      <h2 class="contribution-title">{t('contribution.title', lang)}</h2>
+      <h2 class="contribution-title"><em>Activity</em> at a glance</h2>
       <p class="contribution-year">{currentYear}</p>
     </div>
     
@@ -111,7 +111,7 @@ const visitsText = t('contribution.visits', lang);
 <style>
   .contribution {
     padding: var(--space-16) var(--space-6);
-    background: var(--bg-primary);
+    background: var(--bg-secondary);
   }
 
   @media (min-width: 768px) {
@@ -127,19 +127,25 @@ const visitsText = t('contribution.visits', lang);
 
   .contribution-header {
     text-align: center;
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-10);
   }
 
   .contribution-title {
-    font-size: var(--text-xl);
-    font-weight: 500;
+    font-family: var(--font-display);
+    font-size: clamp(var(--text-xl), 3vw, var(--text-3xl));
+    font-weight: var(--font-normal);
     color: var(--text-primary);
-    margin-bottom: var(--space-1);
+    margin-bottom: var(--space-2);
+  }
+
+  .contribution-title em {
+    font-style: italic;
+    color: var(--color-primary);
   }
 
   .contribution-year {
     font-size: var(--text-sm);
-    color: var(--text-secondary);
+    color: var(--text-tertiary);
   }
 
   .contribution-graph-wrapper {
