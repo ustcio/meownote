@@ -54,7 +54,7 @@
   --font-serif: "Times New Roman", Georgia, "Liberation Serif", serif;
   --font-sans: "Times New Roman", Georgia, "Liberation Serif", serif;
   --font-mono: "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, monospace;
-  --font-number: "Times New Roman", Georgia, serif;
+  --font-number: "Richy", cursive, Georgia, serif;
   
   /* Display Typography - Serif, Elegant */
   --font-display: var(--font-serif);
