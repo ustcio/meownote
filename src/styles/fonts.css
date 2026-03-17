@@ -1,3 +1,12 @@
+/* Doralice Font - For Serif & Sans-serif Typography */
+@font-face {
+  font-family: 'Doralice';
+  src: url('/fonts/doralice-regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* HarmonyOS Sans SC Font - For Chinese Typography */
 @font-face {
   font-family: 'HarmonyOS Sans SC';
@@ -23,7 +32,7 @@
   font-display: swap;
 }
 
-/* Richy Font - For Serif, Sans-serif Typography and Logo */
+/* Richy Font - For Logo Only */
 @font-face {
   font-family: 'Richy';
   src: url('/fonts/richy.otf') format('opentype');
