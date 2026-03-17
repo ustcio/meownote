@@ -114,7 +114,13 @@ const iconPaths: Record<string, string> = {
 
   .products-header {
     max-width: 640px;
-    margin-bottom: var(--space-16);
+    margin-bottom: var(--space-10);
+  }
+
+  @media (min-width: 768px) {
+    .products-header {
+      margin-bottom: var(--space-16);
+    }
   }
 
   .header-label {
@@ -163,26 +169,36 @@ const iconPaths: Record<string, string> = {
   .products-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--space-6);
-    margin-bottom: var(--space-16);
+    gap: var(--space-5);
+    margin-bottom: var(--space-10);
   }
 
   @media (min-width: 768px) {
     .products-grid {
       grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+      margin-bottom: var(--space-16);
     }
   }
 
   .product-card {
     border: 1px solid #D0C4B0;
-    border-radius: 16px;
+    border-radius: 12px;
     background: #EDE5D4;
-    padding: var(--space-8);
+    padding: var(--space-6);
     display: flex;
     flex-direction: column;
-    gap: var(--space-5);
+    gap: var(--space-4);
     transition: border-color var(--duration-normal) var(--ease-default);
     cursor: pointer;
+  }
+
+  @media (min-width: 768px) {
+    .product-card {
+      border-radius: 16px;
+      padding: var(--space-8);
+      gap: var(--space-5);
+    }
   }
 
   .product-card:hover {
@@ -264,19 +280,21 @@ const iconPaths: Record<string, string> = {
 
   .products-cta {
     background: #1A1207;
-    border-radius: 20px;
-    padding: var(--space-10);
+    border-radius: 16px;
+    padding: var(--space-8);
     display: flex;
     flex-direction: column;
-    gap: var(--space-8);
+    gap: var(--space-6);
   }
 
   @media (min-width: 768px) {
     .products-cta {
+      border-radius: 20px;
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
       padding: 3.5rem;
+      gap: var(--space-8);
     }
   }
 
