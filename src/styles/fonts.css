@@ -1,30 +1,43 @@
-/* Avenia Font - For Sans-serif Typography */
+/* Libre Baskerville Font - For Sans-serif Typography (Google Fonts) */
+/* Import via Layout.astro Google Fonts link */
+
+/* HarmonyOS Sans Font - For Serif Typography */
 @font-face {
-  font-family: 'Avenia';
-  src: url('/fonts/Avenia.woff2') format('woff2'),
-       url('/fonts/Avenia.woff') format('woff'),
-       url('/fonts/Avenia.ttf') format('truetype');
+  font-family: 'HarmonyOS Sans SC';
+  src: url('/fonts/HarmonyOS_Sans_SC_Regular.woff2') format('woff2'),
+       url('/fonts/HarmonyOS_Sans_SC_Regular.woff') format('woff'),
+       url('/fonts/HarmonyOS_Sans_SC_Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
-/* Richy Font - For Logo */
 @font-face {
-  font-family: 'Richy';
-  src: url('/fonts/Richy.woff2') format('woff2'),
-       url('/fonts/Richy.woff') format('woff');
-  font-weight: 400;
+  font-family: 'HarmonyOS Sans SC';
+  src: url('/fonts/HarmonyOS_Sans_SC_Medium.woff2') format('woff2'),
+       url('/fonts/HarmonyOS_Sans_SC_Medium.woff') format('woff'),
+       url('/fonts/HarmonyOS_Sans_SC_Medium.ttf') format('truetype');
+  font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
-/* Charming Classy Font - For Serif Typography */
 @font-face {
-  font-family: 'Charming Classy';
-  src: url('/fonts/CharmingClassy.woff2') format('woff2'),
-       url('/fonts/CharmingClassy.woff') format('woff'),
-       url('/fonts/CharmingClassy.ttf') format('truetype');
+  font-family: 'HarmonyOS Sans SC';
+  src: url('/fonts/HarmonyOS_Sans_SC_Bold.woff2') format('woff2'),
+       url('/fonts/HarmonyOS_Sans_SC_Bold.woff') format('woff'),
+       url('/fonts/HarmonyOS_Sans_SC_Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Dorallce Font - For Logo */
+@font-face {
+  font-family: 'Dorallce';
+  src: url('/fonts/Dorallce.woff2') format('woff2'),
+       url('/fonts/Dorallce.woff') format('woff'),
+       url('/fonts/Dorallce.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
