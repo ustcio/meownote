@@ -38,4 +38,15 @@
   font-display: swap;
 }
 
-/* Fallback system fonts will be used if Gotham is not available */
+/* Charming Classy Font - For Serif Typography */
+@font-face {
+  font-family: 'Charming Classy';
+  src: url('/fonts/CharmingClassy.woff2') format('woff2'),
+       url('/fonts/CharmingClassy.woff') format('woff'),
+       url('/fonts/CharmingClassy.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Fallback system fonts will be used if custom fonts are not available */
