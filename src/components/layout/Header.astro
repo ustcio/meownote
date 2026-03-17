@@ -15,6 +15,7 @@ const navItems = [
 <header class="header">
   <div class="header-container">
     <a href="/" class="logo">
+      <span class="logo-icon">◆</span>
       <span class="logo-text">LiveClaw</span>
     </a>
     
@@ -32,6 +33,10 @@ const navItems = [
         ))}
       </ul>
     </nav>
+
+    <div class="header-actions">
+      <a href="/chatbot" class="header-cta">Try LiveChat</a>
+    </div>
     
     <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
       <span></span>
@@ -52,6 +57,7 @@ const navItems = [
         </li>
       ))}
     </ul>
+    <a href="/chatbot" class="mobile-cta">Try LiveChat</a>
   </nav>
 </header>
 
@@ -101,11 +107,29 @@ const navItems = [
   }
 
   .logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+  }
+
+  .logo-text {
     font-family: var(--font-display);
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-weight: var(--font-normal);
     color: var(--text-primary);
-    text-decoration: none;
     letter-spacing: var(--tracking-tight);
   }
 
@@ -134,15 +158,39 @@ const navItems = [
     color: var(--text-secondary);
     text-decoration: none;
     padding: var(--space-2) 0;
-    border-bottom: 1px solid transparent;
-    transition: color var(--duration-fast) var(--ease-smooth),
-                border-color var(--duration-fast) var(--ease-smooth);
+    transition: color var(--duration-fast) var(--ease-smooth);
   }
 
   .nav-link:hover,
   .nav-link.active {
     color: var(--text-primary);
-    border-bottom-color: var(--color-primary);
+  }
+
+  .header-actions {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .header-actions {
+      display: block;
+    }
+  }
+
+  .header-cta {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: white;
+    background: var(--text-primary);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: background-color var(--duration-fast) var(--ease-smooth);
+  }
+
+  .header-cta:hover {
+    background: #2D2D2D;
   }
 
   .mobile-menu-btn {
@@ -183,6 +231,8 @@ const navItems = [
     padding: var(--space-8) var(--space-6);
     transform: translateX(100%);
     transition: transform 0.3s var(--ease-smooth);
+    display: flex;
+    flex-direction: column;
   }
 
   .mobile-nav.open {
@@ -199,6 +249,7 @@ const navItems = [
     list-style: none;
     margin: 0;
     padding: 0;
+    flex: 1;
   }
 
   .mobile-nav-list li + li {
@@ -220,5 +271,19 @@ const navItems = [
   .mobile-nav-link:hover,
   .mobile-nav-link.active {
     color: var(--text-primary);
+  }
+
+  .mobile-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3) var(--space-6);
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
+    color: white;
+    background: var(--text-primary);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    margin-top: var(--space-6);
   }
 </style>

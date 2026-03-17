@@ -1,0 +1,192 @@
+---
+const articles = [
+  {
+    category: "Constitutional AI",
+    date: "Dec 2024",
+    title: "Scalable Oversight via AI-Assisted Debate",
+    description: "We explore how AI systems can assist humans in providing scalable oversight, enabling more reliable evaluation of complex AI outputs.",
+    readTime: "12 min read"
+  },
+  {
+    category: "Interpretability",
+    date: "Nov 2024",
+    title: "Towards Monosemanticity: Decomposing Language Models",
+    description: "A new approach to understanding how transformer models represent information through sparse, interpretable features.",
+    readTime: "18 min read"
+  },
+  {
+    category: "Alignment",
+    date: "Oct 2024",
+    title: "Model-Written Evals for Dangerous Capabilities",
+    description: "Developing automated evaluation methods to assess potentially concerning capabilities in large language models.",
+    readTime: "15 min read"
+  },
+  {
+    category: "Policy",
+    date: "Sep 2024",
+    title: "Responsible Scaling Policy: A Framework for Safety",
+    description: "Our framework for assessing and mitigating potential risks as AI systems become more capable.",
+    readTime: "10 min read"
+  }
+];
+---
+
+<section class="research">
+  <div class="research-container">
+    <div class="research-header">
+      <h2 class="research-title">
+        <em>Advancing</em> the science<br />of AI safety
+      </h2>
+      <a href="#" class="research-link">
+        View all papers →
+      </a>
+    </div>
+
+    <div class="research-grid">
+      {articles.map((article) => (
+        <article class="research-card">
+          <div class="research-card-header">
+            <span class="research-category">{article.category}</span>
+            <span class="research-date">{article.date}</span>
+          </div>
+          <h3 class="research-card-title">{article.title}</h3>
+          <p class="research-card-description">{article.description}</p>
+          <span class="research-readtime">{article.readTime}</span>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .research {
+    padding: var(--space-20) var(--space-6);
+    background: var(--bg-primary);
+  }
+
+  @media (min-width: 768px) {
+    .research {
+      padding: var(--space-24) var(--space-8);
+    }
+  }
+
+  .research-container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+  }
+
+  .research-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-12);
+  }
+
+  @media (min-width: 768px) {
+    .research-header {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+  }
+
+  .research-title {
+    font-family: var(--font-display);
+    font-size: clamp(var(--text-2xl), 4vw, var(--text-4xl));
+    font-weight: var(--font-normal);
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+
+  .research-title em {
+    font-style: italic;
+  }
+
+  .research-link {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--duration-fast) var(--ease-smooth);
+  }
+
+  .research-link:hover {
+    color: var(--text-primary);
+  }
+
+  .research-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-top: 1px solid var(--border-divider);
+  }
+
+  @media (min-width: 768px) {
+    .research-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .research-card {
+    padding: var(--space-6);
+    border-bottom: 1px solid var(--border-divider);
+    transition: background-color var(--duration-fast) var(--ease-smooth);
+  }
+
+  @media (min-width: 768px) {
+    .research-card {
+      padding: var(--space-8);
+    }
+
+    .research-card:nth-child(odd) {
+      border-right: 1px solid var(--border-divider);
+    }
+  }
+
+  .research-card:hover {
+    background: var(--bg-secondary);
+  }
+
+  .research-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+  }
+
+  .research-category {
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    color: var(--color-primary);
+    padding: var(--space-1) var(--space-3);
+    background: var(--color-primary-subtle);
+    border-radius: var(--radius-full);
+  }
+
+  .research-date {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+  }
+
+  .research-card-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: var(--font-normal);
+    line-height: 1.3;
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+  }
+
+  .research-card-description {
+    font-size: var(--text-base);
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-4);
+  }
+
+  .research-readtime {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+  }
+</style>
