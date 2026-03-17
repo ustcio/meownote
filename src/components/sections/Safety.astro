@@ -1,12 +1,21 @@
 ---
 const pillars = [
-  { id: 1, icon: "🔬", title: "Interpretability Research", description: "We work to understand what's happening inside AI models — making their reasoning transparent, predictable, and verifiable." },
-  { id: 2, icon: "⚖️", title: "Constitutional AI", description: "Our Constitutional AI method trains models to be helpful, harmless, and honest using a set of guiding principles." },
-  { id: 3, icon: "🛡️", title: "Red-Teaming & Evals", description: "Rigorous adversarial testing helps us identify vulnerabilities and dangerous capabilities before deployment." },
-  { id: 4, icon: "📋", title: "Responsible Scaling Policy", description: "Our RSP commits us in advance to specific safety measures triggered at defined capability thresholds." },
-  { id: 5, icon: "🌐", title: "Policy & Governance", description: "We engage with governments, regulators, and the broader AI community to shape beneficial AI governance." },
-  { id: 6, icon: "🤝", title: "Industry Collaboration", description: "We collaborate openly with academic and industrial partners, sharing research to elevate safety standards across the field." },
+  { id: 1, icon: "microscope", title: "Interpretability Research", description: "We work to understand what's happening inside AI models — making their reasoning transparent, predictable, and verifiable." },
+  { id: 2, icon: "scale", title: "Constitutional AI", description: "Our Constitutional AI method trains models to be helpful, harmless, and honest using a set of guiding principles." },
+  { id: 3, icon: "shield", title: "Red-Teaming & Evals", description: "Rigorous adversarial testing helps us identify vulnerabilities and dangerous capabilities before deployment." },
+  { id: 4, icon: "clipboard", title: "Responsible Scaling Policy", description: "Our RSP commits us in advance to specific safety measures triggered at defined capability thresholds." },
+  { id: 5, icon: "globe", title: "Policy & Governance", description: "We engage with governments, regulators, and the broader AI community to shape beneficial AI governance." },
+  { id: 6, icon: "handshake", title: "Industry Collaboration", description: "We collaborate openly with academic and industrial partners, sharing research to elevate safety standards across the field." },
 ];
+
+const iconPaths: Record<string, string> = {
+  microscope: `<circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/><path d="M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>`,
+  scale: `<path d="M12 3v18M5 8l7-5 7 5M5 8v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/>`,
+  shield: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>`,
+  clipboard: `<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>`,
+  globe: `<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>`,
+  handshake: `<path d="M6 11l-3 3 3 3M18 11l3 3-3 3M12 6v12M9 9l3-3 3 3"/>`
+};
 ---
 
 <section id="safety" class="safety">
@@ -27,7 +36,11 @@ const pillars = [
     <div class="safety-grid">
       {pillars.map((pillar) => (
         <div class="safety-card">
-          <div class="card-icon">{pillar.icon}</div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <Fragment set:html={iconPaths[pillar.icon]} />
+            </svg>
+          </div>
           <h3 class="card-title">{pillar.title}</h3>
           <p class="card-description">{pillar.description}</p>
         </div>
@@ -138,8 +151,26 @@ const pillars = [
   }
 
   .card-icon {
-    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    background: rgba(192, 107, 62, 0.15);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: var(--space-5);
+    color: #C06B3E;
+    transition: all var(--duration-normal) var(--ease-default);
+  }
+
+  .card-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .safety-card:hover .card-icon {
+    background: rgba(192, 107, 62, 0.25);
+    transform: scale(1.05);
   }
 
   .card-title {

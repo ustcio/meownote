@@ -6,7 +6,8 @@ const products = [
     badge: "Most Popular",
     badgeColor: "#C06B3E",
     description: "Our most capable conversational model. Exceptional at complex analysis, coding, and nuanced dialogue with thoughtful responses.",
-    capabilities: ["Advanced reasoning", "Code generation", "Long context", "Vision"]
+    capabilities: ["Advanced reasoning", "Code generation", "Long context", "Vision"],
+    icon: "chat"
   },
   {
     id: 2,
@@ -14,7 +15,8 @@ const products = [
     badge: "Fastest",
     badgeColor: "#5B7E6A",
     description: "Near-instant responsiveness with strong performance for lightweight tasks and high-volume applications.",
-    capabilities: ["Instant responses", "Cost-efficient", "Real-time tasks", "Summarization"]
+    capabilities: ["Instant responses", "Cost-efficient", "Real-time tasks", "Summarization"],
+    icon: "flash"
   },
   {
     id: 3,
@@ -22,9 +24,17 @@ const products = [
     badge: "Most Powerful",
     badgeColor: "#4A5E8A",
     description: "Highest-capability model for navigating complex problems, research-grade analysis, and open-ended creative work.",
-    capabilities: ["Top intelligence", "Complex tasks", "Research-grade", "Deep analysis"]
+    capabilities: ["Top intelligence", "Complex tasks", "Research-grade", "Deep analysis"],
+    icon: "brain"
   }
 ];
+
+const iconPaths: Record<string, string> = {
+  chat: `<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
+  flash: `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
+  brain: `<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+<path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`
+};
 ---
 
 <section id="features" class="products">
@@ -46,9 +56,9 @@ const products = [
       {products.map((product) => (
         <div class="product-card">
           <div class="product-header">
-            <div class="product-icon">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 4L19.5 18H4.5L12 4Z" fill="#F0E9DC" />
+            <div class="product-icon" style={`background: ${product.badgeColor};`}>
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#F0E9DC">
+                <Fragment set:html={iconPaths[product.icon]} />
               </svg>
             </div>
             <span class="product-badge" style={`color: ${product.badgeColor}; background: ${product.badgeColor}18;`}>
@@ -192,11 +202,15 @@ const products = [
   .product-icon {
     width: 40px;
     height: 40px;
-    background: #1A1207;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform var(--duration-normal) var(--ease-default);
+  }
+
+  .product-card:hover .product-icon {
+    transform: scale(1.05);
   }
 
   .product-icon svg {
