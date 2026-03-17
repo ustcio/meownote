@@ -131,14 +131,20 @@ const lang = getLangFromUrl(Astro.url);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: calc(var(--header-height) + var(--space-8)) var(--space-4) var(--space-8);
+    padding: calc(var(--header-height) + var(--space-12)) var(--space-4) var(--space-12);
     position: relative;
     overflow: hidden;
   }
 
   @media (min-width: 768px) {
     .hero {
-      padding: calc(var(--header-height) + var(--space-12)) var(--space-6) var(--space-12);
+      padding: calc(var(--header-height) + var(--space-16)) var(--space-6) var(--space-16);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero {
+      padding: calc(var(--header-height) + var(--space-20)) var(--space-8) var(--space-20);
     }
   }
 
@@ -148,14 +154,14 @@ const lang = getLangFromUrl(Astro.url);
     margin: 0 auto;
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--space-10);
+    gap: var(--space-12);
     align-items: center;
   }
 
   @media (min-width: 1024px) {
     .hero-container {
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-16);
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: var(--space-20);
     }
   }
 
@@ -210,11 +216,17 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   .hero-title {
-    font-size: clamp(2.25rem, 5vw, 3.5rem);
-    font-weight: var(--font-bold);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: var(--font-semibold);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
     margin-bottom: var(--space-6);
+  }
+
+  @media (min-width: 768px) {
+    .hero-title {
+      margin-bottom: var(--space-8);
+    }
   }
 
   .title-line {
@@ -230,12 +242,13 @@ const lang = getLangFromUrl(Astro.url);
     color: var(--text-secondary);
     line-height: var(--leading-relaxed);
     margin-bottom: var(--space-8);
-    max-width: 520px;
+    max-width: 540px;
   }
 
-  @media (min-width: 1024px) {
+  @media (min-width: 768px) {
     .hero-description {
       font-size: var(--text-xl);
+      margin-bottom: var(--space-10);
     }
   }
 
@@ -257,19 +270,21 @@ const lang = getLangFromUrl(Astro.url);
     flex-direction: column;
     gap: var(--space-3);
     align-items: center;
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-10);
   }
 
   @media (min-width: 480px) {
     .hero-actions {
       flex-direction: row;
       justify-content: center;
+      gap: var(--space-4);
     }
   }
 
   @media (min-width: 1024px) {
     .hero-actions {
       justify-content: flex-start;
+      margin-bottom: var(--space-12);
     }
   }
 
@@ -277,21 +292,21 @@ const lang = getLangFromUrl(Astro.url);
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-3) var(--space-6);
+    padding: var(--space-3) var(--space-5);
     font-size: var(--text-base);
     font-weight: var(--font-medium);
     color: white;
     background: var(--color-primary);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     text-decoration: none;
-    transition: all var(--duration-fast) var(--ease-default);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all var(--duration-normal) var(--ease-default);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   .btn-primary:hover {
     background: var(--color-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(217, 119, 87, 0.25);
   }
 
   .btn-primary svg {
@@ -305,20 +320,21 @@ const lang = getLangFromUrl(Astro.url);
   .btn-secondary {
     display: inline-flex;
     align-items: center;
-    padding: var(--space-3) var(--space-6);
+    padding: var(--space-3) var(--space-5);
     font-size: var(--text-base);
     font-weight: var(--font-medium);
     color: var(--text-primary);
     background: transparent;
     border: 1px solid var(--border-primary);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     text-decoration: none;
-    transition: all var(--duration-fast) var(--ease-default);
+    transition: all var(--duration-normal) var(--ease-default);
   }
 
   .btn-secondary:hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--bg-secondary);
     border-color: var(--border-hover);
+    transform: translateY(-2px);
   }
 
   /* Quick Links */
