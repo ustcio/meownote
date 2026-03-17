@@ -1,6 +1,5 @@
 ---
 import ThemeToggle from '@components/ui/ThemeToggle.astro';
-import Icon from '@components/ui/Icon.astro';
 import AuthModal from '@components/ui/AuthModal.astro';
 import { t, getLangFromUrl, type Language } from '@i18n';
 
@@ -9,10 +8,9 @@ const currentPath = Astro.url.pathname;
 
 const navItems = [
   { href: '/', label: 'Home', id: 'home' },
-  { href: '/chatbot', label: 'AI Assistant', id: 'chatbot' },
-  { href: '/kit', label: 'Toolkit', id: 'kit' },
+  { href: '/chatbot', label: 'Chat', id: 'chatbot' },
+  { href: '/kit', label: 'Tools', id: 'kit' },
   { href: '/claw', label: 'OpenClaw', id: 'claw' },
-  { href: '/trading', label: 'Trading', id: 'trading', highlight: true },
   { href: '/about', label: 'About', id: 'about' },
 ];
 ---
@@ -34,7 +32,7 @@ const navItems = [
       <span class="logo-text">LiveClaw</span>
     </a>
     
-    <nav class="nav-desktop" aria-label="桌面端导航">
+    <nav class="nav-desktop" aria-label="Navigation">
       <ul class="nav-list">
         {navItems.map((item) => (
           <li>
@@ -42,10 +40,7 @@ const navItems = [
               href={item.href}
               class:list={[
                 'nav-link', 
-                { 
-                  active: currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)),
-                  'nav-link--highlight': item.highlight
-                }
+                { active: currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) }
               ]}
             >
               {item.label}
@@ -56,84 +51,38 @@ const navItems = [
     </nav>
     
     <div class="header-actions">
-      <div class="header-utils">
-        <ThemeToggle />
-        
-        <div class="user-menu" id="user-menu">
-          <button class="auth-btn" id="auth-btn" aria-label="Sign In">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-          </button>
-          <div class="user-dropdown" id="user-dropdown">
-            <div class="dropdown-header">
-              <span class="dropdown-username" id="dropdown-username"></span>
-            </div>
-            <div class="dropdown-divider"></div>
-            <a href="/profile" class="dropdown-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              <span>Profile</span>
-            </a>
-            <button class="dropdown-item dropdown-item--logout" id="dropdown-logout">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
-              <span>Sign Out</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      <ThemeToggle />
       
-      <button
-        class="mobile-menu-btn"
-        id="mobile-menu-btn"
-        aria-label="Menu"
-        aria-expanded="false"
-        aria-controls="mobile-nav"
-      >
-        <span class="hamburger-line"></span>
+      <button class="auth-btn" id="auth-btn" aria-label="Sign in">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </button>
+      
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu" aria-expanded="false">
         <span class="hamburger-line"></span>
         <span class="hamburger-line"></span>
       </button>
     </div>
   </div>
   
-  <nav id="mobile-nav" class="mobile-nav" aria-label="Navigation">
-    <div class="mobile-nav-content">
-      <ul class="mobile-nav-list">
-        {navItems.map((item) => (
-          <li>
-            <a 
-              href={item.href}
-              class:list={[
-                'mobile-nav-link', 
-                { 
-                  active: currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)),
-                  'mobile-nav-link--highlight': item.highlight
-                }
-              ]}
-            >
-              {item.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-      <div class="mobile-nav-footer">
-        <button class="mobile-auth-btn" id="mobile-auth-btn">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <span>Sign In</span>
-        </button>
-      </div>
-    </div>
+  <nav id="mobile-nav" class="mobile-nav">
+    <ul class="mobile-nav-list">
+      {navItems.map((item) => (
+        <li>
+          <a 
+            href={item.href}
+            class:list={[
+              'mobile-nav-link', 
+              { active: currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) }
+            ]}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
   </nav>
 </header>
 
@@ -146,10 +95,6 @@ const navItems = [
   const mobileNav = document.getElementById('mobile-nav');
   const headerBackdrop = document.getElementById('header-backdrop');
   const authBtn = document.getElementById('auth-btn');
-  const mobileAuthBtn = document.getElementById('mobile-auth-btn');
-  const userMenu = document.getElementById('user-menu');
-  const dropdownLogout = document.getElementById('dropdown-logout');
-  const dropdownUsername = document.getElementById('dropdown-username');
   
   function toggleMobileMenu(open: boolean) {
     mobileMenuBtn?.setAttribute('aria-expanded', String(open));
@@ -173,174 +118,75 @@ const navItems = [
     });
   });
   
-  document.addEventListener('click', (e) => {
-    if (!userMenu?.contains(e.target as Node)) {
-      userMenu?.classList.remove('open');
-    }
-  });
-  
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       toggleMobileMenu(false);
-      userMenu?.classList.remove('open');
     }
   });
   
-  function openAuthModal() {
+  authBtn?.addEventListener('click', () => {
     (window as any).openAuthModal?.('login');
-  }
-  
-  authBtn?.addEventListener('click', (e) => {
-    const user = localStorage.getItem('user');
-    if (user) {
-      e.stopPropagation();
-      userMenu?.classList.toggle('open');
-    } else {
-      openAuthModal();
-    }
   });
-  
-  mobileAuthBtn?.addEventListener('click', () => {
-    const user = localStorage.getItem('user');
-    if (user) {
-      window.location.href = '/profile';
-    } else {
-      toggleMobileMenu(false);
-      openAuthModal();
-    }
-  });
-  
-  dropdownLogout?.addEventListener('click', () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
-    window.dispatchEvent(new CustomEvent('auth:logout'));
-    window.location.reload();
-  });
-  
-  function updateAuthUI() {
-    const user = localStorage.getItem('user');
-    const mobileAuthBtnSpan = mobileAuthBtn?.querySelector('span');
-
-    if (user) {
-      try {
-        const userData = JSON.parse(user);
-        if (dropdownUsername) dropdownUsername.textContent = userData.username || '';
-        if (mobileAuthBtnSpan) mobileAuthBtnSpan.textContent = userData.username || '';
-        userMenu?.classList.add('logged-in');
-      } catch (e) {
-        console.warn('Failed to parse user data:', e);
-        if (dropdownUsername) dropdownUsername.textContent = '';
-        userMenu?.classList.remove('logged-in');
-      }
-    } else {
-      if (dropdownUsername) dropdownUsername.textContent = '';
-      userMenu?.classList.remove('logged-in');
-    }
-  }
-  
-  window.addEventListener('auth:login', updateAuthUI);
-  window.addEventListener('auth:logout', updateAuthUI);
-  document.addEventListener('DOMContentLoaded', updateAuthUI);
 </script>
 
 <style>
-  /* Claude风格Header - 简洁固定导航栏 */
   .header {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: var(--z-fixed);
-    background: var(--liquid-glass-bg);
-    backdrop-filter: var(--liquid-glass-blur);
-    -webkit-backdrop-filter: var(--liquid-glass-blur);
-    border-bottom: 1px solid var(--border-primary);
-    transition: background var(--duration-normal) var(--ease-default),
-                border-color var(--duration-normal) var(--ease-default);
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-secondary);
   }
-  
-  @media (min-width: 768px) {
-    .header {
-      /* 保持固定在顶部，不添加margin */
-    }
-  }
-  
-  @media (min-width: 1024px) {
-    .header {
-      /* 保持固定在顶部，不添加margin */
-    }
-  }
-  
+
   .header-container {
-    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
     max-width: var(--container-xl);
     margin: 0 auto;
     padding: var(--space-3) var(--space-4);
-    height: calc(var(--header-height) + var(--space-3) * 2);
-    gap: var(--space-3);
+    height: var(--header-height);
   }
-  
+
   @media (min-width: 768px) {
     .header-container {
-      padding: var(--space-4) var(--space-6);
-      gap: var(--space-4);
+      padding: var(--space-3) var(--space-6);
     }
   }
-  
-  @media (min-width: 1024px) {
-    .header-container {
-      padding: var(--space-4) var(--space-8);
-      gap: var(--space-6);
-    }
-  }
-  
+
   .logo {
     display: flex;
     align-items: center;
     gap: var(--space-2);
     text-decoration: none;
     color: var(--text-primary);
-    flex-shrink: 0;
   }
-  
+
   .logo-video {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-lg);
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-md);
     object-fit: cover;
-    object-position: center;
-    transform: scale(1.1);
   }
-  
+
   .logo-text {
-    display: none;
-    font-family: var(--font-brand);
     font-size: var(--text-base);
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: -0.01em;
   }
-  
-  @media (min-width: 480px) {
-    .logo-text {
-      display: block;
-    }
-  }
-  
+
   .nav-desktop {
     display: none;
-    flex: 1;
-    justify-content: center;
   }
-  
-  @media (min-width: 1024px) {
+
+  @media (min-width: 768px) {
     .nav-desktop {
       display: flex;
     }
   }
-  
+
   .nav-list {
     display: flex;
     align-items: center;
@@ -349,268 +195,136 @@ const navItems = [
     margin: 0;
     padding: 0;
   }
-  
+
   .nav-link {
-    position: relative;
-    display: block;
     padding: var(--space-2) var(--space-3);
     color: var(--text-secondary);
-    font-family: var(--font-sans);
     font-size: var(--text-sm);
-    font-weight: var(--font-medium);
+    font-weight: 500;
     text-decoration: none;
     border-radius: var(--radius-md);
-    transition: color var(--duration-fast) var(--ease-default),
-                background-color var(--duration-fast) var(--ease-default);
-  }
-  
-  .nav-link:hover {
-    color: var(--text-primary);
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-  
-  .nav-link.active {
-    color: var(--text-primary);
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-  
-  .nav-link--highlight {
-    color: var(--color-primary);
-    background: var(--color-primary-light);
+    transition: color 0.15s ease, background-color 0.15s ease;
   }
 
-  .nav-link--highlight:hover,
-  .nav-link--highlight.active {
-    background: var(--color-primary-medium);
-    color: var(--color-primary);
+  .nav-link:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+  }
+
+  .nav-link.active {
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
   }
 
   .header-actions {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    flex-shrink: 0;
   }
-  
-  .header-utils {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-  }
-  
+
   .auth-btn {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 36px;
     height: 36px;
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     background: transparent;
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: color var(--duration-fast) var(--ease-default),
-                background-color var(--duration-fast) var(--ease-default);
+    transition: color 0.15s ease, background-color 0.15s ease;
   }
-  
+
   .auth-btn:hover {
     color: var(--text-primary);
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: var(--bg-secondary);
   }
-  
-  .user-menu {
-    position: relative;
-  }
-  
-  .user-menu.logged-in .auth-btn {
-    color: var(--color-primary);
-  }
-  
-  .user-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: var(--space-2);
-    min-width: 180px;
-    padding: var(--space-2);
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-8px) scale(0.95);
-    transition: all var(--duration-fast) var(--ease-default);
-    z-index: var(--z-dropdown);
-  }
-  
-  .user-menu:hover .user-dropdown,
-  .user-menu.open .user-dropdown {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0) scale(1);
-  }
-  
-  .dropdown-header {
-    padding: var(--space-2) var(--space-3);
-  }
-  
-  .dropdown-username {
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
-  }
-  
-  .dropdown-divider {
-    height: 1px;
-    background: var(--border-primary);
-    margin: var(--space-1) 0;
-  }
-  
-  .dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    width: 100%;
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-    border-radius: var(--radius-md);
-    transition: all var(--duration-fast) var(--ease-default);
-    text-decoration: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .dropdown-item:hover {
-    background: rgba(0, 0, 0, 0.05);
-    color: var(--text-primary);
-  }
-  
-  .dropdown-item--logout {
-    color: var(--color-error);
-  }
-  
-  .dropdown-item--logout:hover {
-    background: rgba(255, 55, 95, 0.1);
-  }
-  
-  .dropdown-item--admin {
-    color: var(--color-accent-purple);
-  }
-  
-  .dropdown-item--admin:hover {
-    background: rgba(191, 90, 242, 0.1);
-  }
-  
+
   .mobile-menu-btn {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 40px;
-    height: 40px;
-    padding: 0;
+    width: 36px;
+    height: 36px;
+    gap: 5px;
     background: transparent;
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: background-color var(--duration-fast) var(--ease-default);
   }
-  
-  .mobile-menu-btn:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-  
-  @media (min-width: 1024px) {
+
+  @media (min-width: 768px) {
     .mobile-menu-btn {
       display: none;
     }
   }
-  
+
   .hamburger-line {
     display: block;
     width: 18px;
     height: 2px;
     background: var(--text-secondary);
     border-radius: var(--radius-full);
-    transition: all var(--duration-fast) var(--ease-default);
+    transition: all 0.2s ease;
   }
-  
-  .hamburger-line + .hamburger-line {
-    margin-top: 4px;
-  }
-  
+
   .mobile-menu-btn[aria-expanded="true"] .hamburger-line:nth-child(1) {
-    transform: translateY(6px) rotate(45deg);
+    transform: translateY(3.5px) rotate(45deg);
   }
-  
+
   .mobile-menu-btn[aria-expanded="true"] .hamburger-line:nth-child(2) {
-    opacity: 0;
-    transform: scaleX(0);
+    transform: translateY(-3.5px) rotate(-45deg);
   }
-  
-  .mobile-menu-btn[aria-expanded="true"] .hamburger-line:nth-child(3) {
-    transform: translateY(-6px) rotate(-45deg);
-  }
-  
+
   .header-backdrop {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
     opacity: 0;
     visibility: hidden;
-    transition: all var(--duration-normal) var(--ease-default);
+    transition: all 0.2s ease;
     z-index: calc(var(--z-fixed) - 1);
   }
-  
+
   .header-backdrop.active {
     opacity: 1;
     visibility: visible;
   }
-  
-  @media (min-width: 1024px) {
+
+  @media (min-width: 768px) {
     .header-backdrop {
       display: none;
     }
   }
-  
+
   .mobile-nav {
     position: fixed;
     top: 0;
     right: 0;
     bottom: 0;
-    width: 280px;
-    max-width: 85vw;
-    background: var(--bg-elevated);
-    border-left: 1px solid var(--border-primary);
-    box-shadow: var(--shadow-xl);
+    width: 260px;
+    max-width: 80vw;
+    background: var(--bg-primary);
+    border-left: 1px solid var(--border-secondary);
+    padding: var(--space-6);
+    padding-top: calc(var(--header-height) + var(--space-6));
     transform: translateX(100%);
-    transition: transform var(--duration-normal) var(--ease-default);
+    transition: transform 0.2s ease;
     z-index: calc(var(--z-fixed) + 1);
-    overflow-y: auto;
   }
-  
+
   .mobile-nav.open {
     transform: translateX(0);
   }
-  
-  @media (min-width: 1024px) {
+
+  @media (min-width: 768px) {
     .mobile-nav {
       display: none;
     }
   }
-  
-  .mobile-nav-content {
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-    padding: var(--space-6) var(--space-4);
-  }
-  
+
   .mobile-nav-list {
     list-style: none;
     display: flex;
@@ -619,63 +333,21 @@ const navItems = [
     margin: 0;
     padding: 0;
   }
-  
+
   .mobile-nav-link {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
+    display: block;
     padding: var(--space-3) var(--space-4);
     color: var(--text-secondary);
-    font-family: var(--font-sans);
-    font-weight: var(--font-medium);
     font-size: var(--text-base);
+    font-weight: 500;
     text-decoration: none;
     border-radius: var(--radius-md);
-    transition: color var(--duration-fast) var(--ease-default),
-                background-color var(--duration-fast) var(--ease-default);
+    transition: color 0.15s ease, background-color 0.15s ease;
   }
-  
+
   .mobile-nav-link:hover,
   .mobile-nav-link.active {
     color: var(--text-primary);
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-  
-  .mobile-nav-link--highlight {
-    color: var(--color-primary);
-    background: var(--color-primary-light);
-  }
-
-  .mobile-nav-link--highlight:hover,
-  .mobile-nav-link--highlight.active {
-    background: var(--color-primary-medium);
-    color: var(--color-primary);
-  }
-
-  .mobile-nav-footer {
-    margin-top: auto;
-    padding-top: var(--space-6);
-    border-top: 1px solid var(--border-primary);
-  }
-  
-  .mobile-auth-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    width: 100%;
-    padding: var(--space-3) var(--space-4);
-    color: var(--text-primary);
-    font-size: var(--text-base);
-    font-weight: var(--font-medium);
-    background: rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-  
-  .mobile-auth-btn:hover {
-    background: rgba(0, 0, 0, 0.08);
+    background-color: var(--bg-secondary);
   }
 </style>

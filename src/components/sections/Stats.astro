@@ -1,5 +1,4 @@
 ---
-import Icon from '@components/ui/Icon.astro';
 import { t, getLangFromUrl, type Language } from '@i18n';
 
 const lang = getLangFromUrl(Astro.url);
@@ -8,32 +7,23 @@ const lang = getLangFromUrl(Astro.url);
 <section class="stats">
   <div class="stats-container">
     <div class="stats-grid" id="stats-grid">
-      <div class="stat-card hover-lift">
-        <div class="live-badge">
-          <span class="live-dot"></span>
-          <span class="live-text">{t('stats.live', lang)}</span>
-        </div>
-        <div class="stat-icon">
-          <Icon name="users" size={20} />
-        </div>
+      <div class="stat-item">
         <div class="stat-value" id="stat-online">--</div>
         <div class="stat-label">{t('stats.online', lang)}</div>
       </div>
       
-      <div class="stat-card hover-lift">
-        <div class="stat-icon">
-          <Icon name="trending" size={20} />
-        </div>
-        <div class="stat-value" id="stat-total">--</div>
-        <div class="stat-label">{t('stats.total', lang)}</div>
-      </div>
+      <div class="stat-divider"></div>
       
-      <div class="stat-card hover-lift">
-        <div class="stat-icon">
-          <Icon name="zap" size={20} />
-        </div>
+      <div class="stat-item">
         <div class="stat-value" id="stat-today">--</div>
         <div class="stat-label">{t('stats.today', lang)}</div>
+      </div>
+      
+      <div class="stat-divider"></div>
+      
+      <div class="stat-item">
+        <div class="stat-value" id="stat-total">--</div>
+        <div class="stat-label">{t('stats.total', lang)}</div>
       </div>
     </div>
   </div>
@@ -41,137 +31,80 @@ const lang = getLangFromUrl(Astro.url);
 
 <style>
   .stats {
-    padding: var(--space-8) var(--space-4);
+    padding: var(--space-16) var(--space-6);
+    background: var(--bg-secondary);
   }
-  
+
   @media (min-width: 768px) {
     .stats {
-      padding: var(--space-12) var(--space-4);
+      padding: var(--space-20) var(--space-8);
     }
   }
-  
+
   .stats-container {
     max-width: var(--container-lg);
     margin: 0 auto;
   }
-  
+
   .stats-grid {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-4);
+    gap: var(--space-8);
   }
-  
+
   @media (min-width: 640px) {
     .stats-grid {
       flex-direction: row;
       justify-content: center;
-      flex-wrap: wrap;
+      gap: var(--space-12);
     }
   }
-  
+
   @media (min-width: 1024px) {
     .stats-grid {
-      flex-wrap: nowrap;
+      gap: var(--space-16);
     }
   }
-  
-  .stat-card {
+
+  .stat-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     text-align: center;
-    padding: var(--space-6);
-    min-width: 180px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-2xl);
-    box-shadow: var(--card-shadow);
-    transition: transform var(--duration-normal) var(--ease-default),
-                box-shadow var(--duration-normal) var(--ease-default),
-                border-color var(--duration-normal) var(--ease-default);
-    position: relative;
+    gap: var(--space-2);
   }
-  
-  .live-badge {
-    position: absolute;
-    top: var(--space-2);
-    right: var(--space-2);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    background: var(--color-success-bg);
-    border-radius: var(--radius-full);
-    font-size: 10px;
-    font-weight: var(--font-semibold);
-    letter-spacing: 0.05em;
-  }
-  
-  .live-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--color-success);
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-  }
-  
-  .live-text {
-    color: var(--color-success);
-  }
-  
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.5;
-      transform: scale(0.8);
-    }
-  }
-  
-  .stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--card-hover-shadow);
-    border-color: var(--border-hover);
-  }
-  
-  .stat-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    margin-bottom: var(--space-3);
-    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
-    border-radius: var(--radius-lg);
-    color: white;
-  }
-  
+
   .stat-value {
-    font-family: var(--font-number);
-    font-size: var(--text-2xl);
-    font-weight: var(--font-semibold);
+    font-size: var(--text-3xl);
+    font-weight: 500;
     color: var(--text-primary);
-    margin-bottom: var(--space-1);
-    font-feature-settings: "tnum";
-    font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
   }
-  
+
   @media (min-width: 768px) {
     .stat-value {
-      font-size: var(--text-3xl);
+      font-size: var(--text-4xl);
     }
   }
-  
+
   .stat-label {
-    font-family: var(--font-sans);
     font-size: var(--text-sm);
-    font-weight: var(--font-medium);
     color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  .stat-divider {
+    display: none;
+    width: 1px;
+    height: 40px;
+    background: var(--border-primary);
+  }
+
+  @media (min-width: 640px) {
+    .stat-divider {
+      display: block;
+    }
   }
 </style>
 
@@ -187,7 +120,7 @@ const lang = getLangFromUrl(Astro.url);
         body: JSON.stringify({ page: window.location.pathname })
       });
     } catch (error) {
-      console.warn('Failed to record visit:', error);
+      // Silent fail
     }
   }
   
@@ -204,7 +137,7 @@ const lang = getLangFromUrl(Astro.url);
         updateStatValue('stat-today', result.today || 0);
       }
     } catch (error) {
-      console.warn('Failed to fetch stats:', error);
+      // Silent fail
     }
   }
   

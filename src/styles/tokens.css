@@ -1,14 +1,14 @@
 :root {
-  /* ==================== Color System - LiveClaw Modern Professional ==================== */
+  /* ==================== Color System - Claude Style ==================== */
   
-  /* Primary Colors - Claude Warm Orange */
+  /* Primary Colors - Warm Orange */
   --color-primary: #D97757;
   --color-primary-hover: #C4634D;
   --color-primary-active: #A8523E;
-  --color-primary-light: rgba(217, 119, 87, 0.1);
-  --color-primary-medium: rgba(217, 119, 87, 0.2);
+  --color-primary-light: rgba(217, 119, 87, 0.08);
+  --color-primary-medium: rgba(217, 119, 87, 0.15);
   
-  /* Accent Colors - Claude Palette */
+  /* Accent Colors - Refined Palette */
   --color-accent-blue: #3B82F6;
   --color-accent-purple: #8B5CF6;
   --color-accent-pink: #EC4899;
@@ -17,9 +17,9 @@
   --color-accent-teal: #14B8A6;
   --color-accent-cyan: #06B6D4;
   
-  /* Brand Colors - Claude Identity */
-  --brand-light: #F5F0E8;
-  --brand-dark: #D97757;
+  /* Brand Colors */
+  --brand-light: #FAFAF9;
+  --brand-dark: #1C1917;
   --brand-gradient: linear-gradient(135deg, #D97757, #B4533E);
   
   /* Semantic Colors */
@@ -31,24 +31,24 @@
   --color-danger-light: #F87171;
   --color-info: #3B82F6;
   
-  /* Gradient System - Claude Warm Style */
+  /* Gradient System */
   --gradient-primary: linear-gradient(135deg, #D97757, #B4533E);
   --gradient-accent: linear-gradient(135deg, #8B5CF6, #EC4899);
   --gradient-success: linear-gradient(135deg, #10B981, #14B8A6);
   --gradient-hero: linear-gradient(135deg, #D97757 0%, #B4533E 100%);
   
-  /* Claude Gradients */
-  --gradient-glow: linear-gradient(135deg, rgba(217, 119, 87, 0.15), rgba(217, 119, 87, 0.25));
+  /* Subtle Gradients */
+  --gradient-glow: linear-gradient(135deg, rgba(217, 119, 87, 0.1), rgba(217, 119, 87, 0.15));
   --gradient-aurora: linear-gradient(90deg, #D97757, #B4533E);
   --gradient-dreamscape: linear-gradient(180deg, 
-    #FAFAFA 0%, 
-    #F5F0E8 50%,
-    #EDE6DB 100%
+    #FAFAF9 0%, 
+    #F5F5F4 50%,
+    #E7E5E4 100%
   );
   --gradient-fluid: linear-gradient(135deg,
-    rgba(217, 119, 87, 0.1) 0%,
-    rgba(217, 119, 87, 0.15) 50%,
-    rgba(217, 119, 87, 0.1) 100%
+    rgba(217, 119, 87, 0.05) 0%,
+    rgba(217, 119, 87, 0.1) 50%,
+    rgba(217, 119, 87, 0.05) 100%
   );
   
   /* State Color Scales */
@@ -193,26 +193,26 @@
   --header-total-height: calc(var(--header-height) + var(--header-margin) * 2 + var(--space-4));
   --footer-height: auto;
 
-  /* ==================== Default Theme Variables (Light) - Modern Clean ==================== */
-  /* Background Colors - Modern Light */
-  --bg-primary: #FAFAFA;
-  --bg-secondary: #F5F5F5;
-  --bg-tertiary: #EBEBEB;
+  /* ==================== Default Theme Variables (Light) - Claude Style ==================== */
+  /* Background Colors - Warm Neutrals */
+  --bg-primary: #FAFAF9;
+  --bg-secondary: #F5F5F4;
+  --bg-tertiary: #E7E5E4;
   --bg-elevated: #FFFFFF;
-  --bg-overlay: rgba(0, 0, 0, 0.5);
+  --bg-overlay: rgba(0, 0, 0, 0.4);
   
-  /* Text Colors - High Contrast Professional (WCAG AA) */
-  --text-primary: #171717;      /* Contrast 15.8:1 - AAA */
-  --text-secondary: #404040;    /* Contrast 8.5:1 - AAA (improved from #525252) */
-  --text-tertiary: #6B6B6B;     /* Contrast 4.5:1 - AA (improved from #A3A3A3) */
-  --text-quaternary: #A3A3A3;   /* For decorative text only */
+  /* Text Colors - Stone Palette */
+  --text-primary: #1C1917;
+  --text-secondary: #57534E;
+  --text-tertiary: #A8A29E;
+  --text-quaternary: #D6D3D1;
   --text-inverse: #FFFFFF;
   
   /* Border Colors */
-  --border-primary: rgba(0, 0, 0, 0.1);
-  --border-secondary: rgba(0, 0, 0, 0.06);
+  --border-primary: rgba(0, 0, 0, 0.08);
+  --border-secondary: rgba(0, 0, 0, 0.05);
   --border-focus: var(--color-primary);
-  --border-hover: rgba(0, 0, 0, 0.15);
+  --border-hover: rgba(0, 0, 0, 0.12);
   
   /* Interactive Colors */
   --interactive-primary: var(--color-primary);
@@ -220,39 +220,39 @@
   --interactive-primary-active: var(--color-primary-active);
   
   /* Surface Colors */
-  --surface-primary: rgba(255, 255, 255, 0.8);
-  --surface-secondary: rgba(245, 245, 247, 0.8);
-  --surface-blur: blur(20px);
-  --surface-blur-heavy: blur(40px);
+  --surface-primary: rgba(255, 255, 255, 0.9);
+  --surface-secondary: rgba(245, 245, 244, 0.9);
+  --surface-blur: blur(12px);
+  --surface-blur-heavy: blur(20px);
   
-  /* Card Styles */
-  --card-bg: #ffffff;
-  --card-border: rgba(0, 0, 0, 0.08);
-  --card-border-hover: rgba(0, 0, 0, 0.12);
-  --card-shadow: var(--shadow-sm);
-  --card-hover-shadow: var(--shadow-md);
+  /* Card Styles - Subtle Elevation */
+  --card-bg: #FFFFFF;
+  --card-border: rgba(0, 0, 0, 0.06);
+  --card-border-hover: rgba(0, 0, 0, 0.1);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   
   /* Input Styles */
-  --input-bg: #ffffff;
-  --input-border: rgba(0, 0, 0, 0.1);
+  --input-bg: #FFFFFF;
+  --input-border: rgba(0, 0, 0, 0.08);
   --input-focus-border: var(--color-primary);
   
-  /* Glass Effect - Apple Liquid Glass */
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-bg-hover: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(0, 0, 0, 0.06);
-  --glass-border-hover: rgba(0, 0, 0, 0.1);
+  /* Glass Effect - Subtle */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-bg-hover: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(0, 0, 0, 0.05);
+  --glass-border-hover: rgba(0, 0, 0, 0.08);
   
-  /* Liquid Glass Effect - Simplified Claude Style */
-  --liquid-glass-bg: rgba(255, 255, 255, 0.95);
+  /* Liquid Glass Effect - Minimal */
+  --liquid-glass-bg: rgba(250, 250, 249, 0.95);
   --liquid-glass-bg-hover: rgba(255, 255, 255, 0.98);
-  --liquid-glass-bg-active: rgba(250, 250, 250, 1);
-  --liquid-glass-border: rgba(0, 0, 0, 0.08);
-  --liquid-glass-border-subtle: rgba(0, 0, 0, 0.05);
-  --liquid-glass-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --liquid-glass-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --liquid-glass-blur: blur(12px);
-  --liquid-glass-blur-heavy: blur(20px);
+  --liquid-glass-bg-active: rgba(245, 245, 244, 1);
+  --liquid-glass-border: rgba(0, 0, 0, 0.06);
+  --liquid-glass-border-subtle: rgba(0, 0, 0, 0.04);
+  --liquid-glass-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --liquid-glass-shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --liquid-glass-blur: blur(8px);
+  --liquid-glass-blur-heavy: blur(16px);
   --liquid-glass-highlight: none;
   --liquid-glass-inner-shadow: none;
   
@@ -279,27 +279,27 @@
   }
 }
 
-/* ==================== Light Theme - Modern Clean ==================== */
+/* ==================== Light Theme - Claude Style ==================== */
 [data-theme="light"] {
   /* Background Colors */
-  --bg-primary: #FAFAFA;
-  --bg-secondary: #F5F5F5;
-  --bg-tertiary: #EBEBEB;
+  --bg-primary: #FAFAF9;
+  --bg-secondary: #F5F5F4;
+  --bg-tertiary: #E7E5E4;
   --bg-elevated: #FFFFFF;
-  --bg-overlay: rgba(0, 0, 0, 0.5);
+  --bg-overlay: rgba(0, 0, 0, 0.4);
   
-  /* Text Colors - High Contrast */
-  --text-primary: #171717;
-  --text-secondary: #525252;
-  --text-tertiary: #A3A3A3;
-  --text-quaternary: #D4D4D4;
+  /* Text Colors - Stone Palette */
+  --text-primary: #1C1917;
+  --text-secondary: #57534E;
+  --text-tertiary: #A8A29E;
+  --text-quaternary: #D6D3D1;
   --text-inverse: #FFFFFF;
   
   /* Border Colors */
-  --border-primary: rgba(0, 0, 0, 0.1);
-  --border-secondary: rgba(0, 0, 0, 0.06);
+  --border-primary: rgba(0, 0, 0, 0.08);
+  --border-secondary: rgba(0, 0, 0, 0.05);
   --border-focus: var(--color-primary);
-  --border-hover: rgba(0, 0, 0, 0.15);
+  --border-hover: rgba(0, 0, 0, 0.12);
   
   /* Interactive Colors */
   --interactive-primary: var(--color-primary);
@@ -307,122 +307,122 @@
   --interactive-primary-active: var(--color-primary-active);
   
   /* Surface Colors */
-  --surface-primary: rgba(255, 255, 255, 0.8);
-  --surface-secondary: rgba(245, 245, 247, 0.8);
-  --surface-blur: blur(20px);
-  --surface-blur-heavy: blur(40px);
+  --surface-primary: rgba(255, 255, 255, 0.9);
+  --surface-secondary: rgba(245, 245, 244, 0.9);
+  --surface-blur: blur(12px);
+  --surface-blur-heavy: blur(20px);
   
   /* Card Styles */
-  --card-bg: #ffffff;
-  --card-border: rgba(0, 0, 0, 0.08);
-  --card-border-hover: rgba(0, 0, 0, 0.12);
-  --card-shadow: var(--shadow-sm);
-  --card-hover-shadow: var(--shadow-md);
+  --card-bg: #FFFFFF;
+  --card-border: rgba(0, 0, 0, 0.06);
+  --card-border-hover: rgba(0, 0, 0, 0.1);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   
   /* Input Styles */
-  --input-bg: #ffffff;
-  --input-border: rgba(0, 0, 0, 0.1);
+  --input-bg: #FFFFFF;
+  --input-border: rgba(0, 0, 0, 0.08);
   --input-focus-border: var(--color-primary);
   
-  /* Glass Effect - Liquid Glass */
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-bg-hover: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(0, 0, 0, 0.06);
-  --glass-border-hover: rgba(0, 0, 0, 0.1);
+  /* Glass Effect - Subtle */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-bg-hover: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(0, 0, 0, 0.05);
+  --glass-border-hover: rgba(0, 0, 0, 0.08);
   
-  /* Liquid Glass Effect - Simplified Claude Style */
-  --liquid-glass-bg: rgba(255, 255, 255, 0.95);
+  /* Liquid Glass Effect - Minimal */
+  --liquid-glass-bg: rgba(250, 250, 249, 0.95);
   --liquid-glass-bg-hover: rgba(255, 255, 255, 0.98);
-  --liquid-glass-bg-active: rgba(250, 250, 250, 1);
-  --liquid-glass-border: rgba(0, 0, 0, 0.08);
-  --liquid-glass-border-subtle: rgba(0, 0, 0, 0.05);
-  --liquid-glass-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --liquid-glass-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --liquid-glass-blur: blur(12px);
-  --liquid-glass-blur-heavy: blur(20px);
+  --liquid-glass-bg-active: rgba(245, 245, 244, 1);
+  --liquid-glass-border: rgba(0, 0, 0, 0.06);
+  --liquid-glass-border-subtle: rgba(0, 0, 0, 0.04);
+  --liquid-glass-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --liquid-glass-shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --liquid-glass-blur: blur(8px);
+  --liquid-glass-blur-heavy: blur(16px);
   --liquid-glass-highlight: none;
   --liquid-glass-inner-shadow: none;
   
-  /* Contribution Graph Colors */
-  --contribution-0: #ebedf0;
-  --contribution-1: #9be9a8;
-  --contribution-2: #40c463;
-  --contribution-3: #30a14e;
-  --contribution-4: #216e39;
-  --contribution-5: #0a3d1e;
+  /* Contribution Graph Colors - Warm Tones */
+  --contribution-0: #F5F5F4;
+  --contribution-1: #FED7AA;
+  --contribution-2: #FDBA74;
+  --contribution-3: #FB923C;
+  --contribution-4: #D97757;
+  --contribution-5: #B4533E;
 }
 
-/* ==================== Dark Theme - Modern Dark ==================== */
+/* ==================== Dark Theme - Claude Style ==================== */
 [data-theme="dark"] {
-  /* Background Colors - Modern Dark */
-  --bg-primary: #0A0A0A;
-  --bg-secondary: #171717;
-  --bg-tertiary: #262626;
-  --bg-elevated: #171717;
-  --bg-overlay: rgba(0, 0, 0, 0.8);
+  /* Background Colors - Warm Dark */
+  --bg-primary: #0C0A09;
+  --bg-secondary: #1C1917;
+  --bg-tertiary: #292524;
+  --bg-elevated: #1C1917;
+  --bg-overlay: rgba(0, 0, 0, 0.7);
   
-  /* Text Colors - Modern Light (WCAG AA Compliant) */
-  --text-primary: #FAFAFA;      /* High contrast on dark bg */
-  --text-secondary: #C4C4C4;    /* Contrast 7.1:1 - AAA (improved from #A3A3A3) */
-  --text-tertiary: #9A9A9A;     /* Contrast 4.5:1 - AA */
-  --text-quaternary: #6B6B6B;   /* For decorative text only */
-  --text-inverse: #0A0A0A;
+  /* Text Colors - Stone Light */
+  --text-primary: #FAFAF9;
+  --text-secondary: #A8A29E;
+  --text-tertiary: #78716C;
+  --text-quaternary: #57534E;
+  --text-inverse: #0C0A09;
   
-  /* Border Colors - Subtle Claude */
-  --border-primary: rgba(255, 255, 255, 0.1);
-  --border-secondary: rgba(255, 255, 255, 0.06);
+  /* Border Colors - Subtle */
+  --border-primary: rgba(255, 255, 255, 0.08);
+  --border-secondary: rgba(255, 255, 255, 0.04);
   --border-focus: var(--color-primary);
-  --border-hover: rgba(255, 255, 255, 0.15);
+  --border-hover: rgba(255, 255, 255, 0.12);
   
-  /* Interactive Colors - Electric Glow */
+  /* Interactive Colors */
   --interactive-primary: var(--color-primary);
-  --interactive-primary-hover: #33ddff;
-  --interactive-primary-active: #00a8cc;
+  --interactive-primary-hover: var(--color-primary-hover);
+  --interactive-primary-active: var(--color-primary-active);
   
-  /* Surface Colors - Deep Space Glass */
-  --surface-primary: rgba(26, 26, 46, 0.8);
-  --surface-secondary: rgba(22, 22, 42, 0.8);
-  --surface-blur: blur(20px);
-  --surface-blur-heavy: blur(40px);
+  /* Surface Colors */
+  --surface-primary: rgba(28, 25, 23, 0.9);
+  --surface-secondary: rgba(41, 37, 36, 0.9);
+  --surface-blur: blur(12px);
+  --surface-blur-heavy: blur(20px);
   
-  /* Card Styles - Claude Dark Cards */
-  --card-bg: rgba(26, 26, 26, 0.6);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --card-border-hover: rgba(255, 255, 255, 0.12);
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --card-hover-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+  /* Card Styles */
+  --card-bg: #1C1917;
+  --card-border: rgba(255, 255, 255, 0.06);
+  --card-border-hover: rgba(255, 255, 255, 0.1);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   
-  /* Input Styles - Claude Dark Inputs */
-  --input-bg: rgba(38, 38, 38, 0.8);
-  --input-border: rgba(255, 255, 255, 0.1);
+  /* Input Styles */
+  --input-bg: #292524;
+  --input-border: rgba(255, 255, 255, 0.08);
   --input-focus-border: var(--color-primary);
   
-  /* Glass Effect - Bioluminescent Glass */
-  --glass-bg: rgba(22, 22, 42, 0.72);
-  --glass-bg-hover: rgba(30, 30, 55, 0.85);
-  --glass-border: rgba(0, 212, 255, 0.12);
-  --glass-border-hover: rgba(184, 41, 221, 0.2);
+  /* Glass Effect - Subtle */
+  --glass-bg: rgba(28, 25, 23, 0.8);
+  --glass-bg-hover: rgba(41, 37, 36, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-border-hover: rgba(255, 255, 255, 0.08);
   
-  /* Liquid Glass Effect - Claude Dark Simplified */
-  --liquid-glass-bg: rgba(26, 26, 26, 0.95);
-  --liquid-glass-bg-hover: rgba(38, 38, 38, 0.98);
-  --liquid-glass-bg-active: rgba(45, 45, 45, 1);
-  --liquid-glass-border: rgba(255, 255, 255, 0.1);
-  --liquid-glass-border-subtle: rgba(255, 255, 255, 0.05);
-  --liquid-glass-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --liquid-glass-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.4);
-  --liquid-glass-blur: blur(12px);
-  --liquid-glass-blur-heavy: blur(20px);
+  /* Liquid Glass Effect - Minimal */
+  --liquid-glass-bg: rgba(12, 10, 9, 0.95);
+  --liquid-glass-bg-hover: rgba(28, 25, 23, 0.98);
+  --liquid-glass-bg-active: rgba(41, 37, 36, 1);
+  --liquid-glass-border: rgba(255, 255, 255, 0.06);
+  --liquid-glass-border-subtle: rgba(255, 255, 255, 0.04);
+  --liquid-glass-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --liquid-glass-shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --liquid-glass-blur: blur(8px);
+  --liquid-glass-blur-heavy: blur(16px);
   --liquid-glass-highlight: none;
   --liquid-glass-inner-shadow: none;
   
-  /* Contribution Graph Colors - Claude Dark */
-  --contribution-0: #1A1A1A;
-  --contribution-1: #2A1F1A;
-  --contribution-2: #4A3025;
-  --contribution-3: #6A4535;
-  --contribution-4: #8A5A45;
-  --contribution-5: #AA6F55;
+  /* Contribution Graph Colors - Warm Dark */
+  --contribution-0: #1C1917;
+  --contribution-1: #451a03;
+  --contribution-2: #78350f;
+  --contribution-3: #b45309;
+  --contribution-4: #d97706;
+  --contribution-5: #fbbf24;
 }
 
 /* ==================== Responsive Typography ==================== */
