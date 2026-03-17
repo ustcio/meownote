@@ -51,10 +51,10 @@
   /* ==================== Typography - Anthropic Style ==================== */
   
   /* Font Families - Keep current design per user request */
-  --font-serif: "Doralice", cursive, Georgia, serif;
-  --font-sans: "Doralice", cursive, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: "Times New Roman", Georgia, "Liberation Serif", serif;
+  --font-sans: "Times New Roman", Georgia, "Liberation Serif", serif;
   --font-mono: "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, monospace;
-  --font-number: "Richy", cursive, var(--font-sans);
+  --font-number: "Times New Roman", Georgia, serif;
   
   /* Display Typography - Serif, Elegant */
   --font-display: var(--font-serif);
