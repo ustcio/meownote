@@ -26,12 +26,12 @@
   font-display: swap;
 }
 
-/* Dorallce Font - For Logo */
+/* Richy Font - For Serif Typography and Logo */
 @font-face {
-  font-family: 'Dorallce';
-  src: url('/fonts/Dorallce.woff2') format('woff2'),
-       url('/fonts/Dorallce.woff') format('woff'),
-       url('/fonts/Dorallce.ttf') format('truetype');
+  font-family: 'Richy';
+  src: url('/fonts/Richy.woff2') format('woff2'),
+       url('/fonts/Richy.woff') format('woff'),
+       url('/fonts/Richy.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
