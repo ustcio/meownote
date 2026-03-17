@@ -1,51 +1,56 @@
 /* ================================================================================
-   Anthropic Design System - Warm, Human, Elegant
+   Anthropic Design System - Pixel-Faithful Recreation
    ================================================================================ */
 
-:root {
-  /* ==================== Color Palette - Anthropic Warm ==================== */
+::root {
+  /* ==================== Color Palette - Anthropic Exact ==================== */
   
-  /* Primary - Warm Orange/Clay */
-  --color-primary: #D97757;
-  --color-primary-hover: #C15A3A;
-  --color-primary-active: #A84D32;
-  --color-primary-light: rgba(217, 119, 87, 0.1);
-  --color-primary-subtle: rgba(217, 119, 87, 0.05);
+  /* Primary Colors */
+  --color-primary: #C06B3E;
+  --color-primary-hover: #A85A32;
+  --color-primary-active: #8B4A28;
+  --color-primary-light: rgba(192, 107, 62, 0.1);
+  --color-primary-subtle: rgba(192, 107, 62, 0.08);
   
-  /* Background Colors - Cream/Paper Palette */
-  --bg-primary: #FAF8F5;
-  --bg-secondary: #F5F0E8;
-  --bg-tertiary: #EDE8DF;
-  --bg-elevated: #FFFFFF;
-  --bg-warm: #F8F5F0;
+  /* Background Colors - Cream Palette */
+  --bg-cream: #F0E9DC;
+  --bg-dark-cream: #EDE5D4;
+  --bg-lighter-cream: #F5F0E6;
+  --bg-card: #EDE5D4;
+  --bg-card-hover: #EDE0CC;
   
-  /* Text Colors - Warm Gray (not pure black) */
-  --text-primary: #1A1A1A;
-  --text-secondary: #4A4A48;
-  --text-tertiary: #6B6B66;
-  --text-muted: #8A8A85;
-  --text-inverse: #FFFFFF;
+  /* Dark Section Colors */
+  --bg-dark: #1A1207;
+  --bg-dark-secondary: #2C2210;
+  --bg-dark-footer: #120D05;
+  
+  /* Text Colors */
+  --text-dark: #1A1207;
+  --text-body: #6B5C42;
+  --text-muted: #7A6A52;
+  --text-tertiary: #9A8A72;
+  --text-light: #F0E9DC;
+  --text-light-muted: #A89880;
+  --text-light-tertiary: #8A7A62;
+  --text-dark-muted: #5A4A32;
+  --text-dark-tertiary: #3D2E18;
+  --text-nav: #3D3521;
   
   /* Border Colors */
-  --border-primary: rgba(0, 0, 0, 0.08);
-  --border-secondary: rgba(0, 0, 0, 0.05);
-  --border-hover: rgba(0, 0, 0, 0.12);
-  --border-divider: rgba(0, 0, 0, 0.06);
+  --border-light: #D0C4B0;
+  --border-cream: #C4B9A5;
+  --border-nav: #D6CCBB;
+  --border-dark: #2C2210;
+  --border-dark-light: rgba(240, 233, 220, 0.2);
   
-  /* Accent Colors */
-  --accent-warm: #D97757;
-  --accent-clay: #B8705C;
-  --accent-ochre: #C9905A;
-  --accent-sage: #7A8B6E;
-  
-  /* Semantic Colors */
-  --color-success: #5A7C5A;
-  --color-error: #B85C5C;
-  --color-warning: #C9905A;
+  /* Badge Colors */
+  --badge-orange: #C06B3E;
+  --badge-green: #5B7E6A;
+  --badge-blue: #4A5E8A;
   
   /* ==================== Typography - Anthropic Style ==================== */
   
-  /* Font Families - Serif for display, Sans for body */
+  /* Font Families - Keep current design per user request */
   --font-serif: "Times New Roman", Georgia, "Liberation Serif", serif;
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, monospace;
@@ -55,36 +60,37 @@
   --font-heading: var(--font-serif);
   --font-body: var(--font-sans);
   
-  /* Font Sizes - Elegant Scale */
+  /* Font Sizes */
   --text-xs: 0.75rem;      /* 12px */
   --text-sm: 0.875rem;     /* 14px */
   --text-base: 1rem;       /* 16px */
   --text-lg: 1.125rem;     /* 18px */
   --text-xl: 1.25rem;      /* 20px */
   --text-2xl: 1.5rem;      /* 24px */
-  --text-3xl: 1.875rem;    /* 30px */
-  --text-4xl: 2.25rem;     /* 36px */
+  --text-3xl: 2rem;        /* 32px */
+  --text-4xl: 2.5rem;      /* 40px */
   --text-5xl: 3rem;        /* 48px */
-  --text-6xl: 3.75rem;     /* 60px */
-  --text-7xl: 4.5rem;      /* 72px */
+  --text-6xl: 4rem;        /* 64px */
   
-  /* Font Weights */
+  /* Font Weights - Anthropic uses 400 for headings */
   --font-normal: 400;
   --font-medium: 500;
   --font-semibold: 600;
   
   /* Line Heights */
-  --leading-tight: 1.2;
-  --leading-snug: 1.35;
-  --leading-normal: 1.5;
+  --leading-tight: 1.08;
+  --leading-snug: 1.1;
+  --leading-normal: 1.35;
   --leading-relaxed: 1.65;
+  --leading-loose: 1.7;
   
   /* Letter Spacing */
-  --tracking-tight: -0.02em;
-  --tracking-normal: 0;
-  --tracking-wide: 0.02em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: -0.02em;
+  --tracking-wide: 0.06em;
+  --tracking-wider: 0.1em;
   
-  /* ==================== Spacing - Generous ==================== */
+  /* ==================== Spacing ==================== */
   --space-0: 0;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -98,75 +104,77 @@
   --space-16: 4rem;
   --space-20: 5rem;
   --space-24: 6rem;
+  --space-28: 7rem;
   --space-32: 8rem;
-  --space-40: 10rem;
   
-  /* ==================== Border Radius - Soft ==================== */
-  --radius-none: 0;
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-full: 9999px;
+  /* ==================== Border Radius ==================== */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 100px;
   
-  /* ==================== Shadows - Subtle ==================== */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+  /* ==================== Shadows - Minimal ==================== */
+  --shadow-none: none;
   
   /* ==================== Transitions ==================== */
   --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --duration-slow: 350ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
   
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-default: ease;
   
   /* ==================== Layout ==================== */
-  --container-narrow: 640px;
-  --container-default: 768px;
-  --container-wide: 1024px;
-  --container-max: 1200px;
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
   
   --header-height: 4rem;
   
-  /* ==================== Card Styles ==================== */
-  --card-bg: var(--bg-elevated);
-  --card-border: var(--border-secondary);
-  --card-shadow: var(--shadow-sm);
-  --card-radius: var(--radius-lg);
-  
-  /* ==================== Z-Index Scale ==================== */
-  --z-base: 0;
-  --z-dropdown: 100;
-  --z-sticky: 200;
-  --z-header: 300;
-  --z-modal: 400;
-  --z-popover: 500;
+  /* ==================== Contribution Graph Colors ==================== */
+  --contribution-0: #EDE5D4;
+  --contribution-1: #E8C9B5;
+  --contribution-2: #D9A082;
+  --contribution-3: #C0785A;
+  --contribution-4: #A85A32;
 }
 
-/* ==================== Dark Theme - Warm Dark ==================== */
+/* ==================== Default Theme (Light) ==================== */
+:root {
+  --bg-primary: #F0E9DC;
+  --bg-secondary: #EDE5D4;
+  --bg-tertiary: #EDE0CC;
+  --bg-elevated: #FFFFFF;
+  
+  --text-primary: #1A1207;
+  --text-secondary: #6B5C42;
+  --text-tertiary: #7A6A52;
+  
+  --border-primary: #D0C4B0;
+  --border-secondary: #C4B9A5;
+}
+
+/* ==================== Dark Theme ==================== */
 [data-theme="dark"] {
-  --bg-primary: #1A1816;
-  --bg-secondary: #23211F;
-  --bg-tertiary: #2D2A27;
-  --bg-elevated: #2D2A27;
+  --bg-primary: #1A1207;
+  --bg-secondary: #2C2210;
+  --bg-tertiary: #120D05;
+  --bg-elevated: #2C2210;
   
-  --text-primary: #F5F3F0;
-  --text-secondary: #B8B5B0;
-  --text-tertiary: #8A8782;
-  --text-muted: #6A6762;
+  --text-primary: #F0E9DC;
+  --text-secondary: #A89880;
+  --text-tertiary: #8A7A62;
   
-  --border-primary: rgba(255, 255, 255, 0.08);
-  --border-secondary: rgba(255, 255, 255, 0.05);
-  --border-hover: rgba(255, 255, 255, 0.12);
-  --border-divider: rgba(255, 255, 255, 0.06);
+  --border-primary: #2C2210;
+  --border-secondary: rgba(240, 233, 220, 0.1);
   
-  --card-bg: #2D2A27;
-  --card-border: var(--border-secondary);
-  
-  --color-primary: #E08B6C;
-  --color-primary-hover: #E89B7E;
+  --contribution-0: #2C2210;
+  --contribution-1: #3D2A1A;
+  --contribution-2: #5A3D25;
+  --contribution-3: #785535;
+  --contribution-4: #A87045;
 }
 
 /* ==================== Responsive Typography ==================== */
@@ -174,14 +182,5 @@
   :root {
     --text-5xl: 3.5rem;
     --text-6xl: 4.5rem;
-    --text-7xl: 5.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  :root {
-    --text-5xl: 4rem;
-    --text-6xl: 5rem;
-    --text-7xl: 6rem;
   }
 }

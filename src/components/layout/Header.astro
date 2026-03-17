@@ -16,49 +16,56 @@ const navItems = [
 <header class="header">
   <div class="header-container">
     <a href="/" class="logo">
-      <span class="logo-icon">◆</span>
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3L20.5 18H3.5L12 3Z" fill="white" />
+        </svg>
+      </div>
       <span class="logo-text">LiveClaw</span>
     </a>
     
     <nav class="nav-desktop">
-      <ul class="nav-list">
-        {navItems.map((item) => (
-          <li>
-            <a 
-              href={item.href}
-              class={currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) ? 'nav-link active' : 'nav-link'}
-            >
-              {item.label}
-            </a>
-          </li>
-        ))}
-      </ul>
+      {navItems.map((item) => (
+        <a 
+          href={item.href}
+          class={currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) ? 'nav-link active' : 'nav-link'}
+        >
+          {item.label}
+        </a>
+      ))}
     </nav>
 
     <div class="header-actions">
+      <a href="#" class="nav-link">Log in</a>
       <a href="/chatbot" class="header-cta">Try LiveChat</a>
     </div>
     
     <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
-      <span></span>
-      <span></span>
+      <svg class="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+      <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
     </button>
   </div>
   
   <nav id="mobile-nav" class="mobile-nav">
-    <ul class="mobile-nav-list">
-      {navItems.map((item) => (
-        <li>
-          <a 
-            href={item.href}
-            class={currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) ? 'mobile-nav-link active' : 'mobile-nav-link'}
-          >
-            {item.label}
-          </a>
-        </li>
-      ))}
-    </ul>
-    <a href="/chatbot" class="mobile-cta">Try LiveChat</a>
+    {navItems.map((item) => (
+      <a 
+        href={item.href}
+        class={currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) ? 'mobile-link active' : 'mobile-link'}
+      >
+        {item.label}
+      </a>
+    ))}
+    <div class="mobile-actions">
+      <a href="#" class="mobile-login">Log in</a>
+      <a href="/chatbot" class="mobile-cta">Try LiveChat</a>
+    </div>
   </nav>
 </header>
 
@@ -69,12 +76,14 @@ const navItems = [
   mobileMenuBtn?.addEventListener('click', () => {
     const isOpen = mobileNav?.classList.contains('open');
     mobileNav?.classList.toggle('open', !isOpen);
+    mobileMenuBtn?.classList.toggle('open', !isOpen);
     document.body.style.overflow = isOpen ? '' : 'hidden';
   });
   
-  document.querySelectorAll('.mobile-nav-link').forEach(link => {
+  document.querySelectorAll('.mobile-link').forEach(link => {
     link.addEventListener('click', () => {
       mobileNav?.classList.remove('open');
+      mobileMenuBtn?.classList.remove('open');
       document.body.style.overflow = '';
     });
   });
@@ -86,16 +95,17 @@ const navItems = [
     top: 0;
     left: 0;
     right: 0;
-    z-index: var(--z-header);
-    background: var(--bg-primary);
-    border-bottom: 1px solid var(--border-divider);
+    z-index: 50;
+    background: rgba(240, 233, 220, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #D6CCBB;
   }
 
   .header-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: var(--container-max);
+    max-width: var(--container-xl);
     margin: 0 auto;
     padding: 0 var(--space-6);
     height: var(--header-height);
@@ -103,35 +113,39 @@ const navItems = [
 
   @media (min-width: 768px) {
     .header-container {
-      padding: 0 var(--space-8);
+      padding: 0 var(--space-10);
     }
   }
 
   .logo {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 10px;
     text-decoration: none;
   }
 
   .logo-icon {
     width: 28px;
     height: 28px;
+    border-radius: 50%;
+    background: #C06B3E;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--color-primary);
-    color: white;
-    border-radius: var(--radius-sm);
-    font-size: var(--text-sm);
+    flex-shrink: 0;
+  }
+
+  .logo-icon svg {
+    width: 16px;
+    height: 16px;
   }
 
   .logo-text {
     font-family: var(--font-display);
-    font-size: var(--text-lg);
+    font-size: var(--text-xl);
     font-weight: var(--font-normal);
-    color: var(--text-primary);
-    letter-spacing: var(--tracking-tight);
+    color: #1A1207;
+    letter-spacing: -0.01em;
   }
 
   .nav-desktop {
@@ -140,71 +154,70 @@ const navItems = [
 
   @media (min-width: 768px) {
     .nav-desktop {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: var(--space-8);
     }
   }
 
-  .nav-list {
-    display: flex;
-    align-items: center;
-    gap: var(--space-8);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
   .nav-link {
+    font-family: var(--font-sans);
     font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--text-secondary);
+    font-weight: var(--font-normal);
+    color: #3D3521;
     text-decoration: none;
-    padding: var(--space-2) 0;
-    transition: color var(--duration-fast) var(--ease-smooth);
+    transition: color var(--duration-normal) var(--ease-default);
   }
 
   .nav-link:hover,
   .nav-link.active {
-    color: var(--text-primary);
+    color: #C06B3E;
   }
 
   .header-actions {
     display: none;
+    align-items: center;
+    gap: var(--space-3);
   }
 
   @media (min-width: 768px) {
     .header-actions {
-      display: block;
+      display: flex;
     }
   }
 
   .header-cta {
-    display: inline-flex;
-    align-items: center;
-    padding: var(--space-2) var(--space-4);
+    font-family: var(--font-sans);
     font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: white;
-    background: var(--text-primary);
-    border-radius: var(--radius-md);
+    font-weight: var(--font-normal);
+    padding: 0.5rem 1.25rem;
+    background: #1A1207;
+    color: #F0E9DC;
+    border-radius: var(--radius-full);
     text-decoration: none;
-    transition: background-color var(--duration-fast) var(--ease-smooth);
+    transition: background-color var(--duration-normal) var(--ease-default);
   }
 
   .header-cta:hover {
-    background: #2D2D2D;
+    background: #2C2210;
   }
 
   .mobile-menu-btn {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    gap: 5px;
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     padding: 0;
     background: transparent;
     border: none;
     cursor: pointer;
+    color: #3D3521;
+    transition: color var(--duration-normal) var(--ease-default);
+  }
+
+  .mobile-menu-btn:hover {
+    color: #C06B3E;
   }
 
   @media (min-width: 768px) {
@@ -213,78 +226,92 @@ const navItems = [
     }
   }
 
-  .mobile-menu-btn span {
+  .mobile-menu-btn .icon-menu {
     display: block;
     width: 20px;
-    height: 1.5px;
-    background: var(--text-primary);
-    border-radius: var(--radius-full);
-    transition: transform 0.2s ease;
+    height: 20px;
+  }
+
+  .mobile-menu-btn .icon-close {
+    display: none;
+    width: 20px;
+    height: 20px;
+  }
+
+  .mobile-menu-btn.open .icon-menu {
+    display: none;
+  }
+
+  .mobile-menu-btn.open .icon-close {
+    display: block;
   }
 
   .mobile-nav {
+    display: none;
     position: fixed;
     top: var(--header-height);
     left: 0;
     right: 0;
-    bottom: 0;
-    background: var(--bg-primary);
-    padding: var(--space-8) var(--space-6);
-    transform: translateX(100%);
-    transition: transform 0.3s var(--ease-smooth);
-    display: flex;
+    background: #F0E9DC;
+    border-top: 1px solid #D6CCBB;
+    padding: var(--space-6);
     flex-direction: column;
+    gap: var(--space-5);
   }
 
   .mobile-nav.open {
-    transform: translateX(0);
+    display: flex;
   }
 
   @media (min-width: 768px) {
     .mobile-nav {
-      display: none;
+      display: none !important;
     }
   }
 
-  .mobile-nav-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    flex: 1;
-  }
-
-  .mobile-nav-list li + li {
-    margin-top: var(--space-4);
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--border-divider);
-  }
-
-  .mobile-nav-link {
-    display: block;
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-    color: var(--text-secondary);
+  .mobile-link {
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    font-weight: var(--font-normal);
+    color: #3D3521;
     text-decoration: none;
-    padding: var(--space-2) 0;
-    transition: color var(--duration-fast) var(--ease-smooth);
+    transition: color var(--duration-normal) var(--ease-default);
   }
 
-  .mobile-nav-link:hover,
-  .mobile-nav-link.active {
-    color: var(--text-primary);
+  .mobile-link:hover,
+  .mobile-link.active {
+    color: #C06B3E;
+  }
+
+  .mobile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: 1px solid #D6CCBB;
+  }
+
+  .mobile-login {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: #3D3521;
+    text-decoration: none;
   }
 
   .mobile-cta {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-3) var(--space-6);
-    font-size: var(--text-base);
-    font-weight: var(--font-medium);
-    color: white;
-    background: var(--text-primary);
-    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-normal);
+    padding: 0.625rem 1.25rem;
+    background: #1A1207;
+    color: #F0E9DC;
+    border-radius: var(--radius-full);
     text-decoration: none;
-    margin-top: var(--space-6);
+    text-align: center;
+    transition: background-color var(--duration-normal) var(--ease-default);
+  }
+
+  .mobile-cta:hover {
+    background: #2C2210;
   }
 </style>

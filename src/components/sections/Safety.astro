@@ -1,0 +1,162 @@
+---
+const pillars = [
+  { id: 1, icon: "🔬", title: "Interpretability Research", description: "We work to understand what's happening inside AI models — making their reasoning transparent, predictable, and verifiable." },
+  { id: 2, icon: "⚖️", title: "Constitutional AI", description: "Our Constitutional AI method trains models to be helpful, harmless, and honest using a set of guiding principles." },
+  { id: 3, icon: "🛡️", title: "Red-Teaming & Evals", description: "Rigorous adversarial testing helps us identify vulnerabilities and dangerous capabilities before deployment." },
+  { id: 4, icon: "📋", title: "Responsible Scaling Policy", description: "Our RSP commits us in advance to specific safety measures triggered at defined capability thresholds." },
+  { id: 5, icon: "🌐", title: "Policy & Governance", description: "We engage with governments, regulators, and the broader AI community to shape beneficial AI governance." },
+  { id: 6, icon: "🤝", title: "Industry Collaboration", description: "We collaborate openly with academic and industrial partners, sharing research to elevate safety standards across the field." },
+];
+---
+
+<section id="safety" class="safety">
+  <div class="safety-container">
+    <div class="safety-header">
+      <div class="header-label">
+        <span class="label-dot"></span>
+        <span class="label-text">Safety</span>
+      </div>
+      <h2 class="safety-title">
+        Safety is not a<br />feature — it's our <em>foundation</em>
+      </h2>
+      <p class="safety-description">
+        We believe that powerful AI requires equally powerful safety research. Our multi-layered approach spans technical research, policy, and operations.
+      </p>
+    </div>
+
+    <div class="safety-grid">
+      {pillars.map((pillar) => (
+        <div class="safety-card">
+          <div class="card-icon">{pillar.icon}</div>
+          <h3 class="card-title">{pillar.title}</h3>
+          <p class="card-description">{pillar.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .safety {
+    background: #1A1207;
+    padding: var(--space-28) var(--space-6);
+  }
+
+  @media (min-width: 768px) {
+    .safety {
+      padding: var(--space-28) var(--space-10);
+    }
+  }
+
+  .safety-container {
+    max-width: var(--container-xl);
+    margin: 0 auto;
+  }
+
+  .safety-header {
+    max-width: 640px;
+    margin-bottom: var(--space-16);
+  }
+
+  .header-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .label-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #C06B3E;
+  }
+
+  .label-text {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: #7A6A52;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .safety-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: var(--font-normal);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #F0E9DC;
+    margin-bottom: var(--space-5);
+  }
+
+  .safety-title em {
+    font-style: italic;
+    color: #C06B3E;
+  }
+
+  .safety-description {
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    color: #8A7A62;
+    line-height: 1.7;
+  }
+
+  .safety-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    border: 1px solid #2C2210;
+    background: #2C2210;
+  }
+
+  @media (min-width: 640px) {
+    .safety-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .safety-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .safety-card {
+    background: #1A1207;
+    padding: var(--space-8);
+    cursor: pointer;
+    transition: background-color 300ms var(--ease-default);
+  }
+
+  .safety-card:hover {
+    background: #221908;
+  }
+
+  .safety-card:hover .card-title {
+    color: #C06B3E;
+  }
+
+  .card-icon {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-5);
+  }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: var(--font-normal);
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: #F0E9DC;
+    margin-bottom: var(--space-3);
+    transition: color 300ms var(--ease-default);
+  }
+
+  .card-description {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: #6B5C42;
+    line-height: 1.65;
+  }
+</style>
