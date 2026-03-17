@@ -2,69 +2,12 @@
 import Layout from '@layouts/Layout.astro';
 import Hero from '@components/sections/Hero.astro';
 import Features from '@components/sections/Features.astro';
-import ContributionGraph from '@components/sections/ContributionGraph.astro';
-import Stats from '@components/sections/Stats.astro';
 ---
 
 <Layout 
-  title="LiveClaw - Building the Future of AI"
-  description="Powerful AI tools and intelligent assistants for developers and creators"
+  title="LiveClaw - AI that works for you"
+  description="Meet the AI assistant that helps you create, code, and collaborate with confidence."
 >
   <Hero />
-  <div class="scroll-animate fade-in-up">
-    <Features />
-  </div>
-  <div class="scroll-animate fade-in-up delay-1">
-    <ContributionGraph />
-  </div>
-  <div class="scroll-animate fade-in-up delay-2">
-    <Stats />
-  </div>
+  <Features />
 </Layout>
-
-<style>
-  .scroll-animate {
-    opacity: 0;
-    transform: translateY(40px) translateZ(0);
-    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
-  }
-
-  .scroll-animate.visible {
-    opacity: 1;
-    transform: translateY(0) translateZ(0);
-  }
-
-  .delay-1 {
-    transition-delay: 0.05s;
-  }
-
-  .delay-2 {
-    transition-delay: 0.1s;
-  }
-</style>
-
-<script>
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    },
-    {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    }
-  );
-
-  document.querySelectorAll('.scroll-animate').forEach(el => {
-    observer.observe(el);
-  });
-
-  document.addEventListener('astro:page-load', () => {
-    document.querySelectorAll('.scroll-animate').forEach(el => {
-      observer.observe(el);
-    });
-  });
-</script>

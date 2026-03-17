@@ -1,47 +1,30 @@
 ---
-import ThemeToggle from '@components/ui/ThemeToggle.astro';
-import AuthModal from '@components/ui/AuthModal.astro';
-import { t, getLangFromUrl, type Language } from '@i18n';
+import { t, getLangFromUrl } from '@i18n';
 
 const lang = getLangFromUrl(Astro.url);
 const currentPath = Astro.url.pathname;
 
 const navItems = [
-  { href: '/', label: 'Home', id: 'home' },
-  { href: '/chatbot', label: 'Chat', id: 'chatbot' },
-  { href: '/kit', label: 'Tools', id: 'kit' },
-  { href: '/claw', label: 'OpenClaw', id: 'claw' },
-  { href: '/about', label: 'About', id: 'about' },
+  { href: '/', label: 'Home' },
+  { href: '/chatbot', label: 'Chat' },
+  { href: '/kit', label: 'Tools' },
+  { href: '/about', label: 'About' },
 ];
 ---
 
-<header class="header" id="main-header">
+<header class="header">
   <div class="header-container">
     <a href="/" class="logo">
-      <video 
-        class="logo-video" 
-        autoplay 
-        loop 
-        muted 
-        playsinline 
-        preload="auto" 
-        poster="/favicon-32x32.png"
-      >
-        <source src="/logo.mp4" type="video/mp4" />
-      </video>
       <span class="logo-text">LiveClaw</span>
     </a>
     
-    <nav class="nav-desktop" aria-label="Navigation">
+    <nav class="nav-desktop">
       <ul class="nav-list">
         {navItems.map((item) => (
           <li>
             <a 
               href={item.href}
-              class:list={[
-                'nav-link', 
-                { active: currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) }
-              ]}
+              class={currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) ? 'nav-link active' : 'nav-link'}
             >
               {item.label}
             </a>
@@ -50,21 +33,10 @@ const navItems = [
       </ul>
     </nav>
     
-    <div class="header-actions">
-      <ThemeToggle />
-      
-      <button class="auth-btn" id="auth-btn" aria-label="Sign in">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-      </button>
-      
-      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu" aria-expanded="false">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-      </button>
-    </div>
+    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
+      <span></span>
+      <span></span>
+    </button>
   </div>
   
   <nav id="mobile-nav" class="mobile-nav">
@@ -73,10 +45,7 @@ const navItems = [
         <li>
           <a 
             href={item.href}
-            class:list={[
-              'mobile-nav-link', 
-              { active: currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) }
-            ]}
+            class={currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) ? 'mobile-nav-link active' : 'mobile-nav-link'}
           >
             {item.label}
           </a>
@@ -86,46 +55,21 @@ const navItems = [
   </nav>
 </header>
 
-<div class="header-backdrop" id="header-backdrop"></div>
-
-<AuthModal />
-
 <script>
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileNav = document.getElementById('mobile-nav');
-  const headerBackdrop = document.getElementById('header-backdrop');
-  const authBtn = document.getElementById('auth-btn');
-  
-  function toggleMobileMenu(open: boolean) {
-    mobileMenuBtn?.setAttribute('aria-expanded', String(open));
-    mobileNav?.classList.toggle('open', open);
-    headerBackdrop?.classList.toggle('active', open);
-    document.body.style.overflow = open ? 'hidden' : '';
-  }
   
   mobileMenuBtn?.addEventListener('click', () => {
     const isOpen = mobileNav?.classList.contains('open');
-    toggleMobileMenu(!isOpen);
-  });
-  
-  headerBackdrop?.addEventListener('click', () => {
-    toggleMobileMenu(false);
+    mobileNav?.classList.toggle('open', !isOpen);
+    document.body.style.overflow = isOpen ? '' : 'hidden';
   });
   
   document.querySelectorAll('.mobile-nav-link').forEach(link => {
     link.addEventListener('click', () => {
-      toggleMobileMenu(false);
+      mobileNav?.classList.remove('open');
+      document.body.style.overflow = '';
     });
-  });
-  
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      toggleMobileMenu(false);
-    }
-  });
-  
-  authBtn?.addEventListener('click', () => {
-    (window as any).openAuthModal?.('login');
   });
 </script>
 
@@ -135,46 +79,34 @@ const navItems = [
     top: 0;
     left: 0;
     right: 0;
-    z-index: var(--z-fixed);
+    z-index: var(--z-header);
     background: var(--bg-primary);
-    border-bottom: 1px solid var(--border-secondary);
+    border-bottom: 1px solid var(--border-divider);
   }
 
   .header-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: var(--container-xl);
+    max-width: var(--container-max);
     margin: 0 auto;
-    padding: var(--space-3) var(--space-4);
+    padding: 0 var(--space-6);
     height: var(--header-height);
   }
 
   @media (min-width: 768px) {
     .header-container {
-      padding: var(--space-3) var(--space-6);
+      padding: 0 var(--space-8);
     }
   }
 
   .logo {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    text-decoration: none;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: var(--font-normal);
     color: var(--text-primary);
-  }
-
-  .logo-video {
-    width: 28px;
-    height: 28px;
-    border-radius: var(--radius-md);
-    object-fit: cover;
-  }
-
-  .logo-text {
-    font-size: var(--text-base);
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    text-decoration: none;
+    letter-spacing: var(--tracking-tight);
   }
 
   .nav-desktop {
@@ -183,75 +115,46 @@ const navItems = [
 
   @media (min-width: 768px) {
     .nav-desktop {
-      display: flex;
+      display: block;
     }
   }
 
   .nav-list {
     display: flex;
     align-items: center;
-    gap: var(--space-1);
+    gap: var(--space-8);
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
   .nav-link {
-    padding: var(--space-2) var(--space-3);
-    color: var(--text-secondary);
     font-size: var(--text-sm);
-    font-weight: 500;
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
     text-decoration: none;
-    border-radius: var(--radius-md);
-    transition: color 0.15s ease, background-color 0.15s ease;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid transparent;
+    transition: color var(--duration-fast) var(--ease-smooth),
+                border-color var(--duration-fast) var(--ease-smooth);
   }
 
-  .nav-link:hover {
-    color: var(--text-primary);
-    background-color: var(--bg-secondary);
-  }
-
+  .nav-link:hover,
   .nav-link.active {
     color: var(--text-primary);
-    background-color: var(--bg-secondary);
-  }
-
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .auth-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    color: var(--text-secondary);
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: color 0.15s ease, background-color 0.15s ease;
-  }
-
-  .auth-btn:hover {
-    color: var(--text-primary);
-    background-color: var(--bg-secondary);
+    border-bottom-color: var(--color-primary);
   }
 
   .mobile-menu-btn {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    width: 36px;
-    height: 36px;
     gap: 5px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
     background: transparent;
     border: none;
-    border-radius: var(--radius-md);
     cursor: pointer;
   }
 
@@ -261,58 +164,25 @@ const navItems = [
     }
   }
 
-  .hamburger-line {
+  .mobile-menu-btn span {
     display: block;
-    width: 18px;
-    height: 2px;
-    background: var(--text-secondary);
+    width: 20px;
+    height: 1.5px;
+    background: var(--text-primary);
     border-radius: var(--radius-full);
-    transition: all 0.2s ease;
-  }
-
-  .mobile-menu-btn[aria-expanded="true"] .hamburger-line:nth-child(1) {
-    transform: translateY(3.5px) rotate(45deg);
-  }
-
-  .mobile-menu-btn[aria-expanded="true"] .hamburger-line:nth-child(2) {
-    transform: translateY(-3.5px) rotate(-45deg);
-  }
-
-  .header-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.3);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.2s ease;
-    z-index: calc(var(--z-fixed) - 1);
-  }
-
-  .header-backdrop.active {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  @media (min-width: 768px) {
-    .header-backdrop {
-      display: none;
-    }
+    transition: transform 0.2s ease;
   }
 
   .mobile-nav {
     position: fixed;
-    top: 0;
+    top: var(--header-height);
+    left: 0;
     right: 0;
     bottom: 0;
-    width: 260px;
-    max-width: 80vw;
     background: var(--bg-primary);
-    border-left: 1px solid var(--border-secondary);
-    padding: var(--space-6);
-    padding-top: calc(var(--header-height) + var(--space-6));
+    padding: var(--space-8) var(--space-6);
     transform: translateX(100%);
-    transition: transform 0.2s ease;
-    z-index: calc(var(--z-fixed) + 1);
+    transition: transform 0.3s var(--ease-smooth);
   }
 
   .mobile-nav.open {
@@ -327,27 +197,28 @@ const navItems = [
 
   .mobile-nav-list {
     list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
     margin: 0;
     padding: 0;
   }
 
+  .mobile-nav-list li + li {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-divider);
+  }
+
   .mobile-nav-link {
     display: block;
-    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
     color: var(--text-secondary);
-    font-size: var(--text-base);
-    font-weight: 500;
     text-decoration: none;
-    border-radius: var(--radius-md);
-    transition: color 0.15s ease, background-color 0.15s ease;
+    padding: var(--space-2) 0;
+    transition: color var(--duration-fast) var(--ease-smooth);
   }
 
   .mobile-nav-link:hover,
   .mobile-nav-link.active {
     color: var(--text-primary);
-    background-color: var(--bg-secondary);
   }
 </style>

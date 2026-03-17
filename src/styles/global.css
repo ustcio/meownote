@@ -1,6 +1,6 @@
 @import './tokens.css';
 
-/* ==================== Reset & Base ==================== */
+/* ==================== Base Reset ==================== */
 *,
 *::before,
 *::after {
@@ -15,365 +15,86 @@ html {
   -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  font-family: var(--font-sans);
-}
-
-/* Selection - Modern Professional */
-::selection {
-  background: var(--color-primary);
-  color: white;
-}
-
-/* Chinese font for zh language pages */
-html[lang="zh"] {
-  font-family: var(--font-chinese);
-}
-
-html[lang="zh"] body {
-  font-family: var(--font-chinese);
-}
-
-html[lang="zh"] h1,
-html[lang="zh"] h2,
-html[lang="zh"] h3,
-html[lang="zh"] h4,
-html[lang="zh"] h5,
-html[lang="zh"] h6 {
-  font-family: var(--font-chinese);
-}
-
-html[lang="zh"] p,
-html[lang="zh"] span,
-html[lang="zh"] a,
-html[lang="zh"] li,
-html[lang="zh"] label,
-html[lang="zh"] button,
-html[lang="zh"] input,
-html[lang="zh"] textarea,
-html[lang="zh"] select {
-  font-family: var(--font-chinese);
-}
-
-/* Numbers use Space Grotesk globally - Refik Anadol Style */
-.number,
-[data-number],
-.stat-value,
-.price,
-.amount,
-.quantity,
-.tx-data-value,
-.stat-card .value {
-  font-family: var(--font-number);
-  font-feature-settings: "tnum";
-  font-variant-numeric: tabular-nums;
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   font-size: var(--text-base);
-  font-weight: var(--font-regular);
+  font-weight: var(--font-normal);
   line-height: var(--leading-normal);
   color: var(--text-primary);
   background-color: var(--bg-primary);
-  min-height: 100vh;
-  transition: background-color var(--duration-normal) var(--ease-default),
-              color var(--duration-normal) var(--ease-default);
+  transition: background-color var(--duration-normal) var(--ease-smooth),
+              color var(--duration-normal) var(--ease-smooth);
 }
 
-/* ==================== Global Number Typography - Refik Anadol Style ==================== */
-/* Apply Space Grotesk to all numbers globally */
-.number,
-[data-number],
-.stat-value,
-.contribution-subtitle,
-.font-number,
-.price,
-.change,
-.val,
-.stat .val,
-[id$="-price"],
-[id$="-change"],
-[id$="-high"],
-[id$="-low"],
-[id$="-open"],
-[id$="-count"],
-[id$="-total"],
-[id$="-today"],
-[id$="-online"],
-[id$="-uv"],
-[id$="-pv"],
-[id*="stat-"],
-.footer-copyright {
-  font-family: var(--font-number) !important;
-  font-feature-settings: "tnum";
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-}
+/* ==================== Typography - Anthropic Style ==================== */
 
-/* Auto-detect numbers in text for Apple-style rendering */
-:not(pre) > code:has(:only-child),
-:not(pre) > code {
-  font-family: var(--font-mono);
-}
-
-/* ==================== Typography Hierarchy ==================== */
-h1, h2, h3, h4, h5, h6 {
+/* Display Headings - Serif, Elegant */
+h1, h2, h3 {
   font-family: var(--font-display);
-  font-weight: var(--font-medium);
+  font-weight: var(--font-normal);
   line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
   color: var(--text-primary);
+  letter-spacing: var(--tracking-tight);
 }
 
 h1 {
   font-size: var(--text-5xl);
-  font-weight: var(--font-semibold);
-  letter-spacing: var(--tracking-tighter);
+  line-height: 1.1;
 }
 
 h2 {
-  font-size: var(--text-4xl);
-  letter-spacing: var(--tracking-tight);
+  font-size: var(--text-3xl);
+  line-height: 1.2;
 }
 
 h3 {
-  font-size: var(--text-3xl);
-}
-
-h4 {
   font-size: var(--text-2xl);
 }
 
-h5 {
+/* Subheadings - Sans, Medium weight */
+h4, h5, h6 {
+  font-family: var(--font-body);
+  font-weight: var(--font-medium);
+  line-height: var(--leading-snug);
+  color: var(--text-primary);
+}
+
+h4 {
   font-size: var(--text-xl);
 }
 
-h6 {
+h5 {
   font-size: var(--text-lg);
 }
 
+h6 {
+  font-size: var(--text-base);
+}
+
+/* Body Text */
 p {
-  font-family: var(--font-sans);
-  font-weight: var(--font-regular);
+  font-family: var(--font-body);
   color: var(--text-secondary);
   line-height: var(--leading-relaxed);
 }
 
+/* Links - Subtle */
 a {
-  font-family: var(--font-sans);
-  color: var(--color-primary);
+  color: var(--text-primary);
   text-decoration: none;
-  transition: color var(--duration-fast) var(--ease-default);
+  transition: color var(--duration-fast) var(--ease-smooth);
 }
 
 a:hover {
-  color: var(--interactive-primary-hover);
-}
-
-/* ==================== Interactive Elements ==================== */
-button {
-  font-family: var(--font-sans);
-  font-size: inherit;
-  cursor: pointer;
-  border: none;
-  background: none;
-  color: inherit;
-}
-
-/* ==================== Touch Feedback & Border-Radius Consistency ==================== */
-/* Global fix: Ensure touch feedback area matches visual border-radius */
-button,
-[role="button"],
-.btn,
-.nav-link,
-.nav-cta,
-.auth-btn,
-.mobile-nav-link,
-.mobile-cta,
-.mobile-auth-btn,
-.tab,
-.tool-item,
-.tool-btn,
-.feature-card,
-.stat-card,
-.team-card,
-.dropdown-item,
-.lang-option,
-.model-option,
-.history-item,
-.quick-action,
-.setting-item,
-.card,
-a[class*="btn"],
-[onclick],
-input[type="submit"],
-input[type="button"],
-input[type="reset"] {
-  position: relative;
-  overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-}
-
-/* Active state touch feedback - matches border-radius */
-button::before,
-[role="button"]::before,
-.btn::before,
-.nav-link::before,
-.nav-cta::before,
-.auth-btn::before,
-.mobile-nav-link::before,
-.mobile-cta::before,
-.mobile-auth-btn::before,
-.tab::before,
-.tool-item::before,
-.tool-btn::before,
-.feature-card::before,
-.stat-card::before,
-.team-card::before,
-.dropdown-item::before,
-.lang-option::before,
-.model-option::before,
-.history-item::before,
-.quick-action::before,
-.setting-item::before,
-.card::before,
-a[class*="btn"]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: currentColor;
-  opacity: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  transition: opacity var(--duration-fast) var(--ease-default);
-}
-
-/* Active state - show touch feedback */
-button:active::before,
-[role="button"]:active::before,
-.btn:active::before,
-.nav-link:active::before,
-.nav-cta:active::before,
-.auth-btn:active::before,
-.mobile-nav-link:active::before,
-.mobile-cta:active::before,
-.mobile-auth-btn:active::before,
-.tab:active::before,
-.tool-item:active::before,
-.tool-btn:active::before,
-.feature-card:active::before,
-.stat-card:active::before,
-.team-card:active::before,
-.dropdown-item:active::before,
-.lang-option:active::before,
-.model-option:active::before,
-.history-item:active::before,
-.quick-action:active::before,
-.setting-item:active::before,
-.card:active::before,
-a[class*="btn"]:active::before {
-  opacity: 0.1;
-}
-
-/* Mobile-specific touch feedback enhancement */
-@media (hover: none) and (pointer: coarse) {
-  button:active,
-  [role="button"]:active,
-  .btn:active,
-  .nav-link:active,
-  .nav-cta:active,
-  .auth-btn:active,
-  .mobile-nav-link:active,
-  .mobile-cta:active,
-  .mobile-auth-btn:active,
-  .tab:active,
-  .tool-item:active,
-  .tool-btn:active,
-  .feature-card:active,
-  .stat-card:active,
-  .team-card:active,
-  .dropdown-item:active,
-  .lang-option:active,
-  .model-option:active,
-  .history-item:active,
-  .quick-action:active,
-  .setting-item:active,
-  .card:active,
-  a[class*="btn"]:active {
-    transform: scale(0.98);
-    transition: transform 0.1s ease;
-  }
-  
-  button:active::before,
-  [role="button"]:active::before,
-  .btn:active::before,
-  .nav-link:active::before,
-  .nav-cta:active::before,
-  .auth-btn:active::before,
-  .mobile-nav-link:active::before,
-  .mobile-cta:active::before,
-  .mobile-auth-btn:active::before,
-  .tab:active::before,
-  .tool-item:active::before,
-  .tool-btn:active::before,
-  .feature-card:active::before,
-  .stat-card:active::before,
-  .team-card:active::before,
-  .dropdown-item:active::before,
-  .lang-option:active::before,
-  .model-option:active::before,
-  .history-item:active::before,
-  .quick-action:active::before,
-  .setting-item:active::before,
-  .card:active::before,
-  a[class*="btn"]:active::before {
-    opacity: 0.15;
-  }
-}
-
-/* Ensure border-radius is inherited by all child elements including pseudo-elements */
-[class*="radius"],
-[class*="rounded"],
-[style*="border-radius"] {
-  isolation: isolate;
-}
-
-input,
-textarea,
-select {
-  font-family: var(--font-sans);
-  font-size: inherit;
-  color: var(--text-primary);
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-3) var(--space-4);
-  transition: border-color var(--duration-fast) var(--ease-default),
-              box-shadow var(--duration-fast) var(--ease-default);
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2);
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--text-tertiary);
+  color: var(--color-primary);
 }
 
 /* ==================== Selection ==================== */
 ::selection {
-  background-color: var(--color-primary);
-  color: white;
+  background: var(--color-primary-light);
+  color: var(--text-primary);
 }
 
 /* ==================== Scrollbar ==================== */
@@ -387,7 +108,7 @@ textarea::placeholder {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--text-quaternary);
+  background: var(--text-muted);
   border-radius: var(--radius-full);
 }
 
@@ -395,84 +116,73 @@ textarea::placeholder {
   background: var(--text-tertiary);
 }
 
-/* ==================== Focus Visible ==================== */
+/* ==================== Focus States ==================== */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-/* ==================== Focus Visible - WCAG 2.2 Enhanced ==================== */
-::focus {
+/* ==================== Buttons ==================== */
+button {
+  font-family: var(--font-body);
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+/* ==================== Inputs ==================== */
+input,
+textarea,
+select {
+  font-family: var(--font-body);
+  font-size: inherit;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  transition: border-color var(--duration-fast) var(--ease-smooth);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
   outline: none;
+  border-color: var(--color-primary);
 }
 
-::focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
-  border-radius: inherit;
-}
-
-/* High visibility focus for interactive elements */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible,
-[role="button"]:focus-visible,
-[tabindex]:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
-  box-shadow: var(--focus-ring-offset-box-shadow), 0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset)) rgba(217, 119, 87, 0.2);
-  border-radius: inherit;
-}
-
-/* Remove focus ring for mouse users, keep for keyboard users */
-:focus:not(:focus-visible) {
-  outline: none;
-}
-
-/* ==================== Reduced Motion - Accessibility ==================== */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-  
-  /* Keep essential animations but make them instant */
-  .typing-indicator,
-  .float-element {
-    animation: none !important;
-  }
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
 }
 
 /* ==================== Utility Classes ==================== */
+
+/* Container */
 .container {
   width: 100%;
-  max-width: var(--container-xl);
+  max-width: var(--container-max);
   margin-left: auto;
   margin-right: auto;
-  padding-left: var(--space-4);
-  padding-right: var(--space-4);
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
 }
 
 @media (min-width: 768px) {
-  .container {
-    padding-left: var(--space-6);
-    padding-right: var(--space-6);
-  }
-}
-
-@media (min-width: 1024px) {
   .container {
     padding-left: var(--space-8);
     padding-right: var(--space-8);
   }
 }
 
+/* Narrow Container for Reading */
+.container-narrow {
+  max-width: var(--container-narrow);
+}
+
+/* Screen Reader Only */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -485,73 +195,39 @@ select:focus-visible,
   border: 0;
 }
 
-/* ==================== Animation Utilities - GPU Accelerated ==================== */
+/* ==================== Animation Utilities ==================== */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes slideUp {
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px) translateZ(0);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) translateZ(0);
+    transform: translateY(0);
   }
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) translateZ(0);
+.animate-fade-in {
+  animation: fadeIn 0.5s var(--ease-out);
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s var(--ease-out);
+}
+
+/* ==================== Reduced Motion ==================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0) translateZ(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateZ(0);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateZ(0);
-  }
-}
-
-/* GPU acceleration helpers */
-.scroll-animate,
-.feature-card,
-.hero-visual,
-.hover-lift,
-.card-hoverable {
-  will-change: transform, opacity;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-/* ==================== Hover Card Effect ==================== */
-.hover-lift {
-  transition: transform var(--duration-normal) var(--ease-default),
-              box-shadow var(--duration-normal) var(--ease-default),
-              border-color var(--duration-normal) var(--ease-default);
-}
-
-.hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--card-hover-shadow);
-  border-color: var(--border-hover);
-}
-
-/* ==================== Gradient Text ==================== */
-.gradient-text {
-  background: linear-gradient(135deg, var(--color-accent-blue) 0%, var(--color-accent-purple) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
