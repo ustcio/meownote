@@ -1,7 +1,6 @@
 ---
 import '@styles/global.css';
-import '@styles/chatbot-new.css';
-import Header from '@components/layout/Header.astro';
+import '@styles/chatbot-claude.css';
 import { t, getLangFromUrl, type Language } from '@i18n';
 
 const lang = getLangFromUrl(Astro.url);
@@ -23,10 +22,9 @@ const lang = getLangFromUrl(Astro.url);
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
-    <!-- Google Fonts - Claude Style Unified Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
     <meta name="theme-color" content="#FAFAFA" />
     <meta name="color-scheme" content="light dark" />
@@ -42,246 +40,225 @@ const lang = getLangFromUrl(Astro.url);
       })();
     </script>
   </head>
-  <body class="chatbot-page">
-    <Header />
-    
-    <main class="chatbot-main">
-      <!-- macOS Style Chat Window -->
-      <div class="chat-window" id="chat-window"
-        data-new-chat={t('chatbot.new_chat', lang)}
-        data-export-chat={t('chatbot.export', lang)}
-        data-select-model={t('chatbot.select_model', lang)}
-        data-send-message={t('chatbot.send', lang)}
-        data-stop-generating={t('chatbot.stop', lang)}
-        data-copied={t('chatbot.copied', lang)}
-        data-copy={t('chatbot.copy', lang)}
-      >
-        <!-- Window Title Bar with Traffic Lights -->
-        <div class="window-titlebar">
-          <div class="window-controls">
-            <button class="window-btn window-close" id="window-close" aria-label="Close">
-              <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor">
-                <path d="M1.5 1.5L6.5 6.5M6.5 1.5L1.5 6.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+  <body class="claude-chat">
+    <!-- Main Layout -->
+    <div class="chat-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <a href="/" class="sidebar-logo">
+            <div class="logo-icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3L20.5 18H3.5L12 3Z" fill="white" />
               </svg>
-            </button>
-            <button class="window-btn window-minimize" id="window-minimize" aria-label="Minimize">
-              <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor">
-                <path d="M1.5 4H6.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-              </svg>
-            </button>
-            <button class="window-btn window-maximize" id="window-maximize" aria-label="Maximize">
-              <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor">
-                <rect x="1.5" y="1.5" width="5" height="5" stroke="currentColor" stroke-width="1.2" fill="none" rx="0.5"/>
-              </svg>
-            </button>
-          </div>
-          <div class="window-title">{t('chatbot.title', lang)}</div>
-          <div class="window-actions">
-            <button class="window-action-btn" id="new-chat-btn" title={t('chatbot.new_chat', lang)}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-            </button>
-            <button class="window-action-btn" id="export-btn" title={t('chatbot.export', lang)}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-            </button>
-          </div>
-        </div>
-        
-        <!-- Chat Content Area -->
-        <div class="window-content">
-          <!-- Welcome Screen -->
-          <div class="welcome-screen" id="welcome-screen">
-            <div class="welcome-content">
-              <div class="welcome-brand">
-                <video class="welcome-logo" autoplay loop muted playsinline preload="auto" aria-hidden="true">
-                  <source src="/logo.mp4" type="video/mp4" />
-                </video>
-                <h1 class="welcome-title">{t('chatbot.welcome.title', lang)}</h1>
-                <p class="welcome-subtitle">{t('chatbot.welcome.subtitle', lang)}</p>
-              </div>
-
-              <div class="quick-actions">
-                <div class="quick-actions-title">{t('chatbot.quickstart', lang)}</div>
-                <div class="quick-actions-grid">
-                  <button class="quick-action" data-prompt="Help me write Python code for quicksort algorithm" type="button">
-                    <div class="quick-action-icon">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="16 18 22 12 16 6"></polyline>
-                        <polyline points="8 6 2 12 8 18"></polyline>
-                      </svg>
-                    </div>
-                    <span>{t('chatbot.quickstart.code', lang)}</span>
-                  </button>
-                  <button class="quick-action" data-prompt="Explain the basic principles of quantum computing" type="button">
-                    <div class="quick-action-icon">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M12 16v-4"></path>
-                        <path d="M12 8h.01"></path>
-                      </svg>
-                    </div>
-                    <span>{t('chatbot.quickstart.explain', lang)}</span>
-                  </button>
-                  <button class="quick-action" data-prompt="Help me write a business email about project progress report" type="button">
-                    <div class="quick-action-icon">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0 1.1.9-2 2-2z"></path>
-                        <polyline points="22,6 12,13 2,6"></polyline>
-                      </svg>
-                    </div>
-                    <span>{t('chatbot.quickstart.write', lang)}</span>
-                  </button>
-                  <button class="quick-action" data-prompt="Brainstorm ideas on how to improve team efficiency" type="button">
-                    <div class="quick-action-icon">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
-                        <path d="M9 21h6"></path>
-                      </svg>
-                    </div>
-                    <span>{t('chatbot.quickstart.brainstorm', lang)}</span>
-                  </button>
-                </div>
-              </div>
             </div>
-          </div>
-
-          <!-- Messages Container -->
-          <div class="messages-container" id="messages-container" aria-label="Messages"></div>
+            <span class="logo-text">LiveClaw</span>
+          </a>
+          <button class="new-chat-btn" id="new-chat-btn" title="New chat">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
         </div>
         
-        <!-- Input Area -->
-        <div class="window-input-area">
-          <div class="input-container">
-            <!-- Model Selector Button -->
-            <button class="model-selector-btn" id="model-selector-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label={t('chatbot.select_model', lang)} title={t('chatbot.select_model', lang)}>
-              <span class="model-current-name" id="model-current-name">Qwen Turbo</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chevron-down">
+        <div class="sidebar-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" placeholder="Search chats" class="search-input" id="search-input" />
+        </div>
+        
+        <div class="sidebar-section">
+          <div class="section-header">
+            <span>Today</span>
+          </div>
+          <div class="chat-list" id="chat-list">
+            <!-- Chat items will be populated by JS -->
+          </div>
+        </div>
+        
+        <div class="sidebar-section">
+          <div class="section-header">
+            <span>Previous 7 Days</span>
+          </div>
+          <div class="chat-list" id="chat-list-older">
+            <!-- Chat items will be populated by JS -->
+          </div>
+        </div>
+        
+        <div class="sidebar-footer">
+          <button class="sidebar-footer-btn" id="toggle-sidebar-btn" title="Toggle sidebar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Chat Area -->
+      <main class="chat-main">
+        <!-- Top Bar -->
+        <div class="chat-topbar">
+          <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          
+          <div class="model-selector" id="model-selector">
+            <button class="model-btn" id="model-btn">
+              <span class="model-name">Claude 3.5 Sonnet</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
             
-            <!-- Model Dropdown Panel -->
-            <div class="model-dropdown-panel" id="model-dropdown" role="listbox" aria-label="Model list">>
-              <div class="model-dropdown-header">{t('chatbot.select_model', lang)}</div>
-              
-              <div class="model-group">
-                <div class="model-group-label">{t('model.doubao.group', lang)}</div>
-                <button class="model-option" data-model="doubao-2.0-pro" data-name="Doubao 2.0 Pro" role="option" aria-selected="false" type="button">
-                  <div class="model-option-info">
-                    <span class="model-option-name">{t('model.doubao.pro', lang)}</span>
-                    <span class="model-option-desc">{t('model.doubao.pro.desc', lang)}</span>
-                  </div>
-                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </button>
-                <button class="model-option" data-model="doubao-2.0-code" data-name="Doubao 2.0 Code" role="option" aria-selected="false" type="button">
-                  <div class="model-option-info">
-                    <span class="model-option-name">{t('model.doubao.code', lang)}</span>
-                    <span class="model-option-desc">{t('model.doubao.code.desc', lang)}</span>
-                  </div>
-                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </button>
-              </div>
-              
-              <div class="model-group">
-                <div class="model-group-label">{t('model.qwen.group', lang)}</div>
-                <button class="model-option active" data-model="qwen-turbo" data-name="Qwen Turbo" role="option" aria-selected="true" type="button">
-                  <div class="model-option-info">
-                    <span class="model-option-name">{t('model.qwen.turbo', lang)}</span>
-                    <span class="model-option-desc">{t('model.qwen.turbo.desc', lang)}</span>
-                  </div>
-                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </button>
-                <button class="model-option" data-model="qwen-plus" data-name="Qwen Plus" role="option" aria-selected="false" type="button">
-                  <div class="model-option-info">
-                    <span class="model-option-name">{t('model.qwen.plus', lang)}</span>
-                    <span class="model-option-desc">{t('model.qwen.plus.desc', lang)}</span>
-                  </div>
-                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </button>
-              </div>
-              
-              <div class="model-group">
-                <div class="model-group-label">{t('model.llama.group', lang)}</div>
-                <button class="model-option" data-model="llama-3-8b" data-name="Llama 3 8B" role="option" aria-selected="false" type="button">
-                  <div class="model-option-info">
-                    <span class="model-option-name">{t('model.llama.8b', lang)}</span>
-                    <span class="model-option-desc">{t('model.llama.8b.desc', lang)}</span>
-                  </div>
-                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </button>
-                <button class="model-option" data-model="llama-3.1-8b" data-name="Llama 3.1 8B" role="option" aria-selected="false" type="button">
-                  <div class="model-option-info">
-                    <span class="model-option-name">{t('model.llama.3.1', lang)}</span>
-                    <span class="model-option-desc">{t('model.llama.3.1.desc', lang)}</span>
-                  </div>
-                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </button>
-              </div>
-            </div>
-            
-            <!-- Input Wrapper -->
-            <div class="input-wrapper">
-              <textarea
-                id="chat-input"
-                class="chat-input"
-                placeholder={t('chatbot.input.placeholder', lang)}
-                rows="1"
-                aria-label="Chat input"
-                aria-describedby="input-hint"
-              ></textarea>
-            </div>
-            
-            <!-- Input Actions -->
-            <div class="input-actions">
-              <button class="send-btn" id="send-btn" type="button" disabled aria-label={t('chatbot.send', lang)}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="22" y1="2" x2="11" y2="13"></line>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            <div class="model-dropdown" id="model-dropdown">
+              <div class="model-option" data-model="claude-3.5-sonnet">
+                <div class="model-info">
+                  <span class="model-title">Claude 3.5 Sonnet</span>
+                  <span class="model-desc">Most intelligent model</span>
+                </div>
+                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
+              </div>
+              <div class="model-option" data-model="claude-3.5-haiku">
+                <div class="model-info">
+                  <span class="model-title">Claude 3.5 Haiku</span>
+                  <span class="model-desc">Fastest model</span>
+                </div>
+                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <div class="model-option" data-model="claude-3-opus">
+                <div class="model-info">
+                  <span class="model-title">Claude 3 Opus</span>
+                  <span class="model-desc">Most powerful for complex tasks</span>
+                </div>
+                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="topbar-actions">
+            <button class="action-btn" id="share-btn" title="Share">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+            </button>
+            <a href="/" class="action-btn" title="Home">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div class="messages-area" id="messages-area">
+          <!-- Welcome Screen -->
+          <div class="welcome" id="welcome">
+            <div class="welcome-logo">
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <rect width="48" height="48" rx="12" fill="#D97757"/>
+                <path d="M24 8L38 36H10L24 8Z" fill="white"/>
+              </svg>
+            </div>
+            <h1 class="welcome-title">How can I help you today?</h1>
+            
+            <div class="suggestion-grid">
+              <button class="suggestion-card" data-prompt="Help me write a professional email to request a meeting">
+                <div class="suggestion-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                </div>
+                <span>Write an email</span>
               </button>
-              <button class="stop-btn" id="stop-btn" type="button" style="display: none;" aria-label={t('chatbot.stop', lang)}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="6" y="6" width="12" height="12" rx="2"></rect>
-                </svg>
+              
+              <button class="suggestion-card" data-prompt="Explain the concept of machine learning in simple terms">
+                <div class="suggestion-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                </div>
+                <span>Explain a concept</span>
+              </button>
+              
+              <button class="suggestion-card" data-prompt="Help me debug this Python code and explain what went wrong">
+                <div class="suggestion-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                  </svg>
+                </div>
+                <span>Help me code</span>
+              </button>
+              
+              <button class="suggestion-card" data-prompt="Summarize the key points from this article or document">
+                <div class="suggestion-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                </div>
+                <span>Summarize text</span>
               </button>
             </div>
           </div>
           
-          <div class="input-hint" id="input-hint">
-            <span>{t('chatbot.input.hint', lang)}</span>
-          </div>
+          <!-- Messages Container -->
+          <div class="messages" id="messages"></div>
         </div>
-      </div>
-    </main>
 
-    <!-- Toast Notifications -->
-    <div class="toast-container" id="toast-container" role="status" aria-live="polite"></div>
+        <!-- Input Area -->
+        <div class="input-area">
+          <div class="input-box">
+            <textarea 
+              class="input-field" 
+              id="input-field" 
+              placeholder="Message Claude..."
+              rows="1"
+            ></textarea>
+            <button class="send-btn" id="send-btn" disabled>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+          <p class="input-hint">Claude can make mistakes. Please verify important information.</p>
+        </div>
+      </main>
+    </div>
 
     <script>
-      import { initChatbot } from '../scripts/chatbot-new';
+      import { initClaudeChat } from '../scripts/chatbot-claude';
       
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initChatbot);
+        document.addEventListener('DOMContentLoaded', initClaudeChat);
       } else {
-        initChatbot();
+        initClaudeChat();
       }
     </script>
   </body>
