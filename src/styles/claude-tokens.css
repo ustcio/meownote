@@ -34,8 +34,8 @@
   /* ==================== Claude 排版系统 ==================== */
   
   /* Font Families - 可选: 使用 Inter 更接近 Claude */
-  --font-display: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Gotham", "Gotham A", "Gotham B", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: "Gotham", "Gotham A", "Gotham B", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", SFMono-Regular, ui-monospace, monospace;
   
   /* Claude 风格字体比例 - 更克制的尺度 */

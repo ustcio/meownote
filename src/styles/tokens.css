@@ -52,7 +52,7 @@
   
   /* Font Families - Keep current design per user request */
   --font-serif: "Times New Roman", Georgia, "Liberation Serif", serif;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Gotham", "Gotham A", "Gotham B", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, monospace;
   --font-number: "SF Pro Display", var(--font-sans);
   
