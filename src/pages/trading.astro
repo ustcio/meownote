@@ -3732,7 +3732,11 @@ const API_BASE = 'https://api.ustc.dev';
       }
     } catch (error) {
       console.error(`[API] Network error:`, error);
-      return { success: false, error: error.message || 'Network error' };
+      // Provide more specific error messages
+      if (error.name === 'TypeError' && error.message === 'load failed') {
+        return { success: false, error: '网络连接失败，请检查网络或稍后重试' };
+      }
+      return { success: false, error: error.message || '网络请求失败' };
     }
   }
 
