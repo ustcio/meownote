@@ -37,7 +37,7 @@ const navItems = [
     </nav>
 
     <div class="header-actions">
-      <a href="#" class="nav-link">Log in</a>
+      <a href="#" class="nav-link js-login-trigger">Log in</a>
       <a href="/chatbot" class="header-cta">Try LiveChat</a>
     </div>
     
@@ -64,7 +64,7 @@ const navItems = [
       </a>
     ))}
     <div class="mobile-actions">
-      <a href="#" class="mobile-login">Log in</a>
+      <a href="#" class="mobile-login js-login-trigger">Log in</a>
       <a href="/chatbot" class="mobile-cta">Try LiveChat</a>
     </div>
   </nav>
@@ -86,6 +86,14 @@ const navItems = [
       mobileNav?.classList.remove('open');
       mobileMenuBtn?.classList.remove('open');
       document.body.style.overflow = '';
+    });
+  });
+
+  // Login modal triggers
+  document.querySelectorAll('.js-login-trigger').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      (window as any).openAuthModal?.('login');
     });
   });
 </script>
