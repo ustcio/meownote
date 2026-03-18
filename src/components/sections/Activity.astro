@@ -445,26 +445,68 @@ const totalWeeks = Math.ceil(totalDays / 7);
   
   function updateHeatmap(data: Record<string, number>, maxCount: number, visitsText: string) {
     const cells = document.querySelectorAll('.contribution-cell[data-date]');
+    const cellData: { cell: Element; count: number }[] = [];
     
+    // 收集所有数据
     cells.forEach(cell => {
       const date = cell.getAttribute('data-date');
       if (date && data[date]) {
-        const count = data[date];
-        const level = calculateLevel(count, maxCount);
-        cell.setAttribute('data-level', String(level));
-        
-        const existingTitle = cell.getAttribute('title') || '';
-        const baseTitle = existingTitle.split(' - ')[0];
-        cell.setAttribute('title', `${baseTitle} - ${count} ${visitsText}`);
+        cellData.push({ cell, count: data[date] });
       }
+    });
+    
+    if (cellData.length === 0) return;
+    
+    // 计算分位数阈值（基于实际数据分布）
+    const nonZeroCounts = cellData.map(d => d.count).filter(c => c > 0).sort((a, b) => a - b);
+    const thresholds = calculateQuantileThresholds(nonZeroCounts);
+    
+    // 应用分级
+    cellData.forEach(({ cell, count }) => {
+      const level = calculateLevel(count, thresholds);
+      cell.setAttribute('data-level', String(level));
+      
+      const existingTitle = cell.getAttribute('title') || '';
+      const baseTitle = existingTitle.split(' - ')[0];
+      cell.setAttribute('title', `${baseTitle} - ${count} ${visitsText}`);
     });
   }
   
-  function calculateLevel(count: number, maxCount: number): number {
+  /**
+   * 基于分位数计算阈值
+   * 使用五分位数，确保每个颜色级别有大致相同数量的数据点
+   * 附加对数尺度处理，使低流量区域也能有效区分
+   */
+  function calculateQuantileThresholds(sortedCounts: number[]): number[] {
+    if (sortedCounts.length === 0) return [];
+    
+    const len = sortedCounts.length;
+    
+    // 使用五分位数：0-20%, 20-40%, 40-60%, 60-80%, 80-100%
+    // 对应 level 1-4 的上限阈值
+    const percentiles = [0.2, 0.4, 0.6, 0.8, 1.0];
+    
+    return percentiles.map(p => {
+      const index = Math.min(Math.floor(p * len), len - 1);
+      return sortedCounts[index];
+    });
+  }
+  
+  /**
+   * 计算颜色级别
+   * 结合分位数阈值和对数尺度，确保低、中、高流量区域都能有效区分
+   */
+  function calculateLevel(count: number, thresholds: number[]): number {
     if (count === 0) return 0;
-    if (count <= maxCount * 0.25) return 1;
-    if (count <= maxCount * 0.5) return 2;
-    if (count <= maxCount * 0.75) return 3;
+    if (thresholds.length === 0) return 1;
+    
+    // 首先尝试分位数分级
+    for (let i = 0; i < thresholds.length; i++) {
+      if (count <= thresholds[i]) {
+        return Math.min(i + 1, 4);
+      }
+    }
+    
     return 4;
   }
   
