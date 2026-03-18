@@ -542,7 +542,7 @@ const lang = getLangFromUrl(Astro.url);
         const target = e.target as HTMLElement;
         if (target.closest('.delete-btn')) return;
         const id = card.getAttribute('data-id');
-        if (id) window.location.href = `/workspace/${id}`;
+        if (id) window.location.href = `/workspace/edit?id=${id}`;
       });
     });
 

@@ -311,16 +311,15 @@ import Layout from '@layouts/Layout.astro';
 
   // Initialize
   async function init() {
-    // Get file ID from URL
-    const path = window.location.pathname;
-    const match = path.match(/\/workspace\/([^/]+)$/);
+    // Get file ID from URL query parameter
+    const params = new URLSearchParams(window.location.search);
+    fileId = params.get('id');
     
-    if (!match) {
+    if (!fileId) {
       window.location.href = '/workspace';
       return;
     }
 
-    fileId = match[1];
     await loadFile();
   }
 
@@ -458,8 +457,6 @@ import Layout from '@layouts/Layout.astro';
       return;
     }
 
-    // 如果有 fileUrl，打开下载链接
-    // 这里暂时只是显示提示
     showToast('文件下载功能开发中');
   }
 
