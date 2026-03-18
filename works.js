@@ -557,6 +557,7 @@ const ROUTES = {
   '/api/trading/alerts/history': { handler: handleAlertHistory },
   '/api/trading/market/status': { handler: handleMarketStatus },
   '/api/trading/alert-config': { handler: handleAlertConfig },
+  '/api/workspace': { handler: handleWorkspace, pattern: /^\/api\/workspace(\/[^/]+)?$/ },
 };
 
 // ================================================================================
@@ -7801,5 +7802,236 @@ async function cleanupDailyPriceAlerts(env) {
   } catch (error) {
     console.error('[Cleanup] Error during daily cleanup:', error);
     return { success: false, error: error.message };
+  }
+}
+
+// ================================================================================
+// Workspace API - 协作办公
+// ================================================================================
+
+async function handleWorkspace(request, env, ctx, match) {
+  const url = new URL(request.url);
+  const path = url.pathname;
+  const method = request.method;
+
+  // 获取文件ID（如果有）
+  const fileId = match && match[1] ? match[1].slice(1) : null;
+
+  // 确保数据库表存在
+  await ensureWorkspaceTable(env);
+
+  if (fileId) {
+    // 操作特定文件
+    if (method === 'GET') {
+      return await getWorkspaceFile(request, env, fileId);
+    } else if (method === 'PUT') {
+      return await updateWorkspaceFile(request, env, fileId);
+    } else if (method === 'DELETE') {
+      return await deleteWorkspaceFile(request, env, fileId);
+    }
+    return jsonResponse({ error: 'Method not allowed' }, 405, request);
+  }
+
+  // 文件列表操作
+  if (method === 'GET') {
+    return await listWorkspaceFiles(request, env);
+  } else if (method === 'POST') {
+    return await createWorkspaceFile(request, env);
+  }
+
+  return jsonResponse({ error: 'Method not allowed' }, 405, request);
+}
+
+// 确保表存在
+async function ensureWorkspaceTable(env) {
+  try {
+    await env.DB.exec(`
+      CREATE TABLE IF NOT EXISTS workspace_files (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        content TEXT,
+        type TEXT DEFAULT 'txt',
+        file_url TEXT,
+        file_size INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      )
+    `);
+  } catch (error) {
+    console.error('[Workspace] Table creation failed:', error.message);
+  }
+}
+
+// 生成唯一ID
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+}
+
+// 列出文件
+async function listWorkspaceFiles(request, env) {
+  const url = new URL(request.url);
+  const sortBy = url.searchParams.get('sortBy') || 'updated_at';
+  const order = url.searchParams.get('order') || 'desc';
+  const search = url.searchParams.get('search') || '';
+
+  try {
+    let sql = `SELECT * FROM workspace_files`;
+    const params = [];
+
+    if (search) {
+      sql += ` WHERE title LIKE ?`;
+      params.push(`%${search}%`);
+    }
+
+    const validSorts = ['title', 'created_at', 'updated_at'];
+    const sort = validSorts.includes(sortBy) ? sortBy : 'updated_at';
+    sql += ` ORDER BY ${sort} ${order === 'asc' ? 'ASC' : 'DESC'} LIMIT 100`;
+
+    const result = await env.DB.prepare(sql).bind(...params).all();
+
+    return jsonResponse({
+      success: true,
+      data: result.results.map(row => ({
+        id: row.id,
+        title: row.title,
+        content: row.content,
+        type: row.type,
+        fileUrl: row.file_url,
+        fileSize: row.file_size,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }))
+    }, 200, request);
+  } catch (error) {
+    console.error('[Workspace] List failed:', error);
+    return jsonResponse({ success: false, error: error.message }, 500, request);
+  }
+}
+
+// 获取单个文件
+async function getWorkspaceFile(request, env, fileId) {
+  try {
+    const result = await env.DB.prepare(
+      `SELECT * FROM workspace_files WHERE id = ?`
+    ).bind(fileId).first();
+
+    if (!result) {
+      return jsonResponse({ success: false, error: 'File not found' }, 404, request);
+    }
+
+    return jsonResponse({
+      success: true,
+      data: {
+        id: result.id,
+        title: result.title,
+        content: result.content,
+        type: result.type,
+        fileUrl: result.file_url,
+        fileSize: result.file_size,
+        createdAt: result.created_at,
+        updatedAt: result.updated_at
+      }
+    }, 200, request);
+  } catch (error) {
+    console.error('[Workspace] Get failed:', error);
+    return jsonResponse({ success: false, error: error.message }, 500, request);
+  }
+}
+
+// 创建文件
+async function createWorkspaceFile(request, env) {
+  try {
+    const body = await request.json();
+    const id = generateId();
+    const title = body.title || '未命名笔记';
+    const content = body.content || '';
+    const type = body.type || 'txt';
+    const fileUrl = body.fileUrl || '';
+    const fileSize = body.fileSize || 0;
+
+    await env.DB.prepare(
+      `INSERT INTO workspace_files (id, title, content, type, file_url, file_size) VALUES (?, ?, ?, ?, ?, ?)`
+    ).bind(id, title, content, type, fileUrl, fileSize).run();
+
+    return jsonResponse({
+      success: true,
+      data: { id, title, content, type, fileUrl, fileSize }
+    }, 201, request);
+  } catch (error) {
+    console.error('[Workspace] Create failed:', error);
+    return jsonResponse({ success: false, error: error.message }, 500, request);
+  }
+}
+
+// 更新文件
+async function updateWorkspaceFile(request, env, fileId) {
+  try {
+    const body = await request.json();
+
+    const updates = [];
+    const values = [];
+
+    if (body.title !== undefined) {
+      updates.push('title = ?');
+      values.push(body.title);
+    }
+    if (body.content !== undefined) {
+      updates.push('content = ?');
+      values.push(body.content);
+    }
+    if (body.type !== undefined) {
+      updates.push('type = ?');
+      values.push(body.type);
+    }
+    if (body.fileUrl !== undefined) {
+      updates.push('file_url = ?');
+      values.push(body.fileUrl);
+    }
+    if (body.fileSize !== undefined) {
+      updates.push('file_size = ?');
+      values.push(body.fileSize);
+    }
+
+    updates.push('updated_at = datetime("now")');
+    values.push(fileId);
+
+    const result = await env.DB.prepare(
+      `UPDATE workspace_files SET ${updates.join(', ')} WHERE id = ?`
+    ).bind(...values).run();
+
+    if (result.meta.changes === 0) {
+      return jsonResponse({ success: false, error: 'File not found' }, 404, request);
+    }
+
+    return jsonResponse({ success: true, message: 'Updated' }, 200, request);
+  } catch (error) {
+    console.error('[Workspace] Update failed:', error);
+    return jsonResponse({ success: false, error: error.message }, 500, request);
+  }
+}
+
+// 删除文件
+async function deleteWorkspaceFile(request, env, fileId) {
+  try {
+    // 获取文件信息（如果需要删除云存储中的文件）
+    const file = await env.DB.prepare(
+      `SELECT file_url FROM workspace_files WHERE id = ?`
+    ).bind(fileId).first();
+
+    // 删除数据库记录
+    const result = await env.DB.prepare(
+      `DELETE FROM workspace_files WHERE id = ?`
+    ).bind(fileId).run();
+
+    if (result.meta.changes === 0) {
+      return jsonResponse({ success: false, error: 'File not found' }, 404, request);
+    }
+
+    // TODO: 如果有 file_url，删除 R2 存储中的文件
+
+    return jsonResponse({ success: true, message: 'Deleted' }, 200, request);
+  } catch (error) {
+    console.error('[Workspace] Delete failed:', error);
+    return jsonResponse({ success: false, error: error.message }, 500, request);
   }
 }
