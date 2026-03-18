@@ -1,0 +1,723 @@
+---
+import Layout from '@layouts/Layout.astro';
+import { t, getLangFromUrl } from '@i18n';
+
+const lang = getLangFromUrl(Astro.url);
+---
+
+<Layout 
+  title={`Workspace - LiveMind`}
+  description="Collaborative workspace for notes and files"
+>
+  <div class="workspace-page">
+    <div class="workspace-container">
+      <!-- Header -->
+      <div class="page-header">
+        <div class="header-left">
+          <h1 class="page-title">Workspace</h1>
+          <p class="page-subtitle">协作办公 · 多端同步</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-secondary" id="upload-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span>上传文件</span>
+          </button>
+          <button class="btn-primary" id="new-note-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>新建笔记</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Filter -->
+      <div class="toolbar">
+        <div class="search-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="search-input" placeholder="搜索文件..." />
+        </div>
+        <select class="sort-select" id="sort-select">
+          <option value="updatedAt">最近更新</option>
+          <option value="createdAt">创建时间</option>
+          <option value="title">名称</option>
+        </select>
+      </div>
+
+      <!-- File Stats -->
+      <div class="file-stats">
+        <span id="files-count">0 个文件</span>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state visible" id="loading-state">
+        <div class="spinner"></div>
+        <p>加载中...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="12" y1="18" x2="12" y2="12"></line>
+          <line x1="9" y1="15" x2="15" y2="15"></line>
+        </svg>
+        <h3>暂无文件</h3>
+        <p>点击"新建笔记"或"上传文件"开始使用</p>
+      </div>
+
+      <!-- Files Grid -->
+      <div class="files-grid" id="files-grid"></div>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="file-upload" hidden multiple accept=".txt,.md,.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.zip,.rar" />
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</Layout>
+
+<style>
+  .workspace-page {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    padding-top: calc(var(--header-height) + var(--space-8));
+    padding-bottom: var(--space-12);
+  }
+
+  .workspace-container {
+    max-width: var(--container-xl);
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+  }
+
+  .page-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+  }
+
+  @media (min-width: 768px) {
+    .page-header {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: var(--font-normal);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+  }
+
+  .page-subtitle {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .header-actions {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .btn-primary {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+  }
+
+  .btn-primary:hover {
+    background: var(--color-primary-hover);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .toolbar {
+    display: flex;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+
+  .search-box {
+    flex: 1;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition: border-color var(--duration-fast) var(--ease-default);
+  }
+
+  .search-box:focus-within {
+    border-color: var(--color-primary);
+  }
+
+  .search-box svg {
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+  }
+
+  .search-box input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    outline: none;
+  }
+
+  .search-box input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .sort-select {
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+
+  .file-stats {
+    margin-bottom: var(--space-6);
+  }
+
+  .file-stats span {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .files-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 640px) {
+    .files-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .files-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .file-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    position: relative;
+  }
+
+  .file-card:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .file-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .file-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .file-icon.text { background: rgba(192, 107, 62, 0.1); color: var(--color-primary); }
+  .file-icon.document { background: rgba(74, 94, 138, 0.1); color: #4A5E8A; }
+  .file-icon.image { background: rgba(91, 126, 106, 0.1); color: #5B7E6A; }
+  .file-icon.archive { background: rgba(156, 138, 114, 0.1); color: #9A8A72; }
+
+  .file-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .file-title {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: var(--font-normal);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .file-meta {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+  }
+
+  .file-actions {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-default);
+  }
+
+  .file-card:hover .file-actions {
+    opacity: 1;
+  }
+
+  .delete-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-md);
+    background: rgba(220, 38, 38, 0.1);
+    color: #DC2626;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .delete-btn:hover {
+    background: #DC2626;
+    color: white;
+  }
+
+  .file-preview {
+    margin-top: var(--space-3);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .empty-state,
+  .loading-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-16) var(--space-4);
+    text-align: center;
+  }
+
+  .empty-state.visible,
+  .loading-state.visible {
+    display: flex;
+  }
+
+  .empty-state svg {
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-4);
+  }
+
+  .empty-state h3 {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+  }
+
+  .empty-state p {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: var(--space-4);
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-state p {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .toast {
+    position: fixed;
+    bottom: var(--space-6);
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    z-index: 1000;
+    opacity: 0;
+    transition: all var(--duration-normal) var(--ease-default);
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+</style>
+
+<script>
+  // CloudBase Configuration - will be initialized
+  let app: any = null;
+  let db: any = null;
+  let files: any[] = [];
+  let sortBy = 'updatedAt';
+  let searchQuery = '';
+
+  // DOM Elements
+  const filesGrid = document.getElementById('files-grid');
+  const emptyState = document.getElementById('empty-state');
+  const loadingState = document.getElementById('loading-state');
+  const filesCount = document.getElementById('files-count');
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
+  const fileUpload = document.getElementById('file-upload') as HTMLInputElement;
+  const newNoteBtn = document.getElementById('new-note-btn');
+  const uploadBtn = document.getElementById('upload-btn');
+  const toast = document.getElementById('toast');
+
+  // File type config
+  const fileTypeConfig: Record<string, { icon: string; type: string }> = {
+    'txt': { icon: 'text', type: 'text' },
+    'md': { icon: 'text', type: 'text' },
+    'pdf': { icon: 'document', type: 'document' },
+    'doc': { icon: 'document', type: 'document' },
+    'docx': { icon: 'document', type: 'document' },
+    'xls': { icon: 'document', type: 'document' },
+    'xlsx': { icon: 'document', type: 'document' },
+    'png': { icon: 'image', type: 'image' },
+    'jpg': { icon: 'image', type: 'image' },
+    'jpeg': { icon: 'image', type: 'image' },
+    'gif': { icon: 'image', type: 'image' },
+    'zip': { icon: 'archive', type: 'archive' },
+    'rar': { icon: 'archive', type: 'archive' },
+  };
+
+  // Initialize
+  async function init() {
+    try {
+      const cloudbase = await import('@cloudbase/js-sdk');
+      app = cloudbase.default.init({ env: 'livemind-8gtisgof5c029c22' });
+      
+      const auth = app.auth();
+      await auth.signInAnonymously();
+      
+      db = app.database();
+      await loadFiles();
+    } catch (error) {
+      console.error('Init failed:', error);
+      showToast('连接失败，请刷新重试');
+      hideLoading();
+    }
+  }
+
+  // Load files
+  async function loadFiles() {
+    if (!db) return;
+    
+    showLoading();
+    
+    try {
+      const result = await db.collection('workspace_files')
+        .orderBy(sortBy, 'desc')
+        .limit(100)
+        .get();
+      
+      files = result.data || [];
+      renderFiles();
+    } catch (error) {
+      console.error('Load failed:', error);
+      showToast('加载失败');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // Render files
+  function renderFiles() {
+    const filtered = files.filter(f => 
+      f.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    filesCount!.textContent = `${filtered.length} 个文件`;
+    
+    if (filtered.length === 0) {
+      filesGrid!.innerHTML = '';
+      emptyState!.classList.add('visible');
+      return;
+    }
+
+    emptyState!.classList.remove('visible');
+    
+    filesGrid!.innerHTML = filtered.map(file => {
+      const ext = file.type || 'txt';
+      const config = fileTypeConfig[ext] || { icon: 'document', type: 'document' };
+      const date = new Date(file.updatedAt || file.createdAt).toLocaleDateString();
+      const preview = file.content ? file.content.substring(0, 50) + '...' : '';
+      
+      return `
+        <div class="file-card" data-id="${file._id}">
+          <div class="file-header">
+            <div class="file-icon ${config.type}">
+              ${getFileIcon(config.icon)}
+            </div>
+            <div class="file-info">
+              <div class="file-title">${escapeHtml(file.title)}</div>
+              <div class="file-meta">${ext.toUpperCase()} · ${date}</div>
+            </div>
+          </div>
+          ${preview ? `<div class="file-preview">${escapeHtml(preview)}</div>` : ''}
+          <div class="file-actions">
+            <button class="delete-btn" data-id="${file._id}" title="删除">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Bind events
+    document.querySelectorAll('.file-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (target.closest('.delete-btn')) return;
+        const id = card.getAttribute('data-id');
+        if (id) window.location.href = `/workspace/${id}`;
+      });
+    });
+
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        if (id && confirm('确定删除此文件？')) {
+          await deleteFile(id);
+        }
+      });
+    });
+  }
+
+  // Get file icon SVG
+  function getFileIcon(type: string): string {
+    const icons: Record<string, string> = {
+      text: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+      </svg>`,
+      document: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+      </svg>`,
+      image: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+        <polyline points="21 15 16 10 5 21"></polyline>
+      </svg>`,
+      archive: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 8v13H3V8"></path>
+        <path d="M1 3h22v5H1z"></path>
+        <path d="M10 12h4"></path>
+      </svg>`
+    };
+    return icons[type] || icons.document;
+  }
+
+  // Delete file
+  async function deleteFile(id: string) {
+    try {
+      const file = files.find(f => f._id === id);
+      
+      // Delete from database
+      await db.collection('workspace_files').doc(id).remove();
+      
+      // Delete from storage if has fileUrl
+      if (file?.fileUrl) {
+        await app.deleteFile({ fileList: [file.fileUrl] });
+      }
+      
+      showToast('删除成功');
+      await loadFiles();
+    } catch (error) {
+      console.error('Delete failed:', error);
+      showToast('删除失败');
+    }
+  }
+
+  // Create new note
+  async function createNote() {
+    try {
+      const result = await db.collection('workspace_files').add({
+        title: '未命名笔记',
+        content: '',
+        type: 'txt',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      });
+      
+      if (result.id) {
+        window.location.href = `/workspace/${result.id}`;
+      }
+    } catch (error) {
+      console.error('Create failed:', error);
+      showToast('创建失败');
+    }
+  }
+
+  // Upload file
+  async function handleUpload(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const fileList = input.files;
+    if (!fileList || fileList.length === 0) return;
+
+    for (const file of Array.from(fileList)) {
+      try {
+        const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
+        const isText = ['txt', 'md'].includes(ext);
+        
+        let content = '';
+        let fileUrl = '';
+        
+        if (isText) {
+          content = await file.text();
+        } else {
+          // Upload to cloud storage
+          const cloudPath = `workspace/${Date.now()}_${file.name}`;
+          const result = await app.uploadFile({
+            cloudPath,
+            filePath: file
+          });
+          fileUrl = result.fileID;
+        }
+
+        await db.collection('workspace_files').add({
+          title: file.name.replace(/\.[^/.]+$/, ''),
+          content,
+          type: ext,
+          fileUrl,
+          fileSize: file.size,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        });
+        
+        showToast('上传成功');
+      } catch (error) {
+        console.error('Upload failed:', error);
+        showToast('上传失败');
+      }
+    }
+
+    input.value = '';
+    await loadFiles();
+  }
+
+  // Helper functions
+  function showLoading() {
+    loadingState?.classList.add('visible');
+    emptyState?.classList.remove('visible');
+    if (filesGrid) filesGrid.innerHTML = '';
+  }
+
+  function hideLoading() {
+    loadingState?.classList.remove('visible');
+  }
+
+  function showToast(message: string) {
+    if (toast) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+  }
+
+  function escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Event listeners
+  newNoteBtn?.addEventListener('click', createNote);
+  uploadBtn?.addEventListener('click', () => fileUpload?.click());
+  fileUpload?.addEventListener('change', handleUpload);
+  
+  searchInput?.addEventListener('input', (e) => {
+    searchQuery = (e.target as HTMLInputElement).value;
+    renderFiles();
+  });
+  
+  sortSelect?.addEventListener('change', (e) => {
+    sortBy = (e.target as HTMLSelectElement).value;
+    loadFiles();
+  });
+
+  // Initialize
+  init();
+</script>
