@@ -14,7 +14,7 @@ startDate.setFullYear(startDate.getFullYear() - 1);
 startDate.setDate(startDate.getDate() - startDate.getDay());
 
 function getMonthPositions() {
-  const positions: { month: number; week: number }[] = [];
+  const positions: { month: number; weekIndex: number }[] = [];
   let lastMonth = -1;
   
   const currentDate = new Date(startDate);
@@ -54,8 +54,8 @@ const totalWeeks = Math.ceil(totalDays / 7);
     <div class="contribution-graph-wrapper">
       <div class="contribution-graph" id="contribution-graph" data-year={currentYear}>
         <div class="contribution-months">
-          {monthPositions.map(({ month, week }) => (
-            <span class="contribution-month" style={`--week: ${week}`}>
+          {monthPositions.map(({ month, weekIndex }) => (
+            <span class="contribution-month" style={`--week: ${weekIndex}`}>
               {months[month]}
             </span>
           ))}
