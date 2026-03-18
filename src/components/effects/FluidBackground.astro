@@ -5,7 +5,7 @@ interface Props {
   colorScheme?: 'dreamscape' | 'ocean' | 'cosmic' | 'nature';
 }
 
-const { 
+const {
   class: className,
   intensity = 'medium',
   colorScheme = 'dreamscape'
@@ -33,7 +33,7 @@ const colorSchemes = {
 const scheme = colorSchemes[colorScheme];
 ---
 
-<div 
+<div
   class:list={['fluid-background', `intensity-${intensity}`, className]}
   data-colors={JSON.stringify(scheme.colors)}
   data-background={scheme.background}
@@ -59,6 +59,9 @@ const scheme = colorSchemes[colorScheme];
     left: 0;
     width: 100%;
     height: 100%;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   .fluid-overlay {
@@ -72,7 +75,6 @@ const scheme = colorSchemes[colorScheme];
     opacity: 0.3;
   }
 
-  /* Intensity variations - Claude simplified */
   .intensity-low .fluid-canvas {
     opacity: 0.2;
   }
@@ -83,6 +85,12 @@ const scheme = colorSchemes[colorScheme];
 
   .intensity-high .fluid-canvas {
     opacity: 0.4;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fluid-background {
+      display: none;
+    }
   }
 </style>
 
@@ -98,29 +106,55 @@ const scheme = colorSchemes[colorScheme];
     background: string;
     animationId: number = 0;
     time = 0;
+    isVisible: boolean = true;
+    observer: IntersectionObserver | null = null;
+    prefersReducedMotion: boolean = false;
 
     constructor(canvas: HTMLCanvasElement, colors: string[], background: string) {
       this.canvas = canvas;
       this.ctx = canvas.getContext('2d')!;
       this.colors = colors;
       this.background = background;
-      
+
+      this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (this.prefersReducedMotion) {
+        this.drawStatic();
+        return;
+      }
+
       this.resize();
       this.initParticles();
       this.bindEvents();
+      this.setupIntersectionObserver();
       this.animate();
+    }
+
+    setupIntersectionObserver() {
+      this.observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(entry => {
+            this.isVisible = entry.isIntersecting;
+            if (this.isVisible && !this.animationId) {
+              this.animate();
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+      this.observer.observe(this.canvas);
     }
 
     resize() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       this.width = window.innerWidth;
       this.height = window.innerHeight;
-      
+
       this.canvas.width = this.width * dpr;
       this.canvas.height = this.height * dpr;
       this.canvas.style.width = `${this.width}px`;
       this.canvas.style.height = `${this.height}px`;
-      
+
       this.ctx.scale(dpr, dpr);
     }
 
@@ -129,9 +163,9 @@ const scheme = colorSchemes[colorScheme];
         Math.floor((this.width * this.height) / 12000),
         80
       );
-      
+
       this.particles = [];
-      
+
       for (let i = 0; i < particleCount; i++) {
         this.particles.push(new Particle(
           Math.random() * this.width,
@@ -144,11 +178,11 @@ const scheme = colorSchemes[colorScheme];
     bindEvents() {
       let lastMouseX = 0;
       let lastMouseY = 0;
-      
+
       window.addEventListener('resize', () => {
         this.resize();
         this.initParticles();
-      });
+      }, { passive: true });
 
       window.addEventListener('mousemove', (e) => {
         this.mouse.vx = e.clientX - lastMouseX;
@@ -157,9 +191,8 @@ const scheme = colorSchemes[colorScheme];
         this.mouse.y = e.clientY;
         lastMouseX = e.clientX;
         lastMouseY = e.clientY;
-      });
+      }, { passive: true });
 
-      // Touch support
       window.addEventListener('touchmove', (e) => {
         const touch = e.touches[0];
         this.mouse.vx = touch.clientX - lastMouseX;
@@ -172,30 +205,42 @@ const scheme = colorSchemes[colorScheme];
     }
 
     animate() {
+      if (!this.isVisible) {
+        this.animationId = 0;
+        return;
+      }
+
       this.time += 0.005;
-      
-      // Clear with trail effect
+
       this.ctx.fillStyle = `${this.background}10`;
       this.ctx.fillRect(0, 0, this.width, this.height);
 
-      // Update and draw particles
-      this.particles.forEach((particle, i) => {
+      this.particles.forEach((particle) => {
         particle.update(this.time, this.mouse, this.width, this.height);
         particle.draw(this.ctx);
       });
 
-      // Draw connections
       this.drawConnections();
-
-      // Draw fluid blobs
       this.drawFluidBlobs();
 
       this.animationId = requestAnimationFrame(() => this.animate());
     }
 
+    drawStatic() {
+      this.ctx.fillStyle = this.background;
+      this.ctx.fillRect(0, 0, this.width, this.height);
+    }
+
+    pause() {
+      if (this.animationId) {
+        cancelAnimationFrame(this.animationId);
+        this.animationId = 0;
+      }
+    }
+
     drawConnections() {
       const maxDistance = 180;
-      
+
       for (let i = 0; i < this.particles.length; i++) {
         for (let j = i + 1; j < this.particles.length; j++) {
           const dx = this.particles[i].x - this.particles[j].x;
@@ -210,7 +255,7 @@ const scheme = colorSchemes[colorScheme];
             );
             gradient.addColorStop(0, this.particles[i].color + Math.floor(opacity * 255).toString(16).padStart(2, '0'));
             gradient.addColorStop(1, this.particles[j].color + Math.floor(opacity * 255).toString(16).padStart(2, '0'));
-            
+
             this.ctx.beginPath();
             this.ctx.strokeStyle = gradient;
             this.ctx.lineWidth = 0.5;
@@ -223,20 +268,19 @@ const scheme = colorSchemes[colorScheme];
     }
 
     drawFluidBlobs() {
-      // Draw large, soft gradient blobs for fluid effect
       const blobCount = 3;
-      
+
       for (let i = 0; i < blobCount; i++) {
         const x = this.width * (0.2 + i * 0.3 + Math.sin(this.time + i) * 0.1);
         const y = this.height * (0.3 + Math.cos(this.time * 0.7 + i) * 0.2);
         const radius = Math.min(this.width, this.height) * (0.25 + Math.sin(this.time * 0.5 + i) * 0.05);
-        
+
         const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, radius);
         const color = this.colors[i % this.colors.length];
         gradient.addColorStop(0, color + '15');
         gradient.addColorStop(0.5, color + '08');
         gradient.addColorStop(1, 'transparent');
-        
+
         this.ctx.fillStyle = gradient;
         this.ctx.beginPath();
         this.ctx.arc(x, y, radius, 0, Math.PI * 2);
@@ -247,6 +291,9 @@ const scheme = colorSchemes[colorScheme];
     destroy() {
       if (this.animationId) {
         cancelAnimationFrame(this.animationId);
+      }
+      if (this.observer) {
+        this.observer.disconnect();
       }
     }
   }
@@ -275,27 +322,23 @@ const scheme = colorSchemes[colorScheme];
     }
 
     update(time: number, mouse: { x: number; y: number; vx: number; vy: number }, width: number, height: number) {
-      // Organic movement using sine waves
       this.angle += this.speed * 0.01;
       this.x += this.vx + Math.sin(time + this.angle) * 0.2;
       this.y += this.vy + Math.cos(time + this.angle) * 0.2;
 
-      // Mouse interaction - gentle repulsion
       const dx = this.x - mouse.x;
       const dy = this.y - mouse.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      
+
       if (distance < 150) {
         const force = (150 - distance) / 150;
         this.vx += (dx / distance) * force * 0.02;
         this.vy += (dy / distance) * force * 0.02;
       }
 
-      // Damping
       this.vx *= 0.99;
       this.vy *= 0.99;
 
-      // Boundary wrap
       if (this.x < -50) this.x = width + 50;
       if (this.x > width + 50) this.x = -50;
       if (this.y < -50) this.y = height + 50;
@@ -303,7 +346,6 @@ const scheme = colorSchemes[colorScheme];
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-      // Glow effect
       const gradient = ctx.createRadialGradient(
         this.x, this.y, 0,
         this.x, this.y, this.radius * 4
@@ -311,13 +353,12 @@ const scheme = colorSchemes[colorScheme];
       gradient.addColorStop(0, this.color + '80');
       gradient.addColorStop(0.5, this.color + '20');
       gradient.addColorStop(1, 'transparent');
-      
+
       ctx.fillStyle = gradient;
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius * 4, 0, Math.PI * 2);
       ctx.fill();
 
-      // Core
       ctx.fillStyle = this.color;
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
@@ -325,14 +366,23 @@ const scheme = colorSchemes[colorScheme];
     }
   }
 
-  // Initialize fluid backgrounds
-  document.querySelectorAll('.fluid-background').forEach(container => {
-    const canvas = container.querySelector('.fluid-canvas') as HTMLCanvasElement;
-    const colors = JSON.parse(container.getAttribute('data-colors') || '[]');
-    const background = container.getAttribute('data-background') || '#0a0a0f';
-    
-    if (canvas && colors.length > 0) {
-      new FluidSimulation(canvas, colors, background);
-    }
-  });
+  function initFluidBackgrounds() {
+    document.querySelectorAll('.fluid-background').forEach(container => {
+      const canvas = container.querySelector('.fluid-canvas') as HTMLCanvasElement;
+      const colors = JSON.parse(container.getAttribute('data-colors') || '[]');
+      const background = container.getAttribute('data-background') || '#0a0a0f';
+
+      if (canvas && colors.length > 0) {
+        new FluidSimulation(canvas, colors, background);
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFluidBackgrounds);
+  } else {
+    initFluidBackgrounds();
+  }
+
+  document.addEventListener('astro:page-load', initFluidBackgrounds);
 </script>

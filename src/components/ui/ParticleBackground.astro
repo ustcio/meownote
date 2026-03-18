@@ -25,6 +25,15 @@ const { class: className } = Astro.props;
   .particle-canvas-wrapper canvas {
     width: 100%;
     height: 100%;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .particle-canvas-wrapper {
+      display: none;
+    }
   }
 </style>
 
@@ -36,20 +45,44 @@ const { class: className } = Astro.props;
     mouseX: number = 0;
     mouseY: number = 0;
     animationId: number = 0;
+    isVisible: boolean = true;
+    observer: IntersectionObserver | null = null;
+    prefersReducedMotion: boolean = false;
 
     constructor(canvasId: string) {
       this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
       if (!this.canvas) return;
-      
+
       this.ctx = this.canvas.getContext('2d')!;
+      this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (this.prefersReducedMotion) {
+        return;
+      }
+
       this.init();
+      this.setupIntersectionObserver();
+    }
+
+    setupIntersectionObserver() {
+      this.observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(entry => {
+            this.isVisible = entry.isIntersecting;
+            if (this.isVisible && !this.animationId) {
+              this.animate();
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+      this.observer.observe(this.canvas);
     }
 
     init() {
       this.resize();
       this.createParticles();
       this.bindEvents();
-      this.animate();
     }
 
     resize() {
@@ -63,7 +96,7 @@ const { class: className } = Astro.props;
     createParticles() {
       const count = Math.floor((window.innerWidth * window.innerHeight) / 15000);
       this.particles = [];
-      
+
       for (let i = 0; i < count; i++) {
         this.particles.push({
           x: Math.random() * window.innerWidth,
@@ -90,15 +123,20 @@ const { class: className } = Astro.props;
       window.addEventListener('resize', () => {
         this.resize();
         this.createParticles();
-      });
+      }, { passive: true });
 
       document.addEventListener('mousemove', (e) => {
         this.mouseX = e.clientX;
         this.mouseY = e.clientY;
-      });
+      }, { passive: true });
     }
 
     animate() {
+      if (!this.isVisible) {
+        this.animationId = 0;
+        return;
+      }
+
       const rect = this.canvas.getBoundingClientRect();
       this.ctx.clearRect(0, 0, rect.width, rect.height);
 
@@ -119,7 +157,7 @@ const { class: className } = Astro.props;
       const dx = this.mouseX - p.x;
       const dy = this.mouseY - p.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      
+
       if (distance < 100) {
         const angle = Math.atan2(dy, dx);
         const force = (100 - distance) / 100;
@@ -154,7 +192,7 @@ const { class: className } = Astro.props;
 
     drawConnections() {
       const maxDistance = 150;
-      
+
       for (let i = 0; i < this.particles.length; i++) {
         for (let j = i + 1; j < this.particles.length; j++) {
           const dx = this.particles[i].x - this.particles[j].x;
@@ -178,6 +216,9 @@ const { class: className } = Astro.props;
       if (this.animationId) {
         cancelAnimationFrame(this.animationId);
       }
+      if (this.observer) {
+        this.observer.disconnect();
+      }
     }
   }
 
@@ -186,7 +227,7 @@ const { class: className } = Astro.props;
   function initParticles() {
     const existing = document.getElementById('global-particle-canvas');
     if (!existing) return;
-    
+
     if (particleSystem) {
       particleSystem.destroy();
     }

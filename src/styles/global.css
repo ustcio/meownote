@@ -16,6 +16,7 @@ html {
   -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -27,11 +28,11 @@ body {
   background-color: var(--bg-primary);
   transition: background-color var(--duration-normal) var(--ease-default),
               color var(--duration-normal) var(--ease-default);
+  overflow-x: hidden;
 }
 
 /* ==================== Typography - Anthropic Style ==================== */
 
-/* Display Headings - Serif, Elegant */
 h1, h2, h3 {
   font-family: var(--font-display);
   font-weight: var(--font-normal);
@@ -54,7 +55,6 @@ h3 {
   font-size: var(--text-2xl);
 }
 
-/* Subheadings - Sans, Medium weight */
 h4, h5, h6 {
   font-family: var(--font-body);
   font-weight: var(--font-medium);
@@ -74,7 +74,6 @@ h6 {
   font-size: var(--text-base);
 }
 
-/* Body Text */
 p {
   font-family: var(--font-body);
   color: var(--text-secondary);
@@ -86,7 +85,6 @@ p:last-child {
   margin-bottom: 0;
 }
 
-/* Links - Subtle */
 a {
   color: var(--text-primary);
   text-decoration: none;
@@ -166,7 +164,6 @@ textarea::placeholder {
 
 /* ==================== Utility Classes ==================== */
 
-/* Container */
 .container {
   width: 100%;
   max-width: var(--container-xl);
@@ -183,12 +180,10 @@ textarea::placeholder {
   }
 }
 
-/* Narrow Container for Reading */
 .container-narrow {
   max-width: 768px;
 }
 
-/* Screen Reader Only */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -226,6 +221,12 @@ textarea::placeholder {
   animation: fadeInUp 0.6s ease;
 }
 
+/* ==================== Content Visibility Optimization ==================== */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
 /* ==================== Reduced Motion ==================== */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -236,4 +237,11 @@ textarea::placeholder {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ==================== Hardware Acceleration Hints ==================== */
+.gpu-accelerated {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }

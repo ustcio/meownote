@@ -4,41 +4,29 @@
   src: url('/fonts/doralice-regular.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2013-2014, U+2039-203A, U+2122;
 }
 
 /* HarmonyOS Sans SC Font - For Chinese Typography */
+/* Using WOFF2 format for better compression, font-display: optional prevents FOIT */
 @font-face {
   font-family: 'HarmonyOS Sans SC';
-  src: url('/fonts/HarmonyOS_SansSC_Regular.ttf') format('truetype');
+  src: url('/fonts/HarmonyOS_Sans_SC_Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'HarmonyOS Sans SC';
-  src: url('/fonts/HarmonyOS_SansSC_Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'HarmonyOS Sans SC';
-  src: url('/fonts/HarmonyOS_SansSC_Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
+  font-display: optional;
+  unicode-range: U+4E00-9FFF, U+3000-303F, U+FF00-FFEF, U+2000-206F;
 }
 
 /* Richy Font - For Logo Only */
 @font-face {
   font-family: 'Richy';
-  src: url('/fonts/richy.otf') format('opentype');
+  src: url('/fonts/Richy.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC;
 }
 
 /* Fallback system fonts will be used if custom fonts are not available */

@@ -3519,33 +3519,94 @@ const API_BASE = 'https://api.ustc.dev';
       
       updateEyePosition();
     },
-    
+
     initFormTracking() {
       const usernameInput = document.getElementById('trading-username');
       const passwordInput = document.getElementById('trading-password');
       const loginBtn = document.getElementById('trading-login-btn');
-      
+      const loginForm = document.getElementById('trading-login-form');
+
       usernameInput?.addEventListener('focus', () => {
         this.setExpression('curious');
         this.setSpeech('好的，让我看看你的账号~');
       });
-      
+
       usernameInput?.addEventListener('input', () => {
         this.setExpression('focused');
       });
-      
+
       passwordInput?.addEventListener('focus', () => {
         this.setExpression('shy');
         this.setSpeech('我会保护你的密码~');
       });
-      
+
       passwordInput?.addEventListener('input', () => {
         this.setExpression('focused');
       });
-      
+
       loginBtn?.addEventListener('click', () => {
         this.setExpression('anticipating');
         this.setSpeech('正在验证...');
+      });
+
+      loginForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        this.setExpression('anticipating');
+        this.setSpeech('正在验证...');
+
+        const username = (document.getElementById('trading-username') as HTMLInputElement)?.value;
+        const password = (document.getElementById('trading-password') as HTMLInputElement)?.value;
+
+        if (!username || !password) {
+          this.setExpression('confused');
+          this.setSpeech('请填写用户名和密码~');
+          return;
+        }
+
+        const btn = document.getElementById('trading-login-btn');
+        const btnText = btn?.querySelector('.btn-text');
+        const btnLoading = btn?.querySelector('.btn-loading');
+
+        if (btn) {
+          (btn as HTMLButtonElement).disabled = true;
+          btnText?.classList.add('hidden');
+          btnLoading?.classList.remove('hidden');
+        }
+
+        try {
+          const response = await fetch(`${API_BASE}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+            credentials: 'include'
+          });
+
+          const result = await response.json();
+          console.log('[Login] Response:', result);
+
+          if (result.success && result.token) {
+            setTradingToken(result.token);
+            localStorage.setItem('trading_user', JSON.stringify(result.user));
+            this.setExpression('happy');
+            this.setSpeech('登录成功！欢迎回来！');
+            setTimeout(() => {
+              showDashboard();
+            }, 1000);
+          } else {
+            this.setExpression('sad');
+            this.setSpeech(result.message || '登录失败，请检查用户名和密码~');
+          }
+        } catch (error) {
+          console.error('[Login] Error:', error);
+          this.setExpression('sad');
+          this.setSpeech('网络错误，请稍后重试~');
+        } finally {
+          if (btn) {
+            (btn as HTMLButtonElement).disabled = false;
+            btnText?.classList.remove('hidden');
+            btnLoading?.classList.add('hidden');
+          }
+        }
       });
     },
     

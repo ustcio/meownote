@@ -30,9 +30,10 @@ const lang = getLangFromUrl(Astro.url);
     
     <div class="auth-header">
       <div class="auth-logo">
-        <video autoplay loop muted playsinline width="48" height="48">
-          <source src="/logo.mp4" type="video/mp4" />
-        </video>
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <rect width="64" height="64" rx="16" fill="#C06B3E"/>
+          <path d="M32 12L50 52H14L32 12Z" fill="white"/>
+        </svg>
       </div>
       <h2 class="auth-title">{t('auth.welcome', lang)}</h2>
       <p class="auth-subtitle">{t('auth.login.subtitle', lang)}</p>
@@ -252,22 +253,19 @@ const lang = getLangFromUrl(Astro.url);
     text-align: center;
     margin-bottom: var(--space-6);
   }
-  
+
   .auth-logo {
     display: flex;
     justify-content: center;
     margin-bottom: var(--space-4);
   }
-  
-  .auth-logo video {
+
+  .auth-logo svg {
     width: 64px;
     height: 64px;
     border-radius: var(--radius-xl);
-    object-fit: cover;
-    object-position: center;
-    transform: scale(1.15);
   }
-  
+
   .auth-title {
     font-size: var(--text-xl);
     font-weight: var(--font-bold);
