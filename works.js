@@ -7849,7 +7849,7 @@ async function handleWorkspace(request, env, ctx, match) {
 // 确保表存在
 async function ensureWorkspaceTable(env) {
   try {
-    await env.DB.exec(`
+    await env.DB.prepare(`
       CREATE TABLE IF NOT EXISTS workspace_files (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
@@ -7860,7 +7860,7 @@ async function ensureWorkspaceTable(env) {
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now'))
       )
-    `);
+    `).run();
   } catch (error) {
     console.error('[Workspace] Table creation failed:', error.message);
   }
