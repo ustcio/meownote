@@ -711,7 +711,9 @@ async function handleChat(request, env, ctx) {
     return await handleWorkersAIChat(env, config, message, history, model);
   }
 
-  const apiKey = config.provider === 'qwen' ? env.DASHSCOPE_API_KEY : env.DOUBAO_API_KEY;
+  const apiKey = config.provider === 'qwen' ? env.DASHSCOPE_API_KEY : 
+                  config.provider === 'doubao' ? env.DOUBAO_API_KEY : 
+                  config.provider === 'minimax' ? env.MINIMAX_API_KEY : null;
   
   if (!apiKey) {
     console.error('[Chat API] API key not configured for provider:', config.provider);
