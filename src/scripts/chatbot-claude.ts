@@ -20,7 +20,7 @@ interface ChatSession {
 let currentSession: ChatSession | null = null;
 let sessions: ChatSession[] = [];
 let isGenerating = false;
-let currentModel = 'claude-3.5-sonnet';
+let currentModel = 'minimax-2.7';
 
 // API Configuration
 const API_BASE = 'https://api.ustc.dev';
@@ -205,14 +205,27 @@ async function handleSendMessage() {
   } catch (error) {
     removeTypingIndicator();
     console.error('Error getting response:', error);
-    // Show error message
-    const errorMessage: ChatMessage = {
+    
+    let errorMessage = 'Sorry, I encountered an error. Please try again.';
+    if (error instanceof Error) {
+      if (error.message.includes('API error: 500') || error.message.includes('API not configured')) {
+        errorMessage = 'AI service is not configured. Please check the server setup.';
+      } else if (error.message.includes('API error: 401')) {
+        errorMessage = 'Authentication failed. Please check the API key configuration.';
+      } else if (error.message.includes('fetch')) {
+        errorMessage = 'Unable to connect to the server. Please check your internet connection.';
+      } else {
+        errorMessage = `Error: ${error.message}`;
+      }
+    }
+    
+    const errorMsg: ChatMessage = {
       role: 'assistant',
-      content: 'Sorry, I encountered an error. Please try again.',
+      content: errorMessage,
       timestamp: new Date()
     };
-    currentSession.messages.push(errorMessage);
-    renderMessage(errorMessage);
+    currentSession.messages.push(errorMsg);
+    renderMessage(errorMsg);
   } finally {
     isGenerating = false;
     saveSessions();
@@ -224,27 +237,40 @@ async function handleSendMessage() {
  */
 async function getAIResponse(message: string): Promise<string> {
   try {
-    const response = await fetch(`${API_BASE}/chat`, {
+    const response = await fetch(`${API_BASE}/api/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         message,
-        model: currentModel
+        model: currentModel,
+        history: currentSession?.messages.map(m => ({
+          role: m.role === 'user' ? 'user' : 'assistant',
+          content: m.content
+        })) || []
       })
     });
 
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `API error: ${response.status}`);
     }
 
     const data = await response.json();
-    return data.response || data.message || data.content || 'I apologize, but I could not generate a response.';
+    
+    if (data.success && data.reply) {
+      return data.reply;
+    }
+    
+    if (data.error || data.message) {
+      throw new Error(data.message || data.error || 'Unknown error');
+    }
+    
+    throw new Error('Invalid response format from API');
   } catch (error) {
     console.error('API call failed:', error);
-    // Return a demo response for testing
-    return `I understand you said: "${message}"\n\nThis is a demo response. The actual API endpoint needs to be configured for real responses.`;
+    throw error;
   }
 }
 
