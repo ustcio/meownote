@@ -652,7 +652,7 @@ function getClientIP(request) {
 // 1. Unified Chat API (Qwen & Doubao Models)
 // ================================================================================
 
-const CHAT_SYSTEM_PROMPT = 'You are Meow AI Assistant, a helpful, harmless, and honest AI assistant. You can help users with coding, analysis, creative writing, and various other tasks. Please respond in the same language as the user.';
+const CHAT_SYSTEM_PROMPT = 'You are a helpful AI assistant. Respond directly and concisely.';
 
 const MODEL_CONFIG = {
   // MiniMax Model
