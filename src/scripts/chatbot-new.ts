@@ -18,8 +18,8 @@ interface Conversation {
 }
 
 // State Management
-let currentModel = 'qwen-turbo';
-let currentModelName = 'Qwen Turbo';
+let currentModel = 'minimax-2.7';
+let currentModelName = 'MiniMax 2.7';
 let chatHistory: Message[] = [];
 let conversations: Conversation[] = [];
 let currentConversationId: string | null = null;
@@ -311,10 +311,7 @@ function selectModel(model: string, name: string): void {
 
 function getShortModelName(fullName: string): string {
   const nameMap: Record<string, string> = {
-    'Doubao 2.0 Pro': 'Doubao Pro',
-    'Doubao 2.0 Code': 'Doubao Code',
-    'Qwen Turbo': 'Qwen Turbo',
-    'Qwen Plus': 'Qwen Plus'
+    'MiniMax 2.7': 'MiniMax 2.7'
   };
   return nameMap[fullName] || fullName;
 }
@@ -565,11 +562,6 @@ async function sendMessage(): Promise<void> {
       // Only show performance warning if extremely slow (> 8 seconds)
       if (ttfb > 8000) {
         console.warn(`[Performance] Slow response detected: ${ttfb.toFixed(0)}ms`);
-        // Only show toast for non-turbo models, and only once per session
-        if (currentModel !== 'qwen-turbo' && !window.sessionStorage.getItem('slowWarningShown')) {
-          showToast('响应较慢，建议切换到 Qwen Turbo 模型', 'info');
-          window.sessionStorage.setItem('slowWarningShown', 'true');
-        }
       }
     } else {
       showToast(data.message || 'Failed to get response', 'error');

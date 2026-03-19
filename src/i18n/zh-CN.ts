@@ -79,21 +79,9 @@ export const translations = {
   'chatbot.copied': '已复制',
   
   // Models
-  'model.doubao.group': 'Doubao',
-  'model.doubao.pro': 'Doubao 2.0 Pro',
-  'model.doubao.pro.desc': '通用对话',
-  'model.doubao.code': 'Doubao 2.0 Code',
-  'model.doubao.code.desc': '代码生成',
-  'model.qwen.group': 'Qwen',
-  'model.qwen.turbo': 'Qwen Turbo',
-  'model.qwen.turbo.desc': '快速响应',
-  'model.qwen.plus': 'Qwen Plus',
-  'model.qwen.plus.desc': '增强能力',
-  'model.llama.group': 'Llama (Cloudflare)',
-  'model.llama.8b': 'Llama 3 8B',
-  'model.llama.8b.desc': '边缘推理',
-  'model.llama.3.1': 'Llama 3.1 8B',
-  'model.llama.3.1.desc': '最新版本',
+  'model.minimax.group': 'MiniMax',
+  'model.minimax.2.7': 'MiniMax 2.7',
+  'model.minimax.2.7.desc': '最新 MiniMax 模型',
   
   // Kit Page
   'kit.title': '工具箱',

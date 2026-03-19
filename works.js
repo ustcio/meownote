@@ -655,46 +655,11 @@ function getClientIP(request) {
 const CHAT_SYSTEM_PROMPT = 'You are Meow AI Assistant, a helpful, harmless, and honest AI assistant. You can help users with coding, analysis, creative writing, and various other tasks. Please respond in the same language as the user.';
 
 const MODEL_CONFIG = {
-  // Qwen Models
-  'qwen-turbo': {
-    provider: 'qwen',
-    model: 'qwen-turbo',
-    endpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
-    maxTokens: 2000,
-    temperature: 0.7
-  },
-  'qwen-plus': {
-    provider: 'qwen',
-    model: 'qwen-plus',
-    endpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
-    maxTokens: 2000,
-    temperature: 0.7
-  },
-  // Doubao Models
-  'doubao-2.0-pro': {
-    provider: 'doubao',
-    model: 'doubao-seed-2-0-pro-260215',
-    endpoint: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
-    maxTokens: 2000,
-    temperature: 0.7
-  },
-  'doubao-2.0-code': {
-    provider: 'doubao',
-    model: 'doubao-seed-2-0-code-preview-260215',
-    endpoint: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
-    maxTokens: 2000,
-    temperature: 0.7
-  },
-  // Cloudflare Workers AI - Llama 3
-  'llama-3-8b': {
-    provider: 'workers-ai',
-    model: '@cf/meta/llama-3-8b-instruct',
-    maxTokens: 2000,
-    temperature: 0.7
-  },
-  'llama-3.1-8b': {
-    provider: 'workers-ai',
-    model: '@cf/meta/llama-3.1-8b-instruct',
+  // MiniMax Model
+  'minimax-2.7': {
+    provider: 'minimax',
+    model: 'MiniMax-Text-01',
+    endpoint: 'https://api.minimax.chat/v1/text/chatcompletion_v2',
     maxTokens: 2000,
     temperature: 0.7
   }
@@ -718,7 +683,7 @@ async function handleChat(request, env, ctx) {
     return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
   }
 
-  const { message, model = 'qwen-turbo', history = [], stream = false } = body;
+  const { message, model = 'minimax-2.7', history = [], stream = false } = body;
   
   console.log('[Chat API] Message:', message?.substring(0, 50));
   console.log('[Chat API] Model:', model);

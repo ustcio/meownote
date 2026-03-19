@@ -81,21 +81,9 @@ const translations: Record<TranslationKey, string> = {
   'chatbot.copied': 'Copied',
   
   // Models - Simplified
-  'model.doubao.group': 'Doubao',
-  'model.doubao.pro': 'Pro',
-  'model.doubao.pro.desc': 'Balanced performance',
-  'model.doubao.code': 'Code',
-  'model.doubao.code.desc': 'Optimized for programming',
-  'model.qwen.group': 'Qwen',
-  'model.qwen.turbo': 'Turbo',
-  'model.qwen.turbo.desc': 'Fast responses',
-  'model.qwen.plus': 'Plus',
-  'model.qwen.plus.desc': 'Enhanced capabilities',
-  'model.llama.group': 'Llama',
-  'model.llama.8b': '8B',
-  'model.llama.8b.desc': 'Edge deployment',
-  'model.llama.3.1': '3.1',
-  'model.llama.3.1.desc': 'Latest version',
+  'model.minimax.group': 'MiniMax',
+  'model.minimax.2.7': 'MiniMax 2.7',
+  'model.minimax.2.7.desc': 'Latest MiniMax model',
   
   // Kit Page
   'kit.title': 'Tools',

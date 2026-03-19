@@ -26,7 +26,7 @@ export const config = {
   chatbot: {
     maxHistoryLength: 20,
     maxMessageLength: 4000,
-    defaultModel: 'qwen-turbo',
+    defaultModel: 'minimax-2.7',
     storageKey: 'chatbot_conversations',
     sessionKey: 'chatbot_session_id',
   },
