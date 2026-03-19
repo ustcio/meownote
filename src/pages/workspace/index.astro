@@ -905,6 +905,8 @@ const lang = getLangFromUrl(Astro.url);
 </style>
 
 <script>
+  const API_BASE = 'https://api.ustc.dev';
+  
   let files: any[] = [];
   let sortBy = 'updated_at';
   let searchQuery = '';
@@ -962,7 +964,7 @@ const lang = getLangFromUrl(Astro.url);
     showLoading();
     
     try {
-      const response = await fetch(`/api/workspace?sortBy=${sortBy}&order=desc${searchQuery ? '&search=' + encodeURIComponent(searchQuery) : ''}`);
+      const response = await fetch(`${API_BASE}/api/workspace?sortBy=${sortBy}&order=desc${searchQuery ? '&search=' + encodeURIComponent(searchQuery) : ''}`);
       const result = await response.json();
       
       files = result.data || [];
@@ -1105,7 +1107,7 @@ const lang = getLangFromUrl(Astro.url);
   // Delete file
   async function deleteFile(id: string) {
     try {
-      const response = await fetch(`/api/workspace/${id}`, {
+      const response = await fetch(`${API_BASE}/api/workspace/${id}`, {
         method: 'DELETE'
       });
       
@@ -1126,7 +1128,7 @@ const lang = getLangFromUrl(Astro.url);
   // Create new note
   async function createNote() {
     try {
-      const response = await fetch('/api/workspace', {
+      const response = await fetch(`${API_BASE}/api/workspace`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1172,7 +1174,7 @@ const lang = getLangFromUrl(Astro.url);
           content = await file.text();
         }
 
-        const response = await fetch('/api/workspace', {
+        const response = await fetch(`${API_BASE}/api/workspace`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

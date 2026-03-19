@@ -604,6 +604,8 @@ import Layout from '@layouts/Layout.astro';
 </style>
 
 <script>
+  const API_BASE = 'https://api.ustc.dev';
+  
   let fileId: string | null = null;
   let currentFile: any = null;
   let saveTimeout: number | null = null;
@@ -636,7 +638,7 @@ import Layout from '@layouts/Layout.astro';
   // Load file
   async function loadFile() {
     try {
-      const response = await fetch(`/api/workspace/${fileId}`);
+      const response = await fetch(`${API_BASE}/api/workspace/${fileId}`);
       const result = await response.json();
 
       if (!result.success || !result.data) {
@@ -768,7 +770,7 @@ import Layout from '@layouts/Layout.astro';
   // Save file
   async function saveFile() {
     try {
-      const response = await fetch(`/api/workspace/${fileId}`, {
+      const response = await fetch(`${API_BASE}/api/workspace/${fileId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -837,7 +839,7 @@ import Layout from '@layouts/Layout.astro';
     if (!confirm('Are you sure you want to delete this file?')) return;
 
     try {
-      const response = await fetch(`/api/workspace/${fileId}`, {
+      const response = await fetch(`${API_BASE}/api/workspace/${fileId}`, {
         method: 'DELETE'
       });
       

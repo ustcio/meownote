@@ -44,6 +44,11 @@ export const config = {
     maxRequests: 100,
     windowMs: 60000,
   },
+
+  workspace: {
+    apiBase: import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev',
+    endpoint: '/api/workspace',
+  },
 } as const;
 
 export type Config = typeof config;
