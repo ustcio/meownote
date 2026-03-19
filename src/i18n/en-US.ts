@@ -6,7 +6,7 @@ import type { TranslationKey } from './zh-CN';
 
 const translations: Record<TranslationKey, string> = {
   // Meta
-  'meta.title': 'LiveClaw - AI that works for you',
+  'meta.title': 'MaxMini - AI that works for you',
   'meta.description': 'Meet the AI assistant that helps you create, code, and collaborate with confidence.',
   
   // Navigation - Clean & Simple
@@ -24,7 +24,7 @@ const translations: Record<TranslationKey, string> = {
   'hero.title.word1': 'AI that',
   'hero.title.word2': 'understands',
   'hero.title.word3': 'you',
-  'hero.subtitle': 'LiveClaw is an AI assistant built to help you think deeper, work smarter, and create freely. No shortcuts, just genuine intelligence.',
+  'hero.subtitle': 'MaxMini is an AI assistant built to help you think deeper, work smarter, and create freely. No shortcuts, just genuine intelligence.',
   'hero.cta.primary': 'Start chatting',
   'hero.cta.secondary': 'See what it can do',
   'hero.stats.models': 'Models',
@@ -67,8 +67,8 @@ const translations: Record<TranslationKey, string> = {
   'chatbot.quickstart.explain': 'Explain a concept',
   'chatbot.quickstart.write': 'Draft an email',
   'chatbot.quickstart.brainstorm': 'Brainstorm ideas',
-  'chatbot.input.placeholder': 'Message LiveClaw...',
-  'chatbot.input.hint': 'LiveClaw may produce inaccurate information. Verify important details.',
+  'chatbot.input.placeholder': 'Message MaxMini...',
+  'chatbot.input.hint': 'MaxMini may produce inaccurate information. Verify important details.',
   'chatbot.select_model': 'Model',
   'chatbot.new_chat': 'New chat',
   'chatbot.export': 'Export',
@@ -187,7 +187,7 @@ const translations: Record<TranslationKey, string> = {
   'about.subtitle': 'Building AI with purpose',
   'about.badge': 'Our story',
   'about.story.title': 'Why we exist',
-  'about.story.p1': 'LiveClaw was born from a simple belief: AI should amplify human potential, not replace it. We\'re building tools that help you think clearer, create better, and work smarter.',
+  'about.story.p1': 'MaxMini was born from a simple belief: AI should amplify human potential, not replace it. We\'re building tools that help you think clearer, create better, and work smarter.',
   'about.story.p2': 'Our mission is to make advanced AI accessible to everyone—developers, creators, researchers, and curious minds alike.',
   'about.features.title': 'What matters to us',
   'about.features.performance.title': 'Speed',
