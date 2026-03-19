@@ -1,0 +1,16 @@
+{
+  "models": [
+    {
+      "id": "MiniMax-M2.7",
+      "name": "MiniMax M2.7",
+      "vendor": "MiniMax",
+      "apiKey": "sk-cp-A9-T5UqWhqnNUB-RpxXrVQTG89FRYX0_i8TiCAL7QSXTadCx8Mt3_OtgKRREoqiCJjTqmtFmPpVqTkFOkX3HkVbATQYuMl_RPERpaMyXtW53j7HO4zmqGC0",
+      "maxInputTokens": 204800,
+      "maxOutputTokens": 4096,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "supportsToolCall": true,
+      "supportsImages": false,
+      "supportsReasoning": true
+    }
+  ]
+}

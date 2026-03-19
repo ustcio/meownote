@@ -35,7 +35,7 @@ const lang = getLangFromUrl(Astro.url);
 
       <!-- Toolbar -->
       <div class="workspace-toolbar">
-        <div class="toolbar-left">
+        <div class="search-filter-row">
           <div class="search-box">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <circle cx="11" cy="11" r="8"></circle>
@@ -43,15 +43,22 @@ const lang = getLangFromUrl(Astro.url);
             </svg>
             <input type="text" id="search-input" placeholder="Search files..." />
           </div>
-          
-          <select class="sort-select" id="sort-select">
-            <option value="updated_at">Recent Updates</option>
-            <option value="created_at">Created Time</option>
-            <option value="title">Name</option>
-          </select>
+          <div class="filter-tabs" id="sort-tabs">
+            <button class="filter-tab active" data-sort="updated_at">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              Recent
+            </button>
+            <button class="filter-tab" data-sort="created_at">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              Created
+            </button>
+            <button class="filter-tab" data-sort="title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7V4h16v3"></path><path d="M9 20h6"></path><path d="M12 4v16"></path></svg>
+              Name
+            </button>
+          </div>
         </div>
-        
-        <div class="toolbar-right">
+        <div class="action-row">
           <button class="btn-secondary" id="upload-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -73,28 +80,36 @@ const lang = getLangFromUrl(Astro.url);
       <!-- Stats -->
       <div class="workspace-stats">
         <span id="files-count">0 files</span>
+        <span class="stats-divider">·</span>
+        <span id="total-size">0 KB</span>
       </div>
 
-      <!-- Loading State -->
-      <div class="loading-state visible" id="loading-state">
-        <div class="loading-spinner">
-          <div class="spinner-ring"></div>
-        </div>
-        <p>Loading workspace...</p>
+      <!-- Skeleton Loading -->
+      <div class="skeleton-grid" id="skeleton-grid">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
       </div>
 
       <!-- Empty State -->
       <div class="empty-state" id="empty-state">
-        <div class="empty-icon">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="12" y1="18" x2="12" y2="12"></line>
-            <line x1="9" y1="15" x2="15" y2="15"></line>
+        <div class="empty-illustration">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+            <circle cx="60" cy="60" r="50" fill="rgba(192,107,62,0.08)"/>
+            <rect x="40" y="35" width="40" height="50" rx="4" fill="none" stroke="rgba(192,107,62,0.3)" stroke-width="2"/>
+            <line x1="48" y1="48" x2="72" y2="48" stroke="rgba(192,107,62,0.3)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="48" y1="56" x2="68" y2="56" stroke="rgba(192,107,62,0.3)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="48" y1="64" x2="64" y2="64" stroke="rgba(192,107,62,0.3)" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="85" cy="75" r="18" fill="#C06B3E"/>
+            <line x1="85" y1="67" x2="85" y2="83" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <line x1="77" y1="75" x2="93" y2="75" stroke="white" stroke-width="2" stroke-linecap="round"/>
           </svg>
         </div>
-        <h3>No files yet</h3>
-        <p>Create your first note or upload a file to get started</p>
+        <h3>Your workspace is empty</h3>
+        <p>Capture your first thought, or upload a file to get started</p>
         <div class="empty-actions">
           <button class="btn-empty-primary" id="empty-new-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -222,8 +237,8 @@ const lang = getLangFromUrl(Astro.url);
   .workspace-toolbar {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
-    margin-bottom: var(--space-8);
+    gap: var(--space-5);
+    margin-bottom: var(--space-10);
   }
 
   @media (min-width: 768px) {
@@ -234,28 +249,30 @@ const lang = getLangFromUrl(Astro.url);
     }
   }
 
-  .toolbar-left,
-  .toolbar-right {
+  .search-filter-row {
     display: flex;
+    flex-direction: column;
     gap: var(--space-3);
-    align-items: center;
   }
 
-  .toolbar-left {
-    flex: 1;
+  @media (min-width: 640px) {
+    .search-filter-row {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-4);
+    }
   }
 
   .search-box {
-    flex: 1;
-    max-width: 400px;
     display: flex;
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-3) var(--space-4);
     background: #FFFFFF;
     border: 1px solid #D0C4B0;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-full);
     transition: all var(--duration-fast) var(--ease-default);
+    min-width: 260px;
   }
 
   .search-box:focus-within {
@@ -282,20 +299,51 @@ const lang = getLangFromUrl(Astro.url);
     color: #9A8A72;
   }
 
-  .sort-select {
-    padding: var(--space-3) var(--space-4);
-    background: #FFFFFF;
+  /* Filter Tabs */
+  .filter-tabs {
+    display: flex;
+    gap: var(--space-1);
+    background: rgba(255,255,255,0.6);
+    padding: var(--space-1);
+    border-radius: var(--radius-full);
     border: 1px solid #D0C4B0;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    color: #1A1207;
-    cursor: pointer;
-    font-family: var(--font-sans);
-    transition: border-color var(--duration-fast) var(--ease-default);
   }
 
-  .sort-select:hover {
-    border-color: #C4B9A5;
+  .filter-tab {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    color: #7A6A52;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    font-family: var(--font-sans);
+    white-space: nowrap;
+  }
+
+  .filter-tab:hover {
+    color: #1A1207;
+    background: rgba(192, 107, 62, 0.08);
+  }
+
+  .filter-tab.active {
+    background: #1A1207;
+    color: #F0E9DC;
+  }
+
+  .filter-tab.active:hover {
+    background: #2C2210;
+    color: #F0E9DC;
+  }
+
+  .action-row {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
   }
 
   /* Buttons */
@@ -337,6 +385,9 @@ const lang = getLangFromUrl(Astro.url);
 
   /* Stats */
   .workspace-stats {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
     margin-bottom: var(--space-6);
   }
 
@@ -344,6 +395,10 @@ const lang = getLangFromUrl(Astro.url);
     font-size: var(--text-sm);
     color: #7A6A52;
     font-family: var(--font-sans);
+  }
+
+  .stats-divider {
+    opacity: 0.5;
   }
 
   /* Files Grid */
@@ -365,16 +420,50 @@ const lang = getLangFromUrl(Astro.url);
     }
   }
 
+  /* Skeleton Grid */
+  .skeleton-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 640px) {
+    .skeleton-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .skeleton-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .skeleton-card {
+    height: 140px;
+    background: linear-gradient(90deg, #EDE5D4 0%, #F5EFE6 50%, #EDE5D4 100%);
+    background-size: 200% 100%;
+    border-radius: 16px;
+    border: 1px solid #D0C4B0;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
   /* File Card */
   .file-card {
-    background: #EDE5D4;
+    background: #FFFFFF;
     border: 1px solid #D0C4B0;
     border-radius: 16px;
     padding: var(--space-6);
     cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    transition: all var(--duration-normal) var(--ease-default);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   }
 
   .file-card::before {
@@ -389,13 +478,13 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   .file-card:hover {
-    border-color: #C4B9A5;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
+    border-color: rgba(192, 107, 62, 0.4);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
   }
 
   .file-card:hover::before {
-    background: #C06B3E;
+    background: linear-gradient(90deg, #C06B3E, #5B7E6A);
   }
 
   .file-header {
@@ -407,52 +496,58 @@ const lang = getLangFromUrl(Astro.url);
   .file-icon {
     width: 48px;
     height: 48px;
-    border-radius: 12px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     transition: transform var(--duration-fast) var(--ease-default);
+    background: rgba(192, 107, 62, 0.08);
+    color: #C06B3E;
   }
 
   .file-card:hover .file-icon {
-    transform: scale(1.05);
+    transform: scale(1.08) rotate(-3deg);
   }
 
   .file-icon.text {
-    background: rgba(59, 130, 246, 0.12);
+    background: rgba(59, 130, 246, 0.1);
     color: #3B82F6;
   }
 
   .file-icon.document {
-    background: rgba(168, 85, 247, 0.12);
+    background: rgba(168, 85, 247, 0.1);
     color: #A855F7;
   }
 
   .file-icon.image {
-    background: rgba(34, 197, 94, 0.12);
+    background: rgba(34, 197, 94, 0.1);
     color: #22C55E;
   }
 
   .file-icon.archive {
-    background: rgba(249, 115, 22, 0.12);
+    background: rgba(249, 115, 22, 0.1);
     color: #F97316;
   }
 
   .file-info {
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .file-title {
     font-size: var(--text-base);
-    font-weight: var(--font-normal);
+    font-weight: var(--font-medium);
     color: #1A1207;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     margin-bottom: var(--space-1);
     font-family: var(--font-sans);
+    letter-spacing: -0.01em;
   }
 
   .file-card:hover .file-title {
@@ -460,9 +555,18 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   .file-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
     font-size: var(--text-xs);
     color: #7A6A52;
     font-family: var(--font-sans);
+  }
+
+  .file-meta-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
   }
 
   .file-preview {
@@ -474,21 +578,24 @@ const lang = getLangFromUrl(Astro.url);
     -webkit-box-orient: vertical;
     overflow: hidden;
     font-family: var(--font-sans);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid rgba(208, 196, 176, 0.5);
   }
 
   /* Delete Button */
   .file-actions {
     position: absolute;
-    top: var(--space-4);
-    right: var(--space-4);
+    top: var(--space-3);
+    right: var(--space-3);
   }
 
   .delete-btn {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid transparent;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #D0C4B0;
     color: #7A6A52;
     cursor: pointer;
     display: flex;
@@ -496,6 +603,7 @@ const lang = getLangFromUrl(Astro.url);
     justify-content: center;
     opacity: 0;
     transition: all var(--duration-fast) var(--ease-default);
+    backdrop-filter: blur(4px);
   }
 
   .file-card:hover .delete-btn {
@@ -504,8 +612,9 @@ const lang = getLangFromUrl(Astro.url);
 
   .delete-btn:hover {
     background: rgba(220, 38, 38, 0.1);
-    border-color: rgba(220, 38, 38, 0.2);
+    border-color: rgba(220, 38, 38, 0.3);
     color: #DC2626;
+    transform: scale(1.05);
   }
 
   /* Loading State */
@@ -553,26 +662,20 @@ const lang = getLangFromUrl(Astro.url);
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: var(--space-20) var(--space-4);
+    padding: var(--space-16) var(--space-4);
+    text-align: center;
   }
 
   .empty-state.visible {
     display: flex;
   }
 
-  .empty-icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 20px;
-    background: rgba(192, 107, 62, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: var(--space-4);
+  .empty-illustration {
+    margin-bottom: var(--space-6);
   }
 
-  .empty-icon svg {
-    color: #C06B3E;
+  .empty-illustration svg {
+    display: block;
   }
 
   .empty-state h3 {
@@ -581,13 +684,15 @@ const lang = getLangFromUrl(Astro.url);
     margin: 0 0 var(--space-2);
     font-family: var(--font-display);
     font-weight: var(--font-normal);
+    letter-spacing: -0.02em;
   }
 
   .empty-state p {
     font-size: var(--text-sm);
     color: #7A6A52;
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-8);
     font-family: var(--font-sans);
+    max-width: 300px;
   }
 
   .empty-actions {
@@ -605,22 +710,25 @@ const lang = getLangFromUrl(Astro.url);
     border: none;
     border-radius: var(--radius-full);
     font-size: var(--text-sm);
-    font-weight: var(--font-normal);
+    font-weight: var(--font-medium);
     cursor: pointer;
     font-family: var(--font-sans);
-    transition: background-color var(--duration-fast) var(--ease-default);
+    transition: all var(--duration-fast) var(--ease-default);
+    box-shadow: 0 4px 12px rgba(192, 107, 62, 0.3);
   }
 
   .btn-empty-primary:hover {
     background: #A85A32;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(192, 107, 62, 0.35);
   }
 
   /* Toast */
   .toast {
     position: fixed;
-    bottom: var(--space-6);
+    bottom: var(--space-8);
     left: 50%;
-    transform: translateX(-50%) translateY(100px);
+    transform: translateX(-50%) translateY(20px);
     background: #1A1207;
     color: #F0E9DC;
     padding: var(--space-3) var(--space-6);
@@ -630,12 +738,22 @@ const lang = getLangFromUrl(Astro.url);
     opacity: 0;
     transition: all var(--duration-normal) var(--ease-default);
     font-family: var(--font-sans);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    white-space: nowrap;
   }
 
   .toast.show {
     transform: translateX(-50%) translateY(0);
     opacity: 1;
+  }
+
+  .toast.toast-success {
+    background: #5B7E6A;
+  }
+
+  .toast.toast-error {
+    background: #DC2626;
   }
 
   /* Dark Theme Support */
@@ -644,7 +762,7 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   [data-theme="dark"] .bg-circle {
-    opacity: 0.05;
+    opacity: 0.04;
   }
 
   [data-theme="dark"] .workspace-title {
@@ -659,34 +777,61 @@ const lang = getLangFromUrl(Astro.url);
     color: #A89880;
   }
 
-  [data-theme="dark"] .search-box {
-    background: #2C2210;
-    border-color: rgba(240, 233, 220, 0.15);
+  [data-theme="dark"] .eyebrow-dot {
+    background: #C06B3E;
   }
 
-  [data-theme="dark"] .sort-select {
+  [data-theme="dark"] .search-box {
     background: #2C2210;
-    border-color: rgba(240, 233, 220, 0.15);
+    border-color: rgba(240, 233, 220, 0.12);
+  }
+
+  [data-theme="dark"] .search-box input {
     color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .filter-tabs {
+    background: rgba(44, 34, 16, 0.8);
+    border-color: rgba(240, 233, 220, 0.12);
+  }
+
+  [data-theme="dark"] .filter-tab {
+    color: #A89880;
+  }
+
+  [data-theme="dark"] .filter-tab:hover {
+    color: #F0E9DC;
+    background: rgba(192, 107, 62, 0.15);
   }
 
   [data-theme="dark"] .btn-secondary {
     background: #2C2210;
     color: #F0E9DC;
-    border-color: rgba(240, 233, 220, 0.15);
+    border-color: rgba(240, 233, 220, 0.12);
+  }
+
+  [data-theme="dark"] .btn-secondary:hover {
+    border-color: #C06B3E;
+    color: #C06B3E;
   }
 
   [data-theme="dark"] .file-card {
     background: #2C2210;
-    border-color: rgba(240, 233, 220, 0.15);
+    border-color: rgba(240, 233, 220, 0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   }
 
   [data-theme="dark"] .file-card:hover {
-    border-color: rgba(240, 233, 220, 0.25);
+    border-color: rgba(192, 107, 62, 0.5);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
   }
 
   [data-theme="dark"] .file-title {
     color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .file-card:hover .file-title {
+    color: #C06B3E;
   }
 
   [data-theme="dark"] .file-preview,
@@ -695,12 +840,24 @@ const lang = getLangFromUrl(Astro.url);
   }
 
   [data-theme="dark"] .delete-btn {
-    background: rgba(240, 233, 220, 0.05);
+    background: rgba(44, 34, 16, 0.9);
+    border-color: rgba(240, 233, 220, 0.12);
     color: #A89880;
   }
 
-  [data-theme="dark"] .empty-icon {
-    background: rgba(192, 107, 62, 0.15);
+  [data-theme="dark"] .delete-btn:hover {
+    background: rgba(220, 38, 38, 0.15);
+    border-color: rgba(220, 38, 38, 0.3);
+    color: #DC2626;
+  }
+
+  [data-theme="dark"] .empty-illustration circle {
+    fill: rgba(192, 107, 62, 0.12);
+  }
+
+  [data-theme="dark"] .empty-illustration rect,
+  [data-theme="dark"] .empty-illustration line {
+    stroke: rgba(192, 107, 62, 0.4);
   }
 
   [data-theme="dark"] .empty-state h3 {
@@ -716,6 +873,22 @@ const lang = getLangFromUrl(Astro.url);
     color: #1A1207;
   }
 
+  [data-theme="dark"] .toast.toast-success {
+    background: #5B7E6A;
+    color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .toast.toast-error {
+    background: #DC2626;
+    color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .skeleton-card {
+    background: linear-gradient(90deg, #2C2210 0%, #3D3020 50%, #2C2210 100%);
+    background-size: 200% 100%;
+    border-color: rgba(240, 233, 220, 0.1);
+  }
+
   [data-theme="dark"] .spinner-ring {
     border-color: rgba(240, 233, 220, 0.15);
     border-top-color: #C06B3E;
@@ -724,6 +897,10 @@ const lang = getLangFromUrl(Astro.url);
   [data-theme="dark"] .loading-state p,
   [data-theme="dark"] .workspace-stats span {
     color: #A89880;
+  }
+
+  [data-theme="dark"] .file-preview {
+    border-top-color: rgba(240, 233, 220, 0.1);
   }
 </style>
 
@@ -734,11 +911,11 @@ const lang = getLangFromUrl(Astro.url);
 
   // DOM Elements
   const filesGrid = document.getElementById('files-grid');
+  const skeletonGrid = document.getElementById('skeleton-grid');
   const emptyState = document.getElementById('empty-state');
-  const loadingState = document.getElementById('loading-state');
   const filesCount = document.getElementById('files-count');
+  const totalSize = document.getElementById('total-size');
   const searchInput = document.getElementById('search-input') as HTMLInputElement;
-  const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
   const fileUpload = document.getElementById('file-upload') as HTMLInputElement;
   const newNoteBtn = document.getElementById('new-note-btn');
   const uploadBtn = document.getElementById('upload-btn');
@@ -764,6 +941,20 @@ const lang = getLangFromUrl(Astro.url);
   // Initialize
   async function init() {
     await loadFiles();
+    initSortTabs();
+  }
+
+  // Init sort tabs
+  function initSortTabs() {
+    const tabs = document.querySelectorAll('.filter-tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        sortBy = tab.getAttribute('data-sort') || 'updated_at';
+        loadFiles();
+      });
+    });
   }
 
   // Load files
@@ -778,10 +969,33 @@ const lang = getLangFromUrl(Astro.url);
       renderFiles();
     } catch (error) {
       console.error('Load failed:', error);
-      showToast('加载失败');
+      showToast('加载失败', 'error');
     } finally {
       hideLoading();
     }
+  }
+
+  // Format file size
+  function formatSize(bytes: number): string {
+    if (!bytes) return '0 B';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  // Get time ago string
+  function getTimeAgo(date: Date): string {
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    return date.toLocaleDateString();
   }
 
   // Render files
@@ -790,7 +1004,10 @@ const lang = getLangFromUrl(Astro.url);
       f.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    filesCount!.textContent = `${filtered.length} 个文件`;
+    const total = files.reduce((acc, f) => acc + (f.fileSize || 0), 0);
+    
+    filesCount!.textContent = `${filtered.length} ${filtered.length === 1 ? 'file' : 'files'}`;
+    totalSize!.textContent = formatSize(total);
     
     if (filtered.length === 0) {
       filesGrid!.innerHTML = '';
@@ -803,29 +1020,36 @@ const lang = getLangFromUrl(Astro.url);
     filesGrid!.innerHTML = filtered.map(file => {
       const ext = file.type || 'txt';
       const config = fileTypeConfig[ext] || { icon: 'document', type: 'document' };
-      const date = new Date(file.updatedAt || file.createdAt).toLocaleDateString();
-      const preview = file.content ? file.content.substring(0, 50) + '...' : '';
+      const date = new Date(file.updatedAt || file.createdAt);
+      const timeAgo = getTimeAgo(date);
+      const preview = file.content ? file.content.substring(0, 80).trim() : '';
+      const fileSize = formatSize(file.fileSize || 0);
       
       return `
         <div class="file-card" data-id="${file.id}">
-          <div class="file-header">
-            <div class="file-icon ${config.type}">
-              ${getFileIcon(config.icon)}
-            </div>
-            <div class="file-info">
-              <div class="file-title">${escapeHtml(file.title)}</div>
-              <div class="file-meta">${ext.toUpperCase()} · ${date}</div>
-            </div>
-          </div>
-          ${preview ? `<div class="file-preview">${escapeHtml(preview)}</div>` : ''}
           <div class="file-actions">
-            <button class="delete-btn" data-id="${file.id}" title="删除">
+            <button class="delete-btn" data-id="${file.id}" title="Delete">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
               </svg>
             </button>
           </div>
+          <div class="file-header">
+            <div class="file-icon ${config.type}">
+              ${getFileIcon(config.icon)}
+            </div>
+            <div class="file-info">
+              <div class="file-title">${escapeHtml(file.title)}</div>
+              <div class="file-meta">
+                <span class="file-meta-item">${ext.toUpperCase()}</span>
+                <span>·</span>
+                <span class="file-meta-item">${timeAgo}</span>
+                ${fileSize !== '0 B' ? `<span>·</span><span class="file-meta-item">${fileSize}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          ${preview ? `<div class="file-preview">${escapeHtml(preview)}</div>` : ''}
         </div>
       `;
     }).join('');
@@ -888,14 +1112,14 @@ const lang = getLangFromUrl(Astro.url);
       const result = await response.json();
       
       if (result.success) {
-        showToast('删除成功');
+        showToast('删除成功', 'success');
         await loadFiles();
       } else {
-        showToast('删除失败');
+        showToast('删除失败', 'error');
       }
     } catch (error) {
       console.error('Delete failed:', error);
-      showToast('删除失败');
+      showToast('删除失败', 'error');
     }
   }
 
@@ -986,18 +1210,21 @@ const lang = getLangFromUrl(Astro.url);
 
   // Helper functions
   function showLoading() {
-    loadingState?.classList.add('visible');
+    if (skeletonGrid) skeletonGrid.style.display = 'grid';
     emptyState?.classList.remove('visible');
     if (filesGrid) filesGrid.innerHTML = '';
   }
 
   function hideLoading() {
-    loadingState?.classList.remove('visible');
+    if (skeletonGrid) skeletonGrid.style.display = 'none';
   }
 
-  function showToast(message: string) {
+  function showToast(message: string, type: 'success' | 'error' | 'default' = 'default') {
     if (toast) {
       toast.textContent = message;
+      toast.className = 'toast';
+      if (type === 'success') toast.classList.add('toast-success');
+      if (type === 'error') toast.classList.add('toast-error');
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
@@ -1021,11 +1248,6 @@ const lang = getLangFromUrl(Astro.url);
   searchInput?.addEventListener('input', (e) => {
     searchQuery = (e.target as HTMLInputElement).value;
     renderFiles();
-  });
-  
-  sortSelect?.addEventListener('change', (e) => {
-    sortBy = (e.target as HTMLSelectElement).value;
-    loadFiles();
   });
 
   // Initialize

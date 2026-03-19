@@ -56,7 +56,44 @@ import Layout from '@layouts/Layout.astro';
       <div class="editor-content" id="editor-content" style="display: none;">
         <input type="text" class="title-input" id="title-input" placeholder="Untitled Note" />
         <div class="editor-divider"></div>
+        
+        <!-- Markdown Toolbar -->
+        <div class="markdown-toolbar">
+          <button class="md-btn" data-action="bold" title="Bold (Ctrl+B)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path></svg>
+          </button>
+          <button class="md-btn" data-action="italic" title="Italic (Ctrl+I)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="4" x2="10" y2="4"></line><line x1="14" y1="20" x2="5" y2="20"></line><line x1="15" y1="4" x2="9" y2="20"></line></svg>
+          </button>
+          <button class="md-btn" data-action="heading" title="Heading">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16"></path><path d="M4 6v12"></path><path d="M20 6v12"></path></svg>
+          </button>
+          <div class="toolbar-divider"></div>
+          <button class="md-btn" data-action="list" title="Bullet List">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><circle cx="4" cy="6" r="1" fill="currentColor"></circle><circle cx="4" cy="12" r="1" fill="currentColor"></circle><circle cx="4" cy="18" r="1" fill="currentColor"></circle></svg>
+          </button>
+          <button class="md-btn" data-action="link" title="Link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+          </button>
+          <button class="md-btn" data-action="code" title="Code">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          </button>
+        </div>
+        
         <textarea class="content-textarea" id="content-textarea" placeholder="Start writing your note...&#10;&#10;Markdown supported"></textarea>
+        
+        <!-- Status Bar -->
+        <div class="editor-status-bar">
+          <span id="word-count">0 words</span>
+          <span class="status-sep">·</span>
+          <span id="char-count">0 characters</span>
+          <div class="status-right">
+            <span class="save-indicator" id="save-indicator">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+              Auto-saved
+            </span>
+          </div>
+        </div>
       </div>
 
       <!-- File Preview (for non-text files) -->
@@ -241,6 +278,78 @@ import Layout from '@layouts/Layout.astro';
 
   .content-textarea::placeholder {
     color: #9A8A72;
+  }
+
+  /* Markdown Toolbar */
+  .markdown-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) 0;
+    margin-bottom: var(--space-3);
+    border-bottom: 1px solid #E0D4C0;
+  }
+
+  .md-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: #7A6A52;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .md-btn:hover {
+    background: rgba(192, 107, 62, 0.1);
+    color: #C06B3E;
+  }
+
+  .toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background: #D0C4B0;
+    margin: 0 var(--space-2);
+  }
+
+  /* Editor Status Bar */
+  .editor-status-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) 0;
+    margin-top: var(--space-8);
+    border-top: 1px solid #E0D4C0;
+    font-size: var(--text-xs);
+    color: #7A6A52;
+    font-family: var(--font-sans);
+  }
+
+  .status-sep {
+    opacity: 0.5;
+  }
+
+  .status-right {
+    margin-left: auto;
+  }
+
+  .save-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .save-indicator svg {
+    color: #5B7E6A;
+  }
+
+  .save-indicator.saving svg {
+    color: #C06B3E;
+    animation: pulse 1s infinite;
   }
 
   /* Loading State */
@@ -431,6 +540,32 @@ import Layout from '@layouts/Layout.astro';
     color: #6A5A42;
   }
 
+  [data-theme="dark"] .markdown-toolbar {
+    border-bottom-color: rgba(240, 233, 220, 0.1);
+  }
+
+  [data-theme="dark"] .md-btn {
+    color: #A89880;
+  }
+
+  [data-theme="dark"] .md-btn:hover {
+    background: rgba(192, 107, 62, 0.15);
+    color: #C06B3E;
+  }
+
+  [data-theme="dark"] .toolbar-divider {
+    background: rgba(240, 233, 220, 0.15);
+  }
+
+  [data-theme="dark"] .editor-status-bar {
+    border-top-color: rgba(240, 233, 220, 0.1);
+    color: #A89880;
+  }
+
+  [data-theme="dark"] .save-indicator svg {
+    color: #5B7E6A;
+  }
+
   [data-theme="dark"] .file-info-card {
     background: #2C2210;
     border-color: rgba(240, 233, 220, 0.15);
@@ -481,6 +616,9 @@ import Layout from '@layouts/Layout.astro';
   const contentTextarea = document.getElementById('content-textarea') as HTMLTextAreaElement;
   const saveStatus = document.getElementById('save-status');
   const toast = document.getElementById('toast');
+  const wordCountEl = document.getElementById('word-count');
+  const charCountEl = document.getElementById('char-count');
+  const saveIndicator = document.getElementById('save-indicator');
 
   // Initialize
   async function init() {
@@ -514,8 +652,8 @@ import Layout from '@layouts/Layout.astro';
         showEditor();
         titleInput.value = currentFile.title || '';
         contentTextarea.value = currentFile.content || '';
-        titleInput.addEventListener('input', scheduleSave);
-        contentTextarea.addEventListener('input', scheduleSave);
+        titleInput.addEventListener('input', () => { scheduleSave(); });
+        contentTextarea.addEventListener('input', () => { updateStats(); scheduleSave(); });
       } else {
         showFilePreview();
       }
@@ -531,6 +669,72 @@ import Layout from '@layouts/Layout.astro';
   function showEditor() {
     editorContent!.style.display = 'flex';
     filePreviewContainer!.style.display = 'none';
+    updateStats();
+    initMarkdownToolbar();
+  }
+
+  // Update word and character count
+  function updateStats() {
+    const text = contentTextarea.value;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const chars = text.length;
+    
+    if (wordCountEl) wordCountEl.textContent = `${words} ${words === 1 ? 'word' : 'words'}`;
+    if (charCountEl) charCountEl.textContent = `${chars} ${chars === 1 ? 'character' : 'characters'}`;
+  }
+
+  // Initialize Markdown toolbar
+  function initMarkdownToolbar() {
+    const mdBtns = document.querySelectorAll('.md-btn');
+    mdBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.getAttribute('data-action');
+        if (action) applyMarkdown(action);
+      });
+    });
+  }
+
+  // Apply Markdown formatting
+  function applyMarkdown(action: string) {
+    const start = contentTextarea.selectionStart;
+    const end = contentTextarea.selectionEnd;
+    const text = contentTextarea.value;
+    const selected = text.substring(start, end);
+    
+    let replacement = '';
+    let cursorOffset = 0;
+    
+    switch (action) {
+      case 'bold':
+        replacement = `**${selected || 'bold text'}**`;
+        cursorOffset = selected ? 0 : -11;
+        break;
+      case 'italic':
+        replacement = `*${selected || 'italic text'}*`;
+        cursorOffset = selected ? 0 : -13;
+        break;
+      case 'heading':
+        replacement = `## ${selected || 'Heading'}`;
+        cursorOffset = selected ? 0 : -8;
+        break;
+      case 'list':
+        replacement = `\n- ${selected || 'List item'}`;
+        cursorOffset = selected ? 0 : -11;
+        break;
+      case 'link':
+        replacement = `[${selected || 'link text'}](url)`;
+        cursorOffset = selected ? -1 : -5;
+        break;
+      case 'code':
+        replacement = selected.includes('\n') ? `\`\`\`\n${selected || 'code'}\n\`\`\`` : `\`${selected || 'code'}\``;
+        cursorOffset = selected ? (selected.includes('\n') ? 0 : -1) : -1;
+        break;
+    }
+    
+    contentTextarea.setRangeText(replacement, start, end, 'end');
+    contentTextarea.focus();
+    updateStats();
+    scheduleSave();
   }
 
   // Show file preview
@@ -549,9 +753,9 @@ import Layout from '@layouts/Layout.astro';
 
   // Schedule auto-save
   function scheduleSave() {
-    if (saveStatus) {
-      saveStatus.innerHTML = '<span class="status-dot"></span>Saving...';
-      saveStatus.classList.add('saving');
+    if (saveIndicator) {
+      saveIndicator.classList.add('saving');
+      saveIndicator.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Saving...';
     }
     
     if (saveTimeout) clearTimeout(saveTimeout);
@@ -576,9 +780,9 @@ import Layout from '@layouts/Layout.astro';
       const result = await response.json();
       
       if (result.success) {
-        if (saveStatus) {
-          saveStatus.innerHTML = '<span class="status-dot"></span>Saved';
-          saveStatus.classList.remove('saving');
+        if (saveIndicator) {
+          saveIndicator.classList.remove('saving');
+          saveIndicator.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Auto-saved';
         }
       } else {
         showToast('Failed to save');
