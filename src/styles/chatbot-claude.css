@@ -70,8 +70,9 @@
 }
 
 .logo-text {
+  font-family: 'Richy', 'Doralice', cursive, var(--font-display);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 400;
   color: #1A1A1A;
 }
 

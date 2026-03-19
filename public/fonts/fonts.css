@@ -1,4 +1,13 @@
 @font-face {
+  font-family: 'Richy';
+  src: url('/fonts/Richy.woff2') format('woff2'),
+       url('/fonts/richy.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Limelight';
   src: url('/fonts/Limelight-Regular.woff2') format('woff2'),
        url('/fonts/Limelight-Regular.woff') format('woff');
