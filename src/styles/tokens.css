@@ -50,16 +50,16 @@
   
   /* ==================== Typography - Anthropic Style ==================== */
   
-  /* Font Families - Keep current design per user request */
-  --font-serif: "Times New Roman", Georgia, "Liberation Serif", serif;
-  --font-sans: "Times New Roman", Georgia, "Liberation Serif", serif;
+  /* Font Families - HarmonyOS Sans SC */
+  --font-sans: "HarmonyOS Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, monospace;
-  --font-number: "Richy", cursive, Georgia, serif;
   
-  /* Display Typography - Serif, Elegant */
-  --font-display: var(--font-serif);
-  --font-heading: var(--font-serif);
+  /* Display Typography */
+  --font-display: var(--font-sans);
+  --font-heading: var(--font-sans);
   --font-body: var(--font-sans);
+  --font-serif: var(--font-sans);
+  --font-number: var(--font-sans);
   
   /* Font Sizes - Mobile First */
   --text-xs: 0.75rem;       /* 12px */
