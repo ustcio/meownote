@@ -1,24 +1,11 @@
-/* HarmonyOS Sans SC Font - Default Font */
-@font-face {
-  font-family: 'HarmonyOS Sans SC';
-  src: url('/fonts/HarmonyOS_Sans_SC_Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: optional;
-}
-
-@font-face {
-  font-family: 'HarmonyOS Sans SC';
-  src: url('/fonts/HarmonyOS_SansSC_Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: optional;
-}
-
-@font-face {
-  font-family: 'HarmonyOS Sans SC';
-  src: url('/fonts/HarmonyOS_SansSC_Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: optional;
-}
+/* 
+ * 字体回退链 - 无需本地字体文件
+ * 
+ * 优先级：
+ * 1. HarmonyOS Sans SC - 华为设备内置
+ * 2. PingFang SC - macOS/iOS 苹方
+ * 3. Source Han Sans SC - 思源黑体 (Adobe/Google)
+ * 4. Noto Sans SC - 思源黑体 (Google)
+ * 5. Microsoft YaHei - Windows 微软雅黑
+ * 6. system-ui - 系统默认 UI 字体
+ */

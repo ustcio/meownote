@@ -33,10 +33,10 @@
   
   /* ==================== Claude 排版系统 ==================== */
   
-  /* Font Families - HarmonyOS Sans SC */
-  --font-display: "HarmonyOS Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-sans: "HarmonyOS Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", SFMono-Regular, ui-monospace, monospace;
+  /* Font Families - HarmonyOS Sans SC + 系统字体回退 */
+  --font-display: "HarmonyOS Sans SC", "PingFang SC", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: "HarmonyOS Sans SC", "PingFang SC", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", SFMono-Regular, ui-monospace, "Source Code Pro", Menlo, Monaco, Consolas, monospace;
   
   /* Claude 风格字体比例 - 更克制的尺度 */
   --text-xs: 0.75rem;      /* 12px */

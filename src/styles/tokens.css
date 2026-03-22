@@ -50,9 +50,9 @@
   
   /* ==================== Typography - Anthropic Style ==================== */
   
-  /* Font Families - HarmonyOS Sans SC */
-  --font-sans: "HarmonyOS Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, monospace;
+  /* Font Families - HarmonyOS Sans SC + 系统字体回退 */
+  --font-sans: "HarmonyOS Sans SC", "PingFang SC", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, "Source Code Pro", Menlo, Monaco, Consolas, monospace;
   
   /* Display Typography */
   --font-display: var(--font-sans);
