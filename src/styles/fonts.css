@@ -1,11 +1,23 @@
 /* 
- * 字体回退链 - 无需本地字体文件
+ * 字体配置
  * 
- * 优先级：
- * 1. HarmonyOS Sans SC - 华为设备内置
- * 2. PingFang SC - macOS/iOS 苹方
- * 3. Source Han Sans SC - 思源黑体 (Adobe/Google)
- * 4. Noto Sans SC - 思源黑体 (Google)
- * 5. Microsoft YaHei - Windows 微软雅黑
- * 6. system-ui - 系统默认 UI 字体
+ * 正文字体：系统字体回退链
+ * 代码字体：Maple Mono（CDN）
  */
+
+/* Maple Mono - 代码字体 */
+@import url('https://cdn.jsdelivr.net/npm/@fontsource/maple-mono@5.0.12/index.min.css');
+
+/* 
+ * 正文字体回退链：
+ * 1. HarmonyOS Sans SC - 华为设备
+ * 2. PingFang SC - macOS/iOS 苹方
+ * 3. Source Han Sans SC / Noto Sans SC - 思源黑体
+ * 4. Microsoft YaHei - Windows
+ * 5. system-ui - 系统默认 UI 字体
+ */
+
+:root {
+  --font-sans: "HarmonyOS Sans SC", "PingFang SC", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Maple Mono", "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, "Source Code Pro", Menlo, Monaco, Consolas, monospace;
+}
