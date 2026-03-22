@@ -50,11 +50,7 @@
   
   /* ==================== Typography - Anthropic Style ==================== */
   
-  /* Font Families - 正文用系统字体，代码用 Maple Mono */
-  --font-sans: "HarmonyOS Sans SC", "PingFang SC", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "Maple Mono", "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, "Source Code Pro", Menlo, Monaco, Consolas, monospace;
-  
-  /* Display Typography */
+  /* Font Families - 从 fonts.css 加载 */
   --font-display: var(--font-sans);
   --font-heading: var(--font-sans);
   --font-body: var(--font-sans);

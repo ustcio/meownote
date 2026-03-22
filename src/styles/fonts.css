@@ -1,23 +1,22 @@
 /* 
- * 字体配置
+ * 字体配置 - CDN 加载
  * 
- * 正文字体：系统字体回退链
- * 代码字体：Maple Mono（CDN）
+ * 正文：HarmonyOS Sans SC
+ * 代码：Maple Mono
  */
+
+/* HarmonyOS Sans SC - 中文正文字体 */
+@import url('https://cdn.jsdelivr.net/npm/harmonyos-sans-sc-webfont-splitted@1.1.0/dist/Regular.css');
+@import url('https://cdn.jsdelivr.net/npm/harmonyos-sans-sc-webfont-splitted@1.1.0/dist/Medium.css');
+@import url('https://cdn.jsdelivr.net/npm/harmonyos-sans-sc-webfont-splitted@1.1.0/dist/Bold.css');
 
 /* Maple Mono - 代码字体 */
-@import url('https://cdn.jsdelivr.net/npm/@fontsource/maple-mono@5.0.12/index.min.css');
-
-/* 
- * 正文字体回退链：
- * 1. HarmonyOS Sans SC - 华为设备
- * 2. PingFang SC - macOS/iOS 苹方
- * 3. Source Han Sans SC / Noto Sans SC - 思源黑体
- * 4. Microsoft YaHei - Windows
- * 5. system-ui - 系统默认 UI 字体
- */
+@import url('https://cdn.jsdelivr.net/npm/@fontsource/maple-mono@5.2.6/400.css');
+@import url('https://cdn.jsdelivr.net/npm/@fontsource/maple-mono@5.2.6/400-italic.css');
+@import url('https://cdn.jsdelivr.net/npm/@fontsource/maple-mono@5.2.6/500.css');
+@import url('https://cdn.jsdelivr.net/npm/@fontsource/maple-mono@5.2.6/700.css');
 
 :root {
-  --font-sans: "HarmonyOS Sans SC", "PingFang SC", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "Maple Mono", "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, "Source Code Pro", Menlo, Monaco, Consolas, monospace;
+  --font-sans: "HarmonyOS Sans SC", "PingFang SC", "Source Han Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: "Maple Mono", "JetBrains Mono", ui-monospace, monospace;
 }
