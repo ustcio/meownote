@@ -603,21 +603,23 @@ const suggestions = [
     const typingEl = addTypingIndicator();
 
     try {
-      const response = await fetch(`${API_BASE}/chat`, {
+      const response = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages })
+        body: JSON.stringify({ message: content })
       });
 
       const data = await response.json();
       
       if (typingEl) typingEl.remove();
       
-      if (data.content) {
-        addMessage('assistant', data.content);
-        messages.push({ role: 'assistant', content: data.content });
-      } else if (data.error) {
-        addMessage('assistant', `错误: ${data.error}`);
+      if (data.success && data.reply) {
+        addMessage('assistant', data.reply);
+        messages.push({ role: 'assistant', content: data.reply });
+      } else if (data.message) {
+        addMessage('assistant', `错误: ${data.message}`);
+      } else {
+        addMessage('assistant', '抱歉，未能获取回复');
       }
     } catch (error) {
       if (typingEl) typingEl.remove();
