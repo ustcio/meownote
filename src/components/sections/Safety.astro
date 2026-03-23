@@ -137,9 +137,16 @@ const iconPaths: Record<string, string> = {
 
   .safety-card {
     background: #F0E9DC;
-    padding: var(--space-8);
+    padding: var(--space-6);
     cursor: pointer;
     transition: background-color 300ms var(--ease-default);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (min-width: 768px) {
+    .safety-card {
+      padding: var(--space-8);
+    }
   }
 
   .safety-card:hover {
@@ -189,5 +196,40 @@ const iconPaths: Record<string, string> = {
     font-size: var(--text-sm);
     color: #6B5C42;
     line-height: 1.65;
+  }
+
+  /* Dark theme */
+  [data-theme="dark"] .safety {
+    background: #1A1207;
+  }
+
+  [data-theme="dark"] .safety-title {
+    color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .safety-description,
+  [data-theme="dark"] .label-text {
+    color: #A89880;
+  }
+
+  [data-theme="dark"] .safety-grid {
+    border-color: rgba(240, 233, 220, 0.1);
+    background: rgba(240, 233, 220, 0.1);
+  }
+
+  [data-theme="dark"] .safety-card {
+    background: #1A1207;
+  }
+
+  [data-theme="dark"] .safety-card:hover {
+    background: #2C2210;
+  }
+
+  [data-theme="dark"] .card-title {
+    color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .card-description {
+    color: #A89880;
   }
 </style>

@@ -264,7 +264,7 @@ const suggestions = [
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-4);
     background: var(--bg-secondary);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-lg);
@@ -272,7 +272,9 @@ const suggestions = [
     color: var(--text-secondary);
     text-align: left;
     cursor: pointer;
+    min-height: 48px;
     transition: all var(--duration-fast) var(--ease-default);
+    -webkit-tap-highlight-color: transparent;
   }
 
   .suggestion-btn:hover {
@@ -404,8 +406,8 @@ const suggestions = [
 
   .send-btn {
     flex-shrink: 0;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -415,6 +417,7 @@ const suggestions = [
     color: white;
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-default);
+    -webkit-tap-highlight-color: transparent;
   }
 
   .send-btn:hover:not(:disabled) {
@@ -518,8 +521,9 @@ const suggestions = [
   .btn-primary {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: var(--space-2);
-    padding: var(--space-3) var(--space-6);
+    padding: var(--space-4) var(--space-6);
     background: var(--color-primary);
     color: white;
     font-size: var(--text-base);
@@ -527,12 +531,138 @@ const suggestions = [
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
+    min-height: 48px;
     transition: all var(--duration-fast) var(--ease-default);
+    -webkit-tap-highlight-color: transparent;
   }
 
   .btn-primary:hover {
     background: var(--color-primary-hover);
     transform: translateY(-1px);
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 480px) {
+    .chatbot {
+      padding-left: var(--space-3);
+      padding-right: var(--space-3);
+    }
+
+    .chat-window {
+      min-height: 300px;
+      max-height: 400px;
+      padding: var(--space-4);
+    }
+
+    .chat-welcome {
+      min-height: 280px;
+    }
+
+    .welcome-icon svg {
+      width: 40px;
+      height: 40px;
+    }
+
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .cta-section {
+      padding: var(--space-8);
+    }
+  }
+
+  /* Dark theme */
+  [data-theme="dark"] .chatbot {
+    background: #1A1207;
+  }
+
+  [data-theme="dark"] .hero-title {
+    background: linear-gradient(135deg, #F0E9DC, #C06B3E);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  [data-theme="dark"] .hero-tagline {
+    color: #C06B3E;
+  }
+
+  [data-theme="dark"] .hero-description {
+    color: #A89880;
+  }
+
+  [data-theme="dark"] .chat-interface {
+    background: #2C2210;
+    border-color: rgba(240, 233, 220, 0.12);
+  }
+
+  [data-theme="dark"] .welcome-title {
+    color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .welcome-subtitle {
+    color: #A89880;
+  }
+
+  [data-theme="dark"] .suggestion-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(240, 233, 220, 0.12);
+    color: #A89880;
+  }
+
+  [data-theme="dark"] .suggestion-btn:hover {
+    background: rgba(192, 107, 62, 0.1);
+    border-color: #C06B3E;
+    color: #C06B3E;
+  }
+
+  [data-theme="dark"] .message.assistant .message-content {
+    background: #1A1207;
+    color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .input-wrapper {
+    background: #1A1207;
+    border-color: rgba(240, 233, 220, 0.12);
+  }
+
+  [data-theme="dark"] .chat-input {
+    color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .chat-input::placeholder {
+    color: #6A5A42;
+  }
+
+  [data-theme="dark"] .input-hint {
+    color: #6A5A42;
+  }
+
+  [data-theme="dark"] .feature-card {
+    background: #2C2210;
+    border-color: rgba(240, 233, 220, 0.12);
+  }
+
+  [data-theme="dark"] .feature-title {
+    color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .feature-desc {
+    color: #A89880;
+  }
+
+  [data-theme="dark"] .cta-section {
+    background: linear-gradient(135deg, rgba(192, 107, 62, 0.15), transparent);
+    border-color: rgba(192, 107, 62, 0.2);
+  }
+
+  [data-theme="dark"] .cta-title {
+    color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .cta-subtitle {
+    color: #A89880;
   }
 </style>
 

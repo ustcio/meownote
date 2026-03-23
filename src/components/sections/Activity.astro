@@ -227,16 +227,43 @@ const gridWidth = totalWeeks * weekWidth;
 
   .contribution-graph-wrapper {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     overflow-x: auto;
     margin-bottom: var(--space-4);
     padding-bottom: var(--space-2);
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #C4B9A5 transparent;
+  }
+
+  .contribution-graph-wrapper::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .contribution-graph-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .contribution-graph-wrapper::-webkit-scrollbar-thumb {
+    background: #C4B9A5;
+    border-radius: 3px;
+  }
+
+  @media (min-width: 768px) {
+    .contribution-graph-wrapper {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
   }
 
   .contribution-graph {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    min-width: max-content;
   }
 
   .contribution-months {
@@ -349,6 +376,14 @@ const gridWidth = totalWeeks * weekWidth;
     margin: 0 auto;
   }
 
+  @media (max-width: 359px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-2);
+      max-width: 200px;
+    }
+  }
+
   @media (min-width: 640px) {
     .stats-grid {
       gap: var(--space-4);
@@ -362,11 +397,19 @@ const gridWidth = totalWeeks * weekWidth;
     align-items: center;
     text-align: center;
     gap: var(--space-2);
-    padding: var(--space-4) var(--space-3);
+    padding: var(--space-3) var(--space-2);
     background: rgba(255, 255, 255, 0.6);
     border: 1px solid rgba(192, 107, 62, 0.2);
     border-radius: var(--radius-lg);
     transition: border-color var(--duration-normal) var(--ease-default);
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+  }
+
+  @media (min-width: 480px) {
+    .stat-card {
+      padding: var(--space-4) var(--space-3);
+    }
   }
 
   .stat-card:hover {
@@ -412,6 +455,56 @@ const gridWidth = totalWeeks * weekWidth;
     font-size: var(--text-xs);
     color: #6B5C42;
     font-weight: 400;
+  }
+
+  /* Dark theme */
+  [data-theme="dark"] .activity {
+    background: #1A1207;
+  }
+
+  [data-theme="dark"] .contribution-title {
+    color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .contribution-year {
+    color: #A89880;
+  }
+
+  [data-theme="dark"] .contribution-cell {
+    background-color: #2C2210;
+  }
+
+  [data-theme="dark"] .contribution-cell[data-level="1"] { background-color: #3D2A1A; }
+  [data-theme="dark"] .contribution-cell[data-level="2"] { background-color: #5A3D25; }
+  [data-theme="dark"] .contribution-cell[data-level="3"] { background-color: #785535; }
+  [data-theme="dark"] .contribution-cell[data-level="4"] { background-color: #A87045; }
+
+  [data-theme="dark"] .contribution-day,
+  [data-theme="dark"] .contribution-month,
+  [data-theme="dark"] .legend-text {
+    color: #8A7A62;
+  }
+
+  [data-theme="dark"] .legend-cell {
+    background-color: #2C2210;
+  }
+
+  [data-theme="dark"] .legend-cell[data-level="1"] { background-color: #3D2A1A; }
+  [data-theme="dark"] .legend-cell[data-level="2"] { background-color: #5A3D25; }
+  [data-theme="dark"] .legend-cell[data-level="3"] { background-color: #785535; }
+  [data-theme="dark"] .legend-cell[data-level="4"] { background-color: #A87045; }
+
+  [data-theme="dark"] .stat-card {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(240, 233, 220, 0.12);
+  }
+
+  [data-theme="dark"] .stat-value {
+    color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .stat-label {
+    color: #A89880;
   }
 </style>
 
