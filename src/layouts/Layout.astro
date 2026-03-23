@@ -59,6 +59,13 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <!-- Resource Hints for Performance -->
     <link rel="preconnect" href="https://api.ustc.dev" crossorigin />
     <link rel="dns-prefetch" href="https://api.ustc.dev" />
+    
+    <!-- Preload critical assets -->
+    <link rel="modulepreload" href="/_assets/" />
+    
+    <!-- Performance optimizations -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="color-scheme" content="light dark" />
 
     <style>
       :root:not([data-theme]) {

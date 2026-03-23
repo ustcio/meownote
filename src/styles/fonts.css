@@ -1,22 +1,37 @@
 /* 
- * 字体配置 - CDN 加载
+ * 系统字体堆栈 - 零网络请求，极致性能
  * 
- * 正文：HarmonyOS Sans SC
- * 代码：Maple Mono
+ * 中文字体：
+ * - macOS/iOS: PingFang SC (苹方)
+ * - Windows: Microsoft YaHei (微软雅黑)
+ * - Android: Noto Sans SC
+ * - Linux: Source Han Sans SC (思源黑体)
+ * 
+ * 等宽字体：
+ * - macOS: SF Mono
+ * - Windows: Cascadia Code
+ * - 跨平台: JetBrains Mono
  */
 
-/* HarmonyOS Sans SC - 中文正文字体 */
-@import url('https://cdn.jsdelivr.net/npm/harmonyos-sans-sc-webfont-splitted@1.1.0/dist/Regular.css');
-@import url('https://cdn.jsdelivr.net/npm/harmonyos-sans-sc-webfont-splitted@1.1.0/dist/Medium.css');
-@import url('https://cdn.jsdelivr.net/npm/harmonyos-sans-sc-webfont-splitted@1.1.0/dist/Bold.css');
-
-/* Maple Mono - 代码字体 */
-@import url('https://cdn.jsdelivr.net/npm/@fontsource/maple-mono@5.2.6/400.css');
-@import url('https://cdn.jsdelivr.net/npm/@fontsource/maple-mono@5.2.6/400-italic.css');
-@import url('https://cdn.jsdelivr.net/npm/@fontsource/maple-mono@5.2.6/500.css');
-@import url('https://cdn.jsdelivr.net/npm/@fontsource/maple-mono@5.2.6/700.css');
-
 :root {
-  --font-sans: "HarmonyOS Sans SC", "PingFang SC", "Source Han Sans SC", "Microsoft YaHei", system-ui, sans-serif;
-  --font-mono: "Maple Mono", "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: 
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    "Source Han Sans SC",
+    "Noto Sans SC",
+    sans-serif;
+  
+  --font-mono: 
+    ui-monospace,
+    "SF Mono",
+    "Cascadia Code",
+    "JetBrains Mono",
+    "Menlo",
+    "Monaco",
+    "Consolas",
+    monospace;
 }
