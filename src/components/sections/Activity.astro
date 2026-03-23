@@ -37,6 +37,13 @@ function getMonthPositions() {
 const monthPositions = getMonthPositions();
 const totalDays = Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 const totalWeeks = Math.ceil(totalDays / 7);
+
+function getMonthStyle(weekIndex: number): string {
+  const cellWidth = 11;
+  const cellGap = 3;
+  const weekWidth = cellWidth + cellGap;
+  return `left: ${weekIndex * weekWidth}px;`;
+}
 ---
 
 <section class="activity">
@@ -55,7 +62,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
       <div class="contribution-graph" id="contribution-graph" data-year={currentYear}>
         <div class="contribution-months">
           {monthPositions.map(({ month, weekIndex }) => (
-            <span class="contribution-month" style={`--week: ${weekIndex}`}>
+            <span class="contribution-month" style={getMonthStyle(weekIndex)}>
               {months[month]}
             </span>
           ))}
@@ -238,14 +245,15 @@ const totalWeeks = Math.ceil(totalDays / 7);
     margin-bottom: var(--space-2);
     position: relative;
     height: 16px;
+    min-width: 100%;
   }
 
   .contribution-month {
     position: absolute;
-    left: calc(var(--week) * 14px);
     font-family: var(--font-sans);
     font-size: 10px;
     color: #9A8A72;
+    white-space: nowrap;
   }
 
   .contribution-body {
@@ -447,7 +455,6 @@ const totalWeeks = Math.ceil(totalDays / 7);
     const cells = document.querySelectorAll('.contribution-cell[data-date]');
     const cellData: { cell: Element; count: number }[] = [];
     
-    // 收集所有数据
     cells.forEach(cell => {
       const date = cell.getAttribute('data-date');
       if (date && data[date]) {
@@ -457,11 +464,9 @@ const totalWeeks = Math.ceil(totalDays / 7);
     
     if (cellData.length === 0) return;
     
-    // 计算分位数阈值（基于实际数据分布）
     const nonZeroCounts = cellData.map(d => d.count).filter(c => c > 0).sort((a, b) => a - b);
     const thresholds = calculateQuantileThresholds(nonZeroCounts);
     
-    // 应用分级
     cellData.forEach(({ cell, count }) => {
       const level = calculateLevel(count, thresholds);
       cell.setAttribute('data-level', String(level));
@@ -472,18 +477,10 @@ const totalWeeks = Math.ceil(totalDays / 7);
     });
   }
   
-  /**
-   * 基于分位数计算阈值
-   * 使用五分位数，确保每个颜色级别有大致相同数量的数据点
-   * 附加对数尺度处理，使低流量区域也能有效区分
-   */
   function calculateQuantileThresholds(sortedCounts: number[]): number[] {
     if (sortedCounts.length === 0) return [];
     
     const len = sortedCounts.length;
-    
-    // 使用五分位数：0-20%, 20-40%, 40-60%, 60-80%, 80-100%
-    // 对应 level 1-4 的上限阈值
     const percentiles = [0.2, 0.4, 0.6, 0.8, 1.0];
     
     return percentiles.map(p => {
@@ -492,15 +489,10 @@ const totalWeeks = Math.ceil(totalDays / 7);
     });
   }
   
-  /**
-   * 计算颜色级别
-   * 结合分位数阈值和对数尺度，确保低、中、高流量区域都能有效区分
-   */
   function calculateLevel(count: number, thresholds: number[]): number {
     if (count === 0) return 0;
     if (thresholds.length === 0) return 1;
     
-    // 首先尝试分位数分级
     for (let i = 0; i < thresholds.length; i++) {
       if (count <= thresholds[i]) {
         return Math.min(i + 1, 4);
