@@ -1,11 +1,10 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import { t, getLangFromUrl } from '@i18n';
 
-const lang = getLangFromUrl(Astro.url);
+const currentYear = new Date().getFullYear();
 ---
 
-<Layout 
+<Layout
   title={`Workspace - MaxMin.dev`}
   description="Collaborative workspace for notes and files"
 >
@@ -22,13 +21,13 @@ const lang = getLangFromUrl(Astro.url);
           <span class="eyebrow-dot"></span>
           <span class="eyebrow-text">Personal Workspace</span>
         </div>
-        
+
         <h1 class="workspace-title">
           Your Digital Workspace
         </h1>
-        
+
         <p class="workspace-description">
-          Organize your thoughts, collaborate on ideas, and keep your files in one place. 
+          Organize your thoughts, collaborate on ideas, and keep your files in one place.
           Sync across devices seamlessly.
         </p>
       </div>
@@ -59,6 +58,13 @@ const lang = getLangFromUrl(Astro.url);
           </div>
         </div>
         <div class="action-row">
+          <button class="btn-secondary" id="clipboard-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+            </svg>
+            <span>Clipboard</span>
+          </button>
           <button class="btn-secondary" id="upload-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -128,6 +134,75 @@ const lang = getLangFromUrl(Astro.url);
     <!-- Hidden file input -->
     <input type="file" id="file-upload" hidden multiple accept=".txt,.md,.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.zip,.rar" />
   </section>
+
+  <!-- Clipboard Modal -->
+  <div class="modal" id="clipboard-modal">
+    <div class="modal-backdrop" id="clipboard-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          </svg>
+          Quick Clipboard
+        </h3>
+        <button class="modal-close" id="clipboard-close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="clipboard-input-group">
+          <input type="text" id="clipboard-title" placeholder="Title (optional)" />
+        </div>
+        <div class="clipboard-input-group">
+          <textarea id="clipboard-content" placeholder="Paste your text here... (Ctrl+V)" rows="8"></textarea>
+        </div>
+        <div class="clipboard-actions">
+          <button class="btn-paste" id="paste-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+            </svg>
+            Paste from Clipboard
+          </button>
+          <button class="btn-save" id="save-clipboard-btn">Save to Workspace</button>
+        </div>
+
+        <!-- Recent Clips -->
+        <div class="recent-clips" id="recent-clips">
+          <h4>Recent Clips</h4>
+          <div class="clips-list" id="clips-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal" id="delete-modal">
+    <div class="modal-backdrop" id="delete-backdrop"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h3>Delete File</h3>
+        <button class="modal-close" id="delete-close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="delete-message">Are you sure you want to delete this file?</p>
+        <div class="modal-footer">
+          <button class="btn-cancel" id="delete-cancel">Cancel</button>
+          <button class="btn-danger" id="delete-confirm">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
@@ -323,6 +398,7 @@ const lang = getLangFromUrl(Astro.url);
     transition: all var(--duration-fast) var(--ease-default);
     font-family: var(--font-sans);
     white-space: nowrap;
+    min-height: 36px;
   }
 
   .filter-tab:hover {
@@ -344,6 +420,7 @@ const lang = getLangFromUrl(Astro.url);
     display: flex;
     gap: var(--space-3);
     align-items: center;
+    flex-wrap: wrap;
   }
 
   /* Buttons */
@@ -360,6 +437,7 @@ const lang = getLangFromUrl(Astro.url);
     transition: all var(--duration-fast) var(--ease-default);
     font-family: var(--font-sans);
     white-space: nowrap;
+    min-height: 44px;
   }
 
   .btn-primary {
@@ -530,6 +608,11 @@ const lang = getLangFromUrl(Astro.url);
     color: #F97316;
   }
 
+  .file-icon.clipboard {
+    background: rgba(192, 107, 62, 0.1);
+    color: #C06B3E;
+  }
+
   .file-info {
     flex: 1;
     min-width: 0;
@@ -617,45 +700,6 @@ const lang = getLangFromUrl(Astro.url);
     transform: scale(1.05);
   }
 
-  /* Loading State */
-  .loading-state {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-20) var(--space-4);
-  }
-
-  .loading-state.visible {
-    display: flex;
-  }
-
-  .loading-spinner {
-    position: relative;
-    width: 48px;
-    height: 48px;
-    margin-bottom: var(--space-4);
-  }
-
-  .spinner-ring {
-    position: absolute;
-    inset: 0;
-    border: 3px solid #D0C4B0;
-    border-top-color: #C06B3E;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .loading-state p {
-    font-size: var(--text-sm);
-    color: #7A6A52;
-    font-family: var(--font-sans);
-  }
-
   /* Empty State */
   .empty-state {
     display: none;
@@ -723,6 +767,295 @@ const lang = getLangFromUrl(Astro.url);
     box-shadow: 0 6px 16px rgba(192, 107, 62, 0.35);
   }
 
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+  }
+
+  .modal.open {
+    display: flex;
+  }
+
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(26, 18, 7, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-content {
+    position: relative;
+    background: #FFFFFF;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    animation: modalIn 0.25s ease;
+  }
+
+  .modal-content.modal-sm {
+    max-width: 400px;
+  }
+
+  @keyframes modalIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-5) var(--space-6);
+    border-bottom: 1px solid #D0C4B0;
+  }
+
+  .modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-lg);
+    font-weight: var(--font-medium);
+    color: #1A1207;
+    margin: 0;
+    font-family: var(--font-sans);
+  }
+
+  .modal-close {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: #7A6A52;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .modal-close:hover {
+    background: rgba(220, 38, 38, 0.1);
+    color: #DC2626;
+  }
+
+  .modal-body {
+    padding: var(--space-6);
+    overflow-y: auto;
+    max-height: calc(90vh - 80px);
+  }
+
+  .modal-body p {
+    font-size: var(--text-sm);
+    color: #6B5C42;
+    line-height: 1.6;
+    margin-bottom: var(--space-6);
+    font-family: var(--font-sans);
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+  }
+
+  /* Clipboard Styles */
+  .clipboard-input-group {
+    margin-bottom: var(--space-4);
+  }
+
+  .clipboard-input-group input,
+  .clipboard-input-group textarea {
+    width: 100%;
+    padding: var(--space-4);
+    background: #F5F0E6;
+    border: 1px solid #D0C4B0;
+    border-radius: 12px;
+    font-size: var(--text-sm);
+    color: #1A1207;
+    font-family: var(--font-sans);
+    transition: all var(--duration-fast) var(--ease-default);
+    resize: vertical;
+  }
+
+  .clipboard-input-group input:focus,
+  .clipboard-input-group textarea:focus {
+    outline: none;
+    border-color: #C06B3E;
+    background: #FFFFFF;
+  }
+
+  .clipboard-input-group textarea {
+    line-height: 1.6;
+  }
+
+  .clipboard-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+  }
+
+  .btn-paste {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: rgba(192, 107, 62, 0.1);
+    color: #C06B3E;
+    border: 1px solid rgba(192, 107, 62, 0.3);
+    border-radius: 10px;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .btn-paste:hover {
+    background: rgba(192, 107, 62, 0.15);
+  }
+
+  .btn-save {
+    flex: 1;
+    padding: var(--space-3) var(--space-5);
+    background: #1A1207;
+    color: #F0E9DC;
+    border: none;
+    border-radius: 10px;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .btn-save:hover {
+    background: #2C2210;
+  }
+
+  .btn-cancel {
+    padding: var(--space-3) var(--space-5);
+    background: transparent;
+    color: #7A6A52;
+    border: 1px solid #D0C4B0;
+    border-radius: 10px;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .btn-cancel:hover {
+    background: #F5F0E6;
+  }
+
+  .btn-danger {
+    padding: var(--space-3) var(--space-5);
+    background: #DC2626;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .btn-danger:hover {
+    background: #B91C1C;
+  }
+
+  /* Recent Clips */
+  .recent-clips h4 {
+    font-size: var(--text-xs);
+    color: #7A6A52;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-3);
+    font-family: var(--font-sans);
+  }
+
+  .clips-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .clip-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3);
+    background: #F5F0E6;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .clip-item:hover {
+    background: #EDE5D4;
+  }
+
+  .clip-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .clip-title {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: #1A1207;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: var(--font-sans);
+  }
+
+  .clip-time {
+    font-size: var(--text-xs);
+    color: #7A6A52;
+    font-family: var(--font-sans);
+  }
+
+  .clip-copy {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: #7A6A52;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .clip-copy:hover {
+    background: #C06B3E;
+    color: white;
+  }
+
   /* Toast */
   .toast {
     position: fixed;
@@ -734,7 +1067,7 @@ const lang = getLangFromUrl(Astro.url);
     padding: var(--space-3) var(--space-6);
     border-radius: var(--radius-full);
     font-size: var(--text-sm);
-    z-index: 1000;
+    z-index: 1001;
     opacity: 0;
     transition: all var(--duration-normal) var(--ease-default);
     font-family: var(--font-sans);
@@ -775,10 +1108,6 @@ const lang = getLangFromUrl(Astro.url);
 
   [data-theme="dark"] .eyebrow-text {
     color: #A89880;
-  }
-
-  [data-theme="dark"] .eyebrow-dot {
-    background: #C06B3E;
   }
 
   [data-theme="dark"] .search-box {
@@ -851,15 +1180,6 @@ const lang = getLangFromUrl(Astro.url);
     color: #DC2626;
   }
 
-  [data-theme="dark"] .empty-illustration circle {
-    fill: rgba(192, 107, 62, 0.12);
-  }
-
-  [data-theme="dark"] .empty-illustration rect,
-  [data-theme="dark"] .empty-illustration line {
-    stroke: rgba(192, 107, 62, 0.4);
-  }
-
   [data-theme="dark"] .empty-state h3 {
     color: #F0E9DC;
   }
@@ -868,19 +1188,68 @@ const lang = getLangFromUrl(Astro.url);
     color: #A89880;
   }
 
-  [data-theme="dark"] .toast {
-    background: #F0E9DC;
-    color: #1A1207;
+  [data-theme="dark"] .modal-content {
+    background: #2C2210;
   }
 
-  [data-theme="dark"] .toast.toast-success {
-    background: #5B7E6A;
+  [data-theme="dark"] .modal-header {
+    border-color: rgba(240, 233, 220, 0.1);
+  }
+
+  [data-theme="dark"] .modal-header h3 {
     color: #F0E9DC;
   }
 
-  [data-theme="dark"] .toast.toast-error {
-    background: #DC2626;
+  [data-theme="dark"] .modal-body p {
+    color: #A89880;
+  }
+
+  [data-theme="dark"] .clipboard-input-group input,
+  [data-theme="dark"] .clipboard-input-group textarea {
+    background: #1A1207;
+    border-color: rgba(240, 233, 220, 0.12);
     color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .clipboard-input-group input:focus,
+  [data-theme="dark"] .clipboard-input-group textarea:focus {
+    background: #1A1207;
+    border-color: #C06B3E;
+  }
+
+  [data-theme="dark"] .btn-paste {
+    background: rgba(192, 107, 62, 0.15);
+    border-color: rgba(192, 107, 62, 0.3);
+  }
+
+  [data-theme="dark"] .recent-clips h4 {
+    color: #A89880;
+  }
+
+  [data-theme="dark"] .clip-item {
+    background: #1A1207;
+  }
+
+  [data-theme="dark"] .clip-item:hover {
+    background: rgba(44, 34, 16, 0.8);
+  }
+
+  [data-theme="dark"] .clip-title {
+    color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .clip-time {
+    color: #8A7A62;
+  }
+
+  [data-theme="dark"] .btn-cancel {
+    background: transparent;
+    border-color: rgba(240, 233, 220, 0.15);
+    color: #A89880;
+  }
+
+  [data-theme="dark"] .btn-cancel:hover {
+    background: rgba(240, 233, 220, 0.1);
   }
 
   [data-theme="dark"] .skeleton-card {
@@ -889,12 +1258,6 @@ const lang = getLangFromUrl(Astro.url);
     border-color: rgba(240, 233, 220, 0.1);
   }
 
-  [data-theme="dark"] .spinner-ring {
-    border-color: rgba(240, 233, 220, 0.15);
-    border-top-color: #C06B3E;
-  }
-
-  [data-theme="dark"] .loading-state p,
   [data-theme="dark"] .workspace-stats span {
     color: #A89880;
   }
@@ -902,14 +1265,50 @@ const lang = getLangFromUrl(Astro.url);
   [data-theme="dark"] .file-preview {
     border-top-color: rgba(240, 233, 220, 0.1);
   }
+
+  /* Mobile Optimizations */
+  @media (max-width: 640px) {
+    .action-row {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      padding: var(--space-3) var(--space-4);
+      font-size: 12px;
+    }
+
+    .btn-primary span,
+    .btn-secondary span {
+      display: none;
+    }
+
+    .modal-content {
+      border-radius: 16px;
+    }
+
+    .modal-header {
+      padding: var(--space-4);
+    }
+
+    .modal-body {
+      padding: var(--space-4);
+    }
+
+    .clipboard-actions {
+      flex-direction: column;
+    }
+  }
 </style>
 
 <script>
   const API_BASE = 'https://api.ustc.dev';
-  
+
   let files: any[] = [];
   let sortBy = 'updated_at';
   let searchQuery = '';
+  let deleteTargetId: string | null = null;
 
   // DOM Elements
   const filesGrid = document.getElementById('files-grid');
@@ -921,7 +1320,25 @@ const lang = getLangFromUrl(Astro.url);
   const fileUpload = document.getElementById('file-upload') as HTMLInputElement;
   const newNoteBtn = document.getElementById('new-note-btn');
   const uploadBtn = document.getElementById('upload-btn');
+  const clipboardBtn = document.getElementById('clipboard-btn');
   const toast = document.getElementById('toast');
+
+  // Clipboard Modal Elements
+  const clipboardModal = document.getElementById('clipboard-modal');
+  const clipboardBackdrop = document.getElementById('clipboard-backdrop');
+  const clipboardClose = document.getElementById('clipboard-close');
+  const clipboardTitle = document.getElementById('clipboard-title') as HTMLInputElement;
+  const clipboardContent = document.getElementById('clipboard-content') as HTMLTextAreaElement;
+  const pasteBtn = document.getElementById('paste-btn');
+  const saveClipboardBtn = document.getElementById('save-clipboard-btn');
+  const clipsList = document.getElementById('clips-list');
+
+  // Delete Modal Elements
+  const deleteModal = document.getElementById('delete-modal');
+  const deleteBackdrop = document.getElementById('delete-backdrop');
+  const deleteClose = document.getElementById('delete-close');
+  const deleteCancel = document.getElementById('delete-cancel');
+  const deleteConfirm = document.getElementById('delete-confirm');
 
   // File type config
   const fileTypeConfig: Record<string, { icon: string; type: string }> = {
@@ -938,12 +1355,15 @@ const lang = getLangFromUrl(Astro.url);
     'gif': { icon: 'image', type: 'image' },
     'zip': { icon: 'archive', type: 'archive' },
     'rar': { icon: 'archive', type: 'archive' },
+    'clipboard': { icon: 'clipboard', type: 'clipboard' },
   };
 
   // Initialize
   async function init() {
     await loadFiles();
     initSortTabs();
+    initModals();
+    loadRecentClips();
   }
 
   // Init sort tabs
@@ -959,19 +1379,43 @@ const lang = getLangFromUrl(Astro.url);
     });
   }
 
+  // Init modals
+  function initModals() {
+    // Clipboard modal
+    clipboardBtn?.addEventListener('click', () => openClipboardModal());
+    clipboardBackdrop?.addEventListener('click', () => closeClipboardModal());
+    clipboardClose?.addEventListener('click', () => closeClipboardModal());
+    pasteBtn?.addEventListener('click', pasteFromClipboard);
+    saveClipboardBtn?.addEventListener('click', saveClipboard);
+
+    // Delete modal
+    deleteBackdrop?.addEventListener('click', () => closeDeleteModal());
+    deleteClose?.addEventListener('click', () => closeDeleteModal());
+    deleteCancel?.addEventListener('click', () => closeDeleteModal());
+    deleteConfirm?.addEventListener('click', confirmDelete);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeClipboardModal();
+        closeDeleteModal();
+      }
+    });
+  }
+
   // Load files
   async function loadFiles() {
     showLoading();
-    
+
     try {
       const response = await fetch(`${API_BASE}/api/workspace?sortBy=${sortBy}&order=desc${searchQuery ? '&search=' + encodeURIComponent(searchQuery) : ''}`);
       const result = await response.json();
-      
+
       files = result.data || [];
       renderFiles();
     } catch (error) {
       console.error('Load failed:', error);
-      showToast('加载失败', 'error');
+      showToast('Failed to load files', 'error');
     } finally {
       hideLoading();
     }
@@ -992,7 +1436,7 @@ const lang = getLangFromUrl(Astro.url);
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
-    
+
     if (minutes < 1) return 'Just now';
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
@@ -1002,15 +1446,15 @@ const lang = getLangFromUrl(Astro.url);
 
   // Render files
   function renderFiles() {
-    const filtered = files.filter(f => 
+    const filtered = files.filter(f =>
       f.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const total = files.reduce((acc, f) => acc + (f.fileSize || 0), 0);
-    
+
     filesCount!.textContent = `${filtered.length} ${filtered.length === 1 ? 'file' : 'files'}`;
     totalSize!.textContent = formatSize(total);
-    
+
     if (filtered.length === 0) {
       filesGrid!.innerHTML = '';
       emptyState!.classList.add('visible');
@@ -1018,7 +1462,7 @@ const lang = getLangFromUrl(Astro.url);
     }
 
     emptyState!.classList.remove('visible');
-    
+
     filesGrid!.innerHTML = filtered.map(file => {
       const ext = file.type || 'txt';
       const config = fileTypeConfig[ext] || { icon: 'document', type: 'document' };
@@ -1026,7 +1470,7 @@ const lang = getLangFromUrl(Astro.url);
       const timeAgo = getTimeAgo(date);
       const preview = file.content ? file.content.substring(0, 80).trim() : '';
       const fileSize = formatSize(file.fileSize || 0);
-      
+
       return `
         <div class="file-card" data-id="${file.id}">
           <div class="file-actions">
@@ -1070,9 +1514,7 @@ const lang = getLangFromUrl(Astro.url);
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const id = btn.getAttribute('data-id');
-        if (id && confirm('确定删除此文件？')) {
-          await deleteFile(id);
-        }
+        if (id) openDeleteModal(id);
       });
     });
   }
@@ -1099,30 +1541,159 @@ const lang = getLangFromUrl(Astro.url);
         <path d="M21 8v13H3V8"></path>
         <path d="M1 3h22v5H1z"></path>
         <path d="M10 12h4"></path>
+      </svg>`,
+      clipboard: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
       </svg>`
     };
     return icons[type] || icons.document;
   }
 
-  // Delete file
-  async function deleteFile(id: string) {
+  // Delete Modal Functions
+  function openDeleteModal(id: string) {
+    deleteTargetId = id;
+    deleteModal?.classList.add('open');
+  }
+
+  function closeDeleteModal() {
+    deleteTargetId = null;
+    deleteModal?.classList.remove('open');
+  }
+
+  async function confirmDelete() {
+    if (!deleteTargetId) return;
+
+    closeDeleteModal();
+
     try {
-      const response = await fetch(`${API_BASE}/api/workspace/${id}`, {
+      const response = await fetch(`${API_BASE}/api/workspace/${deleteTargetId}`, {
         method: 'DELETE'
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
-        showToast('删除成功', 'success');
+        showToast('Deleted successfully', 'success');
         await loadFiles();
       } else {
-        showToast('删除失败', 'error');
+        showToast(result.message || 'Delete failed', 'error');
       }
     } catch (error) {
       console.error('Delete failed:', error);
-      showToast('删除失败', 'error');
+      showToast('Delete failed', 'error');
     }
+  }
+
+  // Clipboard Modal Functions
+  function openClipboardModal() {
+    clipboardModal?.classList.add('open');
+    clipboardContent?.focus();
+  }
+
+  function closeClipboardModal() {
+    clipboardModal?.classList.remove('open');
+    clipboardTitle!.value = '';
+    clipboardContent!.value = '';
+  }
+
+  async function pasteFromClipboard() {
+    try {
+      const text = await navigator.clipboard.readText();
+      clipboardContent!.value = text;
+      showToast('Pasted from clipboard', 'success');
+    } catch (error) {
+      showToast('Unable to access clipboard', 'error');
+    }
+  }
+
+  async function saveClipboard() {
+    const title = clipboardTitle?.value.trim() || 'Quick Clip';
+    const content = clipboardContent?.value.trim();
+
+    if (!content) {
+      showToast('Please enter some content', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/api/workspace`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          content,
+          type: 'clipboard',
+          fileSize: content.length
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast('Saved to workspace', 'success');
+        closeClipboardModal();
+        await loadFiles();
+        saveToRecentClips(title, content);
+      } else {
+        showToast(result.message || 'Save failed', 'error');
+      }
+    } catch (error) {
+      console.error('Save failed:', error);
+      showToast('Save failed', 'error');
+    }
+  }
+
+  // Recent Clips (localStorage)
+  function saveToRecentClips(title: string, content: string) {
+    const clips = JSON.parse(localStorage.getItem('recentClips') || '[]');
+    clips.unshift({
+      title,
+      content: content.substring(0, 200),
+      time: new Date().toISOString()
+    });
+    localStorage.setItem('recentClips', JSON.stringify(clips.slice(0, 10)));
+    loadRecentClips();
+  }
+
+  function loadRecentClips() {
+    const clips = JSON.parse(localStorage.getItem('recentClips') || '[]');
+
+    if (clips.length === 0) {
+      clipsList!.innerHTML = '<p style="color: #7A6A52; font-size: var(--text-sm); text-align: center; padding: var(--space-4);">No recent clips</p>';
+      return;
+    }
+
+    clipsList!.innerHTML = clips.map((clip: any, index: number) => `
+      <div class="clip-item" data-index="${index}">
+        <div class="clip-info">
+          <div class="clip-title">${escapeHtml(clip.title)}</div>
+          <div class="clip-time">${getTimeAgo(new Date(clip.time))}</div>
+        </div>
+        <button class="clip-copy" data-content="${escapeHtml(clip.content)}" title="Copy">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      </div>
+    `).join('');
+
+    // Bind copy events
+    document.querySelectorAll('.clip-copy').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const content = btn.getAttribute('data-content');
+        if (content) {
+          try {
+            await navigator.clipboard.writeText(content);
+            showToast('Copied to clipboard', 'success');
+          } catch {
+            showToast('Copy failed', 'error');
+          }
+        }
+      });
+    });
   }
 
   // Create new note
@@ -1137,20 +1708,20 @@ const lang = getLangFromUrl(Astro.url);
           type: 'txt'
         })
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success && result.data?.id) {
-        showToast('Note created successfully');
+        showToast('Note created', 'success');
         setTimeout(() => {
           window.location.href = `/workspace/edit?id=${result.data.id}`;
         }, 500);
       } else {
-        showToast('Failed to create note');
+        showToast(result.message || 'Failed to create note', 'error');
       }
     } catch (error) {
       console.error('Create failed:', error);
-      showToast('Failed to create note');
+      showToast('Failed to create note', 'error');
     }
   }
 
@@ -1163,15 +1734,37 @@ const lang = getLangFromUrl(Astro.url);
     let successCount = 0;
     let failCount = 0;
 
+    showToast('Uploading...', 'default');
+
     for (const file of Array.from(fileList)) {
       try {
         const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
-        const isText = ['txt', 'md'].includes(ext);
-        
+        const isText = ['txt', 'md', 'json', 'js', 'ts', 'css', 'html'].includes(ext);
+
         let content = '';
-        
+        let fileUrl = '';
+
         if (isText) {
           content = await file.text();
+        } else {
+          // For binary files, upload using FormData
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const uploadResponse = await fetch(`${API_BASE}/api/workspace/upload`, {
+            method: 'POST',
+            body: formData
+          });
+
+          const uploadResult = await uploadResponse.json();
+
+          if (uploadResult.success && uploadResult.data?.id) {
+            successCount++;
+            continue;
+          } else {
+            // Fallback: save as reference
+            fileUrl = uploadResult.url || '';
+          }
         }
 
         const response = await fetch(`${API_BASE}/api/workspace`, {
@@ -1181,12 +1774,13 @@ const lang = getLangFromUrl(Astro.url);
             title: file.name.replace(/\.[^/.]+$/, ''),
             content: content,
             type: ext,
-            fileSize: file.size
+            fileSize: file.size,
+            fileUrl: fileUrl
           })
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
           successCount++;
         } else {
@@ -1199,14 +1793,14 @@ const lang = getLangFromUrl(Astro.url);
     }
 
     input.value = '';
-    
+
     if (successCount > 0) {
-      showToast(`${successCount} file(s) uploaded successfully`);
+      showToast(`${successCount} file(s) uploaded`, 'success');
     }
     if (failCount > 0) {
-      showToast(`Failed to upload ${failCount} file(s)`);
+      showToast(`Failed to upload ${failCount} file(s)`, 'error');
     }
-    
+
     await loadFiles();
   }
 
@@ -1242,11 +1836,11 @@ const lang = getLangFromUrl(Astro.url);
   newNoteBtn?.addEventListener('click', createNote);
   uploadBtn?.addEventListener('click', () => fileUpload?.click());
   fileUpload?.addEventListener('change', handleUpload);
-  
+
   // Empty state button
   const emptyNewBtn = document.getElementById('empty-new-btn');
   emptyNewBtn?.addEventListener('click', createNote);
-  
+
   searchInput?.addEventListener('input', (e) => {
     searchQuery = (e.target as HTMLInputElement).value;
     renderFiles();
