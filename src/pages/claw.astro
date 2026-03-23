@@ -432,14 +432,14 @@ const stats = [
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: var(--space-16);
+    gap: var(--space-20);
   }
 
   /* Hero */
   .claw-hero {
     text-align: center;
-    padding: var(--space-8) 0;
-    max-width: 800px;
+    padding: var(--space-16) 0;
+    max-width: 900px;
     margin: 0 auto;
   }
 
@@ -600,24 +600,24 @@ const stats = [
   .install-section {
     background: var(--bg-elevated);
     border-radius: var(--radius-2xl);
-    padding: var(--space-10);
+    padding: var(--space-16);
     border: 1px solid var(--card-border);
   }
 
   .install-tabs {
     display: flex;
     justify-content: center;
-    gap: var(--space-2);
-    margin-bottom: var(--space-8);
+    gap: var(--space-3);
+    margin-bottom: var(--space-12);
   }
 
   .tab-btn {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-3) var(--space-6);
+    padding: var(--space-4) var(--space-8);
     background: transparent;
-    border: 1px solid var(--card-border);
+    border: 1.5px solid var(--card-border);
     border-radius: var(--radius-lg);
     font-size: var(--text-base);
     font-weight: var(--font-medium);
@@ -647,6 +647,52 @@ const stats = [
 
   .install-grid {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-6);
+  }
+
+  .install-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .install-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+  }
+
+  .install-header {
+    padding: var(--space-6);
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .install-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+  }
+
+  .install-desc {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+  }
+
+  .install-code {
+    padding: var(--space-6);
+    margin: 0;
+    background: rgba(0, 0, 0, 0.02);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    color: var(--text-primary);
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--space-4);
   }
@@ -719,15 +765,15 @@ const stats = [
 
   .skills-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-5);
   }
 
   .skill-card {
     display: flex;
     align-items: flex-start;
     gap: var(--space-4);
-    padding: var(--space-5);
+    padding: var(--space-6);
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-xl);
@@ -737,8 +783,8 @@ const stats = [
 
   .skill-card:hover {
     border-color: var(--color-primary);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   }
 
   .skill-icon {
@@ -789,24 +835,24 @@ const stats = [
 
   /* ClawHub Banner */
   .clawhub-banner {
-    margin-top: var(--space-8);
+    margin-top: var(--space-10);
     background: linear-gradient(135deg, var(--color-primary-light), transparent);
     border: 1px solid rgba(217, 119, 87, 0.2);
-    border-radius: var(--radius-xl);
-    padding: var(--space-6);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-8);
   }
 
   .clawhub-content {
     display: flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-8);
     flex-wrap: wrap;
   }
 
   .clawhub-icon {
     flex-shrink: 0;
-    width: 64px;
-    height: 64px;
+    width: 72px;
+    height: 72px;
     display: flex;
     align-items: center;
     justify-content: center;

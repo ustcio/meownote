@@ -58,16 +58,16 @@
   --font-number: var(--font-sans);
   
   /* Font Sizes - Mobile First */
-  --text-xs: 0.75rem;       /* 12px */
-  --text-sm: 0.8125rem;     /* 13px - slightly larger for readability */
-  --text-base: 0.9375rem;   /* 15px - mobile base */
-  --text-lg: 1.0625rem;     /* 17px */
-  --text-xl: 1.1875rem;     /* 19px */
-  --text-2xl: 1.375rem;    /* 22px */
-  --text-3xl: 1.75rem;     /* 28px */
-  --text-4xl: 2.25rem;     /* 36px */
-  --text-5xl: 2.75rem;     /* 44px */
-  --text-6xl: 3.5rem;      /* 56px */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.1875rem;
+  --text-2xl: 1.375rem;
+  --text-3xl: 1.75rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 2.75rem;
+  --text-6xl: 3.5rem;
   
   /* Font Weights - Anthropic uses 400 for headings */
   --font-normal: 400;
@@ -99,11 +99,11 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
-  --space-16: 4rem;
-  --space-20: 5rem;
-  --space-24: 6rem;
-  --space-28: 7rem;
-  --space-32: 8rem;
+  --space-16: 6rem;
+  --space-20: 8rem;
+  --space-24: 10rem;
+  --space-28: 12rem;
+  --space-32: 14rem;
   
   /* ==================== Border Radius ==================== */
   --radius-sm: 0.5rem;
@@ -162,8 +162,8 @@
   /* ==================== Layout ==================== */
   --container-sm: 640px;
   --container-md: 768px;
-  --container-lg: 1024px;
-  --container-xl: 1280px;
+  --container-lg: 980px;
+  --container-xl: 1200px;
   
   --header-height: 4rem;
   

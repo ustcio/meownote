@@ -117,8 +117,8 @@ const navItems = [
     justify-content: space-between;
     max-width: var(--container-xl);
     margin: 0 auto;
-    padding: 0 var(--space-6);
-    height: var(--header-height);
+    padding: 0 var(--space-8);
+    height: 72px;
   }
 
   @media (min-width: 768px) {
@@ -159,7 +159,9 @@ const navItems = [
   }
 
   .nav-desktop {
-    display: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
   }
 
   @media (min-width: 768px) {
