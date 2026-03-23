@@ -1,224 +1,96 @@
 ---
-import '@styles/global.css';
-import '@styles/chatbot-claude.css';
+import Layout from '@layouts/Layout.astro';
+import Icon from '@components/ui/Icon.astro';
 import { t, getLangFromUrl, type Language } from '@i18n';
 
 const lang = getLangFromUrl(Astro.url);
+
+const features = [
+  {
+    icon: 'message-circle',
+    title: '智能对话',
+    desc: '基于 MiniMax 2.7 模型，支持多轮对话、上下文理解'
+  },
+  {
+    icon: 'zap',
+    title: '快速响应',
+    desc: '毫秒级响应速度，流畅的对话体验'
+  },
+  {
+    icon: 'shield',
+    title: '隐私安全',
+    desc: '对话数据本地存储，保护您的隐私'
+  },
+  {
+    icon: 'globe',
+    title: '多语言支持',
+    desc: '支持中英文及多种语言对话'
+  }
+];
+
+const suggestions = [
+  { icon: 'mail', text: '帮我写一封专业邮件', prompt: 'Help me write a professional email to request a meeting' },
+  { icon: 'book', text: '解释复杂概念', prompt: 'Explain the concept of machine learning in simple terms' },
+  { icon: 'code', text: '调试代码问题', prompt: 'Help me debug this Python code and explain what went wrong' },
+  { icon: 'edit', text: '总结文档内容', prompt: 'Summarize the key points from this article or document' },
+];
 ---
 
-<!DOCTYPE html>
-<html lang="en" data-theme="light">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="generator" content={Astro.generator} />
-
-    <title>{t('chatbot.title', lang)} - MaxMin.dev</title>
-    <meta name="title" content={`${t('chatbot.title', lang)} - MaxMin.dev`} />
-    <meta name="description" content={t('chatbot.welcome.subtitle', lang)} />
-
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-
-    <!-- Local Fonts -->
-    <link rel="preconnect" href="/fonts/" crossorigin>
-
-    <meta name="theme-color" content="#FAFAFA" />
-    <meta name="color-scheme" content="light dark" />
-
-    <script is:inline>
-      (function() {
-        try {
-          const theme = localStorage.getItem('theme') || 'light';
-          document.documentElement.setAttribute('data-theme', theme);
-        } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'light');
-        }
-      })();
-    </script>
-  </head>
-  <body class="claude-chat">
-    <!-- Main Layout -->
-    <div class="chat-layout">
-      <!-- Sidebar -->
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-          <a href="/" class="sidebar-logo">
-            <div class="logo-icon">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 3L20.5 18H3.5L12 3Z" fill="white" />
-              </svg>
-            </div>
-            <span class="logo-text">MaxMin.dev</span>
-          </a>
-          <button class="new-chat-btn" id="new-chat-btn" title="New chat">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-          </button>
+<Layout 
+  title={`${t('chatbot.title', lang)} - MaxMin.dev`}
+  description={t('chatbot.welcome.subtitle', lang)}
+>
+  <section class="chatbot">
+    <div class="chatbot-container">
+      <!-- Hero -->
+      <div class="chatbot-hero">
+        <div class="hero-badge">
+          <Icon name="message-circle" size={16} />
+          <span>AI Chat</span>
         </div>
-        
-        <div class="sidebar-search">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <input type="text" placeholder="Search chats" class="search-input" id="search-input" />
-        </div>
-        
-        <div class="sidebar-section">
-          <div class="section-header">
-            <span>Today</span>
-          </div>
-          <div class="chat-list" id="chat-list">
-            <!-- Chat items will be populated by JS -->
-          </div>
-        </div>
-        
-        <div class="sidebar-section">
-          <div class="section-header">
-            <span>Previous 7 Days</span>
-          </div>
-          <div class="chat-list" id="chat-list-older">
-            <!-- Chat items will be populated by JS -->
-          </div>
-        </div>
-        
-        <div class="sidebar-footer">
-          <button class="sidebar-footer-btn" id="toggle-sidebar-btn" title="Toggle sidebar">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="9" y1="3" x2="9" y2="21"></line>
-            </svg>
-          </button>
-        </div>
-      </aside>
+        <h1 class="hero-title">MaxMin Chat</h1>
+        <p class="hero-tagline">基于 MiniMax 2.7 的智能对话助手</p>
+        <p class="hero-description">
+          随时随地与 AI 对话，获取写作、编程、学习等方面的帮助
+        </p>
+      </div>
 
-      <!-- Main Chat Area -->
-      <main class="chat-main">
-        <!-- Top Bar -->
-        <div class="chat-topbar">
-          <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          </button>
-          
-          <div class="model-selector" id="model-selector">
-            <button class="model-btn" id="model-btn">
-              <span class="model-name">MiniMax 2.7</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-            
-            <div class="model-dropdown" id="model-dropdown">
-              <div class="model-option active" data-model="minimax-2.7">
-                <div class="model-info">
-                  <span class="model-title">MiniMax 2.7</span>
-                  <span class="model-desc">Latest MiniMax model</span>
-                </div>
-                <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </div>
-            </div>
-          </div>
-          
-          <div class="topbar-actions">
-            <button class="action-btn" id="share-btn" title="Share">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="18" cy="5" r="3"></circle>
-                <circle cx="6" cy="12" r="3"></circle>
-                <circle cx="18" cy="19" r="3"></circle>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-              </svg>
-            </button>
-            <a href="/" class="action-btn" title="Home">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-              </svg>
-            </a>
-          </div>
-        </div>
-
-        <!-- Messages Area -->
-        <div class="messages-area" id="messages-area">
-          <!-- Welcome Screen -->
-          <div class="welcome" id="welcome">
-            <div class="welcome-logo">
+      <!-- Chat Interface -->
+      <div class="chat-interface">
+        <!-- Chat Window -->
+        <div class="chat-window" id="chat-window">
+          <!-- Welcome Message -->
+          <div class="chat-welcome" id="chat-welcome">
+            <div class="welcome-icon">
               <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                <rect width="48" height="48" rx="12" fill="#D97757"/>
+                <rect width="48" height="48" rx="12" fill="#C06B3E"/>
                 <path d="M24 8L38 36H10L24 8Z" fill="white"/>
               </svg>
             </div>
-            <h1 class="welcome-title">How can I help you today?</h1>
+            <h3 class="welcome-title">有什么我可以帮你的？</h3>
+            <p class="welcome-subtitle">选择一个话题开始对话，或直接输入你的问题</p>
             
             <div class="suggestion-grid">
-              <button class="suggestion-card" data-prompt="Help me write a professional email to request a meeting">
-                <div class="suggestion-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                    <polyline points="22,6 12,13 2,6"></polyline>
-                  </svg>
-                </div>
-                <span>Write an email</span>
-              </button>
-              
-              <button class="suggestion-card" data-prompt="Explain the concept of machine learning in simple terms">
-                <div class="suggestion-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                  </svg>
-                </div>
-                <span>Explain a concept</span>
-              </button>
-              
-              <button class="suggestion-card" data-prompt="Help me debug this Python code and explain what went wrong">
-                <div class="suggestion-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="16 18 22 12 16 6"></polyline>
-                    <polyline points="8 6 2 12 8 18"></polyline>
-                  </svg>
-                </div>
-                <span>Help me code</span>
-              </button>
-              
-              <button class="suggestion-card" data-prompt="Summarize the key points from this article or document">
-                <div class="suggestion-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                    <polyline points="10 9 9 9 8 9"></polyline>
-                  </svg>
-                </div>
-                <span>Summarize text</span>
-              </button>
+              {suggestions.map((s) => (
+                <button class="suggestion-btn" data-prompt={s.prompt}>
+                  <Icon name={s.icon} size={18} />
+                  <span>{s.text}</span>
+                </button>
+              ))}
             </div>
           </div>
           
           <!-- Messages Container -->
-          <div class="messages" id="messages"></div>
+          <div class="chat-messages" id="chat-messages"></div>
         </div>
 
         <!-- Input Area -->
-        <div class="input-area">
-          <div class="input-box">
+        <div class="chat-input-area">
+          <div class="input-wrapper">
             <textarea 
-              class="input-field" 
-              id="input-field" 
-              placeholder="Message MiniMax..."
+              class="chat-input" 
+              id="chat-input" 
+              placeholder="输入消息..."
               rows="1"
             ></textarea>
             <button class="send-btn" id="send-btn" disabled>
@@ -228,19 +100,571 @@ const lang = getLangFromUrl(Astro.url);
               </svg>
             </button>
           </div>
-          <p class="input-hint">AI responses are generated by MiniMax. Please verify important information.</p>
+          <p class="input-hint">AI 回复由 MiniMax 生成，请验证重要信息</p>
         </div>
-      </main>
-    </div>
+      </div>
 
-    <script>
-      import { initClaudeChat } from '../scripts/chatbot-claude';
-      
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initClaudeChat);
-      } else {
-        initClaudeChat();
+      <!-- Features -->
+      <div class="features-section">
+        <h2 class="section-title">功能特点</h2>
+        <div class="features-grid">
+          {features.map((feature) => (
+            <div class="feature-card">
+              <div class="feature-icon">
+                <Icon name={feature.icon} size={24} />
+              </div>
+              <h3 class="feature-title">{feature.title}</h3>
+              <p class="feature-desc">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-section">
+        <h2 class="cta-title">开始对话</h2>
+        <p class="cta-subtitle">AI 助手随时准备为您提供帮助</p>
+        <div class="cta-actions">
+          <button class="btn-primary" id="start-chat-btn">
+            <Icon name="message-circle" size={18} />
+            <span>开始聊天</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .chatbot {
+    min-height: 100vh;
+    padding: calc(var(--header-total-height) + var(--space-8)) var(--space-4) var(--space-12);
+    background: var(--bg-primary);
+  }
+
+  .chatbot-container {
+    max-width: var(--container-xl);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+  }
+
+  /* Hero */
+  .chatbot-hero {
+    text-align: center;
+    padding: var(--space-8) 0;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-primary-light);
+    border: 1px solid rgba(192, 107, 62, 0.2);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-primary);
+    margin-bottom: var(--space-6);
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--text-primary), var(--color-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-tagline {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--color-primary);
+    margin-bottom: var(--space-4);
+  }
+
+  .hero-description {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: var(--leading-relaxed);
+  }
+
+  /* Chat Interface */
+  .chat-interface {
+    background: var(--bg-elevated);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-2xl);
+    overflow: hidden;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .chat-window {
+    min-height: 400px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: var(--space-6);
+  }
+
+  /* Welcome */
+  .chat-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 350px;
+    text-align: center;
+  }
+
+  .chat-welcome.hidden {
+    display: none;
+  }
+
+  .welcome-icon {
+    margin-bottom: var(--space-4);
+  }
+
+  .welcome-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+  }
+
+  .welcome-subtitle {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-6);
+  }
+
+  .suggestion-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+    width: 100%;
+    max-width: 450px;
+  }
+
+  @media (max-width: 500px) {
+    .suggestion-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .suggestion-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .suggestion-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+  }
+
+  /* Messages */
+  .chat-messages {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .message {
+    display: flex;
+    gap: var(--space-3);
+    max-width: 85%;
+  }
+
+  .message.user {
+    margin-left: auto;
+    flex-direction: row-reverse;
+  }
+
+  .message-avatar {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+  }
+
+  .message.assistant .message-avatar {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  .message.user .message-avatar {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  .message-content {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+  }
+
+  .message.assistant .message-content {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  .message.user .message-content {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  /* Typing Indicator */
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: var(--space-3);
+  }
+
+  .typing-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+    opacity: 0.4;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing {
+    0%, 60%, 100% { opacity: 0.4; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-4px); }
+  }
+
+  /* Input Area */
+  .chat-input-area {
+    border-top: 1px solid var(--card-border);
+    padding: var(--space-4);
+    background: var(--bg-elevated);
+  }
+
+  .input-wrapper {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-2);
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-3);
+    transition: border-color var(--duration-fast) var(--ease-default);
+  }
+
+  .input-wrapper:focus-within {
+    border-color: var(--color-primary);
+  }
+
+  .chat-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    resize: none;
+    outline: none;
+    min-height: 24px;
+    max-height: 120px;
+    line-height: 1.5;
+  }
+
+  .chat-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .send-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary);
+    border: none;
+    border-radius: var(--radius-full);
+    color: white;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .send-btn:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+  }
+
+  .send-btn:disabled {
+    background: var(--text-muted);
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .input-hint {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: var(--space-2);
+  }
+
+  /* Features */
+  .features-section {
+    padding: var(--space-8) 0;
+  }
+
+  .section-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: var(--space-8);
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .feature-card {
+    padding: var(--space-6);
+    background: var(--bg-elevated);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    text-align: center;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .feature-card:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+  }
+
+  .feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+    border-radius: var(--radius-lg);
+    color: white;
+    margin-bottom: var(--space-4);
+  }
+
+  .feature-title {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+  }
+
+  .feature-desc {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: var(--leading-relaxed);
+    margin: 0;
+  }
+
+  /* CTA */
+  .cta-section {
+    text-align: center;
+    padding: var(--space-12);
+    background: linear-gradient(135deg, var(--color-primary-light), transparent);
+    border-radius: var(--radius-2xl);
+    border: 1px solid rgba(192, 107, 62, 0.2);
+  }
+
+  .cta-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+  }
+
+  .cta-subtitle {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-6);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-6);
+    background: var(--color-primary);
+    color: white;
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .btn-primary:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-1px);
+  }
+</style>
+
+<script>
+  const API_BASE = 'https://api.ustc.dev';
+  
+  let messages: { role: 'user' | 'assistant'; content: string }[] = [];
+
+  const chatWindow = document.getElementById('chat-window');
+  const chatWelcome = document.getElementById('chat-welcome');
+  const chatMessages = document.getElementById('chat-messages');
+  const chatInput = document.getElementById('chat-input') as HTMLTextAreaElement;
+  const sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
+
+  // Suggestion buttons
+  document.querySelectorAll('.suggestion-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const prompt = btn.getAttribute('data-prompt');
+      if (prompt && chatInput) {
+        chatInput.value = prompt;
+        chatInput.focus();
+        sendBtn.disabled = false;
       }
-    </script>
-  </body>
-</html>
+    });
+  });
+
+  // Start chat button
+  document.getElementById('start-chat-btn')?.addEventListener('click', () => {
+    chatInput?.focus();
+    chatInput?.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // Input handling
+  chatInput?.addEventListener('input', () => {
+    sendBtn.disabled = !chatInput.value.trim();
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+  });
+
+  chatInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!sendBtn.disabled) {
+        sendMessage();
+      }
+    }
+  });
+
+  sendBtn?.addEventListener('click', sendMessage);
+
+  async function sendMessage() {
+    const content = chatInput?.value.trim();
+    if (!content) return;
+
+    // Hide welcome
+    chatWelcome?.classList.add('hidden');
+
+    // Add user message
+    addMessage('user', content);
+    messages.push({ role: 'user', content });
+
+    // Clear input
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    sendBtn.disabled = true;
+
+    // Add typing indicator
+    const typingEl = addTypingIndicator();
+
+    try {
+      const response = await fetch(`${API_BASE}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages })
+      });
+
+      const data = await response.json();
+      
+      if (typingEl) typingEl.remove();
+      
+      if (data.content) {
+        addMessage('assistant', data.content);
+        messages.push({ role: 'assistant', content: data.content });
+      } else if (data.error) {
+        addMessage('assistant', `错误: ${data.error}`);
+      }
+    } catch (error) {
+      if (typingEl) typingEl.remove();
+      addMessage('assistant', '网络错误，请稍后重试');
+    }
+  }
+
+  function addMessage(role: 'user' | 'assistant', content: string) {
+    const messageEl = document.createElement('div');
+    messageEl.className = `message ${role}`;
+    
+    messageEl.innerHTML = `
+      <div class="message-avatar">
+        ${role === 'assistant' 
+          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L20.5 18H3.5L12 3Z"/></svg>'
+          : 'U'}
+      </div>
+      <div class="message-content">${escapeHtml(content)}</div>
+    `;
+    
+    chatMessages?.appendChild(messageEl);
+    chatWindow?.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' });
+  }
+
+  function addTypingIndicator(): HTMLElement | null {
+    const typingEl = document.createElement('div');
+    typingEl.className = 'message assistant';
+    typingEl.innerHTML = `
+      <div class="message-avatar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L20.5 18H3.5L12 3Z"/></svg>
+      </div>
+      <div class="message-content">
+        <div class="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+    `;
+    chatMessages?.appendChild(typingEl);
+    chatWindow?.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' });
+    return typingEl;
+  }
+
+  function escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+</script>
