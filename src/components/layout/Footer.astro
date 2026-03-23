@@ -50,8 +50,9 @@ const legalLinks = ["Privacy Policy", "Terms of Service", "Cookie Settings"];
 
 <style>
   .footer {
-    background: #C06B3E;
+    background: #F0E9DC;
     padding: var(--space-12) var(--space-5);
+    border-top: 1px solid #D0C4B0;
   }
 
   @media (min-width: 768px) {
@@ -70,7 +71,7 @@ const legalLinks = ["Privacy Policy", "Terms of Service", "Cookie Settings"];
     grid-template-columns: 1fr;
     gap: var(--space-8);
     padding-bottom: var(--space-8);
-    border-bottom: 1px solid rgba(240, 233, 220, 0.2);
+    border-bottom: 1px solid #D0C4B0;
     margin-bottom: var(--space-8);
   }
 
@@ -120,8 +121,8 @@ const legalLinks = ["Privacy Policy", "Terms of Service", "Cookie Settings"];
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background: #F0E9DC;
-    color: #C06B3E;
+    background: #C06B3E;
+    color: #F0E9DC;
     transition: transform var(--duration-normal) var(--ease-default);
   }
 
@@ -138,7 +139,7 @@ const legalLinks = ["Privacy Policy", "Terms of Service", "Cookie Settings"];
     font-family: var(--font-serif);
     font-size: var(--text-lg);
     font-weight: var(--font-normal);
-    color: #F0E9DC;
+    color: #1A1207;
     letter-spacing: -0.01em;
   }
 
@@ -151,7 +152,7 @@ const legalLinks = ["Privacy Policy", "Terms of Service", "Cookie Settings"];
   .footer-tagline {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    color: rgba(240, 233, 220, 0.7);
+    color: #6B5C42;
     line-height: 1.6;
     max-width: 260px;
     margin: 0;
@@ -161,7 +162,7 @@ const legalLinks = ["Privacy Policy", "Terms of Service", "Cookie Settings"];
     font-family: var(--font-sans);
     font-size: 11px;
     font-weight: var(--font-medium);
-    color: #F0E9DC;
+    color: #1A1207;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     margin-bottom: var(--space-4);
@@ -185,26 +186,25 @@ const legalLinks = ["Privacy Policy", "Terms of Service", "Cookie Settings"];
   .column-link {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    color: rgba(240, 233, 220, 0.7);
+    color: #6B5C42;
     text-decoration: none;
     line-height: 1.5;
     transition: color var(--duration-normal) var(--ease-default);
-    display: inline-block;
-    padding: 2px 0;
-    min-height: 44px;
     display: flex;
     align-items: center;
+    padding: 2px 0;
+    min-height: 44px;
     -webkit-tap-highlight-color: transparent;
   }
 
   @media (hover: hover) {
     .column-link:hover {
-      color: #F0E9DC;
+      color: #C06B3E;
     }
   }
 
   .column-link:active {
-    color: #1A1207;
+    color: #C06B3E;
   }
 
   .footer-bottom {
@@ -226,7 +226,7 @@ const legalLinks = ["Privacy Policy", "Terms of Service", "Cookie Settings"];
   .copyright {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    color: rgba(240, 233, 220, 0.6);
+    color: #7A6A52;
     margin: 0;
   }
 
@@ -247,7 +247,7 @@ const legalLinks = ["Privacy Policy", "Terms of Service", "Cookie Settings"];
   .legal-link {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    color: rgba(240, 233, 220, 0.6);
+    color: #7A6A52;
     text-decoration: none;
     transition: color var(--duration-normal) var(--ease-default);
     -webkit-tap-highlight-color: transparent;
@@ -255,21 +255,38 @@ const legalLinks = ["Privacy Policy", "Terms of Service", "Cookie Settings"];
 
   @media (hover: hover) {
     .legal-link:hover {
-      color: #F0E9DC;
+      color: #C06B3E;
     }
   }
 
   .legal-link:active {
-    color: #1A1207;
+    color: #C06B3E;
   }
 
   /* Dark theme */
   [data-theme="dark"] .footer {
-    background: #120D05;
+    background: #1A1207;
+    border-top-color: rgba(240, 233, 220, 0.1);
   }
 
-  [data-theme="dark"] .logo-icon {
-    background: #C06B3E;
+  [data-theme="dark"] .footer-grid {
+    border-bottom-color: rgba(240, 233, 220, 0.1);
+  }
+
+  [data-theme="dark"] .logo-text,
+  [data-theme="dark"] .column-title {
     color: #F0E9DC;
+  }
+
+  [data-theme="dark"] .footer-tagline,
+  [data-theme="dark"] .column-link,
+  [data-theme="dark"] .copyright,
+  [data-theme="dark"] .legal-link {
+    color: #A89880;
+  }
+
+  [data-theme="dark"] .column-link:hover,
+  [data-theme="dark"] .legal-link:hover {
+    color: #C06B3E;
   }
 </style>
