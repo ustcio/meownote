@@ -3,7 +3,6 @@ import { t, getLangFromUrl, type Language } from '@i18n';
 
 const lang = getLangFromUrl(Astro.url);
 
-// Contribution Graph Data
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -13,8 +12,13 @@ const startDate = new Date(today);
 startDate.setFullYear(startDate.getFullYear() - 1);
 startDate.setDate(startDate.getDate() - startDate.getDay());
 
-function getMonthPositions() {
-  const positions: { month: number; weekIndex: number }[] = [];
+const cellSize = 11;
+const cellGap = 3;
+const weekWidth = cellSize + cellGap;
+const leftPadding = 36;
+
+function getMonthLabels() {
+  const labels: { name: string; weekIndex: number }[] = [];
   let lastMonth = -1;
   
   const currentDate = new Date(startDate);
@@ -24,31 +28,24 @@ function getMonthPositions() {
     const week = Math.floor(dayIndex / 7);
     const month = currentDate.getMonth();
     if (month !== lastMonth) {
-      positions.push({ month, week });
+      labels.push({ name: months[month], weekIndex: week });
       lastMonth = month;
     }
     currentDate.setDate(currentDate.getDate() + 1);
     dayIndex++;
   }
   
-  return positions;
+  return labels;
 }
 
-const monthPositions = getMonthPositions();
+const monthLabels = getMonthLabels();
 const totalDays = Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 const totalWeeks = Math.ceil(totalDays / 7);
-
-function getMonthStyle(weekIndex: number): string {
-  const cellWidth = 11;
-  const cellGap = 3;
-  const weekWidth = cellWidth + cellGap;
-  return `left: ${weekIndex * weekWidth}px;`;
-}
+const gridWidth = totalWeeks * weekWidth;
 ---
 
 <section class="activity">
   <div class="activity-container">
-    <!-- Heatmap Section -->
     <div class="contribution-header">
       <div class="header-label">
         <span class="label-dot"></span>
@@ -60,12 +57,23 @@ function getMonthStyle(weekIndex: number): string {
     
     <div class="contribution-graph-wrapper">
       <div class="contribution-graph" id="contribution-graph" data-year={currentYear}>
-        <div class="contribution-months">
-          {monthPositions.map(({ month, weekIndex }) => (
-            <span class="contribution-month" style={getMonthStyle(weekIndex)}>
-              {months[month]}
-            </span>
-          ))}
+        <div class="contribution-months" style={`width: ${gridWidth}px; margin-left: ${leftPadding}px;`}>
+          {monthLabels.map((label, i) => {
+            const nextLabel = monthLabels[i + 1];
+            const startPos = label.weekIndex * weekWidth;
+            const endPos = nextLabel ? nextLabel.weekIndex * weekWidth : gridWidth;
+            const labelWidth = endPos - startPos - 4;
+            const showLabel = labelWidth > 28;
+            
+            return (
+              <span 
+                class="contribution-month"
+                style={`left: ${startPos}px; width: ${labelWidth}px;`}
+              >
+                {showLabel ? label.name : ''}
+              </span>
+            );
+          })}
         </div>
         
         <div class="contribution-body">
@@ -114,7 +122,6 @@ function getMonthStyle(weekIndex: number): string {
       <span class="legend-text">More</span>
     </div>
     
-    <!-- Stats Section -->
     <div class="stats-grid" id="stats-grid">
       <div class="stat-card">
         <div class="stat-icon">
@@ -173,7 +180,6 @@ function getMonthStyle(weekIndex: number): string {
     margin: 0 auto;
   }
 
-  /* Contribution Graph Styles */
   .contribution-header {
     text-align: center;
     margin-bottom: var(--space-8);
@@ -213,11 +219,6 @@ function getMonthStyle(weekIndex: number): string {
     margin-bottom: var(--space-1);
   }
 
-  .contribution-title em {
-    font-style: normal;
-    color: var(--color-primary);
-  }
-
   .contribution-year {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
@@ -236,16 +237,12 @@ function getMonthStyle(weekIndex: number): string {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    position: relative;
   }
 
   .contribution-months {
-    display: flex;
-    margin-left: 36px;
-    margin-bottom: var(--space-2);
     position: relative;
     height: 16px;
-    min-width: 100%;
+    margin-bottom: var(--space-2);
   }
 
   .contribution-month {
@@ -254,6 +251,9 @@ function getMonthStyle(weekIndex: number): string {
     font-size: 10px;
     color: #9A8A72;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+    text-align: left;
   }
 
   .contribution-body {
@@ -265,7 +265,7 @@ function getMonthStyle(weekIndex: number): string {
     display: flex;
     flex-direction: column;
     gap: 3px;
-    padding-top: 0;
+    width: 32px;
   }
 
   .contribution-day {
@@ -341,7 +341,6 @@ function getMonthStyle(weekIndex: number): string {
   .legend-cell[data-level="3"] { background-color: #C0785A; }
   .legend-cell[data-level="4"] { background-color: #A85A32; }
 
-  /* Stats Grid - Compact */
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -420,7 +419,6 @@ function getMonthStyle(weekIndex: number): string {
   const API_BASE = 'https://api.ustc.dev';
   const REFRESH_INTERVAL = 60000;
   
-  // Heatmap
   async function fetchHeatmapData() {
     try {
       const graph = document.getElementById('contribution-graph');
@@ -502,7 +500,6 @@ function getMonthStyle(weekIndex: number): string {
     return 4;
   }
   
-  // Stats
   async function recordVisit() {
     try {
       await fetch(`${API_BASE}/stats/visit`, {
@@ -539,7 +536,6 @@ function getMonthStyle(weekIndex: number): string {
     }
   }
   
-  // Initialize
   document.addEventListener('DOMContentLoaded', () => {
     fetchHeatmapData();
     fetchStats();
