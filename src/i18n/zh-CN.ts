@@ -187,13 +187,10 @@ export const translations = {
   'about.team.product': '产品负责人',
   
   // Research Page
-  'research.title': 'AI 大事记',
-  'research.subtitle': '人工智能发展史上的重要时刻',
-  
-  // Research Page
   'research.title': 'AI 时间线',
   'research.subtitle': '人工智能发展史上的重要里程碑',
   'research.badge': 'AI 发展史',
+  
   // About Page
   'about.title': '关于我们',
   'about.subtitle': '构建AI的未来',
