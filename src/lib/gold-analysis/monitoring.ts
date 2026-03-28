@@ -2,8 +2,6 @@
 // 性能监控与可靠性模块
 // ================================================================================
 
-import type { SystemMetrics, DataQualityReport } from './types';
-
 // 监控配置
 const MONITORING_CONFIG = {
   metricsRetentionMs: 7 * 24 * 60 * 60 * 1000, // 7天
@@ -204,7 +202,7 @@ export class MonitoringSystem {
   /**
    * 模拟组件检查
    */
-  private async simulateComponentCheck(component: string): Promise<boolean> {
+  private async simulateComponentCheck(_component: string): Promise<boolean> {
     // 实际实现中应该调用真实的健康检查
     return true;
   }

@@ -1,38 +1,38 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import Icon from '@components/ui/Icon.astro';
-import { t, getLangFromUrl, type Language } from '@i18n';
+import { t, getLangFromUrl } from '@i18n';
 
 const lang = getLangFromUrl(Astro.url);
 
 const features = [
   {
     icon: 'message-circle',
-    title: '智能对话',
-    desc: '基于 MiniMax 2.7 模型，支持多轮对话、上下文理解'
+    title: '更稳的对话节奏',
+    desc: '从提问、追问到改写，都保持清晰的上下文与输出结构。'
   },
   {
     icon: 'zap',
-    title: '快速响应',
-    desc: '毫秒级响应速度，流畅的对话体验'
+    title: '少一点摩擦',
+    desc: '把常用入口、建议问题和输入区做得更安静、更直接。'
   },
   {
     icon: 'shield',
-    title: '隐私安全',
-    desc: '对话数据本地存储，保护您的隐私'
+    title: '信息边界更清楚',
+    desc: '重要内容会提醒你核验，避免把 AI 结果误当最终答案。'
   },
   {
     icon: 'globe',
-    title: '多语言支持',
-    desc: '支持中英文及多种语言对话'
+    title: '更适合日常工作',
+    desc: '写作、总结、解释概念和整理思路都可以从同一个界面开始。'
   }
 ];
 
 const suggestions = [
-  { icon: 'mail', text: '帮我写一封专业邮件', prompt: 'Help me write a professional email to request a meeting' },
-  { icon: 'book', text: '解释复杂概念', prompt: 'Explain the concept of machine learning in simple terms' },
-  { icon: 'code', text: '调试代码问题', prompt: 'Help me debug this Python code and explain what went wrong' },
-  { icon: 'edit', text: '总结文档内容', prompt: 'Summarize the key points from this article or document' },
+  { icon: 'mail', text: '写一封得体的邮件', prompt: 'Help me write a concise, professional email that asks for a meeting next week.' },
+  { icon: 'book', text: '解释一个复杂概念', prompt: 'Explain the concept of machine learning in clear language for a beginner.' },
+  { icon: 'code', text: '一起排查代码问题', prompt: 'Help me debug this Python function and explain the root cause step by step.' },
+  { icon: 'edit', text: '整理一段长文', prompt: 'Summarize this document, extract the decisions, and suggest the next steps.' },
 ];
 ---
 
@@ -46,12 +46,13 @@ const suggestions = [
       <div class="chatbot-hero">
         <div class="hero-badge">
           <Icon name="message-circle" size={16} />
-          <span>AI Chat</span>
+          <span>Conversation workspace</span>
         </div>
-        <h1 class="hero-title">MaxMin Chat</h1>
-        <p class="hero-tagline">基于 MiniMax 2.7 的智能对话助手</p>
+        <h1 class="hero-title">A calmer way to work with AI</h1>
+        <p class="hero-tagline">写作、总结、整理思路，都可以从一个对话开始。</p>
         <p class="hero-description">
-          随时随地与 AI 对话，获取写作、编程、学习等方面的帮助
+          不追求夸张的功能堆叠，而是把输入、建议和回答都整理得更清楚，
+          让你更容易从问题走到下一步。
         </p>
       </div>
 
@@ -67,8 +68,8 @@ const suggestions = [
                 <path d="M24 8L38 36H10L24 8Z" fill="white"/>
               </svg>
             </div>
-            <h3 class="welcome-title">有什么我可以帮你的？</h3>
-            <p class="welcome-subtitle">选择一个话题开始对话，或直接输入你的问题</p>
+            <h3 class="welcome-title">今天想推进什么？</h3>
+            <p class="welcome-subtitle">选一个方向开始，或者直接输入你的问题。</p>
             
             <div class="suggestion-grid">
               {suggestions.map((s) => (
@@ -100,13 +101,13 @@ const suggestions = [
               </svg>
             </button>
           </div>
-          <p class="input-hint">AI 回复由 MiniMax 生成，请验证重要信息</p>
+          <p class="input-hint">AI 可以帮你起草与整理，但重要信息仍然建议你自行核验。</p>
         </div>
       </div>
 
       <!-- Features -->
       <div class="features-section">
-        <h2 class="section-title">功能特点</h2>
+        <h2 class="section-title">为什么这个界面更像 Claude</h2>
         <div class="features-grid">
           {features.map((feature) => (
             <div class="feature-card">
@@ -122,8 +123,8 @@ const suggestions = [
 
       <!-- CTA -->
       <div class="cta-section">
-        <h2 class="cta-title">开始对话</h2>
-        <p class="cta-subtitle">AI 助手随时准备为您提供帮助</p>
+        <h2 class="cta-title">从一个问题开始</h2>
+        <p class="cta-subtitle">把模糊的想法交给 AI，一起把它理顺。</p>
         <div class="cta-actions">
           <button class="btn-primary" id="start-chat-btn">
             <Icon name="message-circle" size={18} />
@@ -143,7 +144,7 @@ const suggestions = [
   }
 
   .chatbot-container {
-    max-width: var(--container-xl);
+    max-width: var(--container-2xl);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -152,48 +153,49 @@ const suggestions = [
 
   /* Hero */
   .chatbot-hero {
-    text-align: center;
-    padding: var(--space-8) 0;
+    text-align: left;
+    padding: var(--space-6) 0 0;
+    max-width: 44rem;
   }
 
   .hero-badge {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-2) var(--space-4);
-    background: var(--color-primary-light);
-    border: 1px solid rgba(192, 107, 62, 0.2);
+    padding: 0.45rem 0.85rem;
+    background: rgba(255, 253, 249, 0.75);
+    border: 1px solid var(--border-primary);
     border-radius: var(--radius-full);
-    font-size: var(--text-sm);
+    font-size: 0.75rem;
     font-weight: var(--font-medium);
-    color: var(--color-primary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
     margin-bottom: var(--space-6);
   }
 
   .hero-title {
-    font-size: clamp(2.5rem, 8vw, 4rem);
-    font-weight: var(--font-bold);
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6vw, 5rem);
+    font-weight: var(--font-medium);
     color: var(--text-primary);
     margin-bottom: var(--space-3);
-    letter-spacing: -0.02em;
-    background: linear-gradient(135deg, var(--text-primary), var(--color-primary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    line-height: 0.98;
+    letter-spacing: var(--tracking-tight);
   }
 
   .hero-tagline {
-    font-size: var(--text-xl);
-    font-weight: var(--font-semibold);
-    color: var(--color-primary);
+    font-size: var(--text-lg);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
     margin-bottom: var(--space-4);
   }
 
   .hero-description {
-    font-size: var(--text-base);
+    font-size: 1.02rem;
     color: var(--text-secondary);
-    max-width: 500px;
-    margin: 0 auto;
+    max-width: 36rem;
+    margin: 0;
     line-height: var(--leading-relaxed);
   }
 
@@ -203,9 +205,10 @@ const suggestions = [
     border: 1px solid var(--card-border);
     border-radius: var(--radius-2xl);
     overflow: hidden;
-    max-width: 800px;
-    margin: 0 auto;
+    max-width: 960px;
+    margin: 0;
     width: 100%;
+    box-shadow: var(--card-shadow);
   }
 
   .chat-window {

@@ -135,26 +135,11 @@ export function sleep(ms: number): Promise<void> {
 }
 
 export function copyToClipboard(text: string): Promise<void> {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
+  if (navigator.clipboard?.writeText) {
     return navigator.clipboard.writeText(text);
   }
-  
-  return new Promise((resolve, reject) => {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.cssText = 'position:fixed;opacity:0;';
-    document.body.appendChild(textarea);
-    textarea.select();
-    
-    try {
-      document.execCommand('copy');
-      resolve();
-    } catch (e) {
-      reject(e);
-    } finally {
-      textarea.remove();
-    }
-  });
+
+  return Promise.reject(new Error('Clipboard API is not available'));
 }
 
 export function downloadFile(content: string, filename: string, mimeType: string = 'text/plain'): void {

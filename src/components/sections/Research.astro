@@ -1,156 +1,61 @@
 ---
-const papers = [
+const notes = [
   {
-    id: 1,
-    tag: "Constitutional AI",
-    date: "Dec 2024",
-    title: "Scalable Oversight via AI-Assisted Debate",
-    description: "We explore how AI systems can assist humans in providing scalable oversight, enabling more reliable evaluation of complex AI outputs.",
-    readTime: "12 min read"
+    tag: 'Writing',
+    title: 'How we tune prompts for clearer first drafts',
+    description: 'A quieter interface matters, but better instructions matter more. This note looks at structure before style.',
+    href: '/research',
   },
   {
-    id: 2,
-    tag: "Interpretability",
-    date: "Nov 2024",
-    title: "Towards Monosemanticity: Decomposing Language Models",
-    description: "A new approach to understanding how transformer models represent information through sparse, interpretable features.",
-    readTime: "18 min read"
+    tag: 'Research',
+    title: 'When should AI summarize and when should it stay out of the way?',
+    description: 'We look at how to reduce fluff and keep summaries useful enough for actual decisions.',
+    href: '/research',
   },
   {
-    id: 3,
-    tag: "Alignment",
-    date: "Oct 2024",
-    title: "Model-Written Evals for Dangerous Capabilities",
-    description: "Developing automated evaluation methods to assess potentially concerning capabilities in large language models.",
-    readTime: "9 min read"
+    tag: 'Workflow',
+    title: 'Why a workspace beats a pile of chat threads',
+    description: 'Longer projects need a home for notes, intermediate drafts, and all the thinking that does not fit in one reply.',
+    href: '/workspace',
   },
   {
-    id: 4,
-    tag: "Policy",
-    date: "Sep 2024",
-    title: "Responsible Scaling Policy: A Framework for Commitment",
-    description: "Our approach to committing in advance to safety measures triggered by specific capability thresholds during model training.",
-    readTime: "7 min read"
-  }
+    tag: 'Design',
+    title: 'What changed in this Claude-inspired redesign',
+    description: 'Typeface, pacing, spacing, surfaces, button hierarchy, and a more measured voice across the whole site.',
+    href: '/about',
+  },
 ];
 ---
 
-<section id="research" class="research">
-  <div class="research-container">
-    <div class="research-header">
-      <div>
-        <div class="header-label">
-          <span class="label-dot"></span>
-          <span class="label-text">Research</span>
-        </div>
-        <h2 class="research-title">
-          Advancing the science<br />of AI safety
-        </h2>
+<section class="claude-section">
+  <div class="container">
+    <div class="research-section">
+      <div class="claude-section-heading">
+        <span class="claude-kicker">Recent notes</span>
+        <h2>Design, prompts, and product decisions worth keeping.</h2>
+        <p>
+          Claude’s product pages mix explanation with examples. These cards do
+          the same by framing each topic as something you can read and act on.
+        </p>
       </div>
-      <a href="#" class="research-link">
-        View all papers →
-      </a>
-    </div>
 
-    <div class="research-grid">
-      {papers.map((paper) => (
-        <article class="research-card">
-          <div class="card-header">
-            <span class="card-tag">{paper.tag}</span>
-            <span class="card-date">{paper.date}</span>
-          </div>
-          <h3 class="card-title">{paper.title}</h3>
-          <p class="card-description">{paper.description}</p>
-          <span class="card-readtime">{paper.readTime}</span>
-        </article>
-      ))}
+      <div class="research-grid">
+        {notes.map((note) => (
+          <a href={note.href} class="research-card">
+            <span class="research-card__tag">{note.tag}</span>
+            <h3>{note.title}</h3>
+            <p>{note.description}</p>
+            <span class="research-card__link">Read more</span>
+          </a>
+        ))}
+      </div>
     </div>
   </div>
 </section>
 
 <style>
-  .research {
-    background: var(--bg-secondary);
-    padding: var(--space-16) var(--space-6);
-  }
-
-  @media (min-width: 768px) {
-    .research {
-      padding: var(--space-20) var(--space-10);
-    }
-  }
-
-  .research-container {
-    max-width: var(--container-xl);
-    margin: 0 auto;
-  }
-
-  .research-header {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-6);
-    margin-bottom: var(--space-16);
-  }
-
-  @media (min-width: 768px) {
-    .research-header {
-      flex-direction: row;
-      align-items: flex-end;
-      justify-content: space-between;
-    }
-  }
-
-  .header-label {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin-bottom: var(--space-4);
-  }
-
-  .label-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--color-primary);
-  }
-
-  .label-text {
-    font-family: var(--font-sans);
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .research-title {
-    font-family: var(--font-display);
-    font-size: clamp(2rem, 4vw, 3.2rem);
-    font-weight: var(--font-normal);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    color: var(--text-primary);
-  }
-
-  .research-link {
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-    border-bottom: 1px solid var(--border-secondary);
-    text-decoration: none;
-    padding-bottom: 2px;
-    white-space: nowrap;
-    transition: border-color var(--duration-normal) var(--ease-default),
-                color var(--duration-normal) var(--ease-default);
-  }
-
-  .research-link:hover {
-    border-color: var(--text-primary);
-    color: var(--text-primary);
-  }
-
   .research-grid {
     display: grid;
-    grid-template-columns: 1fr;
     gap: 1px;
     border: 1px solid var(--border-primary);
     background: var(--border-primary);
@@ -158,21 +63,21 @@ const papers = [
 
   @media (min-width: 768px) {
     .research-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
   .research-card {
+    display: grid;
+    gap: 0.9rem;
+    min-height: 100%;
+    padding: 1.5rem;
     background: var(--card-bg);
-    padding: var(--space-6);
-    cursor: pointer;
-    transition: background-color 300ms var(--ease-default);
-    -webkit-tap-highlight-color: transparent;
   }
 
   @media (min-width: 768px) {
     .research-card {
-      padding: var(--space-10);
+      padding: 2rem;
     }
   }
 
@@ -180,54 +85,26 @@ const papers = [
     background: var(--card-bg-hover);
   }
 
-  .research-card:hover .card-title {
-    color: var(--color-primary);
-  }
-
-  .card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--space-5);
-  }
-
-  .card-tag {
-    font-family: var(--font-sans);
-    font-size: var(--text-xs);
-    color: var(--color-primary);
-    background: var(--color-primary-light);
-    padding: var(--space-1) var(--space-3);
-    border-radius: var(--radius-full);
-  }
-
-  .card-date {
-    font-family: var(--font-sans);
-    font-size: var(--text-xs);
+  .research-card__tag {
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: var(--text-tertiary);
   }
 
-  .card-title {
-    font-family: var(--font-display);
-    font-size: 1.2rem;
-    font-weight: var(--font-normal);
-    line-height: 1.35;
-    letter-spacing: -0.01em;
+  .research-card h3 {
+    font-size: 2rem;
+  }
+
+  .research-card p {
+    margin: 0;
+    font-size: 0.98rem;
+  }
+
+  .research-card__link {
+    font-size: 0.92rem;
+    font-weight: 500;
     color: var(--text-primary);
-    margin-bottom: var(--space-3);
-    transition: color 300ms var(--ease-default);
-  }
-
-  .card-description {
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-    line-height: 1.65;
-    margin-bottom: var(--space-6);
-  }
-
-  .card-readtime {
-    font-family: var(--font-sans);
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
   }
 </style>

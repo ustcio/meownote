@@ -97,9 +97,9 @@ const scheme = colorSchemes[colorScheme];
 <script>
   class FluidSimulation {
     canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
-    width: number;
-    height: number;
+    ctx!: CanvasRenderingContext2D;
+    width = 0;
+    height = 0;
     particles: Particle[] = [];
     mouse = { x: 0, y: 0, vx: 0, vy: 0 };
     colors: string[];

@@ -2,7 +2,7 @@
 // 指令系统 - 标准化指令格式与参数体系
 // ================================================================================
 
-import type { TradingSignal, TradingCommand, AIModelConfig } from './types';
+import type { TradingSignal, TradingCommand } from './types';
 
 // 指令模板配置
 const COMMAND_TEMPLATES = {
@@ -65,7 +65,7 @@ export class CommandSystem {
    */
   generateCommand(signal: TradingSignal, userConfig?: Partial<TradingCommand>): TradingCommand {
     const baseCommand: TradingCommand = {
-      id: `cmd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `cmd_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
       type: signal.type === 'HOLD' ? 'BUY' : signal.type,
       priceRange: {
         min: signal.targetPrice ? signal.targetPrice * 0.995 : signal.currentPrice * 0.995,

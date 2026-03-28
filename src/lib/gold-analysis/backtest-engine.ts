@@ -9,7 +9,6 @@ import type {
   PriceHistoryPoint,
   TradingSignal,
   BacktestResult,
-  MarketTrendAnalysis,
 } from './types';
 import { goldAIEngine } from './ai-engine';
 
@@ -305,7 +304,7 @@ export class BacktestEngine {
   private calculateStatistics(
     state: BacktestState,
     signals: TradingSignal[],
-    priceData: PriceHistoryPoint[],
+    _priceData: PriceHistoryPoint[],
     initialCapital: number,
     startDate: string,
     endDate: string
@@ -319,8 +318,6 @@ export class BacktestEngine {
       : 0;
 
     // 计算总收益
-    const totalReturn = ((state.currentValue - initialCapital) / initialCapital) * 100;
-
     // 计算平均收益
     const avgReturn = closedTrades.length > 0
       ? closedTrades.reduce((sum, t) => sum + (t.profitPercent || 0), 0) / closedTrades.length
@@ -411,7 +408,7 @@ export class BacktestEngine {
   /**
    * 计算夏普比率
    */
-  private calculateSharpeRatio(trades: BacktestTrade[], initialCapital: number): number {
+  private calculateSharpeRatio(trades: BacktestTrade[], _initialCapital: number): number {
     const riskFreeRate = 0.03; // 无风险利率 3%
     
     if (trades.length < 2) return 0;

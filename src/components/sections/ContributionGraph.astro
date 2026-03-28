@@ -1,5 +1,5 @@
 ---
-import { t, getLangFromUrl, type Language } from '@i18n';
+import { getLangFromUrl } from '@i18n';
 
 const lang = getLangFromUrl(Astro.url);
 
@@ -299,25 +299,22 @@ const totalWeeks = Math.ceil(totalDays / 7);
       const result = await response.json();
       
       let heatmapData: Record<string, number> = {};
-      let maxCount = 0;
       
       if (result.data && typeof result.data === 'object') {
         heatmapData = result.data;
-        maxCount = result.maxCount || Math.max(...Object.values(heatmapData), 1);
       } else if (typeof result === 'object' && Object.keys(result).length > 0) {
         heatmapData = result;
-        maxCount = Math.max(...Object.values(heatmapData), 1);
       }
       
       if (Object.keys(heatmapData).length > 0) {
-        updateHeatmap(heatmapData, maxCount, 'visits');
+        updateHeatmap(heatmapData, 'visits');
       }
     } catch (error) {
       // Silent fail
     }
   }
   
-  function updateHeatmap(data: Record<string, number>, maxCount: number, visitsText: string) {
+  function updateHeatmap(data: Record<string, number>, visitsText: string) {
     const cells = document.querySelectorAll('.contribution-cell[data-date]');
     const cellData: { cell: Element; count: number }[] = [];
     

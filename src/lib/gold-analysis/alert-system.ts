@@ -11,7 +11,6 @@ import type {
   SGEAlertConfig,
   SGESession,
   EMAState,
-  ATRState,
   AlertSignal,
   SignalFusionResult,
   Level3AlertEvent,
@@ -426,7 +425,7 @@ export class AlertSystem {
   // ================================================================================
   updatePriceAndCheck(
     currentData: GoldPriceData,
-    marketAnalysis?: MarketTrendAnalysis
+    _marketAnalysis?: MarketTrendAnalysis
   ): Level3AlertEvent[] {
     const price = currentData.domestic.price;
     const timestamp = currentData.timestamp;
@@ -485,8 +484,8 @@ export class AlertSystem {
     if (fusionResult.triggered && !this.shouldSuppress(state, fusionResult.direction, now)) {
       const cooldown = this.calculateDynamicCooldown(state, price);
       
-      const alertEvent: Level3AlertEvent = {
-        id: `l3_${now}_${Math.random().toString(36).substr(2, 9)}`,
+        const alertEvent: Level3AlertEvent = {
+        id: `l3_${now}_${Math.random().toString(36).slice(2, 11)}`,
         alertId: 'level3_global',
         type: 'volatility_spike',
         timestamp: now,
@@ -533,7 +532,7 @@ export class AlertSystem {
       const crossEvent = this.checkPriceCross(price, prevPrice, config);
       if (crossEvent) {
         const alertEvent: Level3AlertEvent = {
-          id: `cross_${now}_${Math.random().toString(36).substr(2, 9)}`,
+          id: `cross_${now}_${Math.random().toString(36).slice(2, 11)}`,
           alertId: config.id,
           type: 'price_target',
           timestamp: now,
@@ -610,7 +609,7 @@ export class AlertSystem {
     const now = Date.now();
     const newConfig: AlertConfiguration = {
       ...config,
-      id: `alert_${now}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `alert_${now}_${Math.random().toString(36).slice(2, 11)}`,
       createdAt: now,
       updatedAt: now,
     };
@@ -661,7 +660,7 @@ export class AlertSystem {
       const beijingHour = getBeijingHour(Date.now());
       
       const alert: Level3AlertEvent = {
-        id: `signal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `signal_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
         alertId: config.id,
         type: 'signal_generated',
         timestamp: Date.now(),
@@ -832,9 +831,9 @@ export class AlertSystem {
 
   calculateThresholdRange(
     basePrice: number,
-    alertType: 'buy' | 'sell',
-    marketVolatility: number,
-    trend: MarketTrendAnalysis['trend']
+    _alertType: 'buy' | 'sell',
+    _marketVolatility: number,
+    _trend: MarketTrendAnalysis['trend']
   ): { min: number; max: number } {
     const state = this.stateCache.get('global')!;
     const dynamicThreshold = this.calculateDynamicThreshold(state);

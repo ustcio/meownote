@@ -34,6 +34,7 @@ const tools = [
   <section class="kit">
     <div class="kit-container">
       <div class="kit-header">
+        <span class="kit-kicker">Tool collection</span>
         <h1 class="kit-title">{t('kit.title')}</h1>
         <p class="kit-desc">{t('kit.subtitle')}</p>
       </div>
@@ -87,18 +88,38 @@ const tools = [
   
   .kit-header {
     margin-bottom: var(--space-10);
+    max-width: 38rem;
+  }
+
+  .kit-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: var(--space-3);
+    padding: 0.45rem 0.85rem;
+    background: rgba(255, 253, 249, 0.75);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-full);
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+    font-weight: var(--font-medium);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
   
   .kit-title {
-    font-size: var(--text-3xl);
-    font-weight: var(--font-bold);
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 5vw, 4.2rem);
+    font-weight: var(--font-medium);
     color: var(--text-primary);
     margin-bottom: var(--space-2);
+    line-height: 0.98;
   }
   
   .kit-desc {
-    font-size: var(--text-base);
+    font-size: 1.05rem;
     color: var(--text-secondary);
+    line-height: var(--leading-relaxed);
   }
   
   .tools-list {
@@ -111,16 +132,18 @@ const tools = [
     display: flex;
     align-items: center;
     gap: var(--space-4);
-    padding: var(--space-4);
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
+    padding: var(--space-5);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     border-radius: var(--radius-xl);
     transition: all var(--duration-fast) var(--ease-default);
+    box-shadow: var(--card-shadow);
   }
   
   .tool-item:hover {
-    background: var(--bg-tertiary);
+    background: var(--card-bg-hover);
     border-color: var(--border-hover);
+    transform: translateY(-1px);
   }
   
   .tool-icon {
@@ -129,14 +152,14 @@ const tools = [
     justify-content: center;
     width: 48px;
     height: 48px;
-    background: var(--bg-primary);
+    background: rgba(244, 237, 228, 0.85);
     border-radius: var(--radius-lg);
     color: var(--text-secondary);
     flex-shrink: 0;
   }
   
   .tool-item:hover .tool-icon {
-    color: var(--color-accent-blue);
+    color: var(--text-primary);
   }
   
   .tool-content {
@@ -148,7 +171,7 @@ const tools = [
   }
   
   .tool-title {
-    font-size: var(--text-base);
+    font-size: 1.05rem;
     font-weight: var(--font-medium);
     color: var(--text-primary);
   }

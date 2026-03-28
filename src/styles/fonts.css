@@ -1,49 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap');
 
 :root {
   --font-display:
-    'Inter',
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "PingFang SC",
-    "Hiragino Sans GB",
-    "Microsoft YaHei",
-    "Source Han Sans SC",
-    "Noto Sans SC",
-    sans-serif;
+    'Newsreader',
+    'Iowan Old Style',
+    'Palatino Linotype',
+    'Noto Serif SC',
+    'Source Han Serif SC',
+    serif;
 
   --font-body:
-    'Inter',
+    'Instrument Sans',
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
-    "PingFang SC",
-    "Hiragino Sans GB",
-    "Microsoft YaHei",
-    "Source Han Sans SC",
-    "Noto Sans SC",
+    'PingFang SC',
+    'Hiragino Sans GB',
+    'Microsoft YaHei',
+    'Source Han Sans SC',
+    'Noto Sans SC',
     sans-serif;
 
-  --font-sans:
-    'Inter',
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "PingFang SC",
-    "Hiragino Sans GB",
-    "Microsoft YaHei",
-    "Source Han Sans SC",
-    "Noto Sans SC",
-    sans-serif;
-
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
   --font-mono:
     ui-monospace,
-    "SF Mono",
-    "Cascadia Code",
-    "JetBrains Mono",
-    "Menlo",
-    "Monaco",
-    "Consolas",
+    'SF Mono',
+    'JetBrains Mono',
+    'Cascadia Code',
+    'Menlo',
+    'Monaco',
+    'Consolas',
     monospace;
 }

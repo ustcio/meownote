@@ -1,165 +1,74 @@
 ---
-import { t, getLangFromUrl, type Language } from '@i18n';
+import { t, getLangFromUrl } from '@i18n';
 
 const lang = getLangFromUrl(Astro.url);
 ---
 
-<section class="cta-section">
-  <div class="cta-container">
-    <div class="cta-content">
-      <h2 class="cta-title">
-        {t('cta.title', lang)}
-      </h2>
-      <p class="cta-subtitle">
-        {t('cta.subtitle', lang)}
-      </p>
-      <div class="cta-actions">
-        <a href="/chatbot" class="cta-primary">
-          {t('cta.primary', lang)}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
-          </svg>
-        </a>
-        <a href="/about" class="cta-secondary">
-          {t('cta.secondary', lang)}
-        </a>
-      </div>
+<section class="home-cta">
+  <div class="container home-cta__inner">
+    <div class="home-cta__copy">
+      <span class="claude-kicker">Ready to try it</span>
+      <h2>{t('cta.title', lang)}</h2>
+      <p>{t('cta.subtitle', lang)}</p>
+    </div>
+    <div class="home-cta__actions">
+      <a href="/chatbot" class="claude-button">{t('cta.primary', lang)}</a>
+      <a href="/workspace" class="claude-button-secondary">{t('cta.secondary', lang)}</a>
     </div>
   </div>
 </section>
 
 <style>
-  .cta-section {
-    padding: var(--space-20) var(--space-4);
-    background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--bg-primary) 100%);
-    position: relative;
-    overflow: hidden;
+  .home-cta {
+    padding: 4.5rem 0;
+    background: #171412;
+    color: #fffdf9;
   }
 
-  @media (min-width: 768px) {
-    .cta-section {
-      padding: var(--space-32) var(--space-6);
+  .home-cta__inner {
+    display: grid;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  @media (min-width: 900px) {
+    .home-cta__inner {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 2rem;
     }
   }
 
-  .cta-section::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
-    opacity: 0.08;
-    pointer-events: none;
+  .home-cta .claude-kicker {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 250, 245, 0.65);
   }
 
-  .cta-container {
-    max-width: var(--container-lg);
-    margin: 0 auto;
+  .home-cta h2,
+  .home-cta p {
+    color: #fffdf9;
   }
 
-  .cta-content {
-    text-align: center;
-    position: relative;
-    z-index: 1;
+  .home-cta p {
+    color: rgba(255, 250, 245, 0.72);
+    margin-top: 0.9rem;
+    max-width: 32rem;
   }
 
-  .cta-title {
-    font-size: var(--text-3xl);
-    font-weight: var(--font-bold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-4);
-    line-height: var(--leading-tight);
+  .home-cta__copy {
+    display: grid;
+    gap: 1rem;
   }
 
-  @media (min-width: 768px) {
-    .cta-title {
-      font-size: var(--text-4xl);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .cta-title {
-      font-size: var(--text-5xl);
-    }
-  }
-
-  .cta-subtitle {
-    font-size: var(--text-lg);
-    color: var(--text-secondary);
-    margin-bottom: var(--space-8);
-    max-width: 480px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: var(--leading-relaxed);
-  }
-
-  .cta-actions {
+  .home-cta__actions {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    align-items: center;
-    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.8rem;
   }
 
-  @media (min-width: 480px) {
-    .cta-actions {
-      flex-direction: row;
-      gap: var(--space-4);
-    }
-  }
-
-  .cta-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-4) var(--space-8);
-    font-size: var(--text-base);
-    font-weight: var(--font-semibold);
-    color: white;
-    background: var(--color-primary);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    transition: transform var(--duration-normal) var(--ease-default),
-                box-shadow var(--duration-normal) var(--ease-default),
-                background-color var(--duration-normal) var(--ease-default);
-    box-shadow: 0 4px 16px rgba(217, 119, 87, 0.25);
-  }
-
-  .cta-primary:hover {
-    background: var(--color-primary-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(217, 119, 87, 0.35);
-  }
-
-  .cta-primary svg {
-    transition: transform var(--duration-fast) var(--ease-default);
-  }
-
-  .cta-primary:hover svg {
-    transform: translateX(4px);
-  }
-
-  .cta-secondary {
-    display: inline-flex;
-    align-items: center;
-    padding: var(--space-4) var(--space-8);
-    font-size: var(--text-base);
-    font-weight: var(--font-medium);
-    color: var(--text-primary);
-    background: transparent;
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    transition: background-color var(--duration-fast) var(--ease-default),
-                border-color var(--duration-fast) var(--ease-default);
-  }
-
-  .cta-secondary:hover {
-    background: rgba(0, 0, 0, 0.05);
-    border-color: var(--border-hover);
+  .home-cta .claude-button-secondary {
+    color: #fffdf9;
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.04);
   }
 </style>

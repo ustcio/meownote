@@ -56,8 +56,8 @@ export default {
         return await handleAdminFolderAction(request, env, path);
       }
       
-      if (path.startsWith('/api/workspace/')) {
-        const match = path.match(/^\/api\/workspace(\/[^/]+)?$/);
+      if (path.startsWith('/api/workspace')) {
+        const match = path.match(/^\/api\/workspace(\/[^/]+(\/[^/]+)?)?$/);
         if (match) {
           return await handleWorkspace(request, env, ctx, match);
         }
@@ -140,7 +140,7 @@ const ROUTES = {
   '/api/trading/alert': { handler: handleAlertOperation },
   '/api/trading/notifications': { handler: handleGetNotifications },
   '/api/trading/tolerance': { handler: handleToleranceSettings },
-  '/api/workspace': { handler: handleWorkspace, pattern: /^\/api\/workspace(\/[^/]+)?$/ },
+  '/api/workspace': { handler: handleWorkspace, pattern: /^\/api\/workspace(\/[^/]+(\/[^/]+)?)?$/ },
 };
 
 // ================================================================================
@@ -5806,14 +5806,16 @@ function generateWorkspaceId() {
 async function handleWorkspace(request, env, ctx, match) {
   const method = request.method;
   const url = new URL(request.url);
-  
+
   let fileId = null;
+  let subAction = null;
   if (match && match[1]) {
     fileId = match[1].substring(1);
   }
-  
-  console.log('[Workspace] Method:', method, 'FileId:', fileId);
-  
+  if (match && match[2]) {
+    subAction = match[2].substring(1);
+  }
+
   if (method === 'GET') {
     if (fileId) {
       return await getWorkspaceFile(env, fileId);
@@ -5821,28 +5823,34 @@ async function handleWorkspace(request, env, ctx, match) {
       return await listWorkspaceFiles(request, env);
     }
   }
-  
+
   if (method === 'POST') {
+    if (fileId === 'batch-delete') {
+      return await batchDeleteWorkspaceFiles(request, env);
+    }
+    if (fileId && subAction === 'duplicate') {
+      return await duplicateWorkspaceFile(env, fileId);
+    }
     if (fileId) {
       return jsonResponse({ success: false, message: 'Invalid operation' }, 400);
     }
     return await createWorkspaceFile(request, env);
   }
-  
+
   if (method === 'PUT') {
     if (!fileId) {
       return jsonResponse({ success: false, message: 'File ID required' }, 400);
     }
     return await updateWorkspaceFile(request, env, fileId);
   }
-  
+
   if (method === 'DELETE') {
     if (!fileId) {
       return jsonResponse({ success: false, message: 'File ID required' }, 400);
     }
     return await deleteWorkspaceFile(env, fileId);
   }
-  
+
   return jsonResponse({ error: 'Method not allowed' }, 405);
 }
 
@@ -5852,23 +5860,31 @@ async function listWorkspaceFiles(request, env) {
     const sortBy = url.searchParams.get('sortBy') || 'updated_at';
     const order = url.searchParams.get('order') || 'desc';
     const search = url.searchParams.get('search') || '';
-    
+    const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50', 10) || 50));
+    const offset = (page - 1) * limit;
+
     const validSortColumns = ['updated_at', 'created_at', 'title'];
     const validOrder = ['asc', 'desc'].includes(order.toLowerCase()) ? order.toUpperCase() : 'DESC';
     const validSortBy = validSortColumns.includes(sortBy) ? sortBy : 'updated_at';
-    
-    let query = 'SELECT * FROM workspace_files';
+
+    let countQuery = 'SELECT COUNT(*) as total FROM workspace_files';
+    let dataQuery = 'SELECT * FROM workspace_files';
     const params = [];
-    
+
     if (search) {
-      query += ' WHERE title LIKE ? OR content LIKE ?';
+      const where = ' WHERE title LIKE ? OR content LIKE ?';
+      countQuery += where;
+      dataQuery += where;
       params.push(`%${search}%`, `%${search}%`);
     }
-    
-    query += ` ORDER BY ${validSortBy} ${validOrder}`;
-    
-    const result = await env.DB.prepare(query).bind(...params).all();
-    
+
+    const countResult = await env.DB.prepare(countQuery).bind(...params).first();
+    const total = countResult?.total || 0;
+
+    dataQuery += ` ORDER BY ${validSortBy} ${validOrder} LIMIT ? OFFSET ?`;
+    const result = await env.DB.prepare(dataQuery).bind(...params, limit, offset).all();
+
     const files = (result.results || []).map(row => ({
       id: row.id,
       title: row.title,
@@ -5879,9 +5895,16 @@ async function listWorkspaceFiles(request, env) {
       createdAt: row.created_at,
       updatedAt: row.updated_at
     }));
-    
-    return jsonResponse({ success: true, data: files });
-    
+
+    return jsonResponse({
+      success: true,
+      data: files,
+      total,
+      page,
+      limit,
+      hasMore: offset + files.length < total
+    });
+
   } catch (error) {
     console.error('[Workspace] List error:', error);
     return jsonResponse({ success: false, message: 'Failed to list files', error: error.message }, 500);
@@ -6030,5 +6053,84 @@ async function deleteWorkspaceFile(env, fileId) {
   } catch (error) {
     console.error('[Workspace] Delete error:', error);
     return jsonResponse({ success: false, message: 'Failed to delete file', error: error.message }, 500);
+  }
+}
+
+async function batchDeleteWorkspaceFiles(request, env) {
+  try {
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+    }
+
+    const { ids } = body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return jsonResponse({ success: false, message: 'ids array required' }, 400);
+    }
+
+    if (ids.length > 100) {
+      return jsonResponse({ success: false, message: 'Maximum 100 files per batch' }, 400);
+    }
+
+    const validIds = ids.filter(id => typeof id === 'string' && id.length > 0);
+    if (validIds.length === 0) {
+      return jsonResponse({ success: false, message: 'No valid ids provided' }, 400);
+    }
+
+    const placeholders = validIds.map(() => '?').join(',');
+    const result = await env.DB.prepare(
+      `DELETE FROM workspace_files WHERE id IN (${placeholders})`
+    ).bind(...validIds).run();
+
+    const deleted = result.meta?.changes || validIds.length;
+    console.log('[Workspace] Batch deleted:', deleted, 'files');
+
+    return jsonResponse({ success: true, deleted });
+
+  } catch (error) {
+    console.error('[Workspace] Batch delete error:', error);
+    return jsonResponse({ success: false, message: 'Failed to batch delete', error: error.message }, 500);
+  }
+}
+
+async function duplicateWorkspaceFile(env, fileId) {
+  try {
+    const existing = await env.DB.prepare(
+      'SELECT * FROM workspace_files WHERE id = ?'
+    ).bind(fileId).first();
+
+    if (!existing) {
+      return jsonResponse({ success: false, message: 'File not found' }, 404);
+    }
+
+    const newId = generateWorkspaceId();
+    const newTitle = (existing.title || 'Untitled') + ' (copy)';
+    const sanitizedTitle = sanitizeInput(newTitle).substring(0, 200);
+    const sanitizedContent = existing.content || '';
+
+    await env.DB.prepare(
+      `INSERT INTO workspace_files (id, title, content, type, file_url, file_size, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
+    ).bind(newId, sanitizedTitle, sanitizedContent, existing.type || 'txt', existing.file_url || '', existing.file_size || 0).run();
+
+    console.log('[Workspace] Duplicated file:', fileId, '->', newId);
+
+    return jsonResponse({
+      success: true,
+      data: {
+        id: newId,
+        title: sanitizedTitle,
+        content: sanitizedContent,
+        type: existing.type || 'txt',
+        fileUrl: existing.file_url || '',
+        fileSize: existing.file_size || 0
+      }
+    });
+
+  } catch (error) {
+    console.error('[Workspace] Duplicate error:', error);
+    return jsonResponse({ success: false, message: 'Failed to duplicate file', error: error.message }, 500);
   }
 }

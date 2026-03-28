@@ -1,7 +1,5 @@
 ---
 import Layout from '@layouts/Layout.astro';
-
-const API_BASE = 'https://api.ustc.dev';
 ---
 
 <Layout 
@@ -77,7 +75,7 @@ const API_BASE = 'https://api.ustc.dev';
               </svg>
               
               <div class="speech-bubble" id="speech-bubble">
-                <span class="speech-text" id="speech-text">嗨！准备好登录了吗？</span>
+                <span class="speech-text" id="speech-text">先登录，再查看账户与提醒。</span>
               </div>
             </div>
             
@@ -90,16 +88,16 @@ const API_BASE = 'https://api.ustc.dev';
           </div>
           
           <div class="animation-info">
-            <h2 class="animation-title">黄金交易管理系统</h2>
-            <p class="animation-desc">实时监控金价波动，智能预警提醒，让您的投资决策更加从容</p>
+            <h2 class="animation-title">Trading workspace</h2>
+            <p class="animation-desc">把价格、记录和提醒整理在一个更安静的界面里。</p>
           </div>
         </div>
         
         <div class="login-form-side">
           <div class="login-card">
             <div class="login-header">
-              <h1 class="login-title">超级管理员</h1>
-              <p class="login-subtitle">登录以访问交易管理系统</p>
+              <h1 class="login-title">登录后继续</h1>
+              <p class="login-subtitle">查看交易记录、预警与市场概况。</p>
             </div>
 
             <form class="login-form" id="trading-login-form">
@@ -645,7 +643,7 @@ const API_BASE = 'https://api.ustc.dev';
     align-items: center;
     justify-content: center;
     padding: var(--space-8);
-    background: linear-gradient(135deg, rgba(100, 210, 255, 0.05) 0%, rgba(191, 90, 242, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(180, 199, 192, 0.08) 0%, rgba(217, 119, 87, 0.05) 100%);
     position: relative;
     overflow: hidden;
   }
@@ -664,7 +662,7 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .character-svg {
-    filter: drop-shadow(0 10px 30px rgba(100, 210, 255, 0.3));
+    filter: drop-shadow(0 14px 34px rgba(44, 33, 24, 0.08));
     animation: characterFloat 4s ease-in-out infinite;
   }
 
@@ -740,7 +738,7 @@ const API_BASE = 'https://api.ustc.dev';
   .shape-1 {
     width: 200px;
     height: 200px;
-    background: linear-gradient(135deg, #64d2ff, #bf5af2);
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
     top: 10%;
     left: 10%;
     animation-delay: 0s;
@@ -749,7 +747,7 @@ const API_BASE = 'https://api.ustc.dev';
   .shape-2 {
     width: 150px;
     height: 150px;
-    background: linear-gradient(135deg, var(--claude-orange-dark), var(--color-primary));
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent-orange));
     top: 60%;
     right: 15%;
     animation-delay: 1.5s;
@@ -767,7 +765,7 @@ const API_BASE = 'https://api.ustc.dev';
   .shape-4 {
     width: 80px;
     height: 80px;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-accent-pink));
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-primary));
     top: 30%;
     right: 25%;
     animation-delay: 4.5s;
@@ -784,14 +782,12 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .animation-title {
-    font-size: var(--text-3xl);
-    font-weight: var(--font-bold);
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 4vw, 4rem);
+    font-weight: var(--font-medium);
     color: var(--text-primary);
     margin-bottom: var(--space-3);
-    background: linear-gradient(135deg, #64d2ff, #bf5af2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    line-height: 0.98;
   }
 
   .animation-desc {
@@ -808,7 +804,7 @@ const API_BASE = 'https://api.ustc.dev';
     justify-content: center;
     padding: var(--space-8);
     background: var(--bg-primary);
-    border-left: 1px solid var(--border-light);
+    border-left: 1px solid var(--border-primary);
   }
 
   .login-card {
@@ -818,7 +814,7 @@ const API_BASE = 'https://api.ustc.dev';
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-2xl);
-    box-shadow: var(--shadow-xl);
+    box-shadow: var(--card-shadow-hover);
   }
 
   .login-header {
@@ -837,8 +833,9 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .login-title {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3vw, 2.75rem);
+    font-weight: var(--font-medium);
     color: var(--text-primary);
     margin-bottom: var(--space-2);
   }
@@ -894,8 +891,8 @@ const API_BASE = 'https://api.ustc.dev';
 
   .input-wrapper input:focus {
     outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(100, 210, 255, 0.2);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.16);
   }
 
   .input-wrapper input::placeholder {
@@ -924,9 +921,9 @@ const API_BASE = 'https://api.ustc.dev';
     width: 100%;
     padding: var(--space-3) var(--space-4);
     font-size: var(--text-base);
-    font-weight: var(--font-semibold);
+    font-weight: var(--font-medium);
     color: white;
-    background: linear-gradient(135deg, #64d2ff, #bf5af2);
+    background: var(--color-primary);
     border: none;
     border-radius: var(--radius-lg);
     cursor: pointer;
@@ -940,7 +937,7 @@ const API_BASE = 'https://api.ustc.dev';
 
   .login-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(100, 210, 255, 0.4);
+    box-shadow: 0 10px 24px rgba(217, 119, 87, 0.24);
   }
 
   .login-btn:active {
@@ -3416,6 +3413,7 @@ const API_BASE = 'https://api.ustc.dev';
 </style>
 
 <script>
+  // @ts-nocheck
   const API_BASE = 'https://api.ustc.dev';
 
   // Client-side authentication check via localStorage (统一使用 localStorage)
@@ -3814,8 +3812,7 @@ const API_BASE = 'https://api.ustc.dev';
     await Promise.all([
       loadStats(),
       loadTransactions(),
-      loadAlerts(),
-      loadMarketStatus()
+      loadAlerts()
     ]);
     // Start gold price auto-refresh separately
     startGoldPriceAutoRefresh();
@@ -4319,7 +4316,7 @@ const API_BASE = 'https://api.ustc.dev';
     if (pagination) pagination.innerHTML = '';
 
     try {
-      const sort = document.getElementById('filter-sort')?.value || 'desc';
+      const sort = document.getElementById('sort-order')?.value || 'desc';
 
       let url = `/api/trading/transactions?page=${page}&limit=10&sortOrder=${sort}`;
       if (currentFilterType) url += `&type=${currentFilterType}`;
@@ -5483,7 +5480,7 @@ const API_BASE = 'https://api.ustc.dev';
     });
   });
 
-  document.getElementById('filter-sort')?.addEventListener('change', () => loadTransactions(1));
+  document.getElementById('sort-order')?.addEventListener('change', () => loadTransactions(1));
 
   document.getElementById('delete-modal-backdrop')?.addEventListener('click', closeDeleteModal);
   document.getElementById('delete-cancel-btn')?.addEventListener('click', closeDeleteModal);
@@ -5498,7 +5495,6 @@ const API_BASE = 'https://api.ustc.dev';
   (window as any).openDeleteModal = openDeleteModal;
   (window as any).openEditModal = openEditModal;
   (window as any).deleteAlert = deleteAlert;
-  (window as any).acknowledgeAlert = acknowledgeAlert;
   (window as any).startInlineEdit = startInlineEdit;
   (window as any).saveInlineEdit = saveInlineEdit;
   (window as any).cancelInlineEdit = cancelInlineEdit;

@@ -64,10 +64,10 @@ export function validateGoldPriceData(data: GoldPriceData): ValidationResult {
   validateDomesticPrice(data, errors, warnings);
 
   // 2. 验证国际金价
-  validateInternationalPrice(data, errors, warnings);
+  validateInternationalPrice(data, errors);
 
   // 3. 验证汇率
-  validateExchangeRate(data, errors, warnings);
+  validateExchangeRate(data, errors);
 
   // 4. 验证 OHLC 数据一致性
   validateOHLCData(data, errors, warnings);
@@ -79,7 +79,7 @@ export function validateGoldPriceData(data: GoldPriceData): ValidationResult {
   validateReliability(data, errors, warnings);
 
   // 7. 验证数据合理性（国际国内价格对比）
-  validatePriceConsistency(data, errors, warnings);
+  validatePriceConsistency(data, warnings);
 
   return {
     isValid: errors.length === 0,
@@ -96,7 +96,7 @@ function validateDomesticPrice(
   errors: ValidationError[],
   warnings: ValidationWarning[]
 ): void {
-  const { price, open, high, low, changePercent } = data.domestic;
+  const { price, open, changePercent } = data.domestic;
 
   // 价格范围验证
   if (price <= 0) {
@@ -142,8 +142,7 @@ function validateDomesticPrice(
  */
 function validateInternationalPrice(
   data: GoldPriceData,
-  errors: ValidationError[],
-  warnings: ValidationWarning[]
+  errors: ValidationError[]
 ): void {
   const { price, changePercent } = data.international;
 
@@ -181,8 +180,7 @@ function validateInternationalPrice(
  */
 function validateExchangeRate(
   data: GoldPriceData,
-  errors: ValidationError[],
-  warnings: ValidationWarning[]
+  errors: ValidationError[]
 ): void {
   const { exchangeRate } = data;
 
@@ -315,7 +313,6 @@ function validateReliability(
  */
 function validatePriceConsistency(
   data: GoldPriceData,
-  errors: ValidationError[],
   warnings: ValidationWarning[]
 ): void {
   const { domestic, international, exchangeRate } = data;

@@ -99,20 +99,16 @@ export function isKeyboardUser(): boolean {
 }
 
 export function setupKeyboardDetection(): void {
-  let lastInteractionWasMouse = false;
-  
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Tab') {
       document.body.classList.add('using-keyboard');
       document.body.classList.remove('using-mouse');
-      lastInteractionWasMouse = false;
     }
   });
   
   document.addEventListener('mousedown', () => {
     document.body.classList.add('using-mouse');
     document.body.classList.remove('using-keyboard');
-    lastInteractionWasMouse = true;
   });
 }
 

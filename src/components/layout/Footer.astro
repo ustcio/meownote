@@ -1,32 +1,227 @@
 ---
 const currentYear = new Date().getFullYear();
+
+const footerGroups = [
+  {
+    title: 'Product',
+    links: [
+      { href: '/chatbot', label: 'Chat' },
+      { href: '/workspace', label: 'Workspace' },
+      { href: '/claw', label: 'Claw' },
+    ],
+  },
+  {
+    title: 'Explore',
+    links: [
+      { href: '/kit', label: 'Tools' },
+      { href: '/research', label: 'Research' },
+      { href: '/trading', label: 'Trading' },
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      { href: '/about', label: 'About' },
+      { href: 'https://github.com/maxwell-xyz', label: 'GitHub' },
+      { href: 'mailto:maxwell@ustc.dev', label: 'Contact' },
+    ],
+  },
+];
 ---
 
-<footer class="footer">
-  <div class="footer-container">
-    <p>&copy; {currentYear} MaxMin.dev</p>
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__lead">
+      <a href="/" class="site-footer__brand">
+        <span class="site-footer__mark">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 4L18.75 17H5.25L12 4Z" fill="currentColor"></path>
+          </svg>
+        </span>
+        <span>MaxMin.dev</span>
+      </a>
+      <p class="site-footer__copy">
+        Calm, capable AI for writing, coding, research, and the work around the work.
+      </p>
+      <form class="site-footer__prompt" action="/chatbot">
+        <input
+          type="text"
+          name="q"
+          value=""
+          placeholder="Ask MaxMin to draft, plan, or explain"
+          aria-label="Prompt"
+        />
+        <button type="submit">Open chat</button>
+      </form>
+    </div>
+
+    <div class="site-footer__links">
+      {footerGroups.map((group) => (
+        <div class="site-footer__group">
+          <h3>{group.title}</h3>
+          <ul>
+            {group.links.map((link) => (
+              <li>
+                <a href={link.href}>{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <div class="site-footer__meta">
+    <span>© {currentYear} MaxMin.dev</span>
+    <span>Built with a Claude-inspired editorial UI system.</span>
   </div>
 </footer>
 
 <style>
-  .footer {
-    background: var(--bg-secondary);
-    padding: var(--space-6) var(--space-5);
-    border-top: 1px solid var(--border-primary);
-    transition: background-color var(--duration-normal) var(--ease-default),
-                border-color var(--duration-normal) var(--ease-default);
+  .site-footer {
+    background: #171412;
+    color: rgba(253, 250, 245, 0.88);
+    padding: 3.5rem 1.5rem 1.5rem;
+    margin-top: 0;
   }
 
-  .footer-container {
-    max-width: var(--container-xl);
+  .site-footer__inner,
+  .site-footer__meta {
+    max-width: var(--container-2xl);
     margin: 0 auto;
-    text-align: center;
   }
 
-  .footer-container p {
+  .site-footer__inner {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  @media (min-width: 900px) {
+    .site-footer__inner {
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+      gap: 5rem;
+    }
+  }
+
+  .site-footer__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #fffdf9;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .site-footer__mark {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    background: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fffdf9;
+  }
+
+  .site-footer__mark svg {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .site-footer__copy {
+    max-width: 28rem;
+    color: rgba(253, 250, 245, 0.62);
+    font-size: 0.98rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .site-footer__prompt {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    max-width: 34rem;
+    padding: 0.8rem;
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .site-footer__prompt input {
+    min-width: 0;
+    border: none;
+    background: transparent;
+    color: #fffdf9;
+    padding: 0.7rem 0.9rem;
+    box-shadow: none;
+  }
+
+  .site-footer__prompt input::placeholder {
+    color: rgba(253, 250, 245, 0.38);
+  }
+
+  .site-footer__prompt button {
+    min-height: 2.7rem;
+    padding: 0.7rem 1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #171412;
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+
+  .site-footer__links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 2rem;
+  }
+
+  @media (min-width: 640px) {
+    .site-footer__links {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .site-footer__group h3 {
     font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--text-tertiary);
-    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(253, 250, 245, 0.45);
+    margin-bottom: 1rem;
+  }
+
+  .site-footer__group ul {
+    list-style: none;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .site-footer__group a {
+    color: rgba(253, 250, 245, 0.72);
+    font-size: 0.95rem;
+  }
+
+  .site-footer__group a:hover {
+    color: #fffdf9;
+  }
+
+  .site-footer__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 2.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.84rem;
+    color: rgba(253, 250, 245, 0.42);
+  }
+
+  @media (min-width: 768px) {
+    .site-footer__meta {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
   }
 </style>

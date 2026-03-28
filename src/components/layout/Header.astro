@@ -1,72 +1,69 @@
 ---
-import { t, getLangFromUrl } from '@i18n';
-
-const lang = getLangFromUrl(Astro.url);
 const currentPath = Astro.url.pathname;
 
 const navItems = [
-  { href: '/', label: 'Home' },
+  { href: '/', label: 'Overview' },
   { href: '/chatbot', label: 'Chat' },
   { href: '/workspace', label: 'Workspace' },
-  { href: '/trading', label: 'Trading' },
-  { href: '/claw', label: 'Claw' },
   { href: '/kit', label: 'Tools' },
   { href: '/about', label: 'About' },
 ];
+
+const utilityItems = [
+  { href: '/claw', label: 'Claw' },
+  { href: '/research', label: 'Research' },
+  { href: '/trading', label: 'Trading' },
+];
+
+const isActive = (href: string) => currentPath === href || (href !== '/' && currentPath.startsWith(href));
 ---
 
-<header class="header">
-  <div class="header-container">
-    <a href="/" class="logo">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 3L20.5 18H3.5L12 3Z" fill="white" />
+<header class="site-header">
+  <div class="site-header__inner">
+    <a href="/" class="site-logo" aria-label="MaxMin.dev home">
+      <span class="site-logo__mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 4L18.75 17H5.25L12 4Z" fill="currentColor"></path>
         </svg>
-      </div>
-      <span class="logo-text">MaxMin.dev</span>
+      </span>
+      <span class="site-logo__wordmark">MaxMin.dev</span>
     </a>
 
-    <nav class="nav-desktop">
+    <nav class="site-nav" aria-label="Primary">
       {navItems.map((item) => (
-        <a
-          href={item.href}
-          class={currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) ? 'nav-link active' : 'nav-link'}
-        >
+        <a href={item.href} class:list={['site-nav__link', { active: isActive(item.href) }]}>
           {item.label}
         </a>
       ))}
     </nav>
 
-    <div class="header-actions">
-      <a href="#" class="nav-link js-login-trigger">Log in</a>
-      <a href="/chatbot" class="header-cta">Try LiveChat</a>
+    <div class="site-actions">
+      <a href="#" class="site-utility-link js-login-trigger">Sign in</a>
+      <a href="/chatbot" class="site-header__cta">Open chat</a>
     </div>
 
-    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
-      <svg class="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
+    <button class="site-menu-button" id="mobile-menu-btn" aria-expanded="false" aria-controls="mobile-nav" aria-label="Open navigation">
+      <svg class="menu-icon menu-icon--open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <line x1="4" y1="7" x2="20" y2="7"></line>
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <line x1="4" y1="17" x2="20" y2="17"></line>
       </svg>
-      <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
+      <svg class="menu-icon menu-icon--close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <line x1="6" y1="6" x2="18" y2="18"></line>
+        <line x1="18" y1="6" x2="6" y2="18"></line>
       </svg>
     </button>
   </div>
 
-  <nav id="mobile-nav" class="mobile-nav">
-    {navItems.map((item) => (
-      <a
-        href={item.href}
-        class={currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) ? 'mobile-link active' : 'mobile-link'}
-      >
+  <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile">
+    {[...navItems, ...utilityItems].map((item) => (
+      <a href={item.href} class:list={['mobile-nav__link', { active: isActive(item.href) }]}>
         {item.label}
       </a>
     ))}
-    <div class="mobile-actions">
-      <a href="#" class="mobile-login js-login-trigger">Log in</a>
-      <a href="/chatbot" class="mobile-cta">Try LiveChat</a>
+    <div class="mobile-nav__actions">
+      <a href="#" class="mobile-nav__link js-login-trigger">Sign in</a>
+      <a href="/chatbot" class="site-header__cta mobile-nav__cta">Open chat</a>
     </div>
   </nav>
 </header>
@@ -75,296 +72,216 @@ const navItems = [
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileNav = document.getElementById('mobile-nav');
 
+  function setMenuState(open: boolean) {
+    mobileNav?.classList.toggle('open', open);
+    mobileMenuBtn?.classList.toggle('open', open);
+    mobileMenuBtn?.setAttribute('aria-expanded', String(open));
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+
   mobileMenuBtn?.addEventListener('click', () => {
-    const isOpen = mobileNav?.classList.contains('open');
-    mobileNav?.classList.toggle('open', !isOpen);
-    mobileMenuBtn?.classList.toggle('open', !isOpen);
-    document.body.style.overflow = isOpen ? '' : 'hidden';
+    setMenuState(!mobileNav?.classList.contains('open'));
   });
 
-  document.querySelectorAll('.mobile-link').forEach(link => {
-    link.addEventListener('click', () => {
-      mobileNav?.classList.remove('open');
-    mobileMenuBtn?.classList.remove('open');
-    document.body.style.overflow = '';
-    });
+  document.querySelectorAll('.mobile-nav__link').forEach((link) => {
+    link.addEventListener('click', () => setMenuState(false));
   });
 
-  document.querySelectorAll('.js-login-trigger').forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
+  document.querySelectorAll('.js-login-trigger').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
       (window as any).openAuthModal?.('login');
+      setMenuState(false);
     });
   });
 </script>
 
 <style>
-  .header {
+  .site-header {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: var(--z-fixed);
     background: var(--nav-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--nav-border);
-    transition: background-color var(--duration-normal) var(--ease-default),
-                border-color var(--duration-normal) var(--ease-default);
   }
 
-  .header-container {
+  .site-header__inner {
+    max-width: var(--container-2xl);
+    margin: 0 auto;
+    padding: 0 1.2rem;
+    min-height: var(--header-height);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    max-width: var(--container-xl);
-    margin: 0 auto;
-    padding: 0 var(--space-5);
-    height: var(--header-height);
+    gap: 1rem;
   }
 
   @media (min-width: 768px) {
-    .header-container {
-      padding: 0 var(--space-8);
+    .site-header__inner {
+      padding: 0 2rem;
     }
   }
 
-  .logo {
-    display: flex;
+  .site-logo {
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    text-decoration: none;
+    gap: 0.75rem;
+    min-width: max-content;
   }
 
-  .logo-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    display: flex;
+  .site-logo__mark {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    transition: transform var(--duration-fast) var(--ease-default);
+    background: var(--color-primary);
+    color: #fffdf9;
+    box-shadow: 0 8px 20px rgba(201, 105, 71, 0.18);
   }
 
-  .logo:hover .logo-icon {
-    transform: scale(1.05);
+  .site-logo__mark svg {
+    width: 0.95rem;
+    height: 0.95rem;
   }
 
-  .logo-icon svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .logo-text {
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
+  .site-logo__wordmark {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
     letter-spacing: -0.02em;
+    color: var(--text-primary);
   }
 
-  .nav-desktop {
+  .site-nav,
+  .site-actions {
     display: none;
-    align-items: center;
-    gap: var(--space-8);
   }
 
-  @media (min-width: 768px) {
-    .nav-desktop {
+  @media (min-width: 1024px) {
+    .site-nav {
       display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-left: 1.5rem;
+    }
+
+    .site-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
     }
   }
 
-  .nav-link {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
+  .site-nav__link,
+  .site-utility-link {
     color: var(--nav-link);
-    text-decoration: none;
-    transition: color var(--duration-fast) var(--ease-default);
-    padding: var(--space-2) 0;
+    font-size: 0.92rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    padding: 0.25rem 0;
   }
 
-  .nav-link:hover,
-  .nav-link.active {
-    color: var(--nav-link-active);
+  .site-nav__link.active,
+  .site-utility-link.active,
+  .site-nav__link:hover,
+  .site-utility-link:hover {
+    color: var(--nav-link-hover);
   }
 
-  .header-actions {
-    display: none;
+  .site-header__cta {
+    display: inline-flex;
     align-items: center;
-    gap: var(--space-4);
-  }
-
-  @media (min-width: 768px) {
-    .header-actions {
-      display: flex;
-    }
-  }
-
-  .header-cta {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    padding: 0.5rem 1.25rem;
+    justify-content: center;
+    min-height: 2.7rem;
+    padding: 0.75rem 1.15rem;
+    border-radius: 999px;
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);
-    border-radius: var(--radius-full);
-    text-decoration: none;
-    transition: all var(--duration-normal) var(--ease-default);
+    font-size: 0.92rem;
+    font-weight: 500;
+    box-shadow: var(--btn-primary-shadow);
   }
 
-  .header-cta:hover {
+  .site-header__cta:hover {
+    color: var(--btn-primary-text);
     background: var(--btn-primary-hover);
     transform: translateY(-1px);
-    color: var(--btn-primary-text);
   }
 
-  .mobile-menu-btn {
-    display: flex;
+  .site-menu-button {
+    margin-left: auto;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-primary);
+    background: rgba(255, 253, 249, 0.78);
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--text-primary);
-    transition: color var(--duration-fast) var(--ease-default);
   }
 
-  @media (min-width: 768px) {
-    .mobile-menu-btn {
+  @media (min-width: 1024px) {
+    .site-menu-button {
       display: none;
     }
   }
 
-  .mobile-menu-btn:hover {
-    color: var(--color-primary);
+  .menu-icon {
+    width: 1.15rem;
+    height: 1.15rem;
   }
 
-  .mobile-menu-btn .icon-menu {
-    display: block;
-    width: 20px;
-    height: 20px;
-  }
-
-  .mobile-menu-btn .icon-close {
-    display: none;
-    width: 20px;
-    height: 20px;
-  }
-
-  .mobile-menu-btn.open .icon-menu {
+  .menu-icon--close {
     display: none;
   }
 
-  .mobile-menu-btn.open .icon-close {
+  .site-menu-button.open .menu-icon--open {
+    display: none;
+  }
+
+  .site-menu-button.open .menu-icon--close {
     display: block;
   }
 
   .mobile-nav {
     display: none;
-    position: fixed;
-    top: var(--header-height);
-    left: 0;
-    right: 0;
-    bottom: 0;
+    padding: 0 1.2rem 1.2rem;
+    border-top: 1px solid rgba(71, 57, 44, 0.05);
     background: var(--bg-primary);
-    padding: var(--space-6);
-    flex-direction: column;
-    gap: var(--space-2);
-    overflow-y: auto;
-    z-index: var(--z-sticky);
   }
 
   .mobile-nav.open {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .mobile-nav__link {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    animation: slideDown 0.25s var(--ease-out);
-    -webkit-overflow-scrolling: touch;
-  }
-
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @media (min-width: 768px) {
-    .mobile-nav {
-      display: none !important;
-    }
-  }
-
-  .mobile-link {
-    font-family: var(--font-body);
-    font-size: var(--text-lg);
-    font-weight: var(--font-medium);
-    color: var(--text-primary);
-    text-decoration: none;
-    padding: var(--space-4);
-    transition: all var(--duration-fast) var(--ease-default);
-    border-radius: var(--radius-md);
-  }
-
-  .mobile-link:active {
-    background: var(--color-primary-light);
-    color: var(--color-primary);
-  }
-
-  .mobile-link.active {
-    color: var(--color-primary);
-  }
-
-  .mobile-actions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    padding-top: var(--space-4);
-    margin-top: auto;
-    border-top: 1px solid var(--border-primary);
-  }
-
-  .mobile-login {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
+    align-items: center;
+    min-height: 3rem;
+    padding: 0 0.2rem;
+    border-bottom: 1px solid rgba(71, 57, 44, 0.06);
     color: var(--text-secondary);
-    text-decoration: none;
-    padding: var(--space-3) var(--space-4);
-    text-align: center;
-    transition: color var(--duration-fast) var(--ease-default);
+    font-size: 1rem;
   }
 
-  .mobile-login:hover {
-    color: var(--color-primary);
+  .mobile-nav__link.active {
+    color: var(--text-primary);
   }
 
-  .mobile-cta {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    padding: var(--space-3) var(--space-5);
-    background: var(--btn-primary-bg);
-    color: var(--btn-primary-text);
-    border-radius: var(--radius-full);
-    text-decoration: none;
-    text-align: center;
-    transition: all var(--duration-normal) var(--ease-default);
+  .mobile-nav__actions {
+    display: grid;
+    gap: 0.75rem;
+    padding-top: 0.75rem;
   }
 
-  .mobile-cta:hover {
-    background: var(--btn-primary-hover);
-    color: var(--btn-primary-text);
+  .mobile-nav__cta {
+    width: 100%;
   }
 </style>

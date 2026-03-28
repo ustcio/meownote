@@ -1,483 +1,157 @@
 ---
 const products = [
   {
-    id: 1,
-    name: "LiveChat",
-    badge: "Most Popular",
-    badgeColor: "#D97757",
-    description: "Our most capable conversational model. Exceptional at complex analysis, coding, and nuanced dialogue.",
-    capabilities: ["Advanced reasoning", "Code generation", "Long context", "Vision"],
-    icon: "chat"
+    name: 'Chat',
+    eyebrow: 'Everyday collaboration',
+    description: 'Use a warm, conversational interface for drafting, reframing, and thinking in public before you commit.',
+    points: ['Clearer writing', 'Better summaries', 'Fast iteration'],
   },
   {
-    id: 2,
-    name: "LiveFlash",
-    badge: "Fastest",
-    badgeColor: "#5B7E6A",
-    description: "Near-instant responsiveness for lightweight tasks and high-volume applications.",
-    capabilities: ["Instant responses", "Cost-efficient", "Real-time tasks"],
-    icon: "flash"
+    name: 'Workspace',
+    eyebrow: 'Long-form thinking',
+    description: 'Move from quick answers to documents, notes, and project scaffolds you can keep refining over time.',
+    points: ['Living notes', 'Reusable briefs', 'Organized context'],
   },
   {
-    id: 3,
-    name: "LivePro",
-    badge: "Most Powerful",
-    badgeColor: "#4A5E8A",
-    description: "Highest-capability model for complex problems, research-grade analysis, and creative work.",
-    capabilities: ["Top intelligence", "Complex tasks", "Research-grade"],
-    icon: "brain"
-  }
+    name: 'Research',
+    eyebrow: 'Deeper exploration',
+    description: 'Pull threads, compare options, and turn scattered findings into something coherent enough to act on.',
+    points: ['Evidence-first', 'Structured output', 'Less context switching'],
+  },
 ];
-
-const iconPaths: Record<string, string> = {
-  chat: `<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
-  flash: `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
-  brain: `<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-<path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`
-};
 ---
 
-<section id="features" class="products">
-  <div class="products-container">
-    <div class="products-header">
-      <div class="header-label">
-        <span class="label-dot"></span>
-        <span class="label-text">Products</span>
-      </div>
-      <h2 class="products-title">
-        Meet MaxMin.dev,<br />our family of AI models
-      </h2>
-      <p class="products-description">
-        MaxMin.dev models are designed to be safe, accurate, and genuinely helpful for a wide range of tasks.
+<section id="features" class="claude-section">
+  <div class="container">
+    <div class="claude-section-heading">
+      <span class="claude-kicker">Built for the work behind the work</span>
+      <h2>Three surfaces, one steady workflow.</h2>
+      <p>
+        Claude’s product pages feel editorial because every block has one job.
+        MaxMin now follows the same rule: fewer gimmicks, better pacing, and
+        more room for the actual message.
       </p>
     </div>
 
-    <div class="products-grid">
-      {products.map((product) => (
-        <div class="product-card">
-          <div class="product-header">
-            <div class="product-icon" style={`background: ${product.badgeColor};`}>
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="white">
-                <Fragment set:html={iconPaths[product.icon]} />
-              </svg>
-            </div>
-            <span class="product-badge" style={`color: ${product.badgeColor}; background: ${product.badgeColor}18;`}>
-              {product.badge}
-            </span>
-          </div>
-          
-          <div class="product-content">
-            <h3 class="product-name">{product.name}</h3>
-            <p class="product-description">{product.description}</p>
-          </div>
-          
-          <div class="product-tags">
-            {product.capabilities.map((cap) => (
-              <span class="product-tag">{cap}</span>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
+    <div class="models-layout">
+      <div class="models-grid">
+        {products.map((product) => (
+          <article class="model-card claude-editorial-card">
+            <span class="model-card__eyebrow">{product.eyebrow}</span>
+            <h3>{product.name}</h3>
+            <p>{product.description}</p>
+            <ul>
+              {product.points.map((point) => (
+                <li>{point}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
 
-    <div class="products-cta">
-      <div class="cta-content">
-        <h3 class="cta-title">Build with the MaxMin.dev API</h3>
-        <p class="cta-description">
-          Access MaxMin.dev models through our API and build powerful AI-native applications with enterprise-grade safety.
+      <aside class="models-aside claude-editorial-card">
+        <span class="models-aside__label">Why this feels closer to Claude</span>
+        <p>
+          Softer contrast, larger editorial headings, restrained color, and
+          cards that read like product notes instead of dashboard tiles.
         </p>
-      </div>
-      <div class="cta-actions">
-        <a href="#" class="cta-primary">Get API access</a>
-        <a href="#" class="cta-secondary">View docs</a>
-      </div>
+        <div class="models-aside__actions">
+          <a href="/chatbot" class="claude-button">Try chat</a>
+          <a href="/workspace" class="claude-button-secondary">Open workspace</a>
+        </div>
+      </aside>
     </div>
   </div>
 </section>
 
 <style>
-  .products {
-    background: var(--bg-primary);
-    padding: var(--space-10) var(--space-5);
+  .models-layout {
+    display: grid;
+    gap: 1.2rem;
   }
 
-  @media (min-width: 768px) {
-    .products {
-      padding: var(--space-16) var(--space-10);
+  @media (min-width: 1100px) {
+    .models-layout {
+      grid-template-columns: minmax(0, 1.3fr) minmax(18rem, 0.7fr);
+      align-items: start;
     }
   }
 
-  .products-container {
-    max-width: var(--container-xl);
-    margin: 0 auto;
+  .models-grid {
+    display: grid;
+    gap: 1rem;
   }
 
-  .products-header {
-    max-width: 640px;
-    margin-bottom: var(--space-8);
-  }
-
-  @media (min-width: 768px) {
-    .products-header {
-      margin-bottom: var(--space-12);
+  @media (min-width: 760px) {
+    .models-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 
-  .header-label {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin-bottom: var(--space-3);
+  .model-card,
+  .models-aside {
+    padding: 1.5rem;
   }
 
-  .label-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
+  .model-card {
+    display: grid;
+    gap: 0.9rem;
+    min-height: 100%;
+  }
+
+  .model-card__eyebrow,
+  .models-aside__label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  .model-card h3 {
+    font-size: 1.75rem;
+  }
+
+  .model-card p,
+  .models-aside p {
+    font-size: 0.98rem;
+    margin: 0;
+  }
+
+  .model-card ul {
+    list-style: none;
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 0.35rem;
+  }
+
+  .model-card li {
+    position: relative;
+    padding-left: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.94rem;
+  }
+
+  .model-card li::before {
+    content: '';
+    position: absolute;
+    top: 0.62rem;
+    left: 0;
+    width: 0.34rem;
+    height: 0.34rem;
+    border-radius: 999px;
     background: var(--color-primary);
   }
 
-  .label-text {
-    font-family: var(--font-sans);
-    font-size: 11px;
-    font-weight: var(--font-medium);
-    color: var(--text-tertiary);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  @media (min-width: 768px) {
-    .label-text {
-      font-size: var(--text-xs);
-    }
-  }
-
-  .products-title {
-    font-family: var(--font-display);
-    font-size: clamp(1.75rem, 6vw, 2.5rem);
-    font-weight: var(--font-normal);
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    color: var(--text-primary);
-    margin-bottom: var(--space-4);
-  }
-
-  .products-description {
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-    line-height: 1.65;
-  }
-
-  @media (min-width: 768px) {
-    .products-description {
-      font-size: var(--text-base);
-      line-height: 1.7;
-    }
-  }
-
-  .products-grid {
+  .models-aside {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
-    margin-bottom: var(--space-8);
+    gap: 1rem;
+    background: var(--card-bg-cream);
   }
 
-  @media (min-width: 768px) {
-    .products-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--space-5);
-      margin-bottom: var(--space-12);
-    }
-  }
-
-  .product-card {
-    border: 1px solid var(--card-border);
-    border-radius: 14px;
-    background: var(--card-bg);
-    padding: var(--space-5);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    transition: border-color var(--duration-normal) var(--ease-default);
-    box-shadow: var(--card-shadow);
-  }
-
-  @media (min-width: 768px) {
-    .product-card {
-      border-radius: 16px;
-      padding: var(--space-6);
-      gap: var(--space-4);
-    }
-  }
-
-  .product-card:active {
-    border-color: var(--color-primary);
-    background: var(--color-primary-light);
-  }
-
-  @media (hover: hover) {
-    .product-card:hover {
-      border-color: var(--card-border-hover);
-      box-shadow: var(--card-shadow-hover);
-    }
-    
-    .product-card:hover .product-name {
-      color: var(--color-primary);
-    }
-    
-    .product-card:hover .product-icon {
-      transform: scale(1.05);
-    }
-  }
-
-  .product-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-3);
-  }
-
-  .product-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform var(--duration-normal) var(--ease-default);
-    flex-shrink: 0;
-  }
-
-  .product-icon svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  @media (min-width: 768px) {
-    .product-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-    }
-    
-    .product-icon svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
-
-  .product-badge {
-    font-family: var(--font-sans);
-    font-size: 10px;
-    font-weight: var(--font-medium);
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-full);
-    white-space: nowrap;
-  }
-
-  @media (min-width: 768px) {
-    .product-badge {
-      font-size: var(--text-xs);
-      padding: var(--space-1) var(--space-3);
-    }
-  }
-
-  .product-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .product-name {
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
-    font-weight: var(--font-normal);
-    letter-spacing: -0.01em;
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-    transition: color var(--duration-normal) var(--ease-default);
-  }
-
-  .product-description {
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-    line-height: 1.6;
-  }
-
-  .product-tags {
+  .models-aside__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-top: auto;
-  }
-
-  .product-tag {
-    font-family: var(--font-sans);
-    font-size: 11px;
-    font-weight: var(--font-medium);
-    color: var(--text-tertiary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-full);
-    padding: 4px 10px;
-  }
-
-  @media (min-width: 768px) {
-    .product-tag {
-      font-size: var(--text-xs);
-      padding: var(--space-1) var(--space-2);
-    }
-  }
-
-  .products-cta {
-    background: var(--bg-elevated);
-    border-radius: 14px;
-    padding: var(--space-5);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    box-shadow: var(--card-shadow);
-  }
-
-  @media (min-width: 640px) {
-    .products-cta {
-      padding: var(--space-6);
-      gap: var(--space-5);
-    }
-  }
-
-  @media (min-width: 768px) {
-    .products-cta {
-      border-radius: 20px;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      padding: var(--space-8);
-      gap: var(--space-8);
-    }
-  }
-
-  .cta-content {
-    max-width: 100%;
-  }
-
-  @media (min-width: 768px) {
-    .cta-content {
-      max-width: 480px;
-    }
-  }
-
-  .cta-title {
-    font-family: var(--font-display);
-    font-size: clamp(1.4rem, 5vw, 1.75rem);
-    font-weight: var(--font-normal);
-    line-height: 1.25;
-    letter-spacing: -0.02em;
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-  }
-
-  @media (min-width: 768px) {
-    .cta-title {
-      font-size: clamp(1.6rem, 3vw, 2rem);
-      margin-bottom: var(--space-3);
-    }
-  }
-
-  .cta-description {
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-    line-height: 1.6;
-  }
-
-  @media (min-width: 768px) {
-    .cta-description {
-      line-height: 1.65;
-    }
-  }
-
-  .cta-actions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    flex-shrink: 0;
-    width: 100%;
-  }
-
-  @media (min-width: 480px) {
-    .cta-actions {
-      flex-direction: row;
-      width: auto;
-    }
-  }
-
-  .cta-primary,
-  .cta-secondary {
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--radius-full);
-    text-decoration: none;
-    text-align: center;
-    white-space: nowrap;
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--duration-normal) var(--ease-default);
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .cta-primary {
-    background: var(--btn-primary-bg);
-    color: var(--btn-primary-text);
-  }
-
-  .cta-primary:active {
-    background: var(--btn-primary-hover);
-  }
-
-  @media (hover: hover) {
-    .cta-primary:hover {
-      background: var(--btn-primary-hover);
-    }
-  }
-
-  .cta-secondary {
-    color: var(--btn-secondary-text);
-    border: 1px solid var(--btn-secondary-border);
-  }
-
-  .cta-secondary:active {
-    border-color: var(--border-hover);
-    background: var(--btn-secondary-hover-bg);
-  }
-
-  @media (hover: hover) {
-    .cta-secondary:hover {
-      border-color: var(--border-hover);
-    }
-  }
-
-  @media (max-width: 480px) {
-    .product-card {
-      padding: var(--space-4);
-    }
-
-    .products-cta {
-      padding: var(--space-4);
-    }
-
-    .cta-actions {
-      flex-direction: column;
-      width: 100%;
-    }
-
-    .cta-primary,
-    .cta-secondary {
-      width: 100%;
-    }
+    gap: 0.75rem;
   }
 </style>

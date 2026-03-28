@@ -1,503 +1,239 @@
 ---
-const stats = [
-  { value: "500K+", label: "Active Users" },
-  { value: "10M+", label: "Conversations" },
-  { value: "99.9%", label: "Uptime" }
-];
-
-const features = [
-  { icon: "brain", title: "Deep Reasoning", desc: "Advanced analysis & problem solving" },
-  { icon: "code", title: "Code Generation", desc: "Write, debug & explain code" },
-  { icon: "shield", title: "Privacy First", desc: "Your data stays secure" }
+const quickActions = [
+  { label: 'Write clearly', href: '/chatbot' },
+  { label: 'Plan a project', href: '/workspace' },
+  { label: 'Research a topic', href: '/research' },
 ];
 ---
 
-<section class="hero">
-  <div class="hero-bg">
-    <div class="bg-circle"></div>
-  </div>
+<section class="home-hero">
+  <div class="container home-hero__grid">
+    <div class="home-hero__copy">
+      <span class="claude-kicker">Thoughtful AI for serious work</span>
+      <h1 class="home-hero__title">
+        Bring calm,
+        <br />
+        capable AI into
+        <br />
+        your day.
+      </h1>
+      <p class="home-hero__lead">
+        MaxMin helps you think through messy problems, draft stronger writing,
+        and move work forward without turning your tools into a circus.
+      </p>
 
-  <div class="hero-container">
-    <div class="hero-eyebrow">
-      <span class="eyebrow-dot"></span>
-      <span class="eyebrow-text">AI Companion</span>
+      <form class="home-hero__composer" action="/chatbot">
+        <input
+          type="text"
+          name="q"
+          value=""
+          placeholder="Ask MaxMin to outline a launch plan, clean up a draft, or explain a concept"
+          aria-label="Prompt"
+        />
+        <button type="submit">Open chat</button>
+      </form>
+
+      <div class="home-hero__chips">
+        {quickActions.map((action) => (
+          <a href={action.href} class="claude-chip">
+            {action.label}
+          </a>
+        ))}
+      </div>
     </div>
 
-    <h1 class="hero-title">
-      The AI that actually<br />does things
-    </h1>
-
-    <p class="hero-description">
-      MaxMin.dev is an AI assistant built to help you think deeper,
-      work smarter, and create freely. No shortcuts, just genuine intelligence.
-    </p>
-
-    <div class="hero-actions">
-      <a href="/chatbot" class="btn-hero-primary">
-        Start chatting
-        <svg class="btn-arrow" viewBox="0 0 20 20" fill="none">
-          <path d="M4 10h12m-4-4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <div class="home-hero__visual">
+      <div class="hero-illustration">
+        <svg viewBox="0 0 620 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="380" cy="140" r="62" fill="#D97757" />
+          <path d="M558 84C512 84 482 117 474 152C468 178 452 196 420 214" stroke="#161311" stroke-width="18" stroke-linecap="round"/>
+          <path d="M250 318C266 250 292 196 320 196C346 196 342 256 318 314" stroke="#161311" stroke-width="18" stroke-linecap="round"/>
+          <path d="M292 318C310 246 338 190 366 190C392 190 388 254 362 318" stroke="#161311" stroke-width="18" stroke-linecap="round"/>
+          <path d="M334 320C354 250 386 194 416 194C438 194 442 232 428 266" stroke="#161311" stroke-width="18" stroke-linecap="round"/>
+          <path d="M420 214C370 214 334 242 314 280C302 302 304 330 330 342C354 352 382 342 402 324C420 308 436 278 474 278" stroke="#161311" stroke-width="18" stroke-linecap="round"/>
         </svg>
-      </a>
-      <a href="#features" class="btn-hero-secondary">
-        Explore features
-      </a>
-    </div>
+      </div>
 
-    <div class="hero-features">
-      {features.map((feature) => (
-        <div class="feature-item">
-          <div class="feature-icon">
-            {feature.icon === 'brain' && (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            )}
-            {feature.icon === 'code' && (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M16 18l6-6-6-6M8 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            )}
-            {feature.icon === 'shield' && (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            )}
-          </div>
-          <div class="feature-text">
-            <span class="feature-title">{feature.title}</span>
-            <span class="feature-desc">{feature.desc}</span>
-          </div>
-        </div>
-      ))}
-    </div>
-
-    <div class="hero-stats">
-      {stats.map((stat) => (
-        <div class="stat-item">
-          <span class="stat-value">{stat.value}</span>
-          <span class="stat-label">{stat.label}</span>
-        </div>
-      ))}
-    </div>
-
-    <div class="hero-divider">
-      <span class="divider-line"></span>
-      <span class="divider-text">Since 2024</span>
-      <span class="divider-line"></span>
+      <article class="hero-spotlight claude-editorial-card">
+        <span class="hero-spotlight__eyebrow">New on MaxMin</span>
+        <h2>One place for drafting, planning, and execution.</h2>
+        <p>
+          Move from a vague prompt to a clear plan, then keep going in chat,
+          workspace, or research mode without changing mental gears.
+        </p>
+        <a href="/workspace" class="hero-spotlight__link">Explore workspace</a>
+      </article>
     </div>
   </div>
 </section>
 
 <style>
-  .hero {
-    background: var(--bg-primary);
-    min-height: 100vh;
-    min-height: 100svh;
-    display: flex;
-    flex-direction: column;
+  .home-hero {
+    padding: calc(var(--header-height) + 5.5rem) 0 5rem;
+  }
+
+  .home-hero__grid {
+    display: grid;
+    gap: 3rem;
     align-items: center;
-    justify-content: center;
-    padding: 6rem var(--space-5) var(--space-16);
-    position: relative;
-    overflow: hidden;
-    transition: background-color var(--duration-normal) var(--ease-default);
   }
 
-  @media (min-width: 768px) {
-    .hero {
-      padding: 8rem var(--space-8) var(--space-20);
+  @media (min-width: 1100px) {
+    .home-hero__grid {
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 3.5rem;
     }
   }
 
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
+  .home-hero__copy {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 38rem;
+    padding-top: 1rem;
   }
 
-  .bg-circle {
-    position: absolute;
-    width: 500px;
-    height: 500px;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--color-primary-light) 0%, transparent 70%);
-    top: -200px;
-    right: -150px;
-    opacity: 0.5;
+  .home-hero__title {
+    max-width: 12ch;
   }
 
-  @media (min-width: 768px) {
-    .bg-circle {
-      width: 700px;
-      height: 700px;
-      top: -250px;
-      right: -200px;
-    }
+  .home-hero__lead {
+    font-size: 1.18rem;
+    max-width: 33rem;
+    margin: 0;
   }
 
-  .hero-container {
-    max-width: 896px;
-    margin: 0 auto;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-    padding: var(--space-8) 0;
-  }
-
-  @media (min-width: 768px) {
-    .hero-container {
-      padding: var(--space-16) 0;
-    }
-  }
-
-  .hero-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-4);
-    background: var(--color-primary-light);
-    border-radius: var(--radius-full);
-    margin-bottom: var(--space-8);
-  }
-
-  @media (min-width: 768px) {
-    .hero-eyebrow {
-      margin-bottom: var(--space-10);
-    }
-  }
-
-  .eyebrow-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--color-primary);
-  }
-
-  .eyebrow-text {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    font-weight: var(--font-medium);
-    color: var(--color-primary);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  .hero-title {
-    font-family: var(--font-display);
-    font-size: clamp(2.5rem, 8vw, 4.5rem);
-    font-weight: var(--font-bold);
-    line-height: 1.08;
-    letter-spacing: -0.035em;
-    color: var(--text-primary);
-    margin-bottom: var(--space-6);
-  }
-
-  @media (min-width: 768px) {
-    .hero-title {
-      font-size: clamp(3.5rem, 6vw, 5rem);
-      line-height: 1.05;
-      margin-bottom: var(--space-8);
-    }
-  }
-
-  .hero-description {
-    font-family: var(--font-body);
-    font-size: var(--text-lg);
-    font-weight: var(--font-normal);
-    color: var(--text-secondary);
-    line-height: 1.7;
-    max-width: 600px;
-    margin: 0 auto var(--space-10);
-    padding: 0 var(--space-4);
-  }
-
-  @media (min-width: 768px) {
-    .hero-description {
-      font-size: var(--text-xl);
-      margin-bottom: var(--space-12);
-      padding: 0;
-    }
-  }
-
-  .hero-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-3);
-    margin-bottom: var(--space-16);
-  }
-
-  @media (min-width: 480px) {
-    .hero-actions {
-      flex-direction: row;
-      justify-content: center;
-      gap: var(--space-4);
-    }
-  }
-
-  .btn-hero-primary {
-    font-family: var(--font-body);
-    font-size: var(--text-base);
-    font-weight: var(--font-medium);
-    padding: 0.875rem 1.75rem;
-    background: var(--text-primary);
-    color: var(--bg-primary);
-    border-radius: var(--radius-full);
-    text-decoration: none;
-    transition: all var(--duration-normal) var(--ease-default);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    min-height: 48px;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .btn-hero-primary:hover {
-    opacity: 0.85;
-    transform: translateY(-1px);
-    color: var(--bg-primary);
-  }
-
-  .btn-arrow {
-    width: 16px;
-    height: 16px;
-    transition: transform var(--duration-normal) var(--ease-default);
-  }
-
-  .btn-hero-primary:hover .btn-arrow {
-    transform: translateX(3px);
-  }
-
-  .btn-hero-secondary {
-    font-family: var(--font-body);
-    font-size: var(--text-base);
-    font-weight: var(--font-medium);
-    padding: 0.875rem 1.75rem;
-    color: var(--text-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-full);
-    text-decoration: none;
-    transition: all var(--duration-normal) var(--ease-default);
-    min-height: 48px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .btn-hero-secondary:hover {
-    border-color: var(--border-hover);
-    background: var(--btn-secondary-hover-bg);
-    color: var(--text-primary);
-  }
-
-  .hero-features {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-3);
-    margin-bottom: var(--space-16);
-    padding: 0 var(--space-2);
-  }
-
-  @media (min-width: 480px) {
-    .hero-features {
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: var(--space-4);
-    }
-  }
-
-  @media (min-width: 768px) {
-    .hero-features {
-      gap: var(--space-5);
-      padding: 0;
-    }
-  }
-
-  .feature-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    background: var(--card-bg);
+  .home-hero__composer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.9rem;
+    max-width: 38rem;
+    padding: 0.7rem;
+    border-radius: 1.65rem;
     border: 1px solid var(--card-border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-4);
-    min-width: 0;
-    width: 100%;
-    max-width: 260px;
-    transition: all var(--duration-normal) var(--ease-default);
-    -webkit-tap-highlight-color: transparent;
+    background: rgba(255, 253, 249, 0.9);
+    box-shadow: var(--card-shadow);
   }
 
-  @media (min-width: 480px) {
-    .feature-item {
-      width: auto;
-      max-width: none;
-      flex: 1;
+  @media (min-width: 700px) {
+    .home-hero__composer {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
     }
   }
 
-  @media (min-width: 768px) {
-    .feature-item {
-      gap: var(--space-4);
-      padding: var(--space-5);
-    }
+  .home-hero__composer input {
+    border: none;
+    background: transparent;
+    padding: 0.9rem 1rem;
+    box-shadow: none;
   }
 
-  .feature-item:hover {
-    border-color: var(--card-border-hover);
-    box-shadow: var(--card-shadow-hover);
-    transform: translateY(-2px);
+  .home-hero__composer button {
+    min-height: 3rem;
+    padding: 0.8rem 1.15rem;
+    border-radius: 999px;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    font-size: 0.96rem;
+    font-weight: 500;
+    box-shadow: var(--btn-primary-shadow);
   }
 
-  .feature-icon {
-    width: 36px;
-    height: 36px;
+  .home-hero__chips {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--color-primary);
-    border-radius: var(--radius-md);
-    flex-shrink: 0;
-  }
-
-  @media (min-width: 768px) {
-    .feature-icon {
-      width: 40px;
-      height: 40px;
-    }
-  }
-
-  .feature-icon svg {
-    width: 18px;
-    height: 18px;
-    color: white;
-  }
-
-  @media (min-width: 768px) {
-    .feature-icon svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
-
-  .feature-text {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    gap: 2px;
-  }
-
-  .feature-title {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--text-primary);
-    line-height: 1.3;
-  }
-
-  @media (min-width: 768px) {
-    .feature-title {
-      font-size: var(--text-base);
-    }
-  }
-
-  .feature-desc {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    line-height: 1.3;
-  }
-
-  @media (min-width: 768px) {
-    .feature-desc {
-      font-size: var(--text-sm);
-    }
-  }
-
-  .hero-stats {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-10);
-    padding: var(--space-8) 0;
     flex-wrap: wrap;
+    gap: 0.65rem;
   }
 
-  @media (min-width: 768px) {
-    .hero-stats {
-      gap: var(--space-16);
-      padding: var(--space-10) 0;
-    }
+  .home-hero__visual {
+    position: relative;
+    min-height: 420px;
+    display: grid;
+    align-items: end;
   }
 
-  .stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-1);
-    min-width: 80px;
+  .hero-illustration {
+    width: min(100%, 42rem);
+    margin-left: auto;
+    opacity: 0.98;
   }
 
-  .stat-value {
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
-    letter-spacing: -0.02em;
+  .hero-illustration svg {
+    display: block;
+    width: 100%;
+    height: auto;
   }
 
-  @media (min-width: 768px) {
-    .stat-value {
-      font-size: var(--text-3xl);
-    }
+  .hero-spotlight {
+    position: absolute;
+    right: 0;
+    bottom: 1rem;
+    width: min(21rem, 90%);
+    padding: 1.4rem;
+    display: grid;
+    gap: 0.8rem;
+    background: rgba(255, 253, 249, 0.96);
   }
 
-  .stat-label {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    text-transform: uppercase;
+  .hero-spotlight__eyebrow {
+    font-size: 0.78rem;
     letter-spacing: 0.08em;
-    font-weight: var(--font-medium);
-  }
-
-  .hero-divider {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    justify-content: center;
-    opacity: 0.4;
-  }
-
-  @media (min-width: 768px) {
-    .hero-divider {
-      gap: var(--space-5);
-    }
-  }
-
-  .divider-line {
-    height: 1px;
-    width: 3rem;
-    background: var(--text-quaternary);
-  }
-
-  @media (min-width: 768px) {
-    .divider-line {
-      width: 5rem;
-    }
-  }
-
-  .divider-text {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    letter-spacing: 0.1em;
     text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  .hero-spotlight h2 {
+    font-size: 2rem;
+  }
+
+  .hero-spotlight p {
+    font-size: 0.98rem;
+  }
+
+  .hero-spotlight__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: fit-content;
+    min-height: 2.5rem;
+    padding: 0.65rem 0.95rem;
+    border-radius: 999px;
+    background: #171412;
+    color: #fffdf9;
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+
+  .hero-spotlight__link:hover {
+    color: #fffdf9;
+    background: #26211c;
+  }
+
+  @media (max-width: 1099px) {
+    .home-hero {
+      padding: calc(var(--header-height) + 4rem) 0 4rem;
+    }
+
+    .home-hero__title {
+      max-width: none;
+    }
+
+    .home-hero__visual {
+      min-height: auto;
+      padding-bottom: 14rem;
+    }
+
+    .hero-illustration {
+      width: 100%;
+      max-width: 34rem;
+      margin: 0 auto;
+    }
+
+    .hero-spotlight {
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      bottom: 0;
+    }
   }
 </style>

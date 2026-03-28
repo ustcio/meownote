@@ -210,7 +210,7 @@ class PerformanceMonitor {
 
 export const performanceMonitor = new PerformanceMonitor();
 
-export function measureAsync<T>(name: string, fn: () => Promise<T>): Promise<T> {
+export async function measureAsync<T>(name: string, fn: () => Promise<T>): Promise<T> {
   const startMark = `${name}-start`;
   const endMark = `${name}-end`;
   

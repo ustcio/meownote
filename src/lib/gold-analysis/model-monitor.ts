@@ -4,7 +4,7 @@
 // 目的：持续跟踪 AI 模型准确率、延迟、成本等指标，优化模型配置
 // ================================================================================
 
-import type { AIPredictionResult, TradingSignal } from './types';
+import type { TradingSignal } from './types';
 
 // 监控配置
 const MONITOR_CONFIG = {
@@ -70,7 +70,6 @@ export class ModelPerformanceMonitor {
   private predictionHistory: PredictionRecord[] = [];
   private modelMetrics = new Map<string, ModelPerformanceMetrics>();
   private costCache = new Map<string, { amount: number; timestamp: number }>();
-  private lastCostUpdate = 0;
 
   /**
    * 记录预测结果
@@ -183,7 +182,7 @@ export class ModelPerformanceMonitor {
           modelName,
           currentWeight,
           suggestedWeight: Math.round(suggestedWeight * 100) / 100,
-          reason: this.generateWeightReason(modelName, metrics, suggestedWeight),
+          reason: this.generateWeightReason(metrics),
           confidence: 0.8,
         });
       }
@@ -425,9 +424,7 @@ export class ModelPerformanceMonitor {
    * 生成权重调整原因
    */
   private generateWeightReason(
-    modelName: string,
-    metrics: ModelPerformanceMetrics,
-    suggestedWeight: number
+    metrics: ModelPerformanceMetrics
   ): string {
     const reasons: string[] = [];
 

@@ -208,7 +208,8 @@ test('价格穿越检测', () => {
   const alerts = alertSystem.updatePriceAndCheck(data2);
   
   // 应该检测到买入信号
-  const buyAlert = alerts.find(a => a.type === 'price_target' && a.metadata?.crossType === 'buy');
+  const hasBuyAlert = alerts.some(a => a.type === 'price_target' && a.metadata?.crossType === 'buy');
+  console.log(`  买入信号触发: ${hasBuyAlert}`);
   
   // 注意：由于冷却期，可能不会触发，这是预期行为
   return true;

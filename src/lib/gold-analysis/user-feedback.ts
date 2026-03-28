@@ -4,8 +4,6 @@
 // 目的：收集用户对 AI 信号的反馈，持续优化信号质量和用户满意度
 // ================================================================================
 
-import type { TradingSignal } from './types';
-
 // 反馈配置
 const FEEDBACK_CONFIG = {
   maxHistorySize: 500,          // 最大反馈记录数
@@ -254,14 +252,9 @@ export class UserFeedbackManager {
 
     if (avgPositionFeedback && avgPositionFeedback.length > 10) {
       const highPosition = avgPositionFeedback.filter(p => p.position > 0.7);
-      const lowPosition = avgPositionFeedback.filter(p => p.position < 0.4);
 
       const highPositionAvgProfit = highPosition.length > 0
         ? highPosition.reduce((sum, p) => sum + p.profit, 0) / highPosition.length
-        : 0;
-
-      const lowPositionAvgProfit = lowPosition.length > 0
-        ? lowPosition.reduce((sum, p) => sum + p.profit, 0) / lowPosition.length
         : 0;
 
       if (highPositionAvgProfit < 0 && highPosition.length > 5) {
@@ -419,7 +412,7 @@ export class UserFeedbackManager {
    * 生成反馈 ID
    */
   private generateFeedbackId(): string {
-    return `fb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `fb_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 }
 

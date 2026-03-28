@@ -2,9 +2,7 @@
 // English (US) Translations - Claude Style: Elegant, Minimal, Human
 // ================================================================================
 
-import type { TranslationKey } from './zh-CN';
-
-const translations: Record<TranslationKey, string> = {
+export const translations = {
   // Meta
   'meta.title': 'MaxMin.dev - AI that works for you',
   'meta.description': 'Meet the AI assistant that helps you create, code, and collaborate with confidence.',
@@ -158,6 +156,12 @@ const translations: Record<TranslationKey, string> = {
   'academic.bibtex.year': 'Year',
   'academic.bibtex.volume': 'Vol',
   'academic.bibtex.pages': 'Pages',
+
+  // Research Page
+  'research.title': 'Research',
+  'research.subtitle': 'Milestones that shaped modern AI',
+  'research.badge': 'Timeline',
+  'research.footer': 'From symbolic systems to deep learning, each breakthrough changed how we build and understand intelligence.',
   
   // Trading Page
   'trading.title': 'Trading Dashboard',
@@ -368,6 +372,6 @@ const translations: Record<TranslationKey, string> = {
   'claw.stats.users': 'Users',
   'claw.stats.skills': 'Skills',
   'claw.stats.integrations': 'Integrations',
-};
+} as const;
 
-export { translations };
+export type TranslationKey = keyof typeof translations;

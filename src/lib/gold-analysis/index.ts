@@ -10,7 +10,6 @@ export * from './alert-system';
 
 import { goldDataCollector } from './data-collector';
 import { goldAIEngine } from './ai-engine';
-import { commandSystem } from './command-system';
 import { alertSystem, SGE_CONFIG } from './alert-system';
 import type {
   GoldPriceData,
@@ -19,10 +18,6 @@ import type {
   SystemMetrics,
   BacktestResult,
   SGEAlertConfig,
-  SGESession,
-  Level3AlertEvent,
-  AlertSignal,
-  SignalFusionResult,
 } from './types';
 
 export { SGE_CONFIG };
@@ -309,7 +304,7 @@ export class GoldAnalysisSystem {
   async runBacktest(
     startDate: string,
     endDate: string,
-    initialCapital: number = 100000
+    _initialCapital: number = 100000
   ): Promise<BacktestResult> {
     console.log('[GoldAnalysisSystem] Running backtest...', { startDate, endDate });
 

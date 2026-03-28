@@ -47,10 +47,10 @@ export function initClaudeChat() {
   inputField = document.getElementById('input-field') as HTMLTextAreaElement;
   sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
   sidebarEl = document.getElementById('sidebar');
-  modelBtn = document.getElementById('model-btn');
+  modelBtn = document.getElementById('model-btn') as HTMLButtonElement | null;
   modelDropdown = document.getElementById('model-dropdown');
-  newChatBtn = document.getElementById('new-chat-btn');
-  sidebarToggle = document.getElementById('sidebar-toggle');
+  newChatBtn = document.getElementById('new-chat-btn') as HTMLButtonElement | null;
+  sidebarToggle = document.getElementById('sidebar-toggle') as HTMLButtonElement | null;
   chatListEl = document.getElementById('chat-list');
 
   // Load saved sessions
@@ -83,7 +83,7 @@ function setupEventListeners() {
   // Enable/disable send button
   inputField?.addEventListener('input', () => {
     if (sendBtn) {
-      sendBtn.disabled = !inputField.value.trim();
+      sendBtn.disabled = !(inputField?.value.trim() ?? '');
     }
   });
 
@@ -504,7 +504,7 @@ function loadSessions() {
  * Generate unique ID
  */
 function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
 
 /**

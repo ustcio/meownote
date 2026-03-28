@@ -190,7 +190,6 @@ function setupModelSelector(): void {
 
   const modelBtn = document.getElementById('model-selector-btn');
   const modelDropdown = document.getElementById('model-dropdown');
-  const modelCurrentName = document.getElementById('model-current-name');
 
   console.log('[ModelSelector] Button element:', modelBtn);
   console.log('[ModelSelector] Dropdown element:', modelDropdown);

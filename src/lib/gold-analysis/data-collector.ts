@@ -56,7 +56,7 @@ export class GoldDataCollector {
     
     try {
       // 并行获取多个数据源
-      const [sgeData, internationalData, exchangeRateData] = await Promise.allSettled([
+      const [sgeData, internationalData] = await Promise.allSettled([
         this.fetchSGEData(),
         this.fetchInternationalData(),
         this.fetchExchangeRate(),

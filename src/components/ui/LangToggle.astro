@@ -1,18 +1,16 @@
 ---
-import { languages, getLangFromUrl, getAlternateLangPath } from '@i18n';
+import { getLangFromUrl } from '@i18n';
 
 const currentLang = getLangFromUrl(Astro.url);
-const currentPath = Astro.url.pathname;
-const otherLang: keyof typeof languages = currentLang === 'zh-CN' ? 'en-US' : 'zh-CN';
-const alternatePath = getAlternateLangPath(currentPath, currentLang);
 ---
 
 <button 
   class="lang-toggle" 
-  aria-label="Switch Language"
-  title="Switch Language"
+  aria-label="Language"
+  title="Language"
+  disabled
 >
-  <span class="lang-current">{currentLang === 'zh-CN' ? 'EN' : '中文'}</span>
+  <span class="lang-current">{currentLang === 'zh-CN' ? '中文' : 'EN'}</span>
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
     <circle cx="12" cy="12" r="10"/>
     <line x1="2" y1="12" x2="22" y2="12"/>
@@ -35,14 +33,9 @@ const alternatePath = getAlternateLangPath(currentPath, currentLang);
     border-radius: var(--radius-lg);
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
-    cursor: pointer;
+    cursor: default;
     transition: all var(--duration-fast) var(--ease-default);
-  }
-  
-  .lang-toggle:hover {
-    color: var(--text-primary);
-    background-color: var(--bg-tertiary);
-    border-color: var(--border-hover);
+    opacity: 0.65;
   }
   
   .lang-current {
@@ -50,26 +43,3 @@ const alternatePath = getAlternateLangPath(currentPath, currentLang);
     letter-spacing: 0.02em;
   }
 </style>
-
-<script>
-  document.querySelector('.lang-toggle')?.addEventListener('click', () => {
-    const currentPath = window.location.pathname;
-    const currentLang = currentPath.startsWith('/en-US') ? 'zh-CN' : 'en-US';
-    
-    // Calculate alternate language path
-    let newPath: string;
-    if (currentPath.startsWith('/en-US')) {
-      // Switching from English to Chinese (default)
-      newPath = currentPath.replace('/en-US', '') || '/';
-    } else {
-      // Switching from Chinese to English
-      newPath = '/en-US' + (currentPath === '/' ? '' : currentPath);
-    }
-    
-    // Store preference
-    localStorage.setItem('preferred-lang', currentLang === 'zh-CN' ? 'en-US' : 'zh-CN');
-    
-    // Navigate to alternate language page
-    window.location.href = newPath;
-  });
-</script>

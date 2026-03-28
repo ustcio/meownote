@@ -334,7 +334,7 @@ export async function fetchAllWithTolerance<T>(
     });
   }
 
-  return results.map((result, index) => {
+  return results.map((result) => {
     if (result.status === 'fulfilled') {
       return {
         success: true,

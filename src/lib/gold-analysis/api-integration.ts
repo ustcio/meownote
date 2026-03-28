@@ -2,7 +2,7 @@
 // API 集成示例 - 展示如何在现有系统中使用新的分析模块
 // ================================================================================
 
-import { goldAnalysisSystem, goldDataCollector, goldAIEngine, alertSystem, commandSystem } from './index';
+import { goldAnalysisSystem, alertSystem, commandSystem } from './index';
 import type { GoldPriceData, TradingSignal, AlertConfiguration } from './types';
 
 /**
@@ -59,9 +59,6 @@ export async function getGoldPriceWithAnalysis(): Promise<{
 
   // 获取活跃信号
   const signals = goldAnalysisSystem.getActiveSignals();
-
-  // 获取系统指标
-  const metrics = goldAnalysisSystem.getMetrics();
 
   // 构建分析结果
   let analysis = null;

@@ -1,587 +1,155 @@
 ---
-import { t, getLangFromUrl, type Language } from '@i18n';
-
-const lang = getLangFromUrl(Astro.url);
-
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-const today = new Date();
-const currentYear = today.getFullYear();
-const startDate = new Date(today);
-startDate.setFullYear(startDate.getFullYear() - 1);
-startDate.setDate(startDate.getDate() - startDate.getDay());
-
-const cellSize = 11;
-const cellGap = 3;
-const weekWidth = cellSize + cellGap;
-const leftPadding = 36;
-
-function getMonthLabels() {
-  const labels: { name: string; weekIndex: number }[] = [];
-  let lastMonth = -1;
-  
-  const currentDate = new Date(startDate);
-  let dayIndex = 0;
-  
-  while (currentDate <= today) {
-    const week = Math.floor(dayIndex / 7);
-    const month = currentDate.getMonth();
-    if (month !== lastMonth) {
-      labels.push({ name: months[month], weekIndex: week });
-      lastMonth = month;
-    }
-    currentDate.setDate(currentDate.getDate() + 1);
-    dayIndex++;
-  }
-  
-  return labels;
-}
-
-const monthLabels = getMonthLabels();
-const totalDays = Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-const totalWeeks = Math.ceil(totalDays / 7);
-const gridWidth = totalWeeks * weekWidth;
+const workModes = [
+  {
+    title: 'Draft with context',
+    prompt: 'Turn these meeting notes into a two-paragraph follow-up and a short list of decisions.',
+    detail: 'Good for writing, reframing, and giving rough thinking a cleaner shape.',
+  },
+  {
+    title: 'Plan the next move',
+    prompt: 'Compare three launch options for a small team. Include tradeoffs, risk, and a recommended next step.',
+    detail: 'Useful when the work is ambiguous and the next action is not obvious yet.',
+  },
+  {
+    title: 'Organize the mess',
+    prompt: 'Review these files and propose a naming system, folder structure, and what should be archived.',
+    detail: 'Closer to the “do the work with me” feeling people associate with Claude.',
+  },
+];
 ---
 
-<section class="activity">
-  <div class="activity-container">
-    <div class="contribution-header">
-      <div class="header-label">
-        <span class="label-dot"></span>
-        <span class="label-text">Activity</span>
-      </div>
-      <h2 class="contribution-title">Activity at a glance</h2>
-      <p class="contribution-year">{currentYear}</p>
+<section class="claude-section claude-section--cream">
+  <div class="container">
+    <div class="claude-section-heading">
+      <span class="claude-kicker">Ways to work</span>
+      <h2>From a vague prompt to a useful next step.</h2>
+      <p>
+        The best Claude pages show the shape of the work, not just a list of
+        features. This section does the same with real prompt patterns and a
+        calmer presentation.
+      </p>
     </div>
-    
-    <div class="contribution-graph-wrapper">
-      <div class="contribution-graph" id="contribution-graph" data-year={currentYear}>
-        <div class="contribution-months" style={`width: ${gridWidth}px; margin-left: ${leftPadding}px;`}>
-          {monthLabels.map((label, i) => {
-            const nextLabel = monthLabels[i + 1];
-            const startPos = label.weekIndex * weekWidth;
-            const endPos = nextLabel ? nextLabel.weekIndex * weekWidth : gridWidth;
-            const labelWidth = endPos - startPos - 4;
-            const showLabel = labelWidth > 28;
-            
-            return (
-              <span 
-                class="contribution-month"
-                style={`left: ${startPos}px; width: ${labelWidth}px;`}
-              >
-                {showLabel ? label.name : ''}
-              </span>
-            );
-          })}
+
+    <div class="work-modes">
+      <div class="work-modes__demo claude-editorial-card">
+        <div class="demo-window">
+          <span class="demo-window__label">Prompt</span>
+          <p>{workModes[0].prompt}</p>
         </div>
-        
-        <div class="contribution-body">
-          <div class="contribution-days">
-            {days.map((day, i) => (
-              <span class="contribution-day">{i % 2 === 0 ? day : ''}</span>
-            ))}
-          </div>
-          
-          <div class="contribution-grid" id="contribution-grid">
-            {Array.from({ length: totalWeeks }).map((_, weekIndex) => (
-              <div class="contribution-week">
-                {Array.from({ length: 7 }).map((_, dayIndex) => {
-                  const dayOffset = weekIndex * 7 + dayIndex;
-                  const cellDate = new Date(startDate);
-                  cellDate.setDate(cellDate.getDate() + dayOffset);
-                  
-                  if (cellDate > today) return <div class="contribution-cell empty"></div>;
-                  
-                  const dateStr = cellDate.toISOString().split('T')[0];
-                  const displayDateStr = `${cellDate.getFullYear()}-${String(cellDate.getMonth() + 1).padStart(2, '0')}-${String(cellDate.getDate()).padStart(2, '0')}`;
-                  
-                  return (
-                    <div
-                      class="contribution-cell"
-                      data-date={dateStr}
-                      data-level="0"
-                      title={`${displayDateStr} - 0 visits`}
-                    ></div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
+        <div class="demo-window demo-window--muted">
+          <span class="demo-window__label">Output shape</span>
+          <ul>
+            <li>Two short paragraphs for the email</li>
+            <li>Bullet list of confirmed decisions</li>
+            <li>Three questions to unblock next steps</li>
+          </ul>
         </div>
       </div>
-    </div>
-    
-    <div class="contribution-legend">
-      <span class="legend-text">Less</span>
-      <div class="legend-cells">
-        {[0, 1, 2, 3, 4].map((level) => (
-          <div class="legend-cell" data-level={level}></div>
+
+      <div class="work-modes__list">
+        {workModes.map((mode) => (
+          <article class="work-mode">
+            <h3>{mode.title}</h3>
+            <p class="work-mode__prompt">{mode.prompt}</p>
+            <p>{mode.detail}</p>
+          </article>
         ))}
-      </div>
-      <span class="legend-text">More</span>
-    </div>
-    
-    <div class="stats-grid" id="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <circle cx="12" cy="12" r="3" fill="currentColor"/>
-          </svg>
-        </div>
-        <div class="stat-value" id="stat-online">--</div>
-        <div class="stat-label">{t('stats.online', lang)}</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon today">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-            <line x1="16" y1="2" x2="16" y2="6"/>
-            <line x1="8" y1="2" x2="8" y2="6"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
-          </svg>
-        </div>
-        <div class="stat-value" id="stat-today">--</div>
-        <div class="stat-label">{t('stats.today', lang)}</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon total">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-        </div>
-        <div class="stat-value" id="stat-total">--</div>
-        <div class="stat-label">{t('stats.total', lang)}</div>
       </div>
     </div>
   </div>
 </section>
 
 <style>
-  .activity {
-    background: var(--bg-secondary);
-    padding: var(--space-12) var(--space-4);
-  }
-
-  @media (min-width: 768px) {
-    .activity {
-      padding: var(--space-16) var(--space-8);
-    }
-  }
-
-  .activity-container {
-    max-width: var(--container-xl);
-    margin: 0 auto;
-  }
-
-  .contribution-header {
-    text-align: center;
-    margin-bottom: var(--space-8);
-  }
-
-  .header-label {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-1) var(--space-3);
-    background: var(--color-primary-light);
-    border-radius: var(--radius-full);
-    margin-bottom: var(--space-3);
-  }
-
-  .label-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--color-primary);
-    border-radius: 50%;
-  }
-
-  .label-text {
-    font-family: var(--font-sans);
-    font-size: var(--text-xs);
-    font-weight: 500;
-    color: var(--color-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .contribution-title {
-    font-family: var(--font-display);
-    font-size: clamp(1.5rem, 3vw, 2rem);
-    font-weight: var(--font-normal);
-    color: var(--text-primary);
-    margin-bottom: var(--space-1);
-  }
-
-  .contribution-year {
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-  }
-
-  .contribution-graph-wrapper {
-    display: flex;
-    justify-content: flex-start;
-    overflow-x: auto;
-    margin-bottom: var(--space-4);
-    padding-bottom: var(--space-2);
-    padding-left: var(--space-2);
-    padding-right: var(--space-2);
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-secondary) transparent;
-  }
-
-  .contribution-graph-wrapper::-webkit-scrollbar {
-    height: 6px;
-  }
-
-  .contribution-graph-wrapper::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .contribution-graph-wrapper::-webkit-scrollbar-thumb {
-    background: var(--border-secondary);
-    border-radius: 3px;
-  }
-
-  @media (min-width: 768px) {
-    .contribution-graph-wrapper {
-      justify-content: center;
-      padding-left: 0;
-      padding-right: 0;
-    }
-  }
-
-  .contribution-graph {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    min-width: max-content;
-  }
-
-  .contribution-months {
-    position: relative;
-    height: 16px;
-    margin-bottom: var(--space-2);
-  }
-
-  .contribution-month {
-    position: absolute;
-    font-family: var(--font-sans);
-    font-size: 10px;
-    color: var(--text-tertiary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: clip;
-    text-align: left;
-  }
-
-  .contribution-body {
-    display: flex;
-    gap: var(--space-2);
-  }
-
-  .contribution-days {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    width: 32px;
-  }
-
-  .contribution-day {
-    font-family: var(--font-sans);
-    font-size: 10px;
-    color: var(--text-tertiary);
-    height: 11px;
-    line-height: 11px;
-  }
-
-  .contribution-grid {
-    display: flex;
-    gap: 3px;
-  }
-
-  .contribution-week {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .contribution-cell {
-    width: 11px;
-    height: 11px;
-    border-radius: 2px;
-    background-color: var(--contribution-0);
-    cursor: pointer;
-    transition: transform var(--duration-fast) var(--ease-default);
-  }
-
-  .contribution-cell.empty {
-    background-color: transparent;
-    cursor: default;
-  }
-
-  .contribution-cell[data-level="1"] { background-color: var(--contribution-1); }
-  .contribution-cell[data-level="2"] { background-color: var(--contribution-2); }
-  .contribution-cell[data-level="3"] { background-color: var(--contribution-3); }
-  .contribution-cell[data-level="4"] { background-color: var(--contribution-4); }
-
-  .contribution-cell:hover {
-    transform: scale(1.2);
-  }
-
-  .contribution-legend {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    margin-bottom: var(--space-10);
-  }
-
-  .legend-text {
-    font-family: var(--font-sans);
-    font-size: 10px;
-    color: var(--text-tertiary);
-  }
-
-  .legend-cells {
-    display: flex;
-    gap: 3px;
-  }
-
-  .legend-cell {
-    width: 11px;
-    height: 11px;
-    border-radius: 2px;
-    background-color: var(--contribution-0);
-  }
-
-  .legend-cell[data-level="1"] { background-color: var(--contribution-1); }
-  .legend-cell[data-level="2"] { background-color: var(--contribution-2); }
-  .legend-cell[data-level="3"] { background-color: var(--contribution-3); }
-  .legend-cell[data-level="4"] { background-color: var(--contribution-4); }
-
-  .stats-grid {
+  .work-modes {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-3);
-    max-width: 480px;
-    margin: 0 auto;
+    gap: 1.5rem;
+    align-items: start;
   }
 
-  @media (max-width: 359px) {
-    .stats-grid {
-      grid-template-columns: 1fr;
-      gap: var(--space-2);
-      max-width: 200px;
+  @media (min-width: 1100px) {
+    .work-modes {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap: 2rem;
     }
   }
 
-  @media (min-width: 640px) {
-    .stats-grid {
-      gap: var(--space-4);
-      max-width: 520px;
-    }
+  .work-modes__demo {
+    padding: 1.4rem;
+    display: grid;
+    gap: 1rem;
   }
 
-  .stat-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-2);
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-lg);
-    transition: border-color var(--duration-normal) var(--ease-default);
-    -webkit-tap-highlight-color: transparent;
-    min-height: 44px;
+  .demo-window {
+    padding: 1.2rem;
+    border-radius: 1.15rem;
+    background: rgba(255, 253, 249, 0.92);
+    border: 1px solid rgba(71, 57, 44, 0.08);
   }
 
-  @media (min-width: 480px) {
-    .stat-card {
-      padding: var(--space-4) var(--space-3);
-    }
+  .demo-window--muted {
+    background: rgba(242, 236, 227, 0.72);
   }
 
-  .stat-card:hover {
-    border-color: var(--color-primary);
+  .demo-window__label {
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
   }
 
-  .stat-icon {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--color-primary-light);
-    border-radius: var(--radius-md);
-    color: var(--color-primary);
-  }
-
-  .stat-icon.today {
-    background: rgba(91, 126, 106, 0.1);
-    color: #5B7E6A;
-  }
-
-  .stat-icon.total {
-    background: rgba(74, 94, 138, 0.1);
-    color: #4A5E8A;
-  }
-
-  .stat-value {
-    font-family: var(--font-number);
-    font-size: var(--text-xl);
-    font-weight: var(--font-normal);
-    color: var(--text-primary);
-    letter-spacing: -0.02em;
-  }
-
-  @media (min-width: 768px) {
-    .stat-value {
-      font-size: var(--text-2xl);
-    }
-  }
-
-  .stat-label {
-    font-size: var(--text-xs);
+  .demo-window p,
+  .demo-window li {
+    font-size: 0.98rem;
     color: var(--text-secondary);
-    font-weight: 400;
+  }
+
+  .demo-window ul {
+    list-style: none;
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .demo-window li {
+    position: relative;
+    padding-left: 1rem;
+  }
+
+  .demo-window li::before {
+    content: '';
+    position: absolute;
+    top: 0.62rem;
+    left: 0;
+    width: 0.32rem;
+    height: 0.32rem;
+    border-radius: 999px;
+    background: var(--color-primary);
+  }
+
+  .work-modes__list {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .work-mode {
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--border-primary);
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .work-mode:first-child {
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .work-mode h3 {
+    font-size: 1.8rem;
+  }
+
+  .work-mode__prompt {
+    color: var(--text-primary);
+    font-size: 1rem;
   }
 </style>
-
-<script>
-  const API_BASE = 'https://api.ustc.dev';
-  const REFRESH_INTERVAL = 60000;
-  
-  async function fetchHeatmapData() {
-    try {
-      const graph = document.getElementById('contribution-graph');
-      const year = graph?.getAttribute('data-year') || new Date().getFullYear();
-      
-      const response = await fetch(`${API_BASE}/stats/heatmap?year=${year}`);
-      
-      if (!response.ok) return;
-      
-      const result = await response.json();
-      
-      let heatmapData: Record<string, number> = {};
-      let maxCount = 0;
-      
-      if (result.data && typeof result.data === 'object') {
-        heatmapData = result.data;
-        maxCount = result.maxCount || Math.max(...Object.values(heatmapData), 1);
-      } else if (typeof result === 'object' && Object.keys(result).length > 0) {
-        heatmapData = result;
-        maxCount = Math.max(...Object.values(heatmapData), 1);
-      }
-      
-      if (Object.keys(heatmapData).length > 0) {
-        updateHeatmap(heatmapData, maxCount, 'visits');
-      }
-    } catch (error) {
-      // Silent fail
-    }
-  }
-  
-  function updateHeatmap(data: Record<string, number>, maxCount: number, visitsText: string) {
-    const cells = document.querySelectorAll('.contribution-cell[data-date]');
-    const cellData: { cell: Element; count: number }[] = [];
-    
-    cells.forEach(cell => {
-      const date = cell.getAttribute('data-date');
-      if (date && data[date]) {
-        cellData.push({ cell, count: data[date] });
-      }
-    });
-    
-    if (cellData.length === 0) return;
-    
-    const nonZeroCounts = cellData.map(d => d.count).filter(c => c > 0).sort((a, b) => a - b);
-    const thresholds = calculateQuantileThresholds(nonZeroCounts);
-    
-    cellData.forEach(({ cell, count }) => {
-      const level = calculateLevel(count, thresholds);
-      cell.setAttribute('data-level', String(level));
-      
-      const existingTitle = cell.getAttribute('title') || '';
-      const baseTitle = existingTitle.split(' - ')[0];
-      cell.setAttribute('title', `${baseTitle} - ${count} ${visitsText}`);
-    });
-  }
-  
-  function calculateQuantileThresholds(sortedCounts: number[]): number[] {
-    if (sortedCounts.length === 0) return [];
-    
-    const len = sortedCounts.length;
-    const percentiles = [0.2, 0.4, 0.6, 0.8, 1.0];
-    
-    return percentiles.map(p => {
-      const index = Math.min(Math.floor(p * len), len - 1);
-      return sortedCounts[index];
-    });
-  }
-  
-  function calculateLevel(count: number, thresholds: number[]): number {
-    if (count === 0) return 0;
-    if (thresholds.length === 0) return 1;
-    
-    for (let i = 0; i < thresholds.length; i++) {
-      if (count <= thresholds[i]) {
-        return Math.min(i + 1, 4);
-      }
-    }
-    
-    return 4;
-  }
-  
-  async function recordVisit() {
-    try {
-      await fetch(`${API_BASE}/stats/visit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ page: window.location.pathname })
-      });
-    } catch (error) {
-      // Silent fail
-    }
-  }
-  
-  async function fetchStats() {
-    try {
-      await recordVisit();
-      
-      const response = await fetch(`${API_BASE}/stats/visitor`);
-      const result = await response.json();
-      
-      if (result.success) {
-        updateStatValue('stat-online', result.online || 0);
-        updateStatValue('stat-total', result.total || 0);
-        updateStatValue('stat-today', result.today || 0);
-      }
-    } catch (error) {
-      // Silent fail
-    }
-  }
-  
-  function updateStatValue(id: string, value: number) {
-    const el = document.getElementById(id);
-    if (el) {
-      el.textContent = value.toLocaleString();
-    }
-  }
-  
-  document.addEventListener('DOMContentLoaded', () => {
-    fetchHeatmapData();
-    fetchStats();
-    setInterval(fetchStats, REFRESH_INTERVAL);
-  });
-</script>

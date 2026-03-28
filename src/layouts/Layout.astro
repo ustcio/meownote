@@ -54,14 +54,11 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2" />
 
     <!-- Theme Color -->
-    <meta name="theme-color" content="#FAF8F5" />
+    <meta name="theme-color" content="#F8F5EF" />
 
     <!-- Resource Hints for Performance -->
     <link rel="preconnect" href="https://api.ustc.dev" crossorigin />
     <link rel="dns-prefetch" href="https://api.ustc.dev" />
-    
-    <!-- Preload critical assets -->
-    <link rel="modulepreload" href="/_assets/" />
     
     <!-- Performance optimizations -->
     <meta name="format-detection" content="telephone=no" />
@@ -70,14 +67,14 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <style>
       :root:not([data-theme]),
       [data-theme="light"] {
-        --bg-primary: #FAFAFA;
-        --text-primary: #1A1A1A;
+        --bg-primary: #F8F5EF;
+        --text-primary: #171412;
         color-scheme: light;
       }
 
       [data-theme="dark"] {
-        --bg-primary: #0D0D0D;
-        --text-primary: #E8E8E8;
+        --bg-primary: #13100D;
+        --text-primary: #F3EEE7;
         color-scheme: dark;
       }
     </style>

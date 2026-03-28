@@ -40,7 +40,7 @@ const { class: className } = Astro.props;
 <script>
   class ParticleSystem {
     canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
+    ctx!: CanvasRenderingContext2D;
     particles: any[] = [];
     mouseX: number = 0;
     mouseY: number = 0;

@@ -8,7 +8,6 @@ import Layout from '@layouts/Layout.astro';
 >
   <section class="workspace-page">
     <div class="workspace-container">
-      <!-- Header -->
       <header class="workspace-header">
         <div class="header-top">
           <h1 class="page-title">Workspace</h1>
@@ -19,7 +18,6 @@ import Layout from '@layouts/Layout.astro';
         <p class="page-subtitle">Your notes and files, organized in one place.</p>
       </header>
 
-      <!-- Toolbar -->
       <div class="toolbar">
         <div class="toolbar-left">
           <div class="search-box">
@@ -67,7 +65,6 @@ import Layout from '@layouts/Layout.astro';
         </div>
       </div>
 
-      <!-- Skeleton Loading -->
       <div class="skeleton-grid" id="skeleton-grid">
         <div class="skeleton-card"></div>
         <div class="skeleton-card"></div>
@@ -77,7 +74,6 @@ import Layout from '@layouts/Layout.astro';
         <div class="skeleton-card"></div>
       </div>
 
-      <!-- Empty State -->
       <div class="empty-state" id="empty-state">
         <div class="empty-icon">
           <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
@@ -96,14 +92,12 @@ import Layout from '@layouts/Layout.astro';
         </button>
       </div>
 
-      <!-- Files Grid -->
       <div class="files-grid" id="files-grid"></div>
     </div>
 
     <input type="file" id="file-upload" hidden multiple accept=".txt,.md,.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.zip,.rar" />
   </section>
 
-  <!-- Clipboard Modal -->
   <div class="modal" id="clipboard-modal">
     <div class="modal-backdrop" id="clipboard-backdrop"></div>
     <div class="modal-content">
@@ -133,7 +127,6 @@ import Layout from '@layouts/Layout.astro';
     </div>
   </div>
 
-  <!-- Delete Modal -->
   <div class="modal" id="delete-modal">
     <div class="modal-backdrop" id="delete-backdrop"></div>
     <div class="modal-content modal-sm">
@@ -156,42 +149,14 @@ import Layout from '@layouts/Layout.astro';
     </div>
   </div>
 
-  <!-- Toast -->
   <div class="toast" id="toast"></div>
 </Layout>
 
 <style>
-  :root {
-    --bg: #faf8f5;
-    --bg-secondary: #ffffff;
-    --fg: #1a1a1a;
-    --fg-muted: #6b6b6b;
-    --border: #e5e5e5;
-    --border-hover: #d0d0d0;
-    --accent: #0066ff;
-    --accent-hover: #0052cc;
-    --danger: #ff3b30;
-    --danger-hover: #e6352b;
-    --radius: 10px;
-    --radius-lg: 14px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
-    --shadow-hover: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-    --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
-  }
-
-  [data-theme="dark"] {
-    --bg: #0a0a0a;
-    --bg-secondary: #141414;
-    --fg: #fafafa;
-    --fg-muted: #8a8a8a;
-    --border: #262626;
-    --border-hover: #404040;
-  }
-
   .workspace-page {
     min-height: 100vh;
-    background: var(--bg);
-    padding: calc(var(--header-height) + 32px) 24px 80px;
+    background: var(--bg-primary);
+    padding: calc(var(--header-height, 64px) + 32px) 24px 80px;
   }
 
   .workspace-container {
@@ -199,7 +164,6 @@ import Layout from '@layouts/Layout.astro';
     margin: 0 auto;
   }
 
-  /* Header */
   .workspace-header {
     margin-bottom: 32px;
   }
@@ -212,23 +176,25 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .page-title {
+    font-family: var(--font-display);
     font-size: 28px;
-    font-weight: 600;
-    color: var(--fg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
     letter-spacing: -0.02em;
   }
 
   .header-stats {
-    font-size: 14px;
-    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
   }
 
   .page-subtitle {
+    font-family: var(--font-sans);
     font-size: 15px;
-    color: var(--fg-muted);
+    color: var(--text-secondary);
   }
 
-  /* Toolbar */
   .toolbar {
     display: flex;
     align-items: center;
@@ -238,7 +204,8 @@ import Layout from '@layouts/Layout.astro';
     flex-wrap: wrap;
   }
 
-  .toolbar-left, .toolbar-right {
+  .toolbar-left,
+  .toolbar-right {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -249,37 +216,37 @@ import Layout from '@layouts/Layout.astro';
     align-items: center;
     gap: 10px;
     padding: 10px 14px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    background: var(--card-bg);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
     min-width: 240px;
-    transition: all 0.15s ease;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .search-box:focus-within {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
   }
 
   .search-box svg {
-    color: var(--fg-muted);
+    color: var(--text-tertiary);
     flex-shrink: 0;
   }
 
   .search-box input {
     border: none;
     background: transparent;
-    font-size: 14px;
-    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
     width: 100%;
     outline: none;
   }
 
   .search-box input::placeholder {
-    color: var(--fg-muted);
+    color: var(--text-tertiary);
   }
 
-  /* Sort Dropdown */
   .sort-dropdown {
     position: relative;
   }
@@ -289,26 +256,27 @@ import Layout from '@layouts/Layout.astro';
     align-items: center;
     gap: 6px;
     padding: 10px 14px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: 14px;
-    color: var(--fg);
+    background: var(--card-bg);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .sort-btn:hover {
-    border-color: var(--border-hover);
+    border-color: var(--border-secondary);
   }
 
   .sort-menu {
     position: absolute;
     top: calc(100% + 4px);
     left: 0;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    background: var(--card-bg);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
     box-shadow: var(--shadow-lg);
     min-width: 120px;
     padding: 4px;
@@ -327,40 +295,41 @@ import Layout from '@layouts/Layout.astro';
     background: transparent;
     border: none;
     border-radius: 6px;
-    font-size: 14px;
-    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
     text-align: left;
     cursor: pointer;
     transition: background 0.1s ease;
   }
 
   .sort-option:hover {
-    background: var(--border);
+    background: var(--bg-elevated);
   }
 
   .sort-option.active {
-    background: var(--accent);
+    background: var(--color-primary);
     color: white;
   }
 
-  /* Buttons */
   .btn-primary {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 10px 16px;
-    background: var(--accent);
-    color: white;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
     border: none;
-    border-radius: var(--radius);
-    font-size: 14px;
-    font-weight: 500;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .btn-primary:hover {
-    background: var(--accent-hover);
+    background: var(--btn-primary-hover);
   }
 
   .btn-primary.btn-lg {
@@ -373,19 +342,20 @@ import Layout from '@layouts/Layout.astro';
     align-items: center;
     gap: 6px;
     padding: 10px 16px;
-    background: var(--bg-secondary);
-    color: var(--fg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: 14px;
-    font-weight: 500;
+    background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+    border: 1px solid var(--btn-secondary-border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .btn-secondary:hover {
     border-color: var(--border-hover);
-    background: var(--bg);
+    background: var(--btn-secondary-hover-bg);
   }
 
   .btn-icon {
@@ -394,17 +364,17 @@ import Layout from '@layouts/Layout.astro';
     justify-content: center;
     width: 40px;
     height: 40px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--fg-muted);
+    background: var(--card-bg);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .btn-icon:hover {
-    border-color: var(--border-hover);
-    color: var(--fg);
+    border-color: var(--border-secondary);
+    color: var(--text-primary);
   }
 
   .btn-icon-sm {
@@ -416,14 +386,14 @@ import Layout from '@layouts/Layout.astro';
     background: transparent;
     border: none;
     border-radius: 8px;
-    color: var(--fg-muted);
+    color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .btn-icon-sm:hover {
-    background: var(--border);
-    color: var(--fg);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
   }
 
   .btn-danger {
@@ -431,21 +401,21 @@ import Layout from '@layouts/Layout.astro';
     align-items: center;
     justify-content: center;
     padding: 10px 16px;
-    background: var(--danger);
+    background: var(--color-danger);
     color: white;
     border: none;
-    border-radius: var(--radius);
-    font-size: 14px;
-    font-weight: 500;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .btn-danger:hover {
-    background: var(--danger-hover);
+    background: var(--color-danger-hover);
   }
 
-  /* Skeleton */
   .skeleton-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -454,7 +424,7 @@ import Layout from '@layouts/Layout.astro';
 
   .skeleton-card {
     height: 120px;
-    background: linear-gradient(90deg, var(--border) 0%, var(--bg-secondary) 50%, var(--border) 100%);
+    background: linear-gradient(90deg, var(--border-primary) 0%, var(--card-bg) 50%, var(--border-primary) 100%);
     background-size: 200% 100%;
     border-radius: var(--radius-lg);
     animation: shimmer 1.5s infinite;
@@ -465,7 +435,6 @@ import Layout from '@layouts/Layout.astro';
     100% { background-position: -200% 0; }
   }
 
-  /* Empty State */
   .empty-state {
     display: none;
     flex-direction: column;
@@ -485,47 +454,47 @@ import Layout from '@layouts/Layout.astro';
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--border);
+    background: var(--bg-elevated);
     border-radius: 20px;
     margin-bottom: 24px;
-    color: var(--fg-muted);
+    color: var(--text-tertiary);
   }
 
   .empty-state h3 {
+    font-family: var(--font-display);
     font-size: 18px;
-    font-weight: 600;
-    color: var(--fg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
     margin-bottom: 8px;
   }
 
   .empty-state p {
-    font-size: 14px;
-    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
     margin-bottom: 24px;
     max-width: 280px;
   }
 
-  /* Files Grid */
   .files-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 16px;
   }
 
-  /* File Card */
   .file-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     border-radius: var(--radius-lg);
     padding: 20px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--duration-normal) var(--ease-default);
     position: relative;
   }
 
   .file-card:hover {
-    border-color: var(--border-hover);
-    box-shadow: var(--shadow-hover);
+    border-color: var(--card-border-hover);
+    box-shadow: var(--card-shadow-hover);
     transform: translateY(-2px);
   }
 
@@ -543,15 +512,13 @@ import Layout from '@layouts/Layout.astro';
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background: rgba(0, 102, 255, 0.08);
-    color: var(--accent);
   }
 
-  .file-icon.text { background: rgba(0, 102, 255, 0.08); color: var(--accent); }
-  .file-icon.document { background: rgba(128, 0, 255, 0.08); color: #8000ff; }
-  .file-icon.image { background: rgba(0, 200, 83, 0.08); color: #00c853; }
-  .file-icon.archive { background: rgba(255, 145, 0, 0.08); color: #ff9100; }
-  .file-icon.clipboard { background: rgba(255, 59, 48, 0.08); color: var(--danger); }
+  .file-icon.text { background: var(--color-primary-light); color: var(--color-primary); }
+  .file-icon.document { background: rgba(74, 94, 138, 0.1); color: #4A5E8A; }
+  .file-icon.image { background: var(--color-success-light); color: var(--color-success); }
+  .file-icon.archive { background: rgba(217, 119, 87, 0.1); color: var(--color-primary); }
+  .file-icon.clipboard { background: var(--color-danger-light); color: var(--color-danger); }
 
   .file-info {
     flex: 1;
@@ -559,9 +526,10 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .file-title {
+    font-family: var(--font-display);
     font-size: 15px;
-    font-weight: 500;
-    color: var(--fg);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -569,30 +537,31 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .file-card:hover .file-title {
-    color: var(--accent);
+    color: var(--color-primary);
   }
 
   .file-meta {
+    font-family: var(--font-sans);
     font-size: 13px;
-    color: var(--fg-muted);
+    color: var(--text-tertiary);
     display: flex;
     align-items: center;
     gap: 6px;
   }
 
   .file-preview {
+    font-family: var(--font-sans);
     font-size: 13px;
-    color: var(--fg-muted);
+    color: var(--text-secondary);
     line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     padding-top: 12px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--border-primary);
   }
 
-  /* Delete Button */
   .file-delete {
     position: absolute;
     top: 12px;
@@ -602,13 +571,13 @@ import Layout from '@layouts/Layout.astro';
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
+    background: var(--card-bg);
+    border: 1px solid var(--border-primary);
     border-radius: 8px;
-    color: var(--fg-muted);
+    color: var(--text-tertiary);
     cursor: pointer;
     opacity: 0;
-    transition: all 0.15s ease;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .file-card:hover .file-delete {
@@ -616,12 +585,11 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .file-delete:hover {
-    background: var(--danger);
-    border-color: var(--danger);
+    background: var(--color-danger);
+    border-color: var(--color-danger);
     color: white;
   }
 
-  /* Modal */
   .modal {
     display: none;
     position: fixed;
@@ -645,9 +613,9 @@ import Layout from '@layouts/Layout.astro';
 
   .modal-content {
     position: relative;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
     width: 100%;
     max-width: 420px;
     box-shadow: var(--shadow-lg);
@@ -668,13 +636,14 @@ import Layout from '@layouts/Layout.astro';
     align-items: center;
     justify-content: space-between;
     padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-primary);
   }
 
   .modal-header h3 {
+    font-family: var(--font-display);
     font-size: 16px;
-    font-weight: 600;
-    color: var(--fg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
   }
 
   .modal-body {
@@ -682,8 +651,9 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .modal-body p {
-    font-size: 14px;
-    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
     margin-bottom: 20px;
     line-height: 1.5;
   }
@@ -697,19 +667,24 @@ import Layout from '@layouts/Layout.astro';
   .input-field {
     width: 100%;
     padding: 12px 14px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: 14px;
-    color: var(--fg);
-    transition: all 0.15s ease;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    transition: all var(--duration-fast) var(--ease-default);
     margin-bottom: 12px;
   }
 
   .input-field:focus {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+  }
+
+  .input-field::placeholder {
+    color: var(--text-tertiary);
   }
 
   .input-field.textarea {
@@ -718,21 +693,21 @@ import Layout from '@layouts/Layout.astro';
     line-height: 1.5;
   }
 
-  /* Toast */
   .toast {
     position: fixed;
     bottom: 24px;
     left: 50%;
     transform: translateX(-50%) translateY(20px);
-    background: var(--fg);
-    color: var(--bg);
+    background: var(--text-primary);
+    color: var(--text-inverse);
     padding: 12px 20px;
-    border-radius: var(--radius);
-    font-size: 14px;
-    font-weight: 500;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     z-index: 1001;
     opacity: 0;
-    transition: all 0.2s ease;
+    transition: all var(--duration-normal) var(--ease-default);
     box-shadow: var(--shadow-lg);
     pointer-events: none;
   }
@@ -743,19 +718,18 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .toast.success {
-    background: #00c853;
+    background: var(--color-success);
     color: white;
   }
 
   .toast.error {
-    background: var(--danger);
+    background: var(--color-danger);
     color: white;
   }
 
-  /* Mobile */
   @media (max-width: 640px) {
     .workspace-page {
-      padding: calc(var(--header-height) + 24px) 16px 60px;
+      padding: calc(var(--header-height, 64px) + 24px) 16px 60px;
     }
 
     .toolbar {
@@ -763,7 +737,8 @@ import Layout from '@layouts/Layout.astro';
       align-items: stretch;
     }
 
-    .toolbar-left, .toolbar-right {
+    .toolbar-left,
+    .toolbar-right {
       flex-wrap: wrap;
     }
 
@@ -775,27 +750,21 @@ import Layout from '@layouts/Layout.astro';
     .files-grid {
       grid-template-columns: 1fr;
     }
-
-    .btn-primary span {
-      display: inline;
-    }
   }
 </style>
 
-<script>
-  const API_BASE = 'https://api.ustc.dev';
-
-  let files: any[] = [];
+<script is:inline define:vars={{ API_BASE: 'https://api.ustc.dev' }}>
+  let files = [];
   let sortBy = 'updated_at';
   let searchQuery = '';
-  let deleteTargetId: string | null = null;
+  let deleteTargetId = null;
 
   const filesGrid = document.getElementById('files-grid');
   const skeletonGrid = document.getElementById('skeleton-grid');
   const emptyState = document.getElementById('empty-state');
   const filesCount = document.getElementById('files-count');
-  const searchInput = document.getElementById('search-input') as HTMLInputElement;
-  const fileUpload = document.getElementById('file-upload') as HTMLInputElement;
+  const searchInput = document.getElementById('search-input');
+  const fileUpload = document.getElementById('file-upload');
   const newNoteBtn = document.getElementById('new-note-btn');
   const uploadBtn = document.getElementById('upload-btn');
   const clipboardBtn = document.getElementById('clipboard-btn');
@@ -803,13 +772,12 @@ import Layout from '@layouts/Layout.astro';
   const sortDropdown = document.getElementById('sort-dropdown');
   const sortBtn = document.getElementById('sort-btn');
   const sortLabel = document.getElementById('sort-label');
-  const sortMenu = document.getElementById('sort-menu');
 
   const clipboardModal = document.getElementById('clipboard-modal');
   const clipboardBackdrop = document.getElementById('clipboard-backdrop');
   const clipboardClose = document.getElementById('clipboard-close');
-  const clipboardTitle = document.getElementById('clipboard-title') as HTMLInputElement;
-  const clipboardContent = document.getElementById('clipboard-content') as HTMLTextAreaElement;
+  const clipboardTitle = document.getElementById('clipboard-title');
+  const clipboardContent = document.getElementById('clipboard-content');
   const pasteBtn = document.getElementById('paste-btn');
   const saveClipboardBtn = document.getElementById('save-clipboard-btn');
 
@@ -819,22 +787,40 @@ import Layout from '@layouts/Layout.astro';
   const deleteCancel = document.getElementById('delete-cancel');
   const deleteConfirm = document.getElementById('delete-confirm');
 
-  const fileTypeConfig: Record<string, { icon: string; type: string }> = {
-    'txt': { icon: 'text', type: 'text' },
-    'md': { icon: 'text', type: 'text' },
-    'pdf': { icon: 'document', type: 'document' },
-    'doc': { icon: 'document', type: 'document' },
-    'docx': { icon: 'document', type: 'document' },
-    'xls': { icon: 'document', type: 'document' },
-    'xlsx': { icon: 'document', type: 'document' },
-    'png': { icon: 'image', type: 'image' },
-    'jpg': { icon: 'image', type: 'image' },
-    'jpeg': { icon: 'image', type: 'image' },
-    'gif': { icon: 'image', type: 'image' },
-    'zip': { icon: 'archive', type: 'archive' },
-    'rar': { icon: 'archive', type: 'archive' },
-    'clipboard': { icon: 'clipboard', type: 'clipboard' },
+  const fileTypeConfig = {
+    txt: { icon: 'text', type: 'text' },
+    md: { icon: 'text', type: 'text' },
+    pdf: { icon: 'document', type: 'document' },
+    doc: { icon: 'document', type: 'document' },
+    docx: { icon: 'document', type: 'document' },
+    xls: { icon: 'document', type: 'document' },
+    xlsx: { icon: 'document', type: 'document' },
+    png: { icon: 'image', type: 'image' },
+    jpg: { icon: 'image', type: 'image' },
+    jpeg: { icon: 'image', type: 'image' },
+    gif: { icon: 'image', type: 'image' },
+    zip: { icon: 'archive', type: 'archive' },
+    rar: { icon: 'archive', type: 'archive' },
+    clipboard: { icon: 'clipboard', type: 'clipboard' },
   };
+
+  async function apiRequest(path, options = {}) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    try {
+      const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+      const response = await fetch(`${API_BASE}${path}`, { ...options, headers, signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || `HTTP ${response.status}`);
+      }
+      return response.json();
+    } catch (e) {
+      clearTimeout(timeoutId);
+      throw e;
+    }
+  }
 
   async function init() {
     await loadFiles();
@@ -843,13 +829,10 @@ import Layout from '@layouts/Layout.astro';
   }
 
   function initSortDropdown() {
-    sortBtn?.addEventListener('click', () => {
-      sortDropdown?.classList.toggle('open');
-    });
-
-    document.querySelectorAll('.sort-option').forEach(opt => {
+    sortBtn?.addEventListener('click', () => sortDropdown?.classList.toggle('open'));
+    document.querySelectorAll('.sort-option').forEach((opt) => {
       opt.addEventListener('click', () => {
-        document.querySelectorAll('.sort-option').forEach(o => o.classList.remove('active'));
+        document.querySelectorAll('.sort-option').forEach((o) => o.classList.remove('active'));
         opt.classList.add('active');
         sortBy = opt.getAttribute('data-sort') || 'updated_at';
         if (sortLabel) sortLabel.textContent = opt.textContent;
@@ -857,39 +840,39 @@ import Layout from '@layouts/Layout.astro';
         loadFiles();
       });
     });
-
     document.addEventListener('click', (e) => {
-      if (!sortDropdown?.contains(e.target as Node)) {
-        sortDropdown?.classList.remove('open');
-      }
+      if (!sortDropdown?.contains(e.target)) sortDropdown?.classList.remove('open');
     });
   }
 
   function initModals() {
-    clipboardBtn?.addEventListener('click', () => openClipboardModal());
-    clipboardBackdrop?.addEventListener('click', () => closeClipboardModal());
-    clipboardClose?.addEventListener('click', () => closeClipboardModal());
+    clipboardBtn?.addEventListener('click', () => clipboardModal?.classList.add('open'));
+    clipboardBackdrop?.addEventListener('click', () => clipboardModal?.classList.remove('open'));
+    clipboardClose?.addEventListener('click', () => clipboardModal?.classList.remove('open'));
     pasteBtn?.addEventListener('click', pasteFromClipboard);
     saveClipboardBtn?.addEventListener('click', saveClipboard);
 
-    deleteBackdrop?.addEventListener('click', () => closeDeleteModal());
-    deleteClose?.addEventListener('click', () => closeDeleteModal());
-    deleteCancel?.addEventListener('click', () => closeDeleteModal());
+    deleteBackdrop?.addEventListener('click', () => deleteModal?.classList.remove('open'));
+    deleteClose?.addEventListener('click', () => deleteModal?.classList.remove('open'));
+    deleteCancel?.addEventListener('click', () => deleteModal?.classList.remove('open'));
     deleteConfirm?.addEventListener('click', confirmDelete);
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        closeClipboardModal();
-        closeDeleteModal();
+        clipboardModal?.classList.remove('open');
+        deleteModal?.classList.remove('open');
       }
     });
   }
 
+  let searchDebounce = null;
+
   async function loadFiles() {
     showLoading();
     try {
-      const response = await fetch(`${API_BASE}/api/workspace?sortBy=${sortBy}&order=desc`);
-      const result = await response.json();
+      const params = [`sortBy=${sortBy}`, 'order=desc'];
+      if (searchQuery) params.push(`search=${encodeURIComponent(searchQuery)}`);
+      const result = await apiRequest(`/api/workspace?${params.join('&')}`);
       files = result.data || [];
       renderFiles();
     } catch (error) {
@@ -900,39 +883,36 @@ import Layout from '@layouts/Layout.astro';
     }
   }
 
-  function getTimeAgo(date: Date): string {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m`;
-    if (hours < 24) return `${hours}h`;
-    if (days < 7) return `${days}d`;
+  function getTimeAgo(date) {
+    const diff = Date.now() - date.getTime();
+    const m = Math.floor(diff / 60000);
+    const h = Math.floor(diff / 3600000);
+    const d = Math.floor(diff / 86400000);
+    if (m < 1) return 'Just now';
+    if (m < 60) return m + 'm';
+    if (h < 24) return h + 'h';
+    if (d < 7) return d + 'd';
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
   function renderFiles() {
-    const filtered = files.filter(f => f.title.toLowerCase().includes(searchQuery.toLowerCase()));
-    filesCount!.textContent = `${filtered.length} file${filtered.length !== 1 ? 's' : ''}`;
+    filesCount.textContent = files.length + ' file' + (files.length !== 1 ? 's' : '');
 
-    if (filtered.length === 0) {
-      filesGrid!.innerHTML = '';
-      emptyState!.classList.add('visible');
+    if (files.length === 0) {
+      filesGrid.innerHTML = '';
+      emptyState.classList.add('visible');
       return;
     }
 
-    emptyState!.classList.remove('visible');
-
-    filesGrid!.innerHTML = filtered.map(file => {
-      const ext = file.type || 'txt';
-      const config = fileTypeConfig[ext] || { icon: 'document', type: 'document' };
-      const date = new Date(file.updatedAt || file.createdAt);
-      const timeAgo = getTimeAgo(date);
-      const preview = file.content ? file.content.substring(0, 100).trim() : '';
-
-      return `
+    emptyState.classList.remove('visible');
+    filesGrid.innerHTML = files
+      .map((file) => {
+        const ext = file.type || 'txt';
+        const config = fileTypeConfig[ext] || { icon: 'document', type: 'document' };
+        const date = new Date(file.updatedAt || file.createdAt);
+        const timeAgo = getTimeAgo(date);
+        const preview = file.content ? file.content.substring(0, 100).trim() : '';
+        return `
         <div class="file-card" data-id="${file.id}">
           <button class="file-delete" data-id="${file.id}" title="Delete">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -941,9 +921,7 @@ import Layout from '@layouts/Layout.astro';
             </svg>
           </button>
           <div class="file-card-header">
-            <div class="file-icon ${config.type}">
-              ${getFileIcon(config.icon)}
-            </div>
+            <div class="file-icon ${config.type}">${getFileIcon(config.icon)}</div>
             <div class="file-info">
               <div class="file-title">${escapeHtml(file.title)}</div>
               <div class="file-meta">
@@ -954,81 +932,63 @@ import Layout from '@layouts/Layout.astro';
             </div>
           </div>
           ${preview ? `<div class="file-preview">${escapeHtml(preview)}</div>` : ''}
-        </div>
-      `;
-    }).join('');
+        </div>`;
+      })
+      .join('');
 
-    document.querySelectorAll('.file-card').forEach(card => {
+    document.querySelectorAll('.file-card').forEach((card) => {
       card.addEventListener('click', (e) => {
-        if ((e.target as HTMLElement).closest('.file-delete')) return;
+        if (e.target.closest('.file-delete')) return;
         const id = card.getAttribute('data-id');
         if (id) window.location.href = `/workspace/edit?id=${id}`;
       });
     });
 
-    document.querySelectorAll('.file-delete').forEach(btn => {
+    document.querySelectorAll('.file-delete').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         e.preventDefault();
-        const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
-        if (id) openDeleteModal(id);
+        const id = btn.getAttribute('data-id');
+        if (id) {
+          deleteTargetId = id;
+          deleteModal?.classList.add('open');
+        }
       });
     });
   }
 
-  function getFileIcon(type: string): string {
-    const icons: Record<string, string> = {
-      text: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>`,
-      document: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`,
-      image: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`,
-      archive: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>`,
-      clipboard: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>`
+  function getFileIcon(type) {
+    const icons = {
+      text: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>',
+      document: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>',
+      image: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>',
+      archive: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>',
+      clipboard: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>',
     };
     return icons[type] || icons.document;
   }
 
-  function openDeleteModal(id: string) {
-    deleteTargetId = id;
-    deleteModal?.classList.add('open');
-  }
-
-  function closeDeleteModal() {
-    deleteTargetId = null;
-    deleteModal?.classList.remove('open');
-  }
-
   async function confirmDelete() {
     if (!deleteTargetId) return;
-    closeDeleteModal();
+    deleteModal?.classList.remove('open');
     try {
-      const response = await fetch(`${API_BASE}/api/workspace/${deleteTargetId}`, { method: 'DELETE' });
-      const result = await response.json();
+      const result = await apiRequest(`/api/workspace/${deleteTargetId}`, { method: 'DELETE' });
       if (result.success) {
         showToast('Deleted', 'success');
         await loadFiles();
       } else {
         showToast(result.message || 'Delete failed', 'error');
       }
-    } catch (error) {
+    } catch {
       showToast('Delete failed', 'error');
     }
-  }
-
-  function openClipboardModal() {
-    clipboardModal?.classList.add('open');
-    clipboardContent?.focus();
-  }
-
-  function closeClipboardModal() {
-    clipboardModal?.classList.remove('open');
-    clipboardTitle!.value = '';
-    clipboardContent!.value = '';
+    deleteTargetId = null;
   }
 
   async function pasteFromClipboard() {
     try {
       const text = await navigator.clipboard.readText();
-      clipboardContent!.value = text;
+      if (clipboardContent) clipboardContent.value = text;
       showToast('Pasted', 'success');
     } catch {
       showToast('Cannot access clipboard', 'error');
@@ -1043,15 +1003,15 @@ import Layout from '@layouts/Layout.astro';
       return;
     }
     try {
-      const response = await fetch(`${API_BASE}/api/workspace`, {
+      const result = await apiRequest('/api/workspace', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content, type: 'clipboard', fileSize: content.length })
+        body: JSON.stringify({ title, content, type: 'clipboard', fileSize: content.length }),
       });
-      const result = await response.json();
       if (result.success) {
         showToast('Saved', 'success');
-        closeClipboardModal();
+        clipboardModal?.classList.remove('open');
+        if (clipboardTitle) clipboardTitle.value = '';
+        if (clipboardContent) clipboardContent.value = '';
         await loadFiles();
       } else {
         showToast(result.message || 'Save failed', 'error');
@@ -1063,12 +1023,10 @@ import Layout from '@layouts/Layout.astro';
 
   async function createNote() {
     try {
-      const response = await fetch(`${API_BASE}/api/workspace`, {
+      const result = await apiRequest('/api/workspace', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: 'Untitled', content: '', type: 'txt' })
+        body: JSON.stringify({ title: 'Untitled', content: '', type: 'txt' }),
       });
-      const result = await response.json();
       if (result.success && result.data?.id) {
         window.location.href = `/workspace/edit?id=${result.data.id}`;
       } else {
@@ -1079,8 +1037,8 @@ import Layout from '@layouts/Layout.astro';
     }
   }
 
-  async function handleUpload(e: Event) {
-    const input = e.target as HTMLInputElement;
+  async function handleUpload(e) {
+    const input = e.target;
     const fileList = input.files;
     if (!fileList || fileList.length === 0) return;
 
@@ -1091,22 +1049,16 @@ import Layout from '@layouts/Layout.astro';
         const isText = ['txt', 'md', 'json', 'js', 'ts', 'css', 'html'].includes(ext);
         let content = '';
         if (isText) content = await file.text();
-        const response = await fetch(`${API_BASE}/api/workspace`, {
+        const result = await apiRequest('/api/workspace', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: file.name.replace(/\.[^/.]+$/, ''),
-            content,
-            type: ext,
-            fileSize: file.size
-          })
+          body: JSON.stringify({ title: file.name.replace(/\.[^/.]+$/, ''), content, type: ext, fileSize: file.size }),
         });
-        if ((await response.json()).success) successCount++;
+        if (result.success) successCount++;
       } catch {}
     }
     input.value = '';
     if (successCount > 0) {
-      showToast(`${successCount} file${successCount > 1 ? 's' : ''} uploaded`, 'success');
+      showToast(successCount + ' file' + (successCount > 1 ? 's' : '') + ' uploaded', 'success');
       await loadFiles();
     }
   }
@@ -1121,7 +1073,7 @@ import Layout from '@layouts/Layout.astro';
     if (skeletonGrid) skeletonGrid.style.display = 'none';
   }
 
-  function showToast(message: string, type: 'success' | 'error' = 'success') {
+  function showToast(message, type = 'success') {
     if (toast) {
       toast.textContent = message;
       toast.className = 'toast show ' + type;
@@ -1129,19 +1081,20 @@ import Layout from '@layouts/Layout.astro';
     }
   }
 
-  function escapeHtml(text: string): string {
+  function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
 
   newNoteBtn?.addEventListener('click', createNote);
+  document.getElementById('empty-new-btn')?.addEventListener('click', createNote);
   uploadBtn?.addEventListener('click', () => fileUpload?.click());
   fileUpload?.addEventListener('change', handleUpload);
-  document.getElementById('empty-new-btn')?.addEventListener('click', createNote);
   searchInput?.addEventListener('input', (e) => {
-    searchQuery = (e.target as HTMLInputElement).value;
-    renderFiles();
+    searchQuery = e.target.value;
+    if (searchDebounce) clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => loadFiles(), 300);
   });
 
   init();
