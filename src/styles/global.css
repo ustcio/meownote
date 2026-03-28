@@ -1,7 +1,6 @@
 @import './fonts.css';
 @import './tokens.css';
 
-/* ==================== Base Reset ==================== */
 *,
 *::before,
 *::after {
@@ -31,14 +30,11 @@ body {
               color var(--duration-normal) var(--ease-default);
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
 }
-
-/* ==================== Typography - Anthropic Style ==================== */
 
 h1, h2, h3 {
   font-family: var(--font-display);
-  font-weight: var(--font-normal);
+  font-weight: var(--font-semibold);
   line-height: var(--leading-tight);
   color: var(--text-primary);
   letter-spacing: var(--tracking-tight);
@@ -47,15 +43,18 @@ h1, h2, h3 {
 h1 {
   font-size: var(--text-5xl);
   line-height: 1.1;
+  letter-spacing: -0.03em;
 }
 
 h2 {
   font-size: var(--text-3xl);
-  line-height: 1.2;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 h3 {
   font-size: var(--text-2xl);
+  letter-spacing: -0.015em;
 }
 
 h4, h5, h6 {
@@ -65,17 +64,9 @@ h4, h5, h6 {
   color: var(--text-primary);
 }
 
-h4 {
-  font-size: var(--text-xl);
-}
-
-h5 {
-  font-size: var(--text-lg);
-}
-
-h6 {
-  font-size: var(--text-base);
-}
+h4 { font-size: var(--text-xl); }
+h5 { font-size: var(--text-lg); }
+h6 { font-size: var(--text-base); }
 
 p {
   font-family: var(--font-body);
@@ -99,7 +90,6 @@ a:hover {
   color: var(--color-primary);
 }
 
-/* Improve touch targets on mobile */
 @media (max-width: 767px) {
   a, button {
     min-height: 44px;
@@ -107,16 +97,14 @@ a:hover {
   }
 }
 
-/* ==================== Selection ==================== */
 ::selection {
   background: var(--color-primary-light);
   color: var(--text-primary);
 }
 
-/* ==================== Scrollbar ==================== */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -124,21 +112,19 @@ a:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--text-muted);
+  background: var(--text-tertiary);
   border-radius: var(--radius-full);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-tertiary);
+  background: var(--text-secondary);
 }
 
-/* ==================== Focus States ==================== */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-/* ==================== Buttons ==================== */
 button {
   font-family: var(--font-body);
   font-size: inherit;
@@ -148,18 +134,18 @@ button {
   color: inherit;
 }
 
-/* ==================== Inputs ==================== */
 input,
 textarea,
 select {
   font-family: var(--font-body);
   font-size: inherit;
   color: var(--text-primary);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-primary);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-4);
-  transition: border-color var(--duration-fast) var(--ease-default);
+  transition: border-color var(--duration-fast) var(--ease-default),
+              box-shadow var(--duration-fast) var(--ease-default);
 }
 
 input:focus,
@@ -167,22 +153,21 @@ textarea:focus,
 select:focus {
   outline: none;
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--input-focus-ring);
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: var(--text-muted);
+  color: var(--text-tertiary);
 }
-
-/* ==================== Utility Classes ==================== */
 
 .container {
   width: 100%;
   max-width: var(--container-xl);
   margin-left: auto;
   margin-right: auto;
-  padding-left: var(--space-6);
-  padding-right: var(--space-6);
+  padding-left: var(--space-5);
+  padding-right: var(--space-5);
 }
 
 @media (min-width: 768px) {
@@ -208,7 +193,6 @@ textarea::placeholder {
   border: 0;
 }
 
-/* ==================== Animation Utilities ==================== */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -217,7 +201,7 @@ textarea::placeholder {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -226,20 +210,18 @@ textarea::placeholder {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.5s ease;
+  animation: fadeIn 0.5s var(--ease-out);
 }
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.6s ease;
+  animation: fadeInUp 0.6s var(--ease-out);
 }
 
-/* ==================== Content Visibility Optimization ==================== */
 .content-visibility-auto {
   content-visibility: auto;
   contain-intrinsic-size: 0 500px;
 }
 
-/* ==================== Reduced Motion ==================== */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -249,11 +231,4 @@ textarea::placeholder {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* ==================== Hardware Acceleration Hints ==================== */
-.gpu-accelerated {
-  will-change: transform;
-  transform: translateZ(0);
-  backface-visibility: hidden;
 }

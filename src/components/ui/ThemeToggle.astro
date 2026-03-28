@@ -2,10 +2,10 @@
 
 ---
 
-<button 
-  class="theme-toggle" 
-  aria-label="切换主题"
-  title="切换主题"
+<button
+  class="theme-toggle"
+  aria-label="Toggle theme"
+  title="Toggle theme"
 >
   <span class="icon-sun">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -33,11 +33,11 @@
 
 <script>
   const themeToggle = document.querySelector('.theme-toggle');
-  
+
   themeToggle?.addEventListener('click', () => {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
+
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
   });
@@ -52,46 +52,47 @@
     width: 40px;
     height: 40px;
     color: var(--text-secondary);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
+    cursor: pointer;
     transition: color var(--duration-fast) var(--ease-default),
                 background-color var(--duration-fast) var(--ease-default);
   }
-  
+
   .theme-toggle:hover {
     color: var(--text-primary);
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-secondary);
   }
-  
+
   .icon-sun,
   .icon-moon {
     position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity var(--duration-fast) var(--ease-default),
-                transform var(--duration-fast) var(--ease-default);
+    transition: opacity 0.2s var(--ease-default),
+                transform 0.2s var(--ease-default);
   }
-  
+
   .icon-sun {
-    opacity: 1;
-    transform: scale(1);
+    opacity: 0;
+    transform: scale(0.5) rotate(-90deg);
+    pointer-events: none;
   }
-  
+
   .icon-moon {
-    opacity: 0;
-    transform: scale(0.5);
-    pointer-events: none;
-  }
-  
-  :global([data-theme="light"]) .icon-sun {
-    opacity: 0;
-    transform: scale(0.5);
-    pointer-events: none;
-  }
-  
-  :global([data-theme="light"]) .icon-moon {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
+  }
+
+  :global([data-theme="dark"]) .icon-sun {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
     pointer-events: auto;
+  }
+
+  :global([data-theme="dark"]) .icon-moon {
+    opacity: 0;
+    transform: scale(0.5) rotate(90deg);
+    pointer-events: none;
   }
 </style>

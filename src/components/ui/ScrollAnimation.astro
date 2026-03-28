@@ -7,9 +7,9 @@ interface Props {
 const { threshold = 0.1, rootMargin = '0px' } = Astro.props;
 ---
 
-<div 
-  class="scroll-animate-wrapper" 
-  data-threshold={threshold} 
+<div
+  class="scroll-animate-wrapper"
+  data-threshold={threshold}
   data-root-margin={rootMargin}
 >
   <slot />
@@ -18,8 +18,8 @@ const { threshold = 0.1, rootMargin = '0px' } = Astro.props;
 <style>
   .scroll-animate-wrapper {
     opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transform: translateY(20px);
+    transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
     will-change: opacity, transform;
   }
 
@@ -28,86 +28,85 @@ const { threshold = 0.1, rootMargin = '0px' } = Astro.props;
     transform: translateY(0);
   }
 
-  /* Animation variants */
   .scroll-animate-wrapper.fade-in {
-    transform: translateY(30px);
+    transform: none;
+    opacity: 0;
   }
 
   .scroll-animate-wrapper.fade-in-up {
-    transform: translateY(50px);
+    transform: translateY(30px);
   }
 
   .scroll-animate-wrapper.fade-in-down {
-    transform: translateY(-50px);
+    transform: translateY(-30px);
   }
 
   .scroll-animate-wrapper.fade-in-left {
-    transform: translateX(-50px);
+    transform: translateX(-30px);
   }
 
   .scroll-animate-wrapper.fade-in-right {
-    transform: translateX(50px);
+    transform: translateX(30px);
   }
 
   .scroll-animate-wrapper.scale-in {
-    transform: scale(0.9);
+    transform: scale(0.95);
   }
 
-  .scroll-animate-wrapper.flip-in {
-    transform: rotateY(90deg);
-  }
-
-  /* Visible states */
   .scroll-animate-wrapper.visible.fade-in,
   .scroll-animate-wrapper.visible.fade-in-up,
   .scroll-animate-wrapper.visible.fade-in-down,
   .scroll-animate-wrapper.visible.fade-in-left,
   .scroll-animate-wrapper.visible.fade-in-right,
-  .scroll-animate-wrapper.visible.scale-in,
-  .scroll-animate-wrapper.visible.flip-in {
-    transform: translate(0) scale(1) rotateY(0);
+  .scroll-animate-wrapper.visible.scale-in {
+    transform: none;
+    opacity: 1;
   }
 
-  /* Stagger delay utility */
   .scroll-animate-wrapper.delay-1 { transition-delay: 0.1s; }
   .scroll-animate-wrapper.delay-2 { transition-delay: 0.2s; }
   .scroll-animate-wrapper.delay-3 { transition-delay: 0.3s; }
   .scroll-animate-wrapper.delay-4 { transition-delay: 0.4s; }
   .scroll-animate-wrapper.delay-5 { transition-delay: 0.5s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-animate-wrapper {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
 </style>
 
 <script>
   class ScrollAnimator {
-    constructor() {
-      this.init();
-    }
-
     init() {
       const elements = document.querySelectorAll('.scroll-animate-wrapper');
-      
       if (elements.length === 0) return;
 
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
-            }
-          });
-        },
-        {
-          threshold: 0.1,
-          rootMargin: '0px'
-        }
-      );
+      elements.forEach(el => {
+        const threshold = parseFloat((el as HTMLElement).dataset.threshold || '0.1');
+        const rootMargin = (el as HTMLElement).dataset.rootMargin || '0px';
 
-      elements.forEach(el => observer.observe(el));
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold, rootMargin }
+        );
+
+        observer.observe(el);
+      });
     }
   }
 
-  // Initialize
   function initScrollAnimator() {
-    new ScrollAnimator();
+    new ScrollAnimator().init();
   }
 
   if (document.readyState === 'loading') {

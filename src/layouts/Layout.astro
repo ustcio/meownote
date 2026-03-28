@@ -68,15 +68,16 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="color-scheme" content="light dark" />
 
     <style>
-      :root:not([data-theme]) {
-        --bg-primary: #F0E9DC;
-        --text-primary: #1A1207;
+      :root:not([data-theme]),
+      [data-theme="light"] {
+        --bg-primary: #FAFAFA;
+        --text-primary: #1A1A1A;
         color-scheme: light;
       }
 
       [data-theme="dark"] {
-        --bg-primary: #1A1207;
-        --text-primary: #F0E9DC;
+        --bg-primary: #0D0D0D;
+        --text-primary: #E8E8E8;
         color-scheme: dark;
       }
     </style>

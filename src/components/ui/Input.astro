@@ -38,14 +38,14 @@ const hasError = Boolean(error);
       {required && <span class="required">*</span>}
     </label>
   )}
-  
+
   <div class="input-wrapper">
     {icon && (
       <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <slot name="icon" />
       </svg>
     )}
-    
+
     <input
       id={inputId}
       type={type}
@@ -58,16 +58,16 @@ const hasError = Boolean(error);
       aria-invalid={hasError}
       aria-describedby={hasError ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
     />
-    
+
     <slot name="suffix" />
   </div>
-  
+
   {error && (
     <p id={`${inputId}-error`} class="input-error" role="alert">
       {error}
     </p>
   )}
-  
+
   {hint && !error && (
     <p id={`${inputId}-hint`} class="input-hint">
       {hint}
@@ -81,81 +81,87 @@ const hasError = Boolean(error);
     flex-direction: column;
     gap: var(--space-2);
   }
-  
+
   .input-label {
+    font-family: var(--font-body);
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
     color: var(--text-secondary);
   }
-  
+
   .required {
-    color: var(--color-error);
+    color: #EF4444;
     margin-left: var(--space-1);
   }
-  
+
   .input-wrapper {
     position: relative;
     display: flex;
     align-items: center;
   }
-  
+
   .input-icon {
     position: absolute;
     left: var(--space-3);
     color: var(--text-tertiary);
     pointer-events: none;
   }
-  
+
   .input {
     width: 100%;
-    padding: var(--space-3) var(--space-4);
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-lg);
+    padding: 0.625rem var(--space-4);
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-md);
     color: var(--text-primary);
+    font-family: var(--font-body);
     font-size: var(--text-sm);
-    transition: all var(--duration-fast) var(--ease-default);
+    transition: border-color var(--duration-fast) var(--ease-default),
+                box-shadow var(--duration-fast) var(--ease-default);
   }
-  
+
   .input.has-icon {
     padding-left: calc(var(--space-3) + 26px);
   }
-  
+
   .input::placeholder {
     color: var(--text-tertiary);
   }
-  
+
   .input:hover:not(:disabled) {
     border-color: var(--border-hover);
   }
-  
+
   .input:focus {
     outline: none;
-    border-color: var(--color-accent-blue);
-    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
-    background: var(--bg-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--input-focus-ring);
+    background: var(--bg-elevated);
   }
-  
+
   .input:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
+    background: var(--bg-secondary);
   }
-  
+
   .has-error .input {
-    border-color: var(--color-error);
+    border-color: #EF4444;
   }
-  
+
   .has-error .input:focus {
-    box-shadow: 0 0 0 3px rgba(255, 55, 95, 0.15);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
   }
-  
+
   .input-error {
+    font-family: var(--font-body);
     font-size: var(--text-xs);
-    color: var(--color-error);
+    color: #EF4444;
     margin: 0;
   }
-  
+
   .input-hint {
+    font-family: var(--font-body);
     font-size: var(--text-xs);
     color: var(--text-tertiary);
     margin: 0;

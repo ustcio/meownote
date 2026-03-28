@@ -1,292 +1,32 @@
 ---
 const currentYear = new Date().getFullYear();
-
-const footerLinks = {
-  Products: ["LiveChat", "API", "Pricing", "Docs"],
-  Company: ["About", "Blog", "Careers", "Contact"],
-  Resources: ["Research", "Safety", "Usage Policy"],
-};
-
-const legalLinks = ["Privacy Policy", "Terms of Service", "Cookie Settings"];
 ---
 
 <footer class="footer">
   <div class="footer-container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <a href="/" class="logo">
-          <div class="logo-icon">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 3L20.5 18H3.5Z" fill="currentColor" />
-            </svg>
-          </div>
-          <span class="logo-text">MaxMin.dev</span>
-        </a>
-        <p class="footer-tagline">The AI that actually does things.</p>
-      </div>
-
-      {Object.entries(footerLinks).map(([category, links]) => (
-        <div class="footer-column">
-          <h4 class="column-title">{category}</h4>
-          <ul class="column-links">
-            {links.map((link) => (
-              <li><a href="#" class="column-link">{link}</a></li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
-
-    <div class="footer-bottom">
-      <p class="copyright">&copy; {currentYear} MaxMin.dev. All rights reserved.</p>
-      <div class="legal-links">
-        {legalLinks.map((link) => (
-          <a href="#" class="legal-link">{link}</a>
-        ))}
-      </div>
-    </div>
+    <p>&copy; {currentYear} MaxMin.dev</p>
   </div>
 </footer>
 
 <style>
   .footer {
-    background: #F0E9DC;
-    padding: var(--space-12) var(--space-5);
-    border-top: 1px solid #D0C4B0;
-  }
-
-  @media (min-width: 768px) {
-    .footer {
-      padding: var(--space-16);
-    }
+    background: var(--bg-secondary);
+    padding: var(--space-6) var(--space-5);
+    border-top: 1px solid var(--border-primary);
+    transition: background-color var(--duration-normal) var(--ease-default),
+                border-color var(--duration-normal) var(--ease-default);
   }
 
   .footer-container {
     max-width: var(--container-xl);
     margin: 0 auto;
-  }
-
-  .footer-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-8);
-    padding-bottom: var(--space-8);
-    border-bottom: 1px solid #D0C4B0;
-    margin-bottom: var(--space-8);
-  }
-
-  @media (min-width: 480px) {
-    .footer-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: var(--space-6);
-    }
-  }
-
-  @media (min-width: 768px) {
-    .footer-grid {
-      grid-template-columns: 1.5fr repeat(3, 1fr);
-      gap: var(--space-8);
-    }
-  }
-
-  .footer-brand {
-    grid-column: span 1;
-  }
-
-  @media (min-width: 480px) {
-    .footer-brand {
-      grid-column: span 2;
-    }
-  }
-
-  @media (min-width: 768px) {
-    .footer-brand {
-      grid-column: span 1;
-    }
-  }
-
-  .logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    margin-bottom: var(--space-4);
-  }
-
-  .logo-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    background: #C06B3E;
-    color: #F0E9DC;
-    transition: transform var(--duration-normal) var(--ease-default);
-  }
-
-  .logo:hover .logo-icon {
-    transform: scale(1.05);
-  }
-
-  .logo-icon svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .logo-text {
-    font-family: var(--font-serif);
-    font-size: var(--text-lg);
-    font-weight: var(--font-normal);
-    color: #1A1207;
-    letter-spacing: -0.01em;
-  }
-
-  @media (min-width: 768px) {
-    .logo-text {
-      font-size: var(--text-xl);
-    }
-  }
-
-  .footer-tagline {
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    color: #6B5C42;
-    line-height: 1.6;
-    max-width: 260px;
-    margin: 0;
-  }
-
-  .column-title {
-    font-family: var(--font-sans);
-    font-size: 11px;
-    font-weight: var(--font-medium);
-    color: #1A1207;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: var(--space-4);
-  }
-
-  @media (min-width: 768px) {
-    .column-title {
-      font-size: var(--text-xs);
-    }
-  }
-
-  .column-links {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .column-link {
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    color: #6B5C42;
-    text-decoration: none;
-    line-height: 1.5;
-    transition: color var(--duration-normal) var(--ease-default);
-    display: flex;
-    align-items: center;
-    padding: 2px 0;
-    min-height: 44px;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  @media (hover: hover) {
-    .column-link:hover {
-      color: #C06B3E;
-    }
-  }
-
-  .column-link:active {
-    color: #C06B3E;
-  }
-
-  .footer-bottom {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-4);
     text-align: center;
   }
 
-  @media (min-width: 640px) {
-    .footer-bottom {
-      flex-direction: row;
-      justify-content: space-between;
-      text-align: left;
-    }
-  }
-
-  .copyright {
-    font-family: var(--font-sans);
+  .footer-container p {
+    font-family: var(--font-body);
     font-size: var(--text-sm);
-    color: #7A6A52;
+    color: var(--text-tertiary);
     margin: 0;
-  }
-
-  .legal-links {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-3);
-  }
-
-  @media (min-width: 640px) {
-    .legal-links {
-      justify-content: flex-end;
-      gap: var(--space-4);
-    }
-  }
-
-  .legal-link {
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    color: #7A6A52;
-    text-decoration: none;
-    transition: color var(--duration-normal) var(--ease-default);
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  @media (hover: hover) {
-    .legal-link:hover {
-      color: #C06B3E;
-    }
-  }
-
-  .legal-link:active {
-    color: #C06B3E;
-  }
-
-  /* Dark theme */
-  [data-theme="dark"] .footer {
-    background: #1A1207;
-    border-top-color: rgba(240, 233, 220, 0.1);
-  }
-
-  [data-theme="dark"] .footer-grid {
-    border-bottom-color: rgba(240, 233, 220, 0.1);
-  }
-
-  [data-theme="dark"] .logo-text,
-  [data-theme="dark"] .column-title {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .footer-tagline,
-  [data-theme="dark"] .column-link,
-  [data-theme="dark"] .copyright,
-  [data-theme="dark"] .legal-link {
-    color: #A89880;
-  }
-
-  [data-theme="dark"] .column-link:hover,
-  [data-theme="dark"] .legal-link:hover {
-    color: #C06B3E;
   }
 </style>

@@ -1,94 +1,43 @@
-/* ================================================================================
-   Anthropic Design System - Pixel-Faithful Recreation
-   ================================================================================ */
-
 :root {
-  /* ==================== Color Palette - Anthropic Exact ==================== */
-  
-  /* Primary Colors */
-  --color-primary: #C06B3E;
-  --color-primary-hover: #A85A32;
-  --color-primary-active: #8B4A28;
-  --color-primary-light: rgba(192, 107, 62, 0.1);
-  --color-primary-subtle: rgba(192, 107, 62, 0.08);
-  
-  /* Background Colors - Cream Palette */
-  --bg-cream: #F0E9DC;
-  --bg-dark-cream: #EDE5D4;
-  --bg-lighter-cream: #F5F0E6;
-  --bg-card: #EDE5D4;
-  --bg-card-hover: #EDE0CC;
-  
-  /* Dark Section Colors */
-  --bg-dark: #1A1207;
-  --bg-dark-secondary: #2C2210;
-  --bg-dark-footer: #120D05;
-  
-  /* Text Colors */
-  --text-dark: #1A1207;
-  --text-body: #6B5C42;
-  --text-muted: #7A6A52;
-  --text-tertiary: #9A8A72;
-  --text-light: #F0E9DC;
-  --text-light-muted: #A89880;
-  --text-light-tertiary: #8A7A62;
-  --text-dark-muted: #5A4A32;
-  --text-dark-tertiary: #3D2E18;
-  --text-nav: #3D3521;
-  
-  /* Border Colors */
-  --border-light: #D0C4B0;
-  --border-cream: #C4B9A5;
-  --border-nav: #D6CCBB;
-  --border-dark: #2C2210;
-  --border-dark-light: rgba(240, 233, 220, 0.2);
-  
-  /* Badge Colors */
-  --badge-orange: #C06B3E;
-  --badge-green: #5B7E6A;
-  --badge-blue: #4A5E8A;
-  
-  /* ==================== Typography - Anthropic Style ==================== */
-  
-  /* Font Families - 从 fonts.css 加载 */
-  --font-display: var(--font-sans);
-  --font-heading: var(--font-sans);
-  --font-body: var(--font-sans);
-  --font-serif: var(--font-sans);
-  --font-number: var(--font-sans);
-  
-  /* Font Sizes - Mobile First */
+  --color-primary: #D97757;
+  --color-primary-hover: #C46A4A;
+  --color-primary-active: #A85535;
+  --color-primary-light: rgba(217, 119, 87, 0.1);
+  --color-primary-subtle: rgba(217, 119, 87, 0.06);
+
+  --font-display: var(--font-display);
+  --font-heading: var(--font-display);
+  --font-body: var(--font-body);
+  --font-serif: var(--font-body);
+  --font-number: var(--font-body);
+
   --text-xs: 0.75rem;
-  --text-sm: 0.8125rem;
-  --text-base: 0.9375rem;
-  --text-lg: 1.0625rem;
-  --text-xl: 1.1875rem;
-  --text-2xl: 1.375rem;
-  --text-3xl: 1.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
   --text-4xl: 2.25rem;
-  --text-5xl: 2.75rem;
-  --text-6xl: 3.5rem;
-  
-  /* Font Weights - Anthropic uses 400 for headings */
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
   --font-normal: 400;
   --font-medium: 500;
   --font-semibold: 600;
   --font-bold: 700;
-  
-  /* Line Heights - Improved for readability */
+
+  --leading-none: 1;
   --leading-tight: 1.15;
-  --leading-snug: 1.25;
+  --leading-snug: 1.3;
   --leading-normal: 1.5;
-  --leading-relaxed: 1.7;
-  --leading-loose: 1.8;
-  
-  /* Letter Spacing */
+  --leading-relaxed: 1.6;
+
   --tracking-tight: -0.025em;
-  --tracking-normal: -0.02em;
-  --tracking-wide: 0.06em;
-  --tracking-wider: 0.1em;
-  
-  /* ==================== Spacing ==================== */
+  --tracking-normal: -0.01em;
+  --tracking-wide: 0.02em;
+  --tracking-wider: 0.05em;
+
   --space-0: 0;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -99,135 +48,155 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
-  --space-16: 6rem;
-  --space-20: 8rem;
-  --space-24: 10rem;
-  --space-28: 12rem;
-  --space-32: 14rem;
-  
-  /* ==================== Border Radius ==================== */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
-  --radius-full: 100px;
-  
-  /* ==================== Shadows - Minimal ==================== */
+  --radius-full: 9999px;
+
   --shadow-none: none;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.12);
-  
-  /* ==================== Card Colors ==================== */
-  --card-bg: #EDE5D4;
-  --card-border: #D0C4B0;
-  --card-shadow: var(--shadow-md);
-  
-  /* ==================== Input Colors ==================== */
-  --input-bg: #FFFFFF;
-  --input-border: #D0C4B0;
-  --input-focus-border: #C06B3E;
-  
-  /* ==================== Accent Colors ==================== */
-  --accent-primary: #C06B3E;
-  --accent-secondary: #64d2ff;
-  
-  /* ==================== Button Colors ==================== */
-  --btn-primary-bg: #1A1207;
-  --btn-primary-text: #F0E9DC;
-  --btn-primary-hover: #2C2210;
-  
-  /* ==================== Claude Colors ==================== */
-  --claude-orange: #C06B3E;
-  --claude-orange-dark: #A85A32;
-  --claude-orange-light: rgba(192, 107, 62, 0.1);
-  
-  /* ==================== Accent Colors ==================== */
-  --color-accent-pink: #EC4899;
-  --color-accent-blue: #64d2ff;
-  --color-accent-purple: #bf5af2;
-  
-  /* ==================== Header Height ==================== */
-  --header-total-height: 4rem;
-  
-  /* ==================== Transitions ==================== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
   --duration-fast: 150ms;
   --duration-normal: 200ms;
   --duration-slow: 300ms;
-  
+
   --ease-default: ease;
-  
-  /* ==================== Layout ==================== */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
   --container-sm: 640px;
   --container-md: 768px;
-  --container-lg: 980px;
-  --container-xl: 1200px;
-  
-  --header-height: 4rem;
-  
-  /* ==================== Contribution Graph Colors ==================== */
-  --contribution-0: #EDE5D4;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1440px;
+
+  --header-height: 64px;
+
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+}
+
+[data-theme="light"],
+:root {
+  --bg-primary: #FAFAFA;
+  --bg-secondary: #F5F0E8;
+  --bg-tertiary: #EBE6DE;
+  --bg-elevated: #FFFFFF;
+  --bg-overlay: rgba(0, 0, 0, 0.4);
+
+  --text-primary: #1A1A1A;
+  --text-secondary: #5C5C5C;
+  --text-tertiary: #8C8C8C;
+  --text-quaternary: #BFBFBF;
+  --text-inverse: #FFFFFF;
+
+  --border: rgba(0, 0, 0, 0.08);
+  --border-primary: rgba(0, 0, 0, 0.1);
+  --border-secondary: rgba(0, 0, 0, 0.06);
+  --border-hover: rgba(0, 0, 0, 0.15);
+  --border-focus: var(--color-primary);
+
+  --card-bg: #FFFFFF;
+  --card-bg-cream: #F5F0E8;
+  --card-border: rgba(0, 0, 0, 0.06);
+  --card-border-hover: rgba(0, 0, 0, 0.12);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+
+  --input-bg: #FFFFFF;
+  --input-border: rgba(0, 0, 0, 0.12);
+  --input-focus-ring: rgba(217, 119, 87, 0.25);
+
+  --btn-primary-bg: #D97757;
+  --btn-primary-text: #FFFFFF;
+  --btn-primary-hover: #C46A4A;
+  --btn-primary-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  --btn-secondary-bg: transparent;
+  --btn-secondary-text: #1A1A1A;
+  --btn-secondary-border: rgba(0, 0, 0, 0.12);
+  --btn-secondary-hover-bg: rgba(0, 0, 0, 0.04);
+
+  --nav-bg: rgba(250, 250, 250, 0.85);
+  --nav-border: rgba(0, 0, 0, 0.06);
+  --nav-link: #5C5C5C;
+  --nav-link-hover: #1A1A1A;
+  --nav-link-active: #D97757;
+
+  --contribution-0: #F5F0E8;
   --contribution-1: #E8C9B5;
   --contribution-2: #D9A082;
   --contribution-3: #C0785A;
-  --contribution-4: #A85A32;
+  --contribution-4: #A85535;
 }
 
-/* ==================== Default Theme (Light) ==================== */
-:root {
-  --bg-primary: #F0E9DC;
-  --bg-secondary: #EDE5D4;
-  --bg-tertiary: #EDE0CC;
-  --bg-elevated: #FFFFFF;
-  
-  --text-primary: #1A1207;
-  --text-secondary: #6B5C42;
-  --text-tertiary: #7A6A52;
-  --text-quaternary: #9A8A72;
-  
-  --border: #D0C4B0;
-  --border-primary: #D0C4B0;
-  --border-secondary: #C4B9A5;
-  
-  --input-bg: #FFFFFF;
-}
-
-/* ==================== Dark Theme ==================== */
 [data-theme="dark"] {
-  --bg-primary: #1A1207;
-  --bg-secondary: #2C2210;
-  --bg-tertiary: #120D05;
-  --bg-elevated: #2C2210;
-  
-  --text-primary: #F0E9DC;
-  --text-secondary: #A89880;
-  --text-tertiary: #8A7A62;
-  --text-quaternary: #6A5A42;
-  
-  --border: rgba(240, 233, 220, 0.15);
-  --border-primary: #2C2210;
-  --border-secondary: rgba(240, 233, 220, 0.1);
-  
-  --card-bg: #2C2210;
-  --card-border: rgba(240, 233, 220, 0.15);
-  
-  --input-bg: #2C2210;
-  --input-border: rgba(240, 233, 220, 0.2);
-  
-  --btn-primary-bg: #F0E9DC;
-  --btn-primary-text: #1A1207;
-  --btn-primary-hover: #EDE5D4;
-  
-  --contribution-0: #2C2210;
-  --contribution-1: #3D2A1A;
-  --contribution-2: #5A3D25;
-  --contribution-3: #785535;
+  --bg-primary: #0D0D0D;
+  --bg-secondary: #1A1A1A;
+  --bg-tertiary: #262626;
+  --bg-elevated: #1A1A1A;
+  --bg-overlay: rgba(0, 0, 0, 0.7);
+
+  --text-primary: #E8E8E8;
+  --text-secondary: #A0A0A0;
+  --text-tertiary: #6B6B6B;
+  --text-quaternary: #404040;
+  --text-inverse: #0D0D0D;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-primary: rgba(255, 255, 255, 0.1);
+  --border-secondary: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.16);
+  --border-focus: var(--color-primary);
+
+  --card-bg: #1A1A1A;
+  --card-bg-cream: #262626;
+  --card-border: rgba(255, 255, 255, 0.06);
+  --card-border-hover: rgba(255, 255, 255, 0.12);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --card-shadow-hover: 0 8px 25px -5px rgba(0, 0, 0, 0.4);
+
+  --input-bg: #1A1A1A;
+  --input-border: rgba(255, 255, 255, 0.12);
+  --input-focus-ring: rgba(217, 119, 87, 0.3);
+
+  --btn-primary-bg: #D97757;
+  --btn-primary-text: #FFFFFF;
+  --btn-primary-hover: #C46A4A;
+  --btn-primary-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+
+  --btn-secondary-bg: transparent;
+  --btn-secondary-text: #E8E8E8;
+  --btn-secondary-border: rgba(255, 255, 255, 0.12);
+  --btn-secondary-hover-bg: rgba(255, 255, 255, 0.06);
+
+  --nav-bg: rgba(13, 13, 13, 0.85);
+  --nav-border: rgba(255, 255, 255, 0.06);
+  --nav-link: #A0A0A0;
+  --nav-link-hover: #E8E8E8;
+  --nav-link-active: #D97757;
+
+  --contribution-0: #1A1A1A;
+  --contribution-1: #2E2218;
+  --contribution-2: #4A3525;
+  --contribution-3: #6B4D35;
   --contribution-4: #A87045;
 }
 
-/* ==================== Responsive Typography ==================== */
 @media (min-width: 768px) {
   :root {
     --text-xs: 0.75rem;
@@ -238,10 +207,7 @@
     --text-2xl: 1.5rem;
     --text-3xl: 2rem;
     --text-4xl: 2.5rem;
-    --text-5xl: 3rem;
-    --text-6xl: 4rem;
-    --leading-normal: 1.4;
-    --leading-relaxed: 1.6;
-    --leading-loose: 1.7;
+    --text-5xl: 3.5rem;
+    --text-6xl: 4.5rem;
   }
 }

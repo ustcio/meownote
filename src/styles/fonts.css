@@ -1,20 +1,8 @@
-/* 
- * 系统字体堆栈 - 零网络请求，极致性能
- * 
- * 中文字体：
- * - macOS/iOS: PingFang SC (苹方)
- * - Windows: Microsoft YaHei (微软雅黑)
- * - Android: Noto Sans SC
- * - Linux: Source Han Sans SC (思源黑体)
- * 
- * 等宽字体：
- * - macOS: SF Mono
- * - Windows: Cascadia Code
- * - 跨平台: JetBrains Mono
- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --font-sans: 
+  --font-display:
+    'Inter',
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -24,8 +12,32 @@
     "Source Han Sans SC",
     "Noto Sans SC",
     sans-serif;
-  
-  --font-mono: 
+
+  --font-body:
+    'Inter',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    "Source Han Sans SC",
+    "Noto Sans SC",
+    sans-serif;
+
+  --font-sans:
+    'Inter',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    "Source Han Sans SC",
+    "Noto Sans SC",
+    sans-serif;
+
+  --font-mono:
     ui-monospace,
     "SF Mono",
     "Cascadia Code",

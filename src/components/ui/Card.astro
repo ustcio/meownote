@@ -1,6 +1,6 @@
 ---
 export interface Props {
-  variant?: 'default' | 'elevated' | 'outlined' | 'glass';
+  variant?: 'default' | 'cream' | 'outlined' | 'elevated';
   padding?: 'none' | 'sm' | 'md' | 'lg';
   hoverable?: boolean;
   clickable?: boolean;
@@ -25,7 +25,7 @@ const classes = [
 ].filter(Boolean).join(' ');
 ---
 
-<div 
+<div
   class={classes}
   role={clickable ? 'button' : undefined}
   tabindex={clickable ? 0 : undefined}
@@ -36,65 +36,59 @@ const classes = [
 
 <style>
   .card {
-    border-radius: var(--radius-xl);
-    transition: all var(--duration-fast) var(--ease-default);
+    border-radius: var(--radius-lg);
+    transition: all var(--duration-normal) var(--ease-default);
+    overflow: hidden;
   }
-  
+
   .card-default {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
   }
-  
+
+  .card-cream {
+    background: var(--card-bg-cream);
+    border: 1px solid var(--card-border);
+  }
+
   .card-elevated {
     background: var(--card-bg);
     box-shadow: var(--shadow-md);
+    border: 1px solid var(--card-border);
   }
-  
+
   .card-outlined {
     background: transparent;
     border: 1px solid var(--border-primary);
   }
-  
-  .card-glass {
-    background: var(--glass-bg);
-    backdrop-filter: var(--surface-blur);
-    border: 1px solid var(--glass-border);
+
+  .card-padding-none { padding: 0; }
+  .card-padding-sm { padding: var(--space-4); }
+  .card-padding-md { padding: var(--space-6); }
+  .card-padding-lg { padding: var(--space-8); }
+
+  .card-hoverable {
+    cursor: pointer;
   }
-  
-  .card-padding-none {
-    padding: 0;
-  }
-  
-  .card-padding-sm {
-    padding: var(--space-3);
-  }
-  
-  .card-padding-md {
-    padding: var(--space-5);
-  }
-  
-  .card-padding-lg {
-    padding: var(--space-8);
-  }
-  
+
   .card-hoverable:hover {
     border-color: var(--card-border-hover);
-    box-shadow: var(--card-hover-shadow);
+    box-shadow: var(--card-shadow-hover);
     transform: translateY(-2px);
   }
-  
+
   .card-clickable {
     cursor: pointer;
     user-select: none;
   }
 
   .card-clickable:focus-visible {
-    outline: var(--focus-ring);
-    outline-offset: var(--focus-ring-offset);
-    box-shadow: var(--focus-ring-offset-box-shadow), 0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset)) rgba(217, 119, 87, 0.2);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--color-primary);
   }
-  
+
   .card-clickable:active {
-    transform: scale(0.99);
+    transform: scale(0.995);
   }
 </style>
