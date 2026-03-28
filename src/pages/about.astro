@@ -7,7 +7,7 @@ const features = [
     icon: 'zap',
     title: t('about.features.performance.title'),
     description: t('about.features.performance.desc'),
-    color: '#C06B3E'
+    color: '#D97757'
   },
   {
     icon: 'shield',
@@ -168,7 +168,7 @@ const iconPaths: Record<string, string> = {
   .about {
     min-height: 100vh;
     padding: calc(var(--header-total-height) + var(--space-4)) var(--space-4) var(--space-12);
-    background: #F0E9DC;
+    background: var(--bg-primary);
   }
   
   .about-container {
@@ -176,7 +176,6 @@ const iconPaths: Record<string, string> = {
     margin: 0 auto;
   }
   
-  /* Hero */
   .about-hero {
     text-align: center;
     margin-bottom: var(--space-16);
@@ -194,13 +193,13 @@ const iconPaths: Record<string, string> = {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #C06B3E;
+    background: var(--color-primary);
   }
   
   .label-text {
     font-family: var(--font-sans);
     font-size: var(--text-xs);
-    color: #7A6A52;
+    color: var(--text-tertiary);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -211,20 +210,19 @@ const iconPaths: Record<string, string> = {
     font-weight: var(--font-normal);
     line-height: 1.1;
     letter-spacing: -0.02em;
-    color: #1A1207;
+    color: var(--text-primary);
     margin-bottom: var(--space-4);
   }
   
   .about-subtitle {
     font-family: var(--font-sans);
-    color: #6B5C42;
+    color: var(--text-secondary);
     font-size: var(--text-lg);
     max-width: 600px;
     margin: 0 auto;
     line-height: 1.7;
   }
   
-  /* Story */
   .about-story {
     max-width: 700px;
     margin: 0 auto var(--space-16);
@@ -232,7 +230,7 @@ const iconPaths: Record<string, string> = {
   }
   
   .story-text {
-    color: #6B5C42;
+    color: var(--text-secondary);
     font-size: var(--text-base);
     line-height: 1.7;
     margin-bottom: var(--space-4);
@@ -242,7 +240,6 @@ const iconPaths: Record<string, string> = {
     margin-bottom: 0;
   }
   
-  /* Stats */
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -259,9 +256,10 @@ const iconPaths: Record<string, string> = {
   .stat-card {
     text-align: center;
     padding: var(--space-6);
-    background: #EDE5D4;
-    border: 1px solid #D0C4B0;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     border-radius: var(--radius-xl);
+    box-shadow: var(--card-shadow);
   }
   
   .stat-value {
@@ -269,30 +267,28 @@ const iconPaths: Record<string, string> = {
     font-family: var(--font-display);
     font-size: var(--text-2xl);
     font-weight: var(--font-normal);
-    color: #C06B3E;
+    color: var(--color-primary);
     margin-bottom: var(--space-1);
   }
   
   .stat-label {
     font-family: var(--font-sans);
     font-size: var(--text-xs);
-    color: #7A6A52;
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
   
-  /* Section Title */
   .section-title {
     font-family: var(--font-display);
     font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: var(--font-normal);
-    color: #1A1207;
+    color: var(--text-primary);
     margin-bottom: var(--space-8);
     text-align: center;
     letter-spacing: -0.01em;
   }
   
-  /* Features */
   .features-section {
     margin-bottom: var(--space-16);
   }
@@ -318,8 +314,8 @@ const iconPaths: Record<string, string> = {
   .feature-card {
     text-align: center;
     padding: var(--space-6);
-    background: #EDE5D4;
-    border: 1px solid #D0C4B0;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     border-radius: var(--radius-2xl);
     transition: all var(--duration-normal) var(--ease-default);
     cursor: pointer;
@@ -327,11 +323,12 @@ const iconPaths: Record<string, string> = {
   
   .feature-card:hover {
     transform: translateY(-4px);
-    border-color: #C4B9A5;
+    border-color: var(--card-border-hover);
+    box-shadow: var(--card-shadow-hover);
   }
   
   .feature-card:hover .feature-title {
-    color: #C06B3E;
+    color: var(--color-primary);
   }
   
   .feature-icon {
@@ -353,7 +350,7 @@ const iconPaths: Record<string, string> = {
     font-family: var(--font-display);
     font-size: var(--text-base);
     font-weight: var(--font-normal);
-    color: #1A1207;
+    color: var(--text-primary);
     margin-bottom: var(--space-2);
     transition: color var(--duration-normal) var(--ease-default);
   }
@@ -361,11 +358,10 @@ const iconPaths: Record<string, string> = {
   .feature-description {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    color: #6B5C42;
+    color: var(--text-secondary);
     line-height: 1.65;
   }
   
-  /* Milestones */
   .milestones-section {
     margin-bottom: var(--space-16);
   }
@@ -391,21 +387,21 @@ const iconPaths: Record<string, string> = {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
     font-weight: var(--font-semibold);
-    color: #C06B3E;
+    color: var(--color-primary);
     margin-bottom: var(--space-2);
   }
   
   .milestone-dot {
     width: 12px;
     height: 12px;
-    background: #C06B3E;
+    background: var(--color-primary);
     border-radius: 50%;
   }
   
   .milestone-line {
     width: 2px;
     flex: 1;
-    background: #D0C4B0;
+    background: var(--border-primary);
     margin-top: var(--space-2);
   }
   
@@ -418,17 +414,16 @@ const iconPaths: Record<string, string> = {
     font-family: var(--font-display);
     font-size: var(--text-base);
     font-weight: var(--font-normal);
-    color: #1A1207;
+    color: var(--text-primary);
     margin-bottom: var(--space-1);
   }
   
   .milestone-desc {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    color: #6B5C42;
+    color: var(--text-secondary);
   }
   
-  /* Tech Stack */
   .tech-section {
     margin-bottom: var(--space-16);
   }
@@ -445,15 +440,15 @@ const iconPaths: Record<string, string> = {
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-3) var(--space-4);
-    background: #EDE5D4;
-    border: 1px solid #D0C4B0;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     border-radius: var(--radius-lg);
     transition: all var(--duration-fast) var(--ease-default);
     cursor: pointer;
   }
   
   .tech-card:hover {
-    border-color: #C4B9A5;
+    border-color: var(--card-border-hover);
     transform: translateY(-2px);
   }
   
@@ -463,38 +458,38 @@ const iconPaths: Record<string, string> = {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #1A1207;
+    background: var(--text-primary);
     border-radius: 6px;
-    color: #F0E9DC;
+    color: var(--text-inverse);
   }
   
   .tech-name {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
     font-weight: var(--font-normal);
-    color: #1A1207;
+    color: var(--text-primary);
   }
   
-  /* CTA */
   .cta-section {
     text-align: center;
     padding: var(--space-12);
-    background: #1A1207;
+    background: var(--bg-elevated);
     border-radius: var(--radius-2xl);
+    box-shadow: var(--card-shadow);
   }
   
   .cta-title {
     font-family: var(--font-display);
     font-size: var(--text-2xl);
     font-weight: var(--font-normal);
-    color: #F0E9DC;
+    color: var(--text-primary);
     margin-bottom: var(--space-3);
     letter-spacing: -0.01em;
   }
   
   .cta-desc {
     font-family: var(--font-sans);
-    color: #A89880;
+    color: var(--text-secondary);
     font-size: var(--text-base);
     margin-bottom: var(--space-6);
     line-height: 1.65;
@@ -511,18 +506,18 @@ const iconPaths: Record<string, string> = {
     display: inline-flex;
     align-items: center;
     padding: var(--space-3) var(--space-6);
-    background: #C06B3E;
+    background: var(--btn-primary-bg);
     border-radius: var(--radius-full);
     font-family: var(--font-sans);
     font-size: var(--text-sm);
     font-weight: var(--font-normal);
-    color: #F0E9DC;
+    color: var(--btn-primary-text);
     text-decoration: none;
     transition: all var(--duration-fast) var(--ease-default);
   }
   
   .cta-primary:hover {
-    background: #A85A32;
+    background: var(--btn-primary-hover);
     transform: translateY(-2px);
   }
   
@@ -530,22 +525,22 @@ const iconPaths: Record<string, string> = {
     display: inline-flex;
     align-items: center;
     padding: var(--space-3) var(--space-6);
-    background: transparent;
-    border: 1px solid rgba(240, 233, 220, 0.2);
+    background: var(--btn-secondary-bg);
+    border: 1px solid var(--btn-secondary-border);
     border-radius: var(--radius-full);
     font-family: var(--font-sans);
     font-size: var(--text-sm);
     font-weight: var(--font-normal);
-    color: #F0E9DC;
+    color: var(--btn-secondary-text);
     text-decoration: none;
     transition: all var(--duration-fast) var(--ease-default);
   }
   
   .cta-secondary:hover {
-    border-color: rgba(240, 233, 220, 0.5);
+    background: var(--btn-secondary-hover-bg);
+    border-color: var(--border-hover);
   }
 
-  /* Touch target optimization */
   .cta-primary,
   .cta-secondary {
     min-height: 48px;
@@ -553,69 +548,5 @@ const iconPaths: Record<string, string> = {
     align-items: center;
     justify-content: center;
     -webkit-tap-highlight-color: transparent;
-  }
-
-  .cta-secondary:hover {
-    border-color: rgba(240, 233, 220, 0.5);
-  }
-
-  /* Dark theme */
-  [data-theme="dark"] .about {
-    background: #1A1207;
-  }
-
-  [data-theme="dark"] .about-title {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .about-subtitle,
-  [data-theme="dark"] .story-text {
-    color: #A89880;
-  }
-
-  [data-theme="dark"] .label-text {
-    color: #A89880;
-  }
-
-  [data-theme="dark"] .stat-card,
-  [data-theme="dark"] .feature-card {
-    background: #2C2210;
-    border-color: rgba(240, 233, 220, 0.12);
-  }
-
-  [data-theme="dark"] .stat-label,
-  [data-theme="dark"] .feature-description {
-    color: #A89880;
-  }
-
-  [data-theme="dark"] .section-title,
-  [data-theme="dark"] .feature-title,
-  [data-theme="dark"] .milestone-title {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .milestone-desc {
-    color: #A89880;
-  }
-
-  [data-theme="dark"] .milestone-line {
-    background: rgba(240, 233, 220, 0.15);
-  }
-
-  [data-theme="dark"] .tech-card {
-    background: #2C2210;
-    border-color: rgba(240, 233, 220, 0.12);
-  }
-
-  [data-theme="dark"] .tech-name {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .cta-section {
-    background: #2C2210;
-  }
-
-  [data-theme="dark"] .cta-desc {
-    color: #8A7A62;
   }
 </style>

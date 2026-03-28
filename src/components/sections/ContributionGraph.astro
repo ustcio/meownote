@@ -112,7 +112,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
 
 <style>
   .contribution {
-    background: #F0E9DC;
+    background: var(--bg-secondary);
     padding: var(--space-16) var(--space-6);
   }
 
@@ -143,13 +143,13 @@ const totalWeeks = Math.ceil(totalDays / 7);
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #C06B3E;
+    background: var(--color-primary);
   }
 
   .label-text {
     font-family: var(--font-sans);
     font-size: var(--text-xs);
-    color: #7A6A52;
+    color: var(--text-secondary);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -158,7 +158,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
     font-family: var(--font-display);
     font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: var(--font-normal);
-    color: #1A1207;
+    color: var(--text-primary);
     margin-bottom: var(--space-2);
   }
 
@@ -169,7 +169,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
   .contribution-year {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    color: #7A6A52;
+    color: var(--text-secondary);
   }
 
   .contribution-graph-wrapper {
@@ -199,7 +199,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
     left: calc(var(--week) * 14px);
     font-family: var(--font-sans);
     font-size: 11px;
-    color: #9A8A72;
+    color: var(--text-tertiary);
     font-weight: 400;
   }
 
@@ -218,7 +218,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
   .contribution-day {
     font-family: var(--font-sans);
     font-size: 10px;
-    color: #9A8A72;
+    color: var(--text-tertiary);
     height: 11px;
     line-height: 11px;
   }
@@ -238,14 +238,14 @@ const totalWeeks = Math.ceil(totalDays / 7);
     width: 11px;
     height: 11px;
     border-radius: 2px;
-    background-color: #EDE5D4;
+    background-color: var(--contribution-0);
     transition: transform 0.15s ease;
   }
 
-  .contribution-cell[data-level="1"] { background-color: #E8C9B5; }
-  .contribution-cell[data-level="2"] { background-color: #D9A082; }
-  .contribution-cell[data-level="3"] { background-color: #C0785A; }
-  .contribution-cell[data-level="4"] { background-color: #A85A32; }
+  .contribution-cell[data-level="1"] { background-color: var(--contribution-1); }
+  .contribution-cell[data-level="2"] { background-color: var(--contribution-2); }
+  .contribution-cell[data-level="3"] { background-color: var(--contribution-3); }
+  .contribution-cell[data-level="4"] { background-color: var(--contribution-4); }
 
   .contribution-cell:hover {
     transform: scale(1.2);
@@ -262,7 +262,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
   .legend-text {
     font-family: var(--font-sans);
     font-size: 11px;
-    color: #9A8A72;
+    color: var(--text-tertiary);
   }
 
   .legend-cells {
@@ -276,11 +276,11 @@ const totalWeeks = Math.ceil(totalDays / 7);
     border-radius: 2px;
   }
 
-  .legend-cell[data-level="0"] { background-color: #EDE5D4; }
-  .legend-cell[data-level="1"] { background-color: #E8C9B5; }
-  .legend-cell[data-level="2"] { background-color: #D9A082; }
-  .legend-cell[data-level="3"] { background-color: #C0785A; }
-  .legend-cell[data-level="4"] { background-color: #A85A32; }
+  .legend-cell[data-level="0"] { background-color: var(--contribution-0); }
+  .legend-cell[data-level="1"] { background-color: var(--contribution-1); }
+  .legend-cell[data-level="2"] { background-color: var(--contribution-2); }
+  .legend-cell[data-level="3"] { background-color: var(--contribution-3); }
+  .legend-cell[data-level="4"] { background-color: var(--contribution-4); }
 </style>
 
 <script>
@@ -321,7 +321,6 @@ const totalWeeks = Math.ceil(totalDays / 7);
     const cells = document.querySelectorAll('.contribution-cell[data-date]');
     const cellData: { cell: Element; count: number }[] = [];
     
-    // 收集所有数据
     cells.forEach(cell => {
       const date = cell.getAttribute('data-date');
       if (date && data[date]) {
@@ -331,11 +330,9 @@ const totalWeeks = Math.ceil(totalDays / 7);
     
     if (cellData.length === 0) return;
     
-    // 计算分位数阈值（基于实际数据分布）
     const nonZeroCounts = cellData.map(d => d.count).filter(c => c > 0).sort((a, b) => a - b);
     const thresholds = calculateQuantileThresholds(nonZeroCounts);
     
-    // 应用分级
     cellData.forEach(({ cell, count }) => {
       const level = calculateLevel(count, thresholds);
       cell.setAttribute('data-level', String(level));
@@ -346,18 +343,10 @@ const totalWeeks = Math.ceil(totalDays / 7);
     });
   }
   
-  /**
-   * 基于分位数计算阈值
-   * 使用五分位数，确保每个颜色级别有大致相同数量的数据点
-   * 附加对数尺度处理，使低流量区域也能有效区分
-   */
   function calculateQuantileThresholds(sortedCounts: number[]): number[] {
     if (sortedCounts.length === 0) return [];
     
     const len = sortedCounts.length;
-    
-    // 使用五分位数：0-20%, 20-40%, 40-60%, 60-80%, 80-100%
-    // 对应 level 1-4 的上限阈值
     const percentiles = [0.2, 0.4, 0.6, 0.8, 1.0];
     
     return percentiles.map(p => {
@@ -366,15 +355,10 @@ const totalWeeks = Math.ceil(totalDays / 7);
     });
   }
   
-  /**
-   * 计算颜色级别
-   * 结合分位数阈值和对数尺度，确保低、中、高流量区域都能有效区分
-   */
   function calculateLevel(count: number, thresholds: number[]): number {
     if (count === 0) return 0;
     if (thresholds.length === 0) return 1;
     
-    // 首先尝试分位数分级
     for (let i = 0; i < thresholds.length; i++) {
       if (count <= thresholds[i]) {
         return Math.min(i + 1, 4);

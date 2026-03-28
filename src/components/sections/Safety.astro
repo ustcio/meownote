@@ -51,7 +51,7 @@ const iconPaths: Record<string, string> = {
 
 <style>
   .safety {
-    background: #F0E9DC;
+    background: var(--bg-secondary);
     padding: var(--space-16) var(--space-6);
   }
 
@@ -82,13 +82,13 @@ const iconPaths: Record<string, string> = {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #C06B3E;
+    background: var(--color-primary);
   }
 
   .label-text {
     font-family: var(--font-sans);
     font-size: var(--text-xs);
-    color: #6B5C42;
+    color: var(--text-tertiary);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -99,19 +99,19 @@ const iconPaths: Record<string, string> = {
     font-weight: var(--font-normal);
     line-height: 1.1;
     letter-spacing: -0.02em;
-    color: #1A1207;
+    color: var(--text-primary);
     margin-bottom: var(--space-5);
   }
 
   .safety-title em {
     font-style: normal;
-    color: #C06B3E;
+    color: var(--color-primary);
   }
 
   .safety-description {
     font-family: var(--font-sans);
     font-size: var(--text-base);
-    color: #6B5C42;
+    color: var(--text-secondary);
     line-height: 1.7;
   }
 
@@ -119,8 +119,8 @@ const iconPaths: Record<string, string> = {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1px;
-    border: 1px solid #D0C4B0;
-    background: #D0C4B0;
+    border: 1px solid var(--border-primary);
+    background: var(--border-primary);
   }
 
   @media (min-width: 640px) {
@@ -136,7 +136,7 @@ const iconPaths: Record<string, string> = {
   }
 
   .safety-card {
-    background: #F0E9DC;
+    background: var(--card-bg);
     padding: var(--space-6);
     cursor: pointer;
     transition: background-color 300ms var(--ease-default);
@@ -150,23 +150,23 @@ const iconPaths: Record<string, string> = {
   }
 
   .safety-card:hover {
-    background: #EDE5D4;
+    background: var(--card-bg-hover);
   }
 
   .safety-card:hover .card-title {
-    color: #C06B3E;
+    color: var(--color-primary);
   }
 
   .card-icon {
     width: 40px;
     height: 40px;
-    background: rgba(192, 107, 62, 0.15);
+    background: var(--color-primary-light);
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: var(--space-5);
-    color: #C06B3E;
+    color: var(--color-primary);
     transition: all var(--duration-normal) var(--ease-default);
   }
 
@@ -176,7 +176,7 @@ const iconPaths: Record<string, string> = {
   }
 
   .safety-card:hover .card-icon {
-    background: rgba(192, 107, 62, 0.25);
+    background: var(--color-primary-subtle);
     transform: scale(1.05);
   }
 
@@ -186,7 +186,7 @@ const iconPaths: Record<string, string> = {
     font-weight: var(--font-normal);
     line-height: 1.35;
     letter-spacing: -0.01em;
-    color: #1A1207;
+    color: var(--text-primary);
     margin-bottom: var(--space-3);
     transition: color 300ms var(--ease-default);
   }
@@ -194,42 +194,7 @@ const iconPaths: Record<string, string> = {
   .card-description {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    color: #6B5C42;
+    color: var(--text-secondary);
     line-height: 1.65;
-  }
-
-  /* Dark theme */
-  [data-theme="dark"] .safety {
-    background: #1A1207;
-  }
-
-  [data-theme="dark"] .safety-title {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .safety-description,
-  [data-theme="dark"] .label-text {
-    color: #A89880;
-  }
-
-  [data-theme="dark"] .safety-grid {
-    border-color: rgba(240, 233, 220, 0.1);
-    background: rgba(240, 233, 220, 0.1);
-  }
-
-  [data-theme="dark"] .safety-card {
-    background: #1A1207;
-  }
-
-  [data-theme="dark"] .safety-card:hover {
-    background: #2C2210;
-  }
-
-  [data-theme="dark"] .card-title {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .card-description {
-    color: #A89880;
   }
 </style>

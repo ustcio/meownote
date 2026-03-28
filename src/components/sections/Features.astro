@@ -4,7 +4,7 @@ const products = [
     id: 1,
     name: "LiveChat",
     badge: "Most Popular",
-    badgeColor: "#C06B3E",
+    badgeColor: "#D97757",
     description: "Our most capable conversational model. Exceptional at complex analysis, coding, and nuanced dialogue.",
     capabilities: ["Advanced reasoning", "Code generation", "Long context", "Vision"],
     icon: "chat"
@@ -57,7 +57,7 @@ const iconPaths: Record<string, string> = {
         <div class="product-card">
           <div class="product-header">
             <div class="product-icon" style={`background: ${product.badgeColor};`}>
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#F0E9DC">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="white">
                 <Fragment set:html={iconPaths[product.icon]} />
               </svg>
             </div>
@@ -97,7 +97,7 @@ const iconPaths: Record<string, string> = {
 
 <style>
   .products {
-    background: #F0E9DC;
+    background: var(--bg-primary);
     padding: var(--space-10) var(--space-5);
   }
 
@@ -134,14 +134,14 @@ const iconPaths: Record<string, string> = {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #C06B3E;
+    background: var(--color-primary);
   }
 
   .label-text {
     font-family: var(--font-sans);
     font-size: 11px;
     font-weight: var(--font-medium);
-    color: #7A6A52;
+    color: var(--text-tertiary);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -158,14 +158,14 @@ const iconPaths: Record<string, string> = {
     font-weight: var(--font-normal);
     line-height: 1.15;
     letter-spacing: -0.02em;
-    color: #1A1207;
+    color: var(--text-primary);
     margin-bottom: var(--space-4);
   }
 
   .products-description {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    color: #6B5C42;
+    color: var(--text-secondary);
     line-height: 1.65;
   }
 
@@ -192,14 +192,15 @@ const iconPaths: Record<string, string> = {
   }
 
   .product-card {
-    border: 1px solid #D0C4B0;
+    border: 1px solid var(--card-border);
     border-radius: 14px;
-    background: #EDE5D4;
+    background: var(--card-bg);
     padding: var(--space-5);
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
     transition: border-color var(--duration-normal) var(--ease-default);
+    box-shadow: var(--card-shadow);
   }
 
   @media (min-width: 768px) {
@@ -211,17 +212,18 @@ const iconPaths: Record<string, string> = {
   }
 
   .product-card:active {
-    border-color: #C06B3E;
-    background: rgba(192, 107, 62, 0.04);
+    border-color: var(--color-primary);
+    background: var(--color-primary-light);
   }
 
   @media (hover: hover) {
     .product-card:hover {
-      border-color: #C4B9A5;
+      border-color: var(--card-border-hover);
+      box-shadow: var(--card-shadow-hover);
     }
     
     .product-card:hover .product-name {
-      color: #C06B3E;
+      color: var(--color-primary);
     }
     
     .product-card:hover .product-icon {
@@ -291,7 +293,7 @@ const iconPaths: Record<string, string> = {
     font-size: var(--text-lg);
     font-weight: var(--font-normal);
     letter-spacing: -0.01em;
-    color: #1A1207;
+    color: var(--text-primary);
     margin-bottom: var(--space-2);
     transition: color var(--duration-normal) var(--ease-default);
   }
@@ -299,7 +301,7 @@ const iconPaths: Record<string, string> = {
   .product-description {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    color: #6B5C42;
+    color: var(--text-secondary);
     line-height: 1.6;
   }
 
@@ -314,8 +316,8 @@ const iconPaths: Record<string, string> = {
     font-family: var(--font-sans);
     font-size: 11px;
     font-weight: var(--font-medium);
-    color: #7A6A52;
-    border: 1px solid #C4B9A5;
+    color: var(--text-tertiary);
+    border: 1px solid var(--border-primary);
     border-radius: var(--radius-full);
     padding: 4px 10px;
   }
@@ -328,12 +330,13 @@ const iconPaths: Record<string, string> = {
   }
 
   .products-cta {
-    background: #1A1207;
+    background: var(--bg-elevated);
     border-radius: 14px;
     padding: var(--space-5);
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
+    box-shadow: var(--card-shadow);
   }
 
   @media (min-width: 640px) {
@@ -370,7 +373,7 @@ const iconPaths: Record<string, string> = {
     font-weight: var(--font-normal);
     line-height: 1.25;
     letter-spacing: -0.02em;
-    color: #F0E9DC;
+    color: var(--text-primary);
     margin-bottom: var(--space-2);
   }
 
@@ -384,7 +387,7 @@ const iconPaths: Record<string, string> = {
   .cta-description {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    color: #A89880;
+    color: var(--text-secondary);
     line-height: 1.6;
   }
 
@@ -428,80 +431,36 @@ const iconPaths: Record<string, string> = {
   }
 
   .cta-primary {
-    background: #C06B3E;
-    color: #F0E9DC;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
   }
 
   .cta-primary:active {
-    background: #A85A32;
+    background: var(--btn-primary-hover);
   }
 
   @media (hover: hover) {
     .cta-primary:hover {
-      background: #A85A32;
+      background: var(--btn-primary-hover);
     }
   }
 
   .cta-secondary {
-    color: #F0E9DC;
-    border: 1px solid rgba(240, 233, 220, 0.25);
+    color: var(--btn-secondary-text);
+    border: 1px solid var(--btn-secondary-border);
   }
 
   .cta-secondary:active {
-    border-color: rgba(240, 233, 220, 0.6);
-    background: rgba(240, 233, 220, 0.05);
+    border-color: var(--border-hover);
+    background: var(--btn-secondary-hover-bg);
   }
 
   @media (hover: hover) {
     .cta-secondary:hover {
-      border-color: rgba(240, 233, 220, 0.5);
+      border-color: var(--border-hover);
     }
   }
 
-  [data-theme="dark"] .products {
-    background: #1A1207;
-  }
-
-  [data-theme="dark"] .products-title {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .products-description {
-    color: #A89880;
-  }
-
-  [data-theme="dark"] .product-card {
-    background: #2C2210;
-    border-color: rgba(240, 233, 220, 0.12);
-  }
-
-  [data-theme="dark"] .product-card:active {
-    background: rgba(192, 107, 62, 0.1);
-    border-color: #C06B3E;
-  }
-
-  [data-theme="dark"] .product-name {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .product-description {
-    color: #A89880;
-  }
-
-  [data-theme="dark"] .product-tag {
-    color: #A89880;
-    border-color: rgba(240, 233, 220, 0.15);
-  }
-
-  [data-theme="dark"] .products-cta {
-    background: #2C2210;
-  }
-
-  [data-theme="dark"] .cta-description {
-    color: #8A7A62;
-  }
-
-  /* Mobile optimizations */
   @media (max-width: 480px) {
     .product-card {
       padding: var(--space-4);

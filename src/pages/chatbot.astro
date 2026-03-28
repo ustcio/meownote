@@ -63,7 +63,7 @@ const suggestions = [
           <div class="chat-welcome" id="chat-welcome">
             <div class="welcome-icon">
               <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                <rect width="48" height="48" rx="12" fill="#C06B3E"/>
+                <rect width="48" height="48" rx="12" fill="var(--color-primary)"/>
                 <path d="M24 8L38 36H10L24 8Z" fill="white"/>
               </svg>
             </div>
@@ -572,98 +572,6 @@ const suggestions = [
     }
   }
 
-  /* Dark theme */
-  [data-theme="dark"] .chatbot {
-    background: #1A1207;
-  }
-
-  [data-theme="dark"] .hero-title {
-    background: linear-gradient(135deg, #F0E9DC, #C06B3E);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  [data-theme="dark"] .hero-tagline {
-    color: #C06B3E;
-  }
-
-  [data-theme="dark"] .hero-description {
-    color: #A89880;
-  }
-
-  [data-theme="dark"] .chat-interface {
-    background: #2C2210;
-    border-color: rgba(240, 233, 220, 0.12);
-  }
-
-  [data-theme="dark"] .welcome-title {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .welcome-subtitle {
-    color: #A89880;
-  }
-
-  [data-theme="dark"] .suggestion-btn {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(240, 233, 220, 0.12);
-    color: #A89880;
-  }
-
-  [data-theme="dark"] .suggestion-btn:hover {
-    background: rgba(192, 107, 62, 0.1);
-    border-color: #C06B3E;
-    color: #C06B3E;
-  }
-
-  [data-theme="dark"] .message.assistant .message-content {
-    background: #1A1207;
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .input-wrapper {
-    background: #1A1207;
-    border-color: rgba(240, 233, 220, 0.12);
-  }
-
-  [data-theme="dark"] .chat-input {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .chat-input::placeholder {
-    color: #6A5A42;
-  }
-
-  [data-theme="dark"] .input-hint {
-    color: #6A5A42;
-  }
-
-  [data-theme="dark"] .feature-card {
-    background: #2C2210;
-    border-color: rgba(240, 233, 220, 0.12);
-  }
-
-  [data-theme="dark"] .feature-title {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .feature-desc {
-    color: #A89880;
-  }
-
-  [data-theme="dark"] .cta-section {
-    background: linear-gradient(135deg, rgba(192, 107, 62, 0.15), transparent);
-    border-color: rgba(192, 107, 62, 0.2);
-  }
-
-  [data-theme="dark"] .cta-title {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .cta-subtitle {
-    color: #A89880;
-  }
 </style>
 
 <script>

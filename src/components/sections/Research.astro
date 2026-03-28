@@ -70,7 +70,7 @@ const papers = [
 
 <style>
   .research {
-    background: #EDE5D4;
+    background: var(--bg-secondary);
     padding: var(--space-16) var(--space-6);
   }
 
@@ -111,13 +111,13 @@ const papers = [
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #C06B3E;
+    background: var(--color-primary);
   }
 
   .label-text {
     font-family: var(--font-sans);
     font-size: var(--text-xs);
-    color: #7A6A52;
+    color: var(--text-tertiary);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -128,18 +128,14 @@ const papers = [
     font-weight: var(--font-normal);
     line-height: 1.1;
     letter-spacing: -0.02em;
-    color: #1A1207;
-  }
-
-  .research-title em {
-    font-style: normal;
+    color: var(--text-primary);
   }
 
   .research-link {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    color: #3D3521;
-    border-bottom: 1px solid #C4B9A5;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-secondary);
     text-decoration: none;
     padding-bottom: 2px;
     white-space: nowrap;
@@ -148,16 +144,16 @@ const papers = [
   }
 
   .research-link:hover {
-    border-color: #1A1207;
-    color: #1A1207;
+    border-color: var(--text-primary);
+    color: var(--text-primary);
   }
 
   .research-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1px;
-    border: 1px solid #D0C4B0;
-    background: #D0C4B0;
+    border: 1px solid var(--border-primary);
+    background: var(--border-primary);
   }
 
   @media (min-width: 768px) {
@@ -167,7 +163,7 @@ const papers = [
   }
 
   .research-card {
-    background: #F0E9DC;
+    background: var(--card-bg);
     padding: var(--space-6);
     cursor: pointer;
     transition: background-color 300ms var(--ease-default);
@@ -181,11 +177,11 @@ const papers = [
   }
 
   .research-card:hover {
-    background: #EDE0CC;
+    background: var(--card-bg-hover);
   }
 
   .research-card:hover .card-title {
-    color: #C06B3E;
+    color: var(--color-primary);
   }
 
   .card-header {
@@ -198,8 +194,8 @@ const papers = [
   .card-tag {
     font-family: var(--font-sans);
     font-size: var(--text-xs);
-    color: #C06B3E;
-    background: rgba(192, 107, 62, 0.1);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
     padding: var(--space-1) var(--space-3);
     border-radius: var(--radius-full);
   }
@@ -207,7 +203,7 @@ const papers = [
   .card-date {
     font-family: var(--font-sans);
     font-size: var(--text-xs);
-    color: #9A8A72;
+    color: var(--text-tertiary);
   }
 
   .card-title {
@@ -216,7 +212,7 @@ const papers = [
     font-weight: var(--font-normal);
     line-height: 1.35;
     letter-spacing: -0.01em;
-    color: #1A1207;
+    color: var(--text-primary);
     margin-bottom: var(--space-3);
     transition: color 300ms var(--ease-default);
   }
@@ -224,7 +220,7 @@ const papers = [
   .card-description {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    color: #6B5C42;
+    color: var(--text-secondary);
     line-height: 1.65;
     margin-bottom: var(--space-6);
   }
@@ -232,57 +228,6 @@ const papers = [
   .card-readtime {
     font-family: var(--font-sans);
     font-size: var(--text-xs);
-    color: #9A8A72;
-  }
-
-  /* Dark theme */
-  [data-theme="dark"] .research {
-    background: #2C2210;
-  }
-
-  [data-theme="dark"] .research-title {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .research-link {
-    color: #A89880;
-    border-color: rgba(240, 233, 220, 0.2);
-  }
-
-  [data-theme="dark"] .research-link:hover {
-    color: #F0E9DC;
-    border-color: rgba(240, 233, 220, 0.4);
-  }
-
-  [data-theme="dark"] .research-grid {
-    border-color: rgba(240, 233, 220, 0.1);
-    background: rgba(240, 233, 220, 0.1);
-  }
-
-  [data-theme="dark"] .research-card {
-    background: #1A1207;
-  }
-
-  [data-theme="dark"] .research-card:hover {
-    background: #2C2210;
-  }
-
-  [data-theme="dark"] .card-tag {
-    color: #C06B3E;
-    background: rgba(192, 107, 62, 0.15);
-  }
-
-  [data-theme="dark"] .card-date,
-  [data-theme="dark"] .label-text {
-    color: #A89880;
-  }
-
-  [data-theme="dark"] .card-title {
-    color: #F0E9DC;
-  }
-
-  [data-theme="dark"] .card-description,
-  [data-theme="dark"] .card-readtime {
-    color: #A89880;
+    color: var(--text-tertiary);
   }
 </style>
