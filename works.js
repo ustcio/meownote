@@ -208,6 +208,107 @@ function getClientIP(request) {
          'unknown';
 }
 
+const WORKSPACE_TEXT_TYPES = new Set([
+  'txt',
+  'md',
+  'markdown',
+  'clipboard',
+  'json',
+  'js',
+  'jsx',
+  'ts',
+  'tsx',
+  'css',
+  'html',
+  'csv',
+]);
+
+function normalizeWorkspaceTitle(title) {
+  if (typeof title !== 'string') return 'Untitled';
+  const normalized = title.trim().substring(0, 200);
+  return normalized || 'Untitled';
+}
+
+function normalizeWorkspaceContent(content) {
+  return typeof content === 'string' ? content : '';
+}
+
+function normalizeWorkspaceType(type) {
+  if (typeof type !== 'string' || !type.trim()) return 'txt';
+  return type.trim().toLowerCase().substring(0, 20);
+}
+
+function isWorkspaceTextType(type) {
+  return WORKSPACE_TEXT_TYPES.has(normalizeWorkspaceType(type));
+}
+
+function getWorkspaceStoragePath(fileId, type) {
+  return `workspace/${fileId}.${normalizeWorkspaceType(type) || 'bin'}`;
+}
+
+function isWorkspaceStoragePath(fileUrl) {
+  return typeof fileUrl === 'string' && fileUrl.startsWith('workspace/');
+}
+
+function getWorkspaceMimeType(type) {
+  const normalizedType = normalizeWorkspaceType(type);
+  const mimeTypes = {
+    txt: 'text/plain',
+    md: 'text/markdown',
+    markdown: 'text/markdown',
+    clipboard: 'text/plain',
+    json: 'application/json',
+    js: 'text/javascript',
+    jsx: 'text/javascript',
+    ts: 'text/plain',
+    tsx: 'text/plain',
+    css: 'text/css',
+    html: 'text/html',
+    csv: 'text/csv',
+    pdf: 'application/pdf',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    xls: 'application/vnd.ms-excel',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    zip: 'application/zip',
+    rar: 'application/vnd.rar',
+  };
+
+  return mimeTypes[normalizedType] || 'application/octet-stream';
+}
+
+function getWorkspaceDownloadExtension(type) {
+  const normalizedType = normalizeWorkspaceType(type);
+  if (!normalizedType) return '';
+  if (normalizedType === 'clipboard') return 'txt';
+  if (normalizedType === 'markdown') return 'md';
+  return normalizedType;
+}
+
+function buildWorkspaceFilename(title, type) {
+  const safeTitle = normalizeWorkspaceTitle(title);
+  const extension = getWorkspaceDownloadExtension(type);
+
+  if (!extension) {
+    return safeTitle;
+  }
+
+  if (safeTitle.toLowerCase().endsWith(`.${extension}`)) {
+    return safeTitle;
+  }
+
+  return `${safeTitle}.${extension}`;
+}
+
+function buildContentDisposition(filename) {
+  const fallback = filename.replace(/[^\x20-\x7E]/g, '_').replace(/"/g, '\\"');
+  return `attachment; filename="${fallback}"; filename*=UTF-8''${encodeURIComponent(filename)}`;
+}
+
 // ================================================================================
 // 1. Unified Chat API (Qwen & Doubao Models)
 // ================================================================================
@@ -5805,7 +5906,6 @@ function generateWorkspaceId() {
 
 async function handleWorkspace(request, env, ctx, match) {
   const method = request.method;
-  const url = new URL(request.url);
 
   let fileId = null;
   let subAction = null;
@@ -5817,6 +5917,9 @@ async function handleWorkspace(request, env, ctx, match) {
   }
 
   if (method === 'GET') {
+    if (fileId && subAction === 'download') {
+      return await downloadWorkspaceFile(env, fileId);
+    }
     if (fileId) {
       return await getWorkspaceFile(env, fileId);
     } else {
@@ -5834,6 +5937,12 @@ async function handleWorkspace(request, env, ctx, match) {
     if (fileId) {
       return jsonResponse({ success: false, message: 'Invalid operation' }, 400);
     }
+
+    const contentType = request.headers.get('Content-Type') || '';
+    if (contentType.includes('multipart/form-data')) {
+      return await uploadWorkspaceFile(request, env);
+    }
+
     return await createWorkspaceFile(request, env);
   }
 
@@ -5891,6 +6000,7 @@ async function listWorkspaceFiles(request, env) {
       content: row.content || '',
       type: row.type || 'txt',
       fileUrl: row.file_url || '',
+      downloadUrl: `/api/workspace/${row.id}/download`,
       fileSize: row.file_size || 0,
       createdAt: row.created_at,
       updatedAt: row.updated_at
@@ -5929,6 +6039,7 @@ async function getWorkspaceFile(env, fileId) {
         content: result.content || '',
         type: result.type || 'txt',
         fileUrl: result.file_url || '',
+        downloadUrl: `/api/workspace/${result.id}/download`,
         fileSize: result.file_size || 0,
         createdAt: result.created_at,
         updatedAt: result.updated_at
@@ -5957,34 +6068,99 @@ async function createWorkspaceFile(request, env) {
     }
     
     const fileId = generateWorkspaceId();
-    const sanitizedTitle = sanitizeInput(title).substring(0, 200);
-    const sanitizedContent = content ? sanitizeInput(content) : '';
-    const sanitizedType = type || 'txt';
-    const sanitizedFileUrl = fileUrl || '';
-    const sanitizedFileSize = fileSize || 0;
+    const normalizedTitle = normalizeWorkspaceTitle(title);
+    const normalizedContent = normalizeWorkspaceContent(content);
+    const normalizedType = normalizeWorkspaceType(type);
+    const normalizedFileUrl = typeof fileUrl === 'string' ? fileUrl : '';
+    const normalizedFileSize = Number(fileSize) || 0;
     
     await env.DB.prepare(
       `INSERT INTO workspace_files (id, title, content, type, file_url, file_size, created_at, updated_at) 
        VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
-    ).bind(fileId, sanitizedTitle, sanitizedContent, sanitizedType, sanitizedFileUrl, sanitizedFileSize).run();
+    ).bind(fileId, normalizedTitle, normalizedContent, normalizedType, normalizedFileUrl, normalizedFileSize).run();
     
-    console.log('[Workspace] Created file:', fileId, sanitizedTitle);
+    console.log('[Workspace] Created file:', fileId, normalizedTitle);
     
     return jsonResponse({
       success: true,
       data: {
         id: fileId,
-        title: sanitizedTitle,
-        content: sanitizedContent,
-        type: sanitizedType,
-        fileUrl: sanitizedFileUrl,
-        fileSize: sanitizedFileSize
+        title: normalizedTitle,
+        content: normalizedContent,
+        type: normalizedType,
+        fileUrl: normalizedFileUrl,
+        downloadUrl: `/api/workspace/${fileId}/download`,
+        fileSize: normalizedFileSize
       }
     });
     
   } catch (error) {
     console.error('[Workspace] Create error:', error);
     return jsonResponse({ success: false, message: 'Failed to create file', error: error.message }, 500);
+  }
+}
+
+async function uploadWorkspaceFile(request, env) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get('file');
+
+    if (!file || !(file instanceof File)) {
+      return jsonResponse({ success: false, message: 'File is required' }, 400);
+    }
+
+    const originalName = normalizeWorkspaceTitle(file.name || 'Untitled');
+    const extensionFromName = originalName.includes('.') ? originalName.split('.').pop() : '';
+    const baseTitle = originalName.replace(/\.[^/.]+$/, '') || originalName;
+    const normalizedType = normalizeWorkspaceType(
+      extensionFromName || file.type.split('/').pop() || 'bin'
+    );
+    const normalizedTitle = normalizeWorkspaceTitle(baseTitle);
+    const fileId = generateWorkspaceId();
+
+    let content = '';
+    let fileUrl = '';
+
+    if (isWorkspaceTextType(normalizedType)) {
+      content = await file.text();
+    } else {
+      if (!env.R2) {
+        return jsonResponse({ success: false, message: 'File storage unavailable' }, 503);
+      }
+
+      fileUrl = getWorkspaceStoragePath(fileId, normalizedType);
+      await env.R2.put(fileUrl, file.stream(), {
+        httpMetadata: {
+          contentType: file.type || getWorkspaceMimeType(normalizedType),
+        },
+        customMetadata: {
+          originalName,
+          scope: 'workspace',
+        },
+      });
+    }
+
+    await env.DB.prepare(
+      `INSERT INTO workspace_files (id, title, content, type, file_url, file_size, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
+    ).bind(fileId, normalizedTitle, content, normalizedType, fileUrl, file.size || 0).run();
+
+    return jsonResponse({
+      success: true,
+      data: {
+        id: fileId,
+        title: normalizedTitle,
+        content,
+        type: normalizedType,
+        fileUrl,
+        downloadUrl: `/api/workspace/${fileId}/download`,
+        fileSize: file.size || 0,
+      }
+    });
+
+  } catch (error) {
+    console.error('[Workspace] Upload error:', error);
+    return jsonResponse({ success: false, message: 'Failed to upload file', error: error.message }, 500);
   }
 }
 
@@ -6007,8 +6183,8 @@ async function updateWorkspaceFile(request, env, fileId) {
     
     const { title, content } = body;
     
-    const newTitle = title !== undefined ? sanitizeInput(title).substring(0, 200) : existing.title;
-    const newContent = content !== undefined ? sanitizeInput(content) : existing.content;
+    const newTitle = title !== undefined ? normalizeWorkspaceTitle(title) : existing.title;
+    const newContent = content !== undefined ? normalizeWorkspaceContent(content) : existing.content;
     
     await env.DB.prepare(
       `UPDATE workspace_files SET title = ?, content = ?, updated_at = datetime('now') WHERE id = ?`
@@ -6040,6 +6216,14 @@ async function deleteWorkspaceFile(env, fileId) {
     
     if (!existing) {
       return jsonResponse({ success: false, message: 'File not found' }, 404);
+    }
+
+    if (env.R2 && existing.file_url && isWorkspaceStoragePath(existing.file_url)) {
+      try {
+        await env.R2.delete(existing.file_url);
+      } catch (error) {
+        console.warn('[Workspace] Failed to delete object:', existing.file_url, error);
+      }
     }
     
     await env.DB.prepare(
@@ -6106,14 +6290,31 @@ async function duplicateWorkspaceFile(env, fileId) {
     }
 
     const newId = generateWorkspaceId();
-    const newTitle = (existing.title || 'Untitled') + ' (copy)';
-    const sanitizedTitle = sanitizeInput(newTitle).substring(0, 200);
-    const sanitizedContent = existing.content || '';
+    const newTitle = normalizeWorkspaceTitle(`${existing.title || 'Untitled'} (copy)`);
+    const newContent = existing.content || '';
+    let duplicatedFileUrl = existing.file_url || '';
+
+    if (duplicatedFileUrl && env.R2 && isWorkspaceStoragePath(duplicatedFileUrl) && !isWorkspaceTextType(existing.type)) {
+      const existingObject = await env.R2.get(duplicatedFileUrl);
+      if (existingObject) {
+        duplicatedFileUrl = getWorkspaceStoragePath(newId, existing.type || 'bin');
+        await env.R2.put(duplicatedFileUrl, existingObject.body, {
+          httpMetadata: {
+            contentType: existingObject.httpMetadata?.contentType || getWorkspaceMimeType(existing.type),
+          },
+          customMetadata: {
+            originalName: buildWorkspaceFilename(newTitle, existing.type),
+            scope: 'workspace',
+            duplicatedFrom: fileId,
+          },
+        });
+      }
+    }
 
     await env.DB.prepare(
       `INSERT INTO workspace_files (id, title, content, type, file_url, file_size, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
-    ).bind(newId, sanitizedTitle, sanitizedContent, existing.type || 'txt', existing.file_url || '', existing.file_size || 0).run();
+    ).bind(newId, newTitle, newContent, existing.type || 'txt', duplicatedFileUrl, existing.file_size || 0).run();
 
     console.log('[Workspace] Duplicated file:', fileId, '->', newId);
 
@@ -6121,10 +6322,11 @@ async function duplicateWorkspaceFile(env, fileId) {
       success: true,
       data: {
         id: newId,
-        title: sanitizedTitle,
-        content: sanitizedContent,
+        title: newTitle,
+        content: newContent,
         type: existing.type || 'txt',
-        fileUrl: existing.file_url || '',
+        fileUrl: duplicatedFileUrl,
+        downloadUrl: `/api/workspace/${newId}/download`,
         fileSize: existing.file_size || 0
       }
     });
@@ -6132,5 +6334,51 @@ async function duplicateWorkspaceFile(env, fileId) {
   } catch (error) {
     console.error('[Workspace] Duplicate error:', error);
     return jsonResponse({ success: false, message: 'Failed to duplicate file', error: error.message }, 500);
+  }
+}
+
+async function downloadWorkspaceFile(env, fileId) {
+  try {
+    const file = await env.DB.prepare(
+      'SELECT * FROM workspace_files WHERE id = ?'
+    ).bind(fileId).first();
+
+    if (!file) {
+      return jsonResponse({ success: false, message: 'File not found' }, 404);
+    }
+
+    const filename = buildWorkspaceFilename(file.title, file.type);
+    const headers = new Headers({
+      'Access-Control-Allow-Origin': '*',
+      'Content-Disposition': buildContentDisposition(filename),
+      'Cache-Control': 'no-store',
+    });
+
+    if (isWorkspaceTextType(file.type)) {
+      headers.set('Content-Type', `${getWorkspaceMimeType(file.type)}; charset=utf-8`);
+      return new Response(file.content || '', { status: 200, headers });
+    }
+
+    if (file.file_url && env.R2) {
+      const object = await env.R2.get(file.file_url);
+      if (object) {
+        headers.set('Content-Type', object.httpMetadata?.contentType || getWorkspaceMimeType(file.type));
+        return new Response(object.body, { status: 200, headers });
+      }
+    }
+
+    if (typeof file.file_url === 'string' && /^https?:\/\//i.test(file.file_url)) {
+      const remoteResponse = await fetch(file.file_url);
+      if (remoteResponse.ok) {
+        headers.set('Content-Type', remoteResponse.headers.get('Content-Type') || getWorkspaceMimeType(file.type));
+        return new Response(remoteResponse.body, { status: 200, headers });
+      }
+    }
+
+    return jsonResponse({ success: false, message: 'File data unavailable' }, 404);
+
+  } catch (error) {
+    console.error('[Workspace] Download error:', error);
+    return jsonResponse({ success: false, message: 'Failed to download file', error: error.message }, 500);
   }
 }

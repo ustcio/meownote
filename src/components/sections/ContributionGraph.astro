@@ -38,98 +38,162 @@ const totalDays = Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60
 const totalWeeks = Math.ceil(totalDays / 7);
 ---
 
-<section class="contribution">
-  <div class="contribution-container">
-    <div class="contribution-header">
-      <div class="header-label">
-        <span class="label-dot"></span>
-        <span class="label-text">Activity</span>
+<section class="claude-section claude-section--cream">
+  <div class="container">
+    <div class="contribution-layout">
+      <div class="claude-section-heading contribution-heading">
+        <span class="claude-kicker">Live activity</span>
+        <h2>A quieter way to show that the site is alive.</h2>
+        <p>
+          The homepage needed the heatmap back, but it fits better as a calm signal than a loud dashboard.
+          This view shows the rhythm of real visits over the last year without pulling attention away from the rest of the page.
+        </p>
       </div>
-      <h2 class="contribution-title">Activity at a glance</h2>
-      <p class="contribution-year">{currentYear}</p>
+
+      <aside class="contribution-aside claude-editorial-card">
+        <span class="contribution-aside__label">Why it belongs here</span>
+        <p>
+          Claude-style landing pages work because proof, explanation, and pacing support each other. This graph now
+          sits between the product overview and the deeper workflow story for exactly that reason.
+        </p>
+        <div class="contribution-aside__meta">
+          <span>Updated every minute</span>
+          <span>{currentYear}</span>
+        </div>
+      </aside>
     </div>
-    
-    <div class="contribution-graph-wrapper">
-      <div class="contribution-graph" id="contribution-graph" data-year={currentYear}>
-        <div class="contribution-months">
-          {monthPositions.map(({ month, week }) => (
-            <span class="contribution-month" style={`--week: ${week}`}>
-              {months[month]}
-            </span>
+
+    <div class="contribution-panel">
+      <div class="contribution-header">
+        <div class="header-label">
+          <span class="label-dot"></span>
+          <span class="label-text">Site activity</span>
+        </div>
+        <p class="contribution-year">Past 12 months</p>
+      </div>
+
+      <div class="contribution-graph-wrapper">
+        <div class="contribution-graph" id="contribution-graph" data-year={currentYear}>
+          <div class="contribution-months">
+            {monthPositions.map(({ month, week }) => (
+              <span class="contribution-month" style={`--week: ${week}`}>
+                {months[month]}
+              </span>
+            ))}
+          </div>
+
+          <div class="contribution-body">
+            <div class="contribution-days">
+              {days.map((day, i) => (
+                <span class="contribution-day">{i % 2 === 0 ? day : ''}</span>
+              ))}
+            </div>
+
+            <div class="contribution-grid" id="contribution-grid">
+              {Array.from({ length: totalWeeks }).map((_, weekIndex) => (
+                <div class="contribution-week">
+                  {Array.from({ length: 7 }).map((_, dayIndex) => {
+                    const dayOffset = weekIndex * 7 + dayIndex;
+                    const cellDate = new Date(startDate);
+                    cellDate.setDate(cellDate.getDate() + dayOffset);
+
+                    if (cellDate > today) return null;
+
+                    const dateStr = cellDate.toISOString().split('T')[0];
+                    const displayDateStr = cellDate.toLocaleDateString(
+                      lang === 'en-US' ? 'en-US' : 'zh-CN',
+                      { month: 'short', day: 'numeric', year: 'numeric' }
+                    );
+
+                    return (
+                      <div
+                        class="contribution-cell"
+                        data-date={dateStr}
+                        data-level="0"
+                        title={displayDateStr}
+                      />
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contribution-legend">
+        <span class="legend-text">Less</span>
+        <div class="legend-cells">
+          {[0, 1, 2, 3, 4].map((level) => (
+            <div class="legend-cell" data-level={level} />
           ))}
         </div>
-        
-        <div class="contribution-body">
-          <div class="contribution-days">
-            {days.map((day, i) => (
-              <span class="contribution-day">{i % 2 === 0 ? day : ''}</span>
-            ))}
-          </div>
-          
-          <div class="contribution-grid" id="contribution-grid">
-            {Array.from({ length: totalWeeks }).map((_, weekIndex) => (
-              <div class="contribution-week">
-                {Array.from({ length: 7 }).map((_, dayIndex) => {
-                  const dayOffset = weekIndex * 7 + dayIndex;
-                  const cellDate = new Date(startDate);
-                  cellDate.setDate(cellDate.getDate() + dayOffset);
-                  
-                  if (cellDate > today) return null;
-                  
-                  const dateStr = cellDate.toISOString().split('T')[0];
-                  const displayDateStr = cellDate.toLocaleDateString(
-                    lang === 'en-US' ? 'en-US' : 'zh-CN',
-                    { month: 'short', day: 'numeric', year: 'numeric' }
-                  );
-                  
-                  return (
-                    <div 
-                      class="contribution-cell"
-                      data-date={dateStr}
-                      data-level="0"
-                      title={displayDateStr}
-                    />
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
+        <span class="legend-text">More</span>
       </div>
-    </div>
-    
-    <div class="contribution-legend">
-      <span class="legend-text">Less</span>
-      <div class="legend-cells">
-        {[0, 1, 2, 3, 4].map((level) => (
-          <div class="legend-cell" data-level={level} />
-        ))}
-      </div>
-      <span class="legend-text">More</span>
     </div>
   </div>
 </section>
 
 <style>
-  .contribution {
-    background: var(--bg-secondary);
-    padding: var(--space-16) var(--space-6);
+  .contribution-layout {
+    display: grid;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
   }
 
-  @media (min-width: 768px) {
-    .contribution {
-      padding: var(--space-20) var(--space-10);
+  @media (min-width: 1100px) {
+    .contribution-layout {
+      grid-template-columns: minmax(0, 1.1fr) minmax(18rem, 0.75fr);
+      align-items: start;
     }
   }
 
-  .contribution-container {
-    max-width: var(--container-xl);
-    margin: 0 auto;
+  .contribution-heading {
+    margin-bottom: 0;
+  }
+
+  .contribution-aside {
+    padding: 1.35rem;
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .contribution-aside__label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  .contribution-aside p {
+    margin: 0;
+    font-size: 0.98rem;
+  }
+
+  .contribution-aside__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+  }
+
+  .contribution-panel {
+    padding: 1.4rem;
+    border-radius: 1.8rem;
+    border: 1px solid rgba(71, 57, 44, 0.1);
+    background: rgba(255, 253, 249, 0.96);
+    box-shadow: 0 22px 56px rgba(51, 38, 26, 0.08);
   }
 
   .contribution-header {
-    text-align: center;
-    margin-bottom: var(--space-10);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.1rem;
   }
 
   .header-label {
@@ -154,29 +218,17 @@ const totalWeeks = Math.ceil(totalDays / 7);
     text-transform: uppercase;
   }
 
-  .contribution-title {
-    font-family: var(--font-display);
-    font-size: clamp(1.5rem, 3vw, 2rem);
-    font-weight: var(--font-normal);
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-  }
-
-  .contribution-title em {
-    font-style: normal;
-  }
-
   .contribution-year {
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
+    margin: 0;
+    font-size: 0.88rem;
     color: var(--text-secondary);
   }
 
   .contribution-graph-wrapper {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     overflow-x: auto;
-    padding: var(--space-2) 0;
+    padding: 0.25rem 0 0.45rem;
   }
 
   .contribution-graph {
@@ -235,8 +287,8 @@ const totalWeeks = Math.ceil(totalDays / 7);
   }
 
   .contribution-cell {
-    width: 11px;
-    height: 11px;
+    width: 12px;
+    height: 12px;
     border-radius: 2px;
     background-color: var(--contribution-0);
     transition: transform 0.15s ease;
@@ -254,7 +306,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
   .contribution-legend {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: var(--space-3);
     margin-top: var(--space-6);
   }
@@ -281,6 +333,22 @@ const totalWeeks = Math.ceil(totalDays / 7);
   .legend-cell[data-level="2"] { background-color: var(--contribution-2); }
   .legend-cell[data-level="3"] { background-color: var(--contribution-3); }
   .legend-cell[data-level="4"] { background-color: var(--contribution-4); }
+
+  @media (max-width: 767px) {
+    .contribution-panel {
+      padding: 1rem;
+      border-radius: 1.4rem;
+    }
+
+    .contribution-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .contribution-legend {
+      justify-content: flex-start;
+    }
+  }
 </style>
 
 <script>

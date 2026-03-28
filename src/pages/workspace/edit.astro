@@ -14,7 +14,7 @@ import Layout from '@layouts/Layout.astro';
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
-          <span>Back to Workspace</span>
+          <span>Back to workspace</span>
         </a>
         <div class="header-actions">
           <span class="save-status" id="save-status">
@@ -26,6 +26,7 @@ import Layout from '@layouts/Layout.astro';
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
             </svg>
+            <span>Copy</span>
           </button>
           <button class="btn-icon" id="download-btn" title="Download">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -33,12 +34,14 @@ import Layout from '@layouts/Layout.astro';
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
+            <span>Download</span>
           </button>
           <button class="btn-icon danger" id="delete-btn" title="Delete">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <polyline points="3 6 5 6 21 6"></polyline>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
+            <span>Delete</span>
           </button>
         </div>
       </div>
@@ -51,7 +54,11 @@ import Layout from '@layouts/Layout.astro';
       </div>
 
       <div class="editor-content" id="editor-content" style="display: none;">
-        <input type="text" class="title-input" id="title-input" placeholder="Untitled Note" />
+        <div class="editor-meta-row">
+          <span class="editor-meta-pill" id="file-type-pill">TXT</span>
+          <span class="editor-meta-copy" id="file-updated-copy">Last updated just now</span>
+        </div>
+        <input type="text" class="title-input" id="title-input" placeholder="Untitled note" />
         <div class="editor-divider"></div>
         
         <div class="markdown-toolbar">
@@ -101,13 +108,16 @@ import Layout from '@layouts/Layout.astro';
           </div>
           <h2 class="file-title-large" id="file-title-large"></h2>
           <div class="file-meta-large" id="file-meta-large"></div>
+          <p class="file-preview-copy" id="file-preview-copy">
+            This file is stored in your workspace and ready for a direct download.
+          </p>
           <button class="btn-download" id="download-file-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            <span>Download File</span>
+            <span>Download file</span>
           </button>
         </div>
       </div>
@@ -120,12 +130,14 @@ import Layout from '@layouts/Layout.astro';
 <style>
   .editor-page {
     min-height: 100vh;
-    background: var(--bg-primary);
+    background:
+      radial-gradient(circle at top right, rgba(217, 119, 87, 0.08), transparent 22rem),
+      linear-gradient(180deg, rgba(255, 252, 247, 0.92) 0%, rgba(250, 246, 238, 0.74) 18%, transparent 100%);
     padding-top: var(--header-height);
   }
 
   .editor-container {
-    max-width: 900px;
+    max-width: 980px;
     margin: 0 auto;
     padding: var(--space-8) var(--space-6);
   }
@@ -134,9 +146,12 @@ import Layout from '@layouts/Layout.astro';
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-8);
-    padding-bottom: var(--space-6);
-    border-bottom: 1px solid var(--border-primary);
+    gap: 1rem;
+    margin-bottom: var(--space-6);
+    padding: 1rem 1.15rem;
+    border: 1px solid rgba(71, 57, 44, 0.1);
+    border-radius: 1.4rem;
+    background: rgba(255, 252, 247, 0.88);
   }
 
   .back-btn {
@@ -158,6 +173,7 @@ import Layout from '@layouts/Layout.astro';
     display: flex;
     align-items: center;
     gap: var(--space-3);
+    flex-wrap: wrap;
   }
 
   .save-status {
@@ -197,34 +213,88 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .btn-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    background: transparent;
-    border: 1px solid var(--border-primary);
+    min-height: 2.5rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(71, 57, 44, 0.12);
     color: var(--text-secondary);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 0.45rem;
     transition: all var(--duration-fast) var(--ease-default);
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+    font-weight: var(--font-medium);
   }
 
   .btn-icon:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-    background: var(--color-primary-light);
+    border-color: rgba(71, 57, 44, 0.2);
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.98);
+  }
+
+  .btn-icon:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
   }
 
   .btn-icon.danger:hover {
-    border-color: var(--color-danger);
+    border-color: rgba(186, 74, 47, 0.2);
     color: var(--color-danger);
-    background: var(--color-danger-light);
+    background: rgba(186, 74, 47, 0.08);
+  }
+
+  .btn-icon.hidden {
+    display: none;
+  }
+
+  .editor-content,
+  .file-preview-container {
+    padding: clamp(1.25rem, 3vw, 1.75rem);
+    border: 1px solid rgba(71, 57, 44, 0.1);
+    border-radius: 1.75rem;
+    background: rgba(255, 253, 249, 0.92);
+    box-shadow: 0 20px 48px rgba(47, 35, 22, 0.08);
   }
 
   .editor-content {
     display: flex;
     flex-direction: column;
+  }
+
+  .editor-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: var(--space-5);
+  }
+
+  .editor-meta-pill,
+  .editor-meta-copy {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    font-weight: var(--font-medium);
+  }
+
+  .editor-meta-pill {
+    background: rgba(23, 20, 18, 0.06);
+    color: var(--text-secondary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .editor-meta-copy {
+    background: rgba(217, 119, 87, 0.08);
+    color: var(--color-primary);
   }
 
   .title-input {
@@ -260,7 +330,7 @@ import Layout from '@layouts/Layout.astro';
     background: transparent;
     outline: none;
     resize: none;
-    min-height: calc(100vh - 300px);
+    min-height: calc(100vh - 360px);
     width: 100%;
   }
 
@@ -381,17 +451,14 @@ import Layout from '@layouts/Layout.astro';
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: var(--space-16) var(--space-4);
   }
 
   .file-info-card {
     text-align: center;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: var(--space-12);
-    max-width: 400px;
-    box-shadow: var(--card-shadow);
+    background: transparent;
+    border: none;
+    padding: var(--space-8) var(--space-4);
+    max-width: 34rem;
   }
 
   .file-icon-large {
@@ -421,6 +488,14 @@ import Layout from '@layouts/Layout.astro';
     font-family: var(--font-sans);
   }
 
+  .file-preview-copy {
+    margin: 0 0 var(--space-6);
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+  }
+
   .btn-download {
     display: inline-flex;
     align-items: center;
@@ -439,6 +514,30 @@ import Layout from '@layouts/Layout.astro';
 
   .btn-download:hover {
     opacity: 0.85;
+  }
+
+  .btn-download:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 760px) {
+    .editor-container {
+      padding: var(--space-6) var(--space-4);
+    }
+
+    .editor-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .header-actions {
+      width: 100%;
+    }
+
+    .btn-icon span {
+      display: none;
+    }
   }
 
   .toast {
@@ -478,6 +577,7 @@ import Layout from '@layouts/Layout.astro';
   let saveTimeout = null;
   let isDirty = false;
   let isSaving = false;
+  let markdownToolbarReady = false;
 
   const loadingState = document.getElementById('loading-state');
   const editorContent = document.getElementById('editor-content');
@@ -488,6 +588,12 @@ import Layout from '@layouts/Layout.astro';
   const wordCountEl = document.getElementById('word-count');
   const charCountEl = document.getElementById('char-count');
   const saveIndicator = document.getElementById('save-indicator');
+  const saveStatus = document.getElementById('save-status');
+  const copyBtn = document.getElementById('copy-btn');
+  const downloadBtn = document.getElementById('download-btn');
+  const fileTypePill = document.getElementById('file-type-pill');
+  const fileUpdatedCopy = document.getElementById('file-updated-copy');
+  const filePreviewCopy = document.getElementById('file-preview-copy');
 
   async function apiRequest(path, options = {}) {
     const controller = new AbortController();
@@ -505,6 +611,54 @@ import Layout from '@layouts/Layout.astro';
       clearTimeout(timeoutId);
       throw e;
     }
+  }
+
+  function isTextType(type) {
+    return ['txt', 'md', 'markdown', 'clipboard', 'json', 'js', 'ts', 'css', 'html'].includes((type || '').toLowerCase());
+  }
+
+  function getTypeLabel(type) {
+    const normalized = (type || 'txt').toUpperCase();
+    return normalized === 'MARKDOWN' ? 'MD' : normalized;
+  }
+
+  function getTextExtension(type) {
+    const normalized = (type || 'txt').toLowerCase();
+    if (normalized === 'clipboard') return 'txt';
+    if (normalized === 'markdown') return 'md';
+    return normalized || 'txt';
+  }
+
+  function formatDateTime(value) {
+    if (!value) return 'just now';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'just now';
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  }
+
+  function getDownloadFilename(response, fallbackName, type) {
+    const contentDisposition = response.headers.get('Content-Disposition') || '';
+    const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+    if (utf8Match?.[1]) {
+      return decodeURIComponent(utf8Match[1]);
+    }
+
+    const basicMatch = contentDisposition.match(/filename="([^"]+)"/i);
+    if (basicMatch?.[1]) {
+      return basicMatch[1];
+    }
+
+    const extension = getTextExtension(type);
+    if (extension && !fallbackName.toLowerCase().endsWith(`.${extension}`)) {
+      return `${fallbackName}.${extension}`;
+    }
+
+    return fallbackName || 'download';
   }
 
   async function init() {
@@ -535,9 +689,10 @@ import Layout from '@layouts/Layout.astro';
       }
 
       currentFile = result.data;
-      const isText = ['txt', 'md', 'clipboard'].includes(currentFile.type);
+      applyFileMetadata();
+      const textFile = isTextType(currentFile.type);
 
-      if (isText) {
+      if (textFile) {
         showEditor();
         titleInput.value = currentFile.title || '';
         contentTextarea.value = currentFile.content || '';
@@ -554,11 +709,26 @@ import Layout from '@layouts/Layout.astro';
     }
   }
 
+  function applyFileMetadata() {
+    if (!currentFile) return;
+
+    if (fileTypePill) {
+      fileTypePill.textContent = getTypeLabel(currentFile.type);
+    }
+
+    if (fileUpdatedCopy) {
+      fileUpdatedCopy.textContent = `Last updated ${formatDateTime(currentFile.updatedAt || currentFile.createdAt)}`;
+    }
+  }
+
   function showEditor() {
     editorContent.style.display = 'flex';
     filePreviewContainer.style.display = 'none';
     updateStats();
     initMarkdownToolbar();
+    copyBtn?.classList.remove('hidden');
+    if (downloadBtn) downloadBtn.disabled = false;
+    updateHeaderActions('Export');
     titleInput.focus();
   }
 
@@ -572,6 +742,7 @@ import Layout from '@layouts/Layout.astro';
   }
 
   function initMarkdownToolbar() {
+    if (markdownToolbarReady) return;
     const mdBtns = document.querySelectorAll('.md-btn');
     mdBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -579,6 +750,7 @@ import Layout from '@layouts/Layout.astro';
         if (action) applyMarkdown(action);
       });
     });
+    markdownToolbarReady = true;
   }
 
   function applyMarkdown(action) {
@@ -619,14 +791,32 @@ import Layout from '@layouts/Layout.astro';
   function showFilePreview() {
     editorContent.style.display = 'none';
     filePreviewContainer.style.display = 'flex';
+    copyBtn?.classList.add('hidden');
 
     const ext = currentFile.type?.toUpperCase() || 'FILE';
     const size = currentFile.fileSize ? formatSize(currentFile.fileSize) : 'Unknown size';
+    const updated = formatDateTime(currentFile.updatedAt || currentFile.createdAt);
+    const hasBinary = Boolean(currentFile.fileUrl);
 
     document.getElementById('file-title-large').textContent = currentFile.title || 'Untitled';
-    document.getElementById('file-meta-large').textContent = `${ext} · ${size}`;
+    document.getElementById('file-meta-large').textContent = `${ext} · ${size} · Updated ${updated}`;
+    if (filePreviewCopy) {
+      filePreviewCopy.textContent = hasBinary
+        ? 'This file is stored in your workspace and now downloads through the server for better reliability.'
+        : 'This older upload is missing its stored binary data. Re-upload it once to restore reliable downloads.';
+    }
 
-    document.getElementById('download-file-btn')?.addEventListener('click', downloadFile);
+    const previewDownloadBtn = document.getElementById('download-file-btn');
+    if (previewDownloadBtn) {
+      previewDownloadBtn.disabled = !hasBinary;
+    }
+
+    if (downloadBtn) {
+      downloadBtn.disabled = !hasBinary;
+    }
+
+    updateHeaderActions(hasBinary ? 'Download' : 'Unavailable');
+    previewDownloadBtn?.addEventListener('click', downloadFile);
   }
 
   function scheduleSave() {
@@ -652,6 +842,13 @@ import Layout from '@layouts/Layout.astro';
 
       if (result.success) {
         isDirty = false;
+        currentFile = {
+          ...currentFile,
+          title: titleInput.value,
+          content: contentTextarea.value,
+          updatedAt: result.data?.updatedAt || new Date().toISOString(),
+        };
+        applyFileMetadata();
         setSaveStatus('saved');
       } else {
         setSaveStatus('error');
@@ -673,12 +870,25 @@ import Layout from '@layouts/Layout.astro';
     if (status === 'saving') {
       saveIndicator.classList.add('saving');
       saveIndicator.innerHTML = dotSvg + 'Saving...';
+      if (saveStatus) saveStatus.innerHTML = '<span class="status-dot"></span>Saving';
+      saveStatus?.classList.add('saving');
     } else if (status === 'saved') {
       saveIndicator.classList.remove('saving');
       saveIndicator.innerHTML = dotSvg + 'Auto-saved';
+      if (saveStatus) saveStatus.innerHTML = '<span class="status-dot"></span>Saved';
+      saveStatus?.classList.remove('saving');
     } else {
       saveIndicator.classList.remove('saving');
       saveIndicator.innerHTML = dotSvg + 'Save failed';
+      if (saveStatus) saveStatus.innerHTML = '<span class="status-dot"></span>Save failed';
+      saveStatus?.classList.remove('saving');
+    }
+  }
+
+  function updateHeaderActions(downloadLabel) {
+    const downloadText = downloadBtn?.querySelector('span');
+    if (downloadText) {
+      downloadText.textContent = downloadLabel;
     }
   }
 
@@ -697,48 +907,59 @@ import Layout from '@layouts/Layout.astro';
     }
   }
 
-  function downloadAsTxt() {
-    const content = contentTextarea.value;
-    if (!content.trim()) {
-      showToast('Nothing to download', 'error');
-      return;
-    }
-
-    const title = titleInput.value || 'Untitled';
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  function downloadAsText() {
+    const content = contentTextarea.value ?? '';
+    const title = (titleInput.value || currentFile?.title || 'Untitled').trim() || 'Untitled';
+    const extension = getTextExtension(currentFile?.type);
+    const mime = extension === 'md' ? 'text/markdown;charset=utf-8' : 'text/plain;charset=utf-8';
+    const blob = new Blob([content], { type: mime });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${title}.txt`;
-    a.click();
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = title.toLowerCase().endsWith(`.${extension}`) ? title : `${title}.${extension}`;
+    anchor.click();
     URL.revokeObjectURL(url);
     showToast('Downloaded', 'success');
   }
 
   async function downloadFile() {
     if (!currentFile?.fileUrl) {
-      showToast('File unavailable', 'error');
+      showToast('This file needs to be re-uploaded before it can be downloaded again', 'error');
       return;
     }
 
     try {
-      const response = await fetch(currentFile.fileUrl);
-      if (!response.ok) throw new Error('Download failed');
+      const downloadPath = currentFile?.downloadUrl || `/api/workspace/${fileId}/download`;
+      const response = await fetch(`${API_BASE}${downloadPath}`);
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || 'Download failed');
+      }
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = currentFile.title || 'download';
-      a.click();
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = getDownloadFilename(response, currentFile?.title || 'download', currentFile?.type || 'txt');
+      anchor.click();
       URL.revokeObjectURL(url);
       showToast('Downloaded', 'success');
-    } catch {
-      showToast('Download failed', 'error');
+    } catch (error) {
+      console.error('Download failed:', error);
+      showToast(error.message || 'Download failed', 'error');
     }
   }
 
+  function downloadCurrentFile() {
+    if (isTextType(currentFile?.type)) {
+      downloadAsText();
+      return;
+    }
+
+    downloadFile();
+  }
+
   async function deleteFile() {
-    if (!confirm('Are you sure you want to delete this file?')) return;
+    if (!confirm('Delete this item from your workspace?')) return;
 
     try {
       const result = await apiRequest(`/api/workspace/${fileId}`, { method: 'DELETE' });
@@ -774,7 +995,7 @@ import Layout from '@layouts/Layout.astro';
   }
 
   document.getElementById('copy-btn')?.addEventListener('click', copyContent);
-  document.getElementById('download-btn')?.addEventListener('click', downloadAsTxt);
+  document.getElementById('download-btn')?.addEventListener('click', downloadCurrentFile);
   document.getElementById('delete-btn')?.addEventListener('click', deleteFile);
 
   init();
