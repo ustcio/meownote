@@ -73,7 +73,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
       </div>
 
       <div class="contribution-graph-wrapper">
-        <div class="contribution-graph" id="contribution-graph" data-year={currentYear}>
+        <div class="contribution-graph" id="contribution-graph" data-year={currentYear} style={`--total-weeks: ${totalWeeks}`}>
           <div class="contribution-months">
             {monthPositions.map(({ month, week }) => (
               <span class="contribution-month" style={`--week: ${week}`}>
@@ -226,7 +226,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
 
   .contribution-graph-wrapper {
     display: flex;
-    justify-content: flex-start;
+    justify-content: stretch;
     overflow-x: auto;
     padding: 0.25rem 0 0.45rem;
   }
@@ -235,7 +235,8 @@ const totalWeeks = Math.ceil(totalDays / 7);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    min-width: fit-content;
+    flex: 1;
+    min-width: 0;
   }
 
   .contribution-months {
@@ -244,11 +245,12 @@ const totalWeeks = Math.ceil(totalDays / 7);
     margin-bottom: var(--space-2);
     position: relative;
     height: 18px;
+    width: calc(100% - 36px);
   }
 
   .contribution-month {
     position: absolute;
-    left: calc(var(--week) * 14px);
+    left: calc(var(--week) / var(--total-weeks) * 100%);
     font-family: var(--font-sans);
     font-size: 11px;
     color: var(--text-tertiary);
@@ -258,6 +260,9 @@ const totalWeeks = Math.ceil(totalDays / 7);
   .contribution-body {
     display: flex;
     gap: var(--space-2);
+    width: 100%;
+    flex: 1;
+    min-width: 0;
   }
 
   .contribution-days {
@@ -265,6 +270,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
     flex-direction: column;
     gap: 3px;
     padding-top: 2px;
+    flex-shrink: 0;
   }
 
   .contribution-day {
@@ -277,18 +283,22 @@ const totalWeeks = Math.ceil(totalDays / 7);
 
   .contribution-grid {
     display: flex;
-    gap: 3px;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
   }
 
   .contribution-week {
     display: flex;
     flex-direction: column;
     gap: 3px;
+    flex: 1;
+    min-width: 0;
   }
 
   .contribution-cell {
-    width: 12px;
-    height: 12px;
+    aspect-ratio: 1;
+    width: 100%;
     border-radius: 2px;
     background-color: var(--contribution-0);
     transition: transform 0.15s ease;
