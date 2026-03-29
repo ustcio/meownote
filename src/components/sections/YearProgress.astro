@@ -1,0 +1,400 @@
+---
+const now = new Date();
+const year = now.getFullYear();
+const startOfYear = new Date(year, 0, 1);
+const endOfYear = new Date(year + 1, 0, 1);
+const totalDays = Math.ceil((endOfYear.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+const elapsedDays = Math.ceil((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+const percentage = ((elapsedDays / totalDays) * 100).toFixed(2);
+
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const monthDays = [31, (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const cumulativeDays: number[] = [];
+let cumSum = 0;
+for (const d of monthDays) {
+  cumulativeDays.push(cumSum);
+  cumSum += d;
+}
+
+const remainingDays = totalDays - elapsedDays;
+const currentMonth = now.getMonth();
+const quarterData = [
+  { label: 'Q1', months: [0, 1, 2] },
+  { label: 'Q2', months: [3, 4, 5] },
+  { label: 'Q3', months: [6, 7, 8] },
+  { label: 'Q4', months: [9, 10, 11] },
+].map(q => {
+  const qStart = cumulativeDays[q.months[0]];
+  const qEnd = cumulativeDays[q.months[2]] + monthDays[q.months[2]];
+  const qMid = ((qStart + qEnd) / 2 / totalDays) * 100;
+  const isActive = elapsedDays >= qStart && elapsedDays <= qEnd;
+  return { label: q.label, pos: qMid, active: isActive };
+});
+---
+
+<section class="claude-section">
+  <div class="container">
+    <div class="yp-layout">
+      <div class="yp-hero">
+        <span class="yp-percent" id="yp-percent">{percentage}%</span>
+        <span class="yp-year">{year}</span>
+      </div>
+
+      <div class="yp-details">
+        <div class="yp-detail-block">
+          <span class="yp-detail-value" id="yp-elapsed">{elapsedDays}</span>
+          <span class="yp-detail-label">days elapsed</span>
+        </div>
+        <div class="yp-detail-divider"></div>
+        <div class="yp-detail-block">
+          <span class="yp-detail-value" id="yp-remaining">{remainingDays}</span>
+          <span class="yp-detail-label">days remaining</span>
+        </div>
+        <div class="yp-detail-divider"></div>
+        <div class="yp-detail-block">
+          <span class="yp-detail-value" id="yp-total">{totalDays}</span>
+          <span class="yp-detail-label">total days</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="yp-timeline-card">
+      <div class="yp-timeline">
+        <div class="yp-track">
+          <div class="yp-track-fill" id="yp-track-fill" style={`--target-width: ${percentage}%`}></div>
+          <div class="yp-track-glow" id="yp-track-glow" style={`--target-left: ${percentage}%`}></div>
+
+          {months.map((month, i) => (
+            <div
+              class={`yp-month-marker ${i <= currentMonth ? 'yp-month-marker--passed' : ''}`}
+              style={`--pos: ${(cumulativeDays[i] / totalDays) * 100}%`}
+            >
+              <span class="yp-month-label">{month}</span>
+            </div>
+          ))}
+        </div>
+
+        <div class="yp-quarters">
+          {quarterData.map((q) => (
+            <span
+              class={`yp-quarter ${q.active ? 'yp-quarter--active' : ''}`}
+              style={`--pos: ${q.pos}%`}
+            >
+              {q.label}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .yp-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+    text-align: center;
+  }
+
+  @media (min-width: 640px) {
+    .yp-layout {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+      text-align: left;
+    }
+  }
+
+  .yp-hero {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+  }
+
+  .yp-percent {
+    font-family: var(--font-number);
+    font-size: clamp(3rem, 8vw, 5rem);
+    font-weight: var(--font-bold);
+    letter-spacing: -0.04em;
+    line-height: var(--leading-none);
+    color: var(--color-primary);
+  }
+
+  .yp-year {
+    font-family: var(--font-number);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: var(--font-normal);
+    color: var(--text-quaternary);
+    letter-spacing: -0.02em;
+  }
+
+  .yp-details {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+  }
+
+  .yp-detail-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .yp-detail-value {
+    font-family: var(--font-number);
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+
+  .yp-detail-label {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .yp-detail-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border-primary);
+  }
+
+  .yp-timeline-card {
+    padding: clamp(1.4rem, 3vw, 2rem);
+    border-radius: var(--radius-2xl);
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+  }
+
+  .yp-timeline {
+    position: relative;
+  }
+
+  .yp-track {
+    position: relative;
+    height: 10px;
+    border-radius: var(--radius-full);
+    background: var(--bg-tertiary);
+    overflow: visible;
+  }
+
+  .yp-track-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    border-radius: var(--radius-full);
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent-pink));
+    width: 0;
+    animation: yp-fill 1.6s var(--ease-out) 0.3s forwards;
+  }
+
+  @keyframes yp-fill {
+    to {
+      width: var(--target-width);
+    }
+  }
+
+  .yp-track-glow {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 12px rgba(217, 119, 87, 0.5), 0 0 28px rgba(217, 119, 87, 0.2);
+    z-index: 2;
+    opacity: 0;
+    animation: yp-glow-move 1.6s var(--ease-out) 0.3s forwards, yp-pulse 2.4s ease-in-out 2s infinite;
+  }
+
+  @keyframes yp-glow-move {
+    from {
+      left: 0;
+      opacity: 1;
+    }
+    to {
+      left: var(--target-left);
+      opacity: 1;
+    }
+  }
+
+  @keyframes yp-pulse {
+    0%, 100% {
+      box-shadow: 0 0 12px rgba(217, 119, 87, 0.5), 0 0 28px rgba(217, 119, 87, 0.2);
+      transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+      box-shadow: 0 0 18px rgba(217, 119, 87, 0.65), 0 0 36px rgba(217, 119, 87, 0.3);
+      transform: translate(-50%, -50%) scale(1.15);
+    }
+  }
+
+  .yp-month-marker {
+    position: absolute;
+    top: 50%;
+    left: var(--pos);
+    transform: translate(-50%, -50%);
+    z-index: 1;
+  }
+
+  .yp-month-marker::after {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--text-quaternary);
+    transition: background var(--duration-normal) var(--ease-default);
+  }
+
+  .yp-month-marker--passed::after {
+    background: var(--color-primary);
+    opacity: 0.6;
+  }
+
+  .yp-month-label {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    color: var(--text-quaternary);
+    white-space: nowrap;
+    transition: color var(--duration-normal) var(--ease-default);
+  }
+
+  .yp-month-marker--passed .yp-month-label {
+    color: var(--text-tertiary);
+  }
+
+  .yp-quarters {
+    position: relative;
+    height: 24px;
+    margin-top: 28px;
+    border-top: 1px solid var(--border-secondary);
+  }
+
+  .yp-quarter {
+    position: absolute;
+    left: var(--pos);
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: var(--font-medium);
+    color: var(--text-quaternary);
+    letter-spacing: 0.04em;
+    transition: color var(--duration-normal) var(--ease-default);
+  }
+
+  .yp-quarter--active {
+    color: var(--color-primary);
+    font-weight: var(--font-semibold);
+  }
+
+  @media (max-width: 639px) {
+    .yp-details {
+      gap: var(--space-4);
+    }
+
+    .yp-detail-value {
+      font-size: var(--text-lg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .yp-track-fill {
+      width: var(--target-width);
+      animation: none;
+    }
+
+    .yp-track-glow {
+      left: var(--target-left);
+      opacity: 1;
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  function animateCounter(elementId: string, target: number, duration: number = 1400) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    const start = performance.now();
+    const startValue = 0;
+
+    function tick(now: number) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(startValue + (target - startValue) * eased);
+      el.textContent = current.toLocaleString();
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  function animatePercent(elementId: string, target: number, duration: number = 1400) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    const start = performance.now();
+
+    function tick(now: number) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = (target * eased).toFixed(2);
+      el.textContent = `${current}%`;
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const percentEl = document.getElementById('yp-percent');
+    const elapsedEl = document.getElementById('yp-elapsed');
+    const remainingEl = document.getElementById('yp-remaining');
+    const totalEl = document.getElementById('yp-total');
+
+    if (!percentEl || !elapsedEl || !remainingEl || !totalEl) return;
+
+    const targetPercent = parseFloat(percentEl.textContent || '0');
+    const targetElapsed = parseInt(elapsedEl.textContent || '0', 10);
+    const targetRemaining = parseInt(remainingEl.textContent || '0', 10);
+    const targetTotal = parseInt(totalEl.textContent || '0', 10);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            animatePercent('yp-percent', targetPercent);
+            animateCounter('yp-elapsed', targetElapsed);
+            animateCounter('yp-remaining', targetRemaining);
+            animateCounter('yp-total', targetTotal);
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+
+    const section = percentEl.closest('.claude-section');
+    if (section) {
+      observer.observe(section);
+    }
+  });
+</script>
