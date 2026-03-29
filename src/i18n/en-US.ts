@@ -4,7 +4,7 @@
 
 export const translations = {
   // Meta
-  'meta.title': 'MaxMin.dev - AI that works for you',
+  'meta.title': 'Maxwell.Science - AI that works for you',
   'meta.description': 'Meet the AI assistant that helps you create, code, and collaborate with confidence.',
   
   // Navigation - Clean & Simple
@@ -22,7 +22,7 @@ export const translations = {
   'hero.title.word1': 'AI that',
   'hero.title.word2': 'understands',
   'hero.title.word3': 'you',
-  'hero.subtitle': 'MaxMin.dev is an AI assistant built to help you think deeper, work smarter, and create freely. No shortcuts, just genuine intelligence.',
+  'hero.subtitle': 'Maxwell.Science is an AI assistant built to help you think deeper, work smarter, and create freely. No shortcuts, just genuine intelligence.',
   'hero.cta.primary': 'Start chatting',
   'hero.cta.secondary': 'See what it can do',
   'hero.stats.models': 'Models',
@@ -65,8 +65,8 @@ export const translations = {
   'chatbot.quickstart.explain': 'Explain a concept',
   'chatbot.quickstart.write': 'Draft an email',
   'chatbot.quickstart.brainstorm': 'Brainstorm ideas',
-  'chatbot.input.placeholder': 'Message MaxMin.dev...',
-  'chatbot.input.hint': 'MaxMin.dev may produce inaccurate information. Verify important details.',
+  'chatbot.input.placeholder': 'Message Maxwell.Science...',
+  'chatbot.input.hint': 'Maxwell.Science may produce inaccurate information. Verify important details.',
   'chatbot.select_model': 'Model',
   'chatbot.new_chat': 'New chat',
   'chatbot.export': 'Export',
@@ -179,7 +179,7 @@ export const translations = {
   'about.subtitle': 'Building AI with purpose',
   'about.badge': 'Our story',
   'about.story.title': 'Why we exist',
-  'about.story.p1': 'MaxMin.dev was born from a simple belief: AI should amplify human potential, not replace it. We\'re building tools that help you think clearer, create better, and work smarter.',
+  'about.story.p1': 'Maxwell.Science was born from a simple belief: AI should amplify human potential, not replace it. We\'re building tools that help you think clearer, create better, and work smarter.',
   'about.story.p2': 'Our mission is to make advanced AI accessible to everyone—developers, creators, researchers, and curious minds alike.',
   'about.features.title': 'What matters to us',
   'about.features.performance.title': 'Speed',

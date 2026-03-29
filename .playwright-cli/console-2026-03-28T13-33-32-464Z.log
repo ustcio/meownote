@@ -1,0 +1,3 @@
+[66053296ms] [ERROR] [vite] Error @ http://127.0.0.1:4321/@vite/client:1540
+[66053318ms] [ERROR] [vite] Failed to reload /src/pages/kit.astro?astro&type=style&index=0&lang.css. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://127.0.0.1:4321/@vite/client:1540
+[66053319ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/src/pages/kit.astro?t=1774770865661&astro&type=style&index=0&lang.css”." {file: "http://127.0.0.1:4321/@vite/client" line: 0}] @ http://127.0.0.1:4321/@vite/client:0
