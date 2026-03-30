@@ -12,6 +12,10 @@
   "dependencies": {
     "@astrojs/check": "^0.9.7",
     "astro": "^6.0.3",
+    "qrcode": "^1.5.4",
     "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.6"
   }
 }

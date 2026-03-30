@@ -1,3 +1,32 @@
 [65745814ms] [ERROR] [vite] Error @ http://127.0.0.1:4321/@vite/client:1540
 [65745815ms] [ERROR] [vite] Failed to reload /src/pages/kit.astro?astro&type=style&index=0&lang.css. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://127.0.0.1:4321/@vite/client:1540
 [65745816ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/src/pages/kit.astro?t=1774770865661&astro&type=style&index=0&lang.css”." {file: "http://127.0.0.1:4321/@vite/client" line: 0}] @ http://127.0.0.1:4321/@vite/client:0
+[140969109ms] [WARNING] [JavaScript Warning: "“127.0.0.1” has been classified as a bounce tracker. If it does not receive user activation within the next 3,600 seconds it will have its state purged."] @ :0
+[140969110ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/node_modules/.vite/deps/ui-library-EVFCBMCE.js?v=bd5d026e”." {file: "http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js" line: 0}] @ http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:0
+[140969113ms] TypeError: error loading dynamically imported module: http://127.0.0.1:4321/node_modules/.vite/deps/ui-library-EVFCBMCE.js?v=bd5d026e
+    at  (http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:32:21)
+    at async* (http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:12:10)
+[140969113ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/node_modules/.vite/deps/toolbar-2H5PSQQU.js?v=bd5d026e”." {file: "http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js" line: 0}] @ http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:0
+[140969113ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/node_modules/.vite/deps/xray-XH6VIXDC.js?v=bd5d026e”." {file: "http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js" line: 0}] @ http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:0
+[140969113ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/node_modules/.vite/deps/settings-K4OHAGC2.js?v=bd5d026e”." {file: "http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js" line: 0}] @ http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:0
+[140969113ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/node_modules/.vite/deps/audit-ZNXLMFSS.js?v=bd5d026e”." {file: "http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js" line: 0}] @ http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:0
+[140969113ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/node_modules/.vite/deps/astro-IQQQXCO3.js?v=bd5d026e”." {file: "http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js" line: 0}] @ http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:0
+[140969356ms] [ERROR] [vite] Error @ http://127.0.0.1:4321/@vite/client:1540
+[140969356ms] [ERROR] [vite] Error @ http://127.0.0.1:4321/@vite/client:1540
+[140969356ms] [ERROR] [vite] Error @ http://127.0.0.1:4321/@vite/client:1540
+[140969357ms] [ERROR] [vite] Error @ http://127.0.0.1:4321/@vite/client:1540
+[140969357ms] [ERROR] [vite] Error @ http://127.0.0.1:4321/@vite/client:1540
+[140969359ms] [ERROR] [vite] Error @ http://127.0.0.1:4321/@vite/client:1540
+[140969359ms] [ERROR] [vite] Error @ http://127.0.0.1:4321/@vite/client:1540
+[140969359ms] [ERROR] [vite] Error @ http://127.0.0.1:4321/@vite/client:1540
+[140969359ms] [ERROR] [vite] Error @ http://127.0.0.1:4321/@vite/client:1540
+[140969360ms] [ERROR] [vite] Error @ http://127.0.0.1:4321/@vite/client:1540
+[140970076ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/node_modules/.vite/deps/audit-ZNXLMFSS.js?v=297fe421”." {file: "http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js" line: 0}] @ http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:0
+[140970076ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/node_modules/.vite/deps/xray-XH6VIXDC.js?v=297fe421”." {file: "http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js" line: 0}] @ http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:0
+[140970077ms] TypeError: error loading dynamically imported module: http://127.0.0.1:4321/node_modules/.vite/deps/audit-ZNXLMFSS.js?v=297fe421
+    at  (http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:32:21)
+    at async* (http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:12:10)
+[140970076ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/node_modules/.vite/deps/astro-IQQQXCO3.js?v=297fe421”." {file: "http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js" line: 0}] @ http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:0
+[140970077ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/node_modules/.vite/deps/ui-library-EVFCBMCE.js?v=297fe421”." {file: "http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js" line: 0}] @ http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:0
+[140970077ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/node_modules/.vite/deps/toolbar-2H5PSQQU.js?v=297fe421”." {file: "http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js" line: 0}] @ http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:0
+[140970077ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://127.0.0.1:4321/node_modules/.vite/deps/settings-K4OHAGC2.js?v=297fe421”." {file: "http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js" line: 0}] @ http://127.0.0.1:4321/@id/astro/runtime/client/dev-toolbar/entrypoint.js:0
