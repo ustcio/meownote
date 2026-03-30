@@ -1103,20 +1103,20 @@ import Layout from '@layouts/Layout.astro';
         const size = formatSize(file.fileSize || 0);
 
         return `
-          <article class="file-card" data-id="${file.id}">
-            <div class="file-card-top">
-              <div class="file-icon ${config.type}">${getFileIcon(config.icon)}</div>
-              <div class="file-content">
-                <div class="file-title">${escapeHtml(file.title)}</div>
-                <div class="file-meta">
-                  <span class="file-badge">${escapeHtml(ext.toUpperCase())}</span>
+          <article class="file-card" data-id="${file.id}" style="display: flex; flex-direction: column; padding: 1.25rem; background: #fff; border: 2px solid #333; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); margin-bottom: 12px;">
+            <div class="file-card-top" style="display: flex; align-items: center; gap: 12px;">
+              <div class="file-icon ${config.type}" style="width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #d97757; color: white;">${getFileIcon(config.icon)}</div>
+              <div class="file-content" style="flex: 1; min-width: 0;">
+                <div class="file-title" style="font-size: 1rem; font-weight: 600; color: #171412; margin-bottom: 4px;">${escapeHtml(file.title)}</div>
+                <div class="file-meta" style="font-size: 0.85rem; color: #666;">
+                  <span style="background: #f0e6dc; padding: 2px 6px; border-radius: 4px; margin-right: 8px;">${escapeHtml(ext.toUpperCase())}</span>
                   <span>${timeAgo}</span>
-                  ${size ? `<span>·</span><span>${size}</span>` : ''}
+                  ${size ? `<span style="margin-left: 8px;">${size}</span>` : ''}
                 </div>
               </div>
             </div>
-            <div class="file-card-actions">
-              <button class="file-card-btn" data-action="open" data-id="${file.id}">
+            <div class="file-card-actions" style="display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee;">
+              <button class="file-card-btn" data-action="open" data-id="${file.id}" style="padding: 8px 16px; background: #171412; color: white; border: none; border-radius: 20px; cursor: pointer; font-size: 0.9rem;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                   <polyline points="15 3 21 3 21 9"></polyline>
@@ -1124,14 +1124,14 @@ import Layout from '@layouts/Layout.astro';
                 </svg>
                 Open
               </button>
-              <button class="file-card-btn secondary" data-action="download" data-id="${file.id}">
+              <button class="file-card-btn secondary" data-action="download" data-id="${file.id}" style="padding: 8px 12px; background: #f5f0e8; color: #333; border: 1px solid #ccc; border-radius: 20px; cursor: pointer;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
               </button>
-              <button class="file-card-btn danger" data-action="delete" data-id="${file.id}" title="Delete">
+              <button class="file-card-btn danger" data-action="delete" data-id="${file.id}" title="Delete" style="padding: 8px; background: transparent; color: #999; border: none; cursor: pointer; margin-left: auto;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
