@@ -420,13 +420,13 @@ import Layout from '@layouts/Layout.astro';
     flex-direction: column;
     padding: 1.35rem 1.45rem;
     background: #fffdf9;
-    border: 1.5px solid rgba(71, 57, 44, 0.18);
-    border-radius: var(--radius-2xl);
+    border: 2px solid rgba(71, 57, 44, 0.25);
+    border-radius: 1.5rem;
     box-shadow:
-      0 1px 3px rgba(47, 35, 22, 0.06),
-      0 8px 24px rgba(47, 35, 22, 0.1);
+      0 2px 6px rgba(47, 35, 22, 0.08),
+      0 12px 32px rgba(47, 35, 22, 0.12);
     cursor: pointer;
-    transition: all var(--duration-normal) var(--ease-default);
+    transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
   }
@@ -437,31 +437,26 @@ import Layout from '@layouts/Layout.astro';
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
+    height: 4px;
     background: linear-gradient(90deg, var(--color-primary), var(--color-accent-pink));
-    opacity: 0;
-    transition: opacity var(--duration-fast) var(--ease-default);
-  }
-
-  .file-card:hover {
-    border-color: rgba(71, 57, 44, 0.32);
-    box-shadow:
-      0 4px 8px rgba(47, 35, 22, 0.08),
-      0 16px 40px rgba(47, 35, 22, 0.14);
-    transform: translateY(-3px);
-  }
-
-  .file-card:hover::before {
     opacity: 1;
   }
 
+  .file-card:hover {
+    border-color: rgba(71, 57, 44, 0.4);
+    box-shadow:
+      0 4px 12px rgba(47, 35, 22, 0.1),
+      0 20px 48px rgba(47, 35, 22, 0.16);
+    transform: translateY(-3px);
+  }
+
   .file-card.skeleton {
-    background: linear-gradient(90deg, var(--bg-tertiary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
+    background: linear-gradient(90deg, #ebe4d9 0%, #f2ece3 50%, #ebe4d9 100%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     cursor: default;
     min-height: 120px;
-    border: 1px solid rgba(71, 57, 44, 0.1);
+    border: 1px solid rgba(71, 57, 44, 0.15);
     box-shadow: 0 4px 12px rgba(47, 35, 22, 0.06);
   }
 
