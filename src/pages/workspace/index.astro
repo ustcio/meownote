@@ -418,36 +418,19 @@ import Layout from '@layouts/Layout.astro';
   .file-card {
     display: flex;
     flex-direction: column;
-    padding: 1.35rem 1.45rem;
-    background: #fffdf9;
-    border: 2px solid #8a7f74;
-    border-radius: 1.5rem;
-    box-shadow:
-      0 2px 6px rgba(47, 35, 22, 0.08),
-      0 12px 32px rgba(47, 35, 22, 0.12);
+    padding: 1.25rem;
+    background: #ffffff;
+    border: 1px solid rgba(71, 57, 44, 0.15);
+    border-radius: 1.25rem;
+    box-shadow: 0 4px 16px rgba(47, 35, 22, 0.08);
     cursor: pointer;
     transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .file-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #d97757, #dda386);
-    opacity: 1;
   }
 
   .file-card:hover {
-    border-color: #5f564e;
-    box-shadow:
-      0 4px 12px rgba(47, 35, 22, 0.1),
-      0 20px 48px rgba(47, 35, 22, 0.16);
-    transform: translateY(-3px);
+    border-color: rgba(71, 57, 44, 0.25);
+    box-shadow: 0 8px 24px rgba(47, 35, 22, 0.12);
+    transform: translateY(-2px);
   }
 
   .file-card.skeleton {
@@ -455,13 +438,7 @@ import Layout from '@layouts/Layout.astro';
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     cursor: default;
-    min-height: 120px;
-    border: 1px solid #b2a79a;
-    box-shadow: 0 4px 12px rgba(47, 35, 22, 0.06);
-  }
-
-  .file-card.skeleton::before {
-    display: none;
+    min-height: 100px;
   }
 
   @keyframes shimmer {
@@ -472,135 +449,118 @@ import Layout from '@layouts/Layout.astro';
   /* Card Top: Icon + Info + Actions */
   .file-card-top {
     display: flex;
-    align-items: flex-start;
-    gap: 1rem;
+    align-items: center;
+    gap: 0.9rem;
   }
 
   /* File Icon */
   .file-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius-lg);
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    color: white;
   }
 
-  .file-icon.text { background: linear-gradient(135deg, var(--color-primary) 0%, #e88a6a 100%); color: white; }
-  .file-icon.document { background: linear-gradient(135deg, #4A5E8A 0%, #6b7fa8 100%); color: white; }
-  .file-icon.image { background: linear-gradient(135deg, var(--color-success) 0%, #8fb09e 100%); color: white; }
-  .file-icon.archive { background: linear-gradient(135deg, #a07850 0%, #c49a6c 100%); color: white; }
-  .file-icon.clipboard { background: linear-gradient(135deg, var(--color-danger) 0%, #d47a65 100%); color: white; }
+  .file-icon.text { background: #d97757; }
+  .file-icon.document { background: #4A5E8A; }
+  .file-icon.image { background: #6f8e7f; }
+  .file-icon.archive { background: #a07850; }
+  .file-icon.clipboard { background: #bf5c46; }
 
   /* File Content */
   .file-content {
     flex: 1;
     min-width: 0;
-    display: grid;
-    gap: 0.35rem;
   }
 
   .file-title {
-    font-size: 1.05rem;
-    font-weight: var(--font-medium);
-    color: var(--text-primary);
-    line-height: 1.35;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #171412;
+    margin-bottom: 4px;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .file-card:hover .file-title {
-    color: var(--color-primary);
+    color: #d97757;
   }
 
   .file-meta {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.82rem;
-    color: var(--text-tertiary);
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #8a7f74;
   }
 
   .file-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.2rem 0.5rem;
-    border-radius: var(--radius-sm);
-    background: var(--color-primary-light);
-    color: var(--color-primary);
-    font-size: 0.68rem;
-    font-weight: var(--font-semibold);
+    background: rgba(217, 119, 87, 0.12);
+    color: #d97757;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
   }
 
   /* Card Actions Bar */
   .file-card-actions {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(71, 57, 44, 0.08);
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
   }
 
   .file-card-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-    min-height: 2.4rem;
-    padding: 0.5rem 0.9rem;
-    background: var(--text-primary);
-    color: var(--text-inverse);
+    gap: 6px;
+    padding: 8px 16px;
+    background: #171412;
+    color: white;
     border: none;
-    border-radius: var(--radius-full);
-    font-size: 0.85rem;
-    font-weight: var(--font-medium);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    transition: all 0.15s ease;
   }
 
   .file-card-btn:hover {
-    background: #26211c;
-    transform: translateY(-1px);
+    background: #333;
   }
 
   .file-card-btn.secondary {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-primary);
+    background: #f5f0e8;
+    color: #333;
+    border: 1px solid #ddd;
   }
 
   .file-card-btn.secondary:hover {
-    background: var(--bg-tertiary);
-    border-color: var(--border-hover);
+    background: #ebe4d9;
+    border-color: #ccc;
   }
 
   .file-card-btn.danger {
     background: transparent;
-    color: var(--text-tertiary);
-    border: 1px solid transparent;
+    color: #999;
+    border: none;
     margin-left: auto;
-    padding: 0.5rem;
+    padding: 8px;
   }
 
   .file-card-btn.danger:hover {
-    background: var(--color-danger-light);
-    border-color: var(--color-danger);
-    color: var(--color-danger);
-  }
-
-  /* Old File Actions - Remove */
-  .file-actions {
-    display: none;
-  }
-
-  .file-action-btn {
-    display: none;
+    background: rgba(191, 92, 70, 0.1);
+    color: #bf5c46;
   }
 
   /* Empty State */
@@ -1103,20 +1063,20 @@ import Layout from '@layouts/Layout.astro';
         const size = formatSize(file.fileSize || 0);
 
         return `
-          <article class="file-card" data-id="${file.id}" style="display: flex; flex-direction: column; padding: 1.25rem; background: #fff; border: 2px solid #333; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); margin-bottom: 12px;">
-            <div class="file-card-top" style="display: flex; align-items: center; gap: 12px;">
-              <div class="file-icon ${config.type}" style="width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #d97757; color: white;">${getFileIcon(config.icon)}</div>
-              <div class="file-content" style="flex: 1; min-width: 0;">
-                <div class="file-title" style="font-size: 1rem; font-weight: 600; color: #171412; margin-bottom: 4px;">${escapeHtml(file.title)}</div>
-                <div class="file-meta" style="font-size: 0.85rem; color: #666;">
-                  <span style="background: #f0e6dc; padding: 2px 6px; border-radius: 4px; margin-right: 8px;">${escapeHtml(ext.toUpperCase())}</span>
+          <article class="file-card" data-id="${file.id}">
+            <div class="file-card-top">
+              <div class="file-icon ${config.type}">${getFileIcon(config.icon)}</div>
+              <div class="file-content">
+                <div class="file-title">${escapeHtml(file.title)}</div>
+                <div class="file-meta">
+                  <span class="file-badge">${escapeHtml(ext.toUpperCase())}</span>
                   <span>${timeAgo}</span>
-                  ${size ? `<span style="margin-left: 8px;">${size}</span>` : ''}
+                  ${size ? `<span>·</span><span>${size}</span>` : ''}
                 </div>
               </div>
             </div>
-            <div class="file-card-actions" style="display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee;">
-              <button class="file-card-btn" data-action="open" data-id="${file.id}" style="padding: 8px 16px; background: #171412; color: white; border: none; border-radius: 20px; cursor: pointer; font-size: 0.9rem;">
+            <div class="file-card-actions">
+              <button class="file-card-btn" data-action="open" data-id="${file.id}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                   <polyline points="15 3 21 3 21 9"></polyline>
@@ -1124,14 +1084,14 @@ import Layout from '@layouts/Layout.astro';
                 </svg>
                 Open
               </button>
-              <button class="file-card-btn secondary" data-action="download" data-id="${file.id}" style="padding: 8px 12px; background: #f5f0e8; color: #333; border: 1px solid #ccc; border-radius: 20px; cursor: pointer;">
+              <button class="file-card-btn secondary" data-action="download" data-id="${file.id}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
               </button>
-              <button class="file-card-btn danger" data-action="delete" data-id="${file.id}" title="Delete" style="padding: 8px; background: transparent; color: #999; border: none; cursor: pointer; margin-left: auto;">
+              <button class="file-card-btn danger" data-action="delete" data-id="${file.id}" title="Delete">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
