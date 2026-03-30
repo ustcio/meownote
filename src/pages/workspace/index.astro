@@ -419,10 +419,12 @@ import Layout from '@layouts/Layout.astro';
     display: flex;
     flex-direction: column;
     padding: 1.35rem 1.45rem;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(252, 247, 240, 0.94) 100%);
-    border: 1px solid rgba(71, 57, 44, 0.12);
+    background: #fffdf9;
+    border: 1.5px solid rgba(71, 57, 44, 0.18);
     border-radius: var(--radius-2xl);
-    box-shadow: 0 18px 40px rgba(47, 35, 22, 0.1);
+    box-shadow:
+      0 1px 3px rgba(47, 35, 22, 0.06),
+      0 8px 24px rgba(47, 35, 22, 0.1);
     cursor: pointer;
     transition: all var(--duration-normal) var(--ease-default);
     position: relative;
@@ -442,8 +444,10 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .file-card:hover {
-    border-color: rgba(71, 57, 44, 0.22);
-    box-shadow: 0 24px 48px rgba(47, 35, 22, 0.14);
+    border-color: rgba(71, 57, 44, 0.32);
+    box-shadow:
+      0 4px 8px rgba(47, 35, 22, 0.08),
+      0 16px 40px rgba(47, 35, 22, 0.14);
     transform: translateY(-3px);
   }
 
@@ -457,7 +461,8 @@ import Layout from '@layouts/Layout.astro';
     animation: shimmer 1.5s infinite;
     cursor: default;
     min-height: 120px;
-    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(71, 57, 44, 0.1);
+    box-shadow: 0 4px 12px rgba(47, 35, 22, 0.06);
   }
 
   .file-card.skeleton::before {
