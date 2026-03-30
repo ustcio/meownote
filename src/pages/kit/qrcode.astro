@@ -285,77 +285,78 @@ import Layout from '@layouts/Layout.astro';
   }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-<script>
-  const qrInput = document.getElementById('qr-input') as HTMLTextAreaElement;
-  const qrSize = document.getElementById('qr-size') as HTMLSelectElement;
-  const qrDark = document.getElementById('qr-dark') as HTMLInputElement;
-  const qrLight = document.getElementById('qr-light') as HTMLInputElement;
-  const qrLevel = document.getElementById('qr-level') as HTMLSelectElement;
-  const generateBtn = document.getElementById('generate-btn');
-  const downloadBtn = document.getElementById('download-btn');
-  const qrPreview = document.getElementById('qr-preview');
+<script is:inline src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script is:inline>
+  (function() {
+    var qrInput = document.getElementById('qr-input');
+    var qrSize = document.getElementById('qr-size');
+    var qrDark = document.getElementById('qr-dark');
+    var qrLight = document.getElementById('qr-light');
+    var qrLevel = document.getElementById('qr-level');
+    var generateBtn = document.getElementById('generate-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var qrPreview = document.getElementById('qr-preview');
 
-  let currentDataUrl: string = '';
+    var currentDataUrl = '';
 
-  function generateQRCode(text: string, size: number, dark: string, light: string, level: string): void {
-    const canvas = document.createElement('canvas');
+    function generateQRCode(text, size, dark, light, level) {
+      var canvas = document.createElement('canvas');
 
-    // @ts-ignore - QRCode is loaded from CDN
-    QRCode.toCanvas(canvas, text, {
-      width: size,
-      margin: 2,
-      color: {
-        dark: dark,
-        light: light
-      },
-      errorCorrectionLevel: level
-    }, function(error: Error | null) {
-      if (error) {
-        qrPreview!.innerHTML = `<span class="placeholder" style="color: #e88a6a;">生成失败: ${error.message}</span>`;
+      QRCode.toCanvas(canvas, text, {
+        width: size,
+        margin: 2,
+        color: {
+          dark: dark,
+          light: light
+        },
+        errorCorrectionLevel: level
+      }, function(error) {
+        if (error) {
+          qrPreview.innerHTML = '<span class="placeholder" style="color: #e88a6a;">生成失败: ' + error.message + '</span>';
+          return;
+        }
+
+        currentDataUrl = canvas.toDataURL('image/png');
+        qrPreview.innerHTML = '';
+        canvas.style.maxWidth = '100%';
+        qrPreview.appendChild(canvas);
+        if (downloadBtn) downloadBtn.disabled = false;
+      });
+    }
+
+    generateBtn.addEventListener('click', function() {
+      var text = qrInput.value.trim();
+      if (!text) {
+        qrInput.focus();
         return;
       }
 
-      currentDataUrl = canvas.toDataURL('image/png');
-      qrPreview!.innerHTML = '';
-      canvas.style.maxWidth = '100%';
-      qrPreview!.appendChild(canvas);
-      if (downloadBtn) downloadBtn.disabled = false;
+      var size = parseInt(qrSize.value || '200');
+      var dark = qrDark.value || '#171412';
+      var light = qrLight.value || '#ffffff';
+      var level = qrLevel.value || 'M';
+
+      generateQRCode(text, size, dark, light, level);
     });
-  }
 
-  generateBtn?.addEventListener('click', () => {
-    const text = qrInput?.value.trim();
-    if (!text) {
-      qrInput?.focus();
-      return;
-    }
+    downloadBtn.addEventListener('click', function() {
+      if (!currentDataUrl) return;
 
-    const size = parseInt(qrSize?.value || '200');
-    const dark = qrDark?.value || '#171412';
-    const light = qrLight?.value || '#ffffff';
-    const level = qrLevel?.value || 'M';
+      var link = document.createElement('a');
+      link.download = 'qrcode.png';
+      link.href = currentDataUrl;
+      link.click();
+    });
 
-    generateQRCode(text, size, dark, light, level);
-  });
-
-  downloadBtn?.addEventListener('click', () => {
-    if (!currentDataUrl) return;
-
-    const link = document.createElement('a');
-    link.download = 'qrcode.png';
-    link.href = currentDataUrl;
-    link.click();
-  });
-
-  // Auto-generate on input with debounce
-  let debounceTimer: ReturnType<typeof setTimeout>;
-  qrInput?.addEventListener('input', () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      if (qrInput.value.trim()) {
-        generateBtn?.click();
-      }
-    }, 300);
-  });
+    // Auto-generate on input with debounce
+    var debounceTimer;
+    qrInput.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function() {
+        if (qrInput.value.trim()) {
+          generateBtn.click();
+        }
+      }, 300);
+    });
+  })();
 </script>
