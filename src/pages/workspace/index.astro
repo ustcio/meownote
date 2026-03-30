@@ -7,68 +7,52 @@ import Layout from '@layouts/Layout.astro';
   description="Personal workspace for notes and files"
 >
   <section class="workspace-page">
-    <div class="workspace-container">
-      <header class="workspace-header">
+    <div class="container">
+      <!-- Header -->
+      <div class="workspace-header">
         <div class="workspace-header__copy">
-          <span class="workspace-kicker">Personal workspace</span>
-          <h1 class="page-title">Workspace</h1>
-          <p class="page-subtitle">
+          <span class="claude-kicker">Personal workspace</span>
+          <h1>Workspace</h1>
+          <p class="workspace-header__desc">
             Keep notes, uploads, and quick captures in one calm place. Draft text inline, store files safely,
             and download anything when you need it.
           </p>
         </div>
-        <div class="workspace-summary">
-          <div class="summary-card">
-            <span class="summary-label">Library</span>
+        <div class="workspace-stats">
+          <div class="stat-card">
+            <span class="stat-label">Library</span>
             <strong id="files-count">0 items</strong>
           </div>
-          <div class="summary-card">
-            <span class="summary-label">Flow</span>
-            <strong>Create, capture, upload</strong>
-          </div>
         </div>
-      </header>
+      </div>
 
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <div class="search-box">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" id="search-input" placeholder="Search notes, titles, or pasted text" />
-          </div>
-          <div class="sort-dropdown" id="sort-dropdown">
-            <button class="sort-btn" id="sort-btn">
-              <span id="sort-label">Recent</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-            <div class="sort-menu" id="sort-menu">
-              <button class="sort-option active" data-sort="updated_at">Recent</button>
-              <button class="sort-option" data-sort="created_at">Created</button>
-              <button class="sort-option" data-sort="title">Name</button>
-            </div>
-          </div>
+      <!-- Toolbar -->
+      <div class="workspace-toolbar">
+        <div class="toolbar-search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="search-input" placeholder="Search notes and files..." />
         </div>
-        <div class="toolbar-right">
-          <button class="btn-secondary" id="clipboard-btn" title="Quick capture">
+
+        <div class="toolbar-actions">
+          <button class="btn-ghost" id="clipboard-btn" title="Quick capture">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
               <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
             </svg>
-            <span>Quick clip</span>
+            <span>Clip</span>
           </button>
-          <button class="btn-secondary" id="upload-btn" title="Upload files">
+          <button class="btn-ghost" id="upload-btn" title="Upload files">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <path d="M21 15v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"></path>
               <polyline points="17 8 12 3 7 8"></polyline>
               <line x1="12" y1="3" x2="12" y2="15"></line>
             </svg>
             <span>Upload</span>
           </button>
-          <button class="btn-primary" id="new-note-btn">
+          <button class="claude-button" id="new-note-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -76,37 +60,47 @@ import Layout from '@layouts/Layout.astro';
             <span>New note</span>
           </button>
         </div>
-        <p class="toolbar-hint" id="toolbar-hint">
-          Upload documents, images, and archives. Text files stay editable in place.
-        </p>
       </div>
 
-      <div class="results-bar">
-        <div>
-          <p class="results-label">Recent items</p>
-          <p class="results-caption" id="results-caption">Everything in your workspace, sorted by the latest change.</p>
+      <!-- Sort -->
+      <div class="workspace-sort">
+        <div class="sort-dropdown" id="sort-dropdown">
+          <button class="sort-btn" id="sort-btn">
+            <span id="sort-label">Recent</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="sort-menu" id="sort-menu">
+            <button class="sort-option active" data-sort="updated_at">Recent</button>
+            <button class="sort-option" data-sort="created_at">Created</button>
+            <button class="sort-option" data-sort="title">Name</button>
+          </div>
         </div>
+        <p class="sort-hint" id="sort-hint">Everything in your workspace, sorted by latest change.</p>
       </div>
 
-      <div class="skeleton-grid" id="skeleton-grid">
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
+      <!-- Loading -->
+      <div class="files-grid" id="skeleton-grid">
+        <div class="file-card skeleton"></div>
+        <div class="file-card skeleton"></div>
+        <div class="file-card skeleton"></div>
+        <div class="file-card skeleton"></div>
+        <div class="file-card skeleton"></div>
+        <div class="file-card skeleton"></div>
       </div>
 
+      <!-- Empty State -->
       <div class="empty-state" id="empty-state">
         <div class="empty-icon">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
           </svg>
         </div>
         <h3>Nothing here yet</h3>
         <p>Start with a note, save a quick clip, or upload files you want close at hand.</p>
-        <button class="btn-primary btn-lg" id="empty-new-btn">
+        <button class="claude-button" id="empty-new-btn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -115,18 +109,20 @@ import Layout from '@layouts/Layout.astro';
         </button>
       </div>
 
+      <!-- Files Grid -->
       <div class="files-grid" id="files-grid"></div>
     </div>
-
-    <input type="file" id="file-upload" hidden multiple accept=".txt,.md,.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.zip,.rar" />
   </section>
 
+  <input type="file" id="file-upload" hidden multiple accept=".txt,.md,.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.zip,.rar" />
+
+  <!-- Clipboard Modal -->
   <div class="modal" id="clipboard-modal">
     <div class="modal-backdrop" id="clipboard-backdrop"></div>
     <div class="modal-content">
       <div class="modal-header">
         <h3>Quick capture</h3>
-        <button class="btn-icon-sm" id="clipboard-close">
+        <button class="btn-icon" id="clipboard-close">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -135,27 +131,28 @@ import Layout from '@layouts/Layout.astro';
       </div>
       <div class="modal-body">
         <input type="text" id="clipboard-title" placeholder="Title (optional)" class="input-field" />
-        <textarea id="clipboard-content" placeholder="Paste or write a note you want to save for later..." rows="6" class="input-field textarea"></textarea>
+        <textarea id="clipboard-content" placeholder="Paste or write a note you want to save for later..." rows="5" class="input-field textarea"></textarea>
         <div class="modal-actions">
-          <button class="btn-secondary" id="paste-btn">
+          <button class="btn-ghost" id="paste-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
             </svg>
             Paste
           </button>
-          <button class="btn-primary" id="save-clipboard-btn">Save</button>
+          <button class="claude-button" id="save-clipboard-btn">Save</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Delete Modal -->
   <div class="modal" id="delete-modal">
     <div class="modal-backdrop" id="delete-backdrop"></div>
     <div class="modal-content modal-sm">
       <div class="modal-header">
         <h3>Delete item</h3>
-        <button class="btn-icon-sm" id="delete-close">
+        <button class="btn-icon" id="delete-close">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -163,9 +160,9 @@ import Layout from '@layouts/Layout.astro';
         </button>
       </div>
       <div class="modal-body">
-        <p id="delete-message">This will permanently remove the item from your workspace.</p>
+        <p>This will permanently remove the item from your workspace.</p>
         <div class="modal-actions">
-          <button class="btn-secondary" id="delete-cancel">Cancel</button>
+          <button class="btn-ghost" id="delete-cancel">Cancel</button>
           <button class="btn-danger" id="delete-confirm">Delete</button>
         </div>
       </div>
@@ -178,31 +175,23 @@ import Layout from '@layouts/Layout.astro';
 <style>
   .workspace-page {
     min-height: 100vh;
+    padding: calc(var(--header-height) + 3rem) 0 5rem;
     background:
-      radial-gradient(circle at top right, rgba(217, 119, 87, 0.08), transparent 24rem),
-      linear-gradient(180deg, rgba(255, 252, 247, 0.92) 0%, rgba(250, 246, 238, 0.72) 18%, transparent 100%);
-    padding: calc(var(--header-height, 64px) + 36px) 24px 88px;
+      radial-gradient(circle at 78% 8%, rgba(217, 119, 87, 0.08), transparent 28%),
+      radial-gradient(circle at 12% 12%, rgba(180, 199, 192, 0.1), transparent 18%),
+      linear-gradient(180deg, #fbf8f3 0%, var(--bg-primary) 30%, #f6f1e8 100%);
   }
 
-  .workspace-container {
-    max-width: 1180px;
-    margin: 0 auto;
-  }
-
+  /* Header */
   .workspace-header {
     display: grid;
-    gap: 1.5rem;
-    padding: 1.75rem;
-    margin-bottom: 1.35rem;
-    border: 1px solid rgba(71, 57, 44, 0.1);
-    border-radius: 1.75rem;
-    background: rgba(255, 252, 247, 0.9);
-    box-shadow: 0 22px 56px rgba(50, 34, 20, 0.08);
+    gap: 2rem;
+    margin-bottom: 2rem;
   }
 
   @media (min-width: 900px) {
     .workspace-header {
-      grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+      grid-template-columns: minmax(0, 1.3fr) minmax(16rem, 0.7fr);
       align-items: start;
     }
   }
@@ -212,148 +201,140 @@ import Layout from '@layouts/Layout.astro';
     gap: 0.85rem;
   }
 
-  .workspace-kicker {
-    display: inline-flex;
-    width: fit-content;
-    padding: 0.45rem 0.75rem;
-    border-radius: 999px;
-    background: rgba(23, 20, 18, 0.06);
-    color: var(--text-secondary);
-    font-family: var(--font-sans);
-    font-size: 0.78rem;
+  .workspace-header__copy h1 {
+    font-size: clamp(2.25rem, 4vw, 3rem);
     font-weight: var(--font-medium);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    letter-spacing: var(--tracking-tight);
   }
 
-  .page-title {
-    font-size: clamp(2.25rem, 4vw, 3.15rem);
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
-    letter-spacing: -0.02em;
-  }
-
-  .page-subtitle {
-    max-width: 42rem;
+  .workspace-header__desc {
+    max-width: 38rem;
     font-size: 1.02rem;
-    line-height: 1.7;
+    line-height: var(--leading-relaxed);
     color: var(--text-secondary);
   }
 
-  .workspace-summary {
+  .workspace-stats {
     display: grid;
-    gap: 0.9rem;
+    gap: 0.75rem;
   }
 
-  .summary-card {
-    display: grid;
-    gap: 0.35rem;
-    padding: 1rem 1.1rem;
-    border-radius: 1.25rem;
-    background: rgba(255, 255, 255, 0.76);
-    border: 1px solid rgba(71, 57, 44, 0.08);
+  .stat-card {
+    padding: 1.1rem 1.25rem;
+    border-radius: var(--radius-xl);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
   }
 
-  .summary-label {
-    font-family: var(--font-sans);
-    font-size: 0.76rem;
+  .stat-label {
+    display: block;
+    font-size: 0.78rem;
     font-weight: var(--font-medium);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-tertiary);
+    margin-bottom: 0.35rem;
   }
 
-  .summary-card strong {
-    font-family: var(--font-display);
+  .stat-card strong {
     font-size: 1.15rem;
     font-weight: var(--font-medium);
     color: var(--text-primary);
   }
 
-  .toolbar {
+  /* Toolbar */
+  .workspace-toolbar {
     display: grid;
     gap: 1rem;
-    padding: 1.1rem 1.15rem;
-    margin-bottom: 1rem;
-    border: 1px solid rgba(71, 57, 44, 0.08);
-    border-radius: 1.45rem;
-    background: rgba(255, 253, 249, 0.88);
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.25rem;
+    border-radius: var(--radius-xl);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
   }
 
-  @media (min-width: 860px) {
-    .toolbar {
+  @media (min-width: 768px) {
+    .workspace-toolbar {
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
     }
-
-    .toolbar-hint {
-      grid-column: 1 / -1;
-    }
   }
 
-  .toolbar-left,
-  .toolbar-right {
+  .toolbar-search {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-
-  .toolbar-right {
-    justify-content: flex-start;
-  }
-
-  .toolbar-hint {
-    margin: 0;
-    font-size: 0.92rem;
-    line-height: 1.5;
-    color: var(--text-secondary);
-  }
-
-  .toolbar-hint.is-busy {
-    color: var(--color-primary);
-  }
-
-  .toolbar-hint.is-error {
-    color: var(--color-danger);
-  }
-
-  .search-box {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    min-height: 3rem;
-    padding: 0.75rem 0.95rem;
-    background: rgba(255, 255, 255, 0.84);
-    border: 1px solid rgba(71, 57, 44, 0.1);
-    border-radius: 999px;
-    min-width: min(100%, 22rem);
-    flex: 1 1 20rem;
+    gap: 0.65rem;
+    min-height: 2.75rem;
+    padding: 0 0.9rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-full);
     transition: all var(--duration-fast) var(--ease-default);
   }
 
-  .search-box:focus-within {
+  .toolbar-search:focus-within {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 4px rgba(217, 119, 87, 0.12);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
   }
 
-  .search-box svg {
+  .toolbar-search svg {
     color: var(--text-tertiary);
     flex-shrink: 0;
   }
 
-  .search-box input {
+  .toolbar-search input {
+    flex: 1;
     border: none;
     background: transparent;
-    font-family: var(--font-sans);
     font-size: var(--text-sm);
     color: var(--text-primary);
-    width: 100%;
     outline: none;
+    padding: 0.5rem 0;
   }
 
-  .search-box input::placeholder {
+  .toolbar-search input::placeholder {
     color: var(--text-tertiary);
+  }
+
+  .toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 2.6rem;
+    padding: 0.55rem 1rem;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .btn-ghost:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+  }
+
+  /* Sort */
+  .workspace-sort {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
   }
 
   .sort-dropdown {
@@ -363,13 +344,12 @@ import Layout from '@layouts/Layout.astro';
   .sort-btn {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    min-height: 3rem;
-    padding: 0.75rem 1rem;
-    background: rgba(255, 255, 255, 0.84);
-    border: 1px solid rgba(71, 57, 44, 0.1);
-    border-radius: 999px;
-    font-family: var(--font-sans);
+    gap: 0.35rem;
+    min-height: 2.25rem;
+    padding: 0.4rem 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-full);
     font-size: var(--text-sm);
     color: var(--text-primary);
     cursor: pointer;
@@ -377,21 +357,21 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .sort-btn:hover {
-    border-color: rgba(71, 57, 44, 0.2);
+    border-color: var(--border-hover);
   }
 
   .sort-menu {
     position: absolute;
-    top: calc(100% + 8px);
+    top: calc(100% + 6px);
     left: 0;
-    background: rgba(255, 253, 249, 0.98);
-    border: 1px solid rgba(71, 57, 44, 0.1);
-    border-radius: 1rem;
-    box-shadow: 0 20px 40px rgba(38, 29, 21, 0.12);
-    min-width: 9rem;
-    padding: 0.35rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    min-width: 8rem;
+    padding: 0.3rem;
     display: none;
-    z-index: 100;
+    z-index: var(--z-dropdown);
   }
 
   .sort-dropdown.open .sort-menu {
@@ -401,11 +381,10 @@ import Layout from '@layouts/Layout.astro';
   .sort-option {
     display: block;
     width: 100%;
-    padding: 0.6rem 0.8rem;
+    padding: 0.5rem 0.7rem;
     background: transparent;
     border: none;
-    border-radius: 0.75rem;
-    font-family: var(--font-sans);
+    border-radius: var(--radius-md);
     font-size: var(--text-sm);
     color: var(--text-primary);
     text-align: left;
@@ -414,147 +393,53 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .sort-option:hover {
-    background: rgba(23, 20, 18, 0.05);
+    background: var(--bg-secondary);
   }
 
   .sort-option.active {
-    background: rgba(217, 119, 87, 0.14);
-    color: var(--text-primary);
+    background: var(--color-primary-light);
+    color: var(--color-primary);
   }
 
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
-    min-height: 3rem;
-    padding: 0.75rem 1.1rem;
-    background: var(--btn-primary-bg);
-    color: var(--btn-primary-text);
-    border: none;
-    border-radius: 999px;
-    font-family: var(--font-sans);
+  .sort-hint {
     font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-    box-shadow: var(--btn-primary-shadow);
-  }
-
-  .btn-primary:hover {
-    background: var(--btn-primary-hover);
-  }
-
-  .btn-primary:disabled,
-  .btn-secondary:disabled,
-  .file-action:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-
-  .btn-primary.btn-lg {
-    min-height: 3.25rem;
-    padding-inline: 1.35rem;
-    font-size: 0.96rem;
-  }
-
-  .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
-    min-height: 3rem;
-    padding: 0.75rem 1rem;
-    background: rgba(255, 255, 255, 0.84);
-    color: var(--btn-secondary-text);
-    border: 1px solid rgba(71, 57, 44, 0.12);
-    border-radius: 999px;
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .btn-secondary:hover {
-    border-color: rgba(71, 57, 44, 0.2);
-    background: rgba(255, 255, 255, 0.94);
-  }
-
-  .results-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    padding-inline: 0.15rem;
-  }
-
-  .results-label {
-    margin: 0 0 0.25rem;
-    font-family: var(--font-display);
-    font-size: 1.3rem;
-    color: var(--text-primary);
-  }
-
-  .results-caption {
+    color: var(--text-secondary);
     margin: 0;
-    font-size: 0.95rem;
-    color: var(--text-secondary);
   }
 
-  .btn-icon-sm {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: transparent;
-    border: none;
-    border-radius: 8px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .btn-icon-sm:hover {
-    background: var(--bg-elevated);
-    color: var(--text-primary);
-  }
-
-  .btn-danger {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 16px;
-    background: var(--color-danger);
-    color: white;
-    border: none;
-    border-radius: var(--radius-md);
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .btn-danger:hover {
-    background: var(--color-danger-hover);
-  }
-
-  .skeleton-grid {
+  /* Files Grid */
+  .files-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1rem;
   }
 
-  .skeleton-card {
-    height: 220px;
-    background: linear-gradient(90deg, rgba(222, 213, 200, 0.7) 0%, rgba(255, 253, 249, 0.92) 50%, rgba(222, 213, 200, 0.7) 100%);
+  /* File Card - 优化后的设计 */
+  .file-card {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1rem 1.1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-default);
+  }
+
+  .file-card:hover {
+    border-color: var(--card-border-hover);
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  .file-card.skeleton {
+    background: linear-gradient(90deg, var(--bg-tertiary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
     background-size: 200% 100%;
-    border-radius: 1.5rem;
     animation: shimmer 1.5s infinite;
+    cursor: default;
+    min-height: 72px;
   }
 
   @keyframes shimmer {
@@ -562,84 +447,11 @@ import Layout from '@layouts/Layout.astro';
     100% { background-position: -200% 0; }
   }
 
-  .empty-state {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 5rem 1.5rem;
-    text-align: center;
-    border: 1px dashed rgba(71, 57, 44, 0.15);
-    border-radius: 1.75rem;
-    background: rgba(255, 253, 249, 0.76);
-  }
-
-  .empty-state.visible {
-    display: flex;
-  }
-
-  .empty-icon {
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(23, 20, 18, 0.06);
-    border-radius: 20px;
-    margin-bottom: 24px;
-    color: var(--text-tertiary);
-  }
-
-  .empty-state h3 {
-    font-family: var(--font-display);
-    font-size: 18px;
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
-    margin-bottom: 8px;
-  }
-
-  .empty-state p {
-    font-size: 0.96rem;
-    color: var(--text-secondary);
-    margin-bottom: 24px;
-    max-width: 30rem;
-  }
-
-  .files-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.2rem;
-  }
-
-  .file-card {
-    display: grid;
-    gap: 1rem;
-    min-height: 15rem;
-    padding: 1.25rem;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(252, 247, 240, 0.94) 100%);
-    border: 1px solid rgba(71, 57, 44, 0.14);
-    border-radius: 1.5rem;
-    transition: all var(--duration-normal) var(--ease-default);
-    position: relative;
-    box-shadow: 0 18px 40px rgba(47, 35, 22, 0.12);
-  }
-
-  .file-card:hover {
-    border-color: rgba(71, 57, 44, 0.22);
-    box-shadow: 0 24px 48px rgba(47, 35, 22, 0.16);
-    transform: translateY(-2px);
-  }
-
-  .file-card-top {
-    display: flex;
-    gap: 0.9rem;
-    align-items: flex-start;
-  }
-
+  /* File Icon */
   .file-icon {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 1rem;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -647,52 +459,27 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .file-icon.text { background: var(--color-primary-light); color: var(--color-primary); }
-  .file-icon.document { background: rgba(74, 94, 138, 0.1); color: #4A5E8A; }
-  .file-icon.image { background: var(--color-success-light); color: var(--color-success); }
-  .file-icon.archive { background: rgba(217, 119, 87, 0.1); color: var(--color-primary); }
-  .file-icon.clipboard { background: var(--color-danger-light); color: var(--color-danger); }
+  .file-icon.document { background: rgba(74, 94, 138, 0.12); color: #4A5E8A; }
+  .file-icon.image { background: rgba(111, 142, 127, 0.12); color: var(--color-success); }
+  .file-icon.archive { background: rgba(217, 119, 87, 0.12); color: var(--color-primary); }
+  .file-icon.clipboard { background: rgba(191, 92, 70, 0.12); color: var(--color-danger); }
 
-  .file-info {
+  /* File Content */
+  .file-content {
     flex: 1;
     min-width: 0;
     display: grid;
-    gap: 0.55rem;
-  }
-
-  .file-badges {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .file-badge,
-  .file-size {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.8rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-    font-family: var(--font-sans);
-    font-size: 0.76rem;
-    font-weight: var(--font-medium);
-  }
-
-  .file-badge {
-    background: rgba(23, 20, 18, 0.06);
-    color: var(--text-secondary);
-  }
-
-  .file-size {
-    background: rgba(217, 119, 87, 0.08);
-    color: var(--color-primary);
+    gap: 0.3rem;
   }
 
   .file-title {
-    font-size: 1.2rem;
+    font-size: 0.98rem;
     font-weight: var(--font-medium);
     color: var(--text-primary);
     line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .file-card:hover .file-title {
@@ -700,96 +487,116 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .file-meta {
-    font-size: 0.86rem;
-    color: var(--text-tertiary);
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
   }
 
-  .file-preview {
-    min-height: 3.8rem;
-    font-size: 0.94rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin: 0;
+  .file-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+    font-size: 0.7rem;
+    font-weight: var(--font-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
   }
 
+  /* File Actions */
   .file-actions {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
-    margin-top: auto;
-    padding-top: 0.95rem;
-    border-top: 1px solid rgba(71, 57, 44, 0.08);
+    gap: 0.35rem;
+    flex-shrink: 0;
   }
 
-  .file-action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 2.5rem;
-    padding: 0.7rem 0.95rem;
-    border-radius: 999px;
-    border: 1px solid rgba(71, 57, 44, 0.12);
-    background: rgba(255, 255, 255, 0.9);
-    color: var(--text-primary);
-    font-family: var(--font-sans);
-    font-size: 0.88rem;
-    font-weight: var(--font-medium);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .file-action:hover {
-    border-color: rgba(71, 57, 44, 0.22);
-    background: rgba(255, 255, 255, 1);
-  }
-
-  .file-action.primary {
-    background: var(--text-primary);
-    color: white;
-    border-color: transparent;
-  }
-
-  .file-action.primary:hover {
-    background: #26211c;
-  }
-
-  .file-delete {
-    width: 2.35rem;
-    height: 2.35rem;
-    margin-left: auto;
+  .file-action-btn {
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: transparent;
-    border: 1px solid rgba(71, 57, 44, 0.1);
-    border-radius: 999px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
     color: var(--text-tertiary);
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-default);
+    opacity: 0;
   }
 
-  .file-delete:hover {
-    background: rgba(186, 74, 47, 0.08);
-    border-color: rgba(186, 74, 47, 0.16);
+  .file-card:hover .file-action-btn {
+    opacity: 1;
+  }
+
+  .file-action-btn:hover {
+    background: var(--bg-secondary);
+    border-color: var(--border-primary);
+    color: var(--text-primary);
+  }
+
+  .file-action-btn.delete:hover {
+    background: var(--color-danger-light);
+    border-color: var(--color-danger);
     color: var(--color-danger);
   }
 
+  /* Empty State */
+  .empty-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1.5rem;
+    text-align: center;
+    border: 1px dashed var(--border-primary);
+    border-radius: var(--radius-2xl);
+    background: var(--card-bg);
+  }
+
+  .empty-state.visible {
+    display: flex;
+  }
+
+  .empty-icon {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-xl);
+    margin-bottom: 1.5rem;
+    color: var(--text-tertiary);
+  }
+
+  .empty-state h3 {
+    font-size: 1.1rem;
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    max-width: 26rem;
+  }
+
+  /* Modal */
   .modal {
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: var(--z-modal);
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 1.5rem;
   }
 
   .modal.open {
@@ -799,27 +606,27 @@ import Layout from '@layouts/Layout.astro';
   .modal-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--bg-overlay);
     backdrop-filter: blur(4px);
   }
 
   .modal-content {
     position: relative;
-    background: rgba(255, 253, 249, 0.98);
-    border: 1px solid rgba(71, 57, 44, 0.1);
-    border-radius: 1.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-2xl);
     width: 100%;
-    max-width: 27rem;
-    box-shadow: 0 24px 60px rgba(36, 28, 21, 0.18);
-    animation: modalIn 0.2s ease;
+    max-width: 28rem;
+    box-shadow: var(--shadow-xl);
+    animation: modalIn 0.2s var(--ease-out);
   }
 
   .modal-content.modal-sm {
-    max-width: 360px;
+    max-width: 22rem;
   }
 
   @keyframes modalIn {
-    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    from { opacity: 0; transform: scale(0.95) translateY(8px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
   }
 
@@ -828,12 +635,31 @@ import Layout from '@layouts/Layout.astro';
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid rgba(71, 57, 44, 0.08);
+    border-bottom: 1px solid var(--border-secondary);
   }
 
   .modal-header h3 {
-    font-size: 1.05rem;
-    font-weight: var(--font-semibold);
+    font-size: 1rem;
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+  }
+
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .btn-icon:hover {
+    background: var(--bg-secondary);
     color: var(--text-primary);
   }
 
@@ -844,33 +670,32 @@ import Layout from '@layouts/Layout.astro';
   .modal-body p {
     font-size: var(--text-sm);
     color: var(--text-secondary);
-    margin-bottom: 20px;
-    line-height: 1.5;
+    margin-bottom: 1.25rem;
+    line-height: var(--leading-relaxed);
   }
 
   .modal-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 0.5rem;
   }
 
   .input-field {
     width: 100%;
-    padding: 0.85rem 0.95rem;
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(71, 57, 44, 0.1);
-    border-radius: 1rem;
-    font-family: var(--font-sans);
+    padding: 0.75rem 0.9rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
     font-size: var(--text-sm);
     color: var(--text-primary);
     transition: all var(--duration-fast) var(--ease-default);
-    margin-bottom: 0.85rem;
+    margin-bottom: 0.75rem;
   }
 
   .input-field:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 4px rgba(217, 119, 87, 0.12);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
   }
 
   .input-field::placeholder {
@@ -879,23 +704,42 @@ import Layout from '@layouts/Layout.astro';
 
   .input-field.textarea {
     resize: vertical;
-    min-height: 120px;
+    min-height: 100px;
     line-height: 1.5;
   }
 
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--text-primary);
-    color: var(--text-inverse);
-    padding: 0.8rem 1rem;
-    border-radius: 999px;
-    font-family: var(--font-sans);
+  .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    background: var(--color-danger);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
-    z-index: 1001;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .btn-danger:hover {
+    background: var(--color-danger-hover);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: var(--text-primary);
+    color: var(--text-inverse);
+    padding: 0.65rem 1rem;
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    z-index: var(--z-toast);
     opacity: 0;
     transition: all var(--duration-normal) var(--ease-default);
     box-shadow: var(--shadow-lg);
@@ -917,39 +761,27 @@ import Layout from '@layouts/Layout.astro';
     color: white;
   }
 
+  /* Mobile */
   @media (max-width: 640px) {
     .workspace-page {
-      padding: calc(var(--header-height, 64px) + 24px) 16px 60px;
+      padding: calc(var(--header-height) + 2rem) 0 4rem;
     }
 
-    .workspace-header,
-    .toolbar {
-      padding: 1rem;
+    .workspace-toolbar {
+      padding: 0.9rem;
     }
 
-    .toolbar-left,
-    .toolbar-right {
+    .toolbar-actions {
       width: 100%;
-    }
-
-    .search-box {
-      min-width: auto;
+      justify-content: space-between;
     }
 
     .files-grid {
       grid-template-columns: 1fr;
     }
 
-    .file-card {
-      padding: 1rem;
-    }
-
-    .file-actions {
-      flex-wrap: wrap;
-    }
-
-    .file-action {
-      flex: 1 1 calc(50% - 0.325rem);
+    .file-action-btn {
+      opacity: 1;
     }
   }
 </style>
@@ -960,19 +792,17 @@ import Layout from '@layouts/Layout.astro';
   let searchQuery = '';
   let deleteTargetId = null;
   let searchDebounce = null;
-  const defaultToolbarHint = 'Upload documents, images, and archives. Text files stay editable in place.';
 
   const filesGrid = document.getElementById('files-grid');
   const skeletonGrid = document.getElementById('skeleton-grid');
   const emptyState = document.getElementById('empty-state');
   const filesCount = document.getElementById('files-count');
-  const resultsCaption = document.getElementById('results-caption');
+  const sortHint = document.getElementById('sort-hint');
   const searchInput = document.getElementById('search-input');
   const fileUpload = document.getElementById('file-upload');
   const newNoteBtn = document.getElementById('new-note-btn');
   const uploadBtn = document.getElementById('upload-btn');
   const clipboardBtn = document.getElementById('clipboard-btn');
-  const toolbarHint = document.getElementById('toolbar-hint');
   const toast = document.getElementById('toast');
   const sortDropdown = document.getElementById('sort-dropdown');
   const sortBtn = document.getElementById('sort-btn');
@@ -1094,7 +924,7 @@ import Layout from '@layouts/Layout.astro';
 
   function initGridActions() {
     filesGrid?.addEventListener('click', async (event) => {
-      const deleteButton = event.target.closest('.file-delete');
+      const deleteButton = event.target.closest('.file-action-btn.delete');
       if (deleteButton) {
         event.preventDefault();
         event.stopPropagation();
@@ -1106,21 +936,13 @@ import Layout from '@layouts/Layout.astro';
         return;
       }
 
-      const actionButton = event.target.closest('.file-action');
-      if (actionButton) {
+      const downloadBtn = event.target.closest('.file-action-btn.download');
+      if (downloadBtn) {
         event.preventDefault();
         event.stopPropagation();
-        const id = actionButton.getAttribute('data-id');
-        const action = actionButton.getAttribute('data-action');
+        const id = downloadBtn.getAttribute('data-id');
         const file = files.find((item) => item.id === id);
-
-        if (!id || !file) return;
-
-        if (action === 'open') {
-          window.location.href = `/workspace/edit?id=${id}`;
-        }
-
-        if (action === 'download') {
+        if (id && file) {
           await downloadWorkspaceFile(id, file.title || 'download', file.type || 'txt');
         }
         return;
@@ -1167,7 +989,7 @@ import Layout from '@layouts/Layout.astro';
   }
 
   function formatSize(bytes) {
-    if (!bytes) return '0 B';
+    if (!bytes) return '';
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -1177,54 +999,27 @@ import Layout from '@layouts/Layout.astro';
     return ['txt', 'md', 'markdown', 'json', 'js', 'ts', 'css', 'html', 'clipboard'].includes((type || '').toLowerCase());
   }
 
-  function getPreviewText(file) {
-    if (file.content && file.content.trim()) {
-      return file.content.replace(/\s+/g, ' ').trim();
-    }
-
-    if (!isEditableType(file.type) && !file.fileUrl) {
-      return 'This older upload is missing stored binary data. Re-upload it to restore downloads.';
-    }
-
-    const fallback = {
-      pdf: 'Stored PDF ready for download from your workspace.',
-      doc: 'Stored document ready for download from your workspace.',
-      docx: 'Stored document ready for download from your workspace.',
-      xls: 'Spreadsheet stored safely in your workspace.',
-      xlsx: 'Spreadsheet stored safely in your workspace.',
-      png: 'Image stored safely in your workspace.',
-      jpg: 'Image stored safely in your workspace.',
-      jpeg: 'Image stored safely in your workspace.',
-      gif: 'Image stored safely in your workspace.',
-      zip: 'Archive stored safely in your workspace.',
-      rar: 'Archive stored safely in your workspace.',
-      clipboard: 'Quick capture saved for later reuse.',
-    };
-
-    return fallback[(file.type || '').toLowerCase()] || 'Saved in your workspace and ready when you need it.';
-  }
-
   function updateResultsCopy() {
     if (filesCount) {
       filesCount.textContent = `${files.length} item${files.length === 1 ? '' : 's'}`;
     }
 
-    if (!resultsCaption) return;
+    if (!sortHint) return;
 
     if (searchQuery) {
-      resultsCaption.textContent = files.length === 0
-        ? `No matches for "${searchQuery}". Try a broader keyword.`
+      sortHint.textContent = files.length === 0
+        ? `No matches for "${searchQuery}".`
         : `${files.length} result${files.length === 1 ? '' : 's'} for "${searchQuery}".`;
       return;
     }
 
     const messages = {
-      updated_at: 'Everything in your workspace, sorted by the latest change.',
-      created_at: 'Everything in your workspace, sorted by when it was created.',
+      updated_at: 'Everything in your workspace, sorted by latest change.',
+      created_at: 'Everything in your workspace, sorted by creation date.',
       title: 'Everything in your workspace, sorted alphabetically.',
     };
 
-    resultsCaption.textContent = messages[sortBy] || messages.updated_at;
+    sortHint.textContent = messages[sortBy] || messages.updated_at;
   }
 
   function renderFiles() {
@@ -1243,43 +1038,33 @@ import Layout from '@layouts/Layout.astro';
         const config = fileTypeConfig[ext] || { icon: 'document', type: 'document' };
         const date = new Date(file.updatedAt || file.createdAt);
         const timeAgo = getTimeAgo(date);
-        const preview = getPreviewText(file);
         const editable = isEditableType(ext);
-        const storedFileReady = editable || Boolean(file.fileUrl);
-        const statusLabel = editable
-          ? 'Editable in workspace'
-          : storedFileReady
-            ? 'Stored file'
-            : 'Missing file data';
+        const size = formatSize(file.fileSize || 0);
 
         return `
           <article class="file-card" data-id="${file.id}">
-            <div class="file-card-top">
-              <div class="file-icon ${config.type}">${getFileIcon(config.icon)}</div>
-              <div class="file-info">
-                <div class="file-badges">
-                  <span class="file-badge">${escapeHtml(ext.toUpperCase())}</span>
-                  <span class="file-size">${escapeHtml(formatSize(file.fileSize || 0))}</span>
-                </div>
-                <div class="file-title">${escapeHtml(file.title)}</div>
-                <div class="file-meta">
-                  <span>Updated ${escapeHtml(timeAgo)}</span>
-                  <span>·</span>
-                  <span>${escapeHtml(statusLabel)}</span>
-                </div>
+            <div class="file-icon ${config.type}">${getFileIcon(config.icon)}</div>
+            <div class="file-content">
+              <div class="file-title">${escapeHtml(file.title)}</div>
+              <div class="file-meta">
+                <span class="file-badge">${escapeHtml(ext.toUpperCase())}</span>
+                <span>${timeAgo}</span>
+                ${size ? `<span>·</span><span>${size}</span>` : ''}
               </div>
-              <button class="file-delete" data-id="${file.id}" title="Delete">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </div>
+            <div class="file-actions">
+              <button class="file-action-btn download" data-id="${file.id}" title="Download">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
               </button>
-            </div>
-            <p class="file-preview">${escapeHtml(preview)}</p>
-            <div class="file-actions">
-              <button class="file-action primary" data-action="open" data-id="${file.id}">Open</button>
-              <button class="file-action" data-action="download" data-id="${file.id}" ${storedFileReady ? '' : 'disabled'}>
-                ${editable ? 'Export' : storedFileReady ? 'Download' : 'Unavailable'}
+              <button class="file-action-btn delete" data-id="${file.id}" title="Delete">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
               </button>
             </div>
           </article>
@@ -1300,30 +1085,8 @@ import Layout from '@layouts/Layout.astro';
     return icons[type] || icons.document;
   }
 
-  function getDownloadFilename(response, fallbackName, type) {
-    const contentDisposition = response.headers.get('Content-Disposition') || '';
-    const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
-    if (utf8Match?.[1]) {
-      return decodeURIComponent(utf8Match[1]);
-    }
-
-    const basicMatch = contentDisposition.match(/filename="([^"]+)"/i);
-    if (basicMatch?.[1]) {
-      return basicMatch[1];
-    }
-
-    const normalizedType = (type || '').toLowerCase();
-    const extension = normalizedType === 'clipboard' ? 'txt' : normalizedType;
-    if (extension && !fallbackName.toLowerCase().endsWith(`.${extension}`)) {
-      return `${fallbackName}.${extension}`;
-    }
-
-    return fallbackName || 'download';
-  }
-
   async function downloadWorkspaceFile(id, fallbackName = 'download', type = '') {
     try {
-      setToolbarHint('Preparing your download...', 'busy');
       const response = await fetch(`${API_BASE}/api/workspace/${id}/download`);
 
       if (!response.ok) {
@@ -1335,36 +1098,21 @@ import Layout from '@layouts/Layout.astro';
       const blobUrl = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = blobUrl;
-      anchor.download = getDownloadFilename(response, fallbackName, type);
+
+      const contentDisposition = response.headers.get('Content-Disposition') || '';
+      const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+      const basicMatch = contentDisposition.match(/filename="([^"]+)"/i);
+      anchor.download = utf8Match?.[1] ? decodeURIComponent(utf8Match[1]) : basicMatch?.[1] || fallbackName;
+
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
       URL.revokeObjectURL(blobUrl);
-      showToast('Download ready', 'success');
-      resetToolbarHint();
+      showToast('Downloaded', 'success');
     } catch (error) {
       console.error('Download failed:', error);
       showToast(error.message || 'Download failed', 'error');
-      setToolbarHint('Download failed. Try re-uploading the file if it was added before this fix.', 'error');
     }
-  }
-
-  function setToolbarHint(message, state = 'default') {
-    if (!toolbarHint) return;
-    toolbarHint.textContent = message;
-    toolbarHint.classList.remove('is-busy', 'is-error');
-    if (state === 'busy') toolbarHint.classList.add('is-busy');
-    if (state === 'error') toolbarHint.classList.add('is-error');
-  }
-
-  function resetToolbarHint() {
-    setToolbarHint(defaultToolbarHint);
-  }
-
-  function setControlsDisabled(disabled) {
-    [uploadBtn, newNoteBtn, clipboardBtn].forEach((button) => {
-      if (button) button.disabled = disabled;
-    });
   }
 
   async function confirmDelete() {
@@ -1449,12 +1197,8 @@ import Layout from '@layouts/Layout.astro';
     if (fileList.length === 0) return;
 
     let successCount = 0;
-    setControlsDisabled(true);
 
-    for (let index = 0; index < fileList.length; index++) {
-      const file = fileList[index];
-      setToolbarHint(`Uploading ${index + 1} of ${fileList.length}: ${file.name}`, 'busy');
-
+    for (const file of fileList) {
       try {
         const formData = new FormData();
         formData.append('file', file);
@@ -1463,16 +1207,13 @@ import Layout from '@layouts/Layout.astro';
           body: formData,
         });
 
-        if (result.success) {
-          successCount++;
-        }
+        if (result.success) successCount++;
       } catch (error) {
         console.error('Upload failed:', error);
       }
     }
 
     input.value = '';
-    setControlsDisabled(false);
 
     if (successCount > 0) {
       showToast(`${successCount} file${successCount > 1 ? 's' : ''} uploaded`, 'success');
@@ -1481,11 +1222,7 @@ import Layout from '@layouts/Layout.astro';
 
     if (successCount < fileList.length) {
       showToast('Some files failed to upload', 'error');
-      setToolbarHint('Some files could not be uploaded. Try again with smaller files or a single retry.', 'error');
-      return;
     }
-
-    resetToolbarHint();
   }
 
   function showLoading() {
