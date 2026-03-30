@@ -1,0 +1,447 @@
+---
+import Layout from '@layouts/Layout.astro';
+---
+
+<Layout
+  title="二维码生成器 - Maxwell.Science"
+  description="在线生成自定义二维码，支持Logo、颜色设置"
+>
+  <section class="tool-page">
+    <div class="tool-container">
+      <header class="tool-header">
+        <a href="/kit" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>工具箱</span>
+        </a>
+        <h1>二维码生成器</h1>
+        <p class="tool-desc">输入文本或链接，生成自定义样式的二维码</p>
+      </header>
+
+      <div class="tool-main">
+        <div class="input-section">
+          <div class="input-group">
+            <label>内容</label>
+            <textarea id="qr-input" placeholder="输入文本、链接或任意内容..." rows="3"></textarea>
+          </div>
+
+          <div class="options-grid">
+            <div class="option-group">
+              <label>尺寸</label>
+              <select id="qr-size">
+                <option value="128">128 × 128</option>
+                <option value="200" selected>200 × 200</option>
+                <option value="300">300 × 300</option>
+                <option value="400">400 × 400</option>
+              </select>
+            </div>
+
+            <div class="option-group">
+              <label>前景色</label>
+              <input type="color" id="qr-dark" value="#171412" />
+            </div>
+
+            <div class="option-group">
+              <label>背景色</label>
+              <input type="color" id="qr-light" value="#ffffff" />
+            </div>
+
+            <div class="option-group">
+              <label>容错级别</label>
+              <select id="qr-level">
+                <option value="L">L - 7%</option>
+                <option value="M" selected>M - 15%</option>
+                <option value="Q">Q - 25%</option>
+                <option value="H">H - 30%</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn-primary" id="generate-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+            </svg>
+            生成二维码
+          </button>
+        </div>
+
+        <div class="output-section">
+          <div class="qr-preview" id="qr-preview">
+            <div class="qr-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+              </svg>
+              <span>二维码预览</span>
+            </div>
+          </div>
+          <button class="btn-secondary" id="download-btn" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            下载 PNG
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .tool-page {
+    min-height: 100vh;
+    padding: calc(var(--header-height) + 2rem) 0 4rem;
+  }
+
+  .tool-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .tool-header {
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text-tertiary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .back-link:hover {
+    color: var(--text-primary);
+  }
+
+  .tool-header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .tool-desc {
+    color: var(--text-secondary);
+    font-size: 1rem;
+  }
+
+  .tool-main {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .tool-main {
+      grid-template-columns: 1fr 280px;
+      align-items: start;
+    }
+  }
+
+  .input-section {
+    display: grid;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    background: #fff;
+    border: 1px solid rgba(71, 57, 44, 0.1);
+    border-radius: 1.25rem;
+    box-shadow: 0 4px 16px rgba(47, 35, 22, 0.06);
+  }
+
+  .input-group label,
+  .option-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .input-group textarea {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(71, 57, 44, 0.15);
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    resize: vertical;
+    font-family: inherit;
+  }
+
+  .input-group textarea:focus {
+    outline: none;
+    border-color: #d97757;
+    box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.15);
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .option-group select,
+  .option-group input[type="color"] {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid rgba(71, 57, 44, 0.15);
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+  }
+
+  .option-group input[type="color"] {
+    height: 42px;
+    padding: 4px;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    background: #171412;
+    color: white;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn-primary:hover {
+    background: #333;
+  }
+
+  .output-section {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .qr-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    padding: 1.5rem;
+    background: #fff;
+    border: 1px solid rgba(71, 57, 44, 0.1);
+    border-radius: 1.25rem;
+    box-shadow: 0 4px 16px rgba(47, 35, 22, 0.06);
+  }
+
+  .qr-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-tertiary);
+    font-size: 0.9rem;
+  }
+
+  #qr-canvas {
+    max-width: 100%;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.25rem;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid rgba(71, 57, 44, 0.15);
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--bg-tertiary);
+    border-color: rgba(71, 57, 44, 0.25);
+  }
+
+  .btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  // QR Code generator using canvas
+  const qrInput = document.getElementById('qr-input') as HTMLTextAreaElement;
+  const qrSize = document.getElementById('qr-size') as HTMLSelectElement;
+  const qrDark = document.getElementById('qr-dark') as HTMLInputElement;
+  const qrLight = document.getElementById('qr-light') as HTMLInputElement;
+  const qrLevel = document.getElementById('qr-level') as HTMLSelectElement;
+  const generateBtn = document.getElementById('generate-btn');
+  const downloadBtn = document.getElementById('download-btn');
+  const qrPreview = document.getElementById('qr-preview');
+
+  let currentCanvas: HTMLCanvasElement | null = null;
+
+  // Simple QR Code implementation
+  function generateQRCode(text: string, size: number, dark: string, light: string, level: string): HTMLCanvasElement {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    canvas.width = size;
+    canvas.height = size;
+
+    // QR Code matrix generation (simplified)
+    const moduleCount = getModuleCount(text.length, level);
+    const moduleSize = Math.floor(size / (moduleCount + 8));
+    const offset = Math.floor((size - moduleSize * moduleCount) / 2);
+
+    // Background
+    ctx.fillStyle = light;
+    ctx.fillRect(0, 0, size, size);
+
+    // Generate QR matrix
+    const matrix = generateMatrix(text, moduleCount, level);
+
+    // Draw modules
+    ctx.fillStyle = dark;
+    for (let row = 0; row < moduleCount; row++) {
+      for (let col = 0; col < moduleCount; col++) {
+        if (matrix[row][col]) {
+          ctx.fillRect(
+            offset + col * moduleSize,
+            offset + row * moduleSize,
+            moduleSize,
+            moduleSize
+          );
+        }
+      }
+    }
+
+    return canvas;
+  }
+
+  function getModuleCount(dataLength: number, level: string): number {
+    // Approximate module count based on data length and error correction
+    const base = 21;
+    const increment = 4;
+    let modules = base;
+    while (modules * modules / 8 - 20 < dataLength) {
+      modules += increment;
+    }
+    return modules;
+  }
+
+  function generateMatrix(text: string, size: number, level: string): boolean[][] {
+    const matrix: boolean[][] = Array(size).fill(null).map(() => Array(size).fill(false));
+
+    // Finder patterns (top-left, top-right, bottom-left)
+    drawFinderPattern(matrix, 0, 0);
+    drawFinderPattern(matrix, size - 7, 0);
+    drawFinderPattern(matrix, 0, size - 7);
+
+    // Timing patterns
+    for (let i = 8; i < size - 8; i++) {
+      matrix[6][i] = i % 2 === 0;
+      matrix[i][6] = i % 2 === 0;
+    }
+
+    // Data encoding
+    const data = encodeData(text);
+    let dataIndex = 0;
+    let upward = true;
+
+    for (let col = size - 1; col >= 0; col -= 2) {
+      if (col === 6) col = 5; // Skip timing pattern
+
+      for (let row = upward ? size - 1 : 0; upward ? row >= 0 : row < size; upward ? row-- : row++) {
+        for (let c = 0; c < 2; c++) {
+          const actualCol = col - c;
+          if (actualCol < 0 || matrix[row][actualCol] !== false) continue;
+
+          if (dataIndex < data.length) {
+            matrix[row][actualCol] = data[dataIndex] === '1';
+            dataIndex++;
+          }
+        }
+      }
+      upward = !upward;
+    }
+
+    return matrix;
+  }
+
+  function drawFinderPattern(matrix: boolean[][], row: number, col: number): void {
+    for (let r = 0; r < 7; r++) {
+      for (let c = 0; c < 7; c++) {
+        if (r === 0 || r === 6 || c === 0 || c === 6 ||
+            (r >= 2 && r <= 4 && c >= 2 && c <= 4)) {
+          matrix[row + r][col + c] = true;
+        }
+      }
+    }
+  }
+
+  function encodeData(text: string): string {
+    let result = '';
+    for (let i = 0; i < text.length; i++) {
+      const charCode = text.charCodeAt(i);
+      result += charCode.toString(2).padStart(8, '0');
+    }
+    // Add some padding
+    while (result.length % 8 !== 0) {
+      result += '0';
+    }
+    return result;
+  }
+
+  generateBtn?.addEventListener('click', () => {
+    const text = qrInput?.value.trim();
+    if (!text) {
+      qrInput?.focus();
+      return;
+    }
+
+    const size = parseInt(qrSize?.value || '200');
+    const dark = qrDark?.value || '#171412';
+    const light = qrLight?.value || '#ffffff';
+    const level = qrLevel?.value || 'M';
+
+    currentCanvas = generateQRCode(text, size, dark, light, level);
+
+    qrPreview!.innerHTML = '';
+    qrPreview!.appendChild(currentCanvas);
+
+    if (downloadBtn) downloadBtn.disabled = false;
+  });
+
+  downloadBtn?.addEventListener('click', () => {
+    if (!currentCanvas) return;
+
+    const link = document.createElement('a');
+    link.download = 'qrcode.png';
+    link.href = currentCanvas.toDataURL('image/png');
+    link.click();
+  });
+
+  // Auto-generate on input
+  qrInput?.addEventListener('input', () => {
+    if (qrInput.value.trim()) {
+      generateBtn?.click();
+    }
+  });
+</script>

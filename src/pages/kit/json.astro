@@ -1,0 +1,415 @@
+---
+import Layout from '@layouts/Layout.astro';
+---
+
+<Layout
+  title="JSON 格式化 - Maxwell.Science"
+  description="JSON 格式化、压缩、校验工具，支持语法高亮"
+>
+  <section class="tool-page">
+    <div class="tool-container">
+      <header class="tool-header">
+        <a href="/kit" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>工具箱</span>
+        </a>
+        <h1>JSON 格式化</h1>
+        <p class="tool-desc">JSON 格式化、压缩、校验，支持语法高亮显示</p>
+      </header>
+
+      <div class="tool-main">
+        <div class="editor-section">
+          <div class="editor-header">
+            <span class="editor-label">输入 JSON</span>
+            <div class="editor-actions">
+              <button class="btn-sm" id="paste-btn">粘贴</button>
+              <button class="btn-sm" id="clear-btn">清空</button>
+            </div>
+          </div>
+          <textarea id="json-input" placeholder='{"name": "example", "value": 123}' spellcheck="false"></textarea>
+        </div>
+
+        <div class="actions-bar">
+          <button class="btn-primary" id="format-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="16 18 22 12 16 6"></polyline>
+              <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+            格式化
+          </button>
+          <button class="btn-secondary" id="minify-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 14 10 14 10 20"></polyline>
+              <polyline points="20 10 14 10 14 4"></polyline>
+              <line x1="14" y1="10" x2="21" y2="3"></line>
+              <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+            压缩
+          </button>
+          <button class="btn-secondary" id="copy-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            复制
+          </button>
+        </div>
+
+        <div class="output-section">
+          <div class="editor-header">
+            <span class="editor-label">输出结果</span>
+            <span class="status" id="status"></span>
+          </div>
+          <div class="output-wrapper">
+            <pre id="json-output" class="json-output"><span class="placeholder">格式化后的 JSON 将显示在这里...</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .tool-page {
+    min-height: 100vh;
+    padding: calc(var(--header-height) + 2rem) 0 4rem;
+  }
+
+  .tool-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .tool-header {
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text-tertiary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .back-link:hover {
+    color: var(--text-primary);
+  }
+
+  .tool-header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .tool-desc {
+    color: var(--text-secondary);
+    font-size: 1rem;
+  }
+
+  .tool-main {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .editor-section {
+    background: #fff;
+    border: 1px solid rgba(71, 57, 44, 0.1);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(47, 35, 22, 0.06);
+  }
+
+  .editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid rgba(71, 57, 44, 0.08);
+  }
+
+  .editor-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .editor-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn-sm {
+    padding: 0.35rem 0.75rem;
+    background: transparent;
+    border: 1px solid rgba(71, 57, 44, 0.15);
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn-sm:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  #json-input {
+    width: 100%;
+    min-height: 200px;
+    padding: 1rem;
+    border: none;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background: transparent;
+    resize: vertical;
+  }
+
+  #json-input:focus {
+    outline: none;
+  }
+
+  .actions-bar {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: #171412;
+    color: white;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn-primary:hover {
+    background: #333;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid rgba(71, 57, 44, 0.15);
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg-tertiary);
+    border-color: rgba(71, 57, 44, 0.25);
+  }
+
+  .output-section {
+    background: #1a1613;
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+
+  .output-section .editor-header {
+    background: #26211c;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .output-section .editor-label {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .status {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.35rem;
+  }
+
+  .status.valid {
+    background: rgba(111, 142, 127, 0.2);
+    color: #8fb09e;
+  }
+
+  .status.invalid {
+    background: rgba(191, 92, 70, 0.2);
+    color: #e88a6a;
+  }
+
+  .output-wrapper {
+    padding: 1rem;
+    overflow-x: auto;
+  }
+
+  .json-output {
+    margin: 0;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: #f3eee7;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .json-output .placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Syntax highlighting */
+  .json-output .key { color: #e88a6a; }
+  .json-output .string { color: #8fb09e; }
+  .json-output .number { color: #dda386; }
+  .json-output .boolean { color: #6b9bc3; }
+  .json-output .null { color: #a07850; }
+
+  @media (max-width: 640px) {
+    .actions-bar {
+      flex-direction: column;
+    }
+
+    .btn-primary, .btn-secondary {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<script>
+  const jsonInput = document.getElementById('json-input') as HTMLTextAreaElement;
+  const jsonOutput = document.getElementById('json-output');
+  const status = document.getElementById('status');
+  const formatBtn = document.getElementById('format-btn');
+  const minifyBtn = document.getElementById('minify-btn');
+  const copyBtn = document.getElementById('copy-btn');
+  const pasteBtn = document.getElementById('paste-btn');
+  const clearBtn = document.getElementById('clear-btn');
+
+  let lastValidJson: string = '';
+
+  function syntaxHighlight(json: string): string {
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
+      let cls = 'number';
+      if (/^"/.test(match)) {
+        if (/:$/.test(match)) {
+          cls = 'key';
+          match = match.slice(0, -1) + '</span>:';
+          return '<span class="' + cls + '">' + match;
+        } else {
+          cls = 'string';
+        }
+      } else if (/true|false/.test(match)) {
+        cls = 'boolean';
+      } else if (/null/.test(match)) {
+        cls = 'null';
+      }
+      return '<span class="' + cls + '">' + match + '</span>';
+    });
+  }
+
+  function formatJson(indent: number = 2): void {
+    const input = jsonInput?.value.trim();
+    if (!input) {
+      if (jsonOutput) jsonOutput.innerHTML = '<span class="placeholder">格式化后的 JSON 将显示在这里...</span>';
+      if (status) status.textContent = '';
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(input);
+      const formatted = JSON.stringify(parsed, null, indent);
+      lastValidJson = formatted;
+      if (jsonOutput) jsonOutput.innerHTML = syntaxHighlight(formatted);
+      if (status) {
+        status.textContent = '✓ 有效 JSON';
+        status.className = 'status valid';
+      }
+    } catch (e) {
+      if (jsonOutput) jsonOutput.innerHTML = `<span class="placeholder" style="color: #e88a6a;">解析错误: ${(e as Error).message}</span>`;
+      if (status) {
+        status.textContent = '✗ 无效 JSON';
+        status.className = 'status invalid';
+      }
+    }
+  }
+
+  function minifyJson(): void {
+    const input = jsonInput?.value.trim();
+    if (!input) return;
+
+    try {
+      const parsed = JSON.parse(input);
+      const minified = JSON.stringify(parsed);
+      lastValidJson = minified;
+      if (jsonOutput) jsonOutput.innerHTML = syntaxHighlight(minified);
+      if (status) {
+        status.textContent = '✓ 已压缩';
+        status.className = 'status valid';
+      }
+    } catch (e) {
+      if (jsonOutput) jsonOutput.innerHTML = `<span class="placeholder" style="color: #e88a6a;">解析错误: ${(e as Error).message}</span>`;
+      if (status) {
+        status.textContent = '✗ 无效 JSON';
+        status.className = 'status invalid';
+      }
+    }
+  }
+
+  formatBtn?.addEventListener('click', () => formatJson(2));
+  minifyBtn?.addEventListener('click', minifyJson);
+
+  copyBtn?.addEventListener('click', async () => {
+    if (!lastValidJson) return;
+    try {
+      await navigator.clipboard.writeText(lastValidJson);
+      const originalText = copyBtn.innerHTML;
+      copyBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> 已复制';
+      setTimeout(() => copyBtn.innerHTML = originalText, 1500);
+    } catch {
+      // fallback
+    }
+  });
+
+  pasteBtn?.addEventListener('click', async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (jsonInput) jsonInput.value = text;
+      formatJson();
+    } catch {
+      // fallback
+    }
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    if (jsonInput) jsonInput.value = '';
+    if (jsonOutput) jsonOutput.innerHTML = '<span class="placeholder">格式化后的 JSON 将显示在这里...</span>';
+    if (status) status.textContent = '';
+    lastValidJson = '';
+  });
+
+  // Auto-format on paste
+  jsonInput?.addEventListener('input', () => {
+    // Debounce
+    clearTimeout((jsonInput as any)._timeout);
+    (jsonInput as any)._timeout = setTimeout(() => formatJson(), 300);
+  });
+</script>
