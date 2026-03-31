@@ -311,7 +311,11 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
         document.getElementById('doi-result').classList.remove('hidden');
         renderCitation();
       }
-    } catch (e) { alert('Fetch failed'); }
+    } catch (e) {
+      const info = document.getElementById('article-info');
+      info.innerHTML = '<span style="color:#ef4444;">获取失败，请检查 DOI 或网络连接</span>';
+      document.getElementById('doi-result').classList.remove('hidden');
+    }
   });
   
   document.querySelectorAll('#format-tabs .tab').forEach(tab => {
@@ -388,29 +392,116 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
       const start = input.selectionStart;
       input.value = input.value.slice(0, start) + sym + input.value.slice(input.selectionEnd);
       input.focus();
+      input.selectionStart = input.selectionEnd = start + sym.length;
     });
   });
-  
+
+  // LaTeX rendering via MathJax CDN
+  let mathJaxLoaded = false;
+  function loadMathJax() {
+    return new Promise((resolve) => {
+      if (mathJaxLoaded && window.MathJax) { resolve(true); return; }
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
+      script.async = true;
+      script.onload = () => { mathJaxLoaded = true; resolve(true); };
+      script.onerror = () => resolve(false);
+      document.head.appendChild(script);
+    });
+  }
+
+  document.getElementById('render-latex')?.addEventListener('click', async () => {
+    const input = document.getElementById('latex-input').value.trim();
+    const preview = document.getElementById('latex-preview');
+    if (!input || !preview) return;
+    preview.innerHTML = '<span style="color:var(--text-tertiary);">渲染中...</span>';
+    const ok = await loadMathJax();
+    if (!ok || !window.MathJax) {
+      preview.innerHTML = '<span style="color:#ef4444;">MathJax 加载失败</span>';
+      return;
+    }
+    try {
+      const svg = window.MathJax.tex2svg(input, {display: true});
+      preview.innerHTML = '';
+      preview.appendChild(svg);
+    } catch (e) {
+      preview.innerHTML = `<span style="color:#ef4444;">LaTeX 语法错误: ${(e as Error).message}</span>`;
+    }
+  });
+
   // Swap
   document.getElementById('swap-lang')?.addEventListener('click', () => {
     const src = document.getElementById('src-lang');
     const tgt = document.getElementById('tgt-lang');
     [src.value, tgt.value] = [tgt.value, src.value];
   });
-  
+
+  // Translate using MyMemory API (free, no key needed)
+  document.getElementById('do-translate')?.addEventListener('click', async () => {
+    const srcText = document.getElementById('src-text').value.trim();
+    const tgtText = document.getElementById('tgt-text');
+    const srcLang = document.getElementById('src-lang').value;
+    const tgtLang = document.getElementById('tgt-lang').value;
+    if (!srcText) return;
+    tgtText.value = '翻译中...';
+    try {
+      const langPair = `${srcLang}|${tgtLang}`;
+      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(srcText)}&langpair=${langPair}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.responseStatus === 200 && data.responseData) {
+        tgtText.value = data.responseData.translatedText;
+      } else {
+        tgtText.value = '翻译失败，请稍后重试';
+      }
+    } catch {
+      tgtText.value = '翻译请求失败，请检查网络';
+    }
+  });
+
+  // Journal Lookup using Crossref API
+  document.getElementById('search-journal')?.addEventListener('click', async () => {
+    const query = document.getElementById('journal-input').value.trim();
+    const ifEl = document.getElementById('if-value');
+    const jcrEl = document.getElementById('jcr-value');
+    const casEl = document.getElementById('cas-value');
+    if (!query) return;
+    ifEl.textContent = jcrEl.textContent = casEl.textContent = '...';
+    try {
+      // Use Crossref journal search as a basic lookup
+      const res = await fetch(`https://api.crossref.org/journals?query=${encodeURIComponent(query)}&rows=1`);
+      const data = await res.json();
+      const journal = data.message?.items?.[0];
+      if (journal) {
+        ifEl.textContent = journal.ISSN?.[0] || '--';
+        jcrEl.textContent = journal.publisher || '--';
+        casEl.textContent = journal.title || '--';
+      } else {
+        ifEl.textContent = jcrEl.textContent = casEl.textContent = '未找到';
+      }
+    } catch {
+      ifEl.textContent = jcrEl.textContent = casEl.textContent = '查询失败';
+    }
+  });
+
   // Keywords
   document.getElementById('extract-kw')?.addEventListener('click', () => {
     const text = document.getElementById('kw-text').value;
     const count = parseInt(document.getElementById('kw-count').value);
     if (!text) return;
-    
-    const words = text.toLowerCase().match(/\b[a-z\u4e00-\u9fff]{3,}\b/g) || [];
+
+    // Stop words for English and basic Chinese extraction
+    const stopWords = new Set(['the','a','an','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','shall','should','may','might','can','could','must','need','dare','ought','used','to','of','in','for','on','with','at','by','from','as','into','through','during','before','after','above','below','between','out','off','over','under','again','further','then','once','here','there','when','where','why','how','all','both','each','few','more','most','other','some','such','no','nor','not','only','own','same','so','than','too','very','just','because','but','and','or','if','while','that','this','these','those','it','its','i','me','my','we','our','you','your','he','him','his','she','her','they','them','their','what','which','who','whom']);
+
+    const words = text.toLowerCase().match(/\b[a-z]{3,}\b/g) || [];
+    const chineseWords = text.match(/[\u4e00-\u9fff]{2,4}/g) || [];
+    const allWords = [...words.filter(w => !stopWords.has(w)), ...chineseWords];
     const freq = {};
-    words.forEach(w => freq[w] = (freq[w] || 0) + 1);
+    allWords.forEach(w => freq[w] = (freq[w] || 0) + 1);
     const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, count);
-    
+
     const tags = document.getElementById('kw-tags');
-    tags.innerHTML = sorted.map(([w]) => `<span class="tag">${w}</span>`).join('');
+    tags.innerHTML = sorted.map(([w, c]) => `<span class="tag">${w} (${c})</span>`).join('');
     tags.classList.remove('hidden');
   });
 </script>

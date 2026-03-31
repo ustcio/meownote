@@ -1,0 +1,270 @@
+---
+import Layout from '@layouts/Layout.astro';
+---
+
+<Layout
+  title="图片工具 - Maxwell.Science"
+  description="图片压缩、格式转换、尺寸调整"
+>
+  <section class="image-tool">
+    <div class="container">
+      <header class="header">
+        <a href="/kit" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span>工具箱</span>
+        </a>
+        <h1 class="title">图片工具</h1>
+        <p class="desc">图片压缩、格式转换、尺寸调整</p>
+      </header>
+
+      <!-- Upload -->
+      <div class="card upload-card" id="upload-area">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        <span>点击或拖拽上传图片</span>
+        <span class="hint">支持 PNG, JPG, GIF, WebP, BMP</span>
+        <input type="file" id="image-input" accept="image/*" hidden />
+      </div>
+
+      <!-- Preview & Info -->
+      <div class="card" id="info-card" style="display:none;">
+        <div class="card-head">
+          <span class="card-title">原始图片</span>
+          <span class="info-text" id="original-info"></span>
+        </div>
+        <div class="preview-box">
+          <img id="preview-img" alt="预览" />
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="card" id="options-card" style="display:none;">
+        <div class="card-head">
+          <span class="card-title">调整选项</span>
+        </div>
+        <div class="options-grid">
+          <div class="option-group">
+            <label class="lbl">输出格式</label>
+            <select id="output-format">
+              <option value="image/png">PNG</option>
+              <option value="image/jpeg" selected>JPEG</option>
+              <option value="image/webp">WebP</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <label class="lbl">质量 <span id="quality-val">80</span>%</label>
+            <input type="range" id="quality-slider" min="10" max="100" value="80" />
+          </div>
+          <div class="option-group">
+            <label class="lbl">宽度 (px)</label>
+            <input type="number" id="resize-width" placeholder="自动" />
+          </div>
+          <div class="option-group">
+            <label class="lbl">高度 (px)</label>
+            <input type="number" id="resize-height" placeholder="自动" />
+          </div>
+        </div>
+        <div class="lock-row">
+          <label class="lock-label">
+            <input type="checkbox" id="lock-ratio" checked />
+            <span>锁定宽高比</span>
+          </label>
+        </div>
+        <button class="btn-primary" id="process-btn">处理图片</button>
+      </div>
+
+      <!-- Result -->
+      <div class="card" id="result-card" style="display:none;">
+        <div class="card-head">
+          <span class="card-title">处理结果</span>
+          <span class="info-text" id="result-info"></span>
+        </div>
+        <div class="preview-box">
+          <img id="result-img" alt="结果" />
+        </div>
+        <div class="result-actions">
+          <button class="btn-download" id="download-btn">下载图片</button>
+          <span class="savings" id="savings-text"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .image-tool { min-height: 100vh; padding: calc(var(--header-total-height) + var(--space-4)) var(--space-4) var(--space-16); }
+  .container { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-4); }
+
+  .header { margin-bottom: var(--space-4); }
+  .back-link { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--text-tertiary); font-size: var(--text-sm); margin-bottom: var(--space-4); }
+  .back-link:hover { color: var(--text-secondary); }
+  .title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-1); }
+  .desc { font-size: var(--text-sm); color: var(--text-secondary); }
+
+  .card { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-xl); padding: var(--space-5); }
+  .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
+  .card-title { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--text-primary); }
+  .info-text { font-size: var(--text-xs); color: var(--text-tertiary); }
+
+  .upload-card { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-8); cursor: pointer; border-style: dashed; border-width: 2px; color: var(--text-tertiary); transition: all var(--duration-fast) var(--ease-default); }
+  .upload-card:hover { border-color: var(--color-accent-blue); color: var(--color-accent-blue); }
+  .upload-card.dragover { border-color: var(--color-accent-blue); background: rgba(59, 130, 246, 0.05); }
+  .hint { font-size: var(--text-xs); color: var(--text-quaternary); }
+
+  .preview-box { max-height: 300px; overflow: hidden; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; background: var(--bg-tertiary); }
+  .preview-box img { max-width: 100%; max-height: 300px; object-fit: contain; }
+
+  .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); margin-bottom: var(--space-4); }
+  .option-group { display: flex; flex-direction: column; gap: var(--space-2); }
+  .lbl { font-size: var(--text-xs); color: var(--text-tertiary); font-weight: var(--font-medium); }
+  .option-group select, .option-group input[type="number"] { padding: var(--space-2) var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-sm); }
+  .option-group input[type="number"]:focus, .option-group select:focus { outline: none; border-color: var(--color-accent-blue); }
+  input[type="range"] { width: 100%; height: 6px; -webkit-appearance: none; appearance: none; background: var(--bg-tertiary); border-radius: var(--radius-full); outline: none; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--color-accent-blue); cursor: pointer; }
+
+  .lock-row { margin-bottom: var(--space-4); }
+  .lock-label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-secondary); cursor: pointer; }
+  .lock-label input { accent-color: var(--color-accent-blue); }
+
+  .btn-primary { width: 100%; padding: var(--space-3); background: var(--text-primary); border: none; border-radius: var(--radius-lg); color: var(--bg-primary); font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer; transition: opacity var(--duration-fast); }
+  .btn-primary:hover { opacity: 0.85; }
+
+  .result-actions { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-4); }
+  .btn-download { padding: var(--space-3) var(--space-6); background: var(--text-primary); border: none; border-radius: var(--radius-lg); color: var(--bg-primary); font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer; }
+  .btn-download:hover { opacity: 0.85; }
+  .savings { font-size: var(--text-sm); font-weight: var(--font-medium); }
+  .savings.positive { color: #22c55e; }
+  .savings.negative { color: #ef4444; }
+</style>
+
+<script>
+  const uploadArea = document.getElementById('upload-area')!;
+  const imageInput = document.getElementById('image-input') as HTMLInputElement;
+  const infoCard = document.getElementById('info-card')!;
+  const optionsCard = document.getElementById('options-card')!;
+  const resultCard = document.getElementById('result-card')!;
+  const previewImg = document.getElementById('preview-img') as HTMLImageElement;
+  const resultImg = document.getElementById('result-img') as HTMLImageElement;
+  const originalInfo = document.getElementById('original-info')!;
+  const resultInfo = document.getElementById('result-info')!;
+  const outputFormat = document.getElementById('output-format') as HTMLSelectElement;
+  const qualitySlider = document.getElementById('quality-slider') as HTMLInputElement;
+  const qualityVal = document.getElementById('quality-val')!;
+  const resizeWidth = document.getElementById('resize-width') as HTMLInputElement;
+  const resizeHeight = document.getElementById('resize-height') as HTMLInputElement;
+  const lockRatio = document.getElementById('lock-ratio') as HTMLInputElement;
+  const processBtn = document.getElementById('process-btn')!;
+  const downloadBtn = document.getElementById('download-btn')!;
+  const savingsText = document.getElementById('savings-text')!;
+
+  let originalFile: File | null = null;
+  let originalWidth = 0;
+  let originalHeight = 0;
+  let resultBlobUrl = '';
+
+  uploadArea.addEventListener('click', () => imageInput.click());
+  uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+  uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    const file = e.dataTransfer?.files[0];
+    if (file && file.type.startsWith('image/')) loadImage(file);
+  });
+  imageInput.addEventListener('change', () => {
+    const file = imageInput.files?.[0];
+    if (file) loadImage(file);
+  });
+
+  function loadImage(file: File) {
+    originalFile = file;
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      originalWidth = img.naturalWidth;
+      originalHeight = img.naturalHeight;
+      previewImg.src = url;
+      originalInfo.textContent = `${originalWidth} × ${originalHeight} · ${(file.size / 1024).toFixed(1)} KB · ${file.type.split('/')[1].toUpperCase()}`;
+      resizeWidth.placeholder = originalWidth.toString();
+      resizeHeight.placeholder = originalHeight.toString();
+      infoCard.style.display = 'block';
+      optionsCard.style.display = 'block';
+      resultCard.style.display = 'none';
+    };
+    img.src = url;
+  }
+
+  qualitySlider.addEventListener('input', () => {
+    qualityVal.textContent = qualitySlider.value;
+  });
+
+  // Lock aspect ratio
+  resizeWidth.addEventListener('input', () => {
+    if (lockRatio.checked && originalWidth) {
+      const w = parseInt(resizeWidth.value);
+      if (!isNaN(w)) {
+        resizeHeight.value = Math.round(w * originalHeight / originalWidth).toString();
+      }
+    }
+  });
+  resizeHeight.addEventListener('input', () => {
+    if (lockRatio.checked && originalHeight) {
+      const h = parseInt(resizeHeight.value);
+      if (!isNaN(h)) {
+        resizeWidth.value = Math.round(h * originalWidth / originalHeight).toString();
+      }
+    }
+  });
+
+  processBtn.addEventListener('click', () => {
+    if (!originalFile) return;
+    const img = new Image();
+    img.onload = () => {
+      let w = parseInt(resizeWidth.value) || img.naturalWidth;
+      let h = parseInt(resizeHeight.value) || img.naturalHeight;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, w, h);
+
+      const quality = parseInt(qualitySlider.value) / 100;
+      const format = outputFormat.value;
+
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        if (resultBlobUrl) URL.revokeObjectURL(resultBlobUrl);
+        resultBlobUrl = URL.createObjectURL(blob);
+        resultImg.src = resultBlobUrl;
+        resultInfo.textContent = `${w} × ${h} · ${(blob.size / 1024).toFixed(1)} KB · ${format.split('/')[1].toUpperCase()}`;
+
+        const diff = blob.size - (originalFile?.size || 0);
+        const pct = ((diff / (originalFile?.size || 1)) * 100).toFixed(1);
+        if (diff < 0) {
+          savingsText.textContent = `减小 ${Math.abs(parseFloat(pct))}%`;
+          savingsText.className = 'savings positive';
+        } else {
+          savingsText.textContent = `增大 ${pct}%`;
+          savingsText.className = 'savings negative';
+        }
+        resultCard.style.display = 'block';
+      }, format, quality);
+    };
+    img.src = previewImg.src;
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    if (!resultBlobUrl) return;
+    const ext = outputFormat.value.split('/')[1];
+    const a = document.createElement('a');
+    a.href = resultBlobUrl;
+    a.download = `image-processed.${ext}`;
+    a.click();
+  });
+</script>

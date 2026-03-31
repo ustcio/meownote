@@ -1,0 +1,212 @@
+---
+import Layout from '@layouts/Layout.astro';
+---
+
+<Layout
+  title="URL 编解码 - Maxwell.Science"
+  description="URL 编码与解码工具，支持中文和特殊字符"
+>
+  <section class="url-tool">
+    <div class="container">
+      <header class="header">
+        <a href="/kit" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span>工具箱</span>
+        </a>
+        <h1 class="title">URL 编解码</h1>
+        <p class="desc">URL 编码与解码，支持中文和特殊字符</p>
+      </header>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">输入</span>
+          <div class="card-actions">
+            <button class="btn-sm" id="clear-btn">清空</button>
+          </div>
+        </div>
+        <textarea id="url-input" rows="4" placeholder="输入 URL 或文本..."></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" id="encode-btn">编码 →</button>
+        <button class="btn-primary" id="decode-btn">← 解码</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">输出</span>
+          <button class="btn-sm" id="copy-btn">复制</button>
+        </div>
+        <textarea id="url-output" rows="4" readonly placeholder="结果将显示在这里..."></textarea>
+      </div>
+
+      <!-- URL Parts Parser -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">URL 解析</span>
+        </div>
+        <div class="parse-result" id="parse-result">
+          <span class="placeholder-text">输入完整 URL 后自动解析各部分</span>
+        </div>
+      </div>
+
+      <!-- Quick tools -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">快速操作</span>
+        </div>
+        <div class="btn-grid">
+          <button class="btn" id="encode-component">编码组件</button>
+          <button class="btn" id="decode-component">解码组件</button>
+          <button class="btn" id="parse-params">解析查询参数</button>
+          <button class="btn" id="build-params">构建查询参数</button>
+        </div>
+        <div class="extra-output" id="extra-output" style="display:none; margin-top: var(--space-3);">
+          <textarea id="extra-result" rows="4" readonly></textarea>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .url-tool { min-height: 100vh; padding: calc(var(--header-total-height) + var(--space-4)) var(--space-4) var(--space-16); }
+  .container { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-4); }
+
+  .header { margin-bottom: var(--space-4); }
+  .back-link { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--text-tertiary); font-size: var(--text-sm); margin-bottom: var(--space-4); }
+  .back-link:hover { color: var(--text-secondary); }
+  .title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-1); }
+  .desc { font-size: var(--text-sm); color: var(--text-secondary); }
+
+  .card { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-xl); padding: var(--space-5); }
+  .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
+  .card-title { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--text-primary); }
+  .card-actions { display: flex; gap: var(--space-2); }
+
+  textarea { width: 100%; padding: var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: var(--font-mono); resize: vertical; line-height: 1.5; }
+  textarea:focus { outline: none; border-color: var(--color-accent-blue); }
+
+  .btn-sm { padding: var(--space-1) var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--text-secondary); cursor: pointer; }
+  .btn-sm:hover { color: var(--text-primary); border-color: var(--border-hover); }
+
+  .actions { display: flex; gap: var(--space-3); justify-content: center; }
+  .btn-primary { padding: var(--space-3) var(--space-6); background: var(--text-primary); border: none; border-radius: var(--radius-lg); color: var(--bg-primary); font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer; transition: opacity var(--duration-fast); }
+  .btn-primary:hover { opacity: 0.85; }
+
+  .parse-result { display: flex; flex-direction: column; gap: var(--space-2); }
+  .placeholder-text { color: var(--text-tertiary); font-size: var(--text-sm); text-align: center; padding: var(--space-4); }
+  .parse-row { display: flex; gap: var(--space-2); align-items: center; }
+  .parse-row .key { min-width: 72px; font-size: var(--text-xs); color: var(--text-tertiary); font-weight: var(--font-medium); }
+  .parse-row .value { flex: 1; padding: var(--space-2) var(--space-3); background: var(--bg-tertiary); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--text-primary); font-family: var(--font-mono); word-break: break-all; }
+
+  .btn-grid { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .btn { padding: var(--space-2) var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--text-primary); cursor: pointer; }
+  .btn:hover { border-color: var(--border-hover); }
+</style>
+
+<script>
+  const urlInput = document.getElementById('url-input') as HTMLTextAreaElement;
+  const urlOutput = document.getElementById('url-output') as HTMLTextAreaElement;
+  const parseResult = document.getElementById('parse-result')!;
+  const extraOutput = document.getElementById('extra-output')!;
+  const extraResult = document.getElementById('extra-result') as HTMLTextAreaElement;
+
+  document.getElementById('encode-btn')?.addEventListener('click', () => {
+    urlOutput.value = encodeURIComponent(urlInput.value);
+    parseUrl(urlInput.value);
+  });
+
+  document.getElementById('decode-btn')?.addEventListener('click', () => {
+    try {
+      urlOutput.value = decodeURIComponent(urlInput.value);
+    } catch {
+      urlOutput.value = '解码失败：无效的编码字符串';
+    }
+    parseUrl(urlInput.value);
+  });
+
+  // Real-time URL parsing
+  urlInput.addEventListener('input', () => {
+    parseUrl(urlInput.value);
+  });
+
+  function parseUrl(text: string) {
+    try {
+      const url = new URL(text);
+      parseResult.innerHTML = [
+        ['Protocol', url.protocol],
+        ['Host', url.host],
+        ['Pathname', url.pathname],
+        ['Search', url.search],
+        ['Hash', url.hash],
+        ['Origin', url.origin],
+      ].map(([k, v]) => `<div class="parse-row"><span class="key">${k}</span><span class="value">${v}</span></div>`).join('');
+    } catch {
+      if (text.trim()) {
+        parseResult.innerHTML = '<span class="placeholder-text">输入的文本不是有效的 URL</span>';
+      } else {
+        parseResult.innerHTML = '<span class="placeholder-text">输入完整 URL 后自动解析各部分</span>';
+      }
+    }
+  }
+
+  document.getElementById('encode-component')?.addEventListener('click', () => {
+    extraOutput.style.display = 'block';
+    extraResult.value = encodeURIComponent(urlInput.value);
+  });
+
+  document.getElementById('decode-component')?.addEventListener('click', () => {
+    extraOutput.style.display = 'block';
+    try { extraResult.value = decodeURIComponent(urlInput.value); }
+    catch { extraResult.value = '解码失败'; }
+  });
+
+  document.getElementById('parse-params')?.addEventListener('click', () => {
+    extraOutput.style.display = 'block';
+    try {
+      const url = new URL(urlInput.value);
+      const params = url.searchParams;
+      const lines: string[] = [];
+      params.forEach((v, k) => lines.push(`${k} = ${v}`));
+      extraResult.value = lines.length ? lines.join('\n') : '无查询参数';
+    } catch {
+      // Try parsing as query string
+      const text = urlInput.value.trim();
+      const params = new URLSearchParams(text.startsWith('?') ? text : '?' + text);
+      const lines: string[] = [];
+      params.forEach((v, k) => lines.push(`${k} = ${v}`));
+      extraResult.value = lines.length ? lines.join('\n') : '无查询参数';
+    }
+  });
+
+  document.getElementById('build-params')?.addEventListener('click', () => {
+    extraOutput.style.display = 'block';
+    const text = urlInput.value.trim();
+    const lines = text.split('\n').filter(l => l.trim());
+    const params = new URLSearchParams();
+    lines.forEach(line => {
+      const [k, ...rest] = line.split('=');
+      if (k) params.set(k.trim(), rest.join('=').trim());
+    });
+    extraResult.value = params.toString();
+  });
+
+  document.getElementById('clear-btn')?.addEventListener('click', () => {
+    urlInput.value = '';
+    urlOutput.value = '';
+    extraResult.value = '';
+    extraOutput.style.display = 'none';
+    parseResult.innerHTML = '<span class="placeholder-text">输入完整 URL 后自动解析各部分</span>';
+  });
+
+  document.getElementById('copy-btn')?.addEventListener('click', () => {
+    const text = urlOutput.value;
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    const btn = document.getElementById('copy-btn');
+    if (btn) { btn.textContent = '已复制'; setTimeout(() => btn.textContent = '复制', 1500); }
+  });
+</script>

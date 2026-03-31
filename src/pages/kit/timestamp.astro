@@ -1,0 +1,227 @@
+---
+import Layout from '@layouts/Layout.astro';
+---
+
+<Layout
+  title="时间戳转换 - Maxwell.Science"
+  description="时间戳与日期时间互相转换工具"
+>
+  <section class="timestamp-tool">
+    <div class="container">
+      <header class="header">
+        <a href="/kit" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span>工具箱</span>
+        </a>
+        <h1 class="title">时间戳转换</h1>
+        <p class="desc">时间戳与日期时间互相转换</p>
+      </header>
+
+      <!-- Current Timestamp -->
+      <div class="card current-card">
+        <div class="card-head">
+          <h2 class="card-title">当前时间戳</h2>
+          <span class="unit">秒</span>
+        </div>
+        <div class="current-ts" id="current-ts">--</div>
+        <div class="current-date" id="current-date">--</div>
+      </div>
+
+      <!-- Timestamp → Date -->
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">时间戳 → 日期</h2>
+        </div>
+        <div class="field">
+          <input type="text" id="ts-input" placeholder="输入时间戳（秒或毫秒）" />
+        </div>
+        <div class="result-row">
+          <div class="result-item">
+            <span class="lbl">本地时间</span>
+            <span class="val" id="ts-local">--</span>
+          </div>
+          <div class="result-item">
+            <span class="lbl">UTC 时间</span>
+            <span class="val" id="ts-utc">--</span>
+          </div>
+          <div class="result-item">
+            <span class="lbl">ISO 8601</span>
+            <span class="val" id="ts-iso">--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date → Timestamp -->
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">日期 → 时间戳</h2>
+        </div>
+        <div class="field">
+          <input type="datetime-local" id="date-input" />
+        </div>
+        <div class="result-row">
+          <div class="result-item">
+            <span class="lbl">秒级时间戳</span>
+            <span class="val" id="date-sec">--</span>
+          </div>
+          <div class="result-item">
+            <span class="lbl">毫秒级时间戳</span>
+            <span class="val" id="date-ms">--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick timestamps -->
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">常用时间戳</h2>
+        </div>
+        <div class="quick-grid" id="quick-grid"></div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .timestamp-tool { min-height: 100vh; padding: calc(var(--header-total-height) + var(--space-4)) var(--space-4) var(--space-16); }
+  .container { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-4); }
+
+  .header { margin-bottom: var(--space-4); }
+  .back-link { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--text-tertiary); font-size: var(--text-sm); margin-bottom: var(--space-4); }
+  .back-link:hover { color: var(--text-secondary); }
+  .title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-1); }
+  .desc { font-size: var(--text-sm); color: var(--text-secondary); }
+
+  .card { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-xl); padding: var(--space-5); }
+  .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
+  .card-title { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--text-primary); }
+  .unit { font-size: var(--text-xs); color: var(--text-tertiary); }
+
+  .current-card { text-align: center; }
+  .current-ts { font-size: var(--text-3xl); font-weight: var(--font-bold); color: var(--text-primary); font-variant-numeric: tabular-nums; font-family: var(--font-mono); margin-bottom: var(--space-1); }
+  .current-date { font-size: var(--text-sm); color: var(--text-tertiary); }
+
+  .field input { width: 100%; padding: var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: var(--font-mono); }
+  .field input:focus { outline: none; border-color: var(--color-accent-blue); }
+
+  .result-row { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-4); }
+  .result-item { display: flex; justify-content: space-between; align-items: center; padding: var(--space-3); background: var(--bg-tertiary); border-radius: var(--radius-lg); }
+  .result-item .lbl { font-size: var(--text-xs); color: var(--text-tertiary); }
+  .result-item .val { font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--text-primary); font-variant-numeric: tabular-nums; font-family: var(--font-mono); cursor: pointer; transition: color var(--duration-fast) var(--ease-default); }
+  .result-item .val:hover { color: var(--color-accent-blue); }
+
+  .quick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--space-2); }
+  .quick-item { padding: var(--space-3); background: var(--bg-tertiary); border-radius: var(--radius-lg); display: flex; flex-direction: column; gap: 2px; }
+  .quick-item .lbl { font-size: var(--text-xs); color: var(--text-tertiary); }
+  .quick-item .val { font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--text-primary); font-variant-numeric: tabular-nums; font-family: var(--font-mono); cursor: pointer; }
+  .quick-item .val:hover { color: var(--color-accent-blue); }
+</style>
+
+<script>
+  const currentTsEl = document.getElementById('current-ts');
+  const currentDateEl = document.getElementById('current-date');
+  const tsInput = document.getElementById('ts-input') as HTMLInputElement;
+  const tsLocal = document.getElementById('ts-local');
+  const tsUtc = document.getElementById('ts-utc');
+  const tsIso = document.getElementById('ts-iso');
+  const dateInput = document.getElementById('date-input') as HTMLInputElement;
+  const dateSec = document.getElementById('date-sec');
+  const dateMs = document.getElementById('date-ms');
+  const quickGrid = document.getElementById('quick-grid');
+
+  function updateCurrent() {
+    const now = Date.now();
+    if (currentTsEl) currentTsEl.textContent = Math.floor(now / 1000).toString();
+    if (currentDateEl) currentDateEl.textContent = new Date(now).toLocaleString('zh-CN', { hour12: false });
+  }
+  setInterval(updateCurrent, 1000);
+  updateCurrent();
+
+  function tsToDate(ts: number) {
+    if (ts > 1e12) ts = Math.floor(ts); // already ms
+    else ts = ts * 1000;
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return null;
+    return d;
+  }
+
+  tsInput?.addEventListener('input', () => {
+    const val = tsInput.value.trim();
+    if (!val) {
+      if (tsLocal) tsLocal.textContent = '--';
+      if (tsUtc) tsUtc.textContent = '--';
+      if (tsIso) tsIso.textContent = '--';
+      return;
+    }
+    const num = parseInt(val);
+    if (isNaN(num)) {
+      if (tsLocal) tsLocal.textContent = '无效输入';
+      return;
+    }
+    const d = tsToDate(num);
+    if (!d) return;
+    if (tsLocal) tsLocal.textContent = d.toLocaleString('zh-CN', { hour12: false });
+    if (tsUtc) tsUtc.textContent = d.toUTCString();
+    if (tsIso) tsIso.textContent = d.toISOString();
+  });
+
+  // Set default datetime to now
+  const now = new Date();
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  dateInput.value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  updateDateToTs();
+
+  function updateDateToTs() {
+    const val = dateInput.value;
+    if (!val) return;
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return;
+    const sec = Math.floor(d.getTime() / 1000);
+    const ms = d.getTime();
+    if (dateSec) dateSec.textContent = sec.toString();
+    if (dateMs) dateMs.textContent = ms.toString();
+  }
+
+  dateInput?.addEventListener('input', updateDateToTs);
+
+  // Copy on click
+  document.querySelectorAll('.val').forEach(el => {
+    el.addEventListener('click', () => {
+      const text = el.textContent;
+      if (text && text !== '--') {
+        navigator.clipboard.writeText(text);
+        el.classList.add('copied');
+        setTimeout(() => el.classList.remove('copied'), 1000);
+      }
+    });
+  });
+
+  // Quick timestamps
+  const quickItems = [
+    { label: '今天 00:00', fn: () => { const d = new Date(); d.setHours(0,0,0,0); return d; } },
+    { label: '今天 23:59', fn: () => { const d = new Date(); d.setHours(23,59,59,999); return d; } },
+    { label: '本周一', fn: () => { const d = new Date(); const day = d.getDay(); d.setDate(d.getDate() - day + (day === 0 ? -6 : 1)); d.setHours(0,0,0,0); return d; } },
+    { label: '本月 1 日', fn: () => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; } },
+    { label: '本年 1 月 1 日', fn: () => { const d = new Date(); d.setMonth(0, 1); d.setHours(0,0,0,0); return d; } },
+    { label: '1 小时后', fn: () => new Date(Date.now() + 3600000) },
+    { label: '24 小时后', fn: () => new Date(Date.now() + 86400000) },
+    { label: '7 天后', fn: () => new Date(Date.now() + 604800000) },
+  ];
+
+  if (quickGrid) {
+    quickGrid.innerHTML = quickItems.map(item => {
+      const d = item.fn();
+      const ts = Math.floor(d.getTime() / 1000);
+      return `<div class="quick-item"><span class="lbl">${item.label}</span><span class="val" data-copy="${ts}">${ts}</span></div>`;
+    }).join('');
+  }
+
+  quickGrid?.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.dataset.copy) {
+      navigator.clipboard.writeText(target.dataset.copy);
+    }
+  });
+</script>

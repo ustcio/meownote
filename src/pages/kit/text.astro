@@ -1,0 +1,181 @@
+---
+import Layout from '@layouts/Layout.astro';
+---
+
+<Layout
+  title="文本工具 - Maxwell.Science"
+  description="字数统计、大小写转换、文本差异对比"
+>
+  <section class="text-tool">
+    <div class="container">
+      <header class="header">
+        <a href="/kit" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span>工具箱</span>
+        </a>
+        <h1 class="title">文本工具</h1>
+        <p class="desc">字数统计、大小写转换、去重、排版</p>
+      </header>
+
+      <!-- Input -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">输入文本</span>
+          <div class="card-actions">
+            <button class="btn-sm" id="paste-btn">粘贴</button>
+            <button class="btn-sm" id="clear-btn">清空</button>
+          </div>
+        </div>
+        <textarea id="text-input" rows="8" placeholder="在此输入或粘贴文本..."></textarea>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-val" id="stat-chars">0</span>
+          <span class="stat-lbl">字符数</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="stat-chars-no-space">0</span>
+          <span class="stat-lbl">不含空格</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="stat-words">0</span>
+          <span class="stat-lbl">词数</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="stat-lines">0</span>
+          <span class="stat-lbl">行数</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="stat-bytes">0</span>
+          <span class="stat-lbl">字节数</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="stat-chinese">0</span>
+          <span class="stat-lbl">中文字数</span>
+        </div>
+      </div>
+
+      <!-- Transform buttons -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">文本转换</span>
+        </div>
+        <div class="btn-grid">
+          <button class="btn" id="to-upper">转为大写</button>
+          <button class="btn" id="to-lower">转为小写</button>
+          <button class="btn" id="to-capitalize">首字母大写</button>
+          <button class="btn" id="to-title">标题格式</button>
+          <button class="btn" id="trim-lines">去除行首尾空格</button>
+          <button class="btn" id="remove-blank-lines">删除空行</button>
+          <button class="btn" id="remove-dup-lines">去除重复行</button>
+          <button class="btn" id="sort-lines">行排序</button>
+          <button class="btn" id="reverse-lines">行倒序</button>
+          <button class="btn" id="reverse-text">文本反转</button>
+          <button class="btn" id="to-fullwidth">全角转换</button>
+          <button class="btn" id="to-halfwidth">半角转换</button>
+        </div>
+      </div>
+
+      <!-- Output -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">转换结果</span>
+          <button class="btn-sm" id="copy-output">复制结果</button>
+        </div>
+        <textarea id="text-output" rows="8" readonly placeholder="转换结果将显示在这里..."></textarea>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .text-tool { min-height: 100vh; padding: calc(var(--header-total-height) + var(--space-4)) var(--space-4) var(--space-16); }
+  .container { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-4); }
+
+  .header { margin-bottom: var(--space-4); }
+  .back-link { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--text-tertiary); font-size: var(--text-sm); margin-bottom: var(--space-4); }
+  .back-link:hover { color: var(--text-secondary); }
+  .title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-1); }
+  .desc { font-size: var(--text-sm); color: var(--text-secondary); }
+
+  .card { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-xl); padding: var(--space-5); }
+  .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
+  .card-title { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--text-primary); }
+  .card-actions { display: flex; gap: var(--space-2); }
+
+  textarea { width: 100%; padding: var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: var(--font-mono); resize: vertical; line-height: 1.6; }
+  textarea:focus { outline: none; border-color: var(--color-accent-blue); }
+
+  .btn-sm { padding: var(--space-1) var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--text-secondary); cursor: pointer; }
+  .btn-sm:hover { color: var(--text-primary); border-color: var(--border-hover); }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+  @media (min-width: 640px) { .stats-grid { grid-template-columns: repeat(6, 1fr); } }
+  .stat-card { display: flex; flex-direction: column; align-items: center; padding: var(--space-3); background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); }
+  .stat-val { font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .stat-lbl { font-size: var(--text-xs); color: var(--text-tertiary); margin-top: 2px; }
+
+  .btn-grid { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .btn { padding: var(--space-2) var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--text-primary); cursor: pointer; transition: all var(--duration-fast) var(--ease-default); }
+  .btn:hover { border-color: var(--border-hover); background: var(--bg-secondary); }
+</style>
+
+<script>
+  const textInput = document.getElementById('text-input') as HTMLTextAreaElement;
+  const textOutput = document.getElementById('text-output') as HTMLTextAreaElement;
+
+  function updateStats() {
+    const text = textInput.value;
+    const el = (id: string) => document.getElementById(id);
+    el('stat-chars')!.textContent = text.length.toString();
+    el('stat-chars-no-space')!.textContent = text.replace(/\s/g, '').length.toString();
+    el('stat-words')!.textContent = text.trim() ? text.trim().split(/\s+/).length.toString() : '0';
+    el('stat-lines')!.textContent = text ? text.split('\n').length.toString() : '0';
+    el('stat-bytes')!.textContent = new Blob([text]).size.toString();
+    el('stat-chinese')!.textContent = (text.match(/[\u4e00-\u9fff]/g) || []).length.toString();
+  }
+
+  textInput.addEventListener('input', updateStats);
+
+  document.getElementById('paste-btn')?.addEventListener('click', async () => {
+    try {
+      textInput.value = await navigator.clipboard.readText();
+      updateStats();
+    } catch {}
+  });
+
+  document.getElementById('clear-btn')?.addEventListener('click', () => {
+    textInput.value = '';
+    textOutput.value = '';
+    updateStats();
+  });
+
+  function transform(fn: (text: string) => string) {
+    textOutput.value = fn(textInput.value);
+  }
+
+  document.getElementById('to-upper')?.addEventListener('click', () => transform(t => t.toUpperCase()));
+  document.getElementById('to-lower')?.addEventListener('click', () => transform(t => t.toLowerCase()));
+  document.getElementById('to-capitalize')?.addEventListener('click', () => transform(t => t.replace(/\b\w/g, c => c.toUpperCase())));
+  document.getElementById('to-title')?.addEventListener('click', () => transform(t => t.toLowerCase().replace(/(?:^|\s)\w/g, c => c.toUpperCase())));
+  document.getElementById('trim-lines')?.addEventListener('click', () => transform(t => t.split('\n').map(l => l.trim()).join('\n')));
+  document.getElementById('remove-blank-lines')?.addEventListener('click', () => transform(t => t.split('\n').filter(l => l.trim()).join('\n')));
+  document.getElementById('remove-dup-lines')?.addEventListener('click', () => transform(t => [...new Set(t.split('\n'))].join('\n')));
+  document.getElementById('sort-lines')?.addEventListener('click', () => transform(t => t.split('\n').sort().join('\n')));
+  document.getElementById('reverse-lines')?.addEventListener('click', () => transform(t => t.split('\n').reverse().join('\n')));
+  document.getElementById('reverse-text')?.addEventListener('click', () => transform(t => [...t].reverse().join('')));
+  document.getElementById('to-fullwidth')?.addEventListener('click', () => transform(t => t.replace(/[!-~]/g, c => String.fromCharCode(c.charCodeAt(0) + 0xfee0))));
+  document.getElementById('to-halfwidth')?.addEventListener('click', () => transform(t => t.replace(/[！-～]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))));
+
+  document.getElementById('copy-output')?.addEventListener('click', () => {
+    const text = textOutput.value;
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    const btn = document.getElementById('copy-output');
+    if (btn) { btn.textContent = '已复制'; setTimeout(() => btn.textContent = '复制结果', 1500); }
+  });
+</script>
