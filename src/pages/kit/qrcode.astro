@@ -69,7 +69,7 @@ import Layout from '@layouts/Layout.astro';
 
         <div class="output-section">
           <div class="qr-preview" id="qr-preview">
-            <div class="qr-placeholder" id="qr-placeholder">
+            <div class="qr-placeholder">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <rect x="3" y="3" width="7" height="7"></rect>
                 <rect x="14" y="3" width="7" height="7"></rect>
@@ -80,7 +80,8 @@ import Layout from '@layouts/Layout.astro';
           </div>
           <button class="btn-secondary" id="download-btn" disabled>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 4a2 2H5a2C6 9l1.85=" height="2" clip-rule="evenodd" d="M12 15 3)"/>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
             下载 PNG
@@ -96,17 +97,12 @@ import Layout from '@layouts/Layout.astro';
     min-height: 100vh;
     padding: calc(var(--header-height) + 2rem) 0 4rem;
   }
-
   .tool-container {
     max-width: 800px;
     margin: 0 auto;
     padding: 0 1.5rem;
   }
-
-  .tool-header {
-    margin-bottom: 2rem;
-  }
-
+  .tool-header { margin-bottom: 2rem; }
   .back-link {
     display: inline-flex;
     align-items: center;
@@ -115,35 +111,27 @@ import Layout from '@layouts/Layout.astro';
     font-size: 0.9rem;
     margin-bottom: 1rem;
   }
-
-  .back-link:hover {
-    color: var(--text-primary);
-  }
-
+  .back-link:hover { color: var(--text-primary); }
   .tool-header h1 {
     font-size: 2rem;
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
   }
-
   .tool-desc {
     color: var(--text-secondary);
     font-size: 1rem;
   }
-
   .tool-main {
     display: grid;
     gap: 1.5rem;
   }
-
   @media (min-width: 768px) {
     .tool-main {
       grid-template-columns: 1fr 280px;
       align-items: start;
     }
   }
-
   .input-section {
     display: grid;
     gap: 1.25rem;
@@ -153,7 +141,6 @@ import Layout from '@layouts/Layout.astro';
     border-radius: 1.25rem;
     box-shadow: 0 4px 16px rgba(47, 35, 22, 0.06);
   }
-
   .input-group label,
   .option-group label {
     display: block;
@@ -162,12 +149,13 @@ import Layout from '@layouts/Layout.astro';
     color: var(--text-secondary);
     margin-bottom: 0.5rem;
   }
-
   .input-group textarea {
     width: 100%;
     padding: 0.9rem 1rem;
     border: 1px solid rgba(71, 57, 44, 0.15);
     border-radius: 0.75rem;
+    font-size: 0.95rem;
+    color: var(--text-primary);
     background: var(--bg-secondary);
     resize: vertical;
     font-family: inherit;
@@ -175,7 +163,7 @@ import Layout from '@layouts/Layout.astro';
   .input-group textarea:focus {
     outline: none;
     border-color: #d97757;
-    box-shadow: 0 0 3px rgba(217, 119, 87, 0.15);
+    box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.15);
   }
   .options-grid {
     display: grid;
@@ -185,7 +173,17 @@ import Layout from '@layouts/Layout.astro';
   .option-group select,
   .option-group input[type="color"] {
     width: 100%;
-    padding: 4px 6px 0.8rem cursor: pointer;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid rgba(71, 57, 44, 0.15);
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+  }
+  .option-group input[type="color"] {
+    height: 42px;
+    padding: 4px;
+    cursor: pointer;
   }
   .btn-primary {
     display: inline-flex;
@@ -202,13 +200,8 @@ import Layout from '@layouts/Layout.astro';
     cursor: pointer;
     transition: all 0.15s ease;
   }
-  .btn-primary:hover {
-    background: #333;
-  }
-  .output-section {
-    display: grid;
-    gap: 1rem;
-  }
+  .btn-primary:hover { background: #333; }
+  .output-section { display: grid; gap: 1rem; }
   .qr-preview {
     display: flex;
     align-items: center;
@@ -228,66 +221,113 @@ import Layout from '@layouts/Layout.astro';
     color: var(--text-tertiary);
     font-size: 0.9rem;
   }
-  .qr-placeholder {
-    display: flex;
-    flex-direction: column;
+  .btn-secondary {
+    display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
-    color: var(--text-tertiary);
-            font-size: 0.9em;
-          }
-        }
-      }
-    </div>
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.25rem;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid rgba(71, 57, 44, 0.15);
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--bg-tertiary);
+    border-color: rgba(71, 57, 44, 0.25);
+  }
+  .btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 </style>
 
-<script is:inline>
+<script>
   // @ts-nocheck
-  var qrInput = document.getElementById('qr-input');
-  var qrSize = document.getElementById('qr-size');
-  var qrDark = document.getElementById('qr-dark');
-  var qrLight = document.getElementById('qr-light');
-  var qrLevel = document.getElementById('qr-level');
-  var generateBtn = document.getElementById('generate-btn');
-  var downloadBtn = document.getElementById('download-btn');
-  var qrPreview = document.getElementById('qr-preview');
-  var currentDataUrl = '';
+  const qrInput = document.getElementById('qr-input') as HTMLTextAreaElement;
+  const qrSize = document.getElementById('qr-size') as HTMLSelectElement;
+  const qrDark = document.getElementById('qr-dark') as HTMLInputElement;
+  const qrLight = document.getElementById('qr-light') as HTMLInputElement;
+  const qrLevel = document.getElementById('qr-level') as HTMLSelectElement;
+  const generateBtn = document.getElementById('generate-btn');
+  const downloadBtn = document.getElementById('download-btn') as HTMLButtonElement;
+  const qrPreview = document.getElementById('qr-preview');
+
+  let currentDataUrl = '';
 
   function generate() {
-      var text = qrInput.value.trim();
-      if (!text) { qrInput.focus(); return; }
-      var size = parseInt(qrSize.value || '200');
-      var dark = qrDark.value || '#171412';
-      var light = qrLight.value || '#ffffff';
-      var level = qrLevel.value || 'M';
-      var url = 'https://chart.googleapis.com/chart?chs=qr&cht=' + text + '&chs=' + size + '&choe +
-        '&chld=' + level + '&chco=' + encodeURIComponent(text) +
-        '&choe=' + encodeURIComponent(text).toUpperCase()) +
-        '&chld=QR%20L&chld=' + encodeURIComponent(size) +
-        '&chld='L&chld=M&choe H&choe Q';
+    const text = qrInput.value.trim();
+    if (!text) { qrInput.focus(); return; }
 
-      url += '&chld=H&chld=T' + encodeURIComponent(level);
- + '&chld=H&chld=H)';
+    const size = parseInt(qrSize.value || '200');
+    const dark = (qrDark.value || '#171412').replace('#', '');
+    const light = (qrLight.value || '#ffffff').replace('#', '');
+    const level = qrLevel.value || 'M';
 
-        var img = new Image();
-        img.src = url;
-        img.style.maxWidth = '100%';
-        img.style.borderRadius = '12px';
-        img.style.boxShadow = '0 4px 6px rgba(47, 35, 22, 0.06)';
+    const url = 'https://api.qrserver.com/v1/create-qr-code/'
+      + '?size=' + size + 'x' + size
+      + '&data=' + encodeURIComponent(text)
+      + '&color=' + dark
+      + '&bgcolor=' + light
+      + '&ecc=' + level
+      + '&format=png';
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.alt = 'QR Code';
+    img.style.maxWidth = '100%';
+    img.style.borderRadius = '12px';
+    img.style.boxShadow = '0 4px 6px rgba(47, 35, 22, 0.06)';
+
+    img.onload = () => {
+      // Draw to canvas for download
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0);
+        currentDataUrl = canvas.toDataURL('image/png');
+      } catch {
+        currentDataUrl = url;
+      }
+      if (qrPreview) {
         qrPreview.innerHTML = '';
         qrPreview.appendChild(img);
-        downloadBtn.disabled = false;
-      } else {
-      if (downloadBtn && currentDataUrl) {
-        var link = document.createElement('a');
-        link.download = 'qrcode.png';
-        link.href = currentDataUrl;
-        link.click();
       }
-    });
-  })();
+      if (downloadBtn) downloadBtn.disabled = false;
+    };
+
+    img.onerror = () => {
+      if (qrPreview) {
+        qrPreview.innerHTML = '<div class="qr-placeholder" style="color: #e88a6a;">生成失败，请检查网络连接</div>';
+      }
+      if (downloadBtn) downloadBtn.disabled = true;
+    };
+
+    img.src = url;
+  }
+
+  generateBtn?.addEventListener('click', generate);
+
+  downloadBtn?.addEventListener('click', () => {
+    if (!currentDataUrl) return;
+    const a = document.createElement('a');
+    a.download = 'qrcode.png';
+    a.href = currentDataUrl;
+    a.click();
+  });
+
+  let debounce: ReturnType<typeof setTimeout>;
+  qrInput?.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => {
+      if (qrInput.value.trim()) generate();
+    }, 500);
+  });
 </script>
-</section>
-</Layout>
-</style>
