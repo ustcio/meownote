@@ -571,13 +571,32 @@ import Layout from '@layouts/Layout.astro';
   }
 </style>
 
-<script is:inline define:vars={{ API_BASE: 'https://api.ustc.dev' }}>
+<script is:inline define:vars={{ API_BASE: 'https://api.ustc.dev', TOKEN_KEY: 'meownote_auth_token' }}>
   let fileId = null;
   let currentFile = null;
   let saveTimeout = null;
   let isDirty = false;
   let isSaving = false;
   let markdownToolbarReady = false;
+
+  function getAuthToken() {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return null;
+    try {
+      return decodeURIComponent(atob(token));
+    } catch {
+      return token;
+    }
+  }
+
+  function getAuthHeaders() {
+    const headers = {};
+    const token = getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }
 
   const loadingState = document.getElementById('loading-state');
   const editorContent = document.getElementById('editor-content');
@@ -596,13 +615,20 @@ import Layout from '@layouts/Layout.astro';
   const filePreviewCopy = document.getElementById('file-preview-copy');
 
   async function apiRequest(path, options = {}) {
+    const isFormData = options.body instanceof FormData;
+    const timeoutMs = isFormData ? 60000 : 10000;
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+      const headers = isFormData
+        ? { ...getAuthHeaders(), ...(options.headers || {}) }
+        : { 'Content-Type': 'application/json', ...getAuthHeaders(), ...(options.headers || {}) };
       const response = await fetch(`${API_BASE}${path}`, { ...options, headers, signal: controller.signal });
       clearTimeout(timeoutId);
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('请先登录');
+        }
         const err = await response.json().catch(() => ({}));
         throw new Error(err.message || `HTTP ${response.status}`);
       }
@@ -651,6 +677,11 @@ import Layout from '@layouts/Layout.astro';
     const basicMatch = contentDisposition.match(/filename="([^"]+)"/i);
     if (basicMatch?.[1]) {
       return basicMatch[1];
+    }
+
+    const plainMatch = contentDisposition.match(/filename=([^;]+)/i);
+    if (plainMatch?.[1]) {
+      return plainMatch[1].replace(/^["']|["']$/g, '');
     }
 
     const extension = getTextExtension(type);
@@ -930,18 +961,27 @@ import Layout from '@layouts/Layout.astro';
 
     try {
       const downloadPath = currentFile?.downloadUrl || `/api/workspace/${fileId}/download`;
-      const response = await fetch(`${API_BASE}${downloadPath}`);
+      const response = await fetch(`${API_BASE}${downloadPath}`, {
+        headers: getAuthHeaders(),
+      });
+
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('请先登录');
+        }
         const err = await response.json().catch(() => ({}));
         throw new Error(err.message || 'Download failed');
       }
+
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
       anchor.download = getDownloadFilename(response, currentFile?.title || 'download', currentFile?.type || 'txt');
+      document.body.appendChild(anchor);
       anchor.click();
-      URL.revokeObjectURL(url);
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 100);
       showToast('Downloaded', 'success');
     } catch (error) {
       console.error('Download failed:', error);
