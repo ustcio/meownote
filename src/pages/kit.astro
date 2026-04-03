@@ -1,203 +1,85 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import { toolCategories } from '@data/tool-categories';
 
-const tools = [
-  {
-    id: 'qrcode',
-    href: '/kit/qrcode',
-    icon: 'qr',
-    title: '二维码生成器',
-    desc: '生成自定义样式的二维码，支持Logo、颜色设置'
-  },
-  {
-    id: 'json',
-    href: '/kit/json',
-    icon: 'code',
-    title: 'JSON 格式化',
-    desc: 'JSON 格式化、压缩、校验，支持语法高亮'
-  },
-  {
-    id: 'base64',
-    href: '/kit/base64',
-    icon: 'hash',
-    title: 'Base64 编解码',
-    desc: '文本和图片的 Base64 编码与解码'
-  },
-  {
-    id: 'timestamp',
-    href: '/kit/timestamp',
-    icon: 'clock',
-    title: '时间戳转换',
-    desc: '时间戳与日期时间互相转换'
-  },
-  {
-    id: 'color',
-    href: '/kit/color',
-    icon: 'palette',
-    title: '颜色转换器',
-    desc: 'HEX、RGB、HSL 颜色格式互转'
-  },
-  {
-    id: 'text',
-    href: '/kit/text',
-    icon: 'type',
-    title: '文本工具',
-    desc: '字数统计、大小写转换、文本差异对比'
-  },
-  {
-    id: 'url',
-    href: '/kit/url',
-    icon: 'link',
-    title: 'URL 编解码',
-    desc: 'URL 编码与解码，支持中文和特殊字符'
-  },
-  {
-    id: 'regex',
-    href: '/kit/regex',
-    icon: 'search',
-    title: '正则测试',
-    desc: '在线测试正则表达式，实时匹配高亮'
-  },
-  {
-    id: 'gold',
-    href: '/kit/gold',
-    icon: 'trending',
-    title: '金价追踪',
-    desc: '实时金价行情，国内外金价对比'
-  },
-  {
-    id: 'image',
-    href: '/kit/image',
-    icon: 'image',
-    title: '图片工具',
-    desc: '图片压缩、格式转换、尺寸调整'
-  },
-  {
-    id: 'password',
-    href: '/kit/password',
-    icon: 'key',
-    title: '密码生成器',
-    desc: '生成安全的随机密码'
-  },
-  {
-    id: 'academic',
-    href: '/kit/academic',
-    icon: 'graduation',
-    title: '学术工具',
-    desc: 'DOI引用、BibTeX生成、影响因子查询'
-  },
-];
+const pageTitle = '工具箱';
+const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处理、编程工具等';
 ---
 
-<Layout
-  title="工具箱 - Maxwell.Science"
-  description="实用在线工具集合：二维码生成、JSON格式化、Base64编解码、时间转换等"
->
+<Layout title={`${pageTitle} - Maxwell.Science`} description={pageDesc}>
   <section class="kit-page">
-    <div class="container">
-      <div class="kit-header">
-        <span class="claude-kicker">Tool collection</span>
-        <h1>工具箱</h1>
-        <p class="kit-desc">
-          精选实用在线工具，无需下载，即开即用。所有数据处理在本地完成，保护你的隐私。
-        </p>
-      </div>
+    <div class="kit-container">
+      <!-- Mobile sidebar toggle -->
+      <button class="sidebar-toggle" id="sidebar-toggle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+        <span>分类</span>
+      </button>
 
-      <div class="tools-grid">
-        {tools.map(tool => (
-          <a href={tool.href} class="tool-card">
-            <div class="tool-icon" data-icon={tool.icon}>
-              {tool.icon === 'qr' && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="3" width="7" height="7"></rect>
-                  <rect x="3" y="14" width="7" height="7"></rect>
-                  <rect x="14" y="14" width="7" height="7"></rect>
-                </svg>
-              )}
-              {tool.icon === 'code' && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="16 18 22 12 16 6"></polyline>
-                  <polyline points="8 6 2 12 8 18"></polyline>
-                </svg>
-              )}
-              {tool.icon === 'hash' && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="4" y1="9" x2="20" y2="9"></line>
-                  <line x1="4" y1="15" x2="20" y2="15"></line>
-                  <line x1="10" y1="3" x2="8" y2="21"></line>
-                  <line x1="16" y1="3" x2="14" y2="21"></line>
-                </svg>
-              )}
-              {tool.icon === 'clock' && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-              )}
-              {tool.icon === 'palette' && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="13.5" cy="6.5" r="0.5" fill="currentColor"></circle>
-                  <circle cx="17.5" cy="10.5" r="0.5" fill="currentColor"></circle>
-                  <circle cx="8.5" cy="7.5" r="0.5" fill="currentColor"></circle>
-                  <circle cx="6.5" cy="12.5" r="0.5" fill="currentColor"></circle>
-                  <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.555C21.965 6.012 17.461 2 12 2z"></path>
-                </svg>
-              )}
-              {tool.icon === 'type' && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="4 7 4 4 20 4 20 7"></polyline>
-                  <line x1="9" y1="20" x2="15" y2="20"></line>
-                  <line x1="12" y1="4" x2="12" y2="20"></line>
-                </svg>
-              )}
-              {tool.icon === 'link' && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                </svg>
-              )}
-              {tool.icon === 'search' && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-              )}
-              {tool.icon === 'trending' && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                  <polyline points="17 6 23 6 23 12"></polyline>
-                </svg>
-              )}
-              {tool.icon === 'image' && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                  <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
-              )}
-              {tool.icon === 'key' && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
-                </svg>
-              )}
-              {tool.icon === 'graduation' && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-                  <path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5"></path>
-                </svg>
-              )}
-            </div>
-            <div class="tool-content">
-              <span class="tool-title">{tool.title}</span>
-              <span class="tool-desc">{tool.desc}</span>
-            </div>
-            <svg class="tool-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6"></polyline>
+      <!-- Sidebar -->
+      <aside class="kit-sidebar" id="kit-sidebar">
+        <div class="sidebar-header">
+          <h2 class="sidebar-title">工具分类</h2>
+          <button class="sidebar-close" id="sidebar-close">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
-          </a>
-        ))}
-      </div>
+          </button>
+        </div>
+        <nav class="sidebar-nav">
+          {toolCategories.map((cat, i) => (
+            <a href={`#${cat.id}`} class="sidebar-link" data-category={cat.id}>
+              <span class="sidebar-icon">{cat.icon}</span>
+              <span class="sidebar-label">{cat.name}</span>
+              <span class="sidebar-count">{cat.tools.length}</span>
+            </a>
+          ))}
+        </nav>
+      </aside>
+
+      <!-- Overlay for mobile -->
+      <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+      <!-- Main content -->
+      <main class="kit-main">
+        <header class="kit-header">
+          <h1 class="kit-title">{pageTitle}</h1>
+          <p class="kit-desc">{pageDesc}</p>
+          <div class="kit-search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="kit-search-input" placeholder="搜索工具..." />
+          </div>
+        </header>
+
+        <div class="kit-content">
+          {toolCategories.map(cat => (
+            <section class="kit-section" id={cat.id}>
+              <h2 class="section-title">
+                <span class="section-icon">{cat.icon}</span>
+                {cat.name}
+              </h2>
+              <div class="tools-grid">
+                {cat.tools.map(tool => (
+                  <a href={tool.path} class="tool-card" data-tool-id={tool.id} data-tool-name={tool.name} data-tool-desc={tool.desc}>
+                    <div class="tool-info">
+                      <h3 class="tool-name">{tool.name}</h3>
+                      <p class="tool-desc">{tool.desc}</p>
+                    </div>
+                    {tool.status === 'todo' && <span class="tool-badge">开发中</span>}
+                  </a>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </main>
     </div>
   </section>
 </Layout>
@@ -205,110 +87,414 @@ const tools = [
 <style>
   .kit-page {
     min-height: 100vh;
-    padding: calc(var(--header-height) + 3rem) 0 5rem;
-    background:
-      radial-gradient(circle at 78% 8%, rgba(217, 119, 87, 0.08), transparent 28%),
-      radial-gradient(circle at 12% 12%, rgba(180, 199, 192, 0.1), transparent 18%),
-      linear-gradient(180deg, #fbf8f3 0%, var(--bg-primary) 30%, #f6f1e8 100%);
+    padding: calc(var(--header-total-height) + var(--space-4)) var(--space-4) var(--space-16);
+    background: var(--bg-primary);
+  }
+
+  .kit-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: var(--space-6);
+    position: relative;
+  }
+
+  /* Sidebar */
+  .kit-sidebar {
+    position: sticky;
+    top: calc(var(--header-total-height) + var(--space-4));
+    height: fit-content;
+    max-height: calc(100vh - var(--header-total-height) - var(--space-8));
+    overflow-y: auto;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl);
+    padding: var(--space-4);
+  }
+
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--border-primary);
+  }
+
+  .sidebar-title {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+  }
+
+  .sidebar-close {
+    display: none;
+    padding: var(--space-1);
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+  }
+
+  .sidebar-close:hover {
+    color: var(--text-primary);
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .sidebar-link:hover {
+    background: var(--bg-tertiary);
+  }
+
+  .sidebar-link.active {
+    background: var(--text-primary);
+    color: var(--bg-primary);
+  }
+
+  .sidebar-icon {
+    font-size: var(--text-lg);
+    flex-shrink: 0;
+  }
+
+  .sidebar-label {
+    flex: 1;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sidebar-count {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    background: var(--bg-tertiary);
+    padding: 2px 6px;
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+  }
+
+  .sidebar-link.active .sidebar-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--bg-primary);
+  }
+
+  /* Overlay */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+  }
+
+  /* Mobile sidebar toggle */
+  .sidebar-toggle {
+    display: none;
+    position: fixed;
+    bottom: var(--space-6);
+    right: var(--space-6);
+    z-index: 50;
+    padding: var(--space-3) var(--space-4);
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .sidebar-toggle:hover {
+    opacity: 0.9;
+  }
+
+  /* Main content */
+  .kit-main {
+    min-width: 0;
   }
 
   .kit-header {
-    margin-bottom: 2.5rem;
-    max-width: 38rem;
+    margin-bottom: var(--space-6);
   }
 
-  .kit-header h1 {
-    font-size: clamp(2.5rem, 5vw, 3.5rem);
-    font-weight: var(--font-medium);
-    letter-spacing: var(--tracking-tight);
-    margin-bottom: 0.75rem;
+  .kit-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
   }
 
   .kit-desc {
-    font-size: 1.05rem;
+    font-size: var(--text-sm);
     color: var(--text-secondary);
-    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-4);
+  }
+
+  .kit-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .kit-search svg {
+    position: absolute;
+    left: var(--space-3);
+    color: var(--text-tertiary);
+    pointer-events: none;
+  }
+
+  .kit-search input {
+    width: 100%;
+    padding: var(--space-3) var(--space-3) var(--space-3) var(--space-10);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+  }
+
+  .kit-search input:focus {
+    outline: none;
+    border-color: var(--color-accent-blue);
+  }
+
+  .kit-search input::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  /* Sections */
+  .kit-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  .kit-section {
+    scroll-margin-top: calc(var(--header-total-height) + var(--space-4));
+  }
+
+  .section-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .section-icon {
+    font-size: var(--text-xl);
   }
 
   .tools-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-3);
   }
 
   .tool-card {
     display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.15rem 1.25rem;
-    background: #ffffff;
-    border: 1px solid rgba(71, 57, 44, 0.1);
-    border-radius: 1.25rem;
-    box-shadow: 0 4px 16px rgba(47, 35, 22, 0.06);
-    transition: all 0.2s ease;
-    cursor: pointer;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--space-4);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl);
+    text-decoration: none;
+    transition: all var(--duration-fast) var(--ease-default);
+    position: relative;
+    min-height: 90px;
   }
 
   .tool-card:hover {
-    border-color: rgba(71, 57, 44, 0.2);
-    box-shadow: 0 8px 24px rgba(47, 35, 22, 0.1);
+    border-color: var(--border-hover);
+    background: var(--bg-tertiary);
     transform: translateY(-2px);
   }
 
-  .tool-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    background: rgba(217, 119, 87, 0.1);
-    border-radius: 12px;
-    color: #d97757;
-    flex-shrink: 0;
+  .tool-card.hidden {
+    display: none;
   }
 
-  .tool-card:hover .tool-icon {
-    background: #d97757;
-    color: white;
-  }
-
-  .tool-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .tool-title {
-    display: block;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #171412;
-    margin-bottom: 2px;
+  .tool-name {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
   }
 
   .tool-desc {
-    display: block;
-    font-size: 0.85rem;
-    color: #8a7f74;
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    line-height: 1.4;
   }
 
-  .tool-arrow {
-    color: #b2a79a;
-    flex-shrink: 0;
-    transition: transform 0.2s ease;
+  .tool-badge {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    padding: 2px 6px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    font-size: 10px;
+    color: var(--text-tertiary);
   }
 
-  .tool-card:hover .tool-arrow {
-    transform: translateX(4px);
-    color: #d97757;
-  }
-
-  @media (max-width: 640px) {
-    .kit-page {
-      padding: calc(var(--header-height) + 2rem) 0 4rem;
+  /* Responsive */
+  @media (max-width: 768px) {
+    .kit-container {
+      grid-template-columns: 1fr;
     }
 
+    .kit-sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      max-height: 100vh;
+      z-index: 50;
+      border-radius: 0;
+      transform: translateX(-100%);
+      transition: transform var(--duration-normal) var(--ease-default);
+    }
+
+    .kit-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-close {
+      display: block;
+    }
+
+    .sidebar-overlay.show {
+      display: block;
+    }
+
+    .sidebar-toggle {
+      display: flex;
+    }
+
+    .tools-grid {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
     .tools-grid {
       grid-template-columns: 1fr;
     }
   }
 </style>
+
+<script>
+  // Sidebar toggle for mobile
+  const sidebar = document.getElementById('kit-sidebar');
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const sidebarClose = document.getElementById('sidebar-close');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+  function openSidebar() {
+    sidebar?.classList.add('open');
+    sidebarOverlay?.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar?.classList.remove('open');
+    sidebarOverlay?.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  sidebarToggle?.addEventListener('click', openSidebar);
+  sidebarClose?.addEventListener('click', closeSidebar);
+  sidebarOverlay?.addEventListener('click', closeSidebar);
+
+  // Active sidebar link on scroll
+  const sections = document.querySelectorAll('.kit-section');
+  const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+  function updateActiveLink() {
+    const scrollPos = window.scrollY + 100;
+    
+    sections.forEach(section => {
+      const top = section.offsetTop;
+      const bottom = top + section.offsetHeight;
+      const id = section.id;
+      
+      if (scrollPos >= top && scrollPos < bottom) {
+        sidebarLinks.forEach(link => {
+          link.classList.toggle('active', link.dataset.category === id);
+        });
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateActiveLink, { passive: true });
+  updateActiveLink();
+
+  // Smooth scroll to section
+  sidebarLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = link.getAttribute('href')?.substring(1);
+      const target = document.getElementById(targetId || '');
+      
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+        closeSidebar();
+      }
+    });
+  });
+
+  // Search functionality
+  const searchInput = document.getElementById('kit-search-input');
+  const toolCards = document.querySelectorAll('.tool-card');
+
+  searchInput?.addEventListener('input', () => {
+    const query = searchInput.value.toLowerCase().trim();
+    
+    if (!query) {
+      toolCards.forEach(card => card.classList.remove('hidden'));
+      sections.forEach(section => section.style.display = '');
+      return;
+    }
+
+    sections.forEach(section => {
+      const sectionCards = section.querySelectorAll('.tool-card');
+      let hasVisible = false;
+      
+      sectionCards.forEach(card => {
+        const name = (card.dataset.toolName || '').toLowerCase();
+        const desc = (card.dataset.toolDesc || '').toLowerCase();
+        const matches = name.includes(query) || desc.includes(query);
+        
+        card.classList.toggle('hidden', !matches);
+        if (matches) hasVisible = true;
+      });
+      
+      section.style.display = hasVisible ? '' : 'none';
+    });
+  });
+</script>
