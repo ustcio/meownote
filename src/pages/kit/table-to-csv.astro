@@ -2,10 +2,10 @@
 import Layout from '@layouts/Layout.astro';
 
 const toolName = '表格转CSV';
-const toolDesc = '将Excel表格转换为CSV文件';
+const toolDesc = '将HTML表格或制表符分隔数据转为CSV';
 ---
 
-<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+<Layout title={toolName + ' - 工具箱 - Maxwell.Science'} description={toolDesc}>
   <section class="tool-page">
     <div class="tool-container">
       <header class="tool-header">
@@ -22,15 +22,28 @@ const toolDesc = '将Excel表格转换为CSV文件';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
-          </div>
+  <div class="form-group">
+    <label class="form-label" for="input-text">输入表格数据（制表符分隔或HTML表格）</label>
+    <textarea id="input-text" class="form-textarea" placeholder="Name	Age	City
+John	25	New York" style="min-height:150px;"></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">分隔符</label>
+    <div class="checkbox-group">
+      <label><input type="radio" name="delimiter" value="tab" checked> 制表符</label>
+      <label><input type="radio" name="delimiter" value="comma"> 逗号</label>
+      <label><input type="radio" name="delimiter" value="html"> HTML表格</label>
+    </div>
+  </div>
+  <div class="btn-group">
+    <button id="convert-btn" class="btn btn-primary">转换为CSV</button>
+    <button id="copy-btn" class="btn btn-secondary">复制</button>
+    <button id="download-btn" class="btn btn-secondary">下载CSV</button>
+  </div>
+  <div class="form-group">
+    <label class="form-label">CSV结果</label>
+    <div id="result" class="result-area">等待输入...</div>
+  </div>
         </div>
       </main>
     </div>
@@ -43,213 +56,137 @@ const toolDesc = '将Excel表格转换为CSV文件';
     padding: calc(var(--header-total-height) + var(--space-6)) var(--space-4) var(--space-16);
     background: var(--bg-primary);
   }
-
-  .tool-container {
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .tool-header {
-    margin-bottom: var(--space-6);
-  }
-
+  .tool-container { max-width: 900px; margin: 0 auto; }
+  .tool-header { margin-bottom: var(--space-6); }
   .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: var(--text-sm);
-    margin-bottom: var(--space-4);
-    transition: color var(--duration-fast) var(--ease-default);
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    color: var(--text-secondary); text-decoration: none; font-size: var(--text-sm);
+    margin-bottom: var(--space-4); transition: color var(--duration-fast) var(--ease-default);
   }
-
-  .back-link:hover {
-    color: var(--text-primary);
-  }
-
-  .tool-title {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-  }
-
-  .tool-description {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-  }
-
+  .back-link:hover { color: var(--text-primary); }
+  .tool-title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-2); }
+  .tool-description { font-size: var(--text-sm); color: var(--text-secondary); }
   .tool-main {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-xl);
-    padding: var(--space-6);
-    min-height: 400px;
+    background: var(--bg-secondary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl); padding: var(--space-6); min-height: 400px;
   }
-
-  .tool-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+  .tool-content { display: flex; flex-direction: column; gap: var(--space-4); }
+  .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+  .form-label { font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--text-primary); }
+  .form-input, .form-textarea, .form-select {
+    padding: var(--space-3); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: inherit;
   }
-
-  .tool-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .tool-placeholder p {
-    font-size: var(--text-sm);
-  }
-
-  /* 通用表单样式 */
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .form-label {
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--text-primary);
-  }
-
-  .form-input,
-  .form-textarea,
-  .form-select {
-    padding: var(--space-3);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
-    font-size: var(--text-sm);
-    font-family: inherit;
-  }
-
-  .form-input:focus,
-  .form-textarea:focus,
-  .form-select:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-  }
-
-  .form-textarea {
-    min-height: 120px;
-    resize: vertical;
-    font-family: var(--font-mono);
-  }
-
-  .form-select {
-    cursor: pointer;
-  }
-
-  /* 通用按钮样式 */
+  .form-input:focus, .form-textarea:focus, .form-select:focus { outline: none; border-color: var(--color-primary); }
+  .form-textarea { min-height: 120px; resize: vertical; font-family: var(--font-mono); }
+  .form-select { cursor: pointer; }
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border: none;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    padding: var(--space-3) var(--space-4); border: none; border-radius: var(--radius-lg);
+    font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer;
     transition: all var(--duration-fast) var(--ease-default);
   }
-
-  .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
-  }
-
-  .btn-primary:hover {
-    opacity: 0.9;
-  }
-
-  .btn-secondary {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-primary);
-  }
-
-  .btn-secondary:hover {
-    background: var(--bg-hover);
-  }
-
-  .btn-group {
-    display: flex;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-  }
-
-  /* 结果区域 */
+  .btn-primary { background: var(--color-primary); color: #fffdf9; }
+  .btn-primary:hover { box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3); }
+  .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-primary); }
+  .btn-secondary:hover { background: var(--bg-hover); }
+  .btn-group { display: flex; gap: var(--space-2); flex-wrap: wrap; }
   .result-area {
-    padding: var(--space-4);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    padding: var(--space-4); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); font-family: var(--font-mono); font-size: var(--text-sm);
+    white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow-y: auto;
   }
-
-  /* 文件上传 */
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .checkbox-group label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-secondary); cursor: pointer; }
+  .stats-bar { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-4); }
+  .stat-item { background: var(--bg-primary); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); }
+  .stat-item strong { color: var(--color-primary); }
   .file-upload {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: var(--space-8); border: 2px dashed var(--border-primary); border-radius: var(--radius-xl);
+    cursor: pointer; transition: all var(--duration-fast) var(--ease-default);
   }
-
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
-  }
-
-  .file-upload input[type="file"] {
-    display: none;
-  }
-
-  /* 响应式 */
+  .file-upload:hover { border-color: var(--color-primary); background: var(--bg-tertiary); }
+  .file-upload input[type="file"] { display: none; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .tag { background: var(--bg-tertiary); border: 1px solid var(--border-primary); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); }
   @media (max-width: 768px) {
-    .tool-main {
-      padding: var(--space-4);
-    }
-
-    .btn-group {
-      flex-direction: column;
-    }
-
-    .btn {
-      width: 100%;
-    }
+    .tool-main { padding: var(--space-4); }
+    .btn-group { flex-direction: column; }
+    .btn { width: 100%; }
   }
 </style>
-
-<script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
+<script>
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('表格转CSV 工具已加载');
+    const inputText = document.getElementById('input-text');
+    const convertBtn = document.getElementById('convert-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const result = document.getElementById('result');
+
+    convertBtn.addEventListener('click', () => {
+      const text = inputText.value.trim();
+      if (!text) { result.textContent = '请输入数据'; return; }
+
+      const delimiter = document.querySelector('input[name="delimiter"]:checked').value;
+      let csv = '';
+
+      if (delimiter === 'html') {
+        const temp = document.createElement('div');
+        temp.innerHTML = text;
+        const rows = temp.querySelectorAll('tr');
+        const data = [];
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('td, th');
+          const rowData = [];
+          cells.forEach(cell => {
+            let val = cell.textContent.trim();
+            if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+              val = '"' + val.replace(/"/g, '""') + '"';
+            }
+            rowData.push(val);
+          });
+          data.push(rowData.join(','));
+        });
+        csv = data.join('\n');
+      } else {
+        const sep = delimiter === 'tab' ? '\t' : ',';
+        const lines = text.split('\n');
+        csv = lines.map(line => {
+          const cells = line.split(sep);
+          return cells.map(cell => {
+            let val = cell.trim();
+            if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+              val = '"' + val.replace(/"/g, '""') + '"';
+            }
+            return val;
+          }).join(',');
+        }).join('\n');
+      }
+
+      result.textContent = csv;
+    });
+
+    copyBtn.addEventListener('click', () => {
+      const text = result.textContent;
+      if (text && text !== '等待输入...') {
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = copyBtn.textContent; copyBtn.textContent = '已复制!';
+          setTimeout(() => { copyBtn.textContent = orig; }, 1500);
+        });
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      const text = result.textContent;
+      if (text && text !== '等待输入...') {
+        const blob = new Blob(['\ufeff' + text], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'data.csv'; a.click();
+        URL.revokeObjectURL(url);
+      }
+    });
   });
+
 </script>

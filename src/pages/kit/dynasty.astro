@@ -1,11 +1,11 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const toolName = '历史朝代年份';
-const toolDesc = '历史朝代年份查询';
+const toolName = '中国朝代查询';
+const toolDesc = '查询中国历史朝代时间线';
 ---
 
-<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+<Layout title={toolName + ' - 工具箱 - Maxwell.Science'} description={toolDesc}>
   <section class="tool-page">
     <div class="tool-container">
       <header class="tool-header">
@@ -22,15 +22,17 @@ const toolDesc = '历史朝代年份查询';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
-          </div>
+  <div class="search-bar">
+    <input type="text" id="search" class="form-input" placeholder="搜索朝代名称...">
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table" id="data-table">
+      <thead>
+        <tr><th>朝代</th><th>起始年份</th><th>结束年份</th><th>持续时间</th><th>开国君主</th></tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
         </div>
       </main>
     </div>
@@ -43,213 +45,108 @@ const toolDesc = '历史朝代年份查询';
     padding: calc(var(--header-total-height) + var(--space-6)) var(--space-4) var(--space-16);
     background: var(--bg-primary);
   }
-
-  .tool-container {
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .tool-header {
-    margin-bottom: var(--space-6);
-  }
-
+  .tool-container { max-width: 900px; margin: 0 auto; }
+  .tool-header { margin-bottom: var(--space-6); }
   .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: var(--text-sm);
-    margin-bottom: var(--space-4);
-    transition: color var(--duration-fast) var(--ease-default);
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    color: var(--text-secondary); text-decoration: none; font-size: var(--text-sm);
+    margin-bottom: var(--space-4); transition: color var(--duration-fast) var(--ease-default);
   }
-
-  .back-link:hover {
-    color: var(--text-primary);
-  }
-
-  .tool-title {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-  }
-
-  .tool-description {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-  }
-
+  .back-link:hover { color: var(--text-primary); }
+  .tool-title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-2); }
+  .tool-description { font-size: var(--text-sm); color: var(--text-secondary); }
   .tool-main {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-xl);
-    padding: var(--space-6);
-    min-height: 400px;
+    background: var(--bg-secondary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl); padding: var(--space-6); min-height: 400px;
   }
-
-  .tool-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+  .tool-content { display: flex; flex-direction: column; gap: var(--space-4); }
+  .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+  .form-label { font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--text-primary); }
+  .form-input, .form-textarea, .form-select {
+    padding: var(--space-3); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: inherit;
   }
-
-  .tool-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .tool-placeholder p {
-    font-size: var(--text-sm);
-  }
-
-  /* 通用表单样式 */
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .form-label {
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--text-primary);
-  }
-
-  .form-input,
-  .form-textarea,
-  .form-select {
-    padding: var(--space-3);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
-    font-size: var(--text-sm);
-    font-family: inherit;
-  }
-
-  .form-input:focus,
-  .form-textarea:focus,
-  .form-select:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-  }
-
-  .form-textarea {
-    min-height: 120px;
-    resize: vertical;
-    font-family: var(--font-mono);
-  }
-
-  .form-select {
-    cursor: pointer;
-  }
-
-  /* 通用按钮样式 */
+  .form-input:focus, .form-textarea:focus, .form-select:focus { outline: none; border-color: var(--color-primary); }
+  .form-textarea { min-height: 120px; resize: vertical; font-family: var(--font-mono); }
+  .form-select { cursor: pointer; }
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border: none;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    padding: var(--space-3) var(--space-4); border: none; border-radius: var(--radius-lg);
+    font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer;
     transition: all var(--duration-fast) var(--ease-default);
   }
-
-  .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
-  }
-
-  .btn-primary:hover {
-    opacity: 0.9;
-  }
-
-  .btn-secondary {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-primary);
-  }
-
-  .btn-secondary:hover {
-    background: var(--bg-hover);
-  }
-
-  .btn-group {
-    display: flex;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-  }
-
-  /* 结果区域 */
+  .btn-primary { background: var(--color-primary); color: #fffdf9; }
+  .btn-primary:hover { box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3); }
+  .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-primary); }
+  .btn-secondary:hover { background: var(--bg-hover); }
+  .btn-group { display: flex; gap: var(--space-2); flex-wrap: wrap; }
   .result-area {
-    padding: var(--space-4);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    padding: var(--space-4); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); font-family: var(--font-mono); font-size: var(--text-sm);
+    white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow-y: auto;
   }
-
-  /* 文件上传 */
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .checkbox-group label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-secondary); cursor: pointer; }
+  .stats-bar { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-4); }
+  .stat-item { background: var(--bg-primary); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); }
+  .stat-item strong { color: var(--color-primary); }
   .file-upload {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: var(--space-8); border: 2px dashed var(--border-primary); border-radius: var(--radius-xl);
+    cursor: pointer; transition: all var(--duration-fast) var(--ease-default);
   }
-
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
-  }
-
-  .file-upload input[type="file"] {
-    display: none;
-  }
-
-  /* 响应式 */
+  .file-upload:hover { border-color: var(--color-primary); background: var(--bg-tertiary); }
+  .file-upload input[type="file"] { display: none; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .tag { background: var(--bg-tertiary); border: 1px solid var(--border-primary); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); }
+  .data-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+  .data-table th, .data-table td { padding: var(--space-2) var(--space-3); text-align: left; border-bottom: 1px solid var(--border-primary); }
+  .data-table th { background: var(--bg-tertiary); font-weight: var(--font-medium); position: sticky; top: 0; }
+  .data-table tr:hover { background: var(--bg-hover); }
+  .table-wrapper { max-height: 500px; overflow-y: auto; border: 1px solid var(--border-primary); border-radius: var(--radius-lg); }
   @media (max-width: 768px) {
-    .tool-main {
-      padding: var(--space-4);
-    }
-
-    .btn-group {
-      flex-direction: column;
-    }
-
-    .btn {
-      width: 100%;
-    }
+    .tool-main { padding: var(--space-4); }
+    .btn-group { flex-direction: column; }
+    .btn { width: 100%; }
   }
 </style>
+<script>
+  const dynasties = [
+    ['夏','约前2070','约前1600','约470年','禹'],
+    ['商','约前1600','约前1046','约554年','汤'],
+    ['西周','前1046','前771','275年','周武王'],
+    ['东周(春秋)','前770','前476','294年','周平王'],
+    ['东周(战国)','前475','前221','254年','-'],
+    ['秦','前221','前207','14年','秦始皇'],
+    ['西汉','前202','公元8年','210年','刘邦'],
+    ['新','8','23','15年','王莽'],
+    ['东汉','25','220','195年','刘秀'],
+    ['三国','220','280','60年','-'],
+    ['西晋','265','316','51年','司马炎'],
+    ['东晋','317','420','103年','司马睿'],
+    ['南北朝','420','589','169年','-'],
+    ['隋','581','618','37年','杨坚'],
+    ['唐','618','907','289年','李渊'],
+    ['五代十国','907','979','72年','-'],
+    ['北宋','960','1127','167年','赵匡胤'],
+    ['南宋','1127','1279','152年','赵构'],
+    ['元','1271','1368','97年','忽必烈'],
+    ['明','1368','1644','276年','朱元璋'],
+    ['清','1644','1912','268年','皇太极']
+  ];
 
-<script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
+  function renderTable(data) {
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = data.map(d => '<tr><td>' + d[0] + '</td><td>' + d[1] + '</td><td>' + d[2] + '</td><td>' + d[3] + '</td><td>' + d[4] + '</td></tr>').join('');
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('历史朝代年份 工具已加载');
+    renderTable(dynasties);
+    document.getElementById('search').addEventListener('input', (e) => {
+      const q = e.target.value;
+      const filtered = dynasties.filter(d => d.some(v => v.includes(q)));
+      renderTable(filtered);
+    });
   });
+
 </script>

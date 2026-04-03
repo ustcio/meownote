@@ -1,11 +1,11 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const toolName = '世界各国首都';
-const toolDesc = '查询世界各国首都信息';
+const toolName = '世界首都查询';
+const toolDesc = '查询世界各国首都城市';
 ---
 
-<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+<Layout title={toolName + ' - 工具箱 - Maxwell.Science'} description={toolDesc}>
   <section class="tool-page">
     <div class="tool-container">
       <header class="tool-header">
@@ -22,15 +22,17 @@ const toolDesc = '查询世界各国首都信息';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
-          </div>
+  <div class="search-bar">
+    <input type="text" id="search" class="form-input" placeholder="搜索国家或首都...">
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table" id="data-table">
+      <thead>
+        <tr><th>国家</th><th>首都</th><th>洲</th></tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
         </div>
       </main>
     </div>
@@ -43,213 +45,104 @@ const toolDesc = '查询世界各国首都信息';
     padding: calc(var(--header-total-height) + var(--space-6)) var(--space-4) var(--space-16);
     background: var(--bg-primary);
   }
-
-  .tool-container {
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .tool-header {
-    margin-bottom: var(--space-6);
-  }
-
+  .tool-container { max-width: 900px; margin: 0 auto; }
+  .tool-header { margin-bottom: var(--space-6); }
   .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: var(--text-sm);
-    margin-bottom: var(--space-4);
-    transition: color var(--duration-fast) var(--ease-default);
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    color: var(--text-secondary); text-decoration: none; font-size: var(--text-sm);
+    margin-bottom: var(--space-4); transition: color var(--duration-fast) var(--ease-default);
   }
-
-  .back-link:hover {
-    color: var(--text-primary);
-  }
-
-  .tool-title {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-  }
-
-  .tool-description {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-  }
-
+  .back-link:hover { color: var(--text-primary); }
+  .tool-title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-2); }
+  .tool-description { font-size: var(--text-sm); color: var(--text-secondary); }
   .tool-main {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-xl);
-    padding: var(--space-6);
-    min-height: 400px;
+    background: var(--bg-secondary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl); padding: var(--space-6); min-height: 400px;
   }
-
-  .tool-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+  .tool-content { display: flex; flex-direction: column; gap: var(--space-4); }
+  .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+  .form-label { font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--text-primary); }
+  .form-input, .form-textarea, .form-select {
+    padding: var(--space-3); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: inherit;
   }
-
-  .tool-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .tool-placeholder p {
-    font-size: var(--text-sm);
-  }
-
-  /* 通用表单样式 */
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .form-label {
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--text-primary);
-  }
-
-  .form-input,
-  .form-textarea,
-  .form-select {
-    padding: var(--space-3);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
-    font-size: var(--text-sm);
-    font-family: inherit;
-  }
-
-  .form-input:focus,
-  .form-textarea:focus,
-  .form-select:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-  }
-
-  .form-textarea {
-    min-height: 120px;
-    resize: vertical;
-    font-family: var(--font-mono);
-  }
-
-  .form-select {
-    cursor: pointer;
-  }
-
-  /* 通用按钮样式 */
+  .form-input:focus, .form-textarea:focus, .form-select:focus { outline: none; border-color: var(--color-primary); }
+  .form-textarea { min-height: 120px; resize: vertical; font-family: var(--font-mono); }
+  .form-select { cursor: pointer; }
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border: none;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    padding: var(--space-3) var(--space-4); border: none; border-radius: var(--radius-lg);
+    font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer;
     transition: all var(--duration-fast) var(--ease-default);
   }
-
-  .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
-  }
-
-  .btn-primary:hover {
-    opacity: 0.9;
-  }
-
-  .btn-secondary {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-primary);
-  }
-
-  .btn-secondary:hover {
-    background: var(--bg-hover);
-  }
-
-  .btn-group {
-    display: flex;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-  }
-
-  /* 结果区域 */
+  .btn-primary { background: var(--color-primary); color: #fffdf9; }
+  .btn-primary:hover { box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3); }
+  .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-primary); }
+  .btn-secondary:hover { background: var(--bg-hover); }
+  .btn-group { display: flex; gap: var(--space-2); flex-wrap: wrap; }
   .result-area {
-    padding: var(--space-4);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    padding: var(--space-4); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); font-family: var(--font-mono); font-size: var(--text-sm);
+    white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow-y: auto;
   }
-
-  /* 文件上传 */
-  .file-upload {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
-  }
-
-  .file-upload input[type="file"] {
-    display: none;
-  }
-
-  /* 响应式 */
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .checkbox-group label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-secondary); cursor: pointer; }
+  .stats-bar { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-4); }
+  .stat-item { background: var(--bg-primary); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); }
+  .stat-item strong { color: var(--color-primary); }
+  .search-bar { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); }
+  .search-bar .form-input { flex: 1; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+  .data-table th, .data-table td { padding: var(--space-2) var(--space-3); text-align: left; border-bottom: 1px solid var(--border-primary); }
+  .data-table th { background: var(--bg-tertiary); font-weight: var(--font-medium); position: sticky; top: 0; }
+  .data-table tr:hover { background: var(--bg-hover); }
+  .table-wrapper { max-height: 500px; overflow-y: auto; border: 1px solid var(--border-primary); border-radius: var(--radius-lg); }
+  .emoji-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: var(--space-2); }
+  .emoji-item { display: flex; flex-direction: column; align-items: center; padding: var(--space-2); border-radius: var(--radius-md); cursor: pointer; transition: background var(--duration-fast) var(--ease-default); }
+  .emoji-item:hover { background: var(--bg-hover); }
+  .emoji-item .emoji { font-size: 1.5rem; }
+  .emoji-item .code { font-size: var(--text-xs); color: var(--text-tertiary); font-family: var(--font-mono); }
+  .tag-list { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .tag { background: var(--bg-tertiary); border: 1px solid var(--border-primary); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); }
   @media (max-width: 768px) {
-    .tool-main {
-      padding: var(--space-4);
-    }
-
-    .btn-group {
-      flex-direction: column;
-    }
-
-    .btn {
-      width: 100%;
-    }
+    .tool-main { padding: var(--space-4); }
+    .btn-group { flex-direction: column; }
+    .btn { width: 100%; }
   }
 </style>
+<script>
+  const data = [
+    ['中国','北京','亚洲'],['美国','华盛顿','北美洲'],['英国','伦敦','欧洲'],
+    ['日本','东京','亚洲'],['韩国','首尔','亚洲'],['德国','柏林','欧洲'],
+    ['法国','巴黎','欧洲'],['俄罗斯','莫斯科','欧洲'],['印度','新德里','亚洲'],
+    ['澳大利亚','堪培拉','大洋洲'],['加拿大','渥太华','北美洲'],['巴西','巴西利亚','南美洲'],
+    ['意大利','罗马','欧洲'],['西班牙','马德里','欧洲'],['墨西哥','墨西哥城','北美洲'],
+    ['印度尼西亚','雅加达','亚洲'],['荷兰','阿姆斯特丹','欧洲'],['瑞士','伯尔尼','欧洲'],
+    ['沙特阿拉伯','利雅得','亚洲'],['土耳其','安卡拉','亚洲'],['波兰','华沙','欧洲'],
+    ['泰国','曼谷','亚洲'],['瑞典','斯德哥尔摩','欧洲'],['尼日利亚','阿布贾','非洲'],
+    ['阿根廷','布宜诺斯艾利斯','南美洲'],['奥地利','维也纳','欧洲'],['挪威','奥斯陆','欧洲'],
+    ['以色列','耶路撒冷','亚洲'],['南非','比勒陀利亚','非洲'],['新加坡','新加坡','亚洲'],
+    ['马来西亚','吉隆坡','亚洲'],['越南','河内','亚洲'],['菲律宾','马尼拉','亚洲'],
+    ['埃及','开罗','非洲'],['巴基斯坦','伊斯兰堡','亚洲'],['孟加拉国','达卡','亚洲'],
+    ['乌克兰','基辅','欧洲'],['哥伦比亚','波哥大','南美洲'],['智利','圣地亚哥','南美洲'],
+    ['芬兰','赫尔辛基','欧洲'],['丹麦','哥本哈根','欧洲'],['爱尔兰','都柏林','欧洲'],
+    ['新西兰','惠灵顿','大洋洲'],['葡萄牙','里斯本','欧洲'],['希腊','雅典','欧洲'],
+    ['捷克','布拉格','欧洲'],['罗马尼亚','布加勒斯特','欧洲'],['匈牙利','布达佩斯','欧洲'],
+    ['比利时','布鲁塞尔','欧洲'],['秘鲁','利马','南美洲'],['阿联酋','阿布扎比','亚洲']
+  ];
 
-<script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
+  function renderTable(d) {
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = d.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td></tr>').join('');
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('世界各国首都 工具已加载');
+    renderTable(data);
+    document.getElementById('search').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase();
+      const filtered = data.filter(r => r.some(v => v.toLowerCase().includes(q)));
+      renderTable(filtered);
+    });
   });
+
 </script>

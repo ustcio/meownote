@@ -2,10 +2,10 @@
 import Layout from '@layouts/Layout.astro';
 
 const toolName = '图标制作';
-const toolDesc = '制作各种尺寸图标文件';
+const toolDesc = '生成常用尺寸的图标文件';
 ---
 
-<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+<Layout title={toolName + ' - 工具箱 - Maxwell.Science'} description={toolDesc}>
   <section class="tool-page">
     <div class="tool-container">
       <header class="tool-header">
@@ -22,15 +22,40 @@ const toolDesc = '制作各种尺寸图标文件';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
-          </div>
+  <label class="file-upload" id="drop-zone">
+    <input type="file" id="image-input" accept="image/*">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-tertiary);margin-bottom:var(--space-3);">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+      <polyline points="21 15 16 10 5 21"></polyline>
+    </svg>
+    <span style="color:var(--text-secondary);font-size:var(--text-sm);">点击或拖拽上传图片</span>
+  </label>
+  <div class="form-group">
+    <label class="form-label">选择输出尺寸</label>
+    <div class="checkbox-group">
+      <label><input type="checkbox" class="size-check" value="16" checked> 16x16</label>
+      <label><input type="checkbox" class="size-check" value="32" checked> 32x32</label>
+      <label><input type="checkbox" class="size-check" value="48" checked> 48x48</label>
+      <label><input type="checkbox" class="size-check" value="64"> 64x64</label>
+      <label><input type="checkbox" class="size-check" value="128" checked> 128x128</label>
+      <label><input type="checkbox" class="size-check" value="256"> 256x256</label>
+      <label><input type="checkbox" class="size-check" value="512"> 512x512</label>
+      <label><input type="checkbox" class="size-check" value="1024"> 1024x1024</label>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">圆角</label>
+    <div class="range-group">
+      <input type="range" id="corner-radius" min="0" max="50" value="0">
+      <span class="range-value" id="corner-val">0%</span>
+    </div>
+  </div>
+  <div class="btn-group">
+    <button id="generate-btn" class="btn btn-primary">生成图标</button>
+    <button id="download-all-btn" class="btn btn-secondary">下载全部</button>
+  </div>
+  <div id="preview-grid" style="display:flex;flex-wrap:wrap;gap:var(--space-4);"></div>
         </div>
       </main>
     </div>
@@ -43,213 +68,151 @@ const toolDesc = '制作各种尺寸图标文件';
     padding: calc(var(--header-total-height) + var(--space-6)) var(--space-4) var(--space-16);
     background: var(--bg-primary);
   }
-
-  .tool-container {
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .tool-header {
-    margin-bottom: var(--space-6);
-  }
-
+  .tool-container { max-width: 900px; margin: 0 auto; }
+  .tool-header { margin-bottom: var(--space-6); }
   .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: var(--text-sm);
-    margin-bottom: var(--space-4);
-    transition: color var(--duration-fast) var(--ease-default);
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    color: var(--text-secondary); text-decoration: none; font-size: var(--text-sm);
+    margin-bottom: var(--space-4); transition: color var(--duration-fast) var(--ease-default);
   }
-
-  .back-link:hover {
-    color: var(--text-primary);
-  }
-
-  .tool-title {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-  }
-
-  .tool-description {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-  }
-
+  .back-link:hover { color: var(--text-primary); }
+  .tool-title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-2); }
+  .tool-description { font-size: var(--text-sm); color: var(--text-secondary); }
   .tool-main {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-xl);
-    padding: var(--space-6);
-    min-height: 400px;
+    background: var(--bg-secondary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl); padding: var(--space-6); min-height: 400px;
   }
-
-  .tool-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+  .tool-content { display: flex; flex-direction: column; gap: var(--space-4); }
+  .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+  .form-label { font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--text-primary); }
+  .form-input, .form-textarea, .form-select {
+    padding: var(--space-3); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: inherit;
   }
-
-  .tool-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .tool-placeholder p {
-    font-size: var(--text-sm);
-  }
-
-  /* 通用表单样式 */
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .form-label {
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--text-primary);
-  }
-
-  .form-input,
-  .form-textarea,
-  .form-select {
-    padding: var(--space-3);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
-    font-size: var(--text-sm);
-    font-family: inherit;
-  }
-
-  .form-input:focus,
-  .form-textarea:focus,
-  .form-select:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-  }
-
-  .form-textarea {
-    min-height: 120px;
-    resize: vertical;
-    font-family: var(--font-mono);
-  }
-
-  .form-select {
-    cursor: pointer;
-  }
-
-  /* 通用按钮样式 */
+  .form-input:focus, .form-textarea:focus, .form-select:focus { outline: none; border-color: var(--color-primary); }
+  .form-textarea { min-height: 120px; resize: vertical; font-family: var(--font-mono); }
+  .form-select { cursor: pointer; }
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border: none;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    padding: var(--space-3) var(--space-4); border: none; border-radius: var(--radius-lg);
+    font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer;
     transition: all var(--duration-fast) var(--ease-default);
   }
-
-  .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
-  }
-
-  .btn-primary:hover {
-    opacity: 0.9;
-  }
-
-  .btn-secondary {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-primary);
-  }
-
-  .btn-secondary:hover {
-    background: var(--bg-hover);
-  }
-
-  .btn-group {
-    display: flex;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-  }
-
-  /* 结果区域 */
+  .btn-primary { background: var(--color-primary); color: #fffdf9; }
+  .btn-primary:hover { box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3); }
+  .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-primary); }
+  .btn-secondary:hover { background: var(--bg-hover); }
+  .btn-group { display: flex; gap: var(--space-2); flex-wrap: wrap; }
   .result-area {
-    padding: var(--space-4);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    padding: var(--space-4); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); font-family: var(--font-mono); font-size: var(--text-sm);
+    white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow-y: auto;
   }
-
-  /* 文件上传 */
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .checkbox-group label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-secondary); cursor: pointer; }
+  .stats-bar { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-4); }
+  .stat-item { background: var(--bg-primary); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); }
+  .stat-item strong { color: var(--color-primary); }
   .file-upload {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: var(--space-8); border: 2px dashed var(--border-primary); border-radius: var(--radius-xl);
+    cursor: pointer; transition: all var(--duration-fast) var(--ease-default);
   }
-
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
-  }
-
-  .file-upload input[type="file"] {
-    display: none;
-  }
-
-  /* 响应式 */
+  .file-upload:hover { border-color: var(--color-primary); background: var(--bg-tertiary); }
+  .file-upload input[type="file"] { display: none; }
+  .preview-area { text-align: center; }
+  .preview-area canvas { max-width: 100%; border: 1px solid var(--border-primary); border-radius: var(--radius-lg); }
+  .color-display { width: 100%; height: 60px; border-radius: var(--radius-lg); border: 1px solid var(--border-primary); margin-bottom: var(--space-2); }
+  .range-group { display: flex; align-items: center; gap: var(--space-3); }
+  .range-group input[type="range"] { flex: 1; }
+  .range-group .range-value { min-width: 50px; text-align: right; font-family: var(--font-mono); font-size: var(--text-sm); }
   @media (max-width: 768px) {
-    .tool-main {
-      padding: var(--space-4);
-    }
-
-    .btn-group {
-      flex-direction: column;
-    }
-
-    .btn {
-      width: 100%;
-    }
+    .tool-main { padding: var(--space-4); }
+    .btn-group { flex-direction: column; }
+    .btn { width: 100%; }
   }
 </style>
-
-<script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
+<script>
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('图标制作 工具已加载');
+    const imageInput = document.getElementById('image-input');
+    const generateBtn = document.getElementById('generate-btn');
+    const downloadAllBtn = document.getElementById('download-all-btn');
+    const previewGrid = document.getElementById('preview-grid');
+    const cornerRadius = document.getElementById('corner-radius');
+    let originalImage = null;
+    let generatedCanvases = [];
+
+    cornerRadius.addEventListener('input', () => {
+      document.getElementById('corner-val').textContent = cornerRadius.value + '%';
+    });
+
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => { originalImage = img; };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function drawRoundedRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    generateBtn.addEventListener('click', () => {
+      if (!originalImage) return;
+      previewGrid.innerHTML = '';
+      generatedCanvases = [];
+
+      const sizes = [...document.querySelectorAll('.size-check:checked')].map(c => parseInt(c.value));
+      const radius = parseInt(cornerRadius.value) / 100;
+
+      sizes.forEach(size => {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        if (radius > 0) {
+          const r = size * radius;
+          drawRoundedRect(ctx, 0, 0, size, size, r);
+          ctx.clip();
+        }
+
+        ctx.drawImage(originalImage, 0, 0, size, size);
+        generatedCanvases.push({ canvas, size });
+
+        const wrapper = document.createElement('div');
+        wrapper.style.textAlign = 'center';
+        wrapper.innerHTML = '<canvas width="' + size + '" height="' + size + '" style="border:1px solid var(--border-primary);border-radius:var(--radius-md);"></canvas><div style="font-size:var(--text-xs);color:var(--text-secondary);margin-top:var(--space-1);">' + size + 'x' + size + '</div>';
+        wrapper.querySelector('canvas').getContext('2d').drawImage(canvas, 0, 0);
+        previewGrid.appendChild(wrapper);
+      });
+    });
+
+    downloadAllBtn.addEventListener('click', () => {
+      generatedCanvases.forEach(item => {
+        item.canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'icon-' + item.size + 'x' + item.size + '.png'; a.click();
+          URL.revokeObjectURL(url);
+        });
+      });
+    });
   });
+
 </script>

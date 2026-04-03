@@ -1,11 +1,11 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const toolName = 'UserAgent生成器';
-const toolDesc = '生成浏览器设备UserAgent';
+const toolName = 'User-Agent生成器';
+const toolDesc = '生成各种浏览器和设备的User-Agent';
 ---
 
-<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+<Layout title={toolName + ' - 工具箱 - Maxwell.Science'} description={toolDesc}>
   <section class="tool-page">
     <div class="tool-container">
       <header class="tool-header">
@@ -22,15 +22,28 @@ const toolDesc = '生成浏览器设备UserAgent';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
-          </div>
+  <div class="form-group">
+    <label class="form-label">浏览器类型</label>
+    <div class="checkbox-group">
+      <label><input type="checkbox" class="browser-check" value="chrome" checked> Chrome</label>
+      <label><input type="checkbox" class="browser-check" value="firefox" checked> Firefox</label>
+      <label><input type="checkbox" class="browser-check" value="safari"> Safari</label>
+      <label><input type="checkbox" class="browser-check" value="edge"> Edge</label>
+      <label><input type="checkbox" class="browser-check" value="mobile"> 移动端</label>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="ua-count">生成数量</label>
+    <input type="number" id="ua-count" class="form-input" value="5" min="1" max="50">
+  </div>
+  <div class="btn-group">
+    <button id="generate-btn" class="btn btn-primary">生成</button>
+    <button id="copy-btn" class="btn btn-secondary">复制全部</button>
+  </div>
+  <div class="form-group">
+    <label class="form-label">生成结果</label>
+    <div id="result" class="result-area">等待生成...</div>
+  </div>
         </div>
       </main>
     </div>
@@ -43,213 +56,131 @@ const toolDesc = '生成浏览器设备UserAgent';
     padding: calc(var(--header-total-height) + var(--space-6)) var(--space-4) var(--space-16);
     background: var(--bg-primary);
   }
-
-  .tool-container {
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .tool-header {
-    margin-bottom: var(--space-6);
-  }
-
+  .tool-container { max-width: 900px; margin: 0 auto; }
+  .tool-header { margin-bottom: var(--space-6); }
   .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: var(--text-sm);
-    margin-bottom: var(--space-4);
-    transition: color var(--duration-fast) var(--ease-default);
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    color: var(--text-secondary); text-decoration: none; font-size: var(--text-sm);
+    margin-bottom: var(--space-4); transition: color var(--duration-fast) var(--ease-default);
   }
-
-  .back-link:hover {
-    color: var(--text-primary);
-  }
-
-  .tool-title {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-  }
-
-  .tool-description {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-  }
-
+  .back-link:hover { color: var(--text-primary); }
+  .tool-title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-2); }
+  .tool-description { font-size: var(--text-sm); color: var(--text-secondary); }
   .tool-main {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-xl);
-    padding: var(--space-6);
-    min-height: 400px;
+    background: var(--bg-secondary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl); padding: var(--space-6); min-height: 400px;
   }
-
-  .tool-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+  .tool-content { display: flex; flex-direction: column; gap: var(--space-4); }
+  .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+  .form-label { font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--text-primary); }
+  .form-input, .form-textarea, .form-select {
+    padding: var(--space-3); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: inherit;
   }
-
-  .tool-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .tool-placeholder p {
-    font-size: var(--text-sm);
-  }
-
-  /* 通用表单样式 */
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .form-label {
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--text-primary);
-  }
-
-  .form-input,
-  .form-textarea,
-  .form-select {
-    padding: var(--space-3);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
-    font-size: var(--text-sm);
-    font-family: inherit;
-  }
-
-  .form-input:focus,
-  .form-textarea:focus,
-  .form-select:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-  }
-
-  .form-textarea {
-    min-height: 120px;
-    resize: vertical;
-    font-family: var(--font-mono);
-  }
-
-  .form-select {
-    cursor: pointer;
-  }
-
-  /* 通用按钮样式 */
+  .form-input:focus, .form-textarea:focus, .form-select:focus { outline: none; border-color: var(--color-primary); }
+  .form-textarea { min-height: 120px; resize: vertical; font-family: var(--font-mono); }
+  .form-select { cursor: pointer; }
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border: none;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    padding: var(--space-3) var(--space-4); border: none; border-radius: var(--radius-lg);
+    font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer;
     transition: all var(--duration-fast) var(--ease-default);
   }
-
-  .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
-  }
-
-  .btn-primary:hover {
-    opacity: 0.9;
-  }
-
-  .btn-secondary {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-primary);
-  }
-
-  .btn-secondary:hover {
-    background: var(--bg-hover);
-  }
-
-  .btn-group {
-    display: flex;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-  }
-
-  /* 结果区域 */
+  .btn-primary { background: var(--color-primary); color: #fffdf9; }
+  .btn-primary:hover { box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3); }
+  .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-primary); }
+  .btn-secondary:hover { background: var(--bg-hover); }
+  .btn-group { display: flex; gap: var(--space-2); flex-wrap: wrap; }
   .result-area {
-    padding: var(--space-4);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    padding: var(--space-4); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); font-family: var(--font-mono); font-size: var(--text-sm);
+    white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow-y: auto;
   }
-
-  /* 文件上传 */
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .checkbox-group label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-secondary); cursor: pointer; }
+  .stats-bar { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-4); }
+  .stat-item { background: var(--bg-primary); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); }
+  .stat-item strong { color: var(--color-primary); }
   .file-upload {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: var(--space-8); border: 2px dashed var(--border-primary); border-radius: var(--radius-xl);
+    cursor: pointer; transition: all var(--duration-fast) var(--ease-default);
   }
-
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
-  }
-
-  .file-upload input[type="file"] {
-    display: none;
-  }
-
-  /* 响应式 */
+  .file-upload:hover { border-color: var(--color-primary); background: var(--bg-tertiary); }
+  .file-upload input[type="file"] { display: none; }
+  .preview-area { text-align: center; }
+  .preview-area canvas { max-width: 100%; border: 1px solid var(--border-primary); border-radius: var(--radius-lg); }
+  .color-display { width: 100%; height: 60px; border-radius: var(--radius-lg); border: 1px solid var(--border-primary); margin-bottom: var(--space-2); }
+  .range-group { display: flex; align-items: center; gap: var(--space-3); }
+  .range-group input[type="range"] { flex: 1; }
+  .range-group .range-value { min-width: 50px; text-align: right; font-family: var(--font-mono); font-size: var(--text-sm); }
   @media (max-width: 768px) {
-    .tool-main {
-      padding: var(--space-4);
-    }
-
-    .btn-group {
-      flex-direction: column;
-    }
-
-    .btn {
-      width: 100%;
-    }
+    .tool-main { padding: var(--space-4); }
+    .btn-group { flex-direction: column; }
+    .btn { width: 100%; }
   }
 </style>
-
-<script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
+<script>
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('UserAgent生成器 工具已加载');
+    const generateBtn = document.getElementById('generate-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const result = document.getElementById('result');
+    const uaCount = document.getElementById('ua-count');
+
+    const chromeVersions = ['120.0.6099.130', '121.0.6167.85', '122.0.6261.69', '123.0.6312.58'];
+    const firefoxVersions = ['121.0', '122.0', '123.0', '124.0'];
+    const safariVersions = ['605.1.15', '604.1', '602.1'];
+    const edgeVersions = ['120.0.2210.91', '121.0.2277.83', '122.0.2365.52'];
+    const winPlatforms = ['Windows NT 10.0; Win64; x64', 'Windows NT 10.0; WOW64'];
+    const macPlatforms = ['Macintosh; Intel Mac OS X 10_15_7', 'Macintosh; Intel Mac OS X 14_2_1'];
+    const linuxPlatforms = ['X11; Linux x86_64', 'X11; Ubuntu; Linux x86_64'];
+    const mobilePlatforms = ['Linux; Android 14; Pixel 8', 'Linux; Android 13; SM-S918B', 'iPhone; CPU iPhone OS 17_2 like Mac OS X'];
+
+    function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    function generateUA(type) {
+      const platform = type === 'mobile' ? rand(mobilePlatforms) : rand([...winPlatforms, ...macPlatforms, ...linuxPlatforms]);
+      const isMobile = type === 'mobile';
+
+      switch (type) {
+        case 'chrome':
+          return 'Mozilla/5.0 (' + platform + ') AppleWebKit/537.36 (KHTML, like Gecko) Chrome/' + rand(chromeVersions) + ' Safari/537.36';
+        case 'firefox':
+          return 'Mozilla/5.0 (' + platform + '; rv:' + rand(firefoxVersions) + ') Gecko/20100101 Firefox/' + rand(firefoxVersions);
+        case 'safari':
+          return 'Mozilla/5.0 (' + (isMobile ? rand(mobilePlatforms) : 'Macintosh; Intel Mac OS X 10_15_7') + ') AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/' + rand(safariVersions);
+        case 'edge':
+          return 'Mozilla/5.0 (' + platform + ') AppleWebKit/537.36 (KHTML, like Gecko) Chrome/' + rand(chromeVersions) + ' Safari/537.36 Edg/' + rand(edgeVersions);
+        case 'mobile':
+          return 'Mozilla/5.0 (' + rand(mobilePlatforms) + ') AppleWebKit/537.36 (KHTML, like Gecko) Chrome/' + rand(chromeVersions) + ' Mobile Safari/537.36';
+        default:
+          return '';
+      }
+    }
+
+    generateBtn.addEventListener('click', () => {
+      const browsers = [...document.querySelectorAll('.browser-check:checked')].map(c => c.value);
+      if (browsers.length === 0) { result.textContent = '请选择至少一种浏览器'; return; }
+
+      const count = parseInt(uaCount.value) || 5;
+      const uas = [];
+
+      for (let i = 0; i < count; i++) {
+        uas.push(generateUA(rand(browsers)));
+      }
+
+      result.textContent = uas.join('\n\n');
+    });
+
+    copyBtn.addEventListener('click', () => {
+      const text = result.textContent;
+      if (text && text !== '等待生成...') {
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = copyBtn.textContent; copyBtn.textContent = '已复制!';
+          setTimeout(() => { copyBtn.textContent = orig; }, 1500);
+        });
+      }
+    });
   });
+
 </script>
