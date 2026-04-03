@@ -26,7 +26,9 @@ const isActive = (href: string) => currentPath === href || (href !== '/' && curr
           <path d="M12 4L18.75 17H5.25L12 4Z" fill="currentColor"></path>
         </svg>
       </span>
-      <span class="site-logo__wordmark">Maxwell.Science</span>
+      <span class="site-logo__wordmark">
+        <span class="wordmark-brand">Maxwell</span><span class="wordmark-dot">.</span><span class="wordmark-domain">Science</span>
+      </span>
     </a>
 
     <nav class="site-nav" aria-label="Primary">
@@ -150,11 +152,35 @@ const isActive = (href: string) => currentPath === href || (href !== '/' && curr
   }
 
   .site-logo__wordmark {
-    font-family: var(--font-body);
-    font-size: 1rem;
+    display: inline-flex;
+    align-items: baseline;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+
+  .wordmark-brand {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
     color: var(--text-primary);
+  }
+
+  .wordmark-dot {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0 0.02em;
+  }
+
+  .wordmark-domain {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--text-secondary);
   }
 
   .site-nav,
