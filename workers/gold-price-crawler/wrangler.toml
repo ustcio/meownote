@@ -3,9 +3,10 @@ main = "src/index.js"
 compatibility_date = "2024-01-01"
 
 # KV 命名空间用于缓存金价数据
+# TODO: 创建 KV namespace 后替换为真实 ID: wrangler kv:namespace create "GOLD_PRICE_CACHE"
 [[kv_namespaces]]
 binding = "GOLD_PRICE_CACHE"
-id = "your_kv_namespace_id_here"
+id = ""  # 替换为 wrangler kv:namespace create "GOLD_PRICE_CACHE" 输出的 ID
 
 # 定时触发器（每分钟执行一次）
 [[triggers]]
@@ -20,4 +21,4 @@ ENVIRONMENT = "production"
 name = "gold-price-crawler-dev"
 [[env.development.kv_namespaces]]
 binding = "GOLD_PRICE_CACHE"
-id = "your_dev_kv_namespace_id_here"
+id = ""  # 开发环境 KV namespace ID

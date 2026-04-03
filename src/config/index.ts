@@ -7,10 +7,10 @@ export const config = {
   },
   
   auth: {
-    tokenKey: 'auth_token',
-    userKey: 'user_data',
+    tokenKey: 'meownote_auth_token',
+    userKey: 'meownote_user_data',
     tokenExpiry: 7 * 24 * 60 * 60 * 1000,
-    refreshTokenKey: 'refresh_token',
+    refreshTokenKey: 'meownote_refresh_token',
   },
   
   storage: {

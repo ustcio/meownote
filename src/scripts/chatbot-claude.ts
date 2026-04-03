@@ -21,9 +21,32 @@ let currentSession: ChatSession | null = null;
 let sessions: ChatSession[] = [];
 let isGenerating = false;
 let currentModel = 'minimax-2.7';
+let abortController: AbortController | null = null;
 
 // API Configuration
-const API_BASE = 'https://api.ustc.dev';
+const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
+const TOKEN_KEY = 'meownote_auth_token';
+const USER_KEY = 'meownote_user_data';
+const SESSIONS_KEY = 'chatbot_sessions';
+
+function getAuthToken(): string | null {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (!token) return null;
+  try {
+    return decodeURIComponent(atob(token));
+  } catch {
+    return token;
+  }
+}
+
+function getAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const token = getAuthToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
 
 // DOM Elements
 let welcomeEl: HTMLElement | null;
@@ -145,6 +168,18 @@ function setupEventListeners() {
   document.getElementById('toggle-sidebar-btn')?.addEventListener('click', () => {
     sidebarEl?.classList.toggle('collapsed');
   });
+
+  // Stop generation button
+  document.getElementById('stop-btn')?.addEventListener('click', () => {
+    if (isGenerating) {
+      stopGeneration();
+      isGenerating = false;
+      if (sendBtn) {
+        sendBtn.disabled = false;
+      }
+      removeTypingIndicator();
+    }
+  });
 }
 
 /**
@@ -204,11 +239,17 @@ async function handleSendMessage() {
     renderMessage(assistantMessage);
   } catch (error) {
     removeTypingIndicator();
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.log('Generation stopped by user');
+      return;
+    }
     console.error('Error getting response:', error);
     
     let errorMessage = 'Sorry, I encountered an error. Please try again.';
     if (error instanceof Error) {
-      if (error.message.includes('API error: 500') || error.message.includes('API not configured')) {
+      if (error.message.includes('请先登录')) {
+        errorMessage = error.message;
+      } else if (error.message.includes('API error: 500') || error.message.includes('API not configured')) {
         errorMessage = 'AI service is not configured. Please check the server setup.';
       } else if (error.message.includes('API error: 401')) {
         errorMessage = 'Authentication failed. Please check the API key configuration.';
@@ -236,12 +277,11 @@ async function handleSendMessage() {
  * Get AI response from API
  */
 async function getAIResponse(message: string): Promise<string> {
+  abortController = new AbortController();
   try {
     const response = await fetch(`${API_BASE}/api/chat`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({
         message,
         model: currentModel,
@@ -249,10 +289,14 @@ async function getAIResponse(message: string): Promise<string> {
           role: m.role === 'user' ? 'user' : 'assistant',
           content: m.content
         })) || []
-      })
+      }),
+      signal: abortController.signal
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('请先登录后再使用聊天功能');
+      }
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `API error: ${response.status}`);
     }
@@ -271,6 +315,18 @@ async function getAIResponse(message: string): Promise<string> {
   } catch (error) {
     console.error('API call failed:', error);
     throw error;
+  } finally {
+    abortController = null;
+  }
+}
+
+/**
+ * Stop current AI generation
+ */
+function stopGeneration() {
+  if (abortController) {
+    abortController.abort();
+    abortController = null;
   }
 }
 

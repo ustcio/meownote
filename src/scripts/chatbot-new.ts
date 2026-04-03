@@ -28,7 +28,31 @@ let abortController: AbortController | null = null;
 let isWindowMaximized = false;
 
 // Constants
-const API_BASE = 'https://api.ustc.dev';
+const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
+const TOKEN_KEY = 'meownote_auth_token';
+
+// ================================================================================
+// Auth Helpers
+// ================================================================================
+
+function getAuthToken(): string | null {
+  const token = safeGetItem(TOKEN_KEY);
+  if (!token) return null;
+  try {
+    return decodeURIComponent(atob(token));
+  } catch {
+    return token;
+  }
+}
+
+function getAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const token = getAuthToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
 
 // ================================================================================
 // Safe Storage Helpers
@@ -529,9 +553,7 @@ async function sendMessage(): Promise<void> {
 
     const response = await fetch(`${API_BASE}/api/chat`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(requestBody),
       signal: abortController.signal
     });
@@ -540,6 +562,9 @@ async function sendMessage(): Promise<void> {
     console.log(`[Performance] TTFB: ${ttfb.toFixed(2)}ms`);
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('请先登录后再使用聊天功能');
+      }
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
