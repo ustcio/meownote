@@ -1,8 +1,8 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const toolName = 'SHA加密';
-const toolDesc = 'SHA哈希加密工具';
+const toolName = 'SHA哈希';
+const toolDesc = '计算文本SHA-1/SHA-256/SHA-384/SHA-512哈希值';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,14 +22,30 @@ const toolDesc = 'SHA哈希加密工具';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+          <div class="form-group">
+            <label class="form-label" for="input-text">输入文本</label>
+            <textarea id="input-text" class="form-textarea" placeholder="请输入要计算SHA哈希的文本..."></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="sha-type">哈希类型</label>
+            <select id="sha-type" class="form-select">
+              <option value="SHA-1">SHA-1</option>
+              <option value="SHA-256" selected>SHA-256</option>
+              <option value="SHA-384">SHA-384</option>
+              <option value="SHA-512">SHA-512</option>
+            </select>
+          </div>
+          
+          <div class="btn-group">
+            <button id="calc-btn" class="btn btn-primary">计算SHA</button>
+            <button id="clear-btn" class="btn btn-secondary">清空</button>
+            <button id="copy-btn" class="btn btn-secondary">复制结果</button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">SHA结果</label>
+            <div id="result" class="result-area">等待计算...</div>
           </div>
         </div>
       </main>
@@ -94,26 +110,6 @@ const toolDesc = 'SHA哈希加密工具';
     gap: var(--space-4);
   }
 
-  .tool-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .tool-placeholder p {
-    font-size: var(--text-sm);
-  }
-
-  /* 通用表单样式 */
   .form-group {
     display: flex;
     flex-direction: column;
@@ -142,7 +138,7 @@ const toolDesc = 'SHA哈希加密工具';
   .form-textarea:focus,
   .form-select:focus {
     outline: none;
-    border-color: var(--color-accent-blue);
+    border-color: var(--color-primary);
   }
 
   .form-textarea {
@@ -155,7 +151,6 @@ const toolDesc = 'SHA哈希加密工具';
     cursor: pointer;
   }
 
-  /* 通用按钮样式 */
   .btn {
     display: inline-flex;
     align-items: center;
@@ -171,12 +166,12 @@ const toolDesc = 'SHA哈希加密工具';
   }
 
   .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
+    background: var(--color-primary);
+    color: white;
   }
 
   .btn-primary:hover {
-    opacity: 0.9;
+    background: var(--color-primary-hover);
   }
 
   .btn-secondary {
@@ -195,7 +190,6 @@ const toolDesc = 'SHA哈希加密工具';
     flex-wrap: wrap;
   }
 
-  /* 结果区域 */
   .result-area {
     padding: var(--space-4);
     background: var(--bg-primary);
@@ -205,33 +199,9 @@ const toolDesc = 'SHA哈希加密工具';
     font-size: var(--text-sm);
     white-space: pre-wrap;
     word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    min-height: 60px;
   }
 
-  /* 文件上传 */
-  .file-upload {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
-  }
-
-  .file-upload input[type="file"] {
-    display: none;
-  }
-
-  /* 响应式 */
   @media (max-width: 768px) {
     .tool-main {
       padding: var(--space-4);
@@ -247,9 +217,42 @@ const toolDesc = 'SHA哈希加密工具';
   }
 </style>
 
-<script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
+<script>
+  async function shaHash(text, algorithm) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
+    const hashBuffer = await crypto.subtle.digest(algorithm, data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('SHA加密 工具已加载');
+    const inputText = document.getElementById('input-text');
+    const shaType = document.getElementById('sha-type');
+    const calcBtn = document.getElementById('calc-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const result = document.getElementById('result');
+
+    calcBtn.addEventListener('click', async () => {
+      const text = inputText.value;
+      if (!text) { result.textContent = '请输入文本'; return; }
+      try {
+        const hash = await shaHash(text, shaType.value);
+        result.textContent = hash;
+      } catch (e) { result.textContent = '计算失败: ' + e.message; }
+    });
+
+    clearBtn.addEventListener('click', () => { inputText.value = ''; result.textContent = '等待计算...'; });
+
+    copyBtn.addEventListener('click', () => {
+      const text = result.textContent;
+      if (text && text !== '等待计算...' && text !== '请输入文本') {
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = copyBtn.textContent; copyBtn.textContent = '已复制!';
+          setTimeout(() => { copyBtn.textContent = orig; }, 1500);
+        });
+      }
+    });
   });
 </script>

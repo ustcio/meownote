@@ -1,8 +1,8 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const toolName = 'BMI计算器';
-const toolDesc = '计算身体质量指数';
+const toolName = '随机数生成';
+const toolDesc = '生成指定范围的随机数';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -23,19 +23,32 @@ const toolDesc = '计算身体质量指数';
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
           <div class="form-group">
-            <label class="form-label" for="height">身高 (cm)</label>
-            <input type="number" id="height" class="form-input" value="170" min="50" max="300">
+            <label class="form-label" for="min-val">最小值</label>
+            <input type="number" id="min-val" class="form-input" value="1">
           </div>
           <div class="form-group">
-            <label class="form-label" for="weight">体重 (kg)</label>
-            <input type="number" id="weight" class="form-input" value="65" min="10" max="500" step="0.1">
+            <label class="form-label" for="max-val">最大值</label>
+            <input type="number" id="max-val" class="form-input" value="100">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="count">生成数量</label>
+            <input type="number" id="count" class="form-input" value="10" min="1" max="1000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <input type="checkbox" id="allow-duplicate" checked> 允许重复
+            </label>
+            <label class="form-label">
+              <input type="checkbox" id="sort-result"> 排序结果
+            </label>
           </div>
           <div class="btn-group">
-            <button id="calc-btn" class="btn btn-primary">计算BMI</button>
+            <button id="generate-btn" class="btn btn-primary">生成随机数</button>
+            <button id="copy-btn" class="btn btn-secondary">复制结果</button>
           </div>
           <div class="form-group">
-            <label class="form-label">计算结果</label>
-            <div id="result" class="result-area">等待计算...</div>
+            <label class="form-label">生成结果</label>
+            <div id="result" class="result-area">点击生成按钮...</div>
           </div>
         </div>
       </main>
@@ -209,22 +222,40 @@ const toolDesc = '计算身体质量指数';
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const heightInput = document.getElementById('height');
-    const weightInput = document.getElementById('weight');
-    const calcBtn = document.getElementById('calc-btn');
+    const minInput = document.getElementById('min-val');
+    const maxInput = document.getElementById('max-val');
+    const countInput = document.getElementById('count');
+    const allowDup = document.getElementById('allow-duplicate');
+    const sortResult = document.getElementById('sort-result');
+    const generateBtn = document.getElementById('generate-btn');
+    const copyBtn = document.getElementById('copy-btn');
     const result = document.getElementById('result');
 
-    calcBtn.addEventListener('click', () => {
-      const h = parseFloat(heightInput.value) / 100;
-      const w = parseFloat(weightInput.value);
-      if (!h || !w || h <= 0 || w <= 0) { result.textContent = '请输入有效数值'; return; }
-      const bmi = w / (h * h);
-      let category = '';
-      if (bmi < 18.5) category = '偏瘦';
-      else if (bmi < 24) category = '正常';
-      else if (bmi < 28) category = '偏胖';
-      else category = '肥胖';
-      result.textContent = `BMI: ${bmi.toFixed(1)}\n分类: ${category}\n\n参考范围:\n偏瘦: < 18.5\n正常: 18.5 - 23.9\n偏胖: 24 - 27.9\n肥胖: >= 28`;
+    generateBtn.addEventListener('click', () => {
+      const min = parseInt(minInput.value) || 0;
+      const max = parseInt(maxInput.value) || 100;
+      const count = Math.min(parseInt(countInput.value) || 1, 1000);
+      const nums = [];
+      if (!allowDup.checked && count > max - min + 1) {
+        result.textContent = '错误: 数量超过可用不重复数字范围'; return;
+      }
+      while (nums.length < count) {
+        const n = Math.floor(Math.random() * (max - min + 1)) + min;
+        if (!allowDup.checked && nums.includes(n)) continue;
+        nums.push(n);
+      }
+      if (sortResult.checked) nums.sort((a, b) => a - b);
+      result.textContent = nums.join(', ');
+    });
+
+    copyBtn.addEventListener('click', () => {
+      const text = result.textContent;
+      if (text && text !== '点击生成按钮...') {
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = copyBtn.textContent; copyBtn.textContent = '已复制!';
+          setTimeout(() => { copyBtn.textContent = orig; }, 1500);
+        });
+      }
     });
   });
 </script>

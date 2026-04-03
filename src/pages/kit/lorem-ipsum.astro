@@ -1,8 +1,8 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const toolName = '图片压缩';
-const toolDesc = '压缩图片文件大小，支持质量调节';
+const toolName = 'Lorem Ipsum生成';
+const toolDesc = '生成占位符文本';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,32 +22,18 @@ const toolDesc = '压缩图片文件大小，支持质量调节';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <label class="file-upload" for="image-input">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-              <circle cx="8.5" cy="8.5" r="1.5"></circle>
-              <polyline points="21 15 16 10 5 21"></polyline>
-            </svg>
-            <p>点击或拖拽上传图片</p>
-            <input type="file" id="image-input" accept="image/*">
-          </label>
           <div class="form-group">
-            <label class="form-label" for="quality">压缩质量: <span id="quality-val">80</span>%</label>
-            <input type="range" id="quality" min="10" max="100" value="80">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="format">输出格式</label>
-            <select id="format" class="form-select">
-              <option value="image/jpeg">JPEG</option>
-              <option value="image/png">PNG</option>
-              <option value="image/webp">WebP</option>
-            </select>
+            <label class="form-label" for="count">段落数量: <span id="count-val">3</span></label>
+            <input type="range" id="count" min="1" max="20" value="3">
           </div>
           <div class="btn-group">
-            <button id="compress-btn" class="btn btn-primary" disabled>压缩图片</button>
-            <button id="download-btn" class="btn btn-secondary" disabled>下载</button>
+            <button id="generate-btn" class="btn btn-primary">生成文本</button>
+            <button id="copy-btn" class="btn btn-secondary">复制</button>
           </div>
-          <div id="info" class="result-area">等待上传图片...</div>
+          <div class="form-group">
+            <label class="form-label">生成结果</label>
+            <div id="result" class="result-area">点击生成按钮...</div>
+          </div>
         </div>
       </main>
     </div>
@@ -117,61 +103,47 @@ const toolDesc = '压缩图片文件大小，支持质量调节';
   }
 </style>
 <script>
-  let originalFile = null;
-  let compressedBlob = null;
+  const WORDS = ['lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua', 'enim', 'ad', 'minim', 'veniam', 'quis', 'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi', 'aliquip', 'ex', 'ea', 'commodo', 'consequat', 'duis', 'aute', 'irure', 'in', 'reprehenderit', 'voluptate', 'velit', 'esse', 'cillum', 'fugiat', 'nulla', 'pariatur', 'excepteur', 'sint', 'occaecat', 'cupidatat', 'non', 'proident', 'sunt', 'culpa', 'qui', 'officia', 'deserunt', 'mollit', 'anim', 'id', 'est', 'laborum'];
 
   document.addEventListener('DOMContentLoaded', () => {
-    const imageInput = document.getElementById('image-input');
-    const quality = document.getElementById('quality');
-    const qualityVal = document.getElementById('quality-val');
-    const format = document.getElementById('format');
-    const compressBtn = document.getElementById('compress-btn');
-    const downloadBtn = document.getElementById('download-btn');
-    const info = document.getElementById('info');
+    const countInput = document.getElementById('count');
+    const countVal = document.getElementById('count-val');
+    const generateBtn = document.getElementById('generate-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const result = document.getElementById('result');
 
-    quality.addEventListener('input', () => { qualityVal.textContent = quality.value; });
+    countInput.addEventListener('input', () => { countVal.textContent = countInput.value; });
 
-    imageInput.addEventListener('change', (e) => {
-      originalFile = e.target.files[0];
-      if (originalFile) {
-        const size = (originalFile.size / 1024).toFixed(1);
-        info.textContent = `原始文件: ${originalFile.name}\n大小: ${size} KB\n类型: ${originalFile.type}`;
-        compressBtn.disabled = false;
+    function randomWord() { return WORDS[Math.floor(Math.random() * WORDS.length)]; }
+    function randomSentence(min = 8, max = 15) {
+      const len = min + Math.floor(Math.random() * (max - min));
+      const words = [];
+      for (let i = 0; i < len; i++) words.push(randomWord());
+      words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+      return words.join(' ') + '.';
+    }
+    function randomParagraph() {
+      const sentences = 3 + Math.floor(Math.random() * 4);
+      const paragraphs = [];
+      for (let i = 0; i < sentences; i++) paragraphs.push(randomSentence());
+      return paragraphs.join(' ');
+    }
+
+    generateBtn.addEventListener('click', () => {
+      const count = parseInt(countInput.value);
+      const paragraphs = [];
+      for (let i = 0; i < count; i++) paragraphs.push(randomParagraph());
+      result.textContent = paragraphs.join('\n\n');
+    });
+
+    copyBtn.addEventListener('click', () => {
+      const text = result.textContent;
+      if (text && text !== '点击生成按钮...') {
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = copyBtn.textContent; copyBtn.textContent = '已复制!';
+          setTimeout(() => { copyBtn.textContent = orig; }, 1500);
+        });
       }
-    });
-
-    compressBtn.addEventListener('click', () => {
-      if (!originalFile) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0);
-          canvas.toBlob((blob) => {
-            compressedBlob = blob;
-            const origSize = (originalFile.size / 1024).toFixed(1);
-            const newSize = (blob.size / 1024).toFixed(1);
-            const ratio = ((1 - blob.size / originalFile.size) * 100).toFixed(1);
-            info.textContent = `原始大小: ${origSize} KB\n压缩后: ${newSize} KB\n压缩率: ${ratio}%\n尺寸: ${img.width}x${img.height}`;
-            downloadBtn.disabled = false;
-          }, format.value, quality.value / 100);
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(originalFile);
-    });
-
-    downloadBtn.addEventListener('click', () => {
-      if (!compressedBlob) return;
-      const ext = format.value.split('/')[1];
-      const url = URL.createObjectURL(compressedBlob);
-      const a = document.createElement('a');
-      a.href = url; a.download = `compressed_${Date.now()}.${ext}`;
-      a.click(); URL.revokeObjectURL(url);
     });
   });
 </script>

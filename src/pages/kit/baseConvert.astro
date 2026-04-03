@@ -1,8 +1,8 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const toolName = 'BMI计算器';
-const toolDesc = '计算身体质量指数';
+const toolName = '进制转换';
+const toolDesc = '二进制、八进制、十进制、十六进制互转';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -23,19 +23,26 @@ const toolDesc = '计算身体质量指数';
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
           <div class="form-group">
-            <label class="form-label" for="height">身高 (cm)</label>
-            <input type="number" id="height" class="form-input" value="170" min="50" max="300">
+            <label class="form-label" for="input-value">输入数值</label>
+            <input type="text" id="input-value" class="form-input" value="255" placeholder="输入数值...">
           </div>
           <div class="form-group">
-            <label class="form-label" for="weight">体重 (kg)</label>
-            <input type="number" id="weight" class="form-input" value="65" min="10" max="500" step="0.1">
+            <label class="form-label" for="from-base">进制</label>
+            <select id="from-base" class="form-select">
+              <option value="2">二进制 (2)</option>
+              <option value="8">八进制 (8)</option>
+              <option value="10" selected>十进制 (10)</option>
+              <option value="16">十六进制 (16)</option>
+              <option value="32">三十二进制 (32)</option>
+              <option value="36">三十六进制 (36)</option>
+            </select>
           </div>
           <div class="btn-group">
-            <button id="calc-btn" class="btn btn-primary">计算BMI</button>
+            <button id="convert-btn" class="btn btn-primary">转换</button>
           </div>
           <div class="form-group">
-            <label class="form-label">计算结果</label>
-            <div id="result" class="result-area">等待计算...</div>
+            <label class="form-label">转换结果</label>
+            <div id="result" class="result-area">等待转换...</div>
           </div>
         </div>
       </main>
@@ -209,22 +216,25 @@ const toolDesc = '计算身体质量指数';
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const heightInput = document.getElementById('height');
-    const weightInput = document.getElementById('weight');
-    const calcBtn = document.getElementById('calc-btn');
+    const inputValue = document.getElementById('input-value');
+    const fromBase = document.getElementById('from-base');
+    const convertBtn = document.getElementById('convert-btn');
     const result = document.getElementById('result');
 
-    calcBtn.addEventListener('click', () => {
-      const h = parseFloat(heightInput.value) / 100;
-      const w = parseFloat(weightInput.value);
-      if (!h || !w || h <= 0 || w <= 0) { result.textContent = '请输入有效数值'; return; }
-      const bmi = w / (h * h);
-      let category = '';
-      if (bmi < 18.5) category = '偏瘦';
-      else if (bmi < 24) category = '正常';
-      else if (bmi < 28) category = '偏胖';
-      else category = '肥胖';
-      result.textContent = `BMI: ${bmi.toFixed(1)}\n分类: ${category}\n\n参考范围:\n偏瘦: < 18.5\n正常: 18.5 - 23.9\n偏胖: 24 - 27.9\n肥胖: >= 28`;
-    });
+    function convert() {
+      const val = inputValue.value.trim();
+      const base = parseInt(fromBase.value);
+      if (!val) { result.textContent = '请输入数值'; return; }
+      try {
+        const decimal = parseInt(val, base);
+        if (isNaN(decimal)) { result.textContent = '无效的' + base + '进制数值'; return; }
+        result.textContent = `二进制: ${decimal.toString(2)}\n八进制: ${decimal.toString(8)}\n十进制: ${decimal.toString(10)}\n十六进制: ${decimal.toString(16).toUpperCase()}\n三十二进制: ${decimal.toString(32).toUpperCase()}\n三十六进制: ${decimal.toString(36).toUpperCase()}`;
+      } catch (e) { result.textContent = '转换失败: ' + e.message; }
+    }
+
+    convertBtn.addEventListener('click', convert);
+    inputValue.addEventListener('input', convert);
+    fromBase.addEventListener('change', convert);
+    convert();
   });
 </script>

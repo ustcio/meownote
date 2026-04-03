@@ -1,8 +1,8 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const toolName = '速度转换';
-const toolDesc = '速度单位转换';
+const toolName = '速度换算';
+const toolDesc = '米/秒、千米/时、英里/时、节等速度单位换算';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,14 +22,26 @@ const toolDesc = '速度单位转换';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+          <div class="form-group">
+            <label class="form-label" for="input-value">输入数值</label>
+            <input type="number" id="input-value" class="form-input" value="100" step="any">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="from-unit">单位</label>
+            <select id="from-unit" class="form-select">
+              <option value="ms">米/秒 (m/s)</option>
+              <option value="kmh" selected>千米/时 (km/h)</option>
+              <option value="mph">英里/时 (mph)</option>
+              <option value="knot">节 (knot)</option>
+              <option value="mach">马赫 (Mach)</option>
+            </select>
+          </div>
+          <div class="btn-group">
+            <button id="convert-btn" class="btn btn-primary">换算</button>
+          </div>
+          <div class="form-group">
+            <label class="form-label">换算结果</label>
+            <div id="result" class="result-area">等待换算...</div>
           </div>
         </div>
       </main>
@@ -94,26 +106,6 @@ const toolDesc = '速度单位转换';
     gap: var(--space-4);
   }
 
-  .tool-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .tool-placeholder p {
-    font-size: var(--text-sm);
-  }
-
-  /* 通用表单样式 */
   .form-group {
     display: flex;
     flex-direction: column;
@@ -142,7 +134,7 @@ const toolDesc = '速度单位转换';
   .form-textarea:focus,
   .form-select:focus {
     outline: none;
-    border-color: var(--color-accent-blue);
+    border-color: var(--color-primary);
   }
 
   .form-textarea {
@@ -155,7 +147,6 @@ const toolDesc = '速度单位转换';
     cursor: pointer;
   }
 
-  /* 通用按钮样式 */
   .btn {
     display: inline-flex;
     align-items: center;
@@ -171,12 +162,12 @@ const toolDesc = '速度单位转换';
   }
 
   .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
+    background: var(--color-primary);
+    color: white;
   }
 
   .btn-primary:hover {
-    opacity: 0.9;
+    background: var(--color-primary-hover);
   }
 
   .btn-secondary {
@@ -195,7 +186,6 @@ const toolDesc = '速度单位转换';
     flex-wrap: wrap;
   }
 
-  /* 结果区域 */
   .result-area {
     padding: var(--space-4);
     background: var(--bg-primary);
@@ -205,33 +195,9 @@ const toolDesc = '速度单位转换';
     font-size: var(--text-sm);
     white-space: pre-wrap;
     word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    min-height: 60px;
   }
 
-  /* 文件上传 */
-  .file-upload {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
-  }
-
-  .file-upload input[type="file"] {
-    display: none;
-  }
-
-  /* 响应式 */
   @media (max-width: 768px) {
     .tool-main {
       padding: var(--space-4);
@@ -247,9 +213,27 @@ const toolDesc = '速度单位转换';
   }
 </style>
 
-<script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
+<script>
+  const TO_MS = { ms: 1, kmh: 0.277778, mph: 0.44704, knot: 0.514444, mach: 343 };
+  const NAMES = { ms: '米/秒', kmh: '千米/时', mph: '英里/时', knot: '节', mach: '马赫' };
+
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('速度转换 工具已加载');
+    const inputValue = document.getElementById('input-value');
+    const fromUnit = document.getElementById('from-unit');
+    const convertBtn = document.getElementById('convert-btn');
+    const result = document.getElementById('result');
+
+    function convert() {
+      const val = parseFloat(inputValue.value);
+      if (isNaN(val)) { result.textContent = '请输入有效数值'; return; }
+      const ms = val * TO_MS[fromUnit.value];
+      const lines = Object.entries(TO_MS).map(([unit, factor]) => `${NAMES[unit]}: ${(ms / factor).toFixed(6)}`).join('\n');
+      result.textContent = lines;
+    }
+
+    convertBtn.addEventListener('click', convert);
+    inputValue.addEventListener('input', convert);
+    fromUnit.addEventListener('change', convert);
+    convert();
   });
 </script>

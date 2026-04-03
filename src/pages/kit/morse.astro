@@ -1,8 +1,8 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const toolName = '电报码翻译';
-const toolDesc = '摩尔斯电报码转换';
+const toolName = '摩尔斯电码';
+const toolDesc = '文本与摩尔斯电码互转';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,14 +22,19 @@ const toolDesc = '摩尔斯电报码转换';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+          <div class="form-group">
+            <label class="form-label" for="input-text">输入文本或摩尔斯电码</label>
+            <textarea id="input-text" class="form-textarea" placeholder="输入文本或摩尔斯电码（用空格分隔）..."></textarea>
+          </div>
+          <div class="btn-group">
+            <button id="encode-btn" class="btn btn-primary">编码为摩尔斯</button>
+            <button id="decode-btn" class="btn btn-secondary">解码为文本</button>
+            <button id="play-btn" class="btn btn-secondary">播放声音</button>
+            <button id="clear-btn" class="btn btn-secondary">清空</button>
+          </div>
+          <div class="form-group">
+            <label class="form-label">结果</label>
+            <div id="result" class="result-area">等待操作...</div>
           </div>
         </div>
       </main>
@@ -94,26 +99,6 @@ const toolDesc = '摩尔斯电报码转换';
     gap: var(--space-4);
   }
 
-  .tool-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .tool-placeholder p {
-    font-size: var(--text-sm);
-  }
-
-  /* 通用表单样式 */
   .form-group {
     display: flex;
     flex-direction: column;
@@ -142,7 +127,7 @@ const toolDesc = '摩尔斯电报码转换';
   .form-textarea:focus,
   .form-select:focus {
     outline: none;
-    border-color: var(--color-accent-blue);
+    border-color: var(--color-primary);
   }
 
   .form-textarea {
@@ -155,7 +140,6 @@ const toolDesc = '摩尔斯电报码转换';
     cursor: pointer;
   }
 
-  /* 通用按钮样式 */
   .btn {
     display: inline-flex;
     align-items: center;
@@ -171,12 +155,12 @@ const toolDesc = '摩尔斯电报码转换';
   }
 
   .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
+    background: var(--color-primary);
+    color: white;
   }
 
   .btn-primary:hover {
-    opacity: 0.9;
+    background: var(--color-primary-hover);
   }
 
   .btn-secondary {
@@ -195,7 +179,6 @@ const toolDesc = '摩尔斯电报码转换';
     flex-wrap: wrap;
   }
 
-  /* 结果区域 */
   .result-area {
     padding: var(--space-4);
     background: var(--bg-primary);
@@ -205,33 +188,9 @@ const toolDesc = '摩尔斯电报码转换';
     font-size: var(--text-sm);
     white-space: pre-wrap;
     word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    min-height: 60px;
   }
 
-  /* 文件上传 */
-  .file-upload {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
-  }
-
-  .file-upload input[type="file"] {
-    display: none;
-  }
-
-  /* 响应式 */
   @media (max-width: 768px) {
     .tool-main {
       padding: var(--space-4);
@@ -247,9 +206,57 @@ const toolDesc = '摩尔斯电报码转换';
   }
 </style>
 
-<script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
+<script>
+  const MORSE_CODE = {
+    'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+    'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+    'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+    'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+    'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----', '2': '..---',
+    '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...',
+    '8': '---..', '9': '----.', '.': '.-.-.-', ',': '--..--', '?': '..--..',
+    '!': '-.-.--', ' ': '/'
+  };
+  const REVERSE_MORSE = Object.fromEntries(Object.entries(MORSE_CODE).map(([k, v]) => [v, k]));
+
+  function toMorse(text) {
+    return text.toUpperCase().split('').map(c => MORSE_CODE[c] || c).join(' ');
+  }
+  function fromMorse(morse) {
+    return morse.split(' ').map(c => REVERSE_MORSE[c] || c).join('');
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('电报码翻译 工具已加载');
+    const inputText = document.getElementById('input-text');
+    const encodeBtn = document.getElementById('encode-btn');
+    const decodeBtn = document.getElementById('decode-btn');
+    const playBtn = document.getElementById('play-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const result = document.getElementById('result');
+
+    encodeBtn.addEventListener('click', () => { result.textContent = toMorse(inputText.value); });
+    decodeBtn.addEventListener('click', () => { result.textContent = fromMorse(inputText.value); });
+    clearBtn.addEventListener('click', () => { inputText.value = ''; result.textContent = '等待操作...'; });
+
+    playBtn.addEventListener('click', () => {
+      const morse = result.textContent || toMorse(inputText.value);
+      if (!morse) return;
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      let time = ctx.currentTime;
+      const dotLen = 0.08;
+      morse.split('').forEach(symbol => {
+        if (symbol === '.' || symbol === '-') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = 600;
+          gain.gain.value = 0.3;
+          osc.start(time);
+          osc.stop(time + (symbol === '.' ? dotLen : dotLen * 3));
+          time += (symbol === '.' ? dotLen : dotLen * 3) + dotLen;
+        } else if (symbol === ' ') { time += dotLen * 3; }
+        else if (symbol === '/') { time += dotLen * 7; }
+      });
+    });
   });
 </script>

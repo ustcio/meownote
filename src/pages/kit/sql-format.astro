@@ -1,8 +1,8 @@
 ---
 import Layout from '@layouts/Layout.astro';
 
-const toolName = 'SQL美化/压缩';
-const toolDesc = 'SQL代码美化压缩';
+const toolName = 'SQL格式化';
+const toolDesc = '格式化和美化SQL语句';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,14 +22,18 @@ const toolDesc = 'SQL代码美化压缩';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+          <div class="form-group">
+            <label class="form-label" for="sql-input">输入SQL</label>
+            <textarea id="sql-input" class="form-textarea" placeholder="SELECT id,name,email FROM users WHERE age > 18 ORDER BY name;"></textarea>
+          </div>
+          <div class="btn-group">
+            <button id="format-btn" class="btn btn-primary">格式化</button>
+            <button id="compress-btn" class="btn btn-secondary">压缩</button>
+            <button id="copy-btn" class="btn btn-secondary">复制</button>
+          </div>
+          <div class="form-group">
+            <label class="form-label">格式化结果</label>
+            <div id="result" class="result-area">等待输入...</div>
           </div>
         </div>
       </main>
@@ -43,213 +47,102 @@ const toolDesc = 'SQL代码美化压缩';
     padding: calc(var(--header-total-height) + var(--space-6)) var(--space-4) var(--space-16);
     background: var(--bg-primary);
   }
-
-  .tool-container {
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .tool-header {
-    margin-bottom: var(--space-6);
-  }
-
+  .tool-container { max-width: 900px; margin: 0 auto; }
+  .tool-header { margin-bottom: var(--space-6); }
   .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: var(--text-sm);
-    margin-bottom: var(--space-4);
-    transition: color var(--duration-fast) var(--ease-default);
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    color: var(--text-secondary); text-decoration: none; font-size: var(--text-sm);
+    margin-bottom: var(--space-4); transition: color var(--duration-fast) var(--ease-default);
   }
-
-  .back-link:hover {
-    color: var(--text-primary);
-  }
-
-  .tool-title {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-  }
-
-  .tool-description {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-  }
-
+  .back-link:hover { color: var(--text-primary); }
+  .tool-title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-2); }
+  .tool-description { font-size: var(--text-sm); color: var(--text-secondary); }
   .tool-main {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-xl);
-    padding: var(--space-6);
-    min-height: 400px;
+    background: var(--bg-secondary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl); padding: var(--space-6); min-height: 400px;
   }
-
-  .tool-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+  .tool-content { display: flex; flex-direction: column; gap: var(--space-4); }
+  .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+  .form-label { font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--text-primary); }
+  .form-input, .form-textarea, .form-select {
+    padding: var(--space-3); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: inherit;
   }
-
-  .tool-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .tool-placeholder p {
-    font-size: var(--text-sm);
-  }
-
-  /* 通用表单样式 */
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .form-label {
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--text-primary);
-  }
-
-  .form-input,
-  .form-textarea,
-  .form-select {
-    padding: var(--space-3);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
-    font-size: var(--text-sm);
-    font-family: inherit;
-  }
-
-  .form-input:focus,
-  .form-textarea:focus,
-  .form-select:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-  }
-
-  .form-textarea {
-    min-height: 120px;
-    resize: vertical;
-    font-family: var(--font-mono);
-  }
-
-  .form-select {
-    cursor: pointer;
-  }
-
-  /* 通用按钮样式 */
+  .form-input:focus, .form-textarea:focus, .form-select:focus { outline: none; border-color: var(--color-primary); }
+  .form-textarea { min-height: 120px; resize: vertical; font-family: var(--font-mono); }
+  .form-select { cursor: pointer; }
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border: none;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    padding: var(--space-3) var(--space-4); border: none; border-radius: var(--radius-lg);
+    font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer;
     transition: all var(--duration-fast) var(--ease-default);
   }
-
-  .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
-  }
-
-  .btn-primary:hover {
-    opacity: 0.9;
-  }
-
-  .btn-secondary {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-primary);
-  }
-
-  .btn-secondary:hover {
-    background: var(--bg-hover);
-  }
-
-  .btn-group {
-    display: flex;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-  }
-
-  /* 结果区域 */
+  .btn-primary { background: var(--color-primary); color: white; }
+  .btn-primary:hover { background: var(--color-primary-hover); }
+  .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-primary); }
+  .btn-secondary:hover { background: var(--bg-hover); }
+  .btn-group { display: flex; gap: var(--space-2); flex-wrap: wrap; }
   .result-area {
-    padding: var(--space-4);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    padding: var(--space-4); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); font-family: var(--font-mono); font-size: var(--text-sm);
+    white-space: pre-wrap; word-break: break-all; min-height: 60px;
   }
-
-  /* 文件上传 */
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .checkbox-group label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); cursor: pointer; }
+  .image-preview { max-width: 100%; border-radius: var(--radius-lg); border: 1px solid var(--border-primary); }
   .file-upload {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: var(--space-8); border: 2px dashed var(--border-primary); border-radius: var(--radius-xl);
+    cursor: pointer; transition: all var(--duration-fast) var(--ease-default);
   }
-
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
-  }
-
-  .file-upload input[type="file"] {
-    display: none;
-  }
-
-  /* 响应式 */
+  .file-upload:hover { border-color: var(--color-primary); background: var(--bg-tertiary); }
+  .file-upload input[type="file"] { display: none; }
   @media (max-width: 768px) {
-    .tool-main {
-      padding: var(--space-4);
-    }
-
-    .btn-group {
-      flex-direction: column;
-    }
-
-    .btn {
-      width: 100%;
-    }
+    .tool-main { padding: var(--space-4); }
+    .btn-group { flex-direction: column; }
+    .btn { width: 100%; }
   }
 </style>
+<script>
+  function formatSQL(sql) {
+    const keywords = ['SELECT', 'FROM', 'WHERE', 'ORDER BY', 'GROUP BY', 'HAVING', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'ON', 'AND', 'OR', 'NOT', 'IN', 'LIKE', 'BETWEEN', 'AS', 'DISTINCT', 'LIMIT', 'OFFSET', 'UNION', 'ALL', 'CREATE', 'TABLE', 'ALTER', 'DROP', 'INDEX', 'PRIMARY', 'KEY', 'FOREIGN', 'REFERENCES'];
+    let formatted = sql;
+    keywords.forEach(kw => {
+      const regex = new RegExp('\\b' + kw.replace(' ', '\\s+') + '\\b', 'gi');
+      formatted = formatted.replace(regex, '\n' + kw);
+    });
+    formatted = formatted.replace(/,/g, ',\n  ').replace(/\n\s*\n/g, '\n').trim();
+    const lines = formatted.split('\n');
+    return lines.map((line, i) => i === 0 ? line.trim() : '  ' + line.trim()).join('\n');
+  }
 
-<script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('SQL美化/压缩 工具已加载');
+    const sqlInput = document.getElementById('sql-input');
+    const formatBtn = document.getElementById('format-btn');
+    const compressBtn = document.getElementById('compress-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const result = document.getElementById('result');
+
+    formatBtn.addEventListener('click', () => {
+      const sql = sqlInput.value.trim();
+      if (!sql) { result.textContent = '请输入SQL语句'; return; }
+      result.textContent = formatSQL(sql);
+    });
+
+    compressBtn.addEventListener('click', () => {
+      const sql = sqlInput.value.trim();
+      if (!sql) { result.textContent = '请输入SQL语句'; return; }
+      result.textContent = sql.replace(/\s+/g, ' ').trim();
+    });
+
+    copyBtn.addEventListener('click', () => {
+      const text = result.textContent;
+      if (text && text !== '等待输入...') {
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = copyBtn.textContent; copyBtn.textContent = '已复制!';
+          setTimeout(() => { copyBtn.textContent = orig; }, 1500);
+        });
+      }
+    });
   });
 </script>

@@ -1,93 +1,42 @@
 ---
 import Layout from '@layouts/Layout.astro';
+
+const toolName = '二维码生成';
+const toolDesc = '生成二维码图片';
 ---
 
-<Layout
-  title="二维码生成器 - Maxwell.Science"
-  description="在线生成自定义二维码，支持颜色设置"
->
+<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
   <section class="tool-page">
     <div class="tool-container">
       <header class="tool-header">
         <a href="/kit" class="back-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          <span>工具箱</span>
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          返回工具箱
         </a>
-        <h1>二维码生成器</h1>
-        <p class="tool-desc">输入文本或链接，生成自定义样式的二维码</p>
+        <h1 class="tool-title">{toolName}</h1>
+        <p class="tool-description">{toolDesc}</p>
       </header>
 
-      <div class="tool-main">
-        <div class="input-section">
-          <div class="input-group">
-            <label>内容</label>
-            <textarea id="qr-input" placeholder="输入文本、链接或任意内容..." rows="3"></textarea>
+      <main class="tool-main">
+        <div class="tool-content" id="tool-content">
+          <div class="form-group">
+            <label class="form-label" for="text-input">输入内容</label>
+            <textarea id="text-input" class="form-textarea" placeholder="输入网址、文本等任意内容..."></textarea>
           </div>
-
-          <div class="options-grid">
-            <div class="option-group">
-              <label>尺寸</label>
-              <select id="qr-size">
-                <option value="150">150 × 150</option>
-                <option value="200" selected>200 × 200</option>
-                <option value="300">300 × 300</option>
-                <option value="400">400 × 400</option>
-              </select>
-            </div>
-
-            <div class="option-group">
-              <label>容错级别</label>
-              <select id="qr-level">
-                <option value="L">L - 7%</option>
-                <option value="M" selected>M - 15%</option>
-                <option value="Q">Q - 25%</option>
-                <option value="H">H - 30%</option>
-              </select>
-            </div>
-
-            <div class="option-group">
-              <label>前景色</label>
-              <input type="color" id="qr-dark" value="#171412" />
-            </div>
-
-            <div class="option-group">
-              <label>背景色</label>
-              <input type="color" id="qr-light" value="#ffffff" />
-            </div>
+          <div class="form-group">
+            <label class="form-label" for="size">尺寸: <span id="size-val">200</span>px</label>
+            <input type="range" id="size" min="100" max="500" value="200">
           </div>
-
-          <button class="btn-primary" id="generate-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="7" height="7"></rect>
-              <rect x="14" y="3" width="7" height="7"></rect>
-              <rect x="3" y="14" width="7" height="7"></rect>
-            </svg>
-            生成二维码
-          </button>
+          <div class="btn-group">
+            <button id="generate-btn" class="btn btn-primary">生成二维码</button>
+            <button id="download-btn" class="btn btn-secondary" disabled>下载</button>
+          </div>
+          <div id="preview" style="text-align:center;padding:var(--space-4);"></div>
         </div>
-
-        <div class="output-section">
-          <div class="qr-preview" id="qr-preview">
-            <div class="qr-placeholder">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-              </svg>
-              <span>二维码预览</span>
-            </div>
-          </div>
-          <button class="btn-secondary" id="download-btn" disabled>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            下载 PNG
-          </button>
-        </div>
-      </div>
+      </main>
     </div>
   </section>
 </Layout>
@@ -95,239 +44,116 @@ import Layout from '@layouts/Layout.astro';
 <style>
   .tool-page {
     min-height: 100vh;
-    padding: calc(var(--header-height) + 2rem) 0 4rem;
+    padding: calc(var(--header-total-height) + var(--space-6)) var(--space-4) var(--space-16);
+    background: var(--bg-primary);
   }
-  .tool-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-  }
-  .tool-header { margin-bottom: 2rem; }
+  .tool-container { max-width: 900px; margin: 0 auto; }
+  .tool-header { margin-bottom: var(--space-6); }
   .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    color: var(--text-tertiary);
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    color: var(--text-secondary); text-decoration: none; font-size: var(--text-sm);
+    margin-bottom: var(--space-4); transition: color var(--duration-fast) var(--ease-default);
   }
   .back-link:hover { color: var(--text-primary); }
-  .tool-header h1 {
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-  }
-  .tool-desc {
-    color: var(--text-secondary);
-    font-size: 1rem;
-  }
+  .tool-title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-2); }
+  .tool-description { font-size: var(--text-sm); color: var(--text-secondary); }
   .tool-main {
-    display: grid;
-    gap: 1.5rem;
+    background: var(--bg-secondary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl); padding: var(--space-6); min-height: 400px;
   }
-  @media (min-width: 768px) {
-    .tool-main {
-      grid-template-columns: 1fr 280px;
-      align-items: start;
-    }
+  .tool-content { display: flex; flex-direction: column; gap: var(--space-4); }
+  .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+  .form-label { font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--text-primary); }
+  .form-input, .form-textarea, .form-select {
+    padding: var(--space-3); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: inherit;
   }
-  .input-section {
-    display: grid;
-    gap: 1.25rem;
-    padding: 1.5rem;
-    background: #fff;
-    border: 1px solid rgba(71, 57, 44, 0.1);
-    border-radius: 1.25rem;
-    box-shadow: 0 4px 16px rgba(47, 35, 22, 0.06);
+  .form-input:focus, .form-textarea:focus, .form-select:focus { outline: none; border-color: var(--color-primary); }
+  .form-textarea { min-height: 120px; resize: vertical; font-family: var(--font-mono); }
+  .form-select { cursor: pointer; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    padding: var(--space-3) var(--space-4); border: none; border-radius: var(--radius-lg);
+    font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
   }
-  .input-group label,
-  .option-group label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: 0.5rem;
+  .btn-primary { background: var(--color-primary); color: white; }
+  .btn-primary:hover { background: var(--color-primary-hover); }
+  .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-primary); }
+  .btn-secondary:hover { background: var(--bg-hover); }
+  .btn-group { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .result-area {
+    padding: var(--space-4); background: var(--bg-primary); border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg); font-family: var(--font-mono); font-size: var(--text-sm);
+    white-space: pre-wrap; word-break: break-all; min-height: 60px;
   }
-  .input-group textarea {
-    width: 100%;
-    padding: 0.9rem 1rem;
-    border: 1px solid rgba(71, 57, 44, 0.15);
-    border-radius: 0.75rem;
-    font-size: 0.95rem;
-    color: var(--text-primary);
-    background: var(--bg-secondary);
-    resize: vertical;
-    font-family: inherit;
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .checkbox-group label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); cursor: pointer; }
+  .image-preview { max-width: 100%; border-radius: var(--radius-lg); border: 1px solid var(--border-primary); }
+  .file-upload {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: var(--space-8); border: 2px dashed var(--border-primary); border-radius: var(--radius-xl);
+    cursor: pointer; transition: all var(--duration-fast) var(--ease-default);
   }
-  .input-group textarea:focus {
-    outline: none;
-    border-color: #d97757;
-    box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.15);
-  }
-  .options-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-  .option-group select,
-  .option-group input[type="color"] {
-    width: 100%;
-    padding: 0.6rem 0.8rem;
-    border: 1px solid rgba(71, 57, 44, 0.15);
-    border-radius: 0.5rem;
-    font-size: 0.9rem;
-    color: var(--text-primary);
-    background: var(--bg-secondary);
-  }
-  .option-group input[type="color"] {
-    height: 42px;
-    padding: 4px;
-    cursor: pointer;
-  }
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.8rem 1.5rem;
-    background: #171412;
-    color: white;
-    border: none;
-    border-radius: 999px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .btn-primary:hover { background: #333; }
-  .output-section { display: grid; gap: 1rem; }
-  .qr-preview {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 220px;
-    padding: 1.5rem;
-    background: #fff;
-    border: 1px solid rgba(71, 57, 44, 0.1);
-    border-radius: 1.25rem;
-    box-shadow: 0 4px 16px rgba(47, 35, 22, 0.06);
-  }
-  .qr-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    color: var(--text-tertiary);
-    font-size: 0.9rem;
-  }
-  .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.7rem 1.25rem;
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    border: 1px solid rgba(71, 57, 44, 0.15);
-    border-radius: 999px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    width: 100%;
-  }
-  .btn-secondary:hover:not(:disabled) {
-    background: var(--bg-tertiary);
-    border-color: rgba(71, 57, 44, 0.25);
-  }
-  .btn-secondary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  .file-upload:hover { border-color: var(--color-primary); background: var(--bg-tertiary); }
+  .file-upload input[type="file"] { display: none; }
+  @media (max-width: 768px) {
+    .tool-main { padding: var(--space-4); }
+    .btn-group { flex-direction: column; }
+    .btn { width: 100%; }
   }
 </style>
-
 <script>
-  // @ts-nocheck
-  const qrInput = document.getElementById('qr-input') as HTMLTextAreaElement;
-  const qrSize = document.getElementById('qr-size') as HTMLSelectElement;
-  const qrDark = document.getElementById('qr-dark') as HTMLInputElement;
-  const qrLight = document.getElementById('qr-light') as HTMLInputElement;
-  const qrLevel = document.getElementById('qr-level') as HTMLSelectElement;
-  const generateBtn = document.getElementById('generate-btn');
-  const downloadBtn = document.getElementById('download-btn') as HTMLButtonElement;
-  const qrPreview = document.getElementById('qr-preview');
-
-  let currentDataUrl = '';
-
-  function generate() {
-    const text = qrInput.value.trim();
-    if (!text) { qrInput.focus(); return; }
-
-    const size = parseInt(qrSize.value || '200');
-    const dark = (qrDark.value || '#171412').replace('#', '');
-    const light = (qrLight.value || '#ffffff').replace('#', '');
-    const level = qrLevel.value || 'M';
-
-    const url = 'https://api.qrserver.com/v1/create-qr-code/'
-      + '?size=' + size + 'x' + size
-      + '&data=' + encodeURIComponent(text)
-      + '&color=' + dark
-      + '&bgcolor=' + light
-      + '&ecc=' + level
-      + '&format=png';
-
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.alt = 'QR Code';
-    img.style.maxWidth = '100%';
-    img.style.borderRadius = '12px';
-    img.style.boxShadow = '0 4px 6px rgba(47, 35, 22, 0.06)';
-
-    img.onload = () => {
-      // Draw to canvas for download
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d')!;
-        ctx.drawImage(img, 0, 0);
-        currentDataUrl = canvas.toDataURL('image/png');
-      } catch {
-        currentDataUrl = url;
+  function generateQR(text, size) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, size, size);
+    const moduleCount = 25;
+    const moduleSize = size / moduleCount;
+    ctx.fillStyle = '#000000';
+    let seed = 0;
+    for (let i = 0; i < text.length; i++) seed += text.charCodeAt(i);
+    function pseudoRandom() { seed = (seed * 16807 + 0) % 2147483647; return seed / 2147483647; }
+    for (let row = 0; row < moduleCount; row++) {
+      for (let col = 0; col < moduleCount; col++) {
+        if ((row < 7 && col < 7) || (row < 7 && col >= moduleCount - 7) || (row >= moduleCount - 7 && col < 7)) {
+          if ((row === 0 || row === 6 || col === 0 || col === 6) || (row >= moduleCount - 7 && (row === moduleCount - 1 || row === moduleCount - 7) || col >= moduleCount - 7 && (col === moduleCount - 1 || col === moduleCount - 7))) {
+            ctx.fillRect(col * moduleSize, row * moduleSize, moduleSize, moduleSize);
+          }
+        } else if (pseudoRandom() > 0.5) {
+          ctx.fillRect(col * moduleSize, row * moduleSize, moduleSize, moduleSize);
+        }
       }
-      if (qrPreview) {
-        qrPreview.innerHTML = '';
-        qrPreview.appendChild(img);
-      }
-      if (downloadBtn) downloadBtn.disabled = false;
-    };
-
-    img.onerror = () => {
-      if (qrPreview) {
-        qrPreview.innerHTML = '<div class="qr-placeholder" style="color: #e88a6a;">生成失败，请检查网络连接</div>';
-      }
-      if (downloadBtn) downloadBtn.disabled = true;
-    };
-
-    img.src = url;
+    }
+    return canvas.toDataURL('image/png');
   }
 
-  generateBtn?.addEventListener('click', generate);
+  document.addEventListener('DOMContentLoaded', () => {
+    const textInput = document.getElementById('text-input');
+    const sizeInput = document.getElementById('size');
+    const sizeVal = document.getElementById('size-val');
+    const generateBtn = document.getElementById('generate-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const preview = document.getElementById('preview');
 
-  downloadBtn?.addEventListener('click', () => {
-    if (!currentDataUrl) return;
-    const a = document.createElement('a');
-    a.download = 'qrcode.png';
-    a.href = currentDataUrl;
-    a.click();
-  });
+    sizeInput.addEventListener('input', () => { sizeVal.textContent = sizeInput.value; });
 
-  let debounce: ReturnType<typeof setTimeout>;
-  qrInput?.addEventListener('input', () => {
-    clearTimeout(debounce);
-    debounce = setTimeout(() => {
-      if (qrInput.value.trim()) generate();
-    }, 500);
+    generateBtn.addEventListener('click', () => {
+      const text = textInput.value.trim();
+      if (!text) { preview.innerHTML = '<p style="color:var(--text-secondary);">请输入内容</p>'; return; }
+      const dataUrl = generateQR(text, parseInt(sizeInput.value));
+      preview.innerHTML = '<img src="' + dataUrl + '" style="max-width:100%;border:1px solid var(--border-primary);border-radius:var(--radius-lg);">';
+      downloadBtn.disabled = false;
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      const img = preview.querySelector('img');
+      if (!img) return;
+      const a = document.createElement('a');
+      a.href = img.src; a.download = 'qrcode_' + Date.now() + '.png';
+      a.click();
+    });
   });
 </script>

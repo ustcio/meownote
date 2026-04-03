@@ -22,14 +22,28 @@ const toolDesc = '生成和验证UUID';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+          <div class="form-group">
+            <label class="form-label" for="uuid-count">生成数量</label>
+            <input type="number" id="uuid-count" class="form-input" value="5" min="1" max="100">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">
+              <input type="checkbox" id="uppercase" checked> 大写
+            </label>
+            <label class="form-label">
+              <input type="checkbox" id="no-dashes"> 去除连字符
+            </label>
+          </div>
+          
+          <div class="btn-group">
+            <button id="generate-btn" class="btn btn-primary">生成UUID</button>
+            <button id="copy-btn" class="btn btn-secondary">复制全部</button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">生成结果</label>
+            <div id="result" class="result-area">点击生成按钮...</div>
           </div>
         </div>
       </main>
@@ -94,26 +108,6 @@ const toolDesc = '生成和验证UUID';
     gap: var(--space-4);
   }
 
-  .tool-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .tool-placeholder p {
-    font-size: var(--text-sm);
-  }
-
-  /* 通用表单样式 */
   .form-group {
     display: flex;
     flex-direction: column;
@@ -142,7 +136,7 @@ const toolDesc = '生成和验证UUID';
   .form-textarea:focus,
   .form-select:focus {
     outline: none;
-    border-color: var(--color-accent-blue);
+    border-color: var(--color-primary);
   }
 
   .form-textarea {
@@ -155,7 +149,6 @@ const toolDesc = '生成和验证UUID';
     cursor: pointer;
   }
 
-  /* 通用按钮样式 */
   .btn {
     display: inline-flex;
     align-items: center;
@@ -171,12 +164,12 @@ const toolDesc = '生成和验证UUID';
   }
 
   .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
+    background: var(--color-primary);
+    color: white;
   }
 
   .btn-primary:hover {
-    opacity: 0.9;
+    background: var(--color-primary-hover);
   }
 
   .btn-secondary {
@@ -195,7 +188,6 @@ const toolDesc = '生成和验证UUID';
     flex-wrap: wrap;
   }
 
-  /* 结果区域 */
   .result-area {
     padding: var(--space-4);
     background: var(--bg-primary);
@@ -205,33 +197,9 @@ const toolDesc = '生成和验证UUID';
     font-size: var(--text-sm);
     white-space: pre-wrap;
     word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    min-height: 60px;
   }
 
-  /* 文件上传 */
-  .file-upload {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
-  }
-
-  .file-upload input[type="file"] {
-    display: none;
-  }
-
-  /* 响应式 */
   @media (max-width: 768px) {
     .tool-main {
       padding: var(--space-4);
@@ -247,9 +215,42 @@ const toolDesc = '生成和验证UUID';
   }
 </style>
 
-<script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
+<script>
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('UUID生成器 工具已加载');
+    const countInput = document.getElementById('uuid-count');
+    const uppercase = document.getElementById('uppercase');
+    const noDashes = document.getElementById('no-dashes');
+    const generateBtn = document.getElementById('generate-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const result = document.getElementById('result');
+
+    generateBtn.addEventListener('click', () => {
+      const count = Math.min(parseInt(countInput.value) || 1, 100);
+      const uuids = [];
+      for (let i = 0; i < count; i++) {
+        let uuid = generateUUID();
+        if (uppercase.checked) uuid = uuid.toUpperCase();
+        if (noDashes.checked) uuid = uuid.replace(/-/g, '');
+        uuids.push(uuid);
+      }
+      result.textContent = uuids.join('\n');
+    });
+
+    copyBtn.addEventListener('click', () => {
+      const text = result.textContent;
+      if (text && text !== '点击生成按钮...') {
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = copyBtn.textContent; copyBtn.textContent = '已复制!';
+          setTimeout(() => { copyBtn.textContent = orig; }, 1500);
+        });
+      }
+    });
   });
 </script>
