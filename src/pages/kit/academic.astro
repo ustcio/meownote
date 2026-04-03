@@ -1,5 +1,6 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import '@styles/hao-design.css';
 
 const tools = [
   { id: 'doi', title: 'DOI Citation', desc: 'Convert to multiple citation formats' },
@@ -209,70 +210,7 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
 </Layout>
 
 <style>
-  .academic { min-height: 100vh; padding: calc(var(--header-total-height) + var(--space-4)) var(--space-4) var(--space-16); }
-  .container { max-width: 640px; margin: 0 auto; }
-  
-  .header { margin-bottom: var(--space-8); }
-  .back-link { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--text-tertiary); font-size: var(--text-sm); margin-bottom: var(--space-4); }
-  .back-link:hover { color: var(--text-secondary); }
-  .title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-1); }
-  .desc { font-size: var(--text-sm); color: var(--text-secondary); }
-  
-  .tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
-  .tool-btn { display: flex; flex-direction: column; gap: 2px; padding: var(--space-4); background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-xl); text-align: left; transition: all var(--duration-fast) var(--ease-default); }
-  .tool-btn:hover { background: var(--bg-tertiary); border-color: var(--border-hover); }
-  .tool-title { font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--text-primary); }
-  .tool-desc { font-size: var(--text-xs); color: var(--text-tertiary); }
-  
-  .panel { display: none; }
-  .panel.active { display: block; }
-  .panel-header { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-6); }
-  .back-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--bg-secondary); border-radius: var(--radius-lg); color: var(--text-tertiary); }
-  .back-btn:hover { color: var(--text-primary); }
-  .panel-title { font-size: var(--text-lg); font-weight: var(--font-semibold); color: var(--text-primary); }
-  
-  .panel-body { display: flex; flex-direction: column; gap: var(--space-3); }
-  .field input, .field textarea, .fields input, .fields select, .fields textarea { width: 100%; padding: var(--space-3); background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); }
-  .field input:focus, .field textarea:focus, .fields input:focus, .fields select:focus { outline: none; border-color: var(--color-accent-blue); }
-  .fields { display: flex; flex-direction: column; gap: var(--space-2); }
-  .row { display: flex; gap: var(--space-2); }
-  .row > * { flex: 1; }
-  
-  .btn { padding: var(--space-3) var(--space-4); background: var(--text-primary); border-radius: var(--radius-lg); color: var(--bg-primary); font-size: var(--text-sm); font-weight: var(--font-medium); transition: opacity var(--duration-fast) var(--ease-default); }
-  .btn:hover { opacity: 0.9; }
-  
-  .result { margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--border-primary); }
-  .result.hidden { display: none; }
-  .article-info { margin-bottom: var(--space-3); font-size: var(--text-sm); color: var(--text-primary); line-height: 1.6; }
-  
-  .format-tabs { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-bottom: var(--space-3); }
-  .tab { padding: var(--space-1) var(--space-2); background: var(--bg-secondary); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--text-secondary); }
-  .tab.active { background: var(--text-primary); color: var(--bg-primary); }
-  
-  .output { position: relative; background: var(--bg-secondary); border-radius: var(--radius-lg); padding: var(--space-3); }
-  .output pre { font-size: var(--text-sm); color: var(--text-primary); white-space: pre-wrap; word-break: break-word; margin: 0; font-family: inherit; }
-  .output.hidden { display: none; }
-  .copy-btn { position: absolute; top: var(--space-2); right: var(--space-2); padding: var(--space-1) var(--space-2); background: var(--bg-tertiary); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--text-secondary); }
-  .copy-btn:hover { color: var(--text-primary); }
-  
-  .metrics { display: flex; gap: var(--space-4); }
-  .metric { display: flex; flex-direction: column; align-items: center; padding: var(--space-3); background: var(--bg-secondary); border-radius: var(--radius-lg); flex: 1; }
-  .metric .val { font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--text-primary); }
-  .metric .lbl { font-size: var(--text-xs); color: var(--text-tertiary); }
-  
-  .symbols { display: flex; flex-wrap: wrap; gap: var(--space-1); }
-  .symbols button { padding: var(--space-1) var(--space-2); background: var(--bg-secondary); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--text-secondary); font-family: var(--font-mono); }
-  .symbols button:hover { background: var(--bg-tertiary); color: var(--text-primary); }
-  .preview { min-height: 80px; padding: var(--space-4); background: var(--bg-secondary); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; }
-  
-  .translate-row { display: flex; align-items: center; gap: var(--space-2); }
-  .translate-row select { padding: var(--space-2); background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-sm); flex: 1; }
-  .swap-btn { width: 36px; height: 36px; background: var(--bg-secondary); border-radius: var(--radius-md); color: var(--text-secondary); }
-  .swap-btn:hover { color: var(--text-primary); }
-  
-  .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
-  .tags.hidden { display: none; }
-  .tag { padding: var(--space-1) var(--space-3); background: var(--bg-secondary); border-radius: var(--radius-full); font-size: var(--text-sm); color: var(--text-primary); }
+  /* Inherits from hao-design.css */
 </style>
 
 <script>

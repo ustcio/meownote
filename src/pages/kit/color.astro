@@ -1,5 +1,6 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import '@styles/hao-design.css';
 ---
 
 <Layout
@@ -92,42 +93,7 @@ import Layout from '@layouts/Layout.astro';
 </Layout>
 
 <style>
-  .color-tool { min-height: 100vh; padding: calc(var(--header-total-height) + var(--space-4)) var(--space-4) var(--space-16); }
-  .container { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-4); }
-
-  .header { margin-bottom: var(--space-4); }
-  .back-link { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--text-tertiary); font-size: var(--text-sm); margin-bottom: var(--space-4); }
-  .back-link:hover { color: var(--text-secondary); }
-  .title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-1); }
-  .desc { font-size: var(--text-sm); color: var(--text-secondary); }
-
-  .card { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-xl); padding: var(--space-5); }
-
-  .preview-card { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); padding: var(--space-8); }
-  .color-preview { width: 120px; height: 120px; border-radius: var(--radius-xl); border: 3px solid var(--border-primary); transition: background-color 0.15s ease; }
-  #native-picker { width: 60px; height: 36px; border: none; border-radius: var(--radius-md); cursor: pointer; }
-
-  .format-row { margin-bottom: var(--space-3); }
-  .format-group { display: flex; flex-direction: column; gap: var(--space-1); }
-  .lbl { font-size: var(--text-xs); color: var(--text-tertiary); font-weight: var(--font-medium); }
-  .input-row { display: flex; gap: var(--space-2); }
-  .input-row input { flex: 1; padding: var(--space-2) var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-sm); font-family: var(--font-mono); }
-  .input-row input:focus { outline: none; border-color: var(--color-accent-blue); }
-  .copy-sm { padding: var(--space-2) var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--text-secondary); cursor: pointer; transition: all var(--duration-fast) var(--ease-default); }
-  .copy-sm:hover { color: var(--text-primary); border-color: var(--border-hover); }
-
-  .slider-group { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
-  .slider-group .lbl { min-width: 48px; text-align: right; }
-  .slider { flex: 1; height: 6px; -webkit-appearance: none; appearance: none; border-radius: var(--radius-full); outline: none; }
-  .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
-  .r-slider { background: linear-gradient(to right, #000, #f00); }
-  .r-slider::-webkit-slider-thumb { background: #ef4444; }
-  .g-slider { background: linear-gradient(to right, #000, #0f0); }
-  .g-slider::-webkit-slider-thumb { background: #22c55e; }
-  .b-slider { background: linear-gradient(to right, #000, #00f); }
-  .b-slider::-webkit-slider-thumb { background: #3b82f6; }
-  .a-slider { background: linear-gradient(to right, transparent, var(--text-primary)); }
-  .a-slider::-webkit-slider-thumb { background: var(--text-primary); }
+  /* Inherits from hao-design.css */
 </style>
 
 <script>

@@ -1,5 +1,6 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import '@styles/hao-design.css';
 ---
 
 <Layout
@@ -93,35 +94,7 @@ import Layout from '@layouts/Layout.astro';
 </Layout>
 
 <style>
-  .text-tool { min-height: 100vh; padding: calc(var(--header-total-height) + var(--space-4)) var(--space-4) var(--space-16); }
-  .container { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-4); }
-
-  .header { margin-bottom: var(--space-4); }
-  .back-link { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--text-tertiary); font-size: var(--text-sm); margin-bottom: var(--space-4); }
-  .back-link:hover { color: var(--text-secondary); }
-  .title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-1); }
-  .desc { font-size: var(--text-sm); color: var(--text-secondary); }
-
-  .card { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-xl); padding: var(--space-5); }
-  .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
-  .card-title { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--text-primary); }
-  .card-actions { display: flex; gap: var(--space-2); }
-
-  textarea { width: 100%; padding: var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: var(--font-mono); resize: vertical; line-height: 1.6; }
-  textarea:focus { outline: none; border-color: var(--color-accent-blue); }
-
-  .btn-sm { padding: var(--space-1) var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--text-secondary); cursor: pointer; }
-  .btn-sm:hover { color: var(--text-primary); border-color: var(--border-hover); }
-
-  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
-  @media (min-width: 640px) { .stats-grid { grid-template-columns: repeat(6, 1fr); } }
-  .stat-card { display: flex; flex-direction: column; align-items: center; padding: var(--space-3); background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); }
-  .stat-val { font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--text-primary); font-variant-numeric: tabular-nums; }
-  .stat-lbl { font-size: var(--text-xs); color: var(--text-tertiary); margin-top: 2px; }
-
-  .btn-grid { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-  .btn { padding: var(--space-2) var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--text-primary); cursor: pointer; transition: all var(--duration-fast) var(--ease-default); }
-  .btn:hover { border-color: var(--border-hover); background: var(--bg-secondary); }
+  /* Inherits from hao-design.css */
 </style>
 
 <script>

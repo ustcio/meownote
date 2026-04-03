@@ -1,5 +1,6 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import '@styles/hao-design.css';
 
 const toolName = '关键词过滤';
 const toolDesc = '过滤文本中的敏感词或关键词';
@@ -59,70 +60,7 @@ const toolDesc = '过滤文本中的敏感词或关键词';
 </Layout>
 
 <style>
-  .tool-page {
-    min-height: 100vh;
-    padding: calc(var(--header-total-height) + var(--space-6)) var(--space-4) var(--space-16);
-    background: var(--bg-primary);
-  }
-  .tool-container { max-width: 900px; margin: 0 auto; }
-  .tool-header { margin-bottom: var(--space-6); }
-  .back-link {
-    display: inline-flex; align-items: center; gap: var(--space-2);
-    color: var(--text-secondary); text-decoration: none; font-size: var(--text-sm);
-    margin-bottom: var(--space-4); transition: color var(--duration-fast) var(--ease-default);
-  }
-  .back-link:hover { color: var(--text-primary); }
-  .tool-title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-2); }
-  .tool-description { font-size: var(--text-sm); color: var(--text-secondary); }
-  .tool-main {
-    background: var(--bg-secondary); border: 1px solid var(--border-primary);
-    border-radius: var(--radius-xl); padding: var(--space-6); min-height: 400px;
-  }
-  .tool-content { display: flex; flex-direction: column; gap: var(--space-4); }
-  .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
-  .form-label { font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--text-primary); }
-  .form-input, .form-textarea, .form-select {
-    padding: var(--space-3); background: var(--bg-primary); border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: inherit;
-  }
-  .form-input:focus, .form-textarea:focus, .form-select:focus { outline: none; border-color: var(--color-primary); }
-  .form-textarea { min-height: 120px; resize: vertical; font-family: var(--font-mono); }
-  .form-select { cursor: pointer; }
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
-    padding: var(--space-3) var(--space-4); border: none; border-radius: var(--radius-lg);
-    font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-  }
-  .btn-primary { background: var(--color-primary); color: #fffdf9; }
-  .btn-primary:hover { box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3); }
-  .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-primary); }
-  .btn-secondary:hover { background: var(--bg-hover); }
-  .btn-group { display: flex; gap: var(--space-2); flex-wrap: wrap; }
-  .result-area {
-    padding: var(--space-4); background: var(--bg-primary); border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg); font-family: var(--font-mono); font-size: var(--text-sm);
-    white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow-y: auto;
-  }
-  .checkbox-group { display: flex; flex-wrap: wrap; gap: var(--space-3); }
-  .checkbox-group label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-secondary); cursor: pointer; }
-  .stats-bar { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-4); }
-  .stat-item { background: var(--bg-primary); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); }
-  .stat-item strong { color: var(--color-primary); }
-  .file-upload {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: var(--space-8); border: 2px dashed var(--border-primary); border-radius: var(--radius-xl);
-    cursor: pointer; transition: all var(--duration-fast) var(--ease-default);
-  }
-  .file-upload:hover { border-color: var(--color-primary); background: var(--bg-tertiary); }
-  .file-upload input[type="file"] { display: none; }
-  .tag-list { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-  .tag { background: var(--bg-tertiary); border: 1px solid var(--border-primary); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); }
-  @media (max-width: 768px) {
-    .tool-main { padding: var(--space-4); }
-    .btn-group { flex-direction: column; }
-    .btn { width: 100%; }
-  }
+  /* Inherits from hao-design.css */
 </style>
 <script>
   document.addEventListener('DOMContentLoaded', () => {

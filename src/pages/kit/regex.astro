@@ -1,5 +1,6 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import '@styles/hao-design.css';
 ---
 
 <Layout
@@ -87,53 +88,7 @@ import Layout from '@layouts/Layout.astro';
 </Layout>
 
 <style>
-  .regex-tool { min-height: 100vh; padding: calc(var(--header-total-height) + var(--space-4)) var(--space-4) var(--space-16); }
-  .container { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-4); }
-
-  .header { margin-bottom: var(--space-4); }
-  .back-link { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--text-tertiary); font-size: var(--text-sm); margin-bottom: var(--space-4); }
-  .back-link:hover { color: var(--text-secondary); }
-  .title { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-1); }
-  .desc { font-size: var(--text-sm); color: var(--text-secondary); }
-
-  .card { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-xl); padding: var(--space-5); }
-  .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
-  .card-title { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--text-primary); }
-  .card-actions { display: flex; gap: var(--space-2); }
-
-  .regex-input-row { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); }
-  .slash { font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--text-tertiary); font-family: var(--font-mono); }
-  .regex-input-row input { flex: 1; padding: var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: var(--font-mono); }
-  .regex-input-row input:focus { outline: none; border-color: var(--color-accent-blue); }
-  .flags-input { max-width: 60px; flex: none !important; }
-
-  .quick-flags { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-2); }
-  .flag-btn { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-1) var(--space-2); background: var(--bg-tertiary); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--text-secondary); cursor: pointer; }
-  .flag-btn input { display: none; }
-  .flag-btn:has(input:checked) { background: var(--text-primary); color: var(--bg-primary); }
-
-  .error-msg { font-size: var(--text-xs); color: #ef4444; min-height: 1.2em; }
-
-  textarea { width: 100%; padding: var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); color: var(--text-primary); font-size: var(--text-sm); font-family: var(--font-mono); resize: vertical; line-height: 1.6; }
-  textarea:focus { outline: none; border-color: var(--color-accent-blue); }
-
-  .btn-sm { padding: var(--space-1) var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--text-secondary); cursor: pointer; }
-  .btn-sm:hover { color: var(--text-primary); }
-
-  .match-count { font-size: var(--text-xs); color: var(--text-tertiary); }
-  .placeholder-text { color: var(--text-tertiary); font-size: var(--text-sm); }
-
-  .highlight-box { padding: var(--space-3); background: var(--bg-tertiary); border-radius: var(--radius-lg); font-family: var(--font-mono); font-size: var(--text-sm); line-height: 1.8; white-space: pre-wrap; word-break: break-all; min-height: 60px; color: var(--text-primary); }
-  .highlight-box mark { background: rgba(59, 130, 246, 0.25); color: var(--text-primary); border-radius: 2px; padding: 1px 0; }
-
-  .groups-list { display: flex; flex-direction: column; gap: var(--space-2); }
-  .group-item { display: flex; gap: var(--space-3); padding: var(--space-2) var(--space-3); background: var(--bg-tertiary); border-radius: var(--radius-md); font-size: var(--text-xs); font-family: var(--font-mono); }
-  .group-idx { color: var(--text-tertiary); min-width: 20px; }
-  .group-val { color: var(--text-primary); word-break: break-all; }
-
-  .pattern-grid { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-  .pattern-btn { padding: var(--space-2) var(--space-3); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--text-primary); cursor: pointer; transition: all var(--duration-fast) var(--ease-default); }
-  .pattern-btn:hover { border-color: var(--border-hover); }
+  /* Inherits from hao-design.css */
 </style>
 
 <script>
