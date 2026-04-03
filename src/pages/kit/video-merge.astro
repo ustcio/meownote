@@ -2,7 +2,7 @@
 import Layout from '@layouts/Layout.astro';
 
 const toolName = '视频拼接';
-const toolDesc = '合并多段视频';
+const toolDesc = '将多个视频文件按顺序拼接成一个视频';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -21,15 +21,57 @@ const toolDesc = '合并多段视频';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+          </svg>
+          <span>点击或拖拽上传多个视频文件</span>
+          <span class="hint">支持 MP4, WebM, MOV, AVI, MKV（至少2个文件）</span>
+          <input type="file" id="video-input" accept="video/*" multiple hidden>
+        </div>
+
+        <div class="file-list" id="file-list" style="display:none;">
+          <div class="file-list-header">
+            <span>已上传文件</span>
+            <button class="btn-small" id="add-more-btn">+ 添加更多</button>
+          </div>
+          <div class="file-items" id="file-items"></div>
+          <div class="file-list-info">
+            <span>总时长: <strong id="total-duration">0:00</strong></span>
+            <span>文件数: <strong id="file-count">0</strong></span>
+          </div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <button class="btn-primary" id="merge-btn">开始拼接</button>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <span class="progress-text" id="progress-text">处理中...</span>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">
+            <span>拼接结果</span>
+          </div>
+          <div class="result-stats">
+            <div class="stat">
+              <span class="stat-label">输出大小</span>
+              <span class="stat-value" id="result-size"></span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">总时长</span>
+              <span class="stat-value" id="result-duration"></span>
+            </div>
+          </div>
+          <video id="result-video" controls class="result-video"></video>
+          <div class="btn-group">
+            <button class="btn-primary" id="download-btn">下载拼接后的视频</button>
+            <button class="btn-secondary" id="reset-btn">重新上传</button>
           </div>
         </div>
       </main>
@@ -45,7 +87,7 @@ const toolDesc = '合并多段视频';
   }
 
   .tool-container {
-    max-width: 900px;
+    max-width: 700px;
     margin: 0 auto;
   }
 
@@ -88,75 +130,177 @@ const toolDesc = '合并多段视频';
     min-height: 400px;
   }
 
-  .tool-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-  }
-
-  .tool-placeholder {
+  .upload-area {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 300px;
+    padding: var(--space-8);
+    border: 2px dashed var(--border-primary);
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
     color: var(--text-tertiary);
-    text-align: center;
   }
 
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
+  .upload-area:hover {
+    border-color: var(--color-accent-blue);
+    color: var(--color-accent-blue);
+    background: var(--bg-tertiary);
   }
 
-  .tool-placeholder p {
-    font-size: var(--text-sm);
+  .upload-area svg {
+    margin-bottom: var(--space-3);
   }
 
-  /* 通用表单样式 */
-  .form-group {
+  .upload-area .hint {
+    font-size: var(--text-xs);
+    color: var(--text-quaternary);
+    margin-top: var(--space-1);
+  }
+
+  .upload-area input[type="file"] {
+    display: none;
+  }
+
+  .file-list {
+    margin-top: var(--space-4);
+  }
+
+  .file-list-header {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
   }
 
-  .form-label {
+  .file-list-header span {
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
     color: var(--text-primary);
   }
 
-  .form-input,
-  .form-textarea,
-  .form-select {
+  .btn-small {
+    padding: var(--space-1) var(--space-3);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .btn-small:hover {
+    background: var(--bg-hover);
+  }
+
+  .file-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
     padding: var(--space-3);
     background: var(--bg-primary);
     border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
+    border-radius: var(--radius-md);
+  }
+
+  .file-item-index {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  .file-item-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .file-item-name {
     font-size: var(--text-sm);
-    font-family: inherit;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .form-input:focus,
-  .form-textarea:focus,
-  .form-select:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
+  .file-item-meta {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
   }
 
-  .form-textarea {
-    min-height: 120px;
-    resize: vertical;
-    font-family: var(--font-mono);
-  }
-
-  .form-select {
+  .file-item-remove {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
     cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: all var(--duration-fast) var(--ease-default);
+    flex-shrink: 0;
   }
 
-  /* 通用按钮样式 */
-  .btn {
+  .file-item-remove:hover {
+    background: var(--bg-hover);
+    color: #ef4444;
+  }
+
+  .file-item-move {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: all var(--duration-fast) var(--ease-default);
+    flex-shrink: 0;
+  }
+
+  .file-item-move:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+
+  .file-list-info {
+    display: flex;
+    gap: var(--space-4);
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .settings {
+    margin-top: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -168,21 +312,33 @@ const toolDesc = '合并多段视频';
     font-weight: var(--font-medium);
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
+    background: var(--color-accent-blue);
+    color: white;
   }
 
   .btn-primary:hover {
     opacity: 0.9;
   }
 
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
     background: var(--bg-tertiary);
-    color: var(--text-primary);
     border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .btn-secondary:hover {
@@ -195,43 +351,82 @@ const toolDesc = '合并多段视频';
     flex-wrap: wrap;
   }
 
-  /* 结果区域 */
+  .progress-area {
+    margin-top: var(--space-4);
+    text-align: center;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--space-2);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--color-accent-blue);
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  .progress-text {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
   .result-area {
+    margin-top: var(--space-4);
     padding: var(--space-4);
     background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
     border-radius: var(--radius-lg);
-    font-family: var(--font-mono);
+    border: 1px solid var(--border-primary);
+  }
+
+  .result-header {
     font-size: var(--text-sm);
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
   }
 
-  /* 文件上传 */
-  .file-upload {
+  .result-stats {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
   }
 
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
+  .stat {
+    flex: 1;
+    text-align: center;
+    padding: var(--space-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
   }
 
-  .file-upload input[type="file"] {
-    display: none;
+  .stat-label {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-1);
   }
 
-  /* 响应式 */
+  .stat-value {
+    display: block;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+  }
+
+  .result-video {
+    width: 100%;
+    margin-bottom: var(--space-4);
+    border-radius: var(--radius-md);
+    background: #000;
+  }
+
   @media (max-width: 768px) {
     .tool-main {
       padding: var(--space-4);
@@ -241,15 +436,316 @@ const toolDesc = '合并多段视频';
       flex-direction: column;
     }
 
-    .btn {
+    .btn-group .btn-primary,
+    .btn-group .btn-secondary {
       width: 100%;
+    }
+
+    .result-stats {
+      flex-direction: column;
     }
   }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('视频拼接 工具已加载');
-  });
+  (function() {
+    var uploadArea = document.getElementById('upload-area');
+    var videoInput = document.getElementById('video-input');
+    var fileList = document.getElementById('file-list');
+    var fileItems = document.getElementById('file-items');
+    var settings = document.getElementById('settings');
+    var progressArea = document.getElementById('progress-area');
+    var resultArea = document.getElementById('result-area');
+    var mergeBtn = document.getElementById('merge-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var resetBtn = document.getElementById('reset-btn');
+
+    var videoFiles = [];
+    var mergedBlob = null;
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function formatDuration(seconds) {
+      var mins = Math.floor(seconds / 60);
+      var secs = Math.floor(seconds % 60);
+      return mins + ':' + secs.toString().padStart(2, '0');
+    }
+
+    uploadArea?.addEventListener('click', function() { videoInput?.click(); });
+
+    uploadArea?.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      uploadArea.style.borderColor = 'var(--color-accent-blue)';
+      uploadArea.style.background = 'var(--bg-tertiary)';
+    });
+
+    uploadArea?.addEventListener('dragleave', function() {
+      uploadArea.style.borderColor = '';
+      uploadArea.style.background = '';
+    });
+
+    uploadArea?.addEventListener('drop', function(e) {
+      e.preventDefault();
+      uploadArea.style.borderColor = '';
+      uploadArea.style.background = '';
+      var files = Array.from(e.dataTransfer?.files || []).filter(function(f) {
+        return f.type.startsWith('video/');
+      });
+      if (files.length > 0) addFiles(files);
+    });
+
+    videoInput?.addEventListener('change', function() {
+      var files = Array.from(videoInput.files || []);
+      if (files.length > 0) addFiles(files);
+      videoInput.value = '';
+    });
+
+    document.getElementById('add-more-btn')?.addEventListener('click', function() {
+      videoInput?.click();
+    });
+
+    function addFiles(files) {
+      files.forEach(function(file) {
+        videoFiles.push({ file: file, duration: 0, width: 0, height: 0 });
+      });
+      loadVideoMetadata();
+    }
+
+    function loadVideoMetadata() {
+      var pending = videoFiles.length;
+      videoFiles.forEach(function(item, index) {
+        if (item.duration > 0) {
+          pending--;
+          return;
+        }
+        var video = document.createElement('video');
+        video.preload = 'metadata';
+        video.muted = true;
+        video.onloadedmetadata = function() {
+          item.duration = video.duration;
+          item.width = video.videoWidth;
+          item.height = video.videoHeight;
+          pending--;
+          if (pending <= 0) renderFileList();
+          URL.revokeObjectURL(video.src);
+        };
+        video.onerror = function() {
+          pending--;
+          if (pending <= 0) renderFileList();
+        };
+        video.src = URL.createObjectURL(item.file);
+      });
+      renderFileList();
+    }
+
+    function renderFileList() {
+      fileItems.innerHTML = '';
+      var totalDur = 0;
+      videoFiles.forEach(function(item, index) {
+        totalDur += item.duration;
+        var div = document.createElement('div');
+        div.className = 'file-item';
+        div.innerHTML =
+          '<button class="file-item-move" data-index="' + index + '" data-dir="-1" title="上移">&#9650;</button>' +
+          '<span class="file-item-index">' + (index + 1) + '</span>' +
+          '<div class="file-item-info">' +
+            '<div class="file-item-name">' + item.file.name + '</div>' +
+            '<div class="file-item-meta">' + formatSize(item.file.size) + (item.duration > 0 ? ' - ' + formatDuration(item.duration) : '') + '</div>' +
+          '</div>' +
+          '<button class="file-item-move" data-index="' + index + '" data-dir="1" title="下移">&#9660;</button>' +
+          '<button class="file-item-remove" data-index="' + index + '" title="移除">&#10005;</button>';
+        fileItems.appendChild(div);
+      });
+
+      document.querySelectorAll('.file-item-remove').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var idx = parseInt(btn.dataset.index);
+          videoFiles.splice(idx, 1);
+          renderFileList();
+        });
+      });
+
+      document.querySelectorAll('.file-item-move').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var idx = parseInt(btn.dataset.index);
+          var dir = parseInt(btn.dataset.dir);
+          var newIdx = idx + dir;
+          if (newIdx < 0 || newIdx >= videoFiles.length) return;
+          var temp = videoFiles[idx];
+          videoFiles[idx] = videoFiles[newIdx];
+          videoFiles[newIdx] = temp;
+          renderFileList();
+        });
+      });
+
+      document.getElementById('total-duration').textContent = formatDuration(totalDur);
+      document.getElementById('file-count').textContent = videoFiles.length;
+
+      if (videoFiles.length > 0) {
+        uploadArea.style.display = 'none';
+        fileList.style.display = 'block';
+        settings.style.display = 'flex';
+      }
+    }
+
+    mergeBtn?.addEventListener('click', async function() {
+      if (videoFiles.length < 1) return;
+
+      mergeBtn.disabled = true;
+      mergeBtn.textContent = '拼接中...';
+      progressArea.style.display = 'block';
+      resultArea.style.display = 'none';
+
+      try {
+        var maxWidth = 0;
+        var maxHeight = 0;
+        var totalDuration = 0;
+        var videoElements = [];
+
+        for (var i = 0; i < videoFiles.length; i++) {
+          var item = videoFiles[i];
+          var video = document.createElement('video');
+          video.muted = true;
+          video.playsInline = true;
+          video.src = URL.createObjectURL(item.file);
+          await new Promise(function(resolve, reject) {
+            video.onloadeddata = resolve;
+            video.onerror = reject;
+          });
+          videoElements.push(video);
+          if (video.videoWidth > maxWidth) maxWidth = video.videoWidth;
+          if (video.videoHeight > maxHeight) maxHeight = video.videoHeight;
+          totalDuration += video.duration;
+        }
+
+        if (maxWidth % 2 !== 0) maxWidth += 1;
+        if (maxHeight % 2 !== 0) maxHeight += 1;
+
+        var canvas = document.createElement('canvas');
+        canvas.width = maxWidth;
+        canvas.height = maxHeight;
+        var ctx = canvas.getContext('2d');
+
+        var mimeType = 'video/webm;codecs=vp9';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm;codecs=vp8';
+        }
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm';
+        }
+
+        var stream = canvas.captureStream(30);
+        var recorder = new MediaRecorder(stream, {
+          mimeType: mimeType,
+          videoBitsPerSecond: 2500000
+        });
+
+        var chunks = [];
+        recorder.ondataavailable = function(e) {
+          if (e.data.size > 0) chunks.push(e.data);
+        };
+
+        var done = new Promise(function(resolve) {
+          recorder.onstop = resolve;
+        });
+
+        recorder.start(100);
+
+        var elapsed = 0;
+        var startTime = performance.now();
+
+        for (var j = 0; j < videoElements.length; j++) {
+          var v = videoElements[j];
+          v.currentTime = 0;
+          await new Promise(function(resolve) {
+            v.onseeked = resolve;
+          });
+          v.play();
+
+          await new Promise(function(resolve) {
+            function drawFrame() {
+              if (v.ended || v.paused) {
+                resolve();
+                return;
+              }
+              var offsetX = Math.round((maxWidth - v.videoWidth) / 2);
+              var offsetY = Math.round((maxHeight - v.videoHeight) / 2);
+              ctx.fillStyle = '#000';
+              ctx.fillRect(0, 0, maxWidth, maxHeight);
+              ctx.drawImage(v, offsetX, offsetY, v.videoWidth, v.videoHeight);
+              var prog = ((performance.now() - startTime) / 1000 / totalDuration) * 100;
+              document.getElementById('progress-fill').style.width = Math.min(prog, 95) + '%';
+              document.getElementById('progress-text').textContent = '处理中 ' + Math.round(Math.min(prog, 95)) + '%...';
+              requestAnimationFrame(drawFrame);
+            }
+            v.onended = function() {
+              ctx.fillStyle = '#000';
+              ctx.fillRect(0, 0, maxWidth, maxHeight);
+              ctx.drawImage(v, 0, 0, v.videoWidth, v.videoHeight);
+              resolve();
+            };
+            drawFrame();
+          });
+        }
+
+        setTimeout(function() {
+          recorder.stop();
+        }, 200);
+
+        await done;
+
+        mergedBlob = new Blob(chunks, { type: mimeType.split(';')[0] });
+
+        document.getElementById('progress-fill').style.width = '100%';
+        document.getElementById('progress-text').textContent = '完成!';
+
+        document.getElementById('result-size').textContent = formatSize(mergedBlob.size);
+        document.getElementById('result-duration').textContent = formatDuration(totalDuration);
+
+        var url = URL.createObjectURL(mergedBlob);
+        document.getElementById('result-video').src = url;
+
+        settings.style.display = 'none';
+        progressArea.style.display = 'none';
+        resultArea.style.display = 'block';
+
+        videoElements.forEach(function(v) {
+          URL.revokeObjectURL(v.src);
+        });
+      } catch (err) {
+        alert('拼接失败: ' + err.message);
+        progressArea.style.display = 'none';
+      }
+
+      mergeBtn.disabled = false;
+      mergeBtn.textContent = '开始拼接';
+    });
+
+    downloadBtn?.addEventListener('click', function() {
+      if (!mergedBlob) return;
+      var url = URL.createObjectURL(mergedBlob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'merged_video.webm';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    resetBtn?.addEventListener('click', function() {
+      videoFiles = [];
+      mergedBlob = null;
+      uploadArea.style.display = 'flex';
+      fileList.style.display = 'none';
+      settings.style.display = 'none';
+      progressArea.style.display = 'none';
+      resultArea.style.display = 'none';
+      videoInput.value = '';
+    });
+  })();
 </script>

@@ -108,11 +108,11 @@ import Layout from '@layouts/Layout.astro';
 </style>
 
 <script>
-  const urlInput = document.getElementById('url-input') as HTMLTextAreaElement;
-  const urlOutput = document.getElementById('url-output') as HTMLTextAreaElement;
+  const urlInput = document.getElementById('url-input');
+  const urlOutput = document.getElementById('url-output');
   const parseResult = document.getElementById('parse-result')!;
   const extraOutput = document.getElementById('extra-output')!;
-  const extraResult = document.getElementById('extra-result') as HTMLTextAreaElement;
+  const extraResult = document.getElementById('extra-result');
 
   document.getElementById('encode-btn')?.addEventListener('click', () => {
     urlOutput.value = encodeURIComponent(urlInput.value);

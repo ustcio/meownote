@@ -2,7 +2,7 @@
 import Layout from '@layouts/Layout.astro';
 
 const toolName = '视频裁剪';
-const toolDesc = '裁剪视频片段';
+const toolDesc = '裁剪视频片段，选择起止时间';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -21,15 +21,94 @@ const toolDesc = '裁剪视频片段';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+          </svg>
+          <span>点击或拖拽上传视频文件</span>
+          <span class="hint">支持 MP4, WebM, MOV, AVI, MKV</span>
+          <input type="file" id="video-input" accept="video/*" hidden>
+        </div>
+
+        <div class="file-info" id="file-info" style="display:none;">
+          <div class="info-row">
+            <span class="info-label">文件名</span>
+            <span class="info-value" id="file-name"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">原始大小</span>
+            <span class="info-value" id="file-size"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">时长</span>
+            <span class="info-value" id="file-duration"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">分辨率</span>
+            <span class="info-value" id="file-resolution"></span>
+          </div>
+        </div>
+
+        <div class="preview-section" id="preview-section" style="display:none;">
+          <video id="preview-video" controls class="preview-video"></video>
+          <div class="time-controls">
+            <div class="time-group">
+              <label class="setting-label">开始时间（秒）</label>
+              <div class="time-input-row">
+                <input type="number" class="time-input" id="start-time" value="0" min="0" step="0.1">
+                <button class="btn-small" id="set-start-btn">设为当前位置</button>
+              </div>
+            </div>
+            <div class="time-group">
+              <label class="setting-label">结束时间（秒）</label>
+              <div class="time-input-row">
+                <input type="number" class="time-input" id="end-time" value="0" min="0" step="0.1">
+                <button class="btn-small" id="set-end-btn">设为当前位置</button>
+              </div>
+            </div>
+            <div class="quick-selects">
+              <span class="quick-label">快速选择:</span>
+              <button class="quick-btn" data-percent="25">前25%</button>
+              <button class="quick-btn" data-percent="50">前50%</button>
+              <button class="quick-btn" data-percent="75">前75%</button>
+              <button class="quick-btn" data-percent="100">全部</button>
+            </div>
+            <div class="clip-duration">
+              <span>裁剪时长: <strong id="clip-duration">0.0</strong> 秒</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <button class="btn-primary" id="cut-btn">开始裁剪</button>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <span class="progress-text" id="progress-text">处理中...</span>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">
+            <span>裁剪结果</span>
+          </div>
+          <div class="result-stats">
+            <div class="stat">
+              <span class="stat-label">输出大小</span>
+              <span class="stat-value" id="result-size"></span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">裁剪时长</span>
+              <span class="stat-value" id="result-duration"></span>
+            </div>
+          </div>
+          <video id="result-video" controls class="result-video"></video>
+          <div class="btn-group">
+            <button class="btn-primary" id="download-btn">下载裁剪后的视频</button>
+            <button class="btn-secondary" id="reset-btn">重新上传</button>
           </div>
         </div>
       </main>
@@ -45,7 +124,7 @@ const toolDesc = '裁剪视频片段';
   }
 
   .tool-container {
-    max-width: 900px;
+    max-width: 700px;
     margin: 0 auto;
   }
 
@@ -88,75 +167,181 @@ const toolDesc = '裁剪视频片段';
     min-height: 400px;
   }
 
-  .tool-content {
+  .upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+    border: 2px dashed var(--border-primary);
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    color: var(--text-tertiary);
+  }
+
+  .upload-area:hover {
+    border-color: var(--color-accent-blue);
+    color: var(--color-accent-blue);
+    background: var(--bg-tertiary);
+  }
+
+  .upload-area svg {
+    margin-bottom: var(--space-3);
+  }
+
+  .upload-area .hint {
+    font-size: var(--text-xs);
+    color: var(--text-quaternary);
+    margin-top: var(--space-1);
+  }
+
+  .upload-area input[type="file"] {
+    display: none;
+  }
+
+  .file-info {
+    margin-top: var(--space-4);
+    padding: var(--space-4);
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-primary);
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border-primary);
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  .info-value {
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+  }
+
+  .preview-section {
+    margin-top: var(--space-4);
+  }
+
+  .preview-video {
+    width: 100%;
+    border-radius: var(--radius-lg);
+    background: #000;
+    margin-bottom: var(--space-4);
+  }
+
+  .time-controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-primary);
+  }
+
+  .time-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .time-input-row {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+  }
+
+  .time-input {
+    flex: 1;
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-family: var(--font-mono);
+  }
+
+  .time-input:focus {
+    outline: none;
+    border-color: var(--color-accent-blue);
+  }
+
+  .btn-small {
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    white-space: nowrap;
+  }
+
+  .btn-small:hover {
+    background: var(--bg-hover);
+  }
+
+  .quick-selects {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .quick-label {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+
+  .quick-btn {
+    padding: var(--space-1) var(--space-2);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .quick-btn:hover {
+    border-color: var(--color-accent-blue);
+    color: var(--text-primary);
+  }
+
+  .clip-duration {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .settings {
+    margin-top: var(--space-4);
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
   }
 
-  .tool-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .tool-placeholder p {
-    font-size: var(--text-sm);
-  }
-
-  /* 通用表单样式 */
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .form-label {
+  .setting-label {
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
     color: var(--text-primary);
   }
 
-  .form-input,
-  .form-textarea,
-  .form-select {
-    padding: var(--space-3);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
-    font-size: var(--text-sm);
-    font-family: inherit;
-  }
-
-  .form-input:focus,
-  .form-textarea:focus,
-  .form-select:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-  }
-
-  .form-textarea {
-    min-height: 120px;
-    resize: vertical;
-    font-family: var(--font-mono);
-  }
-
-  .form-select {
-    cursor: pointer;
-  }
-
-  /* 通用按钮样式 */
-  .btn {
+  .btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -168,21 +353,33 @@ const toolDesc = '裁剪视频片段';
     font-weight: var(--font-medium);
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
+    background: var(--color-accent-blue);
+    color: white;
   }
 
   .btn-primary:hover {
     opacity: 0.9;
   }
 
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
     background: var(--bg-tertiary);
-    color: var(--text-primary);
     border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .btn-secondary:hover {
@@ -195,43 +392,82 @@ const toolDesc = '裁剪视频片段';
     flex-wrap: wrap;
   }
 
-  /* 结果区域 */
+  .progress-area {
+    margin-top: var(--space-4);
+    text-align: center;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--space-2);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--color-accent-blue);
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  .progress-text {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
   .result-area {
+    margin-top: var(--space-4);
     padding: var(--space-4);
     background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
     border-radius: var(--radius-lg);
-    font-family: var(--font-mono);
+    border: 1px solid var(--border-primary);
+  }
+
+  .result-header {
     font-size: var(--text-sm);
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
   }
 
-  /* 文件上传 */
-  .file-upload {
+  .result-stats {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
   }
 
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
+  .stat {
+    flex: 1;
+    text-align: center;
+    padding: var(--space-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
   }
 
-  .file-upload input[type="file"] {
-    display: none;
+  .stat-label {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-1);
   }
 
-  /* 响应式 */
+  .stat-value {
+    display: block;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+  }
+
+  .result-video {
+    width: 100%;
+    margin-bottom: var(--space-4);
+    border-radius: var(--radius-md);
+    background: #000;
+  }
+
   @media (max-width: 768px) {
     .tool-main {
       padding: var(--space-4);
@@ -241,15 +477,277 @@ const toolDesc = '裁剪视频片段';
       flex-direction: column;
     }
 
-    .btn {
+    .btn-group .btn-primary,
+    .btn-group .btn-secondary {
       width: 100%;
+    }
+
+    .result-stats {
+      flex-direction: column;
+    }
+
+    .time-input-row {
+      flex-direction: column;
+      align-items: stretch;
     }
   }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('视频裁剪 工具已加载');
-  });
+  (function() {
+    var uploadArea = document.getElementById('upload-area');
+    var videoInput = document.getElementById('video-input');
+    var fileInfo = document.getElementById('file-info');
+    var previewSection = document.getElementById('preview-section');
+    var settings = document.getElementById('settings');
+    var progressArea = document.getElementById('progress-area');
+    var resultArea = document.getElementById('result-area');
+    var cutBtn = document.getElementById('cut-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var resetBtn = document.getElementById('reset-btn');
+    var previewVideo = document.getElementById('preview-video');
+    var startTimeInput = document.getElementById('start-time');
+    var endTimeInput = document.getElementById('end-time');
+    var clipDurationEl = document.getElementById('clip-duration');
+
+    var originalFile = null;
+    var videoDuration = 0;
+    var videoWidth = 0;
+    var videoHeight = 0;
+    var cutBlob = null;
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function formatDuration(seconds) {
+      var mins = Math.floor(seconds / 60);
+      var secs = Math.floor(seconds % 60);
+      return mins + ':' + secs.toString().padStart(2, '0');
+    }
+
+    function updateClipDuration() {
+      var start = parseFloat(startTimeInput.value) || 0;
+      var end = parseFloat(endTimeInput.value) || videoDuration;
+      var dur = Math.max(0, end - start);
+      clipDurationEl.textContent = dur.toFixed(1);
+    }
+
+    uploadArea?.addEventListener('click', function() { videoInput?.click(); });
+
+    uploadArea?.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      uploadArea.style.borderColor = 'var(--color-accent-blue)';
+      uploadArea.style.background = 'var(--bg-tertiary)';
+    });
+
+    uploadArea?.addEventListener('dragleave', function() {
+      uploadArea.style.borderColor = '';
+      uploadArea.style.background = '';
+    });
+
+    uploadArea?.addEventListener('drop', function(e) {
+      e.preventDefault();
+      uploadArea.style.borderColor = '';
+      uploadArea.style.background = '';
+      var file = e.dataTransfer?.files[0];
+      if (file && file.type.startsWith('video/')) {
+        loadFile(file);
+      }
+    });
+
+    videoInput?.addEventListener('change', function() {
+      var file = videoInput.files?.[0];
+      if (file) loadFile(file);
+    });
+
+    startTimeInput?.addEventListener('input', updateClipDuration);
+    endTimeInput?.addEventListener('input', updateClipDuration);
+
+    document.getElementById('set-start-btn')?.addEventListener('click', function() {
+      startTimeInput.value = previewVideo.currentTime.toFixed(1);
+      updateClipDuration();
+    });
+
+    document.getElementById('set-end-btn')?.addEventListener('click', function() {
+      endTimeInput.value = previewVideo.currentTime.toFixed(1);
+      updateClipDuration();
+    });
+
+    document.querySelectorAll('.quick-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var pct = parseInt(btn.dataset.percent) / 100;
+        startTimeInput.value = '0';
+        endTimeInput.value = (videoDuration * pct).toFixed(1);
+        updateClipDuration();
+      });
+    });
+
+    function loadFile(file) {
+      originalFile = file;
+      var video = document.createElement('video');
+      video.preload = 'metadata';
+      video.muted = true;
+      video.onloadedmetadata = function() {
+        videoDuration = video.duration;
+        videoWidth = video.videoWidth;
+        videoHeight = video.videoHeight;
+        document.getElementById('file-name').textContent = file.name;
+        document.getElementById('file-size').textContent = formatSize(file.size);
+        document.getElementById('file-duration').textContent = formatDuration(videoDuration);
+        document.getElementById('file-resolution').textContent = videoWidth + 'x' + videoHeight;
+        endTimeInput.value = videoDuration.toFixed(1);
+        updateClipDuration();
+        previewVideo.src = URL.createObjectURL(file);
+        uploadArea.style.display = 'none';
+        fileInfo.style.display = 'block';
+        previewSection.style.display = 'block';
+        settings.style.display = 'flex';
+      };
+      video.onerror = function() {
+        alert('无法加载视频文件，请尝试其他格式');
+      };
+      video.src = URL.createObjectURL(file);
+    }
+
+    cutBtn?.addEventListener('click', async function() {
+      if (!originalFile) return;
+
+      var startTime = parseFloat(startTimeInput.value) || 0;
+      var endTime = parseFloat(endTimeInput.value) || videoDuration;
+      if (startTime >= endTime) {
+        alert('开始时间必须小于结束时间');
+        return;
+      }
+
+      cutBtn.disabled = true;
+      cutBtn.textContent = '裁剪中...';
+      progressArea.style.display = 'block';
+      resultArea.style.display = 'none';
+
+      try {
+        var video = document.createElement('video');
+        video.muted = true;
+        video.playsInline = true;
+        video.src = URL.createObjectURL(originalFile);
+        await new Promise(function(resolve, reject) {
+          video.onloadeddata = resolve;
+          video.onerror = reject;
+        });
+
+        var canvas = document.createElement('canvas');
+        canvas.width = videoWidth;
+        canvas.height = videoHeight;
+        var ctx = canvas.getContext('2d');
+
+        var mimeType = 'video/webm;codecs=vp9';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm;codecs=vp8';
+        }
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm';
+        }
+
+        var stream = canvas.captureStream(30);
+        var recorder = new MediaRecorder(stream, {
+          mimeType: mimeType,
+          videoBitsPerSecond: 2500000
+        });
+
+        var chunks = [];
+        recorder.ondataavailable = function(e) {
+          if (e.data.size > 0) chunks.push(e.data);
+        };
+
+        var done = new Promise(function(resolve) {
+          recorder.onstop = resolve;
+        });
+
+        video.currentTime = startTime;
+        await new Promise(function(resolve) {
+          video.onseeked = resolve;
+        });
+
+        recorder.start(100);
+
+        var clipDuration = endTime - startTime;
+        var startTime2 = performance.now();
+
+        function drawFrame() {
+          if (video.currentTime >= endTime || video.ended || video.paused) return;
+          ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
+          var elapsed = (performance.now() - startTime2) / 1000;
+          var progress = Math.min((elapsed / clipDuration) * 100, 95);
+          document.getElementById('progress-fill').style.width = progress + '%';
+          document.getElementById('progress-text').textContent = '处理中 ' + Math.round(progress) + '%...';
+          requestAnimationFrame(drawFrame);
+        }
+
+        video.play();
+        drawFrame();
+
+        var checkEnd = setInterval(function() {
+          if (video.currentTime >= endTime || video.ended) {
+            clearInterval(checkEnd);
+            ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
+            video.pause();
+            setTimeout(function() {
+              recorder.stop();
+            }, 200);
+          }
+        }, 100);
+
+        await done;
+
+        cutBlob = new Blob(chunks, { type: mimeType.split(';')[0] });
+
+        document.getElementById('progress-fill').style.width = '100%';
+        document.getElementById('progress-text').textContent = '完成!';
+
+        document.getElementById('result-size').textContent = formatSize(cutBlob.size);
+        document.getElementById('result-duration').textContent = clipDuration.toFixed(1) + ' 秒';
+
+        var url = URL.createObjectURL(cutBlob);
+        document.getElementById('result-video').src = url;
+
+        settings.style.display = 'none';
+        progressArea.style.display = 'none';
+        resultArea.style.display = 'block';
+
+        URL.revokeObjectURL(video.src);
+      } catch (err) {
+        alert('裁剪失败: ' + err.message);
+        progressArea.style.display = 'none';
+      }
+
+      cutBtn.disabled = false;
+      cutBtn.textContent = '开始裁剪';
+    });
+
+    downloadBtn?.addEventListener('click', function() {
+      if (!cutBlob) return;
+      var url = URL.createObjectURL(cutBlob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = originalFile.name.replace(/\.[^.]+$/, '') + '_cut.webm';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    resetBtn?.addEventListener('click', function() {
+      originalFile = null;
+      cutBlob = null;
+      uploadArea.style.display = 'flex';
+      fileInfo.style.display = 'none';
+      previewSection.style.display = 'none';
+      settings.style.display = 'none';
+      progressArea.style.display = 'none';
+      resultArea.style.display = 'none';
+      videoInput.value = '';
+    });
+  })();
 </script>

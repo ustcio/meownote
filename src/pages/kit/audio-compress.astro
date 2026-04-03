@@ -1,11 +1,8 @@
 ---
 import Layout from '@layouts/Layout.astro';
-
-const toolName = '音频压缩';
-const toolDesc = '压缩音频文件大小';
 ---
 
-<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+<Layout title="音频压缩 - 工具箱 - Maxwell.Science" description="压缩音频文件大小，降低比特率">
   <section class="tool-page">
     <div class="tool-container">
       <header class="tool-header">
@@ -16,20 +13,85 @@ const toolDesc = '压缩音频文件大小';
           </svg>
           返回工具箱
         </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
+        <h1 class="tool-title">音频压缩</h1>
+        <p class="tool-description">上传音频文件，通过降低比特率和采样率来压缩文件大小</p>
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M9 18V5l12-2v13"></path>
+            <circle cx="6" cy="18" r="3"></circle>
+            <circle cx="18" cy="16" r="3"></circle>
+          </svg>
+          <span>点击或拖拽上传音频文件</span>
+          <span class="hint">支持 MP3, WAV, OGG, FLAC, AAC, M4A</span>
+          <input type="file" id="audio-input" accept="audio/*" hidden>
+        </div>
+
+        <div class="file-info" id="file-info" style="display:none;">
+          <div class="info-row">
+            <span class="info-label">文件名</span>
+            <span class="info-value" id="file-name"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">原始大小</span>
+            <span class="info-value" id="file-size"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">时长</span>
+            <span class="info-value" id="file-duration"></span>
+          </div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <div class="setting-group">
+            <label class="setting-label">目标比特率</label>
+            <div class="bitrate-options">
+              <button class="bitrate-btn" data-bitrate="64">64 kbps</button>
+              <button class="bitrate-btn" data-bitrate="96">96 kbps</button>
+              <button class="bitrate-btn active" data-bitrate="128">128 kbps</button>
+              <button class="bitrate-btn" data-bitrate="192">192 kbps</button>
+              <button class="bitrate-btn" data-bitrate="256">256 kbps</button>
+              <button class="bitrate-btn" data-bitrate="320">320 kbps</button>
+            </div>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">采样率</label>
+            <select class="setting-select" id="sample-rate">
+              <option value="22050">22050 Hz</option>
+              <option value="44100" selected>44100 Hz</option>
+              <option value="48000">48000 Hz</option>
+            </select>
+          </div>
+          <button class="btn-primary" id="compress-btn">开始压缩</button>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <span class="progress-text" id="progress-text">处理中...</span>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">
+            <span>压缩结果</span>
+          </div>
+          <div class="result-stats">
+            <div class="stat">
+              <span class="stat-label">压缩后大小</span>
+              <span class="stat-value" id="result-size"></span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">压缩率</span>
+              <span class="stat-value" id="result-ratio"></span>
+            </div>
+          </div>
+          <audio id="result-audio" controls class="result-audio"></audio>
+          <div class="btn-group">
+            <button class="btn-primary" id="download-btn">下载压缩后的音频</button>
+            <button class="btn-secondary" id="reset-btn">重新上传</button>
           </div>
         </div>
       </main>
@@ -45,7 +107,7 @@ const toolDesc = '压缩音频文件大小';
   }
 
   .tool-container {
-    max-width: 900px;
+    max-width: 700px;
     margin: 0 auto;
   }
 
@@ -88,75 +150,127 @@ const toolDesc = '压缩音频文件大小';
     min-height: 400px;
   }
 
-  .tool-content {
+  .upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+    border: 2px dashed var(--border-primary);
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    color: var(--text-tertiary);
+  }
+
+  .upload-area:hover {
+    border-color: var(--color-accent-blue);
+    color: var(--color-accent-blue);
+    background: var(--bg-tertiary);
+  }
+
+  .upload-area svg {
+    margin-bottom: var(--space-3);
+  }
+
+  .upload-area .hint {
+    font-size: var(--text-xs);
+    color: var(--text-quaternary);
+    margin-top: var(--space-1);
+  }
+
+  .upload-area input[type="file"] {
+    display: none;
+  }
+
+  .file-info {
+    margin-top: var(--space-4);
+    padding: var(--space-4);
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-primary);
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border-primary);
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  .info-value {
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+  }
+
+  .settings {
+    margin-top: var(--space-4);
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
   }
 
-  .tool-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .tool-placeholder p {
-    font-size: var(--text-sm);
-  }
-
-  /* 通用表单样式 */
-  .form-group {
+  .setting-group {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
   }
 
-  .form-label {
+  .setting-label {
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
     color: var(--text-primary);
   }
 
-  .form-input,
-  .form-textarea,
-  .form-select {
-    padding: var(--space-3);
+  .bitrate-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .bitrate-btn {
+    padding: var(--space-2) var(--space-3);
     background: var(--bg-primary);
     border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .bitrate-btn:hover {
+    border-color: var(--color-accent-blue);
+    color: var(--text-primary);
+  }
+
+  .bitrate-btn.active {
+    background: var(--color-accent-blue);
+    border-color: var(--color-accent-blue);
+    color: white;
+  }
+
+  .setting-select {
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
     color: var(--text-primary);
     font-size: var(--text-sm);
-    font-family: inherit;
-  }
-
-  .form-input:focus,
-  .form-textarea:focus,
-  .form-select:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-  }
-
-  .form-textarea {
-    min-height: 120px;
-    resize: vertical;
-    font-family: var(--font-mono);
-  }
-
-  .form-select {
     cursor: pointer;
   }
 
-  /* 通用按钮样式 */
-  .btn {
+  .btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -168,11 +282,8 @@ const toolDesc = '压缩音频文件大小';
     font-weight: var(--font-medium);
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
+    background: var(--color-accent-blue);
+    color: white;
   }
 
   .btn-primary:hover {
@@ -180,9 +291,19 @@ const toolDesc = '压缩音频文件大小';
   }
 
   .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
     background: var(--bg-tertiary);
-    color: var(--text-primary);
     border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .btn-secondary:hover {
@@ -195,43 +316,81 @@ const toolDesc = '压缩音频文件大小';
     flex-wrap: wrap;
   }
 
-  /* 结果区域 */
+  .progress-area {
+    margin-top: var(--space-4);
+    text-align: center;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--space-2);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--color-accent-blue);
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  .progress-text {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
   .result-area {
+    margin-top: var(--space-4);
     padding: var(--space-4);
     background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
     border-radius: var(--radius-lg);
-    font-family: var(--font-mono);
+    border: 1px solid var(--border-primary);
+  }
+
+  .result-header {
     font-size: var(--text-sm);
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
   }
 
-  /* 文件上传 */
-  .file-upload {
+  .result-stats {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
   }
 
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
+  .stat {
+    flex: 1;
+    text-align: center;
+    padding: var(--space-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
   }
 
-  .file-upload input[type="file"] {
-    display: none;
+  .stat-label {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-1);
   }
 
-  /* 响应式 */
+  .stat-value {
+    display: block;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+  }
+
+  .result-audio {
+    width: 100%;
+    margin-bottom: var(--space-4);
+    border-radius: var(--radius-md);
+  }
+
   @media (max-width: 768px) {
     .tool-main {
       padding: var(--space-4);
@@ -241,15 +400,252 @@ const toolDesc = '压缩音频文件大小';
       flex-direction: column;
     }
 
-    .btn {
+    .btn-group .btn-primary,
+    .btn-group .btn-secondary {
       width: 100%;
+    }
+
+    .result-stats {
+      flex-direction: column;
     }
   }
 </style>
 
-<script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('音频压缩 工具已加载');
+<script>
+  const uploadArea = document.getElementById('upload-area');
+  const audioInput = document.getElementById('audio-input');
+  const fileInfo = document.getElementById('file-info');
+  const settings = document.getElementById('settings');
+  const progressArea = document.getElementById('progress-area');
+  const resultArea = document.getElementById('result-area');
+  const compressBtn = document.getElementById('compress-btn');
+  const downloadBtn = document.getElementById('download-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const resultAudio = document.getElementById('result-audio');
+
+  let audioBuffer = null;
+  let originalFile = null;
+  let selectedBitrate = 128;
+  let compressedBlob = null;
+
+  // Upload handling
+  uploadArea?.addEventListener('click', () => audioInput?.click());
+
+  uploadArea?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.style.borderColor = 'var(--color-accent-blue)';
+    uploadArea.style.background = 'var(--bg-tertiary)';
   });
+
+  uploadArea?.addEventListener('dragleave', () => {
+    uploadArea.style.borderColor = '';
+    uploadArea.style.background = '';
+  });
+
+  uploadArea?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.style.borderColor = '';
+    uploadArea.style.background = '';
+    const file = e.dataTransfer?.files[0];
+    if (file && file.type.startsWith('audio/')) {
+      loadFile(file);
+    }
+  });
+
+  audioInput?.addEventListener('change', () => {
+    const file = audioInput.files?.[0];
+    if (file) loadFile(file);
+  });
+
+  // Bitrate selection
+  document.querySelectorAll('.bitrate-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.bitrate-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedBitrate = parseInt(btn.dataset.bitrate);
+    });
+  });
+
+  async function loadFile(file) {
+    originalFile = file;
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      
+      document.getElementById('file-name').textContent = file.name;
+      document.getElementById('file-size').textContent = formatSize(file.size);
+      document.getElementById('file-duration').textContent = formatDuration(audioBuffer.duration);
+      
+      uploadArea.style.display = 'none';
+      fileInfo.style.display = 'block';
+      settings.style.display = 'flex';
+    } catch (err) {
+      alert('无法解码音频文件，请尝试其他格式');
+    }
+  }
+
+  compressBtn?.addEventListener('click', async () => {
+    if (!audioBuffer) return;
+    
+    const sampleRate = parseInt(document.getElementById('sample-rate').value);
+    compressBtn.disabled = true;
+    compressBtn.textContent = '压缩中...';
+    progressArea.style.display = 'block';
+    resultArea.style.display = 'none';
+    
+    // Simulate progress
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      progress += 5;
+      if (progress > 90) progress = 90;
+      document.getElementById('progress-fill').style.width = progress + '%';
+      document.getElementById('progress-text').textContent = `处理中 ${progress}%...`;
+    }, 100);
+
+    try {
+      // Create offline context with target sample rate
+      const offlineCtx = new OfflineAudioContext(
+        audioBuffer.numberOfChannels,
+        audioBuffer.duration * sampleRate,
+        sampleRate
+      );
+
+      const source = offlineCtx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(offlineCtx.destination);
+      source.start();
+
+      const renderedBuffer = await offlineCtx.startRendering();
+      
+      // Convert to WAV blob
+      compressedBlob = bufferToWav(renderedBuffer);
+      
+      clearInterval(progressInterval);
+      document.getElementById('progress-fill').style.width = '100%';
+      document.getElementById('progress-text').textContent = '完成!';
+
+      // Show results
+      const originalSize = originalFile.size;
+      const compressedSize = compressedBlob.size;
+      const ratio = ((1 - compressedSize / originalSize) * 100).toFixed(1);
+
+      document.getElementById('result-size').textContent = formatSize(compressedSize);
+      document.getElementById('result-ratio').textContent = (compressedSize < originalSize ? '-' : '+') + Math.abs(ratio) + '%';
+      
+      const url = URL.createObjectURL(compressedBlob);
+      resultAudio.src = url;
+      
+      settings.style.display = 'none';
+      progressArea.style.display = 'none';
+      resultArea.style.display = 'block';
+    } catch (err) {
+      alert('压缩失败: ' + err.message);
+      progressArea.style.display = 'none';
+    }
+    
+    compressBtn.disabled = false;
+    compressBtn.textContent = '开始压缩';
+  });
+
+  downloadBtn?.addEventListener('click', () => {
+    if (!compressedBlob) return;
+    const url = URL.createObjectURL(compressedBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = originalFile.name.replace(/\.[^.]+$/, '') + '_compressed.wav';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  resetBtn?.addEventListener('click', () => {
+    audioBuffer = null;
+    originalFile = null;
+    compressedBlob = null;
+    uploadArea.style.display = 'flex';
+    fileInfo.style.display = 'none';
+    settings.style.display = 'none';
+    progressArea.style.display = 'none';
+    resultArea.style.display = 'none';
+    audioInput.value = '';
+  });
+
+  function bufferToWav(buffer) {
+    const numChannels = buffer.numberOfChannels;
+    const sampleRate = buffer.sampleRate;
+    const format = 1; // PCM
+    const bitDepth = 16;
+    
+    let result;
+    if (numChannels === 2) {
+      result = interleave(buffer.getChannelData(0), buffer.getChannelData(1));
+    } else {
+      result = buffer.getChannelData(0);
+    }
+
+    const dataLength = result.length * (bitDepth / 8);
+    const headerLength = 44;
+    const totalLength = headerLength + dataLength;
+    
+    const arrayBuffer = new ArrayBuffer(totalLength);
+    const view = new DataView(arrayBuffer);
+    
+    // WAV header
+    writeString(view, 0, 'RIFF');
+    view.setUint32(4, totalLength - 8, true);
+    writeString(view, 8, 'WAVE');
+    writeString(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, format, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * numChannels * (bitDepth / 8), true);
+    view.setUint16(32, numChannels * (bitDepth / 8), true);
+    view.setUint16(34, bitDepth, true);
+    writeString(view, 36, 'data');
+    view.setUint32(40, dataLength, true);
+    
+    // Write audio data
+    let offset = 44;
+    for (let i = 0; i < result.length; i++) {
+      const sample = Math.max(-1, Math.min(1, result[i]));
+      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+      offset += 2;
+    }
+    
+    return new Blob([arrayBuffer], { type: 'audio/wav' });
+  }
+
+  function interleave(left, right) {
+    const length = left.length + right.length;
+    const result = new Float32Array(length);
+    let inputIndex = 0;
+    for (let i = 0; i < length;) {
+      result[i++] = left[inputIndex];
+      result[i++] = right[inputIndex];
+      inputIndex++;
+    }
+    return result;
+  }
+
+  function writeString(view, offset, string) {
+    for (let i = 0; i < string.length; i++) {
+      view.setUint8(offset + i, string.charCodeAt(i));
+    }
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+
+  function formatDuration(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
 </script>

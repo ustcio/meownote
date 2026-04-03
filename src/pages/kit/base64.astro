@@ -354,8 +354,8 @@ import Layout from '@layouts/Layout.astro';
   });
 
   // Text encoding/decoding
-  const textInput = document.getElementById('text-input') as HTMLTextAreaElement;
-  const base64Output = document.getElementById('base64-output') as HTMLTextAreaElement;
+  const textInput = document.getElementById('text-input');
+  const base64Output = document.getElementById('base64-output');
   const encodeBtn = document.getElementById('encode-btn');
   const decodeBtn = document.getElementById('decode-btn');
   const textClearBtn = document.getElementById('text-clear');
@@ -419,11 +419,11 @@ import Layout from '@layouts/Layout.astro';
 
   // Image to Base64
   const uploadArea = document.getElementById('upload-area');
-  const imageInput = document.getElementById('image-input') as HTMLInputElement;
+  const imageInput = document.getElementById('image-input');
   const imagePreview = document.getElementById('image-preview');
-  const previewImg = document.getElementById('preview-img') as HTMLImageElement;
+  const previewImg = document.getElementById('preview-img');
   const imageInfo = document.getElementById('image-info');
-  const imgBase64Output = document.getElementById('img-base64-output') as HTMLTextAreaElement;
+  const imgBase64Output = document.getElementById('img-base64-output');
   const imgBase64CopyBtn = document.getElementById('img-base64-copy');
 
   uploadArea?.addEventListener('click', () => imageInput?.click());
@@ -454,7 +454,7 @@ import Layout from '@layouts/Layout.astro';
   function processImage(file: File): void {
     const reader = new FileReader();
     reader.onload = (e) => {
-      const base64 = e.target?.result as string;
+      const base64 = e.target?.result;
 
       if (previewImg) previewImg.src = base64;
       if (imagePreview) imagePreview.style.display = 'block';

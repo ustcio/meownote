@@ -131,16 +131,16 @@ import Layout from '@layouts/Layout.astro';
 </style>
 
 <script>
-  const hexInput = document.getElementById('hex-input') as HTMLInputElement;
-  const rgbInput = document.getElementById('rgb-input') as HTMLInputElement;
-  const hslInput = document.getElementById('hsl-input') as HTMLInputElement;
-  const rgbaInput = document.getElementById('rgba-input') as HTMLInputElement;
-  const nativePicker = document.getElementById('native-picker') as HTMLInputElement;
-  const colorPreview = document.getElementById('color-preview') as HTMLElement;
-  const rSlider = document.getElementById('r-slider') as HTMLInputElement;
-  const gSlider = document.getElementById('g-slider') as HTMLInputElement;
-  const bSlider = document.getElementById('b-slider') as HTMLInputElement;
-  const aSlider = document.getElementById('a-slider') as HTMLInputElement;
+  const hexInput = document.getElementById('hex-input');
+  const rgbInput = document.getElementById('rgb-input');
+  const hslInput = document.getElementById('hsl-input');
+  const rgbaInput = document.getElementById('rgba-input');
+  const nativePicker = document.getElementById('native-picker');
+  const colorPreview = document.getElementById('color-preview');
+  const rSlider = document.getElementById('r-slider');
+  const gSlider = document.getElementById('g-slider');
+  const bSlider = document.getElementById('b-slider');
+  const aSlider = document.getElementById('a-slider');
   const rVal = document.getElementById('r-val');
   const gVal = document.getElementById('g-val');
   const bVal = document.getElementById('b-val');
@@ -260,9 +260,9 @@ import Layout from '@layouts/Layout.astro';
   // Copy buttons
   document.querySelectorAll('.copy-sm').forEach(btn => {
     btn.addEventListener('click', () => {
-      const targetId = (btn as HTMLElement).dataset.copy;
+      const targetId = (btn).dataset.copy;
       if (!targetId) return;
-      const input = document.getElementById(targetId) as HTMLInputElement;
+      const input = document.getElementById(targetId);
       if (input) {
         navigator.clipboard.writeText(input.value);
         btn.textContent = '已复制';

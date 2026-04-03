@@ -295,7 +295,7 @@ import Layout from '@layouts/Layout.astro';
 </style>
 
 <script>
-  const jsonInput = document.getElementById('json-input') as HTMLTextAreaElement;
+  const jsonInput = document.getElementById('json-input');
   const jsonOutput = document.getElementById('json-output');
   const status = document.getElementById('status');
   const formatBtn = document.getElementById('format-btn');
@@ -344,7 +344,7 @@ import Layout from '@layouts/Layout.astro';
         status.className = 'status valid';
       }
     } catch (e) {
-      if (jsonOutput) jsonOutput.innerHTML = `<span class="placeholder" style="color: #e88a6a;">解析错误: ${(e as Error).message}</span>`;
+      if (jsonOutput) jsonOutput.innerHTML = `<span class="placeholder" style="color: #e88a6a;">解析错误: ${(e).message}</span>`;
       if (status) {
         status.textContent = '✗ 无效 JSON';
         status.className = 'status invalid';
@@ -366,7 +366,7 @@ import Layout from '@layouts/Layout.astro';
         status.className = 'status valid';
       }
     } catch (e) {
-      if (jsonOutput) jsonOutput.innerHTML = `<span class="placeholder" style="color: #e88a6a;">解析错误: ${(e as Error).message}</span>`;
+      if (jsonOutput) jsonOutput.innerHTML = `<span class="placeholder" style="color: #e88a6a;">解析错误: ${(e).message}</span>`;
       if (status) {
         status.textContent = '✗ 无效 JSON';
         status.className = 'status invalid';
@@ -409,7 +409,7 @@ import Layout from '@layouts/Layout.astro';
   // Auto-format on paste
   jsonInput?.addEventListener('input', () => {
     // Debounce
-    clearTimeout((jsonInput as any)._timeout);
-    (jsonInput as any)._timeout = setTimeout(() => formatJson(), 300);
+    clearTimeout(jsonInput._timeout);
+    jsonInput._timeout = setTimeout(() => formatJson(), 300);
   });
 </script>

@@ -2,7 +2,7 @@
 import Layout from '@layouts/Layout.astro';
 
 const toolName = '视频转GIF';
-const toolDesc = '将视频转换为GIF动图';
+const toolDesc = '将视频转换为GIF动图，可调节FPS和尺寸';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -21,15 +21,91 @@ const toolDesc = '将视频转换为GIF动图';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+          </svg>
+          <span>点击或拖拽上传视频文件</span>
+          <span class="hint">支持 MP4, WebM, MOV, AVI, MKV</span>
+          <input type="file" id="video-input" accept="video/*" hidden>
+        </div>
+
+        <div class="file-info" id="file-info" style="display:none;">
+          <div class="info-row">
+            <span class="info-label">文件名</span>
+            <span class="info-value" id="file-name"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">原始大小</span>
+            <span class="info-value" id="file-size"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">时长</span>
+            <span class="info-value" id="file-duration"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">分辨率</span>
+            <span class="info-value" id="file-resolution"></span>
+          </div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <div class="setting-group">
+            <label class="setting-label">帧率 (FPS)</label>
+            <div class="fps-options">
+              <button class="fps-btn" data-fps="5">5 FPS</button>
+              <button class="fps-btn active" data-fps="10">10 FPS</button>
+              <button class="fps-btn" data-fps="15">15 FPS</button>
+              <button class="fps-btn" data-fps="20">20 FPS</button>
+            </div>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">最大宽度</label>
+            <select class="setting-select" id="max-width">
+              <option value="200">200px</option>
+              <option value="320" selected>320px</option>
+              <option value="480">480px</option>
+              <option value="640">640px</option>
+              <option value="original">原始</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">最大时长（秒，0=不限制）</label>
+            <input type="number" class="time-input" id="max-duration" value="5" min="0" max="30" step="1">
+          </div>
+          <button class="btn-primary" id="convert-btn">开始转换</button>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <span class="progress-text" id="progress-text">处理中...</span>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">
+            <span>转换结果</span>
+          </div>
+          <div class="result-stats">
+            <div class="stat">
+              <span class="stat-label">GIF大小</span>
+              <span class="stat-value" id="result-size"></span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">帧数</span>
+              <span class="stat-value" id="result-frames"></span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">尺寸</span>
+              <span class="stat-value" id="result-dims"></span>
+            </div>
+          </div>
+          <img id="result-gif" class="result-gif" alt="GIF预览">
+          <div class="btn-group">
+            <button class="btn-primary" id="download-btn">下载GIF</button>
+            <button class="btn-secondary" id="reset-btn">重新上传</button>
           </div>
         </div>
       </main>
@@ -45,7 +121,7 @@ const toolDesc = '将视频转换为GIF动图';
   }
 
   .tool-container {
-    max-width: 900px;
+    max-width: 700px;
     margin: 0 auto;
   }
 
@@ -88,75 +164,138 @@ const toolDesc = '将视频转换为GIF动图';
     min-height: 400px;
   }
 
-  .tool-content {
+  .upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+    border: 2px dashed var(--border-primary);
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    color: var(--text-tertiary);
+  }
+
+  .upload-area:hover {
+    border-color: var(--color-accent-blue);
+    color: var(--color-accent-blue);
+    background: var(--bg-tertiary);
+  }
+
+  .upload-area svg {
+    margin-bottom: var(--space-3);
+  }
+
+  .upload-area .hint {
+    font-size: var(--text-xs);
+    color: var(--text-quaternary);
+    margin-top: var(--space-1);
+  }
+
+  .upload-area input[type="file"] {
+    display: none;
+  }
+
+  .file-info {
+    margin-top: var(--space-4);
+    padding: var(--space-4);
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-primary);
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border-primary);
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  .info-value {
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+  }
+
+  .settings {
+    margin-top: var(--space-4);
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
   }
 
-  .tool-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-
-  .tool-placeholder svg {
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .tool-placeholder p {
-    font-size: var(--text-sm);
-  }
-
-  /* 通用表单样式 */
-  .form-group {
+  .setting-group {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
   }
 
-  .form-label {
+  .setting-label {
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
     color: var(--text-primary);
   }
 
-  .form-input,
-  .form-textarea,
-  .form-select {
-    padding: var(--space-3);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
-    font-size: var(--text-sm);
-    font-family: inherit;
+  .fps-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
   }
 
-  .form-input:focus,
-  .form-textarea:focus,
-  .form-select:focus {
+  .fps-btn {
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .fps-btn:hover {
+    border-color: var(--color-accent-blue);
+    color: var(--text-primary);
+  }
+
+  .fps-btn.active {
+    background: var(--color-accent-blue);
+    border-color: var(--color-accent-blue);
+    color: white;
+  }
+
+  .setting-select,
+  .time-input {
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+  }
+
+  .time-input {
+    width: 100px;
+    font-family: var(--font-mono);
+  }
+
+  .time-input:focus,
+  .setting-select:focus {
     outline: none;
     border-color: var(--color-accent-blue);
   }
 
-  .form-textarea {
-    min-height: 120px;
-    resize: vertical;
-    font-family: var(--font-mono);
-  }
-
-  .form-select {
-    cursor: pointer;
-  }
-
-  /* 通用按钮样式 */
-  .btn {
+  .btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -168,21 +307,33 @@ const toolDesc = '将视频转换为GIF动图';
     font-weight: var(--font-medium);
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-default);
-  }
-
-  .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
+    background: var(--color-accent-blue);
+    color: white;
   }
 
   .btn-primary:hover {
     opacity: 0.9;
   }
 
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
     background: var(--bg-tertiary);
-    color: var(--text-primary);
     border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
   }
 
   .btn-secondary:hover {
@@ -195,43 +346,82 @@ const toolDesc = '将视频转换为GIF动图';
     flex-wrap: wrap;
   }
 
-  /* 结果区域 */
+  .progress-area {
+    margin-top: var(--space-4);
+    text-align: center;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--space-2);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--color-accent-blue);
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  .progress-text {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
   .result-area {
+    margin-top: var(--space-4);
     padding: var(--space-4);
     background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
     border-radius: var(--radius-lg);
-    font-family: var(--font-mono);
+    border: 1px solid var(--border-primary);
+  }
+
+  .result-header {
     font-size: var(--text-sm);
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
   }
 
-  /* 文件上传 */
-  .file-upload {
+  .result-stats {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-    border: 2px dashed var(--border-primary);
-    border-radius: var(--radius-xl);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
   }
 
-  .file-upload:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
+  .stat {
+    flex: 1;
+    text-align: center;
+    padding: var(--space-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
   }
 
-  .file-upload input[type="file"] {
-    display: none;
+  .stat-label {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-1);
   }
 
-  /* 响应式 */
+  .stat-value {
+    display: block;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+  }
+
+  .result-gif {
+    max-width: 100%;
+    margin-bottom: var(--space-4);
+    border-radius: var(--radius-md);
+    background: repeating-conic-gradient(#808080 0% 25%, transparent 0% 50%) 50% / 20px 20px;
+  }
+
   @media (max-width: 768px) {
     .tool-main {
       padding: var(--space-4);
@@ -241,15 +431,436 @@ const toolDesc = '将视频转换为GIF动图';
       flex-direction: column;
     }
 
-    .btn {
+    .btn-group .btn-primary,
+    .btn-group .btn-secondary {
       width: 100%;
+    }
+
+    .result-stats {
+      flex-direction: column;
     }
   }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('视频转GIF 工具已加载');
-  });
+  (function() {
+    var uploadArea = document.getElementById('upload-area');
+    var videoInput = document.getElementById('video-input');
+    var fileInfo = document.getElementById('file-info');
+    var settings = document.getElementById('settings');
+    var progressArea = document.getElementById('progress-area');
+    var resultArea = document.getElementById('result-area');
+    var convertBtn = document.getElementById('convert-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var resetBtn = document.getElementById('reset-btn');
+    var resultGif = document.getElementById('result-gif');
+
+    var originalFile = null;
+    var videoDuration = 0;
+    var videoWidth = 0;
+    var videoHeight = 0;
+    var selectedFps = 10;
+    var gifBlob = null;
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function formatDuration(seconds) {
+      var mins = Math.floor(seconds / 60);
+      var secs = Math.floor(seconds % 60);
+      return mins + ':' + secs.toString().padStart(2, '0');
+    }
+
+    uploadArea?.addEventListener('click', function() { videoInput?.click(); });
+
+    uploadArea?.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      uploadArea.style.borderColor = 'var(--color-accent-blue)';
+      uploadArea.style.background = 'var(--bg-tertiary)';
+    });
+
+    uploadArea?.addEventListener('dragleave', function() {
+      uploadArea.style.borderColor = '';
+      uploadArea.style.background = '';
+    });
+
+    uploadArea?.addEventListener('drop', function(e) {
+      e.preventDefault();
+      uploadArea.style.borderColor = '';
+      uploadArea.style.background = '';
+      var file = e.dataTransfer?.files[0];
+      if (file && file.type.startsWith('video/')) {
+        loadFile(file);
+      }
+    });
+
+    videoInput?.addEventListener('change', function() {
+      var file = videoInput.files?.[0];
+      if (file) loadFile(file);
+    });
+
+    document.querySelectorAll('.fps-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.fps-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        selectedFps = parseInt(btn.dataset.fps);
+      });
+    });
+
+    function loadFile(file) {
+      originalFile = file;
+      var video = document.createElement('video');
+      video.preload = 'metadata';
+      video.muted = true;
+      video.onloadedmetadata = function() {
+        videoDuration = video.duration;
+        videoWidth = video.videoWidth;
+        videoHeight = video.videoHeight;
+        document.getElementById('file-name').textContent = file.name;
+        document.getElementById('file-size').textContent = formatSize(file.size);
+        document.getElementById('file-duration').textContent = formatDuration(videoDuration);
+        document.getElementById('file-resolution').textContent = videoWidth + 'x' + videoHeight;
+        uploadArea.style.display = 'none';
+        fileInfo.style.display = 'block';
+        settings.style.display = 'flex';
+        URL.revokeObjectURL(video.src);
+      };
+      video.onerror = function() {
+        alert('无法加载视频文件，请尝试其他格式');
+      };
+      video.src = URL.createObjectURL(file);
+    }
+
+    convertBtn?.addEventListener('click', async function() {
+      if (!originalFile) return;
+
+      convertBtn.disabled = true;
+      convertBtn.textContent = '转换中...';
+      progressArea.style.display = 'block';
+      resultArea.style.display = 'none';
+
+      var maxWidthVal = document.getElementById('max-width').value;
+      var maxDurationVal = parseFloat(document.getElementById('max-duration').value) || 0;
+
+      try {
+        var video = document.createElement('video');
+        video.muted = true;
+        video.playsInline = true;
+        video.src = URL.createObjectURL(originalFile);
+        await new Promise(function(resolve, reject) {
+          video.onloadeddata = resolve;
+          video.onerror = reject;
+        });
+
+        var vw = video.videoWidth;
+        var vh = video.videoHeight;
+        var targetW, targetH;
+
+        if (maxWidthVal === 'original') {
+          targetW = vw;
+          targetH = vh;
+        } else {
+          var mw = parseInt(maxWidthVal);
+          var ratio = Math.min(mw / vw, 1);
+          targetW = Math.round(vw * ratio);
+          targetH = Math.round(vh * ratio);
+        }
+
+        if (targetW % 2 !== 0) targetW += 1;
+        if (targetH % 2 !== 0) targetH += 1;
+
+        var duration = maxDurationVal > 0 ? Math.min(maxDurationVal, videoDuration) : videoDuration;
+        var frameCount = Math.ceil(duration * selectedFps);
+        var frameDelay = Math.round(100 / selectedFps);
+
+        var canvas = document.createElement('canvas');
+        canvas.width = targetW;
+        canvas.height = targetH;
+        var ctx = canvas.getContext('2d');
+
+        var frames = [];
+        var frameInterval = 1 / selectedFps;
+        var currentTime = 0;
+
+        for (var f = 0; f < frameCount; f++) {
+          video.currentTime = currentTime;
+          await new Promise(function(resolve) {
+            video.onseeked = resolve;
+          });
+          ctx.drawImage(video, 0, 0, targetW, targetH);
+          var imageData = ctx.getImageData(0, 0, targetW, targetH);
+          frames.push(imageData.data);
+
+          var progress = ((f + 1) / frameCount) * 80;
+          document.getElementById('progress-fill').style.width = progress + '%';
+          document.getElementById('progress-text').textContent = '提取帧 ' + (f + 1) + '/' + frameCount + '...';
+
+          currentTime += frameInterval;
+        }
+
+        document.getElementById('progress-text').textContent = '编码GIF...';
+        document.getElementById('progress-fill').style.width = '85%';
+
+        gifBlob = encodeGIF(targetW, targetH, frames, frameDelay);
+
+        document.getElementById('progress-fill').style.width = '100%';
+        document.getElementById('progress-text').textContent = '完成!';
+
+        document.getElementById('result-size').textContent = formatSize(gifBlob.size);
+        document.getElementById('result-frames').textContent = frameCount;
+        document.getElementById('result-dims').textContent = targetW + 'x' + targetH;
+
+        var url = URL.createObjectURL(gifBlob);
+        resultGif.src = url;
+
+        settings.style.display = 'none';
+        progressArea.style.display = 'none';
+        resultArea.style.display = 'block';
+
+        URL.revokeObjectURL(video.src);
+      } catch (err) {
+        alert('转换失败: ' + err.message);
+        progressArea.style.display = 'none';
+      }
+
+      convertBtn.disabled = false;
+      convertBtn.textContent = '开始转换';
+    });
+
+    downloadBtn?.addEventListener('click', function() {
+      if (!gifBlob) return;
+      var url = URL.createObjectURL(gifBlob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = originalFile.name.replace(/\.[^.]+$/, '') + '.gif';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    resetBtn?.addEventListener('click', function() {
+      originalFile = null;
+      gifBlob = null;
+      uploadArea.style.display = 'flex';
+      fileInfo.style.display = 'none';
+      settings.style.display = 'none';
+      progressArea.style.display = 'none';
+      resultArea.style.display = 'none';
+      videoInput.value = '';
+    });
+
+    function encodeGIF(width, height, frames, delayCs) {
+      var out = [];
+      var globalPalette = buildGlobalPalette(frames, 256);
+
+      out.push(0x47, 0x49, 0x46);
+      out.push(0x38, 0x39, 0x61);
+      out.push(width & 0xFF, (width >> 8) & 0xFF);
+      out.push(height & 0xFF, (height >> 8) & 0xFF);
+      out.push(0xF7, 0x00, 0x00);
+
+      for (var i = 0; i < 256; i++) {
+        out.push(globalPalette[i * 3], globalPalette[i * 3 + 1], globalPalette[i * 3 + 2]);
+      }
+
+      out.push(0x21, 0xFF, 0x0B);
+      var appStr = 'NETSCAPE2.0';
+      for (var j = 0; j < appStr.length; j++) out.push(appStr.charCodeAt(j));
+      out.push(0x03, 0x01, 0x00, 0x00, 0x00);
+
+      for (var f = 0; f < frames.length; f++) {
+        var frame = frames[f];
+        var indexed = colorMatch(frame, globalPalette);
+
+        out.push(0x21, 0xF9, 0x04);
+        out.push(0x00);
+        out.push(delayCs & 0xFF, (delayCs >> 8) & 0xFF);
+        out.push(0x00);
+        out.push(0x00);
+
+        out.push(0x2C);
+        out.push(0x00, 0x00, 0x00, 0x00);
+        out.push(width & 0xFF, (width >> 8) & 0xFF);
+        out.push(height & 0xFF, (height >> 8) & 0xFF);
+        out.push(0x00);
+
+        var lzwData = lzwEncode(indexed, 8);
+        out.push(0x08);
+
+        var offset = 0;
+        while (offset < lzwData.length) {
+          var blockSize = Math.min(255, lzwData.length - offset);
+          out.push(blockSize);
+          for (var k = 0; k < blockSize; k++) {
+            out.push(lzwData[offset + k]);
+          }
+          offset += blockSize;
+        }
+        out.push(0x00);
+      }
+
+      out.push(0x3B);
+
+      return new Blob([new Uint8Array(out)], { type: 'image/gif' });
+    }
+
+    function buildGlobalPalette(frames, maxColors) {
+      var colorCount = {};
+      var step = Math.max(1, Math.floor(frames[0].length / 4 / 50000));
+
+      for (var f = 0; f < frames.length; f++) {
+        var frame = frames[f];
+        for (var i = 0; i < frame.length; i += 4 * step) {
+          var r = Math.round(frame[i] / 32) * 32;
+          var g = Math.round(frame[i + 1] / 32) * 32;
+          var b = Math.round(frame[i + 2] / 32) * 32;
+          if (r > 255) r = 255;
+          if (g > 255) g = 255;
+          if (b > 255) b = 255;
+          var key = (r << 16) | (g << 8) | b;
+          colorCount[key] = (colorCount[key] || 0) + 1;
+        }
+      }
+
+      var sorted = Object.keys(colorCount).sort(function(a, b) {
+        return colorCount[b] - colorCount[a];
+      });
+
+      var palette = new Uint8Array(768);
+      var count = Math.min(sorted.length, maxColors);
+
+      for (var i = 0; i < count; i++) {
+        var val = parseInt(sorted[i]);
+        palette[i * 3] = (val >> 16) & 0xFF;
+        palette[i * 3 + 1] = (val >> 8) & 0xFF;
+        palette[i * 3 + 2] = val & 0xFF;
+      }
+
+      for (var j = count; j < maxColors; j++) {
+        palette[j * 3] = 0;
+        palette[j * 3 + 1] = 0;
+        palette[j * 3 + 2] = 0;
+      }
+
+      return palette;
+    }
+
+    function colorMatch(pixels, palette) {
+      var indexed = new Uint8Array(pixels.length / 4);
+      var palLen = 256;
+      var palR = new Uint8Array(palLen);
+      var palG = new Uint8Array(palLen);
+      var palB = new Uint8Array(palLen);
+
+      for (var i = 0; i < palLen; i++) {
+        palR[i] = palette[i * 3];
+        palG[i] = palette[i * 3 + 1];
+        palB[i] = palette[i * 3 + 2];
+      }
+
+      for (var p = 0; p < pixels.length; p += 4) {
+        var r = pixels[p];
+        var g = pixels[p + 1];
+        var b = pixels[p + 2];
+        var a = pixels[p + 3];
+
+        if (a < 128) {
+          indexed[p / 4] = 0;
+          continue;
+        }
+
+        var minDist = Infinity;
+        var bestIdx = 0;
+        for (var i = 0; i < palLen; i++) {
+          var dr = r - palR[i];
+          var dg = g - palG[i];
+          var db = b - palB[i];
+          var dist = dr * dr + dg * dg + db * db;
+          if (dist < minDist) {
+            minDist = dist;
+            bestIdx = i;
+            if (dist === 0) break;
+          }
+        }
+        indexed[p / 4] = bestIdx;
+      }
+
+      return indexed;
+    }
+
+    function lzwEncode(data, minCodeSize) {
+      var clearCode = 1 << minCodeSize;
+      var eoiCode = clearCode + 1;
+      var codeSize = minCodeSize + 1;
+      var nextCode = eoiCode + 1;
+
+      var output = [];
+      var bitBuffer = 0;
+      var bitCount = 0;
+
+      function writeBits(code, size) {
+        bitBuffer |= code << bitCount;
+        bitCount += size;
+        while (bitCount >= 8) {
+          output.push(bitBuffer & 0xFF);
+          bitBuffer >>= 8;
+          bitCount -= 8;
+        }
+      }
+
+      var table = {};
+      for (var i = 0; i < clearCode; i++) {
+        table[String.fromCharCode(i)] = i;
+      }
+
+      writeBits(clearCode, codeSize);
+
+      if (data.length === 0) {
+        writeBits(eoiCode, codeSize);
+        if (bitCount > 0) output.push(bitBuffer & 0xFF);
+        return new Uint8Array(output);
+      }
+
+      var phrase = String.fromCharCode(data[0]);
+
+      for (var j = 1; j < data.length; j++) {
+        var ch = String.fromCharCode(data[j]);
+        var combo = phrase + ch;
+
+        if (table[combo] !== undefined) {
+          phrase = combo;
+        } else {
+          writeBits(table[phrase], codeSize);
+
+          if (nextCode < 4096) {
+            table[combo] = nextCode;
+            nextCode++;
+            if (nextCode > (1 << codeSize) && codeSize < 12) {
+              codeSize++;
+            }
+          } else {
+            writeBits(clearCode, codeSize);
+            table = {};
+            for (var k = 0; k < clearCode; k++) {
+              table[String.fromCharCode(k)] = k;
+            }
+            codeSize = minCodeSize + 1;
+            nextCode = eoiCode + 1;
+          }
+
+          phrase = ch;
+        }
+      }
+
+      writeBits(table[phrase], codeSize);
+      writeBits(eoiCode, codeSize);
+      if (bitCount > 0) output.push(bitBuffer & 0xFF);
+
+      return new Uint8Array(output);
+    }
+  })();
 </script>

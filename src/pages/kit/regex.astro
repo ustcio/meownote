@@ -137,9 +137,9 @@ import Layout from '@layouts/Layout.astro';
 </style>
 
 <script>
-  const patternInput = document.getElementById('regex-pattern') as HTMLInputElement;
-  const flagsInput = document.getElementById('regex-flags') as HTMLInputElement;
-  const testText = document.getElementById('test-text') as HTMLTextAreaElement;
+  const patternInput = document.getElementById('regex-pattern');
+  const flagsInput = document.getElementById('regex-flags');
+  const testText = document.getElementById('test-text');
   const highlightBox = document.getElementById('highlight-box')!;
   const matchCount = document.getElementById('match-count')!;
   const regexError = document.getElementById('regex-error')!;
@@ -215,7 +215,7 @@ import Layout from '@layouts/Layout.astro';
       matchCount.textContent = `${matches.length} 个匹配`;
       showGroups(matches);
     } catch (e) {
-      regexError.textContent = (e as Error).message;
+      regexError.textContent = (e).message;
       highlightBox.textContent = text;
       matchCount.textContent = '0 个匹配';
       groupsCard.style.display = 'none';
@@ -243,10 +243,10 @@ import Layout from '@layouts/Layout.astro';
 
   // Flag checkboxes
   document.querySelectorAll('.flag-btn input').forEach(el => {
-    const cb = el as HTMLInputElement;
+    const cb = el;
     cb.addEventListener('change', () => {
       let flags = '';
-      document.querySelectorAll('.flag-btn input:checked').forEach(c => { flags += (c as HTMLInputElement).value; });
+      document.querySelectorAll('.flag-btn input:checked').forEach(c => { flags += (c).value; });
       flagsInput.value = flags;
       runMatch();
     });
@@ -255,11 +255,11 @@ import Layout from '@layouts/Layout.astro';
   // Common patterns
   document.querySelectorAll('.pattern-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      patternInput.value = (btn as HTMLElement).dataset.pattern || '';
-      flagsInput.value = (btn as HTMLElement).dataset.flags || 'g';
+      patternInput.value = (btn).dataset.pattern || '';
+      flagsInput.value = (btn).dataset.flags || 'g';
       // Sync checkboxes
       document.querySelectorAll('.flag-btn input').forEach(el => {
-        const cb = el as HTMLInputElement;
+        const cb = el;
         cb.checked = flagsInput.value.includes(cb.value);
       });
       runMatch();
