@@ -887,7 +887,7 @@ import Layout from '@layouts/Layout.astro';
   };
 
   async function apiRequest(path, options = {}) {
-    const isFormData = options.body instanceof FormData;
+    const isFormData = options.body && typeof FormData !== 'undefined' && options.body.constructor.name === 'FormData';
     const timeoutMs = isFormData ? 60000 : 10000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -897,25 +897,32 @@ import Layout from '@layouts/Layout.astro';
         ? { ...getAuthHeaders(), ...(options.headers || {}) }
         : { 'Content-Type': 'application/json', ...getAuthHeaders(), ...(options.headers || {}) };
 
-      const response = await fetch(`${API_BASE}${path}`, {
+      const fetchOptions = {
         ...options,
         headers,
         signal: controller.signal,
-      });
+      };
+
+      console.log(`[API] ${options.method || 'GET'} ${API_BASE}${path}`, { isFormData, hasBody: !!options.body, bodyType: options.body?.constructor?.name });
+
+      const response = await fetch(`${API_BASE}${path}`, fetchOptions);
 
       clearTimeout(timeoutId);
+
+      console.log(`[API] Response: ${response.status} ${response.statusText}`);
 
       if (!response.ok) {
         if (response.status === 401) {
           throw new Error('请先登录');
         }
         const err = await response.json().catch(() => ({}));
-        throw new Error(err.message || `HTTP ${response.status}`);
+        throw new Error(err.message || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       return response.json();
     } catch (error) {
       clearTimeout(timeoutId);
+      console.error(`[API] Error:`, error);
       throw error;
     }
   }
@@ -1141,19 +1148,24 @@ import Layout from '@layouts/Layout.astro';
 
   async function downloadWorkspaceFile(id, fallbackName = 'download', type = '') {
     try {
+      console.log(`[Download] Downloading file: ${id} (${type})`);
       const response = await fetch(`${API_BASE}/api/workspace/${id}/download`, {
         headers: getAuthHeaders(),
       });
+
+      console.log(`[Download] Response: ${response.status} ${response.statusText}`);
 
       if (!response.ok) {
         if (response.status === 401) {
           throw new Error('请先登录');
         }
         const err = await response.json().catch(() => ({}));
-        throw new Error(err.message || 'Download failed');
+        throw new Error(err.message || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       const blob = await response.blob();
+      console.log(`[Download] Blob size: ${blob.size} bytes, type: ${blob.type}`);
+
       const blobUrl = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = blobUrl;
@@ -1171,6 +1183,7 @@ import Layout from '@layouts/Layout.astro';
         filename = plainMatch[1].replace(/^["']|["']$/g, '');
       }
       anchor.download = filename;
+      console.log(`[Download] Filename: ${filename}`);
 
       document.body.appendChild(anchor);
       anchor.click();
@@ -1178,7 +1191,7 @@ import Layout from '@layouts/Layout.astro';
       setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
       showToast('Downloaded', 'success');
     } catch (error) {
-      console.error('Download failed:', error);
+      console.error('[Download] Error:', error);
       showToast(error.message || 'Download failed', 'error');
     }
   }
@@ -1267,12 +1280,14 @@ import Layout from '@layouts/Layout.astro';
     let successCount = 0;
     let errorCount = 0;
     const total = fileList.length;
+    const errors = [];
 
     showToast(`Uploading ${total} file${total > 1 ? 's' : ''}...`, 'info');
 
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList[i];
       try {
+        console.log(`[Upload] Uploading: ${file.name} (${file.size} bytes, ${file.type})`);
         const formData = new FormData();
         formData.append('file', file);
         const result = await apiRequest('/api/workspace', {
@@ -1280,15 +1295,21 @@ import Layout from '@layouts/Layout.astro';
           body: formData,
         });
 
+        console.log(`[Upload] Result for ${file.name}:`, result);
+
         if (result.success) {
           successCount++;
         } else {
           errorCount++;
-          console.error(`Upload failed for ${file.name}:`, result.message || result.error);
+          const errMsg = result.message || result.error || 'Unknown error';
+          errors.push(`${file.name}: ${errMsg}`);
+          console.error(`[Upload] Failed for ${file.name}:`, errMsg);
         }
       } catch (error) {
         errorCount++;
-        console.error(`Upload failed for ${file.name}:`, error);
+        const errMsg = error.message || 'Network error';
+        errors.push(`${file.name}: ${errMsg}`);
+        console.error(`[Upload] Error for ${file.name}:`, error);
       }
     }
 
@@ -1303,7 +1324,8 @@ import Layout from '@layouts/Layout.astro';
     } else if (successCount > 0) {
       showToast(`${successCount}/${total} uploaded, ${errorCount} failed`, 'warning');
     } else {
-      showToast(`All ${total} files failed to upload`, 'error');
+      const firstError = errors[0] || 'Upload failed';
+      showToast(`Upload failed: ${firstError}`, 'error');
     }
   }
 

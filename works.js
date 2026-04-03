@@ -57,7 +57,7 @@ export default {
       }
       
       if (path.startsWith('/api/workspace')) {
-        const match = path.match(/^\/api\/workspace(\/[^/]+(\/[^/]+)?)?$/);
+        const match = path.match(/^\/api\/workspace(?:\/([^/]+)(?:\/([^/]+))?)?$/);
         if (match) {
           return await handleWorkspace(request, env, ctx, match);
         }
@@ -140,7 +140,7 @@ const ROUTES = {
   '/api/trading/alert': { handler: handleAlertOperation },
   '/api/trading/notifications': { handler: handleGetNotifications },
   '/api/trading/tolerance': { handler: handleToleranceSettings },
-  '/api/workspace': { handler: handleWorkspace, pattern: /^\/api\/workspace(\/[^/]+(\/[^/]+)?)?$/ },
+  '/api/workspace': { handler: handleWorkspace, pattern: /^\/api\/workspace(?:\/([^/]+)(?:\/([^/]+))?)?$/ },
 };
 
 // ================================================================================
@@ -5910,10 +5910,10 @@ async function handleWorkspace(request, env, ctx, match) {
   let fileId = null;
   let subAction = null;
   if (match && match[1]) {
-    fileId = match[1].substring(1);
+    fileId = match[1];
   }
   if (match && match[2]) {
-    subAction = match[2].substring(1);
+    subAction = match[2];
   }
 
   if (method === 'GET') {
