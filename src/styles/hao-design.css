@@ -1,10 +1,5 @@
 /* ===== HaoWallpaper Design System ===== */
-/* Exact replication of haowallpaper.com visual design */
-
-/* ===== CSS Variables ===== */
-:root {
-  --hao-font-size: 15px;
-}
+/* Extracted from haowallpaper.com live site (2026-04-04) */
 
 *, *:after, *:before {
   box-sizing: border-box;
@@ -21,9 +16,286 @@
 :root {
   overflow-x: hidden;
   overflow-y: scroll;
+  --hao-font-size: 15px;
+  scroll-behavior: smooth;
+}
+
+/* ===== Custom Cursor (touch-style from haowallpaper.com) ===== */
+.cursor-touch {
+  cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAzdJREFUWEfNlk1oFEkUx/+vegKDH4hRJ92vJ4tBBFGEHDwIetAF3YMXRWFd9iJ78OTBi2BA/EDw4+AHiHpS8aIuKysePLis6EEPi+7BD3Aj5hCTrk7UCOpKzKH7SQ3dQzFoVycZ0YKBZqre///rV/VeMbEXD/rG/vi+AeI43gdgoYicY+a7XyNbhRnQWktm+hFAHzOfbDeEC+A1gHmW6aUM5EW7QAoB4jh+JCLLW8yeZRB/tgPClYGbANaLyCMiYgDzLdMjzNw3XQhXBi6IyDYAH5Ik6fU8z5yBDZbp31k2HkwVxJWBQ8bAiDNzY63Weg+Ag5bhWyLqC4Lg7FQgXBnYISKnbADzHEXROqXUCRFZlpsS0XkD4vv+y8mAuDKwGcBVIzgxMRH09PSM5OIDAwNzqtXqcSL6Lf9PRB4rpUw2bpSFKASIomgVETUakIisDsPwXquw1no7gBMAZlggB8Iw3F8GohBgdHR0UZIkz41Qmqbb6vX6xc+JDg8P9yqljgNYa83fMNnwff9xEUghwMjIyMw0Tf/PBA4y894iMa31YQC7rXMxag5xEAQXvhTnvIy01nk3vMTMv7rSqrXeBOAYgB5r7dlqtdrX2dn5tjXeCZB3QxH5JwzDlS4AMz80NBQqpY4R0c9WNu5nVXLL1nACaK0b3RDAa2Ze8CWAsbGx+vj4eLfnefU0TZcR0VLzs0vVxCZJsra7u/tOE8z1RnEc592w2YzymDiOlwLYlXVLl1Q+v4KZ/y0NYB+svBtaAO9FZFaBcz+A/4ioP03TfiJ6aJubuDJbsDOrc1Qqldm1Wq1RFVrr+wBWWObXcyMAxqyfmc0BLhxOgCiKthLRZaPieV5vV1fXQ611844A8A7Aj61v5jIuvQVxHK8RkdtZwBYR6SKi07mAUmqr7/u/lzWcdBlqrZcAeGoCRWQ3ER2xSutoEATNxjMVCOcWDA4Ozu3o6HiTiZtPsR+y57+Y+aepmE6qD2QHrvXb8BUz16ZrXqoKMoAnAJp3f6VSWVyr1RqX1HSHcwsygGsANppnpdQvvu9fma5x6SowC03HE5HTRHQmCII/2mVeegvaaTjpMvya5t9FBj4Ba7kwMB+nlNwAAAAASUVORK5CYII="), auto;
+}
+
+/* ===== Light Theme ===== */
+.lightBody {
+  cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAyFJREFUWEfNlT1oFEEUx9/bvaTwAxG/8BNFBEkQUqQQtDCCWlyRmYmHEQkECysLG8ED8YOAxiIqiKbSYOMHa/bNEVIoihZaiFrECBqxSuVHEKInCHfckzl2w3CYm73chWTh2D123vv/9r15/0FY4AsXWB8WN4AQ4rzneVuZ+TYRvZyPalWtgJSSjSgi/gWAbBiG1xsN4QKYAoBVsSgz32tqasoGQTDZKBAXwHsA2FUh9tlUg4jCRkC4AB4DwEEAMCAbAGC1JdpPRNl6IaoCKKWGmLkXEf8Ui8U23/fNHkjHooj4FBGzw8PDb+cK4gK4xMzlrySi8lohxFlE7LMEp80arfXgXCCqAgghTiLiDRvAPEspDwDANQBotUTvRHvjey0gLoAuRHxkEqZSqfVBEHyNk2cymRXFYvEqABy3BMdNS8IwHE0K4WrBHmYuGxAi7g3D8FVlYiHECUQ01VhijetFrfWFJBCuCmxHxC9Rol4iuvu/pEKINkQ01eiw3o+WSqVsLpcbrwZSFaCnp2dpPp/PmwTM3Ke1PlctmZTyMgCcsdZ8i/bF0GxxzsNISll2Q+OCWutjrrIqpSQADDDzNmtcB33fNw46XRmfBKDshoj4OgzD3S4A8z6TyWwsFAoDiHjEWv8mGtdndo4kALEbThHRmtkAlFKbmHkzAJh7KyK2AID52aNqWtmhtX4xUx3XF8VuWOkF5n9nZ2eL7/unjVu68lgT0q61fpcYwN5YsRvGwVLK3wCwbDZxZp5AxE+IOGGemXnMFi+Pt4tcCHEqmnNjRsuDIChPhVLK9LTdis/FQuZeKBQmRkZGzAauejkBpJTdAHA/ytJGRGNKqZkzAgB+MfP+yi9zCSdugRBiHyI+j7zgsOd565j5pjVi3WEYPkwqWPMYdnV17SyVSh+jQGMy/VaSK0RkG0/NHM4WpNPplc3NzT+jCkwi4pZI5QkRHapZsSLACWDWx25oxf4gorX1iieaggjgg20oqVRqRxAE8SFVF0eiCiiliJlFpHSUiB7UpWoFJwIwjud5ntn5t4goaJR44hY0UrDmMZxP8UVRgX8EFUIwnvYSbQAAAABJRU5ErkJggg=="), auto;
+  --frosted-bg: hsla(0, 0%, 72%, 0.1);
+  --color-background-vk: var(--vt-c-white-mute);
+  --color-ccc-mute: var(--vt-c-white2);
+  --color-background-one: var(--vt-c-white1);
+  --color-background-two: var(--vt-c-white2);
+  --color-background-soft: var(--vt-c-white-soft);
+  --color-background-mute: var(--vt-c-white-mute);
+  --color-border: var(--vt-c-divider-light-2);
+  --color-text: var(--vt-c-text-light-1);
+  --color-cale-text: var(--color-text-white-cale);
+  --color-tm-text: rgba(0, 0, 0, 0.55);
+  --font-color-solid: #000;
+  --color-darkgray-text: var(--color-text-white-cale);
+  --color-background-cut: var(--vt-c-white-cut);
+  --color-background-webkit: var(--webkit-color-light);
+  --source-post-color: var(--source-post-white);
+  --fc-background-webkit: var(--fc-color-light);
+  --hao-dialog: var(--hao-dialog-light);
+  --font-background-webkit: var(--font-color-light);
+  --card-background-webkit: var(--vt-card-bag-white);
+  --card-bottom-bg: hsla(0, 0%, 100%, 0.67);
+  --shen-background-webkit: var(--shen-color-light);
+  --tx-background-one: var(--tx-color-light-one);
+  --tx-background-two: var(--tx-color-light-two);
+  --lable-card-bag: var(--lable-card-bag-white);
+  --hao-bg-bag: var(--hao-bg-color-dark);
+  --main-bg-tw: var(--vt-tm-light);
+  --tm-bg-ty: var(--ty-tm-light);
+  --col-bg-nt: var(--nt-c-white);
+  --col-bg-start: var(--nt-box-white-start);
+  --col-bg-end: var(--nt-box-white-end);
+  --top-color: var(--top-color-light);
+  --svg-color: #909098;
+  --switch-bt-color: #fcf7e4;
+  cursor: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAyFJREFUWEfNlT1oFEEUx9/bvaTwAxG/8BNFBEkQUqQQtDCCWlyRmYmHEQkECysLG8ED8YOAxiIqiKbSYOMHa/bNEVIoihZaiFrECBqxSuVHEKInCHfckzl2w3CYm73chWTh2D123vv/9r15/0FY4AsXWB8WN4AQ4rzneVuZ+TYRvZyPalWtgJSSjSgi/gWAbBiG1xsN4QKYAoBVsSgz32tqasoGQTDZKBAXwHsA2FUh9tlUg4jCRkC4AB4DwEEAMCAbAGC1JdpPRNl6IaoCKKWGmLkXEf8Ui8U23/fNHkjHooj4FBGzw8PDb+cK4gK4xMzlrySi8lohxFlE7LMEp80arfXgXCCqAgghTiLiDRvAPEspDwDANQBotUTvRHvjey0gLoAuRHxkEqZSqfVBEHyNk2cymRXFYvEqABy3BMdNS8IwHE0K4WrBHmYuGxAi7g3D8FVlYiHECUQ01VhijetFrfWFJBCuCmxHxC9Rol4iuvu/pEKINkQ01eiw3o+WSqVsLpcbrwZSFaCnp2dpPp/PmwTM3Ke1PlctmZTyMgCcsdZ8i/bF0GxxzsNISll2Q+OCWutjrrIqpSQADDDzNmtcB33fNw46XRmfBKDshoj4OgzD3S4A8z6TyWwsFAoDiHjEWv8mGtdndo4kALEbThHRmtkAlFKbmHkzAJh7KyK2AID52aNqWtmhtX4xUx3XF8VuWOkF5n9nZ2eL7/unjVu68lgT0q61fpcYwN5YsRvGwVLK3wCwbDZxZp5AxE+IOGGemXnMFi+Pt4tcCHEqmnNjRsuDIChPhVLK9LTdis/FQuZeKBQmRkZGzAauejkBpJTdAHA/ytJGRGNKqZkzAgB+MfP+yi9zCSdugRBiHyI+j7zgsOd565j5pjVi3WEYPkwqWPMYdnV17SyVSh+jQGMy/VaSK0RkG0/NXM4WpNPplc3NzT+jCkwi4pZI5QkRHapZsSLACWDWx25oxf4gorX1iieaggjgg20oqVRqRxAE8SFVF0eiCiiliJlFpHSUiB7UpWoFJwIwjud5ntn5t4goaJR44hY0UrDmMZxP8UVRgX8EFUIwnvYSbQAAAABJRU5ErkJggg==), auto;
+}
+
+/* ===== Extra UI Components from haowallpaper.com ===== */
+.isButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom, var(--color-background-one), var(--color-background-two));
+  border-radius: 50px;
+  padding: 10px;
+  width: 130px;
+  color: var(--font-background-webkit);
+  font-size: 0.3rem;
+  text-shadow: 2px 2px 10px var(--fc-background-webkit);
+}
+
+.isButtonTwo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50px;
+  padding: 5px;
+  width: 80%;
+  color: #ffffffcf;
+  font-size: 0.3rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.82);
+}
+
+.isTitleDk {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 30px;
+  padding: 8px;
+  position: absolute;
+  right: 0;
+  top: 1rem;
+  width: 3.5rem;
+  z-index: 30;
+  text-align: center;
+  color: var(--font-background-webkit);
+  font-size: 0.3rem;
+  text-shadow: 0 0 10px var(--fc-background-webkit);
+}
+
+/* Toggle Switch from haowallpaper.com */
+.switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 0.5rem;
+  width: 1.4rem;
+  border-radius: 2rem;
+  border: 4px solid #b7b6b6;
+  background-color: #b7b6b6;
+  font-size: 0.2rem;
+  font-weight: 500;
+  position: relative;
+  z-index: 100;
+  box-shadow: 0 0 10px #ffffff78;
+  transition: all 0.3s ease;
+}
+
+.switch.switch-checked {
+  background-color: #2f2f2f;
+  border-color: #2f2f2f;
+}
+
+.switch.switch-checked::after {
+  transform: translate(0.93rem);
+}
+
+.switch::after {
+  content: "";
+  position: absolute;
+  left: -10%;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 2rem;
+  background-color: #c9c9c9;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
+  transform: translateX(0) scale(1);
+  transition: all 0.3s ease;
+}
+
+.switch:active::after {
+  width: 1.3rem;
+}
+
+/* Blinking notification dot */
+.notify-prompt {
+  position: absolute;
+  bottom: 25px;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ce4747;
+  border-radius: 50%;
+  box-shadow: 0 0 10px red;
+  color: #fff;
+  font-size: 0.2rem;
+  font-weight: 700 !important;
+  animation: blink 1s infinite alternate;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Miscellaneous haowallpaper elements */
+.dynamic-item-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dotted var(--color-cale-text);
+  border-radius: 30px;
+  color: var(--color-cale-text);
+  font-size: 0.35rem;
+  font-weight: 500;
+  height: 2rem;
+  line-height: 2rem;
+  text-align: center;
+  width: 100%;
+}
+
+/* ===== NProgress Bar Theme ===== */
+#nprogress .bar {
+  background-color: var(--nprogress-bg-color, #ff7300) !important;
+  height: 2px !important;
+}
+
+#nprogress .peg {
+  box-shadow: 5px 8px 10px var(--nprogress-bg-color) !important;
+}
+
+#nprogress .spinner-icon {
+  border-left-color: var(--nprogress-bg-color) !important;
+  border-top-color: var(--nprogress-bg-color) !important;
+}
+
+/* ===== Element Plus Custom Overrides (haowallpaper.com style) ===== */
+.el-switch {
+  height: auto !important;
+  --el-switch-on-color: rgba(86, 86, 86, 0.58) !important;
+  --el-switch-off-color: #191919 !important;
+  --el-switch-border-color: var(--color-background-vk);
+  cursor: var(--cursor-touch), auto !important;
+}
+.el-switch .el-switch__core {
+  cursor: var(--cursor-touch), auto !important;
+}
+
+.el-switch .el-switch__action {
+  background: var(--switch-bt-color) !important;
+  box-shadow: -5px 0 10px #838383;
+  padding: 2px !important;
+}
+
+.el-notification {
+  background: #5959598c !important;
+  border: none !important;
+  border-radius: 20% !important;
+  box-shadow: 10px 10px 20px #3f3a3a !important;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+  white-space: pre-line;
+}
+
+.el-notification .el-icon,
+.el-notification .el-notification__title {
+  color: #000 !important;
+  text-shadow: 2px 2px 15px #fff !important;
+}
+
+.el-notification .el-notification__content {
+  color: #fff !important;
+  font-weight: 500 !important;
+  text-shadow: 2px 2px 15px #fbc4c4 !important;
+}
+
+.el-dialog {
+  background: #5555556b !important;
+  border-radius: 30px !important;
+  box-shadow: 0 0 20px #010101 !important;
+}
+
+.el-dialog .el-dialog__headerbtn {
+  cursor: var(--cursor-touch), auto !important;
+}
+
+.el-dialog .el-dialog__headerbtn:hover * {
+  color: #fff !important;
+}
+
+.el-dialog .isDiaSon {
+  height: 100% !important;
+  width: 100% !important;
+  flex-direction: column;
+  font-size: 0.3rem;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+}
+
+.el-dialog .isDiaSon .elPageDialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--font-color-solid);
+}
+
+.el-dialog .isDiaSon .elPageDialog span {
+  font-weight: 500;
+  margin-left: 5px;
+}
+
+.el-dialog .isDiaSon div:nth-child(2) {
+  margin-top: 30px;
 }
 
 /* ===== Dark Theme ===== */
+body:has(#root-el.lightBody) {
+  --nprogress-bg-color: #ff7300;
+}
+
+body:has(#root-el.darkBody) {
+  --nprogress-bg-color: rgba(255, 190, 163, 0.8);
+}
+
 .darkBody {
   --main-bg-tw: #191919;
   --tm-bg-ty: rgba(0,0,0,0.6);
@@ -801,6 +1073,71 @@
   opacity: 0;
 }
 
+.scale-enter-from, .scale-leave-to {
+  transform: scale(0);
+}
+
+.scale-enter-to, .scale-leave-from {
+  transform: scale(1);
+}
+
+.scale-enter-active {
+  transition: transform 0.4s;
+}
+
+.scale-leave-active {
+  transition: transform 0.2s;
+}
+
+.scaletop-enter-from, .scaletop-leave-to {
+  transform: scale(0) translateY(-170%);
+}
+
+.scaletop-enter-to, .scaletop-leave-from {
+  transform: scale(1) translateY(0);
+}
+
+.scaletop-enter-active {
+  transition: all 0.5s;
+}
+
+.scaletop-leave-active {
+  transition: all 0.2s;
+}
+
+.hz-enter-from, .hz-leave-to {
+  opacity: 0;
+  transform: translate3d(-1.3rem, 0, 0);
+  transition: opacity 0.5s cubic-bezier(0.35, 0, 0.25, 1), transform 0.6s cubic-bezier(0.28, 1, 0.22, 1);
+  will-change: transform, opacity;
+}
+
+.hz-enter-to, .hz-leave-from {
+  transition: transform 0.6s;
+}
+
+.hzdisp-enter-from, .hzdisp-leave-to {
+  bottom: -150%;
+  opacity: 0;
+  position: absolute;
+  transform: translate3d(-1.3rem, 0, 0);
+  transition: transform, opacity 0.5s;
+}
+
+.hzdisp-enter-to, .hzdisp-leave-from {
+  transition: transform 0.7s;
+}
+
+.hzbottom-enter-from, .hzbottom-leave-to {
+  opacity: 0;
+  transform: translateY(1rem);
+  transition: opacity 0.5s, transform 0.5s;
+}
+
+.hzbottom-enter-to, .hzbottom-leave-from {
+  transition: transform 0.7s;
+}
+
 .cardsx-enter-from, .cardsx-leave-to {
   opacity: 0;
   transform: translate3d(0, 1rem, 0);
@@ -814,7 +1151,122 @@
   transition: transform 0.3s, opacity 0.5s;
 }
 
+.top-enter-from, .top-leave-to {
+  transform: translate3d(0, -100%, 0);
+  will-change: transform;
+}
+
+.top-enter-to, .top-leave-from {
+  transform: translateZ(0);
+}
+
+.left-enter-from, .left-leave-to {
+  transform: translate3d(-100%, 0, 0);
+  transition: transform 0.3s;
+  will-change: transform;
+}
+
+.left-enter-to, .left-leave-from {
+  transform: translateZ(0);
+  transition: transform 0.4s;
+}
+
+.blur-enter-active, .blur-leave-active {
+  transition: filter 0.3s;
+}
+
+.blur-enter, .blur-leave-to {
+  filter: blur(100px);
+}
+
+.rotate {
+  animation-name: gradient-animation;
+  animation-duration: 0.4s;
+}
+
+.my-css-class {
+  animation-name: gradient-animation;
+  animation-duration: 0.6s;
+}
+
+.my-css-class-two {
+  animation-name: gradient-animation-two;
+  animation-duration: 0.6s;
+}
+
+@keyframes gradient-animation {
+  40% { filter: blur(100px); }
+  to { filter: none; }
+}
+
+@keyframes gradient-animation-two {
+  40% { filter: blur(100px); }
+  to { filter: none; }
+}
+
 /* ===== Responsive ===== */
+
+/* ===== Masonry / Waterfall Layout (haowallpaper.com) ===== */
+.masonry-div {
+  border-radius: 30px;
+}
+
+.masonry-div .waterfall-content-k1 {
+  border-radius: inherit;
+}
+
+.masonry-div .col-hao-buttom-mobile {
+  height: 1rem;
+  left: 50%;
+  opacity: 0;
+  position: absolute;
+  top: 80%;
+  transform: translate(-50%, -50%);
+  width: 4rem;
+  z-index: 1000;
+}
+
+.masonry-div .col-hao-buttom-mobile:active {
+  transform: translate(-50%, -50%) scale(0.85) !important;
+}
+
+.pc-wallpaper-main {
+  width: 100%;
+}
+
+.image-preview-discover {
+  min-width: 100%;
+}
+
+.image-preview-discover .cardMobile {
+  margin: 2%;
+  width: 29%;
+}
+
+.image-preview-discover .cardMobile .img-or-video {
+  border-radius: 0.3rem;
+  width: 100%;
+}
+
+.image-preview-discover-hover .img-or-video:hover {
+  box-shadow: 0 0 10px 6px var(--font-background-webkit);
+  transition: all 0.3s ease;
+}
+
+/* ===== Main content background transparency ===== */
+#main-content {
+  background: transparent !important;
+}
+
+/* ===== Card hover for wallpaper display ===== */
+.image-preview-discover-color .cardMobile {
+  background-color: transparent;
+  border-radius: 0.6rem;
+}
+
+.image-preview-discover-color .cardMobile .img-or-video {
+  box-shadow: 10px 21px 20px 6px rgba(0, 0, 0, 0.5);
+}
 @media screen and (max-width: 1100px) {
   .main-top .header-top-view {
     flex-grow: 1;
