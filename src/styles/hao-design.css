@@ -206,6 +206,7 @@
   white-space: nowrap;
   backdrop-filter: blur(10px);
   border-radius: 40px;
+  box-shadow: 2px 2px 5px var(--col-bg-start);
   color: var(--color-text);
 }
 
