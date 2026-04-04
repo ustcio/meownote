@@ -1,190 +1,75 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '图片多尺寸导出';
 const toolDesc = '一键导出多种尺寸的图片';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="hao-upload-area" id="upload-area">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>点击或拖拽上传图片</span>
+                <span class="hint">支持 PNG, JPG, WebP 格式</span>
+                <input type="file" id="file-input" accept="image/*">
+              </div>
 
-      <main class="tool-main">
-        <div class="upload-area" id="upload-area">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          <span>点击或拖拽上传图片</span>
-          <span class="hint">支持 PNG, JPG, WebP 格式</span>
-          <input type="file" id="file-input" accept="image/*">
-        </div>
+              <div id="file-info" class="file-info" style="display:none;">
+                <div class="info-row">
+                  <span class="info-label">原始尺寸</span>
+                  <span class="info-value" id="orig-size"></span>
+                </div>
+              </div>
 
-        <div id="file-info" class="file-info" style="display:none;">
-          <div class="info-row">
-            <span class="info-label">原始尺寸</span>
-            <span class="info-value" id="orig-size"></span>
-          </div>
-        </div>
+              <div class="settings" id="settings" style="display:none;">
+                <div class="setting-group">
+                  <label class="setting-label">选择导出尺寸</label>
+                  <div class="format-options" id="size-presets" style="gap:0.15rem;">
+                    <button class="format-btn active" data-size="16">16x16</button>
+                    <button class="format-btn active" data-size="32">32x32</button>
+                    <button class="format-btn active" data-size="48">48x48</button>
+                    <button class="format-btn active" data-size="64">64x64</button>
+                    <button class="format-btn active" data-size="128">128x128</button>
+                    <button class="format-btn active" data-size="256">256x256</button>
+                    <button class="format-btn active" data-size="512">512x512</button>
+                    <button class="format-btn" data-size="1024">1024x1024</button>
+                  </div>
+                </div>
+                <div class="hao-btn-group">
+                  <button class="hao-press-btn hao-press-btn--primary" id="export-btn">导出全部</button>
+                  <button class="hao-press-btn hao-press-btn--secondary" id="reset-btn">重置</button>
+                </div>
+              </div>
 
-        <div class="settings" id="settings" style="display:none;">
-          <div class="setting-group">
-            <label class="setting-label">选择导出尺寸</label>
-            <div class="format-options" id="size-presets" style="gap:0.15rem;">
-              <button class="format-btn active" data-size="16">16x16</button>
-              <button class="format-btn active" data-size="32">32x32</button>
-              <button class="format-btn active" data-size="48">48x48</button>
-              <button class="format-btn active" data-size="64">64x64</button>
-              <button class="format-btn active" data-size="128">128x128</button>
-              <button class="format-btn active" data-size="256">256x256</button>
-              <button class="format-btn active" data-size="512">512x512</button>
-              <button class="format-btn" data-size="1024">1024x1024</button>
-            </div>
-          </div>
-          <div class="btn-group">
-            <button class="btn-primary" id="export-btn">导出全部</button>
-            <button class="btn-secondary" id="reset-btn">重置</button>
-          </div>
-        </div>
+              <div class="progress-area" id="progress-area" style="display:none;">
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                <div class="progress-text" id="progress-text">导出中...</div>
+              </div>
 
-        <div class="progress-area" id="progress-area" style="display:none;">
-          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-          <div class="progress-text" id="progress-text">导出中...</div>
-        </div>
-
-        <div class="result-area" id="result-area" style="display:none;">
-          <div class="result-header">导出结果</div>
-          <div id="size-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:0.3rem;margin-top:0.3rem;"></div>
-        </div>
-      </main>
-    </div>
+              <div class="hao-result" id="hao-result" style="display:none;">
+                <div class="result-header">导出结果</div>
+                <div id="size-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:0.3rem;margin-top:0.3rem;"></div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  .tool-main { overflow: auto; }
-  .size-card { text-align: center; padding: 0.2rem; background: var(--frosted-bg); border-radius: 10px; }
-  .size-card canvas { max-width: 100%; border-radius: 5px; }
-  .size-card .size-label { font-size: 0.22rem; color: var(--color-tm-text); margin-top: 0.1rem; }
-  .size-card .download-link { font-size: 0.2rem; color: var(--top-color); cursor: pointer; display: block; margin-top: 0.1rem; }
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', function() {
-    var uploadArea = document.getElementById('upload-area');
-    var fileInput = document.getElementById('file-input');
-    var fileInfo = document.getElementById('file-info');
-    var settings = document.getElementById('settings');
-    var progressArea = document.getElementById('progress-area');
-    var progressFill = document.getElementById('progress-fill');
-    var progressText = document.getElementById('progress-text');
-    var resultArea = document.getElementById('result-area');
-    var sizeGrid = document.getElementById('size-grid');
-    var presetBtns = document.querySelectorAll('#size-presets .format-btn');
-    var exportBtn = document.getElementById('export-btn');
-    var resetBtn = document.getElementById('reset-btn');
-    var originalImage = null;
-    var originalFileName = '';
-
-    uploadArea.addEventListener('click', function() { fileInput.click(); });
-    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
-    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
-    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
-
-    presetBtns.forEach(function(btn) {
-      btn.addEventListener('click', function() { btn.classList.toggle('active'); });
-    });
-
-    function handleFile(file) {
-      if (!file.type.startsWith('image/')) return;
-      originalFileName = file.name.replace(/\.[^.]+$/, '');
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var img = new Image();
-        img.onload = function() {
-          originalImage = img;
-          document.getElementById('orig-size').textContent = img.width + 'x' + img.height;
-          fileInfo.style.display = 'block';
-          settings.style.display = 'flex';
-          resultArea.style.display = 'none';
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    exportBtn.addEventListener('click', function() {
-      if (!originalImage) return;
-      var selectedSizes = [];
-      presetBtns.forEach(function(btn) {
-        if (btn.classList.contains('active')) selectedSizes.push(parseInt(btn.getAttribute('data-size')));
-      });
-      if (selectedSizes.length === 0) return;
-      progressArea.style.display = 'block';
-      progressFill.style.width = '10%';
-      progressText.textContent = '导出中...';
-      sizeGrid.innerHTML = '';
-      setTimeout(function() {
-        for (var i = 0; i < selectedSizes.length; i++) {
-          var size = selectedSizes[i];
-          var card = document.createElement('div');
-          card.className = 'size-card';
-          var canvas = document.createElement('canvas');
-          canvas.width = size;
-          canvas.height = size;
-          var ctx = canvas.getContext('2d');
-          var minDim = Math.min(originalImage.width, originalImage.height);
-          var sx = (originalImage.width - minDim) / 2;
-          var sy = (originalImage.height - minDim) / 2;
-          ctx.drawImage(originalImage, sx, sy, minDim, minDim, 0, 0, size, size);
-          var label = document.createElement('div');
-          label.className = 'size-label';
-          label.textContent = size + 'x' + size;
-          var link = document.createElement('a');
-          link.className = 'download-link';
-          link.textContent = '下载';
-          link.addEventListener('click', function() {
-            canvas.toBlob(function(blob) {
-              var url = URL.createObjectURL(blob);
-              var a = document.createElement('a');
-              a.href = url;
-              a.download = originalFileName + '_' + size + 'x' + size + '.png';
-              a.click();
-              URL.revokeObjectURL(url);
-            }, 'image/png');
-          });
-          card.appendChild(canvas);
-          card.appendChild(label);
-          card.appendChild(link);
-          sizeGrid.appendChild(card);
-        }
-        progressFill.style.width = '100%';
-        progressText.textContent = '完成!';
-        resultArea.style.display = 'block';
-        setTimeout(function() { progressArea.style.display = 'none'; }, 800);
-      }, 50);
-    });
-
-    resetBtn.addEventListener('click', function() {
-      originalImage = null;
-      fileInfo.style.display = 'none';
-      settings.style.display = 'none';
-      resultArea.style.display = 'none';
-      sizeGrid.innerHTML = '';
-      fileInput.value = '';
-    });
-  });
 </script>

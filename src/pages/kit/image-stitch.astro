@@ -1,236 +1,88 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '图片拼接';
 const toolDesc = '将多张图片水平或垂直拼接';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="hao-upload-area" id="upload-area">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>点击或拖拽上传多张图片</span>
+                <span class="hint">支持 PNG, JPG, WebP 格式，可多选</span>
+                <input type="file" id="file-input" accept="image/*" multiple>
+              </div>
 
-      <main class="tool-main">
-        <div class="upload-area" id="upload-area">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          <span>点击或拖拽上传多张图片</span>
-          <span class="hint">支持 PNG, JPG, WebP 格式，可多选</span>
-          <input type="file" id="file-input" accept="image/*" multiple>
-        </div>
+              <div id="image-list" class="file-info" style="display:none;">
+                <div class="result-header">已上传图片 (<span id="image-count">0</span>张)</div>
+                <div id="thumbnails" style="display:flex;gap:0.2rem;flex-wrap:wrap;margin-top:0.2rem;"></div>
+              </div>
 
-        <div id="image-list" class="file-info" style="display:none;">
-          <div class="result-header">已上传图片 (<span id="image-count">0</span>张)</div>
-          <div id="thumbnails" style="display:flex;gap:0.2rem;flex-wrap:wrap;margin-top:0.2rem;"></div>
-        </div>
+              <div class="settings" id="settings" style="display:none;">
+                <div class="setting-group">
+                  <label class="setting-label">拼接方向</label>
+                  <div class="format-options" id="direction-options">
+                    <button class="format-btn active" data-dir="horizontal">水平拼接</button>
+                    <button class="format-btn" data-dir="vertical">垂直拼接</button>
+                  </div>
+                </div>
+                <div class="setting-group">
+                  <label class="setting-label">间距: <span id="spacing-value">0</span>px</label>
+                  <input type="range" id="spacing" min="0" max="50" value="0" style="width:100%;">
+                </div>
+                <div class="setting-group">
+                  <label class="setting-label">背景颜色</label>
+                  <input type="color" id="bg-color" value="#000000" style="width:3rem;height:2rem;border:none;cursor:pointer;">
+                </div>
+                <div class="hao-btn-group">
+                  <button class="hao-press-btn hao-press-btn--primary" id="stitch-btn">开始拼接</button>
+                  <button class="hao-press-btn hao-press-btn--secondary" id="reset-btn">重置</button>
+                </div>
+              </div>
 
-        <div class="settings" id="settings" style="display:none;">
-          <div class="setting-group">
-            <label class="setting-label">拼接方向</label>
-            <div class="format-options" id="direction-options">
-              <button class="format-btn active" data-dir="horizontal">水平拼接</button>
-              <button class="format-btn" data-dir="vertical">垂直拼接</button>
-            </div>
-          </div>
-          <div class="setting-group">
-            <label class="setting-label">间距: <span id="spacing-value">0</span>px</label>
-            <input type="range" id="spacing" min="0" max="50" value="0" style="width:100%;">
-          </div>
-          <div class="setting-group">
-            <label class="setting-label">背景颜色</label>
-            <input type="color" id="bg-color" value="#000000" style="width:3rem;height:2rem;border:none;cursor:pointer;">
-          </div>
-          <div class="btn-group">
-            <button class="btn-primary" id="stitch-btn">开始拼接</button>
-            <button class="btn-secondary" id="reset-btn">重置</button>
-          </div>
-        </div>
+              <div class="progress-area" id="progress-area" style="display:none;">
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                <div class="progress-text" id="progress-text">处理中...</div>
+              </div>
 
-        <div class="progress-area" id="progress-area" style="display:none;">
-          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-          <div class="progress-text" id="progress-text">处理中...</div>
-        </div>
-
-        <div class="result-area" id="result-area" style="display:none;">
-          <div class="result-header">拼接结果</div>
-          <div class="result-stats">
-            <div class="stat">
-              <span class="stat-label">输出尺寸</span>
-              <span class="stat-value" id="output-size"></span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">图片数量</span>
-              <span class="stat-value" id="stitch-count"></span>
-            </div>
-          </div>
-          <canvas id="result-canvas" style="width:100%;border-radius:10px;"></canvas>
-          <div class="btn-group" style="margin-top:0.3rem;">
-            <button class="btn-primary" id="download-btn">下载图片</button>
-          </div>
-        </div>
-      </main>
-    </div>
+              <div class="hao-result" id="hao-result" style="display:none;">
+                <div class="result-header">拼接结果</div>
+                <div class="hao-result-stats">
+                  <div class="stat">
+                    <span class="stat-label">输出尺寸</span>
+                    <span class="stat-value" id="output-size"></span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">图片数量</span>
+                    <span class="stat-value" id="stitch-count"></span>
+                  </div>
+                </div>
+                <canvas id="result-canvas" style="width:100%;border-radius:10px;"></canvas>
+                <div class="hao-btn-group" style="margin-top:0.3rem;">
+                  <button class="hao-press-btn hao-press-btn--primary" id="download-btn">下载图片</button>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  .tool-main { overflow: auto; }
-  #result-canvas { max-height: 60vh; object-fit: contain; }
-  #thumbnails img { max-width: 80px; max-height: 80px; border-radius: 8px; object-fit: cover; }
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', function() {
-    var uploadArea = document.getElementById('upload-area');
-    var fileInput = document.getElementById('file-input');
-    var imageList = document.getElementById('image-list');
-    var thumbnails = document.getElementById('thumbnails');
-    var settings = document.getElementById('settings');
-    var progressArea = document.getElementById('progress-area');
-    var progressFill = document.getElementById('progress-fill');
-    var progressText = document.getElementById('progress-text');
-    var resultArea = document.getElementById('result-area');
-    var resultCanvas = document.getElementById('result-canvas');
-    var dirBtns = document.querySelectorAll('#direction-options .format-btn');
-    var spacingSlider = document.getElementById('spacing');
-    var spacingValue = document.getElementById('spacing-value');
-    var bgColorInput = document.getElementById('bg-color');
-    var stitchBtn = document.getElementById('stitch-btn');
-    var resetBtn = document.getElementById('reset-btn');
-    var downloadBtn = document.getElementById('download-btn');
-    var images = [];
-    var direction = 'horizontal';
-
-    uploadArea.addEventListener('click', function() { fileInput.click(); });
-    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
-    uploadArea.addEventListener('drop', function(e) {
-      e.preventDefault();
-      if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
-    });
-    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFiles(fileInput.files); });
-    spacingSlider.addEventListener('input', function() { spacingValue.textContent = spacingSlider.value; });
-
-    dirBtns.forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        dirBtns.forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        direction = btn.getAttribute('data-dir');
-      });
-    });
-
-    function handleFiles(files) {
-      images = [];
-      thumbnails.innerHTML = '';
-      var loaded = 0;
-      var total = 0;
-      for (var i = 0; i < files.length; i++) {
-        if (!files[i].type.startsWith('image/')) continue;
-        total++;
-        (function(file) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            var img = new Image();
-            img.onload = function() {
-              images.push(img);
-              loaded++;
-              var thumb = document.createElement('img');
-              thumb.src = e.target.result;
-              thumbnails.appendChild(thumb);
-              if (loaded === total) {
-                document.getElementById('image-count').textContent = images.length;
-                imageList.style.display = 'block';
-                settings.style.display = 'flex';
-                resultArea.style.display = 'none';
-              }
-            };
-            img.src = e.target.result;
-          };
-          reader.readAsDataURL(file);
-        })(files[i]);
-      }
-    }
-
-    stitchBtn.addEventListener('click', function() {
-      if (images.length < 2) return;
-      progressArea.style.display = 'block';
-      progressFill.style.width = '50%';
-      progressText.textContent = '拼接中...';
-      setTimeout(function() {
-        var spacing = parseInt(spacingSlider.value);
-        var bg = bgColorInput.value;
-        var totalW, totalH;
-        if (direction === 'horizontal') {
-          totalW = 0;
-          totalH = 0;
-          for (var i = 0; i < images.length; i++) {
-            totalW += images[i].width + (i < images.length - 1 ? spacing : 0);
-            totalH = Math.max(totalH, images[i].height);
-          }
-        } else {
-          totalW = 0;
-          totalH = 0;
-          for (var i = 0; i < images.length; i++) {
-            totalW = Math.max(totalW, images[i].width);
-            totalH += images[i].height + (i < images.length - 1 ? spacing : 0);
-          }
-        }
-        var canvas = resultCanvas;
-        var ctx = canvas.getContext('2d');
-        canvas.width = totalW;
-        canvas.height = totalH;
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, totalW, totalH);
-        var offset = 0;
-        for (var i = 0; i < images.length; i++) {
-          if (direction === 'horizontal') {
-            ctx.drawImage(images[i], offset, (totalH - images[i].height) / 2);
-            offset += images[i].width + spacing;
-          } else {
-            ctx.drawImage(images[i], (totalW - images[i].width) / 2, offset);
-            offset += images[i].height + spacing;
-          }
-        }
-        document.getElementById('output-size').textContent = totalW + 'x' + totalH;
-        document.getElementById('stitch-count').textContent = images.length;
-        progressFill.style.width = '100%';
-        progressText.textContent = '完成!';
-        resultArea.style.display = 'block';
-        setTimeout(function() { progressArea.style.display = 'none'; }, 800);
-      }, 50);
-    });
-
-    resetBtn.addEventListener('click', function() {
-      images = [];
-      thumbnails.innerHTML = '';
-      imageList.style.display = 'none';
-      settings.style.display = 'none';
-      resultArea.style.display = 'none';
-      fileInput.value = '';
-    });
-
-    downloadBtn.addEventListener('click', function() {
-      resultCanvas.toBlob(function(blob) {
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = 'stitched_image.png';
-        a.click();
-        URL.revokeObjectURL(url);
-      }, 'image/png');
-    });
-  });
 </script>

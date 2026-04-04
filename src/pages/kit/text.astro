@@ -1,103 +1,115 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
+
+const toolName = '文本工具';
+const toolDesc = '字数统计、大小写转换、文本差异对比';
 ---
 
-<Layout
-  title="文本工具 - Maxwell.Science"
-  description="字数统计、大小写转换、文本差异对比"
->
-  <section class="text-tool">
-    <div class="container">
-      <header class="header">
-        <a href="/kit" class="back-link">
+<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+<section >
+    <div class="hao-section-container">
+      <header class="hao-tool-header">
+        <a href="/kit" class="hao-back-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
           <span>工具箱</span>
         </a>
-        <h1 class="title">文本工具</h1>
+        <h1 class="hao-tool-title">文本工具</h1>
         <p class="desc">字数统计、大小写转换、去重、排版</p>
       </header>
 
       <!-- Input -->
-      <div class="card">
+      <div class="hao-card">
         <div class="card-head">
           <span class="card-title">输入文本</span>
-          <div class="card-actions">
-            <button class="btn-sm" id="paste-btn">粘贴</button>
-            <button class="btn-sm" id="clear-btn">清空</button>
+          <div class="hao-card-actions">
+            <button class="hao-btn-sm" id="paste-btn">粘贴</button>
+            <button class="hao-btn-sm" id="clear-btn">清空</button>
           </div>
         </div>
         <textarea id="text-input" rows="8" placeholder="在此输入或粘贴文本..."></textarea>
       </div>
 
       <!-- Stats -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-val" id="stat-chars">0</span>
-          <span class="stat-lbl">字符数</span>
+      <div class="hao-stats-grid">
+        <div class="hao-stat-card">
+          <span class="hao-stat-val" id="stat-chars">0</span>
+          <span class="hao-stat-lbl">字符数</span>
         </div>
-        <div class="stat-card">
-          <span class="stat-val" id="stat-chars-no-space">0</span>
-          <span class="stat-lbl">不含空格</span>
+        <div class="hao-stat-card">
+          <span class="hao-stat-val" id="stat-chars-no-space">0</span>
+          <span class="hao-stat-lbl">不含空格</span>
         </div>
-        <div class="stat-card">
-          <span class="stat-val" id="stat-words">0</span>
-          <span class="stat-lbl">词数</span>
+        <div class="hao-stat-card">
+          <span class="hao-stat-val" id="stat-words">0</span>
+          <span class="hao-stat-lbl">词数</span>
         </div>
-        <div class="stat-card">
-          <span class="stat-val" id="stat-lines">0</span>
-          <span class="stat-lbl">行数</span>
+        <div class="hao-stat-card">
+          <span class="hao-stat-val" id="stat-lines">0</span>
+          <span class="hao-stat-lbl">行数</span>
         </div>
-        <div class="stat-card">
-          <span class="stat-val" id="stat-bytes">0</span>
-          <span class="stat-lbl">字节数</span>
+        <div class="hao-stat-card">
+          <span class="hao-stat-val" id="stat-bytes">0</span>
+          <span class="hao-stat-lbl">字节数</span>
         </div>
-        <div class="stat-card">
-          <span class="stat-val" id="stat-chinese">0</span>
-          <span class="stat-lbl">中文字数</span>
+        <div class="hao-stat-card">
+          <span class="hao-stat-val" id="stat-chinese">0</span>
+          <span class="hao-stat-lbl">中文字数</span>
         </div>
       </div>
 
       <!-- Transform buttons -->
-      <div class="card">
+      <div class="hao-card">
         <div class="card-head">
           <span class="card-title">文本转换</span>
         </div>
         <div class="btn-grid">
-          <button class="btn" id="to-upper">转为大写</button>
-          <button class="btn" id="to-lower">转为小写</button>
-          <button class="btn" id="to-capitalize">首字母大写</button>
-          <button class="btn" id="to-title">标题格式</button>
-          <button class="btn" id="trim-lines">去除行首尾空格</button>
-          <button class="btn" id="remove-blank-lines">删除空行</button>
-          <button class="btn" id="remove-dup-lines">去除重复行</button>
-          <button class="btn" id="sort-lines">行排序</button>
-          <button class="btn" id="reverse-lines">行倒序</button>
-          <button class="btn" id="reverse-text">文本反转</button>
-          <button class="btn" id="to-fullwidth">全角转换</button>
-          <button class="btn" id="to-halfwidth">半角转换</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="to-upper">转为大写</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="to-lower">转为小写</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="to-capitalize">首字母大写</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="to-title">标题格式</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="trim-lines">去除行首尾空格</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="remove-blank-lines">删除空行</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="remove-dup-lines">去除重复行</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="sort-lines">行排序</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="reverse-lines">行倒序</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="reverse-text">文本反转</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="to-fullwidth">全角转换</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="to-halfwidth">半角转换</button>
         </div>
       </div>
 
       <!-- Output -->
-      <div class="card">
+      <div class="hao-card">
         <div class="card-head">
           <span class="card-title">转换结果</span>
-          <button class="btn-sm" id="copy-output">复制结果</button>
+          <button class="hao-btn-sm" id="copy-output">复制结果</button>
         </div>
         <textarea id="text-output" rows="8" readonly placeholder="转换结果将显示在这里..."></textarea>
       </div>
     </div>
   </section>
+    </KitToolWrapper>
+  </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
-<script>
+<script is:inline>
+>
   const textInput = document.getElementById('text-input');
   const textOutput = document.getElementById('text-output');
 

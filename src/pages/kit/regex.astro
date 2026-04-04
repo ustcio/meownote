@@ -1,28 +1,30 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
+
+const toolName = '正则测试';
+const toolDesc = '在线测试正则表达式，实时匹配高亮';
 ---
 
-<Layout
-  title="正则测试 - Maxwell.Science"
-  description="在线测试正则表达式，实时匹配高亮"
->
-  <section class="regex-tool">
-    <div class="container">
-      <header class="header">
-        <a href="/kit" class="back-link">
+<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+<section >
+    <div class="hao-section-container">
+      <header class="hao-tool-header">
+        <a href="/kit" class="hao-back-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
           <span>工具箱</span>
         </a>
-        <h1 class="title">正则测试</h1>
+        <h1 class="hao-tool-title">正则测试</h1>
         <p class="desc">在线测试正则表达式，实时匹配高亮</p>
       </header>
 
       <!-- Regex Input -->
-      <div class="card">
-        <div class="regex-input-row">
+      <div class="hao-card">
+        <div class="hao-regex-input">
           <span class="slash">/</span>
           <input type="text" id="regex-pattern" placeholder="输入正则表达式..." spellcheck="false" />
           <span class="slash">/</span>
@@ -38,29 +40,29 @@ import '@styles/hao-design.css';
       </div>
 
       <!-- Test String -->
-      <div class="card">
+      <div class="hao-card">
         <div class="card-head">
           <span class="card-title">测试文本</span>
-          <div class="card-actions">
-            <button class="btn-sm" id="clear-btn">清空</button>
+          <div class="hao-card-actions">
+            <button class="hao-btn-sm" id="clear-btn">清空</button>
           </div>
         </div>
         <textarea id="test-text" rows="6" placeholder="输入要匹配的文本..."></textarea>
       </div>
 
       <!-- Match Results -->
-      <div class="card">
+      <div class="hao-card">
         <div class="card-head">
           <span class="card-title">匹配结果</span>
           <span class="match-count" id="match-count">0 个匹配</span>
         </div>
-        <div class="highlight-box" id="highlight-box">
+        <div class="hao-highlight" id="highlight-box">
           <span class="placeholder-text">匹配结果将高亮显示在这里...</span>
         </div>
       </div>
 
       <!-- Match Groups -->
-      <div class="card" id="groups-card" style="display:none;">
+      <div class="hao-card" id="groups-card" style="display:none;">
         <div class="card-head">
           <span class="card-title">匹配详情</span>
         </div>
@@ -68,7 +70,7 @@ import '@styles/hao-design.css';
       </div>
 
       <!-- Common Patterns -->
-      <div class="card">
+      <div class="hao-card">
         <div class="card-head">
           <span class="card-title">常用正则</span>
         </div>
@@ -85,13 +87,23 @@ import '@styles/hao-design.css';
       </div>
     </div>
   </section>
+    </KitToolWrapper>
+  </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
-<script>
+<script is:inline>
+>
   const patternInput = document.getElementById('regex-pattern');
   const flagsInput = document.getElementById('regex-flags');
   const testText = document.getElementById('test-text');

@@ -1,50 +1,52 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
+
+const toolName = 'URL 编解码';
+const toolDesc = 'URL 编码与解码工具，支持中文和特殊字符';
 ---
 
-<Layout
-  title="URL 编解码 - Maxwell.Science"
-  description="URL 编码与解码工具，支持中文和特殊字符"
->
-  <section class="url-tool">
-    <div class="container">
-      <header class="header">
-        <a href="/kit" class="back-link">
+<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+<section >
+    <div class="hao-section-container">
+      <header class="hao-tool-header">
+        <a href="/kit" class="hao-back-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
           <span>工具箱</span>
         </a>
-        <h1 class="title">URL 编解码</h1>
+        <h1 class="hao-tool-title">URL 编解码</h1>
         <p class="desc">URL 编码与解码，支持中文和特殊字符</p>
       </header>
 
-      <div class="card">
+      <div class="hao-card">
         <div class="card-head">
           <span class="card-title">输入</span>
-          <div class="card-actions">
-            <button class="btn-sm" id="clear-btn">清空</button>
+          <div class="hao-card-actions">
+            <button class="hao-btn-sm" id="clear-btn">清空</button>
           </div>
         </div>
         <textarea id="url-input" rows="4" placeholder="输入 URL 或文本..."></textarea>
       </div>
 
-      <div class="actions">
-        <button class="btn-primary" id="encode-btn">编码 →</button>
-        <button class="btn-primary" id="decode-btn">← 解码</button>
+      <div class="hao-actions">
+        <button class="hao-press-btn hao-press-btn--primary" id="encode-btn">编码 →</button>
+        <button class="hao-press-btn hao-press-btn--primary" id="decode-btn">← 解码</button>
       </div>
 
-      <div class="card">
+      <div class="hao-card">
         <div class="card-head">
           <span class="card-title">输出</span>
-          <button class="btn-sm" id="copy-btn">复制</button>
+          <button class="hao-btn-sm" id="copy-btn">复制</button>
         </div>
         <textarea id="url-output" rows="4" readonly placeholder="结果将显示在这里..."></textarea>
       </div>
 
       <!-- URL Parts Parser -->
-      <div class="card">
+      <div class="hao-card">
         <div class="card-head">
           <span class="card-title">URL 解析</span>
         </div>
@@ -54,15 +56,15 @@ import '@styles/hao-design.css';
       </div>
 
       <!-- Quick tools -->
-      <div class="card">
+      <div class="hao-card">
         <div class="card-head">
           <span class="card-title">快速操作</span>
         </div>
         <div class="btn-grid">
-          <button class="btn" id="encode-component">编码组件</button>
-          <button class="btn" id="decode-component">解码组件</button>
-          <button class="btn" id="parse-params">解析查询参数</button>
-          <button class="btn" id="build-params">构建查询参数</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="encode-component">编码组件</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="decode-component">解码组件</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="parse-params">解析查询参数</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="build-params">构建查询参数</button>
         </div>
         <div class="extra-output" id="extra-output" style="display:none; margin-top: var(--space-3);">
           <textarea id="extra-result" rows="4" readonly></textarea>
@@ -70,13 +72,23 @@ import '@styles/hao-design.css';
       </div>
     </div>
   </section>
+    </KitToolWrapper>
+  </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
-<script>
+<script is:inline>
+>
   const urlInput = document.getElementById('url-input');
   const urlOutput = document.getElementById('url-output');
   const parseResult = document.getElementById('parse-result')!;

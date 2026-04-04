@@ -1,102 +1,114 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
+
+const toolName = '颜色转换器';
+const toolDesc = 'HEX、RGB、HSL 颜色格式互转工具';
 ---
 
-<Layout
-  title="颜色转换器 - Maxwell.Science"
-  description="HEX、RGB、HSL 颜色格式互转工具"
->
-  <section class="color-tool">
-    <div class="container">
-      <header class="header">
-        <a href="/kit" class="back-link">
+<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+<section >
+    <div class="hao-section-container">
+      <header class="hao-tool-header">
+        <a href="/kit" class="hao-back-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
           <span>工具箱</span>
         </a>
-        <h1 class="title">颜色转换器</h1>
+        <h1 class="hao-tool-title">颜色转换器</h1>
         <p class="desc">HEX、RGB、HSL 颜色格式互转</p>
       </header>
 
       <!-- Preview -->
-      <div class="card preview-card">
-        <div class="color-preview" id="color-preview" style="background: #d97757;"></div>
+      <div class="hao-card hao-preview-card">
+        <div class="hao-color-preview" id="color-preview" style="background: #d97757;"></div>
         <input type="color" id="native-picker" value="#d97757" />
       </div>
 
       <!-- Formats -->
-      <div class="card">
-        <div class="format-row">
+      <div class="hao-card">
+        <div class="hao-format-row">
           <div class="format-group">
             <label class="lbl">HEX</label>
             <div class="input-row">
               <input type="text" id="hex-input" value="#d97757" spellcheck="false" />
-              <button class="copy-sm" data-copy="hex-input">复制</button>
+              <button class="hao-copy-btn" data-copy="hex-input">复制</button>
             </div>
           </div>
         </div>
 
-        <div class="format-row">
+        <div class="hao-format-row">
           <div class="format-group">
             <label class="lbl">RGB</label>
             <div class="input-row">
               <input type="text" id="rgb-input" value="rgb(217, 119, 87)" spellcheck="false" />
-              <button class="copy-sm" data-copy="rgb-input">复制</button>
+              <button class="hao-copy-btn" data-copy="rgb-input">复制</button>
             </div>
           </div>
         </div>
 
-        <div class="format-row">
+        <div class="hao-format-row">
           <div class="format-group">
             <label class="lbl">HSL</label>
             <div class="input-row">
               <input type="text" id="hsl-input" value="hsl(16, 65%, 60%)" spellcheck="false" />
-              <button class="copy-sm" data-copy="hsl-input">复制</button>
+              <button class="hao-copy-btn" data-copy="hsl-input">复制</button>
             </div>
           </div>
         </div>
 
-        <div class="format-row">
+        <div class="hao-format-row">
           <div class="format-group">
             <label class="lbl">RGBA</label>
             <div class="input-row">
               <input type="text" id="rgba-input" value="rgba(217, 119, 87, 1)" spellcheck="false" />
-              <button class="copy-sm" data-copy="rgba-input">复制</button>
+              <button class="hao-copy-btn" data-copy="rgba-input">复制</button>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Slider controls -->
-      <div class="card">
-        <div class="slider-group">
+      <div class="hao-card">
+        <div class="hao-slider-group">
           <label class="lbl">R <span id="r-val">217</span></label>
           <input type="range" id="r-slider" min="0" max="255" value="217" class="slider r-slider" />
         </div>
-        <div class="slider-group">
+        <div class="hao-slider-group">
           <label class="lbl">G <span id="g-val">119</span></label>
           <input type="range" id="g-slider" min="0" max="255" value="119" class="slider g-slider" />
         </div>
-        <div class="slider-group">
+        <div class="hao-slider-group">
           <label class="lbl">B <span id="b-val">87</span></label>
           <input type="range" id="b-slider" min="0" max="255" value="87" class="slider b-slider" />
         </div>
-        <div class="slider-group">
+        <div class="hao-slider-group">
           <label class="lbl">A <span id="a-val">1</span></label>
           <input type="range" id="a-slider" min="0" max="100" value="100" class="slider a-slider" />
         </div>
       </div>
     </div>
   </section>
+    </KitToolWrapper>
+  </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
-<script>
+<script is:inline>
+>
   const hexInput = document.getElementById('hex-input');
   const rgbInput = document.getElementById('rgb-input');
   const hslInput = document.getElementById('hsl-input');

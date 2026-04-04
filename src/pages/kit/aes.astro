@@ -1,56 +1,50 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = 'AES加密解密';
 const toolDesc = 'AES对称加密和解密';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="form-group">
-            <label class="form-label" for="input-text">输入文本</label>
-            <textarea id="input-text" class="form-textarea" placeholder="输入要加密或解密的文本..."></textarea>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="password">密钥</label>
-            <input type="text" id="password" class="form-input" placeholder="输入加密密钥">
-          </div>
-          <div class="btn-group">
-            <button id="encrypt-btn" class="btn btn-primary">加密</button>
-            <button id="decrypt-btn" class="btn btn-secondary">解密</button>
-            <button id="copy-btn" class="btn btn-secondary">复制</button>
-          </div>
-          <div class="form-group">
-            <label class="form-label">结果</label>
-            <div id="result" class="result-area">等待输入...</div>
-          </div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="hao-form-group">
+                  <label class="hao-label" for="input-text">输入文本</label>
+                  <textarea id="input-text" class="hao-input" placeholder="输入要加密或解密的文本..."></textarea>
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label" for="password">密钥</label>
+                  <input type="text" id="password" class="hao-input" placeholder="输入加密密钥">
+                </div>
+                <div class="hao-btn-group">
+                  <button id="encrypt-btn" class="hao-press-btn hao-press-btn--primary">加密</button>
+                  <button id="decrypt-btn" class="hao-press-btn hao-press-btn--secondary">解密</button>
+                  <button id="copy-btn" class="hao-press-btn hao-press-btn--secondary">复制</button>
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">结果</label>
+                  <div id="result" class="hao-result">等待输入...</div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  async function deriveKey(password, salt) {
+
+<script is:inline>
+async function deriveKey(password, salt) {
     const enc = new TextEncoder();
     const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
     return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);

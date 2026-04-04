@@ -1,46 +1,48 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
+
+const toolName = 'JSON 格式化';
+const toolDesc = 'JSON 格式化、压缩、校验工具，支持语法高亮';
 ---
 
-<Layout
-  title="JSON 格式化 - Maxwell.Science"
-  description="JSON 格式化、压缩、校验工具，支持语法高亮"
->
-  <section class="tool-page">
-    <div class="tool-container">
+<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+<section class="hao-tool-page">
+    <div class="hao-tool-container">
       <header class="tool-header">
-        <a href="/kit" class="back-link">
+        <a href="/kit" class="hao-back-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
           <span>工具箱</span>
         </a>
         <h1>JSON 格式化</h1>
-        <p class="tool-desc">JSON 格式化、压缩、校验，支持语法高亮显示</p>
+        <p class="hao-tool-desc">JSON 格式化、压缩、校验，支持语法高亮显示</p>
       </header>
 
-      <div class="tool-main">
-        <div class="editor-section">
-          <div class="editor-header">
-            <span class="editor-label">输入 JSON</span>
-            <div class="editor-actions">
-              <button class="btn-sm" id="paste-btn">粘贴</button>
-              <button class="btn-sm" id="clear-btn">清空</button>
+      <div class="hao-tool-card">
+        <div class="hao-editor-section">
+          <div class="hao-editor-header">
+            <span class="hao-editor-label">输入 JSON</span>
+            <div class="hao-editor-actions">
+              <button class="hao-btn-sm" id="paste-btn">粘贴</button>
+              <button class="hao-btn-sm" id="clear-btn">清空</button>
             </div>
           </div>
           <textarea id="json-input" placeholder='{"name": "example", "value": 123}' spellcheck="false"></textarea>
         </div>
 
         <div class="actions-bar">
-          <button class="btn-primary" id="format-btn">
+          <button class="hao-press-btn hao-press-btn--primary" id="format-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="16 18 22 12 16 6"></polyline>
               <polyline points="8 6 2 12 8 18"></polyline>
             </svg>
             格式化
           </button>
-          <button class="btn-secondary" id="minify-btn">
+          <button class="hao-press-btn hao-press-btn--secondary" id="minify-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="4 14 10 14 10 20"></polyline>
               <polyline points="20 10 14 10 14 4"></polyline>
@@ -49,7 +51,7 @@ import '@styles/hao-design.css';
             </svg>
             压缩
           </button>
-          <button class="btn-secondary" id="copy-btn">
+          <button class="hao-press-btn hao-press-btn--secondary" id="copy-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -59,8 +61,8 @@ import '@styles/hao-design.css';
         </div>
 
         <div class="output-section">
-          <div class="editor-header">
-            <span class="editor-label">输出结果</span>
+          <div class="hao-editor-header">
+            <span class="hao-editor-label">输出结果</span>
             <span class="status" id="status"></span>
           </div>
           <div class="output-wrapper">
@@ -70,13 +72,23 @@ import '@styles/hao-design.css';
       </div>
     </div>
   </section>
+    </KitToolWrapper>
+  </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
-<script>
+<script is:inline>
+>
   const jsonInput = document.getElementById('json-input');
   const jsonOutput = document.getElementById('json-output');
   const status = document.getElementById('status');

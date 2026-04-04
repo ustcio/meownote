@@ -1,153 +1,68 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '经纬度查询/转换';
 const toolDesc = '地址转经纬度、DMS与十进制坐标互转';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="tab-buttons" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;">
-            <button id="tab-geo" class="btn-primary" data-tab="geo">坐标查询</button>
-            <button id="tab-convert" class="btn-secondary" data-tab="convert">坐标转换</button>
-          </div>
-
-          <div id="panel-geo">
-            <div class="input-group" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;">
-              <input id="address-input" type="text" class="form-input" placeholder="输入地址，如 北京市天安门" style="flex:1;padding:0.3rem 0.4rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:15px;color:var(--color-text);font-size:0.28rem;outline:none;">
-              <button id="search-btn" class="btn-primary">查询</button>
-            </div>
-            <div id="geo-result" class="result-area" style="display:none;">
-              <div class="result-header">查询结果</div>
-              <div class="file-info" id="geo-info"></div>
-            </div>
-          </div>
-
-          <div id="panel-convert" style="display:none;">
-            <div class="settings">
-              <div class="setting-group">
-                <span class="setting-label">十进制转DMS (度分秒)</span>
-                <div style="display:flex;gap:0.2rem;flex-wrap:wrap;margin-top:0.2rem;">
-                  <input id="dec-lat" type="number" step="any" placeholder="纬度 (如 39.9042)" style="flex:1;padding:0.25rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:10px;color:var(--color-text);font-size:0.28rem;">
-                  <input id="dec-lng" type="number" step="any" placeholder="经度 (如 116.4074)" style="flex:1;padding:0.25rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:10px;color:var(--color-text);font-size:0.28rem;">
-                  <button id="dec-to-dms" class="btn-primary">转换</button>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="tab-buttons" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;">
+                  <button id="tab-geo" class="hao-press-btn hao-press-btn--primary" data-tab="geo">坐标查询</button>
+                  <button id="tab-convert" class="hao-press-btn hao-press-btn--secondary" data-tab="convert">坐标转换</button>
                 </div>
-                <div id="dms-result" style="margin-top:0.2rem;padding:0.3rem;background:var(--color-background-one);border-radius:10px;color:var(--font-color-solid);font-size:0.28rem;display:none;"></div>
-              </div>
-              <div class="setting-group">
-                <span class="setting-label">DMS转十进制</span>
-                <div style="display:flex;gap:0.2rem;flex-wrap:wrap;margin-top:0.2rem;">
-                  <input id="dms-lat" type="text" placeholder="纬度 度,分,秒 (如 39,54,15)" style="flex:1;padding:0.25rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:10px;color:var(--color-text);font-size:0.28rem;">
-                  <input id="dms-lng" type="text" placeholder="经度 度,分,秒 (如 116,24,27)" style="flex:1;padding:0.25rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:10px;color:var(--color-text);font-size:0.28rem;">
-                  <button id="dms-to-dec" class="btn-primary">转换</button>
+
+                <div id="panel-geo">
+                  <div class="input-group" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;">
+                    <input id="address-input" type="text" class="hao-input" placeholder="输入地址，如 北京市天安门" style="flex:1;padding:0.3rem 0.4rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:15px;color:var(--color-text);font-size:0.28rem;outline:none;">
+                    <button id="search-btn" class="hao-press-btn hao-press-btn--primary">查询</button>
+                  </div>
+                  <div id="geo-result" class="hao-result" style="display:none;">
+                    <div class="result-header">查询结果</div>
+                    <div class="file-info" id="geo-info"></div>
+                  </div>
                 </div>
-                <div id="dec-result" style="margin-top:0.2rem;padding:0.3rem;background:var(--color-background-one);border-radius:10px;color:var(--font-color-solid);font-size:0.28rem;display:none;"></div>
+
+                <div id="panel-convert" style="display:none;">
+                  <div class="settings">
+                    <div class="setting-group">
+                      <span class="setting-label">十进制转DMS (度分秒)</span>
+                      <div style="display:flex;gap:0.2rem;flex-wrap:wrap;margin-top:0.2rem;">
+                        <input id="dec-lat" type="number" step="any" placeholder="纬度 (如 39.9042)" style="flex:1;padding:0.25rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:10px;color:var(--color-text);font-size:0.28rem;">
+                        <input id="dec-lng" type="number" step="any" placeholder="经度 (如 116.4074)" style="flex:1;padding:0.25rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:10px;color:var(--color-text);font-size:0.28rem;">
+                        <button id="dec-to-dms" class="hao-press-btn hao-press-btn--primary">转换</button>
+                      </div>
+                      <div id="dms-result" style="margin-top:0.2rem;padding:0.3rem;background:var(--color-background-one);border-radius:10px;color:var(--font-color-solid);font-size:0.28rem;display:none;"></div>
+                    </div>
+                    <div class="setting-group">
+                      <span class="setting-label">DMS转十进制</span>
+                      <div style="display:flex;gap:0.2rem;flex-wrap:wrap;margin-top:0.2rem;">
+                        <input id="dms-lat" type="text" placeholder="纬度 度,分,秒 (如 39,54,15)" style="flex:1;padding:0.25rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:10px;color:var(--color-text);font-size:0.28rem;">
+                        <input id="dms-lng" type="text" placeholder="经度 度,分,秒 (如 116,24,27)" style="flex:1;padding:0.25rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:10px;color:var(--color-text);font-size:0.28rem;">
+                        <button id="dms-to-dec" class="hao-press-btn hao-press-btn--primary">转换</button>
+                      </div>
+                      <div id="dec-result" style="margin-top:0.2rem;padding:0.3rem;background:var(--color-background-one);border-radius:10px;color:var(--font-color-solid);font-size:0.28rem;display:none;"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
+<style>
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
+</style>
+
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', () => {
-    const tabGeo = document.getElementById('tab-geo');
-    const tabConvert = document.getElementById('tab-convert');
-    const panelGeo = document.getElementById('panel-geo');
-    const panelConvert = document.getElementById('panel-convert');
-
-    tabGeo.addEventListener('click', () => {
-      tabGeo.className = 'btn-primary'; tabConvert.className = 'btn-secondary';
-      panelGeo.style.display = 'block'; panelConvert.style.display = 'none';
-    });
-    tabConvert.addEventListener('click', () => {
-      tabConvert.className = 'btn-primary'; tabGeo.className = 'btn-secondary';
-      panelConvert.style.display = 'block'; panelGeo.style.display = 'none';
-    });
-
-    const addressInput = document.getElementById('address-input');
-    const searchBtn = document.getElementById('search-btn');
-    const geoResult = document.getElementById('geo-result');
-    const geoInfo = document.getElementById('geo-info');
-
-    searchBtn.addEventListener('click', async () => {
-      const address = addressInput.value.trim();
-      if (!address) return;
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`, {
-          headers: { 'Accept-Language': 'zh-CN' }
-        });
-        const data = await res.json();
-        if (data.length === 0) { geoInfo.innerHTML = '<div style="color:var(--color-tm-text);">未找到结果</div>'; geoResult.style.display = 'block'; return; }
-        const d = data[0];
-        const lat = parseFloat(d.lat).toFixed(6);
-        const lon = parseFloat(d.lon).toFixed(6);
-        geoInfo.innerHTML = `
-          <div class="info-row"><span class="info-label">地址</span><span class="info-value">${d.display_name}</span></div>
-          <div class="info-row"><span class="info-label">纬度</span><span class="info-value">${lat}</span></div>
-          <div class="info-row"><span class="info-label">经度</span><span class="info-value">${lon}</span></div>
-          <div class="info-row"><span class="info-label">类型</span><span class="info-value">${d.type}</span></div>
-          <div class="info-row"><span class="info-label">地图</span><span class="info-value"><a href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=15/${lat}/${lon}" target="_blank" style="color:var(--top-color);">在地图上查看</a></span></div>`;
-        geoResult.style.display = 'block';
-      } catch (e) {
-        geoInfo.innerHTML = `<div style="color:#ff6b6b;">查询失败: ${e.message}</div>`;
-        geoResult.style.display = 'block';
-      }
-    });
-    addressInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchBtn.click(); });
-
-    function decimalToDMS(dec) {
-      const dir = dec >= 0 ? (dec === Math.abs(dec) || arguments[1] === 'lat' ? 'N' : 'E') : (arguments[1] === 'lat' ? 'S' : 'W');
-      const abs = Math.abs(dec);
-      const d = Math.floor(abs);
-      const mFloat = (abs - d) * 60;
-      const m = Math.floor(mFloat);
-      const s = ((mFloat - m) * 60).toFixed(2);
-      return `${d}° ${m}' ${s}" ${dir}`;
-    }
-
-    function dmsToDecimal(d, m, s) {
-      return parseFloat(d) + parseFloat(m) / 60 + parseFloat(s) / 3600;
-    }
-
-    document.getElementById('dec-to-dms').addEventListener('click', () => {
-      const lat = parseFloat(document.getElementById('dec-lat').value);
-      const lng = parseFloat(document.getElementById('dec-lng').value);
-      if (isNaN(lat) || isNaN(lng)) return;
-      const dmsLat = decimalToDMS(lat, 'lat');
-      const dmsLng = decimalToDMS(lng, 'lng');
-      const el = document.getElementById('dms-result');
-      el.innerHTML = `<strong>纬度:</strong> ${dmsLat}<br><strong>经度:</strong> ${dmsLng}`;
-      el.style.display = 'block';
-    });
-
-    document.getElementById('dms-to-dec').addEventListener('click', () => {
-      const latParts = document.getElementById('dms-lat').value.split(/[,\s]+/).map(Number);
-      const lngParts = document.getElementById('dms-lng').value.split(/[,\s]+/).map(Number);
-      if (latParts.length < 3 || lngParts.length < 3 || latParts.some(isNaN) || lngParts.some(isNaN)) return;
-      const decLat = dmsToDecimal(latParts[0], latParts[1], latParts[2]);
-      const decLng = dmsToDecimal(lngParts[0], lngParts[1], lngParts[2]);
-      const el = document.getElementById('dec-result');
-      el.innerHTML = `<strong>纬度:</strong> ${decLat.toFixed(6)}<br><strong>经度:</strong> ${decLng.toFixed(6)}<br><a href="https://www.openstreetmap.org/?mlat=${decLat}&mlon=${decLng}#map=15/${decLat}/${decLng}" target="_blank" style="color:var(--top-color);">在地图上查看</a>`;
-      el.style.display = 'block';
-    });
-  });
 </script>

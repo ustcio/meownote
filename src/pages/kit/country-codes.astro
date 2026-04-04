@@ -1,50 +1,44 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '国家代码查询';
 const toolDesc = '查询各国国际电话区号、ISO代码等';
 ---
 
-<Layout title={toolName + ' - 工具箱 - Maxwell.Science'} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-  <div class="search-bar">
-    <input type="text" id="search" class="form-input" placeholder="搜索国家名称、代码或区号...">
-  </div>
-  <div class="table-wrapper">
-    <table class="data-table" id="data-table">
-      <thead>
-        <tr><th>国家</th><th>电话区号</th><th>ISO 2位</th><th>ISO 3位</th></tr>
-      </thead>
-      <tbody id="table-body"></tbody>
-    </table>
-  </div>
+<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+        <div class="search-bar">
+          <input type="text" id="search" class="hao-input" placeholder="搜索国家名称、代码或区号...">
         </div>
-      </main>
-    </div>
+        <div class="table-wrapper">
+          <table class="data-table" id="data-table">
+            <thead>
+              <tr><th>国家</th><th>电话区号</th><th>ISO 2位</th><th>ISO 3位</th></tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  const countries = [
+
+<script is:inline>
+const countries = [
     ['中国','+86','CN','CHN'],['美国','+1','US','USA'],['英国','+44','GB','GBR'],
     ['日本','+81','JP','JPN'],['韩国','+82','KR','KOR'],['德国','+49','DE','DEU'],
     ['法国','+33','FR','FRA'],['俄罗斯','+7','RU','RUS'],['印度','+91','IN','IND'],
@@ -77,5 +71,4 @@ const toolDesc = '查询各国国际电话区号、ISO代码等';
       renderTable(filtered);
     });
   });
-
 </script>

@@ -1,49 +1,43 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '文件Base64';
 const toolDesc = '文件与Base64互转';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <label class="file-upload" for="file-input" style="display:flex;flex-direction:column;align-items:center;padding:var(--space-8);border:2px dashed var(--border-primary);border-radius:var(--radius-xl);cursor:pointer;">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-            <p>选择文件</p>
-            <input type="file" id="file-input" style="display:none;">
-          </label>
-          <div class="btn-group">
-            <button id="copy-btn" class="btn btn-secondary" disabled>复制Base64</button>
-            <button id="download-btn" class="btn btn-secondary" disabled>下载文件</button>
-          </div>
-          <div id="result" class="result-area" style="max-height:300px;overflow-y:auto;">等待选择文件...</div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <label class="hao-upload-area" for="file-input" style="display:flex;flex-direction:column;align-items:center;padding:var(--space-8);border:2px dashed var(--border-primary);border-radius:var(--radius-xl);cursor:pointer;">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                  <p>选择文件</p>
+                  <input type="file" id="file-input" style="display:none;">
+                </label>
+                <div class="hao-btn-group">
+                  <button id="copy-btn" class="hao-press-btn hao-press-btn--secondary" disabled>复制Base64</button>
+                  <button id="download-btn" class="hao-press-btn hao-press-btn--secondary" disabled>下载文件</button>
+                </div>
+                <div id="result" class="hao-result" style="max-height:300px;overflow-y:auto;">等待选择文件...</div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  let base64Result = '';
+
+<script is:inline>
+let base64Result = '';
   let fileName = '';
 
   document.addEventListener('DOMContentLoaded', () => {

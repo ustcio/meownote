@@ -1,104 +1,42 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '企业信息查询';
 const toolDesc = '查询企业工商注册信息';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="input-group" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;">
-            <input id="company-input" type="text" class="form-input" placeholder="输入企业名称" style="flex:1;padding:0.3rem 0.4rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:15px;color:var(--color-text);font-size:0.28rem;outline:none;">
-            <button id="search-btn" class="btn-primary">查询</button>
-          </div>
-          <div id="loading" style="display:none;text-align:center;padding:1rem;color:var(--color-cale-text);">查询中...</div>
-          <div id="error" style="display:none;text-align:center;padding:1rem;color:#ff6b6b;"></div>
-          <div id="result-area" style="display:none;">
-            <div class="result-area">
-              <div class="result-header">企业信息</div>
-              <div class="file-info" id="company-info"></div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="input-group" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;">
+                  <input id="company-input" type="text" class="hao-input" placeholder="输入企业名称" style="flex:1;padding:0.3rem 0.4rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:15px;color:var(--color-text);font-size:0.28rem;outline:none;">
+                  <button id="search-btn" class="hao-press-btn hao-press-btn--primary">查询</button>
+                </div>
+                <div id="loading" style="display:none;text-align:center;padding:1rem;color:var(--color-cale-text);">查询中...</div>
+                <div id="error" style="display:none;text-align:center;padding:1rem;color:#ff6b6b;"></div>
+                <div id="hao-result" style="display:none;">
+                  <div class="hao-result">
+                    <div class="result-header">企业信息</div>
+                    <div class="file-info" id="company-info"></div>
+                  </div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
+<style>
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
+</style>
+
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', () => {
-    const companyInput = document.getElementById('company-input');
-    const searchBtn = document.getElementById('search-btn');
-    const loading = document.getElementById('loading');
-    const error = document.getElementById('error');
-    const resultArea = document.getElementById('result-area');
-    const companyInfo = document.getElementById('company-info');
-
-    const mockData = [
-      { name: '腾讯科技', credit: '91440300708461136T', legal: '马化腾', capital: '6500万元', date: '2000-02-24', status: '存续', type: '有限责任公司', industry: '信息技术', address: '深圳市南山区' },
-      { name: '阿里巴巴', credit: '91330100716105852F', legal: '张勇', capital: '100000万元', date: '1999-04-10', status: '存续', type: '有限责任公司', industry: '电子商务', address: '杭州市余杭区' },
-      { name: '百度', credit: '91110000802100433B', legal: '李彦宏', capital: '30000万元', date: '2000-01-18', status: '存续', type: '有限责任公司', industry: '信息技术', address: '北京市海淀区' },
-      { name: '华为技术', credit: '91440300708448128J', legal: '赵明路', capital: '4030000万元', date: '1987-09-15', status: '存续', type: '有限责任公司', industry: '通信技术', address: '深圳市龙岗区' },
-      { name: '小米科技', credit: '91110108551385082Q', legal: '雷军', capital: '185000万元', date: '2010-03-03', status: '存续', type: '有限责任公司', industry: '电子设备', address: '北京市海淀区' },
-      { name: '字节跳动', credit: '91110108MA001XN78X', legal: '张利东', capital: '10000万元', date: '2012-03-15', status: '存续', type: '有限责任公司', industry: '信息技术', address: '北京市海淀区' },
-      { name: '京东集团', credit: '91110302660507487X', legal: '许冉', capital: '100000万元', date: '2004-01-15', status: '存续', type: '有限责任公司', industry: '电子商务', address: '北京市大兴区' },
-      { name: '网易', credit: '91330100749461512X', legal: '丁磊', capital: '50000万元', date: '1997-06-11', status: '存续', type: '有限责任公司', industry: '互联网', address: '杭州市滨江区' }
-    ];
-
-    function searchCompany(name) {
-      loading.style.display = 'block';
-      error.style.display = 'none';
-      resultArea.style.display = 'none';
-
-      setTimeout(() => {
-        const found = mockData.filter(c => c.name.includes(name));
-        if (found.length === 0) {
-          companyInfo.innerHTML = `
-            <div style="text-align:center;padding:0.5rem;">
-              <div style="font-size:0.4rem;margin-bottom:0.3rem;">📋</div>
-              <div style="color:var(--color-tm-text);font-size:0.28rem;">未找到匹配的企业信息</div>
-              <div style="color:var(--color-tm-text);font-size:0.22rem;margin-top:0.2rem;">提示: 可尝试搜索 "腾讯"、"阿里"、"百度"、"华为"、"小米"、"字节"、"京东"、"网易"</div>
-            </div>`;
-        } else {
-          const c = found[0];
-          companyInfo.innerHTML = `
-            <div class="info-row"><span class="info-label">企业名称</span><span class="info-value">${c.name}</span></div>
-            <div class="info-row"><span class="info-label">统一信用代码</span><span class="info-value">${c.credit}</span></div>
-            <div class="info-row"><span class="info-label">法定代表人</span><span class="info-value">${c.legal}</span></div>
-            <div class="info-row"><span class="info-label">注册资本</span><span class="info-value">${c.capital}</span></div>
-            <div class="info-row"><span class="info-label">成立日期</span><span class="info-value">${c.date}</span></div>
-            <div class="info-row"><span class="info-label">经营状态</span><span class="info-value">${c.status}</span></div>
-            <div class="info-row"><span class="info-label">企业类型</span><span class="info-value">${c.type}</span></div>
-            <div class="info-row"><span class="info-label">行业</span><span class="info-value">${c.industry}</span></div>
-            <div class="info-row"><span class="info-label">注册地址</span><span class="info-value">${c.address}</span></div>`;
-        }
-        resultArea.style.display = 'block';
-        loading.style.display = 'none';
-      }, 500);
-    }
-
-    searchBtn.addEventListener('click', () => {
-      const name = companyInput.value.trim();
-      if (!name) { error.textContent = '请输入企业名称'; error.style.display = 'block'; return; }
-      searchCompany(name);
-    });
-
-    companyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchBtn.click(); });
-  });
 </script>

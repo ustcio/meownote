@@ -1,187 +1,66 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '图片校正';
 const toolDesc = '调整亮度、对比度、饱和度和曝光';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="hao-upload-area" id="upload-area">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>点击或拖拽上传图片</span>
+                <span class="hint">支持 PNG, JPG, WebP 格式</span>
+                <input type="file" id="file-input" accept="image/*">
+              </div>
 
-      <main class="tool-main">
-        <div class="upload-area" id="upload-area">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          <span>点击或拖拽上传图片</span>
-          <span class="hint">支持 PNG, JPG, WebP 格式</span>
-          <input type="file" id="file-input" accept="image/*">
-        </div>
+              <div class="settings" id="settings" style="display:none;">
+                <div class="setting-group">
+                  <label class="setting-label">亮度: <span id="brightness-value">0</span></label>
+                  <input type="range" id="brightness" min="-100" max="100" value="0" style="width:100%;">
+                </div>
+                <div class="setting-group">
+                  <label class="setting-label">对比度: <span id="contrast-value">0</span></label>
+                  <input type="range" id="contrast" min="-100" max="100" value="0" style="width:100%;">
+                </div>
+                <div class="setting-group">
+                  <label class="setting-label">饱和度: <span id="saturation-value">0</span></label>
+                  <input type="range" id="saturation" min="-100" max="100" value="0" style="width:100%;">
+                </div>
+                <div class="setting-group">
+                  <label class="setting-label">曝光: <span id="exposure-value">0</span></label>
+                  <input type="range" id="exposure" min="-100" max="100" value="0" style="width:100%;">
+                </div>
+                <div class="hao-btn-group">
+                  <button class="hao-press-btn hao-press-btn--secondary" id="reset-btn">重置参数</button>
+                  <button class="hao-press-btn hao-press-btn--primary" id="download-btn">下载图片</button>
+                </div>
+              </div>
 
-        <div class="settings" id="settings" style="display:none;">
-          <div class="setting-group">
-            <label class="setting-label">亮度: <span id="brightness-value">0</span></label>
-            <input type="range" id="brightness" min="-100" max="100" value="0" style="width:100%;">
-          </div>
-          <div class="setting-group">
-            <label class="setting-label">对比度: <span id="contrast-value">0</span></label>
-            <input type="range" id="contrast" min="-100" max="100" value="0" style="width:100%;">
-          </div>
-          <div class="setting-group">
-            <label class="setting-label">饱和度: <span id="saturation-value">0</span></label>
-            <input type="range" id="saturation" min="-100" max="100" value="0" style="width:100%;">
-          </div>
-          <div class="setting-group">
-            <label class="setting-label">曝光: <span id="exposure-value">0</span></label>
-            <input type="range" id="exposure" min="-100" max="100" value="0" style="width:100%;">
-          </div>
-          <div class="btn-group">
-            <button class="btn-secondary" id="reset-btn">重置参数</button>
-            <button class="btn-primary" id="download-btn">下载图片</button>
-          </div>
-        </div>
-
-        <div class="result-area" id="result-area" style="display:none;">
-          <div class="result-header">预览</div>
-          <canvas id="result-canvas" style="width:100%;border-radius:10px;"></canvas>
-        </div>
-      </main>
-    </div>
+              <div class="hao-result" id="hao-result" style="display:none;">
+                <div class="result-header">预览</div>
+                <canvas id="result-canvas" style="width:100%;border-radius:10px;"></canvas>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  .tool-main { overflow: auto; }
-  #result-canvas { max-height: 60vh; object-fit: contain; }
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', function() {
-    var uploadArea = document.getElementById('upload-area');
-    var fileInput = document.getElementById('file-input');
-    var settings = document.getElementById('settings');
-    var resultArea = document.getElementById('result-area');
-    var resultCanvas = document.getElementById('result-canvas');
-    var sliders = {
-      brightness: { el: document.getElementById('brightness'), val: document.getElementById('brightness-value') },
-      contrast: { el: document.getElementById('contrast'), val: document.getElementById('contrast-value') },
-      saturation: { el: document.getElementById('saturation'), val: document.getElementById('saturation-value') },
-      exposure: { el: document.getElementById('exposure'), val: document.getElementById('exposure-value') }
-    };
-    var resetBtn = document.getElementById('reset-btn');
-    var downloadBtn = document.getElementById('download-btn');
-    var originalImage = null;
-    var originalFileName = '';
-
-    uploadArea.addEventListener('click', function() { fileInput.click(); });
-    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
-    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
-    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
-
-    Object.keys(sliders).forEach(function(key) {
-      sliders[key].el.addEventListener('input', function() {
-        sliders[key].val.textContent = sliders[key].el.value;
-        applyAdjustments();
-      });
-    });
-
-    function handleFile(file) {
-      if (!file.type.startsWith('image/')) return;
-      originalFileName = file.name.replace(/\.[^.]+$/, '');
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var img = new Image();
-        img.onload = function() {
-          originalImage = img;
-          var ctx = resultCanvas.getContext('2d');
-          resultCanvas.width = img.width;
-          resultCanvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-          settings.style.display = 'flex';
-          resultArea.style.display = 'block';
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function applyAdjustments() {
-      if (!originalImage) return;
-      var ctx = resultCanvas.getContext('2d');
-      resultCanvas.width = originalImage.width;
-      resultCanvas.height = originalImage.height;
-      ctx.drawImage(originalImage, 0, 0);
-      var imageData = ctx.getImageData(0, 0, resultCanvas.width, resultCanvas.height);
-      var data = imageData.data;
-      var brightness = parseInt(sliders.brightness.el.value);
-      var contrast = parseInt(sliders.contrast.el.value);
-      var saturation = parseInt(sliders.saturation.el.value);
-      var exposure = parseInt(sliders.exposure.el.value);
-      var contrastFactor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-      var exposureFactor = Math.pow(2, exposure / 50);
-
-      for (var i = 0; i < data.length; i += 4) {
-        var r = data[i], g = data[i+1], b = data[i+2];
-        r = (r - 128) * contrastFactor + 128;
-        g = (g - 128) * contrastFactor + 128;
-        b = (b - 128) * contrastFactor + 128;
-        r *= exposureFactor;
-        g *= exposureFactor;
-        b *= exposureFactor;
-        r += brightness * 2.55;
-        g += brightness * 2.55;
-        b += brightness * 2.55;
-        if (saturation !== 0) {
-          var gray = 0.299 * r + 0.587 * g + 0.114 * b;
-          var s = 1 + saturation / 100;
-          r = gray + s * (r - gray);
-          g = gray + s * (g - gray);
-          b = gray + s * (b - gray);
-        }
-        data[i] = Math.min(255, Math.max(0, Math.round(r)));
-        data[i+1] = Math.min(255, Math.max(0, Math.round(g)));
-        data[i+2] = Math.min(255, Math.max(0, Math.round(b)));
-      }
-      ctx.putImageData(imageData, 0, 0);
-    }
-
-    resetBtn.addEventListener('click', function() {
-      Object.keys(sliders).forEach(function(key) {
-        sliders[key].el.value = 0;
-        sliders[key].val.textContent = '0';
-      });
-      if (originalImage) {
-        var ctx = resultCanvas.getContext('2d');
-        resultCanvas.width = originalImage.width;
-        resultCanvas.height = originalImage.height;
-        ctx.drawImage(originalImage, 0, 0);
-      }
-    });
-
-    downloadBtn.addEventListener('click', function() {
-      resultCanvas.toBlob(function(blob) {
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = originalFileName + '_corrected.png';
-        a.click();
-        URL.revokeObjectURL(url);
-      }, 'image/png');
-    });
-  });
 </script>

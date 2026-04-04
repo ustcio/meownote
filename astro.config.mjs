@@ -1,17 +1,22 @@
 import { defineConfig } from 'astro/config';
 import path from 'path';
 
+import vue from '@astrojs/vue';
+
 export default defineConfig({
   site: 'https://ustc.dev',
   compressHTML: true,
+
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
   },
+
   build: {
     inlineStylesheets: 'auto',
     assets: '_assets'
   },
+
   vite: {
     build: {
       cssMinify: true,
@@ -28,5 +33,7 @@ export default defineConfig({
         '@content': path.resolve('./src/content'),
       }
     }
-  }
+  },
+
+  integrations: [vue()]
 });

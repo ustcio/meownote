@@ -1,66 +1,60 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = 'Crontab生成';
 const toolDesc = '生成Cron表达式';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="form-group">
-            <label class="form-label">执行频率</label>
-            <select id="frequency" class="form-select">
-              <option value="custom">自定义</option>
-              <option value="every-minute">每分钟</option>
-              <option value="every-5min">每5分钟</option>
-              <option value="every-hour">每小时</option>
-              <option value="daily">每天</option>
-              <option value="weekly">每周</option>
-              <option value="monthly">每月</option>
-            </select>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:var(--space-2);">
-            <div class="form-group"><label class="form-label">分钟</label><input type="text" id="minute" class="form-input" value="0"></div>
-            <div class="form-group"><label class="form-label">小时</label><input type="text" id="hour" class="form-input" value="0"></div>
-            <div class="form-group"><label class="form-label">日</label><input type="text" id="day" class="form-input" value="*"></div>
-            <div class="form-group"><label class="form-label">月</label><input type="text" id="month" class="form-input" value="*"></div>
-            <div class="form-group"><label class="form-label">星期</label><input type="text" id="weekday" class="form-input" value="*"></div>
-          </div>
-          <div class="btn-group">
-            <button id="generate-btn" class="btn btn-primary">生成表达式</button>
-            <button id="copy-btn" class="btn btn-secondary">复制</button>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Cron表达式</label>
-            <div id="result" class="result-area" style="font-size:var(--text-lg);">点击生成按钮...</div>
-          </div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="hao-form-group">
+                  <label class="hao-label">执行频率</label>
+                  <select id="frequency" class="form-select">
+                    <option value="custom">自定义</option>
+                    <option value="every-minute">每分钟</option>
+                    <option value="every-5min">每5分钟</option>
+                    <option value="every-hour">每小时</option>
+                    <option value="daily">每天</option>
+                    <option value="weekly">每周</option>
+                    <option value="monthly">每月</option>
+                  </select>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:var(--space-2);">
+                  <div class="hao-form-group"><label class="hao-label">分钟</label><input type="text" id="minute" class="hao-input" value="0"></div>
+                  <div class="hao-form-group"><label class="hao-label">小时</label><input type="text" id="hour" class="hao-input" value="0"></div>
+                  <div class="hao-form-group"><label class="hao-label">日</label><input type="text" id="day" class="hao-input" value="*"></div>
+                  <div class="hao-form-group"><label class="hao-label">月</label><input type="text" id="month" class="hao-input" value="*"></div>
+                  <div class="hao-form-group"><label class="hao-label">星期</label><input type="text" id="weekday" class="hao-input" value="*"></div>
+                </div>
+                <div class="hao-btn-group">
+                  <button id="generate-btn" class="hao-press-btn hao-press-btn--primary">生成表达式</button>
+                  <button id="copy-btn" class="hao-press-btn hao-press-btn--secondary">复制</button>
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">Cron表达式</label>
+                  <div id="result" class="hao-result" style="font-size:var(--text-lg);">点击生成按钮...</div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
+
+<script is:inline>
+document.addEventListener('DOMContentLoaded', () => {
     const frequency = document.getElementById('frequency');
     const minute = document.getElementById('minute');
     const hour = document.getElementById('hour');

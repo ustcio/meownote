@@ -1,60 +1,68 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = 'MD5摘要';
 const toolDesc = '计算文本MD5哈希值';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="hao-form-group">
+        <label class="hao-label">输入文本</label>
+        <textarea id="input-text" class="hao-input" placeholder="请输入要计算MD5的文本..." rows="5"></textarea>
+        <div class="hao-counter" id="char-counter">0 字符</div>
+      </div>
+
+      <div class="hao-btn-group">
+        <button id="calc-btn" class="hao-press-btn hao-press-btn--primary">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
+            <polyline points="9 11 12 14 22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
           </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
+          计算MD5
+        </button>
+        <button id="clear-btn" class="hao-press-btn hao-press-btn--secondary">清空</button>
+        <button id="copy-btn" class="hao-copy-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          复制
+        </button>
+      </div>
 
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="form-group">
-            <label class="form-label" for="input-text">输入文本</label>
-            <textarea id="input-text" class="form-textarea" placeholder="请输入要计算MD5的文本..."></textarea>
-          </div>
-          
-          <div class="btn-group">
-            <button id="calc-btn" class="btn btn-primary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 11 12 14 22 4"></polyline>
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-              </svg>
-              计算MD5
-            </button>
-            <button id="clear-btn" class="btn btn-secondary">清空</button>
-            <button id="copy-btn" class="btn btn-secondary">复制结果</button>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">MD5结果</label>
-            <div id="result" class="result-area">等待计算...</div>
-          </div>
-        </div>
-      </main>
-    </div>
+      <div class="hao-form-group">
+        <label class="hao-label">MD5结果</label>
+        <div id="result" class="hao-result" style="color: #909098;">等待计算...</div>
+      </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+
+  @media (max-width: 767px) {
+    .tool-page-hao {
+      padding-top: calc(var(--header-height) + 1rem);
+    }
+  }
 </style>
 
-<script>
+<script is:inline>
+  const inputText = document.getElementById('input-text');
+  const calcBtn = document.getElementById('calc-btn');
+  const clearBtn = document.getElementById('clear-btn');
+  const copyBtn = document.getElementById('copy-btn');
+  const result = document.getElementById('result');
+  const counter = document.getElementById('char-counter');
+
   function md5(string) {
     function md5cycle(x, k) {
       var a = x[0], b = x[1], c = x[2], d = x[3];
@@ -92,7 +100,7 @@ const toolDesc = '计算文本MD5哈希值';
       c = ii(c, d, a, b, k[2], 15, 718787259); b = ii(b, c, d, a, k[9], 21, -343485551);
       x[0] = add32(a, x[0]); x[1] = add32(b, x[1]); x[2] = add32(c, x[2]); x[3] = add32(d, x[3]);
     }
-    function cmn(q, a, b, x, s, t) { a = add32(add32(a, q), add32(x, t)); return add32((a << s) | (a >>> (32 - s)), b); }
+    function cmn(q, a, b, x, s, t) { return add32(add32(a, q), add32(x, t)); }
     function ff(a, b, c, d, x, s, t) { return cmn((b & c) | ((~b) & d), a, b, x, s, t); }
     function gg(a, b, c, d, x, s, t) { return cmn((b & d) | (c & (~d)), a, b, x, s, t); }
     function hh(a, b, c, d, x, s, t) { return cmn(b ^ c ^ d, a, b, x, s, t); }
@@ -101,57 +109,56 @@ const toolDesc = '计算文本MD5哈希值';
       var n = s.length, state = [1732584193, -271733879, -1732584194, 271733878], i;
       for (i = 64; i <= s.length; i += 64) { md5cycle(state, md5blk(s.substring(i - 64, i))); }
       s = s.substring(i - 64);
-      var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      var tail = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
       for (i = 0; i < s.length; i++) tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
       tail[i >> 2] |= 0x80 << ((i % 4) << 3);
       if (i > 55) { md5cycle(state, tail); for (i = 0; i < 16; i++) tail[i] = 0; }
-      tail[14] = n * 8;
-      md5cycle(state, tail);
-      return state;
+      tail[14] = n * 8; md5cycle(state, tail); return state;
     }
     function md5blk(s) {
       var md5blks = [], i;
-      for (i = 0; i < 64; i += 4) { md5blks[i >> 2] = s.charCodeAt(i) + (s.charCodeAt(i + 1) << 8) + (s.charCodeAt(i + 2) << 16) + (s.charCodeAt(i + 3) << 24); }
+      for (i = 0; i < 64; i += 4) { md5blks[i >> 2] = s.charCodeAt(i) + (s.charCodeAt(i+1)<<8) + (s.charCodeAt(i+2)<<16) + (s.charCodeAt(i+3)<<24); }
       return md5blks;
     }
-    var hex_chr = '0123456789abcdef'.split('');
-    function rhex(n) { var s = '', j = 0; for (; j < 4; j++) s += hex_chr[(n >> (j * 8 + 4)) & 0x0F] + hex_chr[(n >> (j * 8)) & 0x0F]; return s; }
+    function rhex(n) {
+      var s = '', j = 0;
+      for (; j < 4; j++) s += '0123456789abcdef'[(n >> (j*8+4)) & 0x0F] + '0123456789abcdef'[(n >> (j*8)) & 0x0F];
+      return s;
+    }
     function hex(x) { for (var i = 0; i < x.length; i++) x[i] = rhex(x[i]); return x.join(''); }
     function add32(a, b) { return (a + b) & 0xFFFFFFFF; }
     return hex(md51(string));
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const inputText = document.getElementById('input-text');
-    const calcBtn = document.getElementById('calc-btn');
-    const clearBtn = document.getElementById('clear-btn');
-    const copyBtn = document.getElementById('copy-btn');
-    const result = document.getElementById('result');
-
-    calcBtn.addEventListener('click', () => {
-      const text = inputText.value;
-      if (!text) {
-        result.textContent = '请输入文本';
-        return;
-      }
-      const hash = md5(text);
-      result.textContent = hash;
-    });
-
-    clearBtn.addEventListener('click', () => {
-      inputText.value = '';
-      result.textContent = '等待计算...';
-    });
-
-    copyBtn.addEventListener('click', () => {
-      const text = result.textContent;
-      if (text && text !== '等待计算...' && text !== '请输入文本') {
-        navigator.clipboard.writeText(text).then(() => {
-          const originalText = copyBtn.textContent;
-          copyBtn.textContent = '已复制!';
-          setTimeout(() => { copyBtn.textContent = originalText; }, 1500);
-        });
-      }
-    });
+  inputText?.addEventListener('input', () => {
+    if (counter) counter.textContent = `${inputText?.value.length || 0} 字符`;
   });
+
+  calcBtn?.addEventListener('click', () => {
+    const text = inputText?.value || '';
+    if (!text) { result.textContent = '请输入文本'; result.style.color = '#909098'; return; }
+    if (result) {
+      result.textContent = md5(text);
+      result.style.color = '#fff';
+    }
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    if (inputText) inputText.value = '';
+    if (result) { result.textContent = '等待计算...'; result.style.color = '#909098'; }
+    if (counter) counter.textContent = '0 字符';
+  });
+
+  copyBtn?.addEventListener('click', () => {
+    const text = result?.textContent;
+    if (text && text !== '等待计算...' && text !== '请输入文本') {
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = copyBtn.innerHTML;
+        if (copyBtn) copyBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> 已复制!`;
+        setTimeout(() => { if (copyBtn) copyBtn.innerHTML = orig; }, 1500);
+      });
+    }
+  });
+
+  document.addEventListener('astro:page-load', () => {});
 </script>

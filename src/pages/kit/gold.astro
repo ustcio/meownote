@@ -1,34 +1,36 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const dayTabs = [
-  { id: 'today', label: 'Today' },
-  { id: 'yesterday', label: 'Yesterday' },
+  { id: "today", label: "Today" },
+  { id: "yesterday", label: "Yesterday" },
 ];
+
+const toolName = 'Gold Price';
+const toolDesc = 'Track domestic and international gold prices';
 ---
 
-<Layout 
-  title="Gold Price - Maxwell.Science"
-  description="Track domestic and international gold prices"
->
-  <!-- Preload Chart.js for faster rendering -->
+<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+<!-- Preload Chart.js for faster rendering -->
   <link rel="preload" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" as="script" />
   
-  <section class="gold">
-    <div class="container">
-      <header class="header">
-        <a href="/kit" class="back-link">
+  <section >
+    <div class="hao-section-container">
+      <header class="hao-tool-header">
+        <a href="/kit" class="hao-back-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
           <span>Toolkit</span>
         </a>
-        <h1 class="title">Gold Price</h1>
+        <h1 class="hao-tool-title">Gold Price</h1>
         <p class="desc">Track domestic and international gold price trends</p>
       </header>
       
-      <div class="tabs" id="day-tabs">
+      <div class="hao-tabs" id="day-tabs">
         {dayTabs.map((tab, index) => (
           <button class:list={['tab', { active: index === 0 }]} data-day={tab.id}>
             {tab.label}
@@ -37,13 +39,13 @@ const dayTabs = [
       </div>
       
       <div class="cards">
-        <div class="card">
+        <div class="hao-card">
           <div class="card-head">
             <h2 class="card-title">Domestic Gold</h2>
             <span class="unit">CNY/g</span>
           </div>
           <div class="price-row">
-            <span class="price" id="domestic-price">--</span>
+            <span class="hao-price" id="domestic-price">--</span>
             <span class="change" id="domestic-change">--</span>
           </div>
           <div class="stats">
@@ -51,16 +53,16 @@ const dayTabs = [
             <div class="stat"><span class="lbl">Low</span><span class="val" id="domestic-low">--</span></div>
             <div class="stat"><span class="lbl">Open</span><span class="val" id="domestic-open">--</span></div>
           </div>
-          <div class="chart"><canvas id="domestic-chart"></canvas><div class="chart-empty" id="domestic-empty">Loading data...</div></div>
+          <div class="hao-chart"><canvas id="domestic-chart"></canvas><div class="chart-empty" id="domestic-empty">Loading data...</div></div>
         </div>
         
-        <div class="card">
+        <div class="hao-card">
           <div class="card-head">
             <h2 class="card-title">International Gold</h2>
             <span class="unit">USD/oz</span>
           </div>
           <div class="price-row">
-            <span class="price" id="international-price">--</span>
+            <span class="hao-price" id="international-price">--</span>
             <span class="change" id="international-change">--</span>
           </div>
           <div class="stats">
@@ -68,7 +70,7 @@ const dayTabs = [
             <div class="stat"><span class="lbl">Low</span><span class="val" id="international-low">--</span></div>
             <div class="stat"><span class="lbl">Open</span><span class="val" id="international-open">--</span></div>
           </div>
-          <div class="chart"><canvas id="international-chart"></canvas><div class="chart-empty" id="international-empty">Loading data...</div></div>
+          <div class="hao-chart"><canvas id="international-chart"></canvas><div class="chart-empty" id="international-empty">Loading data...</div></div>
         </div>
       </div>
       
@@ -77,13 +79,23 @@ const dayTabs = [
       </div>
     </div>
   </section>
+    </KitToolWrapper>
+  </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
-<script>
+<script is:inline>
+>
   // @ts-nocheck
   const API_BASE = 'https://api.ustc.dev';
   const REFRESH_INTERVAL = 10000;

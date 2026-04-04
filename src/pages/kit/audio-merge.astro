@@ -1,426 +1,101 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '音频拼接';
 const toolDesc = '合并多个音频文件为一个';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="upload-zone" id="upload-zone">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <p class="upload-text">点击或拖拽上传多个音频文件</p>
+                  <p class="upload-hint">支持 MP3、WAV、OGG、FLAC、WebM 等格式</p>
+                  <input type="file" id="file-input" accept="audio/*" multiple />
+                </div>
 
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="upload-zone" id="upload-zone">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-            <p class="upload-text">点击或拖拽上传多个音频文件</p>
-            <p class="upload-hint">支持 MP3、WAV、OGG、FLAC、WebM 等格式</p>
-            <input type="file" id="file-input" accept="audio/*" multiple />
-          </div>
+                <div class="file-list hidden" id="file-list"></div>
 
-          <div class="file-list hidden" id="file-list"></div>
+                <div class="actions hidden" id="actions">
+                  <button class="hao-press-btn hao-press-btn--secondary" id="add-more-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    添加更多
+                  </button>
+                  <button class="hao-press-btn hao-press-btn--primary" id="merge-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M8 6h13"></path>
+                      <path d="M8 12h13"></path>
+                      <path d="M8 18h13"></path>
+                      <circle cx="4" cy="6" r="1" fill="currentColor"></circle>
+                      <circle cx="4" cy="12" r="1" fill="currentColor"></circle>
+                      <circle cx="4" cy="18" r="1" fill="currentColor"></circle>
+                    </svg>
+                    开始合并
+                  </button>
+                </div>
 
-          <div class="actions hidden" id="actions">
-            <button class="btn btn-secondary" id="add-more-btn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-              添加更多
-            </button>
-            <button class="btn btn-primary" id="merge-btn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M8 6h13"></path>
-                <path d="M8 12h13"></path>
-                <path d="M8 18h13"></path>
-                <circle cx="4" cy="6" r="1" fill="currentColor"></circle>
-                <circle cx="4" cy="12" r="1" fill="currentColor"></circle>
-                <circle cx="4" cy="18" r="1" fill="currentColor"></circle>
-              </svg>
-              开始合并
-            </button>
-          </div>
+                <div class="progress-container hidden" id="progress-container">
+                  <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                  </div>
+                  <span class="progress-text" id="progress-text">处理中...</span>
+                </div>
 
-          <div class="progress-container hidden" id="progress-container">
-            <div class="progress-bar">
-              <div class="progress-fill" id="progress-fill"></div>
-            </div>
-            <span class="progress-text" id="progress-text">处理中...</span>
-          </div>
-
-          <div class="result hidden" id="result">
-            <div class="result-header">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
-              <span>合并完成</span>
-            </div>
-            <div class="result-info">
-              <span>WAV</span>
-              <span class="separator">·</span>
-              <span id="result-size"></span>
-              <span class="separator">·</span>
-              <span id="result-duration"></span>
-              <span class="separator">·</span>
-              <span id="result-count"></span>
-            </div>
-            <audio class="audio-player" id="audio-player" controls></audio>
-            <div class="btn-group">
-              <button class="btn btn-primary" id="download-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="7 10 12 15 17 10"></polyline>
-                  <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                下载文件
-              </button>
-              <button class="btn btn-secondary" id="reset-btn">重新开始</button>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+                <div class="result hidden" id="result">
+                  <div class="result-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <span>合并完成</span>
+                  </div>
+                  <div class="result-info">
+                    <span>WAV</span>
+                    <span class="separator">·</span>
+                    <span id="result-size"></span>
+                    <span class="separator">·</span>
+                    <span id="result-duration"></span>
+                    <span class="separator">·</span>
+                    <span id="result-count"></span>
+                  </div>
+                  <audio class="audio-player" id="audio-player" controls></audio>
+                  <div class="hao-btn-group">
+                    <button class="hao-press-btn hao-press-btn--primary" id="download-btn">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                      下载文件
+                    </button>
+                    <button class="hao-press-btn hao-press-btn--secondary" id="reset-btn">重新开始</button>
+                  </div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', function() {
-    var uploadZone = document.getElementById('upload-zone');
-    var fileInput = document.getElementById('file-input');
-    var fileList = document.getElementById('file-list');
-    var actions = document.getElementById('actions');
-    var progressContainer = document.getElementById('progress-container');
-    var progressFill = document.getElementById('progress-fill');
-    var progressText = document.getElementById('progress-text');
-    var result = document.getElementById('result');
-    var mergeBtn = document.getElementById('merge-btn');
-    var addMoreBtn = document.getElementById('add-more-btn');
-    var downloadBtn = document.getElementById('download-btn');
-    var resetBtn = document.getElementById('reset-btn');
-    var audioPlayer = document.getElementById('audio-player');
-
-    var audioBuffers = [];
-    var fileData = [];
-    var resultBlob = null;
-
-    function formatSize(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-      return (bytes / 1048576).toFixed(1) + ' MB';
-    }
-
-    function formatDuration(seconds) {
-      var m = Math.floor(seconds / 60);
-      var s = Math.floor(seconds % 60);
-      return m + ':' + (s < 10 ? '0' : '') + s;
-    }
-
-    function interleave(left, right) {
-      var length = left.length + right.length;
-      var result = new Float32Array(length);
-      var inputIndex = 0;
-      for (var i = 0; i < length;) {
-        result[i++] = left[inputIndex];
-        result[i++] = right[inputIndex];
-        inputIndex++;
-      }
-      return result;
-    }
-
-    function writeString(view, offset, string) {
-      for (var i = 0; i < string.length; i++) {
-        view.setUint8(offset + i, string.charCodeAt(i));
-      }
-    }
-
-    function bufferToWav(buffer) {
-      var numChannels = buffer.numberOfChannels;
-      var sampleRate = buffer.sampleRate;
-      var format = 1;
-      var bitDepth = 16;
-      var channels = [];
-      var totalLength = 0;
-      for (var i = 0; i < numChannels; i++) {
-        channels.push(buffer.getChannelData(i));
-        totalLength += channels[i].length;
-      }
-      var interleaved;
-      if (numChannels === 2) {
-        interleaved = interleave(channels[0], channels[1]);
-      } else {
-        interleaved = channels[0];
-      }
-      var dataLength = interleaved.length * (bitDepth / 8);
-      var headerLength = 44;
-      var totalSize = headerLength + dataLength;
-      var arrayBuffer = new ArrayBuffer(totalSize);
-      var view = new DataView(arrayBuffer);
-      writeString(view, 0, 'RIFF');
-      view.setUint32(4, totalSize - 8, true);
-      writeString(view, 8, 'WAVE');
-      writeString(view, 12, 'fmt ');
-      view.setUint32(16, 16, true);
-      view.setUint16(20, format, true);
-      view.setUint16(22, numChannels, true);
-      view.setUint32(24, sampleRate, true);
-      view.setUint32(28, sampleRate * numChannels * (bitDepth / 8), true);
-      view.setUint16(32, numChannels * (bitDepth / 8), true);
-      view.setUint16(34, bitDepth, true);
-      writeString(view, 36, 'data');
-      view.setUint32(40, dataLength, true);
-      var offset = 44;
-      for (var j = 0; j < interleaved.length; j++) {
-        var sample = Math.max(-1, Math.min(1, interleaved[j]));
-        sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
-        view.setInt16(offset, sample, true);
-        offset += 2;
-      }
-      return new Blob([arrayBuffer], { type: 'audio/wav' });
-    }
-
-    function showProgress(percent, text) {
-      progressFill.style.width = percent + '%';
-      if (text) progressText.textContent = text;
-    }
-
-    function renderFileList() {
-      fileList.innerHTML = '';
-      fileData.forEach(function(item, index) {
-        var el = document.createElement('div');
-        el.className = 'file-item';
-        el.setAttribute('draggable', 'true');
-        el.setAttribute('data-index', index);
-        el.innerHTML =
-          '<svg class="drag-handle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-            '<circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle>' +
-            '<circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle>' +
-          '</svg>' +
-          '<span class="order-num">' + (index + 1) + '</span>' +
-          '<div class="file-details">' +
-            '<span class="file-name">' + item.file.name + '</span>' +
-            '<span class="file-meta">' +
-              '<span>' + formatSize(item.file.size) + '</span>' +
-              '<span class="separator">·</span>' +
-              '<span>' + formatDuration(item.buffer.duration) + '</span>' +
-            '</span>' +
-          '</div>' +
-          '<button class="btn-icon remove-btn" data-index="' + index + '" title="移除">' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-              '<line x1="18" y1="6" x2="6" y2="18"></line>' +
-              '<line x1="6" y1="6" x2="18" y2="18"></line>' +
-            '</svg>' +
-          '</button>';
-        fileList.appendChild(el);
-
-        el.addEventListener('dragstart', function(e) {
-          e.dataTransfer.setData('text/plain', index);
-          el.classList.add('dragging');
-        });
-
-        el.addEventListener('dragend', function() {
-          el.classList.remove('dragging');
-        });
-
-        el.addEventListener('dragover', function(e) {
-          e.preventDefault();
-        });
-
-        el.addEventListener('drop', function(e) {
-          e.preventDefault();
-          var fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
-          var toIndex = parseInt(el.getAttribute('data-index'));
-          if (fromIndex !== toIndex) {
-            var moved = fileData.splice(fromIndex, 1)[0];
-            var movedBuffer = audioBuffers.splice(fromIndex, 1)[0];
-            fileData.splice(toIndex, 0, moved);
-            audioBuffers.splice(toIndex, 0, movedBuffer);
-            renderFileList();
-          }
-        });
-      });
-
-      document.querySelectorAll('.remove-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var idx = parseInt(btn.getAttribute('data-index'));
-          fileData.splice(idx, 1);
-          audioBuffers.splice(idx, 1);
-          if (fileData.length === 0) {
-            resetAll();
-          } else {
-            renderFileList();
-          }
-        });
-      });
-    }
-
-    function processFiles(files) {
-      var processed = 0;
-      var total = files.length;
-      Array.from(files).forEach(function(file) {
-        if (!file.type.startsWith('audio/') && !file.name.match(/\.(mp3|wav|ogg|flac|webm|m4a|aac|wma)$/i)) return;
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          var ctx = new (window.AudioContext || window.webkitAudioContext)();
-          ctx.decodeAudioData(e.target.result, function(decoded) {
-            fileData.push({ file: file, buffer: decoded });
-            audioBuffers.push(decoded);
-            processed++;
-            if (processed === total) {
-              uploadZone.classList.add('hidden');
-              fileList.classList.remove('hidden');
-              actions.classList.remove('hidden');
-              renderFileList();
-            }
-            ctx.close();
-          }, function() {
-            processed++;
-            alert('无法解码文件: ' + file.name);
-          });
-        };
-        reader.readAsArrayBuffer(file);
-      });
-    }
-
-    function resetAll() {
-      audioBuffers = [];
-      fileData = [];
-      resultBlob = null;
-      fileInput.value = '';
-      uploadZone.classList.remove('hidden');
-      fileList.classList.add('hidden');
-      actions.classList.add('hidden');
-      progressContainer.classList.add('hidden');
-      result.classList.add('hidden');
-    }
-
-    uploadZone.addEventListener('click', function() {
-      fileInput.click();
-    });
-
-    uploadZone.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      uploadZone.classList.add('drag-over');
-    });
-
-    uploadZone.addEventListener('dragleave', function() {
-      uploadZone.classList.remove('drag-over');
-    });
-
-    uploadZone.addEventListener('drop', function(e) {
-      e.preventDefault();
-      uploadZone.classList.remove('drag-over');
-      if (e.dataTransfer.files.length > 0) {
-        processFiles(e.dataTransfer.files);
-      }
-    });
-
-    fileInput.addEventListener('change', function() {
-      if (fileInput.files.length > 0) {
-        processFiles(fileInput.files);
-      }
-    });
-
-    addMoreBtn.addEventListener('click', function() {
-      fileInput.click();
-    });
-
-    resetBtn.addEventListener('click', function() {
-      resetAll();
-    });
-
-    mergeBtn.addEventListener('click', function() {
-      if (audioBuffers.length < 2) {
-        alert('请至少上传两个音频文件');
-        return;
-      }
-      mergeBtn.disabled = true;
-      actions.classList.add('hidden');
-      progressContainer.classList.remove('hidden');
-      showProgress(10, '正在合并音频...');
-
-      setTimeout(function() {
-        try {
-          var sampleRate = audioBuffers[0].sampleRate;
-          var numChannels = audioBuffers[0].numberOfChannels;
-          var totalLength = 0;
-          for (var i = 0; i < audioBuffers.length; i++) {
-            totalLength += audioBuffers[i].length;
-          }
-          var mergedBuffer = new AudioContext().createBuffer(numChannels, totalLength, sampleRate);
-          var offset = 0;
-          for (var j = 0; j < audioBuffers.length; j++) {
-            var buf = audioBuffers[j];
-            var chCount = Math.min(numChannels, buf.numberOfChannels);
-            for (var ch = 0; ch < numChannels; ch++) {
-              var dest = mergedBuffer.getChannelData(ch);
-              if (ch < chCount) {
-                var src = buf.getChannelData(ch);
-                for (var k = 0; k < src.length; k++) {
-                  dest[offset + k] = src[k];
-                }
-              }
-            }
-            offset += buf.length;
-            showProgress(10 + Math.round((j + 1) / audioBuffers.length * 60), '正在合并 ' + (j + 1) + '/' + audioBuffers.length);
-          }
-          showProgress(80, '正在编码 WAV...');
-          resultBlob = bufferToWav(mergedBuffer);
-          showProgress(100, '合并完成');
-          setTimeout(function() {
-            progressContainer.classList.add('hidden');
-            showResult(mergedBuffer);
-          }, 500);
-        } catch (err) {
-          alert('合并失败: ' + err.message);
-          progressContainer.classList.add('hidden');
-          actions.classList.remove('hidden');
-        }
-        mergeBtn.disabled = false;
-      }, 100);
-    });
-
-    function showResult(buffer) {
-      document.getElementById('result-size').textContent = formatSize(resultBlob.size);
-      document.getElementById('result-duration').textContent = formatDuration(buffer.duration);
-      document.getElementById('result-count').textContent = fileData.length + ' 个文件';
-      var url = URL.createObjectURL(resultBlob);
-      audioPlayer.src = url;
-      result.classList.remove('hidden');
-      mergeBtn.disabled = false;
-    }
-
-    downloadBtn.addEventListener('click', function() {
-      if (!resultBlob) return;
-      var name = 'merged_' + fileData.length + 'files.wav';
-      var url = URL.createObjectURL(resultBlob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-  });
 </script>

@@ -1,22 +1,24 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
+
+const toolName = '图片工具';
+const toolDesc = '图片压缩、格式转换、尺寸调整';
 ---
 
-<Layout
-  title="图片工具 - Maxwell.Science"
-  description="图片压缩、格式转换、尺寸调整"
->
-  <section class="image-tool">
-    <div class="container">
-      <header class="header">
-        <a href="/kit" class="back-link">
+<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+<section >
+    <div class="hao-section-container">
+      <header class="hao-tool-header">
+        <a href="/kit" class="hao-back-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
           <span>工具箱</span>
         </a>
-        <h1 class="title">图片工具</h1>
+        <h1 class="hao-tool-title">图片工具</h1>
         <p class="desc">图片压缩、格式转换、尺寸调整</p>
       </header>
 
@@ -33,18 +35,18 @@ import '@styles/hao-design.css';
       </div>
 
       <!-- Preview & Info -->
-      <div class="card" id="info-card" style="display:none;">
+      <div class="hao-card" id="info-card" style="display:none;">
         <div class="card-head">
           <span class="card-title">原始图片</span>
           <span class="info-text" id="original-info"></span>
         </div>
-        <div class="preview-box">
+        <div class="hao-preview-box">
           <img id="preview-img" alt="预览" />
         </div>
       </div>
 
       <!-- Options -->
-      <div class="card" id="options-card" style="display:none;">
+      <div class="hao-card" id="options-card" style="display:none;">
         <div class="card-head">
           <span class="card-title">调整选项</span>
         </div>
@@ -76,32 +78,42 @@ import '@styles/hao-design.css';
             <span>锁定宽高比</span>
           </label>
         </div>
-        <button class="btn-primary" id="process-btn">处理图片</button>
+        <button class="hao-press-btn hao-press-btn--primary" id="process-btn">处理图片</button>
       </div>
 
       <!-- Result -->
-      <div class="card" id="result-card" style="display:none;">
+      <div class="hao-card" id="result-card" style="display:none;">
         <div class="card-head">
           <span class="card-title">处理结果</span>
           <span class="info-text" id="result-info"></span>
         </div>
-        <div class="preview-box">
+        <div class="hao-preview-box">
           <img id="result-img" alt="结果" />
         </div>
         <div class="result-actions">
-          <button class="btn-download" id="download-btn">下载图片</button>
+          <button class="hao-btn-download" id="download-btn">下载图片</button>
           <span class="savings" id="savings-text"></span>
         </div>
       </div>
     </div>
   </section>
+    </KitToolWrapper>
+  </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
-<script>
+<script is:inline>
+>
   const uploadArea = document.getElementById('upload-area')!;
   const imageInput = document.getElementById('image-input');
   const infoCard = document.getElementById('info-card')!;

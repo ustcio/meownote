@@ -1,237 +1,90 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '图片去背景';
 const toolDesc = '基于颜色阈值自动去除图片背景';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="hao-upload-area" id="upload-area">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>点击或拖拽上传图片</span>
+                <span class="hint">支持 PNG, JPG, WebP 格式</span>
+                <input type="file" id="file-input" accept="image/*">
+              </div>
 
-      <main class="tool-main">
-        <div class="upload-area" id="upload-area">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          <span>点击或拖拽上传图片</span>
-          <span class="hint">支持 PNG, JPG, WebP 格式</span>
-          <input type="file" id="file-input" accept="image/*">
-        </div>
+              <div id="file-info" class="file-info" style="display:none;">
+                <div class="info-row">
+                  <span class="info-label">文件名</span>
+                  <span class="info-value" id="file-name"></span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">尺寸</span>
+                  <span class="info-value" id="file-size"></span>
+                </div>
+              </div>
 
-        <div id="file-info" class="file-info" style="display:none;">
-          <div class="info-row">
-            <span class="info-label">文件名</span>
-            <span class="info-value" id="file-name"></span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">尺寸</span>
-            <span class="info-value" id="file-size"></span>
-          </div>
-        </div>
+              <div class="settings" id="settings" style="display:none;">
+                <div class="setting-group">
+                  <label class="setting-label">容差值: <span id="tolerance-value">30</span></label>
+                  <input type="range" id="tolerance" min="1" max="100" value="30" style="width:100%;">
+                </div>
+                <div class="setting-group">
+                  <label class="setting-label">取样背景色</label>
+                  <div style="display:flex;gap:0.2rem;align-items:center;">
+                    <input type="color" id="bg-color" value="#ffffff" style="width:2rem;height:2rem;border:none;cursor:pointer;">
+                    <span class="hint">点击取色器选择或点击预览图取样</span>
+                  </div>
+                </div>
+                <div class="hao-btn-group">
+                  <button class="hao-press-btn hao-press-btn--primary" id="process-btn">去除背景</button>
+                  <button class="hao-press-btn hao-press-btn--secondary" id="reset-btn">重置</button>
+                </div>
+              </div>
 
-        <div class="settings" id="settings" style="display:none;">
-          <div class="setting-group">
-            <label class="setting-label">容差值: <span id="tolerance-value">30</span></label>
-            <input type="range" id="tolerance" min="1" max="100" value="30" style="width:100%;">
-          </div>
-          <div class="setting-group">
-            <label class="setting-label">取样背景色</label>
-            <div style="display:flex;gap:0.2rem;align-items:center;">
-              <input type="color" id="bg-color" value="#ffffff" style="width:2rem;height:2rem;border:none;cursor:pointer;">
-              <span class="hint">点击取色器选择或点击预览图取样</span>
-            </div>
-          </div>
-          <div class="btn-group">
-            <button class="btn-primary" id="process-btn">去除背景</button>
-            <button class="btn-secondary" id="reset-btn">重置</button>
-          </div>
-        </div>
+              <div class="progress-area" id="progress-area" style="display:none;">
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                <div class="progress-text" id="progress-text">处理中...</div>
+              </div>
 
-        <div class="progress-area" id="progress-area" style="display:none;">
-          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-          <div class="progress-text" id="progress-text">处理中...</div>
-        </div>
-
-        <div class="result-area" id="result-area" style="display:none;">
-          <div class="result-header">处理结果</div>
-          <div class="result-stats">
-            <div class="stat">
-              <span class="stat-label">原始尺寸</span>
-              <span class="stat-value" id="orig-size"></span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">透明像素</span>
-              <span class="stat-value" id="transparent-pct"></span>
-            </div>
-          </div>
-          <canvas id="result-canvas" style="width:100%;border-radius:10px;background-image:linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0;"></canvas>
-          <div class="btn-group" style="margin-top:0.3rem;">
-            <button class="btn-primary" id="download-btn">下载 PNG</button>
-          </div>
-        </div>
-      </main>
-    </div>
+              <div class="hao-result" id="hao-result" style="display:none;">
+                <div class="result-header">处理结果</div>
+                <div class="hao-result-stats">
+                  <div class="stat">
+                    <span class="stat-label">原始尺寸</span>
+                    <span class="stat-value" id="orig-size"></span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">透明像素</span>
+                    <span class="stat-value" id="transparent-pct"></span>
+                  </div>
+                </div>
+                <canvas id="result-canvas" style="width:100%;border-radius:10px;background-image:linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0;"></canvas>
+                <div class="hao-btn-group" style="margin-top:0.3rem;">
+                  <button class="hao-press-btn hao-press-btn--primary" id="download-btn">下载 PNG</button>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  .tool-main { overflow: auto; }
-  #result-canvas { max-height: 60vh; object-fit: contain; }
-  .sample-cursor { cursor: crosshair !important; }
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', function() {
-    var uploadArea = document.getElementById('upload-area');
-    var fileInput = document.getElementById('file-input');
-    var fileInfo = document.getElementById('file-info');
-    var settings = document.getElementById('settings');
-    var progressArea = document.getElementById('progress-area');
-    var progressFill = document.getElementById('progress-fill');
-    var progressText = document.getElementById('progress-text');
-    var resultArea = document.getElementById('result-area');
-    var resultCanvas = document.getElementById('result-canvas');
-    var toleranceSlider = document.getElementById('tolerance');
-    var toleranceValue = document.getElementById('tolerance-value');
-    var bgColorInput = document.getElementById('bg-color');
-    var processBtn = document.getElementById('process-btn');
-    var resetBtn = document.getElementById('reset-btn');
-    var downloadBtn = document.getElementById('download-btn');
-    var sampling = false;
-    var originalImage = null;
-    var originalFileName = '';
-
-    uploadArea.addEventListener('click', function() { fileInput.click(); });
-    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); uploadArea.style.borderColor = 'var(--top-color)'; });
-    uploadArea.addEventListener('dragleave', function() { uploadArea.style.borderColor = ''; });
-    uploadArea.addEventListener('drop', function(e) {
-      e.preventDefault();
-      uploadArea.style.borderColor = '';
-      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-    });
-    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
-
-    toleranceSlider.addEventListener('input', function() { toleranceValue.textContent = toleranceSlider.value; });
-
-    resultCanvas.addEventListener('click', function(e) {
-      if (!sampling || !originalImage) return;
-      var rect = resultCanvas.getBoundingClientRect();
-      var scaleX = resultCanvas.width / rect.width;
-      var scaleY = resultCanvas.height / rect.height;
-      var ctx = resultCanvas.getContext('2d');
-      var x = Math.floor((e.clientX - rect.left) * scaleX);
-      var y = Math.floor((e.clientY - rect.top) * scaleY);
-      var pixel = ctx.getImageData(x, y, 1, 1).data;
-      var hex = '#' + ((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1);
-      bgColorInput.value = hex;
-      sampling = false;
-      resultCanvas.classList.remove('sample-cursor');
-    });
-
-    function handleFile(file) {
-      if (!file.type.startsWith('image/')) return;
-      originalFileName = file.name.replace(/\.[^.]+$/, '');
-      document.getElementById('file-name').textContent = file.name;
-      document.getElementById('file-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
-      fileInfo.style.display = 'block';
-      settings.style.display = 'flex';
-      resultArea.style.display = 'none';
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var img = new Image();
-        img.onload = function() {
-          originalImage = img;
-          var ctx = resultCanvas.getContext('2d');
-          resultCanvas.width = img.width;
-          resultCanvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-          var pixel = ctx.getImageData(0, 0, 1, 1).data;
-          var hex = '#' + ((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1);
-          bgColorInput.value = hex;
-          resultArea.style.display = 'block';
-          document.getElementById('orig-size').textContent = img.width + 'x' + img.height;
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function hexToRgb(hex) {
-      var r = parseInt(hex.slice(1, 3), 16);
-      var g = parseInt(hex.slice(3, 5), 16);
-      var b = parseInt(hex.slice(5, 7), 16);
-      return [r, g, b];
-    }
-
-    processBtn.addEventListener('click', function() {
-      if (!originalImage) return;
-      progressArea.style.display = 'block';
-      progressFill.style.width = '20%';
-      progressText.textContent = '处理中...';
-      setTimeout(function() {
-        var canvas = resultCanvas;
-        var ctx = canvas.getContext('2d');
-        canvas.width = originalImage.width;
-        canvas.height = originalImage.height;
-        ctx.drawImage(originalImage, 0, 0);
-        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        var data = imageData.data;
-        var bgColor = hexToRgb(bgColorInput.value);
-        var tolerance = parseInt(toleranceSlider.value);
-        var transparentCount = 0;
-        var total = data.length / 4;
-        for (var i = 0; i < data.length; i += 4) {
-          var dr = data[i] - bgColor[0];
-          var dg = data[i + 1] - bgColor[1];
-          var db = data[i + 2] - bgColor[2];
-          var dist = Math.sqrt(dr * dr + dg * dg + db * db);
-          if (dist < tolerance * 2.55) {
-            var alpha = Math.max(0, Math.floor(255 * (1 - dist / (tolerance * 2.55))));
-            data[i + 3] = alpha;
-            if (alpha === 0) transparentCount++;
-          }
-        }
-        ctx.putImageData(imageData, 0, 0);
-        progressFill.style.width = '100%';
-        progressText.textContent = '完成!';
-        document.getElementById('transparent-pct').textContent = (transparentCount / total * 100).toFixed(1) + '%';
-        setTimeout(function() { progressArea.style.display = 'none'; }, 1000);
-      }, 50);
-    });
-
-    resetBtn.addEventListener('click', function() {
-      if (!originalImage) return;
-      var ctx = resultCanvas.getContext('2d');
-      resultCanvas.width = originalImage.width;
-      resultCanvas.height = originalImage.height;
-      ctx.drawImage(originalImage, 0, 0);
-      resultArea.style.display = 'block';
-    });
-
-    downloadBtn.addEventListener('click', function() {
-      resultCanvas.toBlob(function(blob) {
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = originalFileName + '_no_bg.png';
-        a.click();
-        URL.revokeObjectURL(url);
-      }, 'image/png');
-    });
-  });
 </script>

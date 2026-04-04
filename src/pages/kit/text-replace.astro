@@ -1,68 +1,62 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '文本替换';
 const toolDesc = '查找并替换文本内容';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="form-group">
-            <label class="form-label" for="input-text">输入文本</label>
-            <textarea id="input-text" class="form-textarea" placeholder="输入要处理的文本..."></textarea>
-          </div>
-          <div style="display:flex;gap:var(--space-2);">
-            <div class="form-group" style="flex:1;">
-              <label class="form-label" for="find-text">查找</label>
-              <input type="text" id="find-text" class="form-input" placeholder="要查找的内容">
-            </div>
-            <div class="form-group" style="flex:1;">
-              <label class="form-label" for="replace-text">替换为</label>
-              <input type="text" id="replace-text" class="form-input" placeholder="替换后的内容">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">选项</label>
-            <div class="checkbox-group">
-              <label><input type="checkbox" id="case-sensitive"> 区分大小写</label>
-              <label><input type="checkbox" id="use-regex"> 使用正则表达式</label>
-            </div>
-          </div>
-          <div class="btn-group">
-            <button id="replace-btn" class="btn btn-primary">替换全部</button>
-            <button id="copy-btn" class="btn btn-secondary">复制结果</button>
-          </div>
-          <div class="form-group">
-            <label class="form-label">替换结果</label>
-            <div id="result" class="result-area">等待输入...</div>
-          </div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="hao-form-group">
+                  <label class="hao-label" for="input-text">输入文本</label>
+                  <textarea id="input-text" class="hao-input" placeholder="输入要处理的文本..."></textarea>
+                </div>
+                <div style="display:flex;gap:var(--space-2);">
+                  <div class="hao-form-group" style="flex:1;">
+                    <label class="hao-label" for="find-text">查找</label>
+                    <input type="text" id="find-text" class="hao-input" placeholder="要查找的内容">
+                  </div>
+                  <div class="hao-form-group" style="flex:1;">
+                    <label class="hao-label" for="replace-text">替换为</label>
+                    <input type="text" id="replace-text" class="hao-input" placeholder="替换后的内容">
+                  </div>
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">选项</label>
+                  <div class="hao-checkbox-group">
+                    <label><input type="checkbox" id="case-sensitive"> 区分大小写</label>
+                    <label><input type="checkbox" id="use-regex"> 使用正则表达式</label>
+                  </div>
+                </div>
+                <div class="hao-btn-group">
+                  <button id="replace-btn" class="hao-press-btn hao-press-btn--primary">替换全部</button>
+                  <button id="copy-btn" class="hao-press-btn hao-press-btn--secondary">复制结果</button>
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">替换结果</label>
+                  <div id="result" class="hao-result">等待输入...</div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
+
+<script is:inline>
+document.addEventListener('DOMContentLoaded', () => {
     const inputText = document.getElementById('input-text');
     const findText = document.getElementById('find-text');
     const replaceText = document.getElementById('replace-text');

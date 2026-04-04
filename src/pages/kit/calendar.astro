@@ -1,72 +1,66 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '日历';
 const toolDesc = '查看月历，支持切换月份';
 ---
 
-<Layout title={toolName + ' - 工具箱 - Maxwell.Science'} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-  <div class="calendar-nav">
-    <button id="prev-month">&lt; 上月</button>
-    <h3 id="month-title"></h3>
-    <button id="next-month">下月 &gt;</button>
-  </div>
-  <div class="calendar-grid" id="calendar-grid"></div>
+<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="hao-tool-content" id="tool-content">
+        <div class="hao-calendar-nav">
+          <button id="prev-month">&lt; 上月</button>
+          <h3 id="month-title"></h3>
+          <button id="next-month">下月 &gt;</button>
         </div>
-      </main>
-    </div>
+        <div class="hao-calendar-grid" id="hao-calendar-grid"></div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  let currentYear, currentMonth;
+
+<script is:inline>
+let currentYear, currentMonth;
   const today = new Date();
 
   function renderCalendar() {
-    const grid = document.getElementById('calendar-grid');
+    const grid = document.getElementById('hao-calendar-grid');
     const title = document.getElementById('month-title');
     title.textContent = currentYear + '年' + (currentMonth + 1) + '月';
 
     const weekdays = ['日','一','二','三','四','五','六'];
-    let html = weekdays.map(d => '<div class="calendar-header">' + d + '</div>').join('');
+    let html = weekdays.map(d => '<div class="hao-calendar-header">' + d + '</div>').join('');
 
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
 
     for (let i = firstDay - 1; i >= 0; i--) {
-      html += '<div class="calendar-day other-month">' + (daysInPrevMonth - i) + '</div>';
+      html += '<div class="hao-hao-calendar-day hao-other-month">' + (daysInPrevMonth - i) + '</div>';
     }
 
     for (let d = 1; d <= daysInMonth; d++) {
       const isToday = d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
-      html += '<div class="calendar-day' + (isToday ? ' today' : '') + '">' + d + '</div>';
+      html += '<div class="hao-calendar-day' + (isToday ? ' hao-today' : '') + '">' + d + '</div>';
     }
 
     const totalCells = firstDay + daysInMonth;
     const remaining = (7 - totalCells % 7) % 7;
     for (let i = 1; i <= remaining; i++) {
-      html += '<div class="calendar-day other-month">' + i + '</div>';
+      html += '<div class="hao-hao-calendar-day hao-other-month">' + i + '</div>';
     }
 
     grid.innerHTML = html;
@@ -89,5 +83,4 @@ const toolDesc = '查看月历，支持切换月份';
       renderCalendar();
     });
   });
-
 </script>

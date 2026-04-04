@@ -1,47 +1,49 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const tools = [
-  { id: 'doi', title: 'DOI Citation', desc: 'Convert to multiple citation formats' },
-  { id: 'bibtex', title: 'BibTeX', desc: 'Generate standard BibTeX format' },
-  { id: 'impact', title: 'Journal Lookup', desc: 'Query impact factor and quartile' },
-  { id: 'latex', title: 'LaTeX', desc: 'Math equation editor' },
-  { id: 'translate', title: 'Academic Translation', desc: 'Professional academic translation' },
-  { id: 'keywords', title: 'Keyword Extraction', desc: 'Auto-extract keywords' }
+  { id: "doi", title: "DOI Citation", desc: "Convert to multiple citation formats" },
+  { id: "bibtex", title: "BibTeX", desc: "Generate standard BibTeX format" },
+  { id: "impact", title: "Journal Lookup", desc: "Query impact factor and quartile" },
+  { id: "latex", title: "LaTeX", desc: "Math equation editor" },
+  { id: "translate", title: "Academic Translation", desc: "Professional academic translation" },
+  { id: "keywords", title: "Keyword Extraction", desc: "Auto-extract keywords" }
 ];
 
-const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'BibTeX'];
+const formats = ["APA", "MLA", "Chicago", "IEEE", "Vancouver", "GB/T 7714", "BibTeX"];
+
+const toolName = 'Academic Tools';
+const toolDesc = 'Academic research tools collection';
 ---
 
-<Layout 
-  title="Academic Tools - Maxwell.Science"
-  description="Academic research tools collection"
->
-  <section class="academic">
-    <div class="container">
-      <header class="header">
-        <a href="/kit" class="back-link">
+<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+<section >
+    <div class="hao-section-container">
+      <header class="hao-tool-header">
+        <a href="/kit" class="hao-back-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
           <span>Toolkit</span>
         </a>
-        <h1 class="title">Academic Tools</h1>
+        <h1 class="hao-tool-title">Academic Tools</h1>
         <p class="desc">Convenient tools for academic research</p>
       </header>
       
       <div class="tools-grid" id="tools-grid">
         {tools.map(tool => (
-          <button class="tool-btn" data-tool={tool.id}>
-            <span class="tool-title">{tool.title}</span>
-            <span class="tool-desc">{tool.desc}</span>
+          <button class="hao-tool-btn" data-tool={tool.id}>
+            <span class="hao-tool-title">{tool.title}</span>
+            <span class="hao-tool-desc">{tool.desc}</span>
           </button>
         ))}
       </div>
       
       <!-- DOI Tool -->
-      <div class="panel" id="panel-doi">
+      <div class="hao-panel" id="panel-doi">
         <div class="panel-header">
           <button class="back-btn" data-back>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -54,22 +56,22 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
           <div class="field">
             <input type="text" id="doi-input" placeholder="10.1000/xyz123" />
           </div>
-          <button class="btn" id="fetch-doi">Get Citation</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="fetch-doi">Get Citation</button>
           <div class="result hidden" id="doi-result">
             <div class="article-info" id="article-info"></div>
             <div class="format-tabs" id="format-tabs">
               {formats.map((f, i) => <button class:list={['tab', { active: i === 0 }]} data-format={f}>{f}</button>)}
             </div>
-            <div class="output">
+            <div class="hao-output">
               <pre id="citation-output"></pre>
-              <button class="copy-btn" id="copy-doi">Copy</button>
+              <button class="hao-copy-btn" id="copy-doi">Copy</button>
             </div>
           </div>
         </div>
       </div>
       
       <!-- BibTeX Tool -->
-      <div class="panel" id="panel-bibtex">
+      <div class="hao-panel" id="panel-bibtex">
         <div class="panel-header">
           <button class="back-btn" data-back>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -95,16 +97,16 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
               <input type="text" id="bibtex-pages" placeholder="Pages" />
             </div>
           </div>
-          <button class="btn" id="gen-bibtex">Generate</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="gen-bibtex">Generate</button>
           <div class="output hidden" id="bibtex-output">
             <pre id="bibtex-code"></pre>
-            <button class="copy-btn" id="copy-bibtex">Copy</button>
+            <button class="hao-copy-btn" id="copy-bibtex">Copy</button>
           </div>
         </div>
       </div>
       
       <!-- Impact Factor -->
-      <div class="panel" id="panel-impact">
+      <div class="hao-panel" id="panel-impact">
         <div class="panel-header">
           <button class="back-btn" data-back>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -117,7 +119,7 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
           <div class="field">
             <input type="text" id="journal-input" placeholder="Journal name or ISSN" />
           </div>
-          <button class="btn" id="search-journal">Search</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="search-journal">Search</button>
           <div class="result hidden" id="journal-result">
             <div class="metrics">
               <div class="metric"><span class="val" id="if-value">--</span><span class="lbl">IF</span></div>
@@ -129,7 +131,7 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
       </div>
       
       <!-- LaTeX -->
-      <div class="panel" id="panel-latex">
+      <div class="hao-panel" id="panel-latex">
         <div class="panel-header">
           <button class="back-btn" data-back>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -153,13 +155,13 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
             <button data-sym="\beta">β</button>
             <button data-sym="\infty">∞</button>
           </div>
-          <button class="btn" id="render-latex">Render</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="render-latex">Render</button>
           <div class="preview" id="latex-preview"></div>
         </div>
       </div>
       
       <!-- Translate -->
-      <div class="panel" id="panel-translate">
+      <div class="hao-panel" id="panel-translate">
         <div class="panel-header">
           <button class="back-btn" data-back>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -175,13 +177,13 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
             <select id="tgt-lang"><option value="zh">Chinese</option><option value="en">English</option></select>
           </div>
           <textarea id="src-text" rows="4" placeholder="Enter text"></textarea>
-          <button class="btn" id="do-translate">Translate</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="do-translate">Translate</button>
           <textarea id="tgt-text" rows="4" readonly placeholder="Translation result"></textarea>
         </div>
       </div>
       
       <!-- Keywords -->
-      <div class="panel" id="panel-keywords">
+      <div class="hao-panel" id="panel-keywords">
         <div class="panel-header">
           <button class="back-btn" data-back>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -201,19 +203,29 @@ const formats = ['APA', 'MLA', 'Chicago', 'IEEE', 'Vancouver', 'GB/T 7714', 'Bib
               <option value="15">15</option>
             </select>
           </div>
-          <button class="btn" id="extract-kw">Extract</button>
+          <button class="hao-press-btn hao-press-btn--secondary" id="extract-kw">Extract</button>
           <div class="tags hidden" id="kw-tags"></div>
         </div>
       </div>
     </div>
   </section>
+    </KitToolWrapper>
+  </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
-<script>
+<script is:inline>
+>
   // @ts-nocheck
   const toolsGrid = document.getElementById('tools-grid');
   const panels = document.querySelectorAll('.panel');

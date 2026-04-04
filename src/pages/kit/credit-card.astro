@@ -1,50 +1,44 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '信用卡工具';
 const toolDesc = '信用卡号码验证';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="form-group">
-            <label class="form-label" for="card-input">信用卡号</label>
-            <input type="text" id="card-input" class="form-input" placeholder="输入信用卡号" maxlength="19">
-          </div>
-          <div class="btn-group">
-            <button id="verify-btn" class="btn btn-primary">验证</button>
-          </div>
-          <div class="form-group">
-            <label class="form-label">验证结果</label>
-            <div id="result" class="result-area">等待输入...</div>
-          </div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="hao-form-group">
+                  <label class="hao-label" for="card-input">信用卡号</label>
+                  <input type="text" id="card-input" class="hao-input" placeholder="输入信用卡号" maxlength="19">
+                </div>
+                <div class="hao-btn-group">
+                  <button id="verify-btn" class="hao-press-btn hao-press-btn--primary">验证</button>
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">验证结果</label>
+                  <div id="result" class="hao-result">等待输入...</div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
+
+<script is:inline>
+document.addEventListener('DOMContentLoaded', () => {
     const cardInput = document.getElementById('card-input');
     const verifyBtn = document.getElementById('verify-btn');
     const result = document.getElementById('result');

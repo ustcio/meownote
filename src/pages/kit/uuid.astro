@@ -1,63 +1,56 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = 'UUID生成器';
 const toolDesc = '生成和验证UUID';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="form-group">
-            <label class="form-label" for="uuid-count">生成数量</label>
-            <input type="number" id="uuid-count" class="form-input" value="5" min="1" max="100">
-          </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="hao-form-group">
+                  <label class="hao-label" for="uuid-count">生成数量</label>
+                  <input type="number" id="uuid-count" class="hao-input" value="5" min="1" max="100">
+                </div>
           
-          <div class="form-group">
-            <label class="form-label">
-              <input type="checkbox" id="uppercase" checked> 大写
-            </label>
-            <label class="form-label">
-              <input type="checkbox" id="no-dashes"> 去除连字符
-            </label>
-          </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">
+                    <input type="checkbox" id="uppercase" checked> 大写
+                  </label>
+                  <label class="hao-label">
+                    <input type="checkbox" id="no-dashes"> 去除连字符
+                  </label>
+                </div>
           
-          <div class="btn-group">
-            <button id="generate-btn" class="btn btn-primary">生成UUID</button>
-            <button id="copy-btn" class="btn btn-secondary">复制全部</button>
-          </div>
+                <div class="hao-btn-group">
+                  <button id="generate-btn" class="hao-press-btn hao-press-btn--primary">生成UUID</button>
+                  <button id="copy-btn" class="hao-press-btn hao-press-btn--secondary">复制全部</button>
+                </div>
 
-          <div class="form-group">
-            <label class="form-label">生成结果</label>
-            <div id="result" class="result-area">点击生成按钮...</div>
-          </div>
-        </div>
-      </main>
-    </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">生成结果</label>
+                  <div id="result" class="hao-result">点击生成按钮...</div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
-<script>
-  function generateUUID() {
+<script is:inline>
+function generateUUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
       const r = Math.random() * 16 | 0;
       return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);

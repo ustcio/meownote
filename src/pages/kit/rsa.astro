@@ -1,65 +1,59 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = 'RSA加密解密';
 const toolDesc = '生成RSA密钥对并进行加密解密';
 ---
 
-<Layout title={toolName + ' - 工具箱 - Maxwell.Science'} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-  <div class="btn-group">
-    <button id="generate-btn" class="btn btn-primary">生成密钥对</button>
-  </div>
-  <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;">
-    <div class="form-group" style="flex:1;">
-      <label class="form-label" for="public-key">公钥</label>
-      <textarea id="public-key" class="form-textarea" placeholder="公钥将在此显示..." readonly></textarea>
-    </div>
-    <div class="form-group" style="flex:1;">
-      <label class="form-label" for="private-key">私钥</label>
-      <textarea id="private-key" class="form-textarea" placeholder="私钥将在此显示..." readonly></textarea>
-    </div>
-  </div>
-  <div class="form-group">
-    <label class="form-label" for="input-text">输入文本</label>
-    <textarea id="input-text" class="form-textarea" placeholder="输入要加密的文本..."></textarea>
-  </div>
-  <div class="btn-group">
-    <button id="encrypt-btn" class="btn btn-primary">加密</button>
-    <button id="decrypt-btn" class="btn btn-secondary">解密</button>
-    <button id="copy-btn" class="btn btn-secondary">复制结果</button>
-  </div>
-  <div class="form-group">
-    <label class="form-label">结果</label>
-    <div id="result" class="result-area">等待操作...</div>
-  </div>
+<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+        <div class="hao-btn-group">
+          <button id="generate-btn" class="hao-press-btn hao-press-btn--primary">生成密钥对</button>
         </div>
-      </main>
-    </div>
+        <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;">
+          <div class="hao-form-group" style="flex:1;">
+            <label class="hao-label" for="public-key">公钥</label>
+            <textarea id="public-key" class="hao-input" placeholder="公钥将在此显示..." readonly></textarea>
+          </div>
+          <div class="hao-form-group" style="flex:1;">
+            <label class="hao-label" for="private-key">私钥</label>
+            <textarea id="private-key" class="hao-input" placeholder="私钥将在此显示..." readonly></textarea>
+          </div>
+        </div>
+        <div class="hao-form-group">
+          <label class="hao-label" for="input-text">输入文本</label>
+          <textarea id="input-text" class="hao-input" placeholder="输入要加密的文本..."></textarea>
+        </div>
+        <div class="hao-btn-group">
+          <button id="encrypt-btn" class="hao-press-btn hao-press-btn--primary">加密</button>
+          <button id="decrypt-btn" class="hao-press-btn hao-press-btn--secondary">解密</button>
+          <button id="copy-btn" class="hao-press-btn hao-press-btn--secondary">复制结果</button>
+        </div>
+        <div class="hao-form-group">
+          <label class="hao-label">结果</label>
+          <div id="result" class="hao-result">等待操作...</div>
+        </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
+
+<script is:inline>
+document.addEventListener('DOMContentLoaded', () => {
     const publicKeyEl = document.getElementById('public-key');
     const privateKeyEl = document.getElementById('private-key');
     const inputText = document.getElementById('input-text');
@@ -143,5 +137,4 @@ const toolDesc = '生成RSA密钥对并进行加密解密';
       }
     });
   });
-
 </script>

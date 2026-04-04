@@ -1,56 +1,50 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '富文本编辑器';
 const toolDesc = '在线富文本编辑';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="btn-group" style="margin-bottom:var(--space-4);">
-            <button class="btn btn-secondary" onclick="document.execCommand('bold')"><b>B</b></button>
-            <button class="btn btn-secondary" onclick="document.execCommand('italic')"><i>I</i></button>
-            <button class="btn btn-secondary" onclick="document.execCommand('underline')"><u>U</u></button>
-            <button class="btn btn-secondary" onclick="document.execCommand('strikeThrough')"><s>S</s></button>
-            <button class="btn btn-secondary" onclick="document.execCommand('insertUnorderedList')">• 列表</button>
-            <button class="btn btn-secondary" onclick="document.execCommand('insertOrderedList')">1. 列表</button>
-            <button class="btn btn-secondary" onclick="document.execCommand('justifyLeft')">左对齐</button>
-            <button class="btn btn-secondary" onclick="document.execCommand('justifyCenter')">居中</button>
-            <button class="btn btn-secondary" onclick="document.execCommand('justifyRight')">右对齐</button>
-          </div>
-          <div id="editor" contenteditable="true" style="min-height:400px;padding:var(--space-4);background:var(--bg-primary);border:1px solid var(--border-primary);border-radius:var(--radius-lg);"></div>
-          <div class="btn-group" style="margin-top:var(--space-4);">
-            <button id="html-btn" class="btn btn-primary">查看HTML</button>
-            <button id="copy-btn" class="btn btn-secondary">复制HTML</button>
-          </div>
-          <div id="html-output" class="result-area" style="display:none;margin-top:var(--space-4);"></div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="hao-btn-group" style="margin-bottom:var(--space-4);">
+                  <button class="hao-press-btn hao-press-btn--secondary" onclick="document.execCommand('bold')"><b>B</b></button>
+                  <button class="hao-press-btn hao-press-btn--secondary" onclick="document.execCommand('italic')"><i>I</i></button>
+                  <button class="hao-press-btn hao-press-btn--secondary" onclick="document.execCommand('underline')"><u>U</u></button>
+                  <button class="hao-press-btn hao-press-btn--secondary" onclick="document.execCommand('strikeThrough')"><s>S</s></button>
+                  <button class="hao-press-btn hao-press-btn--secondary" onclick="document.execCommand('insertUnorderedList')">• 列表</button>
+                  <button class="hao-press-btn hao-press-btn--secondary" onclick="document.execCommand('insertOrderedList')">1. 列表</button>
+                  <button class="hao-press-btn hao-press-btn--secondary" onclick="document.execCommand('justifyLeft')">左对齐</button>
+                  <button class="hao-press-btn hao-press-btn--secondary" onclick="document.execCommand('justifyCenter')">居中</button>
+                  <button class="hao-press-btn hao-press-btn--secondary" onclick="document.execCommand('justifyRight')">右对齐</button>
+                </div>
+                <div id="editor" contenteditable="true" style="min-height:400px;padding:var(--space-4);background:var(--bg-primary);border:1px solid var(--border-primary);border-radius:var(--radius-lg);"></div>
+                <div class="hao-btn-group" style="margin-top:var(--space-4);">
+                  <button id="html-btn" class="hao-press-btn hao-press-btn--primary">查看HTML</button>
+                  <button id="copy-btn" class="hao-press-btn hao-press-btn--secondary">复制HTML</button>
+                </div>
+                <div id="html-output" class="hao-result" style="display:none;margin-top:var(--space-4);"></div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
+
+<script is:inline>
+document.addEventListener('DOMContentLoaded', () => {
     const editor = document.getElementById('editor');
     const htmlBtn = document.getElementById('html-btn');
     const copyBtn = document.getElementById('copy-btn');

@@ -1,128 +1,50 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '网站综合查询';
 const toolDesc = '查询网站状态、响应时间等信息';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="input-group" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;">
-            <input id="url-input" type="text" class="form-input" placeholder="输入网址，如 https://example.com" style="flex:1;padding:0.3rem 0.4rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:15px;color:var(--color-text);font-size:0.28rem;outline:none;">
-            <button id="check-btn" class="btn-primary">检测</button>
-          </div>
-          <div id="loading" style="display:none;text-align:center;padding:1rem;color:var(--color-cale-text);">检测中...</div>
-          <div id="error" style="display:none;text-align:center;padding:1rem;color:#ff6b6b;"></div>
-          <div id="result-area" style="display:none;">
-            <div class="result-area" style="margin-bottom:0.3rem;">
-              <div class="result-header">网站状态</div>
-              <div class="file-info" id="status-info"></div>
-            </div>
-            <div class="result-area" style="margin-bottom:0.3rem;">
-              <div class="result-header">SSL信息</div>
-              <div class="file-info" id="ssl-info"></div>
-            </div>
-            <div class="result-area">
-              <div class="result-header">技术栈检测</div>
-              <div class="file-info" id="tech-info"></div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="input-group" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;">
+                  <input id="url-input" type="text" class="hao-input" placeholder="输入网址，如 https://example.com" style="flex:1;padding:0.3rem 0.4rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:15px;color:var(--color-text);font-size:0.28rem;outline:none;">
+                  <button id="check-btn" class="hao-press-btn hao-press-btn--primary">检测</button>
+                </div>
+                <div id="loading" style="display:none;text-align:center;padding:1rem;color:var(--color-cale-text);">检测中...</div>
+                <div id="error" style="display:none;text-align:center;padding:1rem;color:#ff6b6b;"></div>
+                <div id="hao-result" style="display:none;">
+                  <div class="hao-result" style="margin-bottom:0.3rem;">
+                    <div class="result-header">网站状态</div>
+                    <div class="file-info" id="status-info"></div>
+                  </div>
+                  <div class="hao-result" style="margin-bottom:0.3rem;">
+                    <div class="result-header">SSL信息</div>
+                    <div class="file-info" id="ssl-info"></div>
+                  </div>
+                  <div class="hao-result">
+                    <div class="result-header">技术栈检测</div>
+                    <div class="file-info" id="tech-info"></div>
+                  </div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
+<style>
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
+</style>
+
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', () => {
-    const urlInput = document.getElementById('url-input');
-    const checkBtn = document.getElementById('check-btn');
-    const loading = document.getElementById('loading');
-    const error = document.getElementById('error');
-    const resultArea = document.getElementById('result-area');
-    const statusInfo = document.getElementById('status-info');
-    const sslInfo = document.getElementById('ssl-info');
-    const techInfo = document.getElementById('tech-info');
-
-    function normalizeUrl(url) {
-      if (!url.startsWith('http://') && !url.startsWith('https://')) return 'https://' + url;
-      return url;
-    }
-
-    checkBtn.addEventListener('click', async () => {
-      let url = urlInput.value.trim();
-      if (!url) { error.textContent = '请输入网址'; error.style.display = 'block'; return; }
-      url = normalizeUrl(url);
-
-      loading.style.display = 'block';
-      error.style.display = 'none';
-      resultArea.style.display = 'none';
-
-      const startTime = performance.now();
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 10000);
-        const res = await fetch(url, { mode: 'no-cors', signal: controller.signal });
-        clearTimeout(timeout);
-        const responseTime = (performance.now() - startTime).toFixed(0);
-
-        const isHttps = url.startsWith('https://');
-        const domain = new URL(url).hostname;
-
-        statusInfo.innerHTML = `
-          <div class="info-row"><span class="info-label">网址</span><span class="info-value">${url}</span></div>
-          <div class="info-row"><span class="info-label">状态</span><span class="info-value" style="color:#4ecdc4;">✓ 可访问</span></div>
-          <div class="info-row"><span class="info-label">响应时间</span><span class="info-value">${responseTime}ms</span></div>
-          <div class="info-row"><span class="info-label">协议</span><span class="info-value">${isHttps ? 'HTTPS' : 'HTTP'}</span></div>
-          <div class="info-row"><span class="info-label">域名</span><span class="info-value">${domain}</span></div>`;
-
-        sslInfo.innerHTML = isHttps
-          ? `<div class="info-row"><span class="info-label">SSL状态</span><span class="info-value" style="color:#4ecdc4;">✓ 已启用</span></div>
-             <div class="info-row"><span class="info-label">协议版本</span><span class="info-value">TLS 1.3</span></div>
-             <div class="info-row"><span class="info-label">加密强度</span><span class="info-value">256-bit</span></div>`
-          : `<div class="info-row"><span class="info-label">SSL状态</span><span class="info-value" style="color:#ff6b6b;">✗ 未启用</span></div>
-             <div class="info-row"><span class="info-label">建议</span><span class="info-value">建议启用HTTPS</span></div>`;
-
-        techInfo.innerHTML = `
-          <div class="info-row"><span class="info-label">服务器</span><span class="info-value">未知 (跨域限制)</span></div>
-          <div class="info-row"><span class="info-label">说明</span><span class="info-value">浏览器跨域限制无法获取完整服务器信息</span></div>
-          <div class="info-row"><span class="info-label">建议工具</span><span class="info-value"><a href="https://builtwith.com/${domain}" target="_blank" style="color:var(--top-color);">BuiltWith</a></span></div>`;
-
-        resultArea.style.display = 'block';
-      } catch (e) {
-        const responseTime = (performance.now() - startTime).toFixed(0);
-        const domain = new URL(url).hostname;
-        statusInfo.innerHTML = `
-          <div class="info-row"><span class="info-label">网址</span><span class="info-value">${url}</span></div>
-          <div class="info-row"><span class="info-label">状态</span><span class="info-value" style="color:#ff6b6b;">✗ 无法访问</span></div>
-          <div class="info-row"><span class="info-label">响应时间</span><span class="info-value">${responseTime}ms (超时)</span></div>
-          <div class="info-row"><span class="info-label">域名</span><span class="info-value">${domain}</span></div>`;
-
-        sslInfo.innerHTML = `<div class="info-row"><span class="info-label">SSL状态</span><span class="info-value">无法检测</span></div>`;
-        techInfo.innerHTML = `<div class="info-row"><span class="info-label">技术栈</span><span class="info-value">无法检测 (网站不可达或跨域限制)</span></div>`;
-
-        resultArea.style.display = 'block';
-      } finally {
-        loading.style.display = 'none';
-      }
-    });
-
-    urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkBtn.click(); });
-  });
 </script>

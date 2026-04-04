@@ -1,58 +1,52 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '时间戳转换';
 const toolDesc = 'Unix时间戳与日期时间互转';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="form-group">
-            <label class="form-label" for="timestamp">时间戳（秒或毫秒）</label>
-            <input type="number" id="timestamp" class="form-input" placeholder="1700000000">
-          </div>
-          <div class="btn-group">
-            <button id="to-date-btn" class="btn btn-primary">转日期时间</button>
-            <button id="now-btn" class="btn btn-secondary">当前时间</button>
-          </div>
-          <div class="form-group">
-            <label class="form-label">日期时间</label>
-            <input type="datetime-local" id="datetime" class="form-input">
-          </div>
-          <div class="btn-group">
-            <button id="to-ts-btn" class="btn btn-primary">转时间戳</button>
-          </div>
-          <div class="form-group">
-            <label class="form-label">结果</label>
-            <div id="result" class="result-area">等待输入...</div>
-          </div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="hao-form-group">
+                  <label class="hao-label" for="timestamp">时间戳（秒或毫秒）</label>
+                  <input type="number" id="timestamp" class="hao-input" placeholder="1700000000">
+                </div>
+                <div class="hao-btn-group">
+                  <button id="to-date-btn" class="hao-press-btn hao-press-btn--primary">转日期时间</button>
+                  <button id="now-btn" class="hao-press-btn hao-press-btn--secondary">当前时间</button>
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">日期时间</label>
+                  <input type="datetime-local" id="datetime" class="hao-input">
+                </div>
+                <div class="hao-btn-group">
+                  <button id="to-ts-btn" class="hao-press-btn hao-press-btn--primary">转时间戳</button>
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">结果</label>
+                  <div id="result" class="hao-result">等待输入...</div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
+
+<script is:inline>
+document.addEventListener('DOMContentLoaded', () => {
     const tsInput = document.getElementById('timestamp');
     const datetimeInput = document.getElementById('datetime');
     const toDateBtn = document.getElementById('to-date-btn');

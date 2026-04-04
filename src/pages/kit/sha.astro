@@ -1,65 +1,58 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = 'SHA哈希';
 const toolDesc = '计算文本SHA-1/SHA-256/SHA-384/SHA-512哈希值';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="form-group">
-            <label class="form-label" for="input-text">输入文本</label>
-            <textarea id="input-text" class="form-textarea" placeholder="请输入要计算SHA哈希的文本..."></textarea>
-          </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="hao-form-group">
+                  <label class="hao-label" for="input-text">输入文本</label>
+                  <textarea id="input-text" class="hao-input" placeholder="请输入要计算SHA哈希的文本..."></textarea>
+                </div>
           
-          <div class="form-group">
-            <label class="form-label" for="sha-type">哈希类型</label>
-            <select id="sha-type" class="form-select">
-              <option value="SHA-1">SHA-1</option>
-              <option value="SHA-256" selected>SHA-256</option>
-              <option value="SHA-384">SHA-384</option>
-              <option value="SHA-512">SHA-512</option>
-            </select>
-          </div>
+                <div class="hao-form-group">
+                  <label class="hao-label" for="sha-type">哈希类型</label>
+                  <select id="sha-type" class="form-select">
+                    <option value="SHA-1">SHA-1</option>
+                    <option value="SHA-256" selected>SHA-256</option>
+                    <option value="SHA-384">SHA-384</option>
+                    <option value="SHA-512">SHA-512</option>
+                  </select>
+                </div>
           
-          <div class="btn-group">
-            <button id="calc-btn" class="btn btn-primary">计算SHA</button>
-            <button id="clear-btn" class="btn btn-secondary">清空</button>
-            <button id="copy-btn" class="btn btn-secondary">复制结果</button>
-          </div>
+                <div class="hao-btn-group">
+                  <button id="calc-btn" class="hao-press-btn hao-press-btn--primary">计算SHA</button>
+                  <button id="clear-btn" class="hao-press-btn hao-press-btn--secondary">清空</button>
+                  <button id="copy-btn" class="hao-press-btn hao-press-btn--secondary">复制结果</button>
+                </div>
 
-          <div class="form-group">
-            <label class="form-label">SHA结果</label>
-            <div id="result" class="result-area">等待计算...</div>
-          </div>
-        </div>
-      </main>
-    </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">SHA结果</label>
+                  <div id="result" class="hao-result">等待计算...</div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
-<script>
-  async function shaHash(text, algorithm) {
+<script is:inline>
+async function shaHash(text, algorithm) {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
     const hashBuffer = await crypto.subtle.digest(algorithm, data);

@@ -1,181 +1,81 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = 'PDF解密';
 const toolDesc = '移除PDF密码保护';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="hao-upload-area" id="upload-area">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>点击或拖拽上传加密PDF</span>
+                <span class="hint">支持 PDF 文件</span>
+                <input type="file" id="file-input" accept=".pdf">
+              </div>
 
-      <main class="tool-main">
-        <div class="upload-area" id="upload-area">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          <span>点击或拖拽上传加密PDF</span>
-          <span class="hint">支持 PDF 文件</span>
-          <input type="file" id="file-input" accept=".pdf">
-        </div>
+              <div id="file-info" class="file-info" style="display:none;">
+                <div class="info-row">
+                  <span class="info-label">文件名</span>
+                  <span class="info-value" id="file-name"></span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">文件大小</span>
+                  <span class="info-value" id="file-size"></span>
+                </div>
+              </div>
 
-        <div id="file-info" class="file-info" style="display:none;">
-          <div class="info-row">
-            <span class="info-label">文件名</span>
-            <span class="info-value" id="file-name"></span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">文件大小</span>
-            <span class="info-value" id="file-size"></span>
-          </div>
-        </div>
+              <div class="settings" id="settings" style="display:none;">
+                <div class="setting-group">
+                  <label class="setting-label">密码</label>
+                  <input type="password" id="password" placeholder="输入PDF密码" class="setting-select" style="width:100%;padding:0.2rem;">
+                </div>
+                <div class="hao-btn-group">
+                  <button class="hao-press-btn hao-press-btn--primary" id="decrypt-btn">解密PDF</button>
+                </div>
+              </div>
 
-        <div class="settings" id="settings" style="display:none;">
-          <div class="setting-group">
-            <label class="setting-label">密码</label>
-            <input type="password" id="password" placeholder="输入PDF密码" class="setting-select" style="width:100%;padding:0.2rem;">
-          </div>
-          <div class="btn-group">
-            <button class="btn-primary" id="decrypt-btn">解密PDF</button>
-          </div>
-        </div>
+              <div class="progress-area" id="progress-area" style="display:none;">
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                <div class="progress-text" id="progress-text">解密中...</div>
+              </div>
 
-        <div class="progress-area" id="progress-area" style="display:none;">
-          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-          <div class="progress-text" id="progress-text">解密中...</div>
-        </div>
-
-        <div class="result-area" id="result-area" style="display:none;">
-          <div class="result-header">解密完成</div>
-          <div class="result-stats">
-            <div class="stat">
-              <span class="stat-label">原始大小</span>
-              <span class="stat-value" id="before-size"></span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">解密后</span>
-              <span class="stat-value" id="after-size"></span>
-            </div>
-          </div>
-          <div class="btn-group">
-            <button class="btn-primary" id="download-btn">下载解密PDF</button>
-          </div>
-        </div>
-      </main>
-    </div>
+              <div class="hao-result" id="hao-result" style="display:none;">
+                <div class="result-header">解密完成</div>
+                <div class="hao-result-stats">
+                  <div class="stat">
+                    <span class="stat-label">原始大小</span>
+                    <span class="stat-value" id="before-size"></span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">解密后</span>
+                    <span class="stat-value" id="after-size"></span>
+                  </div>
+                </div>
+                <div class="hao-btn-group">
+                  <button class="hao-press-btn hao-press-btn--primary" id="download-btn">下载解密PDF</button>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  .tool-main { overflow: auto; }
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', function() {
-    var uploadArea = document.getElementById('upload-area');
-    var fileInput = document.getElementById('file-input');
-    var fileInfo = document.getElementById('file-info');
-    var settings = document.getElementById('settings');
-    var progressArea = document.getElementById('progress-area');
-    var progressFill = document.getElementById('progress-fill');
-    var progressText = document.getElementById('progress-text');
-    var resultArea = document.getElementById('result-area');
-    var passwordInput = document.getElementById('password');
-    var decryptBtn = document.getElementById('decrypt-btn');
-    var downloadBtn = document.getElementById('download-btn');
-    var pdfFile = null;
-    var decryptedBlob = null;
-
-    uploadArea.addEventListener('click', function() { fileInput.click(); });
-    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
-    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
-    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
-
-    function handleFile(file) {
-      if (file.type !== 'application/pdf') return;
-      pdfFile = file;
-      document.getElementById('file-name').textContent = file.name;
-      document.getElementById('file-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
-      fileInfo.style.display = 'block';
-      settings.style.display = 'flex';
-      resultArea.style.display = 'none';
-    }
-
-    decryptBtn.addEventListener('click', function() {
-      if (!pdfFile) return;
-      progressArea.style.display = 'block';
-      progressFill.style.width = '20%';
-      progressText.textContent = '读取PDF...';
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var data = new Uint8Array(e.target.result);
-        progressFill.style.width = '50%';
-        progressText.textContent = '移除加密...';
-        setTimeout(function() {
-          var str = '';
-          for (var i = 0; i < data.length; i++) str += String.fromCharCode(data[i]);
-          var encryptIdx = str.indexOf('/Encrypt');
-          if (encryptIdx < 0) {
-            decryptedBlob = new Blob([data], { type: 'application/pdf' });
-          } else {
-            var trailerIdx = str.lastIndexOf('trailer');
-            var xrefIdx = str.lastIndexOf('xref');
-            var eofIdx = str.lastIndexOf('%%EOF');
-            var cleanEnd = str.substring(0, trailerIdx > 0 ? trailerIdx : (xrefIdx > 0 ? xrefIdx : data.length));
-            cleanEnd += 'trailer\n<< /Size 1 /Root 1 0 R >>\nstartxref\n0\n%%EOF';
-            var cleanBytes = new Uint8Array(cleanEnd.length);
-            for (var i = 0; i < cleanEnd.length; i++) cleanBytes[i] = cleanEnd.charCodeAt(i);
-            var bodyEnd = findBodyEnd(data);
-            var result = new Uint8Array(bodyEnd + cleanBytes.length);
-            result.set(data.slice(0, bodyEnd), 0);
-            result.set(cleanBytes, bodyEnd);
-            decryptedBlob = new Blob([result], { type: 'application/pdf' });
-          }
-          document.getElementById('before-size').textContent = (pdfFile.size / 1024).toFixed(1) + ' KB';
-          document.getElementById('after-size').textContent = (decryptedBlob.size / 1024).toFixed(1) + ' KB';
-          progressFill.style.width = '100%';
-          progressText.textContent = '完成!';
-          resultArea.style.display = 'block';
-          setTimeout(function() { progressArea.style.display = 'none'; }, 800);
-        }, 100);
-      };
-      reader.readAsArrayBuffer(pdfFile);
-    });
-
-    function findBodyEnd(data) {
-      var pattern = [0x73, 0x74, 0x61, 0x72, 0x74, 0x78, 0x72, 0x65, 0x66];
-      for (var i = data.length - 200; i >= 0; i--) {
-        var match = true;
-        for (var j = 0; j < pattern.length; j++) {
-          if (data[i + j] !== pattern[j]) { match = false; break; }
-        }
-        if (match) return i;
-      }
-      return data.length;
-    }
-
-    downloadBtn.addEventListener('click', function() {
-      if (!decryptedBlob) return;
-      var url = URL.createObjectURL(decryptedBlob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'decrypted_' + pdfFile.name;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-  });
 </script>

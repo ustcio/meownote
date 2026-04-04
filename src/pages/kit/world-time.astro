@@ -1,40 +1,34 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '世界时钟';
 const toolDesc = '查看世界各地当前时间';
 ---
 
-<Layout title={toolName + ' - 工具箱 - Maxwell.Science'} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-  <div class="timezone-grid" id="timezone-grid"></div>
-        </div>
-      </main>
-    </div>
+<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="hao-tool-content" id="tool-content">
+        <div class="hao-timezone-grid" id="timezone-grid"></div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  const timezones = [
+
+<script is:inline>
+const timezones = [
     { city: '北京', tz: 'Asia/Shanghai', flag: '🇨🇳' },
     { city: '东京', tz: 'Asia/Tokyo', flag: '🇯🇵' },
     { city: '首尔', tz: 'Asia/Seoul', flag: '🇰🇷' },
@@ -65,7 +59,7 @@ const toolDesc = '查看世界各地当前时间';
     timezones.forEach(tz => {
       const timeStr = now.toLocaleTimeString('zh-CN', { timeZone: tz.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const dateStr = now.toLocaleDateString('zh-CN', { timeZone: tz.tz, weekday: 'short', month: 'short', day: 'numeric' });
-      html += '<div class="timezone-card"><div class="city">' + tz.flag + ' ' + tz.city + '</div><div class="time">' + timeStr + '</div><div class="date">' + dateStr + '</div></div>';
+      html += '<div class="hao-timezone-card"><div class="city">' + tz.flag + ' ' + tz.city + '</div><div class="time">' + timeStr + '</div><div class="date">' + dateStr + '</div></div>';
     });
 
     grid.innerHTML = html;
@@ -75,5 +69,4 @@ const toolDesc = '查看世界各地当前时间';
     updateTime();
     setInterval(updateTime, 1000);
   });
-
 </script>

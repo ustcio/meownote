@@ -1,335 +1,106 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '视频调速';
 const toolDesc = '调整视频播放速度，支持0.25x到2x';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="hao-upload-area" id="upload-area">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                </svg>
+                <span>点击或拖拽上传视频文件</span>
+                <span class="hint">支持 MP4, WebM, MOV, AVI, MKV</span>
+                <input type="file" id="video-input" accept="video/*" hidden>
+              </div>
 
-      <main class="tool-main">
-        <div class="upload-area" id="upload-area">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <polygon points="23 7 16 12 23 17 23 7"></polygon>
-            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-          </svg>
-          <span>点击或拖拽上传视频文件</span>
-          <span class="hint">支持 MP4, WebM, MOV, AVI, MKV</span>
-          <input type="file" id="video-input" accept="video/*" hidden>
-        </div>
+              <div class="file-info" id="file-info" style="display:none;">
+                <div class="info-row">
+                  <span class="info-label">文件名</span>
+                  <span class="info-value" id="file-name"></span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">原始大小</span>
+                  <span class="info-value" id="file-size"></span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">时长</span>
+                  <span class="info-value" id="file-duration"></span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">分辨率</span>
+                  <span class="info-value" id="file-resolution"></span>
+                </div>
+              </div>
 
-        <div class="file-info" id="file-info" style="display:none;">
-          <div class="info-row">
-            <span class="info-label">文件名</span>
-            <span class="info-value" id="file-name"></span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">原始大小</span>
-            <span class="info-value" id="file-size"></span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">时长</span>
-            <span class="info-value" id="file-duration"></span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">分辨率</span>
-            <span class="info-value" id="file-resolution"></span>
-          </div>
-        </div>
+              <div class="settings" id="settings" style="display:none;">
+                <div class="setting-group">
+                  <label class="setting-label">播放速度</label>
+                  <div class="speed-options">
+                    <button class="speed-btn" data-speed="0.25">0.25x</button>
+                    <button class="speed-btn" data-speed="0.5">0.5x</button>
+                    <button class="speed-btn" data-speed="0.75">0.75x</button>
+                    <button class="speed-btn active" data-speed="1">1x</button>
+                    <button class="speed-btn" data-speed="1.5">1.5x</button>
+                    <button class="speed-btn" data-speed="2">2x</button>
+                  </div>
+                </div>
+                <div class="speed-preview">
+                  <span>输出时长: <strong id="output-duration">0:00</strong></span>
+                </div>
+                <button class="hao-press-btn hao-press-btn--primary" id="speed-btn">开始调速</button>
+              </div>
 
-        <div class="settings" id="settings" style="display:none;">
-          <div class="setting-group">
-            <label class="setting-label">播放速度</label>
-            <div class="speed-options">
-              <button class="speed-btn" data-speed="0.25">0.25x</button>
-              <button class="speed-btn" data-speed="0.5">0.5x</button>
-              <button class="speed-btn" data-speed="0.75">0.75x</button>
-              <button class="speed-btn active" data-speed="1">1x</button>
-              <button class="speed-btn" data-speed="1.5">1.5x</button>
-              <button class="speed-btn" data-speed="2">2x</button>
-            </div>
-          </div>
-          <div class="speed-preview">
-            <span>输出时长: <strong id="output-duration">0:00</strong></span>
-          </div>
-          <button class="btn-primary" id="speed-btn">开始调速</button>
-        </div>
+              <div class="progress-area" id="progress-area" style="display:none;">
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <span class="progress-text" id="progress-text">处理中...</span>
+              </div>
 
-        <div class="progress-area" id="progress-area" style="display:none;">
-          <div class="progress-bar">
-            <div class="progress-fill" id="progress-fill"></div>
-          </div>
-          <span class="progress-text" id="progress-text">处理中...</span>
-        </div>
-
-        <div class="result-area" id="result-area" style="display:none;">
-          <div class="result-header">
-            <span>调速结果</span>
-          </div>
-          <div class="result-stats">
-            <div class="stat">
-              <span class="stat-label">输出大小</span>
-              <span class="stat-value" id="result-size"></span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">输出时长</span>
-              <span class="stat-value" id="result-duration"></span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">速度</span>
-              <span class="stat-value" id="result-speed"></span>
-            </div>
-          </div>
-          <video id="result-video" controls class="result-video"></video>
-          <div class="btn-group">
-            <button class="btn-primary" id="download-btn">下载调速后的视频</button>
-            <button class="btn-secondary" id="reset-btn">重新上传</button>
-          </div>
-        </div>
-      </main>
-    </div>
+              <div class="hao-result" id="hao-result" style="display:none;">
+                <div class="result-header">
+                  <span>调速结果</span>
+                </div>
+                <div class="hao-result-stats">
+                  <div class="stat">
+                    <span class="stat-label">输出大小</span>
+                    <span class="stat-value" id="result-size"></span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">输出时长</span>
+                    <span class="stat-value" id="result-duration"></span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">速度</span>
+                    <span class="stat-value" id="result-speed"></span>
+                  </div>
+                </div>
+                <video id="result-video" controls class="result-video"></video>
+                <div class="hao-btn-group">
+                  <button class="hao-press-btn hao-press-btn--primary" id="download-btn">下载调速后的视频</button>
+                  <button class="hao-press-btn hao-press-btn--secondary" id="reset-btn">重新上传</button>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
 <script is:inline>
-  (function() {
-    var uploadArea = document.getElementById('upload-area');
-    var videoInput = document.getElementById('video-input');
-    var fileInfo = document.getElementById('file-info');
-    var settings = document.getElementById('settings');
-    var progressArea = document.getElementById('progress-area');
-    var resultArea = document.getElementById('result-area');
-    var speedBtn = document.getElementById('speed-btn');
-    var downloadBtn = document.getElementById('download-btn');
-    var resetBtn = document.getElementById('reset-btn');
-    var resultVideo = document.getElementById('result-video');
-    var outputDurationEl = document.getElementById('output-duration');
-
-    var originalFile = null;
-    var videoDuration = 0;
-    var videoWidth = 0;
-    var videoHeight = 0;
-    var selectedSpeed = 1;
-    var speedBlob = null;
-
-    function formatSize(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-    }
-
-    function formatDuration(seconds) {
-      var mins = Math.floor(seconds / 60);
-      var secs = Math.floor(seconds % 60);
-      return mins + ':' + secs.toString().padStart(2, '0');
-    }
-
-    uploadArea?.addEventListener('click', function() { videoInput?.click(); });
-
-    uploadArea?.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      uploadArea.style.borderColor = 'var(--color-accent-blue)';
-      uploadArea.style.background = 'var(--bg-tertiary)';
-    });
-
-    uploadArea?.addEventListener('dragleave', function() {
-      uploadArea.style.borderColor = '';
-      uploadArea.style.background = '';
-    });
-
-    uploadArea?.addEventListener('drop', function(e) {
-      e.preventDefault();
-      uploadArea.style.borderColor = '';
-      uploadArea.style.background = '';
-      var file = e.dataTransfer?.files[0];
-      if (file && file.type.startsWith('video/')) {
-        loadFile(file);
-      }
-    });
-
-    videoInput?.addEventListener('change', function() {
-      var file = videoInput.files?.[0];
-      if (file) loadFile(file);
-    });
-
-    document.querySelectorAll('.speed-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.speed-btn').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        selectedSpeed = parseFloat(btn.dataset.speed);
-        outputDurationEl.textContent = formatDuration(videoDuration / selectedSpeed);
-      });
-    });
-
-    function loadFile(file) {
-      originalFile = file;
-      var video = document.createElement('video');
-      video.preload = 'metadata';
-      video.muted = true;
-      video.onloadedmetadata = function() {
-        videoDuration = video.duration;
-        videoWidth = video.videoWidth;
-        videoHeight = video.videoHeight;
-        document.getElementById('file-name').textContent = file.name;
-        document.getElementById('file-size').textContent = formatSize(file.size);
-        document.getElementById('file-duration').textContent = formatDuration(videoDuration);
-        document.getElementById('file-resolution').textContent = videoWidth + 'x' + videoHeight;
-        outputDurationEl.textContent = formatDuration(videoDuration / selectedSpeed);
-        uploadArea.style.display = 'none';
-        fileInfo.style.display = 'block';
-        settings.style.display = 'flex';
-        URL.revokeObjectURL(video.src);
-      };
-      video.onerror = function() {
-        alert('无法加载视频文件，请尝试其他格式');
-      };
-      video.src = URL.createObjectURL(file);
-    }
-
-    speedBtn?.addEventListener('click', async function() {
-      if (!originalFile) return;
-
-      speedBtn.disabled = true;
-      speedBtn.textContent = '处理中...';
-      progressArea.style.display = 'block';
-      resultArea.style.display = 'none';
-
-      var outputDuration = videoDuration / selectedSpeed;
-
-      try {
-        var video = document.createElement('video');
-        video.muted = true;
-        video.playsInline = true;
-        video.playbackRate = selectedSpeed;
-        video.src = URL.createObjectURL(originalFile);
-        await new Promise(function(resolve, reject) {
-          video.onloadeddata = resolve;
-          video.onerror = reject;
-        });
-
-        var canvas = document.createElement('canvas');
-        canvas.width = videoWidth;
-        canvas.height = videoHeight;
-        var ctx = canvas.getContext('2d');
-
-        var mimeType = 'video/webm;codecs=vp9';
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = 'video/webm;codecs=vp8';
-        }
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = 'video/webm';
-        }
-
-        var stream = canvas.captureStream(30);
-        var recorder = new MediaRecorder(stream, {
-          mimeType: mimeType,
-          videoBitsPerSecond: 2500000
-        });
-
-        var chunks = [];
-        recorder.ondataavailable = function(e) {
-          if (e.data.size > 0) chunks.push(e.data);
-        };
-
-        var done = new Promise(function(resolve) {
-          recorder.onstop = resolve;
-        });
-
-        recorder.start(100);
-
-        var startTime = performance.now();
-        video.currentTime = 0;
-        await new Promise(function(resolve) {
-          video.onseeked = resolve;
-        });
-
-        function drawFrame() {
-          if (video.ended || video.paused) return;
-          ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
-          var elapsed = (performance.now() - startTime) / 1000;
-          var progress = Math.min((elapsed / outputDuration) * 100, 95);
-          document.getElementById('progress-fill').style.width = progress + '%';
-          document.getElementById('progress-text').textContent = '处理中 ' + Math.round(progress) + '%...';
-          requestAnimationFrame(drawFrame);
-        }
-
-        video.play();
-        drawFrame();
-
-        video.onended = function() {
-          ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
-          setTimeout(function() {
-            recorder.stop();
-          }, 200);
-        };
-
-        await done;
-
-        speedBlob = new Blob(chunks, { type: mimeType.split(';')[0] });
-
-        document.getElementById('progress-fill').style.width = '100%';
-        document.getElementById('progress-text').textContent = '完成!';
-
-        document.getElementById('result-size').textContent = formatSize(speedBlob.size);
-        document.getElementById('result-duration').textContent = formatDuration(outputDuration);
-        document.getElementById('result-speed').textContent = selectedSpeed + 'x';
-
-        var url = URL.createObjectURL(speedBlob);
-        resultVideo.src = url;
-
-        settings.style.display = 'none';
-        progressArea.style.display = 'none';
-        resultArea.style.display = 'block';
-
-        URL.revokeObjectURL(video.src);
-      } catch (err) {
-        alert('调速失败: ' + err.message);
-        progressArea.style.display = 'none';
-      }
-
-      speedBtn.disabled = false;
-      speedBtn.textContent = '开始调速';
-    });
-
-    downloadBtn?.addEventListener('click', function() {
-      if (!speedBlob) return;
-      var url = URL.createObjectURL(speedBlob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = originalFile.name.replace(/\.[^.]+$/, '') + '_' + selectedSpeed + 'x.webm';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-
-    resetBtn?.addEventListener('click', function() {
-      originalFile = null;
-      speedBlob = null;
-      uploadArea.style.display = 'flex';
-      fileInfo.style.display = 'none';
-      settings.style.display = 'none';
-      progressArea.style.display = 'none';
-      resultArea.style.display = 'none';
-      videoInput.value = '';
-    });
-  })();
 </script>

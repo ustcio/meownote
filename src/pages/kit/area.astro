@@ -1,62 +1,55 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '面积换算';
 const toolDesc = '平方米、平方千米、公顷、亩等面积单位换算';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="form-group">
-            <label class="form-label" for="input-value">输入数值</label>
-            <input type="number" id="input-value" class="form-input" value="1" step="any">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="from-unit">单位</label>
-            <select id="from-unit" class="form-select">
-              <option value="sqm">平方米 (m²)</option>
-              <option value="sqkm">平方千米 (km²)</option>
-              <option value="hectare">公顷 (ha)</option>
-              <option value="mu" selected>亩</option>
-              <option value="sqft">平方英尺 (ft²)</option>
-              <option value="acre">英亩 (acre)</option>
-            </select>
-          </div>
-          <div class="btn-group">
-            <button id="convert-btn" class="btn btn-primary">换算</button>
-          </div>
-          <div class="form-group">
-            <label class="form-label">换算结果</label>
-            <div id="result" class="result-area">等待换算...</div>
-          </div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="hao-form-group">
+                  <label class="hao-label" for="input-value">输入数值</label>
+                  <input type="number" id="input-value" class="hao-input" value="1" step="any">
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label" for="from-unit">单位</label>
+                  <select id="from-unit" class="form-select">
+                    <option value="sqm">平方米 (m²)</option>
+                    <option value="sqkm">平方千米 (km²)</option>
+                    <option value="hectare">公顷 (ha)</option>
+                    <option value="mu" selected>亩</option>
+                    <option value="sqft">平方英尺 (ft²)</option>
+                    <option value="acre">英亩 (acre)</option>
+                  </select>
+                </div>
+                <div class="hao-btn-group">
+                  <button id="convert-btn" class="hao-press-btn hao-press-btn--primary">换算</button>
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">换算结果</label>
+                  <div id="result" class="hao-result">等待换算...</div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
-<script>
-  const TO_SQM = { sqm: 1, sqkm: 1000000, hectare: 10000, mu: 666.667, sqft: 0.092903, acre: 4046.86 };
+<script is:inline>
+const TO_SQM = { sqm: 1, sqkm: 1000000, hectare: 10000, mu: 666.667, sqft: 0.092903, acre: 4046.86 };
   const NAMES = { sqm: '平方米', sqkm: '平方千米', hectare: '公顷', mu: '亩', sqft: '平方英尺', acre: '英亩' };
 
   document.addEventListener('DOMContentLoaded', () => {

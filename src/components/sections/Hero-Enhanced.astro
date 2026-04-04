@@ -1,0 +1,480 @@
+---
+const quickActions = [
+  { label: 'Write clearly', href: '/chatbot', icon: '✏️' },
+  { label: 'Plan a project', href: '/workspace', icon: '📋' },
+  { label: 'Research a topic', href: '/research', icon: '🔍' },
+];
+---
+
+<section class="hero">
+  <div class="hero__bg">
+    <div class="hero__orb hero__orb--1"></div>
+    <div class="hero__orb hero__orb--2"></div>
+    <div class="hero__orb hero__orb--3"></div>
+    <div class="hero__gradient"></div>
+  </div>
+
+  <div class="container hero__grid">
+    <div class="hero__copy">
+      <div class="hero__kicker">
+        <span class="hero__kicker-dot"></span>
+        <span>Thoughtful AI for serious work</span>
+      </div>
+
+      <h1 class="hero__title">
+        <span class="hero__title-line">Bring calm,</span>
+        <span class="hero__title-line">capable AI into</span>
+        <span class="hero__title-line hero__title-line--accent">your day.</span>
+      </h1>
+
+      <p class="hero__lead">
+        Maxwell helps you think through messy problems, draft stronger writing,
+        and move work forward without turning your tools into a circus.
+      </p>
+
+      <form class="hero__composer" action="/chatbot">
+        <input
+          type="text"
+          name="q"
+          value=""
+          placeholder="Ask Maxwell to outline a launch plan, clean up a draft, or explain a concept"
+          aria-label="Prompt"
+        />
+        <button type="submit">Open chat</button>
+      </form>
+
+      <div class="hero__chips">
+        {quickActions.map((action) => (
+          <a href={action.href} class="hero__chip">
+            <span class="hero__chip-icon">{action.icon}</span>
+            {action.label}
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="hero__visual">
+      <article class="hero__spotlight">
+        <span class="hero__spotlight-eyebrow">New on Maxwell</span>
+        <h2>One place for drafting, planning, and execution.</h2>
+        <p>
+          Move from a vague prompt to a clear plan, then keep going in chat,
+          workspace, or research mode without changing mental gears.
+        </p>
+        <a href="/workspace" class="hero__spotlight-cta">
+          Explore workspace
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    padding: calc(var(--header-height) + 5.5rem) 0 6rem;
+    overflow: hidden;
+  }
+
+  /* -------- animated bg -------- */
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+  }
+
+  .hero__orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.45;
+    will-change: transform;
+    animation: float 20s ease-in-out infinite;
+  }
+
+  [data-theme="dark"] .hero__orb {
+    opacity: 0.25;
+  }
+
+  .hero__orb--1 {
+    width: 40vw;
+    height: 40vw;
+    top: -10%;
+    right: -5%;
+    background: var(--color-primary);
+    animation-delay: 0s;
+  }
+
+  .hero__orb--2 {
+    width: 30vw;
+    height: 30vw;
+    bottom: 10%;
+    left: -8%;
+    background: var(--color-accent-blue);
+    animation-delay: -6s;
+  }
+
+  .hero__orb--3 {
+    width: 20vw;
+    height: 20vw;
+    top: 30%;
+    left: 30%;
+    background: var(--color-accent-purple);
+    animation-delay: -12s;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25%      { transform: translate(4vw, -3vh) scale(1.05); }
+    50%      { transform: translate(-2vw, 4vh) scale(0.95); }
+    75%      { transform: translate(-4vw, -2vh) scale(1.02); }
+  }
+
+  .hero__gradient {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(100% 60% at 50% 0%, transparent, var(--bg-primary));
+  }
+
+  /* -------- layout -------- */
+  .hero__grid {
+    display: grid;
+    gap: 3.5rem;
+    align-items: center;
+    position: relative;
+  }
+
+  @media (min-width: 1100px) {
+    .hero__grid {
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 4rem;
+    }
+  }
+
+  .hero__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    max-width: 38rem;
+  }
+
+  /* -------- kicker -------- */
+  .hero__kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 1rem;
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-full);
+    background: rgba(255, 253, 249, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text-tertiary);
+    font-size: 0.78rem;
+    font-weight: var(--font-medium);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    width: fit-content;
+    animation: fadeUp 0.7s var(--ease-default) both;
+  }
+
+  [data-theme="dark"] .hero__kicker {
+    background: rgba(26, 22, 19, 0.6);
+  }
+
+  .hero__kicker-dot {
+    width: 0.42rem;
+    height: 0.42rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    box-shadow: 0 0 8px var(--color-primary-alpha-30);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.5; transform: scale(1.25); }
+  }
+
+  /* -------- title -------- */
+  .hero__title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+  }
+
+  .hero__title-line {
+    opacity: 0;
+    animation: fadeUp 0.8s var(--ease-default) both;
+  }
+
+  .hero__title-line:nth-child(1) { animation-delay: 0.15s; }
+  .hero__title-line:nth-child(2) { animation-delay: 0.3s; }
+  .hero__title-line:nth-child(3) {
+    animation-delay: 0.45s;
+    --color-primary: oklch(0.72 0.18 35.5);
+  }
+
+  .hero__title-line--accent {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent-pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero__title {
+    max-width: 14ch;
+  }
+
+  /* -------- lead -------- */
+  .hero__lead {
+    font-size: 1.18rem;
+    max-width: 33rem;
+    margin: 0;
+    opacity: 0;
+    animation: fadeUp 0.8s var(--ease-default) 0.55s both;
+  }
+
+  /* -------- composer -------- */
+  .hero__composer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.9rem;
+    max-width: 38rem;
+    padding: 0.65rem;
+    border-radius: 1.65rem;
+    border: 1px solid var(--card-border);
+    background: rgba(255, 253, 249, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--card-shadow), 0 0 0 1px var(--border-secondary);
+    opacity: 0;
+    animation: fadeUp 0.8s var(--ease-default) 0.7s both;
+    transition: box-shadow var(--duration-normal) var(--ease-default);
+  }
+
+  [data-theme="dark"] .hero__composer {
+    background: rgba(26, 22, 19, 0.85);
+  }
+
+  .hero__composer:focus-within {
+    box-shadow: var(--card-shadow-hover), 0 0 0 3px var(--input-focus-ring);
+    border-color: var(--color-primary);
+  }
+
+  @media (min-width: 700px) {
+    .hero__composer {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+    }
+  }
+
+  .hero__composer input {
+    border: none;
+    background: transparent;
+    padding: 0.9rem 1rem;
+    box-shadow: none;
+    font-size: 0.95rem;
+  }
+
+  .hero__composer button {
+    min-height: 3rem;
+    padding: 0.8rem 1.25rem;
+    border-radius: 999px;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    font-size: 0.96rem;
+    font-weight: var(--font-medium);
+    box-shadow: var(--btn-primary-shadow);
+    transition: all var(--duration-normal) var(--ease-default);
+  }
+
+  .hero__composer button:hover {
+    background: var(--btn-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(201, 105, 71, 0.25);
+  }
+
+  /* -------- chips -------- */
+  .hero__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    opacity: 0;
+    animation: fadeUp 0.8s var(--ease-default) 0.85s both;
+  }
+
+  .hero__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.1rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 0.9rem;
+    border: 1px solid var(--border-primary);
+    background: rgba(255, 253, 249, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    font-weight: var(--font-medium);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  [data-theme="dark"] .hero__chip {
+    background: rgba(26, 22, 19, 0.6);
+  }
+
+  .hero__chip:hover {
+    background: var(--card-bg-hover);
+    color: var(--text-primary);
+    border-color: var(--color-primary-alpha-20);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .hero__chip-icon {
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+
+  /* -------- visual ======== */
+  .hero__visual {
+    position: relative;
+    min-height: 440px;
+    display: flex;
+    align-items: end;
+  }
+
+  /* -------- spotlight ======== */
+  .hero__spotlight {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: min(22rem, 100%);
+    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    background: rgba(255, 253, 249, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: var(--radius-2xl);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+    opacity: 0;
+    animation: fadeUp 0.9s var(--ease-default) 1s both;
+    transition: transform var(--duration-normal) var(--ease-default),
+                box-shadow var(--duration-normal) var(--ease-default);
+  }
+
+  [data-theme="dark"] .hero__spotlight {
+    background: rgba(26, 22, 19, 0.92);
+  }
+
+  .hero__spotlight:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  .hero__spotlight-eyebrow {
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  .hero__spotlight h2 {
+    font-size: 1.35rem;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .hero__spotlight p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .hero__spotlight-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: fit-content;
+    min-height: 2.6rem;
+    padding: 0.7rem 1rem;
+    border-radius: var(--radius-full);
+    background: #171412;
+    color: #fffdf9;
+    font-size: 0.9rem;
+    font-weight: var(--font-medium);
+    transition: all var(--duration-normal) var(--ease-default);
+  }
+
+  [data-theme="dark"] .hero__spotlight-cta {
+    background: #e0dcd6;
+    color: #171412;
+  }
+
+  .hero__spotlight-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(23, 20, 18, 0.25);
+  }
+
+  [data-theme="dark"] .hero__spotlight-cta:hover {
+    box-shadow: 0 8px 20px rgba(224, 220, 214, 0.15);
+  }
+
+  .hero__spotlight-cta svg {
+    transition: transform var(--duration-fast) var(--ease-default);
+  }
+
+  .hero__spotlight-cta:hover svg {
+    transform: translateX(3px);
+  }
+
+  /* -------- responsive ======== */
+  @media (max-width: 1099px) {
+    .hero {
+      padding: calc(var(--header-height) + 4rem) 0 4rem;
+    }
+
+    .hero__title {
+      max-width: none;
+    }
+
+    .hero__visual {
+      min-height: auto;
+      padding-bottom: 16rem;
+    }
+
+    .hero__spotlight {
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      bottom: 0;
+      width: min(22rem, 92%);
+    }
+
+    .hero__spotlight:hover {
+      transform: translateX(-50%) translateY(-4px);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .hero__orb {
+      filter: blur(70px);
+    }
+  }
+</style>

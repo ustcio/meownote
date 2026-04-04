@@ -1,180 +1,65 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = 'Word转Markdown';
 const toolDesc = '将Word文档转换为Markdown格式';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="hao-upload-area" id="upload-area">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>点击或拖拽上传Word文档</span>
+                <span class="hint">支持 .docx 文件</span>
+                <input type="file" id="file-input" accept=".docx">
+              </div>
 
-      <main class="tool-main">
-        <div class="upload-area" id="upload-area">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          <span>点击或拖拽上传Word文档</span>
-          <span class="hint">支持 .docx 文件</span>
-          <input type="file" id="file-input" accept=".docx">
-        </div>
+              <div id="file-info" class="file-info" style="display:none;">
+                <div class="info-row">
+                  <span class="info-label">文件名</span>
+                  <span class="info-value" id="file-name"></span>
+                </div>
+              </div>
 
-        <div id="file-info" class="file-info" style="display:none;">
-          <div class="info-row">
-            <span class="info-label">文件名</span>
-            <span class="info-value" id="file-name"></span>
-          </div>
-        </div>
+              <div class="settings" id="settings" style="display:none;">
+                <div class="hao-btn-group">
+                  <button class="hao-press-btn hao-press-btn--primary" id="convert-btn">转换为Markdown</button>
+                </div>
+              </div>
 
-        <div class="settings" id="settings" style="display:none;">
-          <div class="btn-group">
-            <button class="btn-primary" id="convert-btn">转换为Markdown</button>
-          </div>
-        </div>
+              <div class="progress-area" id="progress-area" style="display:none;">
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                <div class="progress-text" id="progress-text">转换中...</div>
+              </div>
 
-        <div class="progress-area" id="progress-area" style="display:none;">
-          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-          <div class="progress-text" id="progress-text">转换中...</div>
-        </div>
-
-        <div class="result-area" id="result-area" style="display:none;">
-          <div class="result-header">Markdown 预览</div>
-          <textarea id="md-output" readonly style="width:100%;min-height:300px;background:var(--color-background-one);color:var(--color-text);border:1px solid var(--color-border);border-radius:10px;padding:0.3rem;font-size:0.28rem;resize:vertical;font-family:monospace;"></textarea>
-          <div class="btn-group" style="margin-top:0.3rem;">
-            <button class="btn-primary" id="download-btn">下载 .md</button>
-            <button class="btn-secondary" id="copy-btn">复制</button>
-          </div>
-        </div>
-      </main>
-    </div>
+              <div class="hao-result" id="hao-result" style="display:none;">
+                <div class="result-header">Markdown 预览</div>
+                <textarea id="md-output" readonly style="width:100%;min-height:300px;background:var(--color-background-one);color:var(--color-text);border:1px solid var(--color-border);border-radius:10px;padding:0.3rem;font-size:0.28rem;resize:vertical;font-family:monospace;"></textarea>
+                <div class="hao-btn-group" style="margin-top:0.3rem;">
+                  <button class="hao-press-btn hao-press-btn--primary" id="download-btn">下载 .md</button>
+                  <button class="hao-press-btn hao-press-btn--secondary" id="copy-btn">复制</button>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  .tool-main { overflow: auto; }
-  #md-output { font-family: monospace; }
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', function() {
-    var uploadArea = document.getElementById('upload-area');
-    var fileInput = document.getElementById('file-input');
-    var fileInfo = document.getElementById('file-info');
-    var settings = document.getElementById('settings');
-    var progressArea = document.getElementById('progress-area');
-    var progressFill = document.getElementById('progress-fill');
-    var progressText = document.getElementById('progress-text');
-    var resultArea = document.getElementById('result-area');
-    var mdOutput = document.getElementById('md-output');
-    var convertBtn = document.getElementById('convert-btn');
-    var downloadBtn = document.getElementById('download-btn');
-    var copyBtn = document.getElementById('copy-btn');
-    var docxFile = null;
-    var mdContent = '';
-
-    uploadArea.addEventListener('click', function() { fileInput.click(); });
-    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
-    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
-    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
-
-    function handleFile(file) {
-      docxFile = file;
-      document.getElementById('file-name').textContent = file.name;
-      fileInfo.style.display = 'block';
-      settings.style.display = 'flex';
-      resultArea.style.display = 'none';
-    }
-
-    convertBtn.addEventListener('click', function() {
-      if (!docxFile) return;
-      progressArea.style.display = 'block';
-      progressFill.style.width = '20%';
-      progressText.textContent = '解析DOCX...';
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        progressFill.style.width = '50%';
-        progressText.textContent = '提取内容...';
-        setTimeout(function() {
-          var data = new Uint8Array(e.target.result);
-          var str = '';
-          for (var i = 0; i < data.length; i++) str += String.fromCharCode(data[i]);
-          var md = extractDocxText(str);
-          mdContent = md;
-          mdOutput.value = md;
-          progressFill.style.width = '100%';
-          progressText.textContent = '完成!';
-          resultArea.style.display = 'block';
-          setTimeout(function() { progressArea.style.display = 'none'; }, 800);
-        }, 100);
-      };
-      reader.readAsArrayBuffer(docxFile);
-    });
-
-    function extractDocxText(str) {
-      var result = '';
-      var pRegex = /<w:p[^>]*>([\s\S]*?)<\/w:p>/g;
-      var match;
-      while ((match = pRegex.exec(str)) !== null) {
-        var pContent = match[1];
-        var headingMatch = pContent.match(/<w:pStyle\s+w:val="(Heading\s*\d+)"/);
-        var textParts = [];
-        var tRegex = /<w:t[^>]*>([^<]*)<\/w:t>/g;
-        var tMatch;
-        while ((tMatch = tRegex.exec(pContent)) !== null) {
-          textParts.push(tMatch[1]);
-        }
-        var text = textParts.join('');
-        if (!text) continue;
-        if (headingMatch) {
-          var level = parseInt(headingMatch[1].replace(/\D/g, '')) || 1;
-          result += '#'.repeat(level) + ' ' + text + '\n\n';
-        } else {
-          var bold = pContent.indexOf('<w:b') >= 0;
-          var italic = pContent.indexOf('<w:i') >= 0;
-          if (bold && italic) result += '***' + text + '***\n\n';
-          else if (bold) result += '**' + text + '**\n\n';
-          else if (italic) result += '*' + text + '*\n\n';
-          else result += text + '\n\n';
-        }
-      }
-      var listRegex = /<w:numPr>[\s\S]*?<w:t[^>]*>([^<]*)<\/w:t>/g;
-      if (listRegex.test(str)) {
-        result = result.replace(/^(\s*)/gm, function(m, spaces) {
-          return spaces ? '- ' + m.trim() : m;
-        });
-      }
-      return result.trim() || 'No text content found in document.';
-    }
-
-    downloadBtn.addEventListener('click', function() {
-      var blob = new Blob([mdContent], { type: 'text/markdown' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = docxFile.name.replace('.docx', '.md');
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    copyBtn.addEventListener('click', function() {
-      navigator.clipboard.writeText(mdContent).then(function() {
-        copyBtn.textContent = '已复制!';
-        setTimeout(function() { copyBtn.textContent = '复制'; }, 2000);
-      });
-    });
-  });
 </script>

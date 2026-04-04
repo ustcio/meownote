@@ -1,52 +1,46 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = 'JSON转CSV';
 const toolDesc = '将JSON数据转换为CSV格式';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="form-group">
-            <label class="form-label" for="json-input">输入JSON</label>
-            <textarea id="json-input" class="form-textarea" placeholder='[{"name":"张三","age":25},{"name":"李四","age":30}]'></textarea>
-          </div>
-          <div class="btn-group">
-            <button id="convert-btn" class="btn btn-primary">转换</button>
-            <button id="download-btn" class="btn btn-secondary" disabled>下载CSV</button>
-            <button id="copy-btn" class="btn btn-secondary">复制</button>
-          </div>
-          <div class="form-group">
-            <label class="form-label">CSV结果</label>
-            <div id="result" class="result-area">等待输入...</div>
-          </div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="hao-form-group">
+                  <label class="hao-label" for="json-input">输入JSON</label>
+                  <textarea id="json-input" class="hao-input" placeholder='[{"name":"张三","age":25},{"name":"李四","age":30}]'></textarea>
+                </div>
+                <div class="hao-btn-group">
+                  <button id="convert-btn" class="hao-press-btn hao-press-btn--primary">转换</button>
+                  <button id="download-btn" class="hao-press-btn hao-press-btn--secondary" disabled>下载CSV</button>
+                  <button id="copy-btn" class="hao-press-btn hao-press-btn--secondary">复制</button>
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">CSV结果</label>
+                  <div id="result" class="hao-result">等待输入...</div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  let csvResult = '';
+
+<script is:inline>
+let csvResult = '';
 
   document.addEventListener('DOMContentLoaded', () => {
     const jsonInput = document.getElementById('json-input');

@@ -1,52 +1,46 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = 'SQL格式化';
 const toolDesc = '格式化和美化SQL语句';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="form-group">
-            <label class="form-label" for="sql-input">输入SQL</label>
-            <textarea id="sql-input" class="form-textarea" placeholder="SELECT id,name,email FROM users WHERE age > 18 ORDER BY name;"></textarea>
-          </div>
-          <div class="btn-group">
-            <button id="format-btn" class="btn btn-primary">格式化</button>
-            <button id="compress-btn" class="btn btn-secondary">压缩</button>
-            <button id="copy-btn" class="btn btn-secondary">复制</button>
-          </div>
-          <div class="form-group">
-            <label class="form-label">格式化结果</label>
-            <div id="result" class="result-area">等待输入...</div>
-          </div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="hao-form-group">
+                  <label class="hao-label" for="sql-input">输入SQL</label>
+                  <textarea id="sql-input" class="hao-input" placeholder="SELECT id,name,email FROM users WHERE age > 18 ORDER BY name;"></textarea>
+                </div>
+                <div class="hao-btn-group">
+                  <button id="format-btn" class="hao-press-btn hao-press-btn--primary">格式化</button>
+                  <button id="compress-btn" class="hao-press-btn hao-press-btn--secondary">压缩</button>
+                  <button id="copy-btn" class="hao-press-btn hao-press-btn--secondary">复制</button>
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">格式化结果</label>
+                  <div id="result" class="hao-result">等待输入...</div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  function formatSQL(sql) {
+
+<script is:inline>
+function formatSQL(sql) {
     const keywords = ['SELECT', 'FROM', 'WHERE', 'ORDER BY', 'GROUP BY', 'HAVING', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'ON', 'AND', 'OR', 'NOT', 'IN', 'LIKE', 'BETWEEN', 'AS', 'DISTINCT', 'LIMIT', 'OFFSET', 'UNION', 'ALL', 'CREATE', 'TABLE', 'ALTER', 'DROP', 'INDEX', 'PRIMARY', 'KEY', 'FOREIGN', 'REFERENCES'];
     let formatted = sql;
     keywords.forEach(kw => {

@@ -1,63 +1,56 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '温度换算';
 const toolDesc = '摄氏度、华氏度、开尔文互转';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="form-group">
-            <label class="form-label" for="input-value">输入数值</label>
-            <input type="number" id="input-value" class="form-input" value="100" step="any">
-          </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="hao-form-group">
+                  <label class="hao-label" for="input-value">输入数值</label>
+                  <input type="number" id="input-value" class="hao-input" value="100" step="any">
+                </div>
           
-          <div class="form-group">
-            <label class="form-label" for="from-unit">从</label>
-            <select id="from-unit" class="form-select">
-              <option value="C" selected>摄氏度 (°C)</option>
-              <option value="F">华氏度 (°F)</option>
-              <option value="K">开尔文 (K)</option>
-            </select>
-          </div>
+                <div class="hao-form-group">
+                  <label class="hao-label" for="from-unit">从</label>
+                  <select id="from-unit" class="form-select">
+                    <option value="C" selected>摄氏度 (°C)</option>
+                    <option value="F">华氏度 (°F)</option>
+                    <option value="K">开尔文 (K)</option>
+                  </select>
+                </div>
           
-          <div class="btn-group">
-            <button id="convert-btn" class="btn btn-primary">换算</button>
-            <button id="swap-btn" class="btn btn-secondary">交换单位</button>
-          </div>
+                <div class="hao-btn-group">
+                  <button id="convert-btn" class="hao-press-btn hao-press-btn--primary">换算</button>
+                  <button id="swap-btn" class="hao-press-btn hao-press-btn--secondary">交换单位</button>
+                </div>
 
-          <div class="form-group">
-            <label class="form-label">换算结果</label>
-            <div id="result" class="result-area">等待换算...</div>
-          </div>
-        </div>
-      </main>
-    </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">换算结果</label>
+                  <div id="result" class="hao-result">等待换算...</div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
+<script is:inline>
+document.addEventListener('DOMContentLoaded', () => {
     const inputValue = document.getElementById('input-value');
     const fromUnit = document.getElementById('from-unit');
     const convertBtn = document.getElementById('convert-btn');

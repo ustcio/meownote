@@ -1,63 +1,57 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = 'Meta标签生成';
 const toolDesc = '生成网页Meta标签';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div class="form-group">
-            <label class="form-label" for="title">页面标题</label>
-            <input type="text" id="title" class="form-input" placeholder="My Website">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="description">页面描述</label>
-            <textarea id="description" class="form-textarea" placeholder="A brief description of the page..."></textarea>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="keywords">关键词（逗号分隔）</label>
-            <input type="text" id="keywords" class="form-input" placeholder="web, design, development">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="author">作者</label>
-            <input type="text" id="author" class="form-input" placeholder="Author Name">
-          </div>
-          <div class="btn-group">
-            <button id="generate-btn" class="btn btn-primary">生成Meta标签</button>
-            <button id="copy-btn" class="btn btn-secondary">复制</button>
-          </div>
-          <div class="form-group">
-            <label class="form-label">生成的HTML</label>
-            <div id="result" class="result-area">等待输入...</div>
-          </div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div class="hao-form-group">
+                  <label class="hao-label" for="title">页面标题</label>
+                  <input type="text" id="title" class="hao-input" placeholder="My Website">
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label" for="description">页面描述</label>
+                  <textarea id="description" class="hao-input" placeholder="A brief description of the page..."></textarea>
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label" for="keywords">关键词（逗号分隔）</label>
+                  <input type="text" id="keywords" class="hao-input" placeholder="web, design, development">
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label" for="author">作者</label>
+                  <input type="text" id="author" class="hao-input" placeholder="Author Name">
+                </div>
+                <div class="hao-btn-group">
+                  <button id="generate-btn" class="hao-press-btn hao-press-btn--primary">生成Meta标签</button>
+                  <button id="copy-btn" class="hao-press-btn hao-press-btn--secondary">复制</button>
+                </div>
+                <div class="hao-form-group">
+                  <label class="hao-label">生成的HTML</label>
+                  <div id="result" class="hao-result">等待输入...</div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
+
+<script is:inline>
+document.addEventListener('DOMContentLoaded', () => {
     const title = document.getElementById('title');
     const description = document.getElementById('description');
     const keywords = document.getElementById('keywords');

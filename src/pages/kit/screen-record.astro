@@ -1,48 +1,42 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import '@styles/hao-design.css';
+import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const toolName = '屏幕录制';
 const toolDesc = '录制屏幕视频';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page">
-    <div class="tool-container">
-      <header class="tool-header">
-        <a href="/kit" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          返回工具箱
-        </a>
-        <h1 class="tool-title">{toolName}</h1>
-        <p class="tool-description">{toolDesc}</p>
-      </header>
-
-      <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <div style="text-align:center;padding:var(--space-8);">
-            <video id="preview" autoplay muted style="max-width:100%;border-radius:var(--radius-xl);border:1px solid var(--border-primary);background:#000;"></video>
-            <div class="btn-group" style="justify-content:center;margin-top:var(--space-4);">
-              <button id="start-btn" class="btn btn-primary">开始录制</button>
-              <button id="stop-btn" class="btn btn-secondary" disabled>停止录制</button>
-              <button id="download-btn" class="btn btn-secondary" disabled>下载视频</button>
-            </div>
-            <div id="status" style="margin-top:var(--space-4);color:var(--text-secondary);">点击开始录制</div>
-          </div>
-        </div>
-      </main>
-    </div>
+  <section class="tool-page-hao">
+    <KitToolWrapper title={toolName} description={toolDesc} client:load>
+      <div class="tool-content" id="tool-content">
+                <div style="text-align:center;padding:var(--space-8);">
+                  <video id="preview" autoplay muted style="max-width:100%;border-radius:var(--radius-xl);border:1px solid var(--border-primary);background:#000;"></video>
+                  <div class="hao-btn-group" style="justify-content:center;margin-top:var(--space-4);">
+                    <button id="start-btn" class="hao-press-btn hao-press-btn--primary">开始录制</button>
+                    <button id="stop-btn" class="hao-press-btn hao-press-btn--secondary" disabled>停止录制</button>
+                    <button id="download-btn" class="hao-press-btn hao-press-btn--secondary" disabled>下载视频</button>
+                  </div>
+                  <div id="status" style="margin-top:var(--space-4);color:var(--text-secondary);">点击开始录制</div>
+                </div>
+              </div>
+    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-page-hao {
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
+    min-height: 100vh;
+  }
+  @media (max-width: 767px) {
+    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+  }
 </style>
-<script>
-  let mediaRecorder = null;
+
+<script is:inline>
+let mediaRecorder = null;
   let chunks = [];
   let stream = null;
 
