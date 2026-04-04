@@ -23,14 +23,16 @@ const toolDesc = '每日新闻早报资讯';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+          <div class="tab-buttons" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;flex-wrap:wrap;">
+            <button class="news-tab btn-primary" data-tab="domestic">国内</button>
+            <button class="news-tab btn-secondary" data-tab="international">国际</button>
+            <button class="news-tab btn-secondary" data-tab="tech">科技</button>
+            <button class="news-tab btn-secondary" data-tab="finance">财经</button>
+          </div>
+          <div id="loading" style="display:none;text-align:center;padding:1rem;color:var(--color-cale-text);">加载中...</div>
+          <div id="news-list"></div>
+          <div style="margin-top:0.4rem;text-align:center;">
+            <button id="refresh-btn" class="btn-secondary" style="font-size:0.22rem;">🔄 刷新</button>
           </div>
         </div>
       </main>
@@ -38,13 +40,89 @@ const toolDesc = '每日新闻早报资讯';
   </section>
 </Layout>
 
-<style>
-  /* Inherits from hao-design.css */
-</style>
-
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('每日早报 工具已加载');
+    const newsList = document.getElementById('news-list');
+    const loading = document.getElementById('loading');
+    const refreshBtn = document.getElementById('refresh-btn');
+    let currentTab = 'domestic';
+
+    const newsData = {
+      domestic: [
+        { title: '2026年全国两会即将召开，聚焦经济发展新目标', source: '新华社', time: '2小时前', category: '时政' },
+        { title: '春运返程高峰到来，全国铁路预计发送旅客超千万人次', source: '央视新闻', time: '3小时前', category: '社会' },
+        { title: '教育部发布新规：中小学课后服务全覆盖', source: '人民日报', time: '4小时前', category: '教育' },
+        { title: '全国多地推进老旧小区改造，惠及千万居民', source: '经济日报', time: '5小时前', category: '民生' },
+        { title: '国产大飞机C929完成首次跨洋试飞', source: '科技日报', time: '6小时前', category: '科技' },
+        { title: '2026年春节档电影总票房突破百亿大关', source: '光明日报', time: '7小时前', category: '文化' },
+        { title: '新能源汽车下乡活动启动，覆盖全国200个城市', source: '中国汽车报', time: '8小时前', category: '汽车' },
+        { title: '全国碳排放权交易市场扩容，钢铁行业纳入', source: '中国环境报', time: '9小时前', category: '环保' }
+      ],
+      international: [
+        { title: '联合国气候变化大会达成新协议，各国承诺加大减排力度', source: '新华社', time: '1小时前', category: '国际' },
+        { title: '美联储宣布维持利率不变，暗示年内可能降息', source: '路透社', time: '2小时前', category: '经济' },
+        { title: '欧盟通过全球首部AI监管法案，科技巨头面临合规挑战', source: 'BBC', time: '3小时前', category: '科技' },
+        { title: '东南亚多国加强经贸合作，RCEP红利持续释放', source: '联合早报', time: '4小时前', category: '经济' },
+        { title: 'SpaceX星舰完成第六次试飞，火星计划再进一步', source: 'CNN', time: '5小时前', category: '科技' },
+        { title: '全球芯片供应链重构，多国加大本土制造投资', source: '金融时报', time: '6小时前', category: '产业' },
+        { title: 'WHO发布全球健康报告：预期寿命持续增长', source: 'WHO', time: '7小时前', category: '健康' },
+        { title: '中东局势出现缓和迹象，多国恢复外交关系', source: '半岛电视台', time: '8小时前', category: '政治' }
+      ],
+      tech: [
+        { title: 'GPT-5发布：多模态能力大幅提升，支持实时视频理解', source: '36氪', time: '1小时前', category: 'AI' },
+        { title: '华为发布鸿蒙Next 5.0：原生应用生态全面成熟', source: 'IT之家', time: '2小时前', category: '系统' },
+        { title: '苹果MR头显第二代曝光：重量减半，价格更亲民', source: 'The Verge', time: '3小时前', category: '硬件' },
+        { title: '量子计算机实现1000量子比特突破，商业化进程加速', source: 'Nature', time: '4小时前', category: '科研' },
+        { title: '特斯拉Optimus机器人开始工厂实测，计划年底量产', source: 'Electrek', time: '5小时前', category: '机器人' },
+        { title: '中国6G技术研发取得重要进展，太赫兹通信实现突破', source: '通信世界', time: '6小时前', category: '通信' },
+        { title: '开源大模型生态蓬勃发展，Llama 5性能超越闭源模型', source: '机器之心', time: '7小时前', category: 'AI' },
+        { title: '全球首款固态电池电动车上市，续航突破1000公里', source: '汽车之家', time: '8小时前', category: '汽车' }
+      ],
+      finance: [
+        { title: 'A股三大指数集体上涨，沪指突破3500点', source: '证券时报', time: '1小时前', category: '股市' },
+        { title: '人民币汇率走强，离岸人民币升破7.0关口', source: '财新网', time: '2小时前', category: '汇率' },
+        { title: '央行宣布降准0.25个百分点，释放长期资金约5000亿', source: '第一财经', time: '3小时前', category: '货币' },
+        { title: '房地产市场回暖信号明显，一线城市成交量回升', source: '经济观察报', time: '4小时前', category: '房产' },
+        { title: '数字人民币试点扩大至全国，应用场景持续丰富', source: '金融时报', time: '5小时前', category: '金融' },
+        { title: '国际金价再创新高，突破2500美元/盎司', source: ' Bloomberg', time: '6小时前', category: '大宗商品' },
+        { title: '险资加大权益资产配置，长期资金入市步伐加快', source: '中国证券报', time: '7小时前', category: '保险' },
+        { title: '跨境电商进出口额同比增长30%，外贸新动能强劲', source: '国际商报', time: '8小时前', category: '外贸' }
+      ]
+    };
+
+    function renderNews(category) {
+      loading.style.display = 'block';
+      newsList.innerHTML = '';
+      setTimeout(() => {
+        const data = newsData[category] || [];
+        if (data.length === 0) {
+          newsList.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--color-tm-text);">暂无新闻</div>';
+        } else {
+          newsList.innerHTML = data.map(n => `
+            <div class="result-area" style="margin-bottom:0.2rem;padding:0.3rem;">
+              <div style="font-size:0.3rem;color:var(--font-color-solid);font-weight:500;margin-bottom:0.15rem;">${n.title}</div>
+              <div style="display:flex;gap:0.3rem;font-size:0.22rem;color:var(--color-tm-text);">
+                <span style="background:var(--lable-card-bag);padding:2px 8px;border-radius:10px;">${n.category}</span>
+                <span>${n.source}</span>
+                <span>${n.time}</span>
+              </div>
+            </div>`).join('');
+        }
+        loading.style.display = 'none';
+      }, 300);
+    }
+
+    document.querySelectorAll('.news-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.news-tab').forEach(b => { b.className = 'news-tab btn-secondary'; });
+        btn.className = 'news-tab btn-primary';
+        currentTab = btn.dataset.tab;
+        renderNews(currentTab);
+      });
+    });
+
+    refreshBtn.addEventListener('click', () => renderNews(currentTab));
+
+    renderNews('domestic');
   });
 </script>

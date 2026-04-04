@@ -23,14 +23,18 @@ const toolDesc = '查询商标注册信息';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+          <div class="input-group" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;">
+            <input id="trademark-input" type="text" class="form-input" placeholder="输入商标名称" style="flex:1;padding:0.3rem 0.4rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:15px;color:var(--color-text);font-size:0.28rem;outline:none;">
+            <button id="search-btn" class="btn-primary">查询</button>
+          </div>
+          <div id="loading" style="display:none;text-align:center;padding:1rem;color:var(--color-cale-text);">查询中...</div>
+          <div id="error" style="display:none;text-align:center;padding:1rem;color:#ff6b6b;"></div>
+          <div id="result-area" style="display:none;">
+            <div class="result-header">查询结果</div>
+            <div id="trademark-list"></div>
+          </div>
+          <div style="margin-top:0.4rem;padding:0.3rem;background:var(--color-background-one);border-radius:15px;font-size:0.22rem;color:var(--color-tm-text);">
+            * 演示数据仅供参考。正式查询请访问 <a href="https://sbj.cnipa.gov.cn/" target="_blank" style="color:var(--top-color);">国家知识产权局商标局</a>
           </div>
         </div>
       </main>
@@ -38,13 +42,59 @@ const toolDesc = '查询商标注册信息';
   </section>
 </Layout>
 
-<style>
-  /* Inherits from hao-design.css */
-</style>
-
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('商标查询 工具已加载');
+    const input = document.getElementById('trademark-input');
+    const searchBtn = document.getElementById('search-btn');
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
+    const resultArea = document.getElementById('result-area');
+    const list = document.getElementById('trademark-list');
+
+    const mockData = [
+      { name: '华为', regNo: '12345678', class: '第9类', status: '已注册', applicant: '华为技术有限公司', date: '2010-05-14', expireDate: '2030-05-13' },
+      { name: '华为云', regNo: '23456789', class: '第42类', status: '已注册', applicant: '华为技术有限公司', date: '2018-03-21', expireDate: '2028-03-20' },
+      { name: '小米', regNo: '34567890', class: '第9类', status: '已注册', applicant: '小米科技有限责任公司', date: '2011-08-10', expireDate: '2031-08-09' },
+      { name: 'MI', regNo: '45678901', class: '第9类', status: '已注册', applicant: '小米科技有限责任公司', date: '2012-01-05', expireDate: '2032-01-04' },
+      { name: '腾讯', regNo: '56789012', class: '第41类', status: '已注册', applicant: '腾讯科技(深圳)有限公司', date: '2005-11-20', expireDate: '2025-11-19' },
+      { name: '微信', regNo: '67890123', class: '第38类', status: '已注册', applicant: '腾讯科技(深圳)有限公司', date: '2011-06-15', expireDate: '2031-06-14' },
+      { name: '支付宝', regNo: '78901234', class: '第36类', status: '已注册', applicant: '支付宝(中国)网络技术有限公司', date: '2004-12-08', expireDate: '2024-12-07' },
+      { name: '淘宝', regNo: '89012345', class: '第35类', status: '已注册', applicant: '浙江淘宝网络有限公司', date: '2003-09-01', expireDate: '2033-08-31' },
+      { name: '天猫', regNo: '90123456', class: '第35类', status: '已注册', applicant: '浙江天猫网络有限公司', date: '2012-01-11', expireDate: '2032-01-10' },
+      { name: '抖音', regNo: '11223344', class: '第41类', status: '已注册', applicant: '北京微播视界科技有限公司', date: '2017-05-20', expireDate: '2027-05-19' }
+    ];
+
+    searchBtn.addEventListener('click', () => {
+      const keyword = input.value.trim();
+      if (!keyword) { error.textContent = '请输入商标名称'; error.style.display = 'block'; return; }
+
+      loading.style.display = 'block';
+      error.style.display = 'none';
+      resultArea.style.display = 'none';
+
+      setTimeout(() => {
+        const found = mockData.filter(t => t.name.includes(keyword));
+        if (found.length === 0) {
+          list.innerHTML = `<div class="result-area" style="text-align:center;"><div style="color:var(--color-tm-text);">未找到相关商标信息</div></div>`;
+        } else {
+          list.innerHTML = found.map(t => `
+            <div class="result-area" style="margin-bottom:0.3rem;">
+              <div class="file-info">
+                <div class="info-row"><span class="info-label">商标名称</span><span class="info-value">${t.name}</span></div>
+                <div class="info-row"><span class="info-label">注册号</span><span class="info-value">${t.regNo}</span></div>
+                <div class="info-row"><span class="info-label">国际分类</span><span class="info-value">${t.class}</span></div>
+                <div class="info-row"><span class="info-label">申请人</span><span class="info-value">${t.applicant}</span></div>
+                <div class="info-row"><span class="info-label">注册日期</span><span class="info-value">${t.date}</span></div>
+                <div class="info-row"><span class="info-label">有效期至</span><span class="info-value">${t.expireDate}</span></div>
+                <div class="info-row"><span class="info-label">状态</span><span class="info-value" style="color:${t.status === '已注册' ? '#4ecdc4' : '#ff6b6b'};">${t.status}</span></div>
+              </div>
+            </div>`).join('');
+        }
+        resultArea.style.display = 'block';
+        loading.style.display = 'none';
+      }, 500);
+    });
+
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchBtn.click(); });
   });
 </script>

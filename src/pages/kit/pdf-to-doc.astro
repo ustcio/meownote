@@ -3,7 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
 const toolName = 'PDF转文档';
-const toolDesc = 'PDF转换为Word或TXT';
+const toolDesc = '从PDF中提取文本内容';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,15 +22,62 @@ const toolDesc = 'PDF转换为Word或TXT';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>点击或拖拽上传PDF</span>
+          <span class="hint">支持 PDF 文件</span>
+          <input type="file" id="file-input" accept=".pdf">
+        </div>
+
+        <div id="file-info" class="file-info" style="display:none;">
+          <div class="info-row">
+            <span class="info-label">文件名</span>
+            <span class="info-value" id="file-name"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">文件大小</span>
+            <span class="info-value" id="file-size"></span>
+          </div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <div class="setting-group">
+            <label class="setting-label">输出格式</label>
+            <div class="format-options" id="format-options">
+              <button class="format-btn active" data-fmt="txt">TXT</button>
+              <button class="format-btn" data-fmt="doc">DOC</button>
+            </div>
+          </div>
+          <div class="btn-group">
+            <button class="btn-primary" id="extract-btn">提取文本</button>
+          </div>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-text" id="progress-text">提取中...</div>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">提取结果</div>
+          <div class="result-stats">
+            <div class="stat">
+              <span class="stat-label">字符数</span>
+              <span class="stat-value" id="char-count"></span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">行数</span>
+              <span class="stat-value" id="line-count"></span>
+            </div>
+          </div>
+          <textarea id="extracted-text" readonly style="width:100%;min-height:200px;background:var(--color-background-one);color:var(--color-text);border:1px solid var(--color-border);border-radius:10px;padding:0.3rem;font-size:0.28rem;resize:vertical;font-family:monospace;"></textarea>
+          <div class="btn-group" style="margin-top:0.3rem;">
+            <button class="btn-primary" id="download-btn">下载文档</button>
+            <button class="btn-secondary" id="copy-btn">复制文本</button>
           </div>
         </div>
       </main>
@@ -39,12 +86,134 @@ const toolDesc = 'PDF转换为Word或TXT';
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-main { overflow: auto; }
+  #extracted-text { font-family: monospace; }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('PDF转文档 工具已加载');
+  document.addEventListener('DOMContentLoaded', function() {
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var fileInfo = document.getElementById('file-info');
+    var settings = document.getElementById('settings');
+    var progressArea = document.getElementById('progress-area');
+    var progressFill = document.getElementById('progress-fill');
+    var progressText = document.getElementById('progress-text');
+    var resultArea = document.getElementById('result-area');
+    var extractedText = document.getElementById('extracted-text');
+    var formatBtns = document.querySelectorAll('#format-options .format-btn');
+    var extractBtn = document.getElementById('extract-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var copyBtn = document.getElementById('copy-btn');
+    var pdfFile = null;
+    var extractedContent = '';
+    var outputFormat = 'txt';
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+    formatBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        formatBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        outputFormat = btn.getAttribute('data-fmt');
+      });
+    });
+
+    function handleFile(file) {
+      if (file.type !== 'application/pdf') return;
+      pdfFile = file;
+      document.getElementById('file-name').textContent = file.name;
+      document.getElementById('file-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
+      fileInfo.style.display = 'block';
+      settings.style.display = 'flex';
+      resultArea.style.display = 'none';
+    }
+
+    extractBtn.addEventListener('click', function() {
+      if (!pdfFile) return;
+      progressArea.style.display = 'block';
+      progressFill.style.width = '20%';
+      progressText.textContent = '读取PDF...';
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var data = new Uint8Array(e.target.result);
+        progressFill.style.width = '50%';
+        progressText.textContent = '提取文本...';
+        setTimeout(function() {
+          var str = '';
+          for (var i = 0; i < data.length; i++) str += String.fromCharCode(data[i]);
+          var text = '';
+          var btIdx = 0;
+          while (btIdx < str.length) {
+            var bt = str.indexOf('BT', btIdx);
+            if (bt < 0) break;
+            var et = str.indexOf('ET', bt);
+            if (et < 0) break;
+            var block = str.substring(bt, et);
+            var tjMatch = block.match(/\[([^\]]*)\]/);
+            if (tjMatch) {
+              var hexStrings = tjMatch[1].match(/<([0-9A-Fa-f]+)>/g);
+              if (hexStrings) {
+                for (var h = 0; h < hexStrings.length; h++) {
+                  var hex = hexStrings[h].slice(1, -1);
+                  for (var c = 0; c < hex.length; c += 4) {
+                    var code = parseInt(hex.substring(c, c + 4), 16);
+                    if (code > 0 && code < 128) text += String.fromCharCode(code);
+                    else if (code >= 0xFF00) text += String.fromCharCode(code - 0xFEE0);
+                  }
+                }
+              }
+            }
+            var parenMatches = block.match(/\(([^)]*)\)/g);
+            if (parenMatches) {
+              for (var m = 0; m < parenMatches.length; m++) {
+                var content = parenMatches[m].slice(1, -1).replace(/\\n/g, '\n').replace(/\\r/g, '\r').replace(/\\t/g, '\t').replace(/\\\(/g, '(').replace(/\\right\)/g, ')');
+                text += content;
+              }
+            }
+            text += '\n';
+            btIdx = et + 2;
+          }
+          if (!text) text = 'Unable to extract text from this PDF. The file may contain scanned images or encrypted content.';
+          extractedContent = text;
+          extractedText.value = text;
+          document.getElementById('char-count').textContent = text.length.toLocaleString();
+          document.getElementById('line-count').textContent = text.split('\n').length.toLocaleString();
+          progressFill.style.width = '100%';
+          progressText.textContent = '完成!';
+          resultArea.style.display = 'block';
+          setTimeout(function() { progressArea.style.display = 'none'; }, 800);
+        }, 100);
+      };
+      reader.readAsArrayBuffer(pdfFile);
+    });
+
+    downloadBtn.addEventListener('click', function() {
+      if (!extractedContent) return;
+      var blob, ext;
+      if (outputFormat === 'doc') {
+        var html = '<html><head><meta charset="utf-8"></head><body>' + extractedContent.replace(/\n/g, '<br>') + '</body></html>';
+        blob = new Blob([html], { type: 'application/msword' });
+        ext = 'doc';
+      } else {
+        blob = new Blob([extractedContent], { type: 'text/plain' });
+        ext = 'txt';
+      }
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = pdfFile.name.replace('.pdf', '') + '.' + ext;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    copyBtn.addEventListener('click', function() {
+      navigator.clipboard.writeText(extractedContent).then(function() {
+        copyBtn.textContent = '已复制!';
+        setTimeout(function() { copyBtn.textContent = '复制文本'; }, 2000);
+      });
+    });
   });
 </script>

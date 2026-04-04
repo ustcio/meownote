@@ -23,14 +23,13 @@ const toolDesc = '查询彩票开奖结果';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+          <div class="tab-buttons" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;">
+            <button id="tab-ssq" class="btn-primary" data-tab="ssq">双色球</button>
+            <button id="tab-dlt" class="btn-secondary" data-tab="dlt">大乐透</button>
+          </div>
+          <div id="lottery-result"></div>
+          <div style="margin-top:0.4rem;padding:0.3rem;background:var(--color-background-one);border-radius:15px;font-size:0.22rem;color:var(--color-tm-text);text-align:center;">
+            * 数据为模拟演示，实时开奖信息请访问 <a href="https://www.cwl.gov.cn/" target="_blank" style="color:var(--top-color);">中国福利彩票</a>
           </div>
         </div>
       </main>
@@ -38,13 +37,66 @@ const toolDesc = '查询彩票开奖结果';
   </section>
 </Layout>
 
-<style>
-  /* Inherits from hao-design.css */
+<style is:inline>
+  .ball { display:inline-flex;align-items:center;justify-content:center;width:0.6rem;height:0.6rem;border-radius:50%;font-size:0.25rem;font-weight:500;color:white;margin:0 0.05rem; }
+  .ball-red { background:linear-gradient(135deg,#ff6b6b,#ee5a24); }
+  .ball-blue { background:linear-gradient(135deg,#4a69bd,#1e3799); }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('彩票开奖查询 工具已加载');
+    const tabSsq = document.getElementById('tab-ssq');
+    const tabDlt = document.getElementById('tab-dlt');
+    const result = document.getElementById('lottery-result');
+    let currentTab = 'ssq';
+
+    const ssqData = [
+      { period: '2026035', date: '2026-04-02', red: [3, 9, 15, 22, 28, 31], blue: 7, prize: '852万' },
+      { period: '2026034', date: '2026-03-31', red: [5, 11, 16, 20, 25, 33], blue: 12, prize: '1025万' },
+      { period: '2026033', date: '2026-03-29', red: [1, 8, 14, 19, 27, 30], blue: 5, prize: '680万' },
+      { period: '2026032', date: '2026-03-26', red: [6, 12, 18, 23, 29, 32], blue: 9, prize: '920万' },
+      { period: '2026031', date: '2026-03-24', red: [2, 7, 13, 21, 26, 33], blue: 14, prize: '756万' },
+      { period: '2026030', date: '2026-03-22', red: [4, 10, 17, 24, 28, 31], blue: 3, prize: '1100万' }
+    ];
+
+    const dltData = [
+      { period: '2026035', date: '2026-04-02', front: [5, 12, 18, 27, 33], back: [3, 9], prize: '650万' },
+      { period: '2026034', date: '2026-03-30', front: [2, 9, 15, 22, 35], back: [6, 11], prize: '820万' },
+      { period: '2026033', date: '2026-03-28', front: [7, 14, 20, 28, 31], back: [2, 8], prize: '580万' },
+      { period: '2026032', date: '2026-03-25', front: [3, 11, 19, 25, 34], back: [4, 10], prize: '720万' },
+      { period: '2026031', date: '2026-03-23', front: [8, 16, 21, 29, 32], back: [1, 7], prize: '900万' },
+      { period: '2026030', date: '2026-03-21', front: [1, 10, 17, 24, 30], back: [5, 12], prize: '680万' }
+    ];
+
+    function renderBalls(type, data) {
+      const isSsq = type === 'ssq';
+      const items = isSsq ? ssqData : dltData;
+      const label = isSsq ? '双色球' : '大乐透';
+
+      result.innerHTML = items.map((item, idx) => {
+        const balls = isSsq
+          ? item.red.map(n => `<span class="ball ball-red">${n}</span>`).join('') + `<span class="ball ball-blue">${item.blue}</span>`
+          : item.front.map(n => `<span class="ball ball-red">${n}</span>`).join('') + item.back.map(n => `<span class="ball ball-blue">${n}</span>`).join('');
+
+        return `<div class="result-area" style="margin-bottom:0.3rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.2rem;">
+            <span style="font-size:0.28rem;font-weight:500;color:var(--font-color-solid);">${label} 第${item.period}期</span>
+            <span style="font-size:0.22rem;color:var(--color-tm-text);">${item.date} 一等奖奖金: ${item.prize}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.1rem;flex-wrap:wrap;">${balls}</div>
+        </div>`;
+      }).join('');
+    }
+
+    tabSsq.addEventListener('click', () => {
+      tabSsq.className = 'btn-primary'; tabDlt.className = 'btn-secondary';
+      currentTab = 'ssq'; renderBalls('ssq');
+    });
+    tabDlt.addEventListener('click', () => {
+      tabDlt.className = 'btn-primary'; tabSsq.className = 'btn-secondary';
+      currentTab = 'dlt'; renderBalls('dlt');
+    });
+
+    renderBalls('ssq');
   });
 </script>

@@ -3,7 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
 const toolName = '二维码修复';
-const toolDesc = '修复破损二维码';
+const toolDesc = '增强和修复破损的二维码';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,15 +22,46 @@ const toolDesc = '修复破损二维码';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>点击或拖拽上传二维码</span>
+          <span class="hint">支持 PNG, JPG 格式</span>
+          <input type="file" id="file-input" accept="image/*">
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <div class="setting-group">
+            <label class="setting-label">对比度: <span id="contrast-value">50</span></label>
+            <input type="range" id="contrast" min="0" max="100" value="50" style="width:100%;">
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">阈值: <span id="threshold-value">128</span></label>
+            <input type="range" id="threshold" min="0" max="255" value="128" style="width:100%;">
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">缩放倍数: <span id="scale-value">3</span>x</label>
+            <input type="range" id="scale" min="1" max="10" value="3" style="width:100%;">
+          </div>
+          <div class="btn-group">
+            <button class="btn-primary" id="enhance-btn">增强二维码</button>
+            <button class="btn-secondary" id="reset-btn">重置</button>
+          </div>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-text" id="progress-text">处理中...</div>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">增强结果</div>
+          <canvas id="result-canvas" style="width:100%;border-radius:10px;image-rendering:pixelated;"></canvas>
+          <div class="btn-group" style="margin-top:0.3rem;">
+            <button class="btn-primary" id="download-btn">下载二维码</button>
           </div>
         </div>
       </main>
@@ -39,12 +70,107 @@ const toolDesc = '修复破损二维码';
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-main { overflow: auto; }
+  #result-canvas { max-height: 60vh; object-fit: contain; }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('二维码修复 工具已加载');
+  document.addEventListener('DOMContentLoaded', function() {
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var settings = document.getElementById('settings');
+    var progressArea = document.getElementById('progress-area');
+    var progressFill = document.getElementById('progress-fill');
+    var progressText = document.getElementById('progress-text');
+    var resultArea = document.getElementById('result-area');
+    var resultCanvas = document.getElementById('result-canvas');
+    var contrastSlider = document.getElementById('contrast');
+    var contrastValue = document.getElementById('contrast-value');
+    var thresholdSlider = document.getElementById('threshold');
+    var thresholdValue = document.getElementById('threshold-value');
+    var scaleSlider = document.getElementById('scale');
+    var scaleValue = document.getElementById('scale-value');
+    var enhanceBtn = document.getElementById('enhance-btn');
+    var resetBtn = document.getElementById('reset-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var originalImage = null;
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+    contrastSlider.addEventListener('input', function() { contrastValue.textContent = contrastSlider.value; });
+    thresholdSlider.addEventListener('input', function() { thresholdValue.textContent = thresholdSlider.value; });
+    scaleSlider.addEventListener('input', function() { scaleValue.textContent = scaleSlider.value; });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          originalImage = img;
+          settings.style.display = 'flex';
+          resultArea.style.display = 'none';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    enhanceBtn.addEventListener('click', function() {
+      if (!originalImage) return;
+      progressArea.style.display = 'block';
+      progressFill.style.width = '20%';
+      progressText.textContent = '增强中...';
+      setTimeout(function() {
+        var ctx = resultCanvas.getContext('2d');
+        var scale = parseInt(scaleSlider.value);
+        var w = originalImage.width * scale;
+        var h = originalImage.height * scale;
+        resultCanvas.width = w;
+        resultCanvas.height = h;
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(originalImage, 0, 0, w, h);
+        var imageData = ctx.getImageData(0, 0, w, h);
+        var data = imageData.data;
+        var contrast = parseInt(contrastSlider.value);
+        var threshold = parseInt(thresholdSlider.value);
+        var contrastFactor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+
+        for (var i = 0; i < data.length; i += 4) {
+          var gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+          gray = (gray - 128) * contrastFactor + 128;
+          var val = gray < threshold ? 0 : 255;
+          data[i] = val;
+          data[i+1] = val;
+          data[i+2] = val;
+        }
+        ctx.putImageData(imageData, 0, 0);
+        progressFill.style.width = '100%';
+        progressText.textContent = '完成!';
+        resultArea.style.display = 'block';
+        setTimeout(function() { progressArea.style.display = 'none'; }, 800);
+      }, 50);
+    });
+
+    resetBtn.addEventListener('click', function() {
+      if (!originalImage) return;
+      contrastSlider.value = 50; contrastValue.textContent = '50';
+      thresholdSlider.value = 128; thresholdValue.textContent = '128';
+      scaleSlider.value = 3; scaleValue.textContent = '3';
+      resultArea.style.display = 'none';
+    });
+
+    downloadBtn.addEventListener('click', function() {
+      resultCanvas.toBlob(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'enhanced_qr.png';
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    });
   });
 </script>

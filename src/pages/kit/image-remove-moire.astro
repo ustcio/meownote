@@ -2,8 +2,8 @@
 import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
-const toolName = '图片去摩尔纹';
-const toolDesc = '图片摩尔纹去除';
+const toolName = '去除摩尔纹';
+const toolDesc = '通过高斯模糊和锐化减少图片摩尔纹';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,15 +22,53 @@ const toolDesc = '图片摩尔纹去除';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>点击或拖拽上传图片</span>
+          <span class="hint">支持 PNG, JPG, WebP 格式</span>
+          <input type="file" id="file-input" accept="image/*">
+        </div>
+
+        <div id="file-info" class="file-info" style="display:none;">
+          <div class="info-row">
+            <span class="info-label">文件名</span>
+            <span class="info-value" id="file-name"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">尺寸</span>
+            <span class="info-value" id="file-dimensions"></span>
+          </div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <div class="setting-group">
+            <label class="setting-label">模糊强度: <span id="blur-value">2</span></label>
+            <input type="range" id="blur" min="1" max="10" value="2" step="0.5" style="width:100%;">
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">锐化强度: <span id="sharpen-value">1</span></label>
+            <input type="range" id="sharpen" min="0" max="5" value="1" step="0.5" style="width:100%;">
+          </div>
+          <div class="btn-group">
+            <button class="btn-primary" id="process-btn">去除摩尔纹</button>
+            <button class="btn-secondary" id="reset-btn">重置</button>
+          </div>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-text" id="progress-text">处理中...</div>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">处理结果</div>
+          <canvas id="result-canvas" style="width:100%;border-radius:10px;"></canvas>
+          <div class="btn-group" style="margin-top:0.3rem;">
+            <button class="btn-primary" id="download-btn">下载图片</button>
           </div>
         </div>
       </main>
@@ -39,12 +77,169 @@ const toolDesc = '图片摩尔纹去除';
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-main { overflow: auto; }
+  #result-canvas { max-height: 60vh; object-fit: contain; }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('图片去摩尔纹 工具已加载');
+  document.addEventListener('DOMContentLoaded', function() {
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var fileInfo = document.getElementById('file-info');
+    var settings = document.getElementById('settings');
+    var progressArea = document.getElementById('progress-area');
+    var progressFill = document.getElementById('progress-fill');
+    var progressText = document.getElementById('progress-text');
+    var resultArea = document.getElementById('result-area');
+    var resultCanvas = document.getElementById('result-canvas');
+    var blurSlider = document.getElementById('blur');
+    var blurValue = document.getElementById('blur-value');
+    var sharpenSlider = document.getElementById('sharpen');
+    var sharpenValue = document.getElementById('sharpen-value');
+    var processBtn = document.getElementById('process-btn');
+    var resetBtn = document.getElementById('reset-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var originalImage = null;
+    var originalFileName = '';
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+    blurSlider.addEventListener('input', function() { blurValue.textContent = blurSlider.value; });
+    sharpenSlider.addEventListener('input', function() { sharpenValue.textContent = sharpenSlider.value; });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) return;
+      originalFileName = file.name.replace(/\.[^.]+$/, '');
+      document.getElementById('file-name').textContent = file.name;
+      document.getElementById('file-dimensions').textContent = '';
+      fileInfo.style.display = 'block';
+      settings.style.display = 'flex';
+      resultArea.style.display = 'none';
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          originalImage = img;
+          var ctx = resultCanvas.getContext('2d');
+          resultCanvas.width = img.width;
+          resultCanvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          document.getElementById('file-dimensions').textContent = img.width + 'x' + img.height;
+          resultArea.style.display = 'block';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function gaussianBlur(data, w, h, radius) {
+      var copy = new Uint8ClampedArray(data);
+      var r = Math.ceil(radius);
+      var kernel = [];
+      var sigma = radius / 2;
+      var sum = 0;
+      for (var i = -r; i <= r; i++) {
+        var val = Math.exp(-(i * i) / (2 * sigma * sigma));
+        kernel.push(val);
+        sum += val;
+      }
+      for (var i = 0; i < kernel.length; i++) kernel[i] /= sum;
+
+      var temp = new Uint8ClampedArray(data.length);
+      for (var y = 0; y < h; y++) {
+        for (var x = 0; x < w; x++) {
+          var idx = (y * w + x) * 4;
+          for (var c = 0; c < 4; c++) {
+            var val = 0;
+            for (var k = -r; k <= r; k++) {
+              var sx = Math.min(Math.max(x + k, 0), w - 1);
+              val += copy[(y * w + sx) * 4 + c] * kernel[k + r];
+            }
+            temp[idx + c] = val;
+          }
+        }
+      }
+      for (var y = 0; y < h; y++) {
+        for (var x = 0; x < w; x++) {
+          var idx = (y * w + x) * 4;
+          for (var c = 0; c < 4; c++) {
+            var val = 0;
+            for (var k = -r; k <= r; k++) {
+              var sy = Math.min(Math.max(y + k, 0), h - 1);
+              val += temp[(sy * w + x) * 4 + c] * kernel[k + r];
+            }
+            data[idx + c] = val;
+          }
+        }
+      }
+    }
+
+    function sharpen(data, w, h, amount) {
+      var copy = new Uint8ClampedArray(data);
+      var kernel = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+      for (var y = 1; y < h - 1; y++) {
+        for (var x = 1; x < w - 1; x++) {
+          var idx = (y * w + x) * 4;
+          for (var c = 0; c < 3; c++) {
+            var sum = 0;
+            for (var ky = -1; ky <= 1; ky++) {
+              for (var kx = -1; kx <= 1; kx++) {
+                var ni = ((y + ky) * w + (x + kx)) * 4 + c;
+                sum += copy[ni] * kernel[(ky + 1) * 3 + (kx + 1)];
+              }
+            }
+            data[idx + c] = Math.min(255, Math.max(0, copy[idx + c] + (sum - copy[idx + c]) * amount));
+          }
+        }
+      }
+    }
+
+    processBtn.addEventListener('click', function() {
+      if (!originalImage) return;
+      progressArea.style.display = 'block';
+      progressFill.style.width = '10%';
+      progressText.textContent = '应用高斯模糊...';
+      setTimeout(function() {
+        var canvas = resultCanvas;
+        var ctx = canvas.getContext('2d');
+        canvas.width = originalImage.width;
+        canvas.height = originalImage.height;
+        ctx.drawImage(originalImage, 0, 0);
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var w = canvas.width;
+        var h = canvas.height;
+        gaussianBlur(imageData.data, w, h, parseFloat(blurSlider.value));
+        progressFill.style.width = '60%';
+        progressText.textContent = '应用锐化...';
+        setTimeout(function() {
+          sharpen(imageData.data, w, h, parseFloat(sharpenSlider.value));
+          ctx.putImageData(imageData, 0, 0);
+          progressFill.style.width = '100%';
+          progressText.textContent = '完成!';
+          setTimeout(function() { progressArea.style.display = 'none'; }, 800);
+        }, 50);
+      }, 50);
+    });
+
+    resetBtn.addEventListener('click', function() {
+      if (!originalImage) return;
+      var ctx = resultCanvas.getContext('2d');
+      resultCanvas.width = originalImage.width;
+      resultCanvas.height = originalImage.height;
+      ctx.drawImage(originalImage, 0, 0);
+    });
+
+    downloadBtn.addEventListener('click', function() {
+      resultCanvas.toBlob(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = originalFileName + '_no_moire.jpg';
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/jpeg', 0.92);
+    });
   });
 </script>

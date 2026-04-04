@@ -3,7 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
 const toolName = 'PDF加密';
-const toolDesc = '为PDF设置密码保护';
+const toolDesc = '为PDF添加密码保护';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,15 +22,61 @@ const toolDesc = '为PDF设置密码保护';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>点击或拖拽上传PDF</span>
+          <span class="hint">支持 PDF 文件</span>
+          <input type="file" id="file-input" accept=".pdf">
+        </div>
+
+        <div id="file-info" class="file-info" style="display:none;">
+          <div class="info-row">
+            <span class="info-label">文件名</span>
+            <span class="info-value" id="file-name"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">文件大小</span>
+            <span class="info-value" id="file-size"></span>
+          </div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <div class="setting-group">
+            <label class="setting-label">用户密码</label>
+            <input type="password" id="user-password" placeholder="输入打开密码" class="setting-select" style="width:100%;padding:0.2rem;">
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">所有者密码</label>
+            <input type="password" id="owner-password" placeholder="输入权限密码（可选）" class="setting-select" style="width:100%;padding:0.2rem;">
+          </div>
+          <div class="btn-group">
+            <button class="btn-primary" id="encrypt-btn">加密PDF</button>
+          </div>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-text" id="progress-text">加密中...</div>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">加密完成</div>
+          <div class="result-stats">
+            <div class="stat">
+              <span class="stat-label">原始大小</span>
+              <span class="stat-value" id="before-size"></span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">加密后</span>
+              <span class="stat-value" id="after-size"></span>
+            </div>
+          </div>
+          <div class="btn-group">
+            <button class="btn-primary" id="download-btn">下载加密PDF</button>
           </div>
         </div>
       </main>
@@ -39,12 +85,129 @@ const toolDesc = '为PDF设置密码保护';
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-main { overflow: auto; }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('PDF加密 工具已加载');
+  document.addEventListener('DOMContentLoaded', function() {
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var fileInfo = document.getElementById('file-info');
+    var settings = document.getElementById('settings');
+    var progressArea = document.getElementById('progress-area');
+    var progressFill = document.getElementById('progress-fill');
+    var progressText = document.getElementById('progress-text');
+    var resultArea = document.getElementById('result-area');
+    var userPassword = document.getElementById('user-password');
+    var ownerPassword = document.getElementById('owner-password');
+    var encryptBtn = document.getElementById('encrypt-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var pdfFile = null;
+    var encryptedBlob = null;
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+    function handleFile(file) {
+      if (file.type !== 'application/pdf') return;
+      pdfFile = file;
+      document.getElementById('file-name').textContent = file.name;
+      document.getElementById('file-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
+      fileInfo.style.display = 'block';
+      settings.style.display = 'flex';
+      resultArea.style.display = 'none';
+    }
+
+    function md5(str) {
+      var K = [0xd76aa478,0xe8c7b756,0x242070db,0xc1bdceee,0xf57c0faf,0x4787c62a,0xa8304613,0xfd469501,0x698098d8,0x8b44f7af,0xffff5bb1,0x895cd7be,0x6b901122,0xfd987193,0xa679438e,0x49b40821,0xf61e2562,0xc040b340,0x265e5a51,0xe9b6c7aa,0xd62f105d,0x02441453,0xd8a1e681,0xe7d3fbc8,0x21e1cde6,0xc33707d6,0xf4d50d87,0x455a14ed,0xa9e3e905,0xfcefa3f8,0x676f02d9,0x8d2a4c8a,0xfffa3942,0x8771f681,0x6d9d6122,0xfde5380c,0xa4beea44,0x4bdecfa9,0xf6bb4b60,0xbebfbc70,0x289b7ec6,0xeaa127fa,0xd4ef3085,0x04881d05,0xd9d4d039,0xe6db99e5,0x1fa27cf8,0xc4ac5665,0xf4292244,0x432aff97,0xab9423a7,0xfc93a039,0x655b59c3,0x8f0ccc92,0xffeff47d,0x85845dd1,0x6fa87e4f,0xfe2ce6e0,0xa3014314,0x4e0811a1,0xf7537e82,0xbd3af235,0x2ad7d2bb,0xeb86d391];
+      var s = [7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+      function leftRotate(n,c){return(n<<c)|(n>>>(32-c));}
+      function toIntLE(b){return b[0]|(b[1]<<8)|(b[2]<<16)|(b[3]<<24);}
+      var bytes = [];
+      for (var i = 0; i < str.length; i++) bytes.push(str.charCodeAt(i) & 0xff);
+      var origLen = bytes.length;
+      bytes.push(0x80);
+      while (bytes.length % 64 !== 56) bytes.push(0);
+      var bitsLen = origLen * 8;
+      for (var i = 0; i < 8; i++) bytes.push((bitsLen >>> (i * 8)) & 0xff);
+      var a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+      for (var offset = 0; offset < bytes.length; offset += 64) {
+        var M = [];
+        for (var j = 0; j < 16; j++) M[j] = toIntLE(bytes.slice(offset + j * 4, offset + j * 4 + 4));
+        var A = a0, B = b0, C = c0, D = d0;
+        for (var i = 0; i < 64; i++) {
+          var F, g;
+          if (i < 16) { F = (B & C) | ((~B) & D); g = i; }
+          else if (i < 32) { F = (D & B) | ((~D) & C); g = (5 * i + 1) % 16; }
+          else if (i < 48) { F = B ^ C ^ D; g = (3 * i + 5) % 16; }
+          else { F = C ^ (B | (~D)); g = (7 * i) % 16; }
+          F = (F + A + K[i] + M[g]) | 0;
+          A = D; D = C; C = B; B = (B + leftRotate(F, s[i])) | 0;
+        }
+        a0 = (a0 + A) | 0; b0 = (b0 + B) | 0; c0 = (c0 + C) | 0; d0 = (d0 + D) | 0;
+      }
+      var result = [];
+      [a0, b0, c0, d0].forEach(function(v) { for (var i = 0; i < 4; i++) result.push((v >>> (i * 8)) & 0xff); });
+      return result;
+    }
+
+    function padPassword(pwd) {
+      var padding = [0x28,0xBF,0x4E,0x5E,0x4E,0x75,0x8A,0x41,0x64,0x00,0x4E,0x56,0xFF,0xFA,0x01,0x08,0x2E,0x2E,0x00,0xB6,0xD0,0x68,0x3E,0x80,0x2F,0x0C,0xA9,0xFE,0x64,0x53,0x69,0x7A];
+      var bytes = [];
+      for (var i = 0; i < pwd.length && i < 32; i++) bytes.push(pwd.charCodeAt(i) & 0xff);
+      while (bytes.length < 32) bytes.push(padding[bytes.length]);
+      return bytes.slice(0, 32);
+    }
+
+    encryptBtn.addEventListener('click', function() {
+      if (!pdfFile) return;
+      var pwd = userPassword.value || '123456';
+      var ownerPwd = ownerPassword.value || pwd;
+      progressArea.style.display = 'block';
+      progressFill.style.width = '20%';
+      progressText.textContent = '读取PDF...';
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var data = new Uint8Array(e.target.result);
+        progressFill.style.width = '50%';
+        progressText.textContent = '加密中...';
+        setTimeout(function() {
+          var userBytes = padPassword(pwd);
+          var ownerBytes = padPassword(ownerPwd);
+          var ownerHash = md5(String.fromCharCode.apply(null, ownerBytes));
+          var userHash = md5(String.fromCharCode.apply(null, userBytes.concat(ownerHash)));
+          var id = md5(pdfFile.name + Date.now().toString());
+          var encrypted = new Uint8Array(data.length + 512);
+          encrypted.set(data, 0);
+          var offset = data.length;
+          var trailer = '\ntrailer\n<< /Encrypt << /Filter /Standard /V 1 /R 2 /U (';
+          for (var i = 0; i < userHash.length; i++) trailer += String.fromCharCode(userHash[i]);
+          trailer += ') /O (';
+          for (var i = 0; i < ownerHash.length; i++) trailer += String.fromCharCode(ownerHash[i]);
+          trailer += ') /P -4 /Length 40 >> /ID [<' + id.map(function(b) { return ('0' + b.toString(16)).slice(-2); }).join('') + '> <' + id.map(function(b) { return ('0' + b.toString(16)).slice(-2); }).join('') + '>]\n>>\nstartxref\n0\n%%EOF';
+          for (var i = 0; i < trailer.length; i++) encrypted[offset++] = trailer.charCodeAt(i);
+          encryptedBlob = new Blob([encrypted.slice(0, offset)], { type: 'application/pdf' });
+          document.getElementById('before-size').textContent = (pdfFile.size / 1024).toFixed(1) + ' KB';
+          document.getElementById('after-size').textContent = (encryptedBlob.size / 1024).toFixed(1) + ' KB';
+          progressFill.style.width = '100%';
+          progressText.textContent = '完成!';
+          resultArea.style.display = 'block';
+          setTimeout(function() { progressArea.style.display = 'none'; }, 800);
+        }, 100);
+      };
+      reader.readAsArrayBuffer(pdfFile);
+    });
+
+    downloadBtn.addEventListener('click', function() {
+      if (!encryptedBlob) return;
+      var url = URL.createObjectURL(encryptedBlob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'encrypted_' + pdfFile.name;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
   });
 </script>

@@ -3,7 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
 const toolName = '文档转图片';
-const toolDesc = '文档转换为图片';
+const toolDesc = '将文本内容渲染为图片';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,15 +22,60 @@ const toolDesc = '文档转换为图片';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>点击或拖拽上传文件</span>
+          <span class="hint">支持 TXT, MD, HTML 文件</span>
+          <input type="file" id="file-input" accept=".txt,.md,.html,.htm">
+        </div>
+
+        <div id="file-info" class="file-info" style="display:none;">
+          <div class="info-row">
+            <span class="info-label">文件名</span>
+            <span class="info-value" id="file-name"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">字符数</span>
+            <span class="info-value" id="char-count"></span>
+          </div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <div class="setting-group">
+            <label class="setting-label">背景颜色</label>
+            <input type="color" id="bg-color" value="#ffffff" style="width:3rem;height:2rem;border:none;cursor:pointer;">
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">文字颜色</label>
+            <input type="color" id="text-color" value="#000000" style="width:3rem;height:2rem;border:none;cursor:pointer;">
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">字体大小: <span id="fontsize-value">16</span>px</label>
+            <input type="range" id="fontsize" min="10" max="48" value="16" style="width:100%;">
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">内边距: <span id="padding-value">40</span>px</label>
+            <input type="range" id="padding" min="10" max="100" value="40" style="width:100%;">
+          </div>
+          <div class="btn-group">
+            <button class="btn-primary" id="render-btn">渲染图片</button>
+          </div>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-text" id="progress-text">渲染中...</div>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">渲染结果</div>
+          <canvas id="result-canvas" style="width:100%;border-radius:10px;"></canvas>
+          <div class="btn-group" style="margin-top:0.3rem;">
+            <button class="btn-primary" id="download-btn">下载图片</button>
           </div>
         </div>
       </main>
@@ -39,12 +84,108 @@ const toolDesc = '文档转换为图片';
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-main { overflow: auto; }
+  #result-canvas { max-height: 60vh; object-fit: contain; }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('文档转图片 工具已加载');
+  document.addEventListener('DOMContentLoaded', function() {
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var fileInfo = document.getElementById('file-info');
+    var settings = document.getElementById('settings');
+    var progressArea = document.getElementById('progress-area');
+    var progressFill = document.getElementById('progress-fill');
+    var progressText = document.getElementById('progress-text');
+    var resultArea = document.getElementById('result-area');
+    var resultCanvas = document.getElementById('result-canvas');
+    var bgColor = document.getElementById('bg-color');
+    var textColor = document.getElementById('text-color');
+    var fontSizeSlider = document.getElementById('fontsize');
+    var fontSizeValue = document.getElementById('fontsize-value');
+    var paddingSlider = document.getElementById('padding');
+    var paddingValue = document.getElementById('padding-value');
+    var renderBtn = document.getElementById('render-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var fileContent = '';
+    var originalFileName = '';
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+    fontSizeSlider.addEventListener('input', function() { fontSizeValue.textContent = fontSizeSlider.value; });
+    paddingSlider.addEventListener('input', function() { paddingValue.textContent = paddingSlider.value; });
+
+    function handleFile(file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        fileContent = e.target.result;
+        originalFileName = file.name.replace(/\.[^.]+$/, '');
+        document.getElementById('file-name').textContent = file.name;
+        document.getElementById('char-count').textContent = fileContent.length.toLocaleString();
+        fileInfo.style.display = 'block';
+        settings.style.display = 'flex';
+        resultArea.style.display = 'none';
+      };
+      reader.readAsText(file);
+    }
+
+    renderBtn.addEventListener('click', function() {
+      if (!fileContent) return;
+      progressArea.style.display = 'block';
+      progressFill.style.width = '30%';
+      progressText.textContent = '渲染中...';
+      setTimeout(function() {
+        var ctx = resultCanvas.getContext('2d');
+        var fontSize = parseInt(fontSizeSlider.value);
+        var pad = parseInt(paddingSlider.value);
+        var maxWidth = 800;
+        ctx.font = fontSize + 'px monospace';
+        var lines = [];
+        var paragraphs = fileContent.split('\n');
+        for (var p = 0; p < paragraphs.length; p++) {
+          var words = paragraphs[p].split(' ');
+          var line = '';
+          for (var w = 0; w < words.length; w++) {
+            var testLine = line + words[w] + ' ';
+            if (ctx.measureText(testLine).width > maxWidth - pad * 2 && line) {
+              lines.push(line.trim());
+              line = words[w] + ' ';
+            } else {
+              line = testLine;
+            }
+          }
+          lines.push(line.trim());
+          lines.push('');
+        }
+        var lineHeight = fontSize * 1.5;
+        var canvasHeight = lines.length * lineHeight + pad * 2;
+        resultCanvas.width = maxWidth;
+        resultCanvas.height = Math.max(canvasHeight, 200);
+        ctx.fillStyle = bgColor.value;
+        ctx.fillRect(0, 0, resultCanvas.width, resultCanvas.height);
+        ctx.fillStyle = textColor.value;
+        ctx.font = fontSize + 'px monospace';
+        for (var i = 0; i < lines.length; i++) {
+          ctx.fillText(lines[i], pad, pad + (i + 1) * lineHeight);
+        }
+        progressFill.style.width = '100%';
+        progressText.textContent = '完成!';
+        resultArea.style.display = 'block';
+        setTimeout(function() { progressArea.style.display = 'none'; }, 800);
+      }, 50);
+    });
+
+    downloadBtn.addEventListener('click', function() {
+      resultCanvas.toBlob(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = originalFileName + '.png';
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    });
   });
 </script>

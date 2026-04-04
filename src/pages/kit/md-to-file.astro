@@ -3,7 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
 const toolName = 'Markdown转文件';
-const toolDesc = 'Markdown转换为其他格式';
+const toolDesc = 'Markdown编辑器，支持导出为HTML、PDF、TXT';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,16 +22,53 @@ const toolDesc = 'Markdown转换为其他格式';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="settings" style="margin-top:0;">
+          <div class="setting-group">
+            <label class="setting-label">导出格式</label>
+            <div class="format-options" id="export-format">
+              <button class="format-btn active" data-fmt="html">HTML</button>
+              <button class="format-btn" data-fmt="pdf">PDF</button>
+              <button class="format-btn" data-fmt="txt">TXT</button>
+            </div>
           </div>
+          <div class="setting-group">
+            <label class="setting-label">主题</label>
+            <div class="format-options" id="theme-options">
+              <button class="format-btn active" data-theme="light">浅色</button>
+              <button class="format-btn" data-theme="dark">深色</button>
+            </div>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">字体大小: <span id="fontsize-value">16</span>px</label>
+            <input type="range" id="fontsize" min="12" max="24" value="16" style="width:100%;">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem;margin-top:0.3rem;">
+          <div>
+            <label class="setting-label">Markdown 编辑</label>
+            <textarea id="md-input" style="width:100%;min-height:400px;background:var(--color-background-one);color:var(--color-text);border:1px solid var(--color-border);border-radius:10px;padding:0.3rem;font-size:0.28rem;resize:vertical;font-family:monospace;" placeholder="在此输入Markdown..."># 标题
+
+这是一段**粗体**和*斜体*文本。
+
+## 列表
+- 项目一
+- 项目二
+- 项目三
+
+## 代码
+`代码示例`
+
+> 引用文本</textarea>
+          </div>
+          <div>
+            <label class="setting-label">实时预览</label>
+            <div id="preview" style="width:100%;min-height:400px;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:10px;padding:0.3rem;font-size:16px;overflow:auto;"></div>
+          </div>
+        </div>
+
+        <div class="btn-group" style="margin-top:0.3rem;">
+          <button class="btn-primary" id="export-btn">导出文件</button>
         </div>
       </main>
     </div>
@@ -39,12 +76,175 @@ const toolDesc = 'Markdown转换为其他格式';
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-main { overflow: auto; }
+  #preview h1 { font-size:1.5em; margin:0.5em 0; }
+  #preview h2 { font-size:1.3em; margin:0.4em 0; }
+  #preview h3 { font-size:1.1em; margin:0.3em 0; }
+  #preview p { margin:0.3em 0; }
+  #preview code { background:var(--frosted-bg); padding:2px 6px; border-radius:4px; font-family:monospace; }
+  #preview blockquote { border-left:3px solid var(--top-color); padding-left:1em; margin:0.5em 0; color:var(--color-tm-text); }
+  #preview ul { padding-left:1.5em; }
+  #preview li { margin:0.2em 0; }
+  #preview strong { font-weight:700; }
+  #preview em { font-style:italic; }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('Markdown转文件 工具已加载');
+  document.addEventListener('DOMContentLoaded', function() {
+    var mdInput = document.getElementById('md-input');
+    var preview = document.getElementById('preview');
+    var exportFormatBtns = document.querySelectorAll('#export-format .format-btn');
+    var themeBtns = document.querySelectorAll('#theme-options .format-btn');
+    var fontSizeSlider = document.getElementById('fontsize');
+    var fontSizeValue = document.getElementById('fontsize-value');
+    var exportBtn = document.getElementById('export-btn');
+    var exportFormat = 'html';
+    var theme = 'light';
+
+    fontSizeSlider.addEventListener('input', function() {
+      fontSizeValue.textContent = fontSizeSlider.value;
+      preview.style.fontSize = fontSizeSlider.value + 'px';
+    });
+
+    exportFormatBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        exportFormatBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        exportFormat = btn.getAttribute('data-fmt');
+      });
+    });
+
+    themeBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        themeBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        theme = btn.getAttribute('data-theme');
+        updatePreview();
+      });
+    });
+
+    mdInput.addEventListener('input', updatePreview);
+
+    function updatePreview() {
+      var md = mdInput.value;
+      var html = mdToHtml(md);
+      preview.innerHTML = html;
+      preview.style.fontSize = fontSizeSlider.value + 'px';
+      if (theme === 'dark') {
+        preview.style.background = 'var(--color-background-one)';
+        preview.style.color = 'var(--color-text)';
+      } else {
+        preview.style.background = '#fff';
+        preview.style.color = '#333';
+      }
+    }
+
+    function mdToHtml(md) {
+      var lines = md.split('\n');
+      var html = '';
+      var inList = false;
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (line.match(/^#{1,6}\s/)) {
+          if (inList) { html += '</ul>'; inList = false; }
+          var level = line.match(/^(#+)/)[1].length;
+          var text = processInline(line.replace(/^#+\s/, ''));
+          html += '<h' + level + '>' + text + '</h' + level + '>';
+        } else if (line.match(/^[-*]\s/)) {
+          if (!inList) { html += '<ul>'; inList = true; }
+          html += '<li>' + processInline(line.replace(/^[-*]\s/, '')) + '</li>';
+        } else if (line.match(/^>\s/)) {
+          if (inList) { html += '</ul>'; inList = false; }
+          html += '<blockquote>' + processInline(line.replace(/^>\s/, '')) + '</blockquote>';
+        } else if (line.trim() === '') {
+          if (inList) { html += '</ul>'; inList = false; }
+        } else {
+          if (inList) { html += '</ul>'; inList = false; }
+          html += '<p>' + processInline(line) + '</p>';
+        }
+      }
+      if (inList) html += '</ul>';
+      return html;
+    }
+
+    function processInline(text) {
+      text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+      text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+      text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      return text;
+    }
+
+    exportBtn.addEventListener('click', function() {
+      var md = mdInput.value;
+      var blob, ext;
+      if (exportFormat === 'html') {
+        var htmlContent = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Export</title><style>body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:2em;line-height:1.6;}code{background:#f4f4f4;padding:2px 6px;border-radius:4px;}blockquote{border-left:3px solid #666;padding-left:1em;color:#666;}</style></head><body>' + mdToHtml(md) + '</body></html>';
+        blob = new Blob([htmlContent], { type: 'text/html' });
+        ext = 'html';
+      } else if (exportFormat === 'pdf') {
+        var dims = [595.28, 841.89];
+        var margin = 50;
+        var fontSize = parseInt(fontSizeSlider.value);
+        var lineHeight = fontSize * 1.5;
+        var textW = dims[0] - margin * 2;
+        var textH = dims[1] - margin * 2;
+        var linesPerPage = Math.floor(textH / lineHeight);
+        var lines = md.split('\n');
+        var pages = [];
+        for (var i = 0; i < lines.length; i += linesPerPage) pages.push(lines.slice(i, i + linesPerPage));
+        if (pages.length === 0) pages.push(['']);
+        var objects = [], objId = 0;
+        function addObj(c) { objId++; objects.push({ id: objId, content: c }); return objId; }
+        addObj('<< /Type /Catalog /Pages 2 0 R >>');
+        var kids = [];
+        for (var p = 0; p < pages.length; p++) {
+          var stream = 'BT /F1 ' + fontSize + ' Tf ' + margin + ' ' + (dims[1] - margin - fontSize) + ' Td\n';
+          for (var l = 0; l < pages[p].length; l++) {
+            var line = pages[p][l].replace(/[()\\]/g, '\\$&');
+            if (l > 0) stream += '0 -' + lineHeight + ' Td\n';
+            stream += '(' + line + ') Tj\n';
+          }
+          stream += 'ET';
+          var sb = new Uint8Array(stream.length);
+          for (var j = 0; j < stream.length; j++) sb[j] = stream.charCodeAt(j);
+          var cid = addObj(null);
+          objects[cid - 1].content = '<< /Length ' + sb.length + ' >>';
+          objects[cid - 1].stream = sb;
+          var pid = addObj('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + dims[0] + ' ' + dims[1] + '] /Contents ' + cid + ' 0 R /Resources << /Font << /F1 5 0 R >> >> >>');
+          kids.push(pid + ' 0 R');
+        }
+        addObj('<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + pages.length + ' >>');
+        addObj('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+        var parts = ['%PDF-1.4\n'];
+        var offsets = [];
+        for (var i = 0; i < objects.length; i++) {
+          offsets.push(parts.join('').length);
+          parts.push(objects[i].id + ' 0 obj\n' + objects[i].content);
+          if (objects[i].stream) { parts.push('\nstream\n'); for (var j = 0; j < objects[i].stream.length; j++) parts.push(String.fromCharCode(objects[i].stream[j])); parts.push('\nendstream\n'); }
+          parts.push('\nendobj\n');
+        }
+        var xrefOffset = parts.join('').length;
+        parts.push('xref\n0 ' + (objects.length + 1) + '\n0000000000 65535 f \n');
+        for (var i = 0; i < offsets.length; i++) parts.push(('0000000000' + offsets[i]).slice(-10) + ' 00000 n \n');
+        parts.push('trailer\n<< /Size ' + (objects.length + 1) + ' /Root 1 0 R >>\nstartxref\n' + xrefOffset + '\n%%EOF');
+        var pdfStr = parts.join('');
+        var pdfBytes = new Uint8Array(pdfStr.length);
+        for (var i = 0; i < pdfStr.length; i++) pdfBytes[i] = pdfStr.charCodeAt(i) & 0xff;
+        blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        ext = 'pdf';
+      } else {
+        blob = new Blob([md], { type: 'text/plain' });
+        ext = 'txt';
+      }
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'document.' + ext;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    updatePreview();
   });
 </script>

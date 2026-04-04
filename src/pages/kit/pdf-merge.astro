@@ -3,7 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
 const toolName = 'PDF合并';
-const toolDesc = '合并多个PDF文件';
+const toolDesc = '合并多个PDF文件为一个';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,15 +22,48 @@ const toolDesc = '合并多个PDF文件';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>点击或拖拽上传多个PDF</span>
+          <span class="hint">按上传顺序合并</span>
+          <input type="file" id="file-input" accept=".pdf" multiple>
+        </div>
+
+        <div id="file-list" class="file-info" style="display:none;">
+          <div class="result-header">已上传文件 (<span id="file-count">0</span>个)</div>
+          <div id="file-items" style="margin-top:0.2rem;"></div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <div class="btn-group">
+            <button class="btn-primary" id="merge-btn">合并PDF</button>
+            <button class="btn-secondary" id="reset-btn">重置</button>
+          </div>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-text" id="progress-text">合并中...</div>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">合并完成</div>
+          <div class="result-stats">
+            <div class="stat">
+              <span class="stat-label">文件数</span>
+              <span class="stat-value" id="merged-count"></span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">总大小</span>
+              <span class="stat-value" id="merged-size"></span>
+            </div>
+          </div>
+          <div class="btn-group">
+            <button class="btn-primary" id="download-btn">下载合并PDF</button>
           </div>
         </div>
       </main>
@@ -39,12 +72,146 @@ const toolDesc = '合并多个PDF文件';
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-main { overflow: auto; }
+  .file-item { display:flex; align-items:center; gap:0.2rem; padding:0.2rem; border-bottom:1px solid var(--color-border); }
+  .file-item .file-icon { color:var(--top-color); }
+  .file-item .file-name { flex:1; font-size:0.28rem; }
+  .file-item .file-size { font-size:0.22rem; color:var(--color-tm-text); }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('PDF合并 工具已加载');
+  document.addEventListener('DOMContentLoaded', function() {
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var fileList = document.getElementById('file-list');
+    var fileItems = document.getElementById('file-items');
+    var settings = document.getElementById('settings');
+    var progressArea = document.getElementById('progress-area');
+    var progressFill = document.getElementById('progress-fill');
+    var progressText = document.getElementById('progress-text');
+    var resultArea = document.getElementById('result-area');
+    var mergeBtn = document.getElementById('merge-btn');
+    var resetBtn = document.getElementById('reset-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var pdfFiles = [];
+    var mergedBlob = null;
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFiles(fileInput.files); });
+
+    function handleFiles(files) {
+      pdfFiles = [];
+      fileItems.innerHTML = '';
+      for (var i = 0; i < files.length; i++) {
+        if (files[i].type !== 'application/pdf') continue;
+        pdfFiles.push(files[i]);
+        var item = document.createElement('div');
+        item.className = 'file-item';
+        item.innerHTML = '<span class="file-icon">📄</span><span class="file-name">' + files[i].name + '</span><span class="file-size">' + (files[i].size / 1024).toFixed(1) + ' KB</span>';
+        fileItems.appendChild(item);
+      }
+      document.getElementById('file-count').textContent = pdfFiles.length;
+      if (pdfFiles.length >= 2) {
+        fileList.style.display = 'block';
+        settings.style.display = 'flex';
+      }
+      resultArea.style.display = 'none';
+    }
+
+    mergeBtn.addEventListener('click', function() {
+      if (pdfFiles.length < 2) return;
+      progressArea.style.display = 'block';
+      progressFill.style.width = '20%';
+      progressText.textContent = '读取文件...';
+      var readers = [];
+      var totalSize = 0;
+      var loaded = 0;
+      var buffers = [];
+      for (var i = 0; i < pdfFiles.length; i++) {
+        (function(idx) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            buffers.push(new Uint8Array(e.target.result));
+            totalSize += e.target.result.byteLength;
+            loaded++;
+            progressFill.style.width = (20 + (loaded / pdfFiles.length) * 40) + '%';
+            if (loaded === pdfFiles.length) {
+              progressText.textContent = '合并中...';
+              setTimeout(function() {
+                var merged = new Uint8Array(totalSize + pdfFiles.length * 100);
+                var offset = 0;
+                merged.set([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34, 0x0a], 0);
+                offset = 9;
+                for (var j = 0; j < buffers.length; j++) {
+                  var buf = buffers[j];
+                  var startIdx = findPdfBody(buf);
+                  var endIdx = findStartXref(buf);
+                  if (startIdx >= 0 && endIdx > startIdx) {
+                    var content = buf.slice(startIdx, endIdx);
+                    merged.set(content, offset);
+                    offset += content.length;
+                  }
+                }
+                merged[offset++] = 0x0a;
+                var trailer = 'trailer\n<< /Size 1 /Root 1 0 R >>\nstartxref\n0\n%%EOF';
+                for (var k = 0; k < trailer.length; k++) merged[offset++] = trailer.charCodeAt(k);
+                mergedBlob = new Blob([merged.slice(0, offset)], { type: 'application/pdf' });
+                document.getElementById('merged-count').textContent = pdfFiles.length;
+                document.getElementById('merged-size').textContent = (mergedBlob.size / 1024).toFixed(1) + ' KB';
+                progressFill.style.width = '100%';
+                progressText.textContent = '完成!';
+                resultArea.style.display = 'block';
+                setTimeout(function() { progressArea.style.display = 'none'; }, 800);
+              }, 100);
+            }
+          };
+          reader.readAsArrayBuffer(pdfFiles[idx]);
+        })(i);
+      }
+    });
+
+    function findPdfBody(buf) {
+      var str = '%PDF';
+      for (var i = 0; i < Math.min(buf.length, 1024); i++) {
+        if (buf[i] === 0x25 && buf[i+1] === 0x50 && buf[i+2] === 0x44 && buf[i+3] === 0x46) {
+          var newline = buf.indexOf(0x0a, i);
+          return newline >= 0 ? newline + 1 : i;
+        }
+      }
+      return 0;
+    }
+
+    function findStartXref(buf) {
+      var pattern = [0x73, 0x74, 0x61, 0x72, 0x74, 0x78, 0x72, 0x65, 0x66];
+      for (var i = buf.length - 100; i >= 0; i--) {
+        var match = true;
+        for (var j = 0; j < pattern.length; j++) {
+          if (buf[i + j] !== pattern[j]) { match = false; break; }
+        }
+        if (match) return i;
+      }
+      return buf.length;
+    }
+
+    resetBtn.addEventListener('click', function() {
+      pdfFiles = [];
+      fileItems.innerHTML = '';
+      fileList.style.display = 'none';
+      settings.style.display = 'none';
+      resultArea.style.display = 'none';
+      fileInput.value = '';
+    });
+
+    downloadBtn.addEventListener('click', function() {
+      if (!mergedBlob) return;
+      var url = URL.createObjectURL(mergedBlob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'merged.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
   });
 </script>

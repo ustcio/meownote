@@ -2,8 +2,8 @@
 import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
-const toolName = 'GIF图片帧修改';
-const toolDesc = '修改GIF动图效果';
+const toolName = 'GIF编辑';
+const toolDesc = '编辑GIF动图的帧和播放设置';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,15 +22,53 @@ const toolDesc = '修改GIF动图效果';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>点击或拖拽上传GIF</span>
+          <span class="hint">支持 GIF 文件</span>
+          <input type="file" id="file-input" accept=".gif">
+        </div>
+
+        <div id="file-info" class="file-info" style="display:none;">
+          <div class="info-row">
+            <span class="info-label">文件名</span>
+            <span class="info-value" id="file-name"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">帧数</span>
+            <span class="info-value" id="frame-count"></span>
+          </div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <div class="setting-group">
+            <label class="setting-label">帧延迟: <span id="delay-value">10</span> (1/100s)</label>
+            <input type="range" id="delay" min="2" max="100" value="10" style="width:100%;">
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">循环次数 (0=无限)</label>
+            <input type="number" id="loop-count" value="0" min="0" max="100" class="setting-select" style="width:4rem;">
+          </div>
+          <div class="btn-group">
+            <button class="btn-primary" id="save-btn">保存GIF</button>
+            <button class="btn-secondary" id="add-frame-btn">添加帧</button>
+          </div>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-text" id="progress-text">处理中...</div>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">帧列表</div>
+          <div id="frame-list" style="display:flex;gap:0.2rem;flex-wrap:wrap;margin-top:0.2rem;"></div>
+          <div class="btn-group" style="margin-top:0.3rem;">
+            <button class="btn-primary" id="download-btn">下载GIF</button>
           </div>
         </div>
       </main>
@@ -39,12 +77,232 @@ const toolDesc = '修改GIF动图效果';
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-main { overflow: auto; }
+  .frame-thumb { position:relative; cursor:pointer; border-radius:8px; overflow:hidden; }
+  .frame-thumb canvas { max-width:100px; max-height:100px; display:block; }
+  .frame-thumb .remove-btn { position:absolute; top:2px; right:2px; background:rgba(255,0,0,0.7); color:#fff; border:none; border-radius:50%; width:20px; height:20px; cursor:pointer; font-size:12px; line-height:20px; text-align:center; }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('GIF图片帧修改 工具已加载');
+  document.addEventListener('DOMContentLoaded', function() {
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var fileInfo = document.getElementById('file-info');
+    var settings = document.getElementById('settings');
+    var progressArea = document.getElementById('progress-area');
+    var progressFill = document.getElementById('progress-fill');
+    var progressText = document.getElementById('progress-text');
+    var resultArea = document.getElementById('result-area');
+    var frameList = document.getElementById('frame-list');
+    var delaySlider = document.getElementById('delay');
+    var delayValue = document.getElementById('delay-value');
+    var loopCount = document.getElementById('loop-count');
+    var saveBtn = document.getElementById('save-btn');
+    var addFrameBtn = document.getElementById('add-frame-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var frames = [];
+    var gifWidth = 0, gifHeight = 0;
+    var gifBlob = null;
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+    delaySlider.addEventListener('input', function() { delayValue.textContent = delaySlider.value; });
+
+    function handleFile(file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          frames = [];
+          gifWidth = img.width;
+          gifHeight = img.height;
+          var c = document.createElement('canvas');
+          c.width = img.width;
+          c.height = img.height;
+          var ctx = c.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          frames.push(ctx.getImageData(0, 0, img.width, img.height));
+          document.getElementById('file-name').textContent = file.name;
+          document.getElementById('frame-count').textContent = frames.length;
+          fileInfo.style.display = 'block';
+          settings.style.display = 'flex';
+          resultArea.style.display = 'block';
+          renderFrames();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function renderFrames() {
+      frameList.innerHTML = '';
+      for (var i = 0; i < frames.length; i++) {
+        (function(idx) {
+          var div = document.createElement('div');
+          div.className = 'frame-thumb';
+          var c = document.createElement('canvas');
+          c.width = frames[idx].width;
+          c.height = frames[idx].height;
+          var ctx = c.getContext('2d');
+          ctx.putImageData(frames[idx], 0, 0);
+          var removeBtn = document.createElement('button');
+          removeBtn.className = 'remove-btn';
+          removeBtn.textContent = 'x';
+          removeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (frames.length <= 1) return;
+            frames.splice(idx, 1);
+            document.getElementById('frame-count').textContent = frames.length;
+            renderFrames();
+          });
+          div.appendChild(c);
+          div.appendChild(removeBtn);
+          frameList.appendChild(div);
+        })(i);
+      }
+    }
+
+    addFrameBtn.addEventListener('click', function() {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.addEventListener('change', function() {
+        if (!input.files.length) return;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var img = new Image();
+          img.onload = function() {
+            var c = document.createElement('canvas');
+            c.width = gifWidth;
+            c.height = gifHeight;
+            var ctx = c.getContext('2d');
+            ctx.drawImage(img, 0, 0, gifWidth, gifHeight);
+            frames.push(ctx.getImageData(0, 0, gifWidth, gifHeight));
+            document.getElementById('frame-count').textContent = frames.length;
+            renderFrames();
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+      });
+      input.click();
+    });
+
+    saveBtn.addEventListener('click', function() {
+      if (frames.length < 1) return;
+      progressArea.style.display = 'block';
+      progressFill.style.width = '30%';
+      progressText.textContent = '编码GIF...';
+      setTimeout(function() {
+        var delay = parseInt(delaySlider.value);
+        var loops = parseInt(loopCount.value);
+        gifBlob = encodeGIF(frames, gifWidth, gifHeight, delay, loops);
+        progressFill.style.width = '100%';
+        progressText.textContent = '完成!';
+        setTimeout(function() { progressArea.style.display = 'none'; }, 800);
+      }, 50);
+    });
+
+    downloadBtn.addEventListener('click', function() {
+      if (!gifBlob) { saveBtn.click(); setTimeout(function() { downloadBtn.click(); }, 500); return; }
+      var url = URL.createObjectURL(gifBlob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'edited.gif';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    function encodeGIF(frames, w, h, delay, loops) {
+      var globalPalette = buildPalette(frames, 256);
+      var out = [];
+      out.push(0x47, 0x49, 0x46, 0x38, 0x39, 0x61);
+      out.push(w & 0xff, (w >> 8) & 0xff, h & 0xff, (h >> 8) & 0xff);
+      out.push(0xf7, 0x00, 0x00);
+      for (var i = 0; i < 256; i++) out.push(globalPalette[i][0], globalPalette[i][1], globalPalette[i][2]);
+      if (loops >= 0) {
+        out.push(0x21, 0xff, 0x0b, 0x4e, 0x45, 0x54, 0x53, 0x43, 0x41, 0x50, 0x45, 0x32, 0x2e, 0x30, 0x03, 0x01);
+        out.push(loops & 0xff, (loops >> 8) & 0xff, 0x00);
+      }
+      for (var f = 0; f < frames.length; f++) {
+        var indexed = quantizeFrame(frames[f].data, globalPalette);
+        out.push(0x21, 0xf9, 0x04, 0x00);
+        out.push(delay & 0xff, (delay >> 8) & 0xff, 0x00, 0x00);
+        out.push(0x2c, 0x00, 0x00, 0x00, 0x00);
+        out.push(w & 0xff, (w >> 8) & 0xff, h & 0xff, (h >> 8) & 0xff, 0x00);
+        var lzw = lzwEncode(indexed, 8);
+        out = out.concat(lzw);
+      }
+      out.push(0x3b);
+      return new Blob([new Uint8Array(out)], { type: 'image/gif' });
+    }
+
+    function buildPalette(frames, maxColors) {
+      var colorCount = {};
+      var step = Math.max(1, Math.floor(frames[0].data.length / 4 / 50000));
+      for (var f = 0; f < frames.length; f++) {
+        var data = frames[f].data;
+        for (var i = 0; i < data.length; i += 4 * step) {
+          var key = (data[i] >> 3) + ',' + (data[i+1] >> 3) + ',' + (data[i+2] >> 3);
+          colorCount[key] = (colorCount[key] || 0) + 1;
+        }
+      }
+      var sorted = Object.keys(colorCount).sort(function(a, b) { return colorCount[b] - colorCount[a]; });
+      var palette = [];
+      for (var i = 0; i < Math.min(maxColors, sorted.length); i++) {
+        var parts = sorted[i].split(',');
+        palette.push([parseInt(parts[0]) << 3, parseInt(parts[1]) << 3, parseInt(parts[2]) << 3]);
+      }
+      while (palette.length < maxColors) palette.push([0, 0, 0]);
+      return palette;
+    }
+
+    function quantizeFrame(data, palette) {
+      var result = new Uint8Array(data.length / 4);
+      for (var i = 0; i < data.length; i += 4) {
+        var minDist = Infinity, minIdx = 0;
+        for (var j = 0; j < palette.length; j++) {
+          var dr = data[i] - palette[j][0], dg = data[i+1] - palette[j][1], db = data[i+2] - palette[j][2];
+          var dist = dr*dr + dg*dg + db*db;
+          if (dist < minDist) { minDist = dist; minIdx = j; }
+        }
+        result[i / 4] = minIdx;
+      }
+      return result;
+    }
+
+    function lzwEncode(data, minCodeSize) {
+      var clearCode = 1 << minCodeSize, eoiCode = clearCode + 1;
+      var codeSize = minCodeSize + 1, nextCode = eoiCode + 1;
+      var output = [], bits = [];
+      function writeCode(code, size) { for (var i = 0; i < size; i++) bits.push((code >> i) & 1); }
+      function flushBits() { while (bits.length >= 8) { var b = 0; for (var i = 0; i < 8; i++) b |= (bits.shift() << i); output.push(b); } }
+      writeCode(clearCode, codeSize); flushBits();
+      var dict = {};
+      for (var i = 0; i < clearCode; i++) dict[String(i)] = i;
+      var w = String(data[0]);
+      for (var i = 1; i < data.length; i++) {
+        var k = String(data[i]), wk = w + ',' + k;
+        if (dict[wk] !== undefined) { w = wk; }
+        else {
+          if (nextCode < 4096) {
+            dict[wk] = nextCode++;
+            if (nextCode > (1 << codeSize) && codeSize < 12) codeSize++;
+          } else {
+            writeCode(clearCode, codeSize); flushBits();
+            dict = {}; for (var j = 0; j < clearCode; j++) dict[String(j)] = j;
+            nextCode = eoiCode + 1; codeSize = minCodeSize + 1;
+          }
+          writeCode(dict[w], codeSize); flushBits(); w = k;
+        }
+      }
+      writeCode(dict[w], codeSize); writeCode(eoiCode, codeSize); flushBits();
+      var result = [minCodeSize], idx = 0;
+      while (idx < output.length) { var bs = Math.min(255, output.length - idx); result.push(bs); for (var i = 0; i < bs; i++) result.push(output[idx++]); }
+      result.push(0x00);
+      return result;
+    }
   });
 </script>

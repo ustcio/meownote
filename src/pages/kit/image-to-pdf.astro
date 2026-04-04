@@ -3,7 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
 const toolName = '图片转PDF';
-const toolDesc = '图片转换为PDF';
+const toolDesc = '将图片转换为PDF文件';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,15 +22,70 @@ const toolDesc = '图片转换为PDF';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>点击或拖拽上传图片</span>
+          <span class="hint">每张图片将成为PDF的一页</span>
+          <input type="file" id="file-input" accept="image/*" multiple>
+        </div>
+
+        <div id="image-list" class="file-info" style="display:none;">
+          <div class="result-header">已上传图片 (<span id="image-count">0</span>张)</div>
+          <div id="thumbnails" style="display:flex;gap:0.2rem;flex-wrap:wrap;margin-top:0.2rem;"></div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <div class="setting-group">
+            <label class="setting-label">页面尺寸</label>
+            <div class="format-options" id="page-size-options">
+              <button class="format-btn active" data-size="a4">A4</button>
+              <button class="format-btn" data-size="letter">Letter</button>
+              <button class="format-btn" data-size="fit">适应图片</button>
+            </div>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">方向</label>
+            <div class="format-options" id="orientation-options">
+              <button class="format-btn active" data-orient="portrait">纵向</button>
+              <button class="format-btn" data-orient="landscape">横向</button>
+            </div>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">适配模式</label>
+            <div class="format-options" id="fit-options">
+              <button class="format-btn active" data-fit="contain">完整显示</button>
+              <button class="format-btn" data-fit="fill">填满页面</button>
+            </div>
+          </div>
+          <div class="btn-group">
+            <button class="btn-primary" id="generate-btn">生成 PDF</button>
+            <button class="btn-secondary" id="reset-btn">重置</button>
+          </div>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-text" id="progress-text">生成中...</div>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">PDF 已生成</div>
+          <div class="result-stats">
+            <div class="stat">
+              <span class="stat-label">页数</span>
+              <span class="stat-value" id="page-count"></span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">文件大小</span>
+              <span class="stat-value" id="pdf-size"></span>
+            </div>
+          </div>
+          <div class="btn-group" style="margin-top:0.3rem;">
+            <button class="btn-primary" id="download-btn">下载 PDF</button>
           </div>
         </div>
       </main>
@@ -39,12 +94,191 @@ const toolDesc = '图片转换为PDF';
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-main { overflow: auto; }
+  #thumbnails img { max-width: 80px; max-height: 80px; border-radius: 8px; object-fit: cover; }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('图片转PDF 工具已加载');
+  document.addEventListener('DOMContentLoaded', function() {
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var imageList = document.getElementById('image-list');
+    var thumbnails = document.getElementById('thumbnails');
+    var settings = document.getElementById('settings');
+    var progressArea = document.getElementById('progress-area');
+    var progressFill = document.getElementById('progress-fill');
+    var progressText = document.getElementById('progress-text');
+    var resultArea = document.getElementById('result-area');
+    var pageSizeBtns = document.querySelectorAll('#page-size-options .format-btn');
+    var orientBtns = document.querySelectorAll('#orientation-options .format-btn');
+    var fitBtns = document.querySelectorAll('#fit-options .format-btn');
+    var generateBtn = document.getElementById('generate-btn');
+    var resetBtn = document.getElementById('reset-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var images = [];
+    var pdfBlob = null;
+    var pageSize = 'a4';
+    var orientation = 'portrait';
+    var fitMode = 'contain';
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFiles(fileInput.files); });
+
+    function bindBtns(btns, getter) {
+      btns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          btns.forEach(function(b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          getter(btn);
+        });
+      });
+    }
+    bindBtns(pageSizeBtns, function(btn) { pageSize = btn.getAttribute('data-size'); });
+    bindBtns(orientBtns, function(btn) { orientation = btn.getAttribute('data-orient'); });
+    bindBtns(fitBtns, function(btn) { fitMode = btn.getAttribute('data-fit'); });
+
+    function handleFiles(files) {
+      images = [];
+      thumbnails.innerHTML = '';
+      var loaded = 0;
+      var total = 0;
+      for (var i = 0; i < files.length; i++) {
+        if (!files[i].type.startsWith('image/')) continue;
+        total++;
+        (function(file) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var img = new Image();
+            img.onload = function() { images.push(img); loaded++; var t = document.createElement('img'); t.src = e.target.result; thumbnails.appendChild(t); if (loaded === total) { document.getElementById('image-count').textContent = images.length; imageList.style.display = 'block'; settings.style.display = 'flex'; resultArea.style.display = 'none'; } };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        })(files[i]);
+      }
+    }
+
+    function getPageDims() {
+      if (pageSize === 'fit') return null;
+      var pts = pageSize === 'a4' ? [595.28, 841.89] : [612, 792];
+      if (orientation === 'landscape') return [pts[1], pts[0]];
+      return pts;
+    }
+
+    function generatePDF() {
+      var objects = [];
+      var objId = 0;
+      function addObj(content) { objId++; objects.push({ id: objId, content: content }); return objId; }
+
+      addObj('<< /Type /Catalog /Pages 2 0 R >>');
+      var kids = [];
+      var pageDims = getPageDims();
+
+      for (var i = 0; i < images.length; i++) {
+        var img = images[i];
+        var c = document.createElement('canvas');
+        c.width = img.width;
+        c.height = img.height;
+        var ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        var jpegData = c.toDataURL('image/jpeg', 0.85);
+        var binStr = atob(jpegData.split(',')[1]);
+        var imgBytes = new Uint8Array(binStr.length);
+        for (var j = 0; j < binStr.length; j++) imgBytes[j] = binStr.charCodeAt(j);
+
+        var imgObjId = addObj(null);
+        var imgContent = '<< /Type /XObject /Subtype /Image /Width ' + img.width + ' /Height ' + img.height + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + imgBytes.length + ' >>';
+        objects[imgObjId - 1].content = imgContent;
+        objects[imgObjId - 1].stream = imgBytes;
+
+        var pw, ph;
+        if (pageDims) {
+          pw = pageDims[0];
+          ph = pageDims[1];
+        } else {
+          pw = img.width * 0.75;
+          ph = img.height * 0.75;
+        }
+
+        var contentStream = 'q ' + pw.toFixed(2) + ' 0 0 ' + ph.toFixed(2) + ' 0 0 cm /Img' + imgObjId + ' Do Q';
+        var contentBytes = new Uint8Array(contentStream.length);
+        for (var j = 0; j < contentStream.length; j++) contentBytes[j] = contentStream.charCodeAt(j);
+        var contentObjId = addObj(null);
+        objects[contentObjId - 1].content = '<< /Length ' + contentBytes.length + ' >>';
+        objects[contentObjId - 1].stream = contentBytes;
+
+        var pageObjId = addObj('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pw.toFixed(2) + ' ' + ph.toFixed(2) + '] /Contents ' + contentObjId + ' 0 R /Resources << /XObject << /Img' + imgObjId + ' ' + imgObjId + ' 0 R >> >> >>');
+        kids.push(pageObjId + ' 0 R');
+      }
+
+      var pagesContent = '<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + images.length + ' >>';
+      objects[1].content = pagesContent;
+
+      var pdfParts = [];
+      pdfParts.push('%PDF-1.4\n');
+      var offsets = [];
+      for (var i = 0; i < objects.length; i++) {
+        offsets.push(pdfParts.join('').length);
+        pdfParts.push(objects[i].id + ' 0 obj\n');
+        pdfParts.push(objects[i].content);
+        if (objects[i].stream) {
+          pdfParts.push('\nstream\n');
+          for (var j = 0; j < objects[i].stream.length; j++) {
+            pdfParts.push(String.fromCharCode(objects[i].stream[j]));
+          }
+          pdfParts.push('\nendstream\n');
+        }
+        pdfParts.push('\nendobj\n');
+      }
+
+      var xrefOffset = pdfParts.join('').length;
+      pdfParts.push('xref\n0 ' + (objects.length + 1) + '\n');
+      pdfParts.push('0000000000 65535 f \n');
+      for (var i = 0; i < offsets.length; i++) {
+        pdfParts.push(('0000000000' + offsets[i]).slice(-10) + ' 00000 n \n');
+      }
+      pdfParts.push('trailer\n<< /Size ' + (objects.length + 1) + ' /Root 1 0 R >>\nstartxref\n' + xrefOffset + '\n%%EOF');
+
+      var pdfStr = pdfParts.join('');
+      var pdfBytes = new Uint8Array(pdfStr.length);
+      for (var i = 0; i < pdfStr.length; i++) pdfBytes[i] = pdfStr.charCodeAt(i) & 0xff;
+      return new Blob([pdfBytes], { type: 'application/pdf' });
+    }
+
+    generateBtn.addEventListener('click', function() {
+      if (images.length === 0) return;
+      progressArea.style.display = 'block';
+      progressFill.style.width = '50%';
+      progressText.textContent = '生成 PDF...';
+      setTimeout(function() {
+        pdfBlob = generatePDF();
+        document.getElementById('page-count').textContent = images.length;
+        document.getElementById('pdf-size').textContent = (pdfBlob.size / 1024).toFixed(1) + ' KB';
+        progressFill.style.width = '100%';
+        progressText.textContent = '完成!';
+        resultArea.style.display = 'block';
+        setTimeout(function() { progressArea.style.display = 'none'; }, 800);
+      }, 50);
+    });
+
+    resetBtn.addEventListener('click', function() {
+      images = [];
+      thumbnails.innerHTML = '';
+      imageList.style.display = 'none';
+      settings.style.display = 'none';
+      resultArea.style.display = 'none';
+      fileInput.value = '';
+    });
+
+    downloadBtn.addEventListener('click', function() {
+      if (!pdfBlob) return;
+      var url = URL.createObjectURL(pdfBlob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'images.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
   });
 </script>

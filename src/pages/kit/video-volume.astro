@@ -2,8 +2,8 @@
 import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
-const toolName = '视频音量修改';
-const toolDesc = '调整视频音量';
+const toolName = '视频音量调节';
+const toolDesc = '调整视频音频音量并导出';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,15 +22,54 @@ const toolDesc = '调整视频音量';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>点击或拖拽上传视频</span>
+          <span class="hint">支持 MP4, WebM, OGG 格式</span>
+          <input type="file" id="file-input" accept="video/*">
+        </div>
+
+        <div id="file-info" class="file-info" style="display:none;">
+          <div class="info-row">
+            <span class="info-label">文件名</span>
+            <span class="info-value" id="file-name"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">时长</span>
+            <span class="info-value" id="duration"></span>
+          </div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <div class="setting-group">
+            <label class="setting-label">音量: <span id="volume-value">1.0</span>x</label>
+            <input type="range" id="volume" min="0" max="300" value="100" style="width:100%;">
+          </div>
+          <div class="btn-group">
+            <button class="btn-primary" id="preview-btn">预览效果</button>
+            <button class="btn-secondary" id="reset-btn">重置</button>
+          </div>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">预览</div>
+          <video id="preview-video" controls style="width:100%;border-radius:10px;max-height:50vh;"></video>
+          <div class="result-stats">
+            <div class="stat">
+              <span class="stat-label">原始音量</span>
+              <span class="stat-value">1.0x</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">调整后</span>
+              <span class="stat-value" id="new-volume"></span>
+            </div>
+          </div>
+          <div class="btn-group" style="margin-top:0.3rem;">
+            <button class="btn-primary" id="download-btn">下载视频</button>
           </div>
         </div>
       </main>
@@ -39,12 +78,138 @@ const toolDesc = '调整视频音量';
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-main { overflow: auto; }
+  #preview-video { background: #000; }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('视频音量修改 工具已加载');
+  document.addEventListener('DOMContentLoaded', function() {
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var fileInfo = document.getElementById('file-info');
+    var settings = document.getElementById('settings');
+    var resultArea = document.getElementById('result-area');
+    var previewVideo = document.getElementById('preview-video');
+    var volumeSlider = document.getElementById('volume');
+    var volumeValue = document.getElementById('volume-value');
+    var previewBtn = document.getElementById('preview-btn');
+    var resetBtn = document.getElementById('reset-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var videoFile = null;
+    var videoUrl = null;
+    var audioCtx = null;
+    var gainNode = null;
+    var sourceNode = null;
+    var mediaElement = null;
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+    volumeSlider.addEventListener('input', function() {
+      var vol = (volumeSlider.value / 100).toFixed(1);
+      volumeValue.textContent = vol;
+      if (gainNode) gainNode.gain.value = volumeSlider.value / 100;
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('video/')) return;
+      videoFile = file;
+      if (videoUrl) URL.revokeObjectURL(videoUrl);
+      videoUrl = URL.createObjectURL(file);
+      document.getElementById('file-name').textContent = file.name;
+      fileInfo.style.display = 'block';
+      settings.style.display = 'flex';
+      resultArea.style.display = 'none';
+      var tempVideo = document.createElement('video');
+      tempVideo.src = videoUrl;
+      tempVideo.addEventListener('loadedmetadata', function() {
+        var mins = Math.floor(tempVideo.duration / 60);
+        var secs = Math.floor(tempVideo.duration % 60);
+        document.getElementById('duration').textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+      });
+    }
+
+    previewBtn.addEventListener('click', function() {
+      if (!videoUrl) return;
+      if (audioCtx) { audioCtx.close(); audioCtx = null; }
+      previewVideo.src = videoUrl;
+      previewVideo.volume = volumeSlider.value / 100;
+      previewVideo.play();
+      document.getElementById('new-volume').textContent = (volumeSlider.value / 100).toFixed(1) + 'x';
+      resultArea.style.display = 'block';
+    });
+
+    resetBtn.addEventListener('click', function() {
+      volumeSlider.value = 100;
+      volumeValue.textContent = '1.0';
+      if (previewVideo) { previewVideo.pause(); previewVideo.volume = 1; }
+      resultArea.style.display = 'none';
+    });
+
+    downloadBtn.addEventListener('click', function() {
+      if (!videoFile) return;
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext('2d');
+      var tempVideo = document.createElement('video');
+      tempVideo.src = videoUrl;
+      tempVideo.muted = false;
+      tempVideo.volume = volumeSlider.value / 100;
+
+      tempVideo.addEventListener('loadedmetadata', function() {
+        canvas.width = tempVideo.videoWidth;
+        canvas.height = tempVideo.videoHeight;
+        var stream = canvas.captureStream(30);
+
+        try {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          sourceNode = audioCtx.createMediaElementSource(tempVideo);
+          gainNode = audioCtx.createGain();
+          gainNode.gain.value = volumeSlider.value / 100;
+          var dest = audioCtx.createMediaStreamDestination();
+          sourceNode.connect(gainNode);
+          gainNode.connect(dest);
+          gainNode.connect(audioCtx.destination);
+          dest.stream.getAudioTracks().forEach(function(track) {
+            stream.addTrack(track);
+          });
+        } catch(e) {
+          console.warn('Audio processing not available, downloading without volume adjustment');
+        }
+
+        var recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+        var chunks = [];
+        recorder.ondataavailable = function(e) { if (e.data.size > 0) chunks.push(e.data); };
+        recorder.onstop = function() {
+          var blob = new Blob(chunks, { type: 'video/webm' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = videoFile.name.replace(/\.[^.]+$/, '') + '_volume_' + (volumeSlider.value / 100).toFixed(1) + 'x.webm';
+          a.click();
+          URL.revokeObjectURL(url);
+          if (audioCtx) { audioCtx.close(); audioCtx = null; }
+        };
+
+        tempVideo.play();
+        recorder.start();
+
+        function drawFrame() {
+          if (tempVideo.paused || tempVideo.ended) {
+            recorder.stop();
+            return;
+          }
+          ctx.drawImage(tempVideo, 0, 0, canvas.width, canvas.height);
+          requestAnimationFrame(drawFrame);
+        }
+        drawFrame();
+
+        tempVideo.addEventListener('ended', function() {
+          setTimeout(function() { recorder.stop(); }, 100);
+        });
+      });
+
+      tempVideo.load();
+    });
   });
 </script>

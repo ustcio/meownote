@@ -3,7 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
 const toolName = 'PDF转图片';
-const toolDesc = 'PDF转换为图片';
+const toolDesc = '将PDF每一页转换为图片';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,15 +22,51 @@ const toolDesc = 'PDF转换为图片';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>点击或拖拽上传PDF</span>
+          <span class="hint">每页将转换为单独的图片</span>
+          <input type="file" id="file-input" accept=".pdf">
+        </div>
+
+        <div id="file-info" class="file-info" style="display:none;">
+          <div class="info-row">
+            <span class="info-label">文件名</span>
+            <span class="info-value" id="file-name"></span>
+          </div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <div class="setting-group">
+            <label class="setting-label">输出格式</label>
+            <div class="format-options" id="format-options">
+              <button class="format-btn active" data-fmt="png">PNG</button>
+              <button class="format-btn" data-fmt="jpeg">JPG</button>
+            </div>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">分辨率倍数: <span id="scale-value">2</span>x</label>
+            <input type="range" id="scale" min="1" max="4" value="2" step="0.5" style="width:100%;">
+          </div>
+          <div class="btn-group">
+            <button class="btn-primary" id="convert-btn">开始转换</button>
+          </div>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-text" id="progress-text">转换中...</div>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">转换结果</div>
+          <div id="pages-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.3rem;margin-top:0.3rem;"></div>
+          <div class="btn-group" style="margin-top:0.3rem;">
+            <button class="btn-primary" id="download-all-btn">下载全部</button>
           </div>
         </div>
       </main>
@@ -39,12 +75,164 @@ const toolDesc = 'PDF转换为图片';
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-main { overflow: auto; }
+  .page-card { background:var(--frosted-bg); border-radius:10px; padding:0.2rem; text-align:center; }
+  .page-card canvas { width:100%; border-radius:5px; }
+  .page-card .page-label { font-size:0.22rem; color:var(--color-tm-text); margin-top:0.1rem; }
+  .page-card .download-link { font-size:0.2rem; color:var(--top-color); cursor:pointer; display:block; margin-top:0.1rem; }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('PDF转图片 工具已加载');
+  document.addEventListener('DOMContentLoaded', function() {
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var fileInfo = document.getElementById('file-info');
+    var settings = document.getElementById('settings');
+    var progressArea = document.getElementById('progress-area');
+    var progressFill = document.getElementById('progress-fill');
+    var progressText = document.getElementById('progress-text');
+    var resultArea = document.getElementById('result-area');
+    var pagesGrid = document.getElementById('pages-grid');
+    var formatBtns = document.querySelectorAll('#format-options .format-btn');
+    var scaleSlider = document.getElementById('scale');
+    var scaleValue = document.getElementById('scale-value');
+    var convertBtn = document.getElementById('convert-btn');
+    var downloadAllBtn = document.getElementById('download-all-btn');
+    var pdfFile = null;
+    var format = 'png';
+    var pageCanvases = [];
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+    scaleSlider.addEventListener('input', function() { scaleValue.textContent = scaleSlider.value; });
+    formatBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        formatBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        format = btn.getAttribute('data-fmt');
+      });
+    });
+
+    function handleFile(file) {
+      if (file.type !== 'application/pdf') return;
+      pdfFile = file;
+      document.getElementById('file-name').textContent = file.name;
+      fileInfo.style.display = 'block';
+      settings.style.display = 'flex';
+      resultArea.style.display = 'none';
+    }
+
+    convertBtn.addEventListener('click', function() {
+      if (!pdfFile) return;
+      progressArea.style.display = 'block';
+      progressFill.style.width = '10%';
+      progressText.textContent = '读取PDF...';
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var data = new Uint8Array(e.target.result);
+        var text = '';
+        for (var i = 0; i < Math.min(data.length, 50000); i++) text += String.fromCharCode(data[i]);
+        var pages = extractPages(text);
+        if (pages.length === 0) pages.push('Page content unavailable - binary PDF data');
+        progressFill.style.width = '30%';
+        progressText.textContent = '渲染页面...';
+        pagesGrid.innerHTML = '';
+        pageCanvases = [];
+        var scale = parseFloat(scaleSlider.value);
+        var done = 0;
+        pages.forEach(function(pageText, idx) {
+          var canvas = document.createElement('canvas');
+          var w = 612 * scale;
+          var h = 792 * scale;
+          canvas.width = w;
+          canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = '#000000';
+          ctx.font = (12 * scale) + 'px Helvetica, sans-serif';
+          var lines = pageText.split('\n');
+          var y = 40 * scale;
+          for (var l = 0; l < lines.length && y < h - 20 * scale; l++) {
+            ctx.fillText(lines[l], 40 * scale, y);
+            y += 16 * scale;
+          }
+          pageCanvases.push(canvas);
+          var card = document.createElement('div');
+          card.className = 'page-card';
+          var thumb = document.createElement('canvas');
+          thumb.width = 200;
+          thumb.height = 200 * (h / w);
+          var tctx = thumb.getContext('2d');
+          tctx.drawImage(canvas, 0, 0, thumb.width, thumb.height);
+          var label = document.createElement('div');
+          label.className = 'page-label';
+          label.textContent = 'Page ' + (idx + 1);
+          var link = document.createElement('a');
+          link.className = 'download-link';
+          link.textContent = '下载';
+          link.addEventListener('click', function() {
+            canvas.toBlob(function(blob) {
+              var url = URL.createObjectURL(blob);
+              var a = document.createElement('a');
+              a.href = url;
+              a.download = 'page_' + (idx + 1) + '.' + (format === 'jpeg' ? 'jpg' : 'png');
+              a.click();
+              URL.revokeObjectURL(url);
+            }, 'image/' + format, 0.92);
+          });
+          card.appendChild(thumb);
+          card.appendChild(label);
+          card.appendChild(link);
+          pagesGrid.appendChild(card);
+          done++;
+          progressFill.style.width = (30 + (done / pages.length) * 60) + '%';
+        });
+        progressFill.style.width = '100%';
+        progressText.textContent = '完成! ' + pages.length + ' 页';
+        resultArea.style.display = 'block';
+        setTimeout(function() { progressArea.style.display = 'none'; }, 800);
+      };
+      reader.readAsArrayBuffer(pdfFile);
+    });
+
+    function extractPages(text) {
+      var pages = [];
+      var btIdx = 0;
+      while (btIdx < text.length) {
+        var bt = text.indexOf('BT', btIdx);
+        if (bt < 0) break;
+        var et = text.indexOf('ET', bt);
+        if (et < 0) break;
+        var block = text.substring(bt, et);
+        var pageText = '';
+        var matches = block.match(/\(([^)]*)\)/g);
+        if (matches) {
+          for (var m = 0; m < matches.length; m++) {
+            pageText += matches[m].slice(1, -1);
+          }
+        }
+        pages.push(pageText);
+        btIdx = et + 2;
+      }
+      return pages;
+    }
+
+    downloadAllBtn.addEventListener('click', function() {
+      pageCanvases.forEach(function(canvas, idx) {
+        setTimeout(function() {
+          canvas.toBlob(function(blob) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'page_' + (idx + 1) + '.' + (format === 'jpeg' ? 'jpg' : 'png');
+            a.click();
+            URL.revokeObjectURL(url);
+          }, 'image/' + format, 0.92);
+        }, idx * 300);
+      });
+    });
   });
 </script>

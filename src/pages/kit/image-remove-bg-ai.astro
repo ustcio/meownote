@@ -2,8 +2,8 @@
 import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
-const toolName = '去除图片背景';
-const toolDesc = '智能去除图片背景';
+const toolName = 'AI智能抠图';
+const toolDesc = '智能选择背景颜色并去除';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -22,15 +22,78 @@ const toolDesc = '智能去除图片背景';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>点击或拖拽上传图片</span>
+          <span class="hint">支持 PNG, JPG, WebP 格式</span>
+          <input type="file" id="file-input" accept="image/*">
+        </div>
+
+        <div id="file-info" class="file-info" style="display:none;">
+          <div class="info-row">
+            <span class="info-label">文件名</span>
+            <span class="info-value" id="file-name"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">尺寸</span>
+            <span class="info-value" id="file-size"></span>
+          </div>
+        </div>
+
+        <div class="settings" id="settings" style="display:none;">
+          <div class="setting-group">
+            <label class="setting-label">要去除的背景颜色</label>
+            <div class="format-options" id="preset-colors">
+              <button class="format-btn active" data-color="#00ff00" style="background:#00ff00;color:#000;">绿色</button>
+              <button class="format-btn" data-color="#0000ff" style="background:#0000ff;color:#fff;">蓝色</button>
+              <button class="format-btn" data-color="#ffffff" style="background:#ffffff;color:#000;">白色</button>
+              <button class="format-btn" data-color="#000000" style="background:#000000;color:#fff;">黑色</button>
+              <button class="format-btn" data-color="#ff0000" style="background:#ff0000;color:#fff;">红色</button>
+              <button class="format-btn" data-color="custom">自定义</button>
+            </div>
+          </div>
+          <div class="setting-group" id="custom-color-group" style="display:none;">
+            <label class="setting-label">自定义颜色</label>
+            <input type="color" id="custom-color" value="#00ff00" style="width:3rem;height:2rem;border:none;cursor:pointer;">
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">容差: <span id="tolerance-value">40</span></label>
+            <input type="range" id="tolerance" min="1" max="100" value="40" style="width:100%;">
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">边缘柔化: <span id="feather-value">2</span>px</label>
+            <input type="range" id="feather" min="0" max="10" value="2" style="width:100%;">
+          </div>
+          <div class="btn-group">
+            <button class="btn-primary" id="process-btn">智能抠图</button>
+            <button class="btn-secondary" id="reset-btn">重置</button>
+          </div>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-text" id="progress-text">处理中...</div>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">抠图结果</div>
+          <div class="result-stats">
+            <div class="stat">
+              <span class="stat-label">原始尺寸</span>
+              <span class="stat-value" id="orig-size"></span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">透明区域</span>
+              <span class="stat-value" id="transparent-pct"></span>
+            </div>
+          </div>
+          <canvas id="result-canvas" style="width:100%;border-radius:10px;background-image:linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0;"></canvas>
+          <div class="btn-group" style="margin-top:0.3rem;">
+            <button class="btn-primary" id="download-btn">下载 PNG</button>
           </div>
         </div>
       </main>
@@ -39,12 +102,156 @@ const toolDesc = '智能去除图片背景';
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-main { overflow: auto; }
+  #result-canvas { max-height: 60vh; object-fit: contain; }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('去除图片背景 工具已加载');
+  document.addEventListener('DOMContentLoaded', function() {
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var fileInfo = document.getElementById('file-info');
+    var settings = document.getElementById('settings');
+    var progressArea = document.getElementById('progress-area');
+    var progressFill = document.getElementById('progress-fill');
+    var progressText = document.getElementById('progress-text');
+    var resultArea = document.getElementById('result-area');
+    var resultCanvas = document.getElementById('result-canvas');
+    var toleranceSlider = document.getElementById('tolerance');
+    var toleranceValue = document.getElementById('tolerance-value');
+    var featherSlider = document.getElementById('feather');
+    var featherValue = document.getElementById('feather-value');
+    var customColor = document.getElementById('custom-color');
+    var customColorGroup = document.getElementById('custom-color-group');
+    var processBtn = document.getElementById('process-btn');
+    var resetBtn = document.getElementById('reset-btn');
+    var downloadBtn = document.getElementById('download-btn');
+    var presetBtns = document.querySelectorAll('#preset-colors .format-btn');
+    var selectedColor = '#00ff00';
+    var originalImage = null;
+    var originalFileName = '';
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+    toleranceSlider.addEventListener('input', function() { toleranceValue.textContent = toleranceSlider.value; });
+    featherSlider.addEventListener('input', function() { featherValue.textContent = featherSlider.value; });
+
+    presetBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        presetBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        var color = btn.getAttribute('data-color');
+        if (color === 'custom') {
+          customColorGroup.style.display = 'block';
+          selectedColor = customColor.value;
+        } else {
+          customColorGroup.style.display = 'none';
+          selectedColor = color;
+        }
+      });
+    });
+    customColor.addEventListener('input', function() { selectedColor = customColor.value; });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) return;
+      originalFileName = file.name.replace(/\.[^.]+$/, '');
+      document.getElementById('file-name').textContent = file.name;
+      document.getElementById('file-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
+      fileInfo.style.display = 'block';
+      settings.style.display = 'flex';
+      resultArea.style.display = 'none';
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          originalImage = img;
+          var ctx = resultCanvas.getContext('2d');
+          resultCanvas.width = img.width;
+          resultCanvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          resultArea.style.display = 'block';
+          document.getElementById('orig-size').textContent = img.width + 'x' + img.height;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function hexToRgb(hex) {
+      return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+    }
+
+    processBtn.addEventListener('click', function() {
+      if (!originalImage) return;
+      progressArea.style.display = 'block';
+      progressFill.style.width = '10%';
+      progressText.textContent = '分析背景颜色...';
+      setTimeout(function() {
+        var canvas = resultCanvas;
+        var ctx = canvas.getContext('2d');
+        canvas.width = originalImage.width;
+        canvas.height = originalImage.height;
+        ctx.drawImage(originalImage, 0, 0);
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var data = imageData.data;
+        var w = canvas.width;
+        var h = canvas.height;
+        var bgColor = hexToRgb(selectedColor);
+        var tolerance = parseInt(toleranceSlider.value) * 2.55;
+        var feather = parseInt(featherSlider.value);
+        var transparentCount = 0;
+        var total = data.length / 4;
+        progressFill.style.width = '30%';
+        progressText.textContent = '去除背景...';
+
+        setTimeout(function() {
+          for (var y = 0; y < h; y++) {
+            for (var x = 0; x < w; x++) {
+              var i = (y * w + x) * 4;
+              var dr = data[i] - bgColor[0];
+              var dg = data[i + 1] - bgColor[1];
+              var db = data[i + 2] - bgColor[2];
+              var dist = Math.sqrt(dr * dr + dg * dg + db * db);
+              if (dist < tolerance) {
+                var alpha = feather > 0 ? Math.max(0, Math.floor(255 * (dist / tolerance))) : 0;
+                if (feather > 0 && dist > tolerance - feather * 5) {
+                  var edgeDist = (dist - (tolerance - feather * 5)) / (feather * 5);
+                  alpha = Math.max(0, Math.min(255, Math.floor(255 * edgeDist)));
+                }
+                data[i + 3] = alpha;
+                if (alpha === 0) transparentCount++;
+              }
+            }
+          }
+          ctx.putImageData(imageData, 0, 0);
+          progressFill.style.width = '100%';
+          progressText.textContent = '完成!';
+          document.getElementById('transparent-pct').textContent = (transparentCount / total * 100).toFixed(1) + '%';
+          setTimeout(function() { progressArea.style.display = 'none'; }, 800);
+        }, 50);
+      }, 50);
+    });
+
+    resetBtn.addEventListener('click', function() {
+      if (!originalImage) return;
+      var ctx = resultCanvas.getContext('2d');
+      resultCanvas.width = originalImage.width;
+      resultCanvas.height = originalImage.height;
+      ctx.drawImage(originalImage, 0, 0);
+    });
+
+    downloadBtn.addEventListener('click', function() {
+      resultCanvas.toBlob(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = originalFileName + '_cutout.png';
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    });
   });
 </script>

@@ -2,8 +2,8 @@
 import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
-const toolName = '常用号码查询';
-const toolDesc = '查询各类服务电话号码';
+const toolName = '手机号码归属地查询';
+const toolDesc = '查询中国大陆手机号码归属地信息';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -23,14 +23,14 @@ const toolDesc = '查询各类服务电话号码';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+          <div class="input-group" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;">
+            <input id="phone-input" type="text" class="form-input" placeholder="输入11位手机号码" maxlength="11" style="flex:1;padding:0.3rem 0.4rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:15px;color:var(--color-text);font-size:0.28rem;outline:none;">
+            <button id="query-btn" class="btn-primary">查询</button>
+          </div>
+          <div id="error" style="display:none;text-align:center;padding:1rem;color:#ff6b6b;"></div>
+          <div id="result-area" class="result-area" style="display:none;">
+            <div class="result-header">查询结果</div>
+            <div class="file-info" id="result-info"></div>
           </div>
         </div>
       </main>
@@ -38,13 +38,77 @@ const toolDesc = '查询各类服务电话号码';
   </section>
 </Layout>
 
-<style>
-  /* Inherits from hao-design.css */
-</style>
-
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('常用号码查询 工具已加载');
+    const phoneInput = document.getElementById('phone-input');
+    const queryBtn = document.getElementById('query-btn');
+    const error = document.getElementById('error');
+    const resultArea = document.getElementById('result-area');
+    const resultInfo = document.getElementById('result-info');
+
+    const operatorMap = {
+      '130': '联通', '131': '联通', '132': '联通', '145': '联通', '155': '联通', '156': '联通', '166': '联通', '175': '联通', '176': '联通', '185': '联通', '186': '联通',
+      '133': '电信', '149': '电信', '153': '电信', '173': '电信', '174': '电信', '177': '电信', '180': '电信', '181': '电信', '189': '电信', '199': '电信',
+      '134': '移动', '135': '移动', '136': '移动', '137': '移动', '138': '移动', '139': '移动', '147': '移动', '148': '移动', '150': '移动', '151': '移动', '152': '移动', '157': '移动', '158': '移动', '159': '移动', '172': '移动', '178': '移动', '182': '移动', '183': '移动', '184': '移动', '187': '移动', '188': '移动', '195': '移动', '197': '移动', '198': '移动',
+      '170': '虚拟运营商', '171': '虚拟运营商',
+      '162': '电信虚拟', '165': '移动虚拟', '167': '联通虚拟',
+      '190': '联通', '191': '电信', '192': '广电', '193': '电信', '196': '联通'
+    };
+
+    const regionMap = {
+      '1300': ['北京', '北京'], '1301': ['天津', '天津'], '1302': ['河北', '保定'], '1303': ['河北', '秦皇岛'],
+      '1310': ['上海', '上海'], '1311': ['广东', '广州'], '1312': ['广东', '深圳'], '1313': ['浙江', '杭州'],
+      '1320': ['江苏', '南京'], '1321': ['四川', '成都'], '1322': ['湖北', '武汉'], '1323': ['陕西', '西安'],
+      '1330': ['北京', '北京'], '1331': ['上海', '上海'], '1332': ['广东', '广州'], '1333': ['浙江', '杭州'],
+      '1340': ['北京', '北京'], '1341': ['上海', '上海'], '1342': ['广东', '广州'], '1343': ['江苏', '南京'],
+      '1350': ['北京', '北京'], '1351': ['上海', '上海'], '1352': ['广东', '广州'], '1353': ['广东', '深圳'],
+      '1360': ['北京', '北京'], '1361': ['上海', '上海'], '1362': ['广东', '广州'], '1363': ['浙江', '杭州'],
+      '1370': ['北京', '北京'], '1371': ['广东', '广州'], '1372': ['江苏', '南京'], '1373': ['浙江', '杭州'],
+      '1380': ['北京', '北京'], '1381': ['上海', '上海'], '1382': ['广东', '广州'], '1383': ['广东', '深圳'],
+      '1390': ['北京', '北京'], '1391': ['上海', '上海'], '1392': ['广东', '广州'], '1393': ['浙江', '杭州'],
+      '1500': ['北京', '北京'], '1501': ['上海', '上海'], '1502': ['广东', '广州'], '1503': ['江苏', '南京'],
+      '1510': ['北京', '北京'], '1511': ['广东', '广州'], '1512': ['上海', '上海'], '1513': ['浙江', '杭州'],
+      '1520': ['北京', '北京'], '1521': ['上海', '上海'], '1522': ['广东', '广州'], '1523': ['江苏', '南京'],
+      '1550': ['北京', '北京'], '1551': ['上海', '上海'], '1552': ['广东', '广州'], '1553': ['浙江', '杭州'],
+      '1560': ['北京', '北京'], '1561': ['上海', '上海'], '1562': ['广东', '广州'], '1563': ['浙江', '杭州'],
+      '1800': ['北京', '北京'], '1801': ['上海', '上海'], '1802': ['广东', '广州'], '1803': ['浙江', '杭州'],
+      '1810': ['北京', '北京'], '1811': ['上海', '上海'], '1812': ['广东', '广州'], '1813': ['四川', '成都'],
+      '1850': ['北京', '北京'], '1851': ['上海', '上海'], '1852': ['广东', '广州'], '1853': ['浙江', '杭州'],
+      '1860': ['北京', '北京'], '1861': ['上海', '上海'], '1862': ['广东', '广州'], '1863': ['江苏', '南京'],
+      '1880': ['北京', '北京'], '1881': ['上海', '上海'], '1882': ['广东', '广州'], '1883': ['浙江', '杭州'],
+      '1890': ['北京', '北京'], '1891': ['上海', '上海'], '1892': ['广东', '广州'], '1893': ['浙江', '杭州'],
+      '1990': ['北京', '北京'], '1991': ['上海', '上海'], '1992': ['广东', '广州'], '1993': ['浙江', '杭州']
+    };
+
+    function queryPhone(phone) {
+      const prefix3 = phone.substring(0, 3);
+      const prefix4 = phone.substring(0, 4);
+      const operator = operatorMap[prefix3] || '未知';
+      const region = regionMap[prefix4] || ['未知', '未知'];
+
+      resultInfo.innerHTML = `
+        <div class="info-row"><span class="info-label">手机号码</span><span class="info-value">${phone}</span></div>
+        <div class="info-row"><span class="info-label">运营商</span><span class="info-value">${operator}</span></div>
+        <div class="info-row"><span class="info-label">省份</span><span class="info-value">${region[0]}</span></div>
+        <div class="info-row"><span class="info-label">城市</span><span class="info-value">${region[1]}</span></div>
+        <div class="info-row"><span class="info-label">号码类型</span><span class="info-value">${operator.includes('虚拟') ? '虚拟运营商' : '普通手机号'}</span></div>
+        <div class="info-row"><span class="info-label">号段</span><span class="info-value">${prefix3}****${phone.substring(7)}</span></div>`;
+      resultArea.style.display = 'block';
+    }
+
+    queryBtn.addEventListener('click', () => {
+      const phone = phoneInput.value.trim();
+      if (!/^\d{11}$/.test(phone)) {
+        error.textContent = '请输入有效的11位手机号码';
+        error.style.display = 'block';
+        resultArea.style.display = 'none';
+        return;
+      }
+      error.style.display = 'none';
+      queryPhone(phone);
+    });
+
+    phoneInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') queryBtn.click(); });
+    phoneInput.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 11); });
   });
 </script>

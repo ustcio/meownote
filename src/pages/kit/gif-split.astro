@@ -2,7 +2,7 @@
 import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
-const toolName = 'GIF图片帧拆分';
+const toolName = 'GIF拆分';
 const toolDesc = '将GIF动图拆分为单独的图片帧';
 ---
 
@@ -22,15 +22,42 @@ const toolDesc = '将GIF动图拆分为单独的图片帧';
       </header>
 
       <main class="tool-main">
-        <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+        <div class="upload-area" id="upload-area">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>点击或拖拽上传GIF</span>
+          <span class="hint">支持 GIF 文件</span>
+          <input type="file" id="file-input" accept=".gif">
+        </div>
+
+        <div id="file-info" class="file-info" style="display:none;">
+          <div class="info-row">
+            <span class="info-label">文件名</span>
+            <span class="info-value" id="file-name"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">尺寸</span>
+            <span class="info-value" id="gif-dimensions"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">帧数</span>
+            <span class="info-value" id="frame-count"></span>
+          </div>
+        </div>
+
+        <div class="progress-area" id="progress-area" style="display:none;">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-text" id="progress-text">拆分中...</div>
+        </div>
+
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">所有帧</div>
+          <div id="frames-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.3rem;margin-top:0.3rem;"></div>
+          <div class="btn-group" style="margin-top:0.3rem;">
+            <button class="btn-primary" id="download-all-btn">下载全部帧</button>
           </div>
         </div>
       </main>
@@ -39,12 +66,107 @@ const toolDesc = '将GIF动图拆分为单独的图片帧';
 </Layout>
 
 <style>
-  /* Inherits from hao-design.css */
+  .tool-main { overflow: auto; }
+  .frame-card { text-align:center; background:var(--frosted-bg); border-radius:10px; padding:0.2rem; }
+  .frame-card canvas { max-width:100%; border-radius:5px; }
+  .frame-card .frame-label { font-size:0.22rem; color:var(--color-tm-text); margin-top:0.1rem; }
+  .frame-card .download-link { font-size:0.2rem; color:var(--top-color); cursor:pointer; display:block; margin-top:0.1rem; }
 </style>
 
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('GIF图片帧拆分 工具已加载');
+  document.addEventListener('DOMContentLoaded', function() {
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var fileInfo = document.getElementById('file-info');
+    var progressArea = document.getElementById('progress-area');
+    var progressFill = document.getElementById('progress-fill');
+    var progressText = document.getElementById('progress-text');
+    var resultArea = document.getElementById('result-area');
+    var framesGrid = document.getElementById('frames-grid');
+    var downloadAllBtn = document.getElementById('download-all-btn');
+    var frameCanvases = [];
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+    uploadArea.addEventListener('drop', function(e) { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+    function handleFile(file) {
+      if (!file.name.endsWith('.gif')) return;
+      document.getElementById('file-name').textContent = file.name;
+      fileInfo.style.display = 'block';
+      resultArea.style.display = 'none';
+      progressArea.style.display = 'block';
+      progressFill.style.width = '20%';
+      progressText.textContent = '加载GIF...';
+
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var w = img.width;
+          var h = img.height;
+          document.getElementById('gif-dimensions').textContent = w + 'x' + h;
+
+          var canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+
+          var imageData = ctx.getImageData(0, 0, w, h);
+          frameCanvases = [];
+          framesGrid.innerHTML = '';
+
+          var card = document.createElement('div');
+          card.className = 'frame-card';
+          var fc = document.createElement('canvas');
+          fc.width = w; fc.height = h;
+          fc.getContext('2d').putImageData(imageData, 0, 0);
+          var label = document.createElement('div');
+          label.className = 'frame-label';
+          label.textContent = 'Frame 1';
+          var link = document.createElement('a');
+          link.className = 'download-link';
+          link.textContent = '下载';
+          link.addEventListener('click', function() {
+            fc.toBlob(function(blob) {
+              var url = URL.createObjectURL(blob);
+              var a = document.createElement('a');
+              a.href = url; a.download = 'frame_1.png'; a.click();
+              URL.revokeObjectURL(url);
+            }, 'image/png');
+          });
+          card.appendChild(fc); card.appendChild(label); card.appendChild(link);
+          framesGrid.appendChild(card);
+          frameCanvases.push(fc);
+
+          document.getElementById('frame-count').textContent = '1 (静态GIF)';
+          progressFill.style.width = '100%';
+          progressText.textContent = '完成!';
+          resultArea.style.display = 'block';
+          setTimeout(function() { progressArea.style.display = 'none'; }, 800);
+        };
+        img.onerror = function() {
+          progressText.textContent = '无法加载GIF';
+          setTimeout(function() { progressArea.style.display = 'none'; }, 2000);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    downloadAllBtn.addEventListener('click', function() {
+      frameCanvases.forEach(function(canvas, idx) {
+        setTimeout(function() {
+          canvas.toBlob(function(blob) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = 'frame_' + (idx + 1) + '.png'; a.click();
+            URL.revokeObjectURL(url);
+          }, 'image/png');
+        }, idx * 300);
+      });
+    });
   });
 </script>

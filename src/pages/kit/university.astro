@@ -23,28 +23,182 @@ const toolDesc = '查询全国高校信息';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+          <div style="display:flex;gap:0.2rem;margin-bottom:0.4rem;flex-wrap:wrap;">
+            <input id="search-input" type="text" class="form-input" placeholder="搜索大学名称" style="flex:1;min-width:150px;padding:0.3rem 0.4rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:15px;color:var(--color-text);font-size:0.28rem;outline:none;">
+            <select id="filter-type" class="setting-select" style="padding:0.3rem;">
+              <option value="all">全部类型</option>
+              <option value="985">985工程</option>
+              <option value="211">211工程</option>
+              <option value="双一流">双一流</option>
+            </select>
+            <select id="filter-province" class="setting-select" style="padding:0.3rem;">
+              <option value="all">全部省份</option>
+            </select>
           </div>
+          <div id="count-info" style="font-size:0.22rem;color:var(--color-tm-text);margin-bottom:0.3rem;"></div>
+          <div id="table-container" style="overflow-x:auto;"></div>
         </div>
       </main>
     </div>
   </section>
 </Layout>
 
-<style>
-  /* Inherits from hao-design.css */
-</style>
-
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('高校查询 工具已加载');
+    const universities = [
+      { name: '清华大学', province: '北京', type: '985', rank: 1 },
+      { name: '北京大学', province: '北京', type: '985', rank: 2 },
+      { name: '浙江大学', province: '浙江', type: '985', rank: 3 },
+      { name: '上海交通大学', province: '上海', type: '985', rank: 4 },
+      { name: '复旦大学', province: '上海', type: '985', rank: 5 },
+      { name: '南京大学', province: '江苏', type: '985', rank: 6 },
+      { name: '中国科学技术大学', province: '安徽', type: '985', rank: 7 },
+      { name: '华中科技大学', province: '湖北', type: '985', rank: 8 },
+      { name: '武汉大学', province: '湖北', type: '985', rank: 9 },
+      { name: '中山大学', province: '广东', type: '985', rank: 10 },
+      { name: '西安交通大学', province: '陕西', type: '985', rank: 11 },
+      { name: '哈尔滨工业大学', province: '黑龙江', type: '985', rank: 12 },
+      { name: '北京航空航天大学', province: '北京', type: '985', rank: 13 },
+      { name: '同济大学', province: '上海', type: '985', rank: 14 },
+      { name: '东南大学', province: '江苏', type: '985', rank: 15 },
+      { name: '中国人民大学', province: '北京', type: '985', rank: 16 },
+      { name: '北京理工大学', province: '北京', type: '985', rank: 17 },
+      { name: '四川大学', province: '四川', type: '985', rank: 18 },
+      { name: '天津大学', province: '天津', type: '985', rank: 19 },
+      { name: '南开大学', province: '天津', type: '985', rank: 20 },
+      { name: '山东大学', province: '山东', type: '985', rank: 21 },
+      { name: '厦门大学', province: '福建', type: '985', rank: 22 },
+      { name: '吉林大学', province: '吉林', type: '985', rank: 23 },
+      { name: '中南大学', province: '湖南', type: '985', rank: 24 },
+      { name: '大连理工大学', province: '辽宁', type: '985', rank: 25 },
+      { name: '西北工业大学', province: '陕西', type: '985', rank: 26 },
+      { name: '电子科技大学', province: '四川', type: '985', rank: 27 },
+      { name: '华南理工大学', province: '广东', type: '985', rank: 28 },
+      { name: '重庆大学', province: '重庆', type: '985', rank: 29 },
+      { name: '湖南大学', province: '湖南', type: '985', rank: 30 },
+      { name: '北京师范大学', province: '北京', type: '985', rank: 31 },
+      { name: '兰州大学', province: '甘肃', type: '985', rank: 32 },
+      { name: '中国农业大学', province: '北京', type: '985', rank: 33 },
+      { name: '东北大学', province: '辽宁', type: '985', rank: 34 },
+      { name: '云南大学', province: '云南', type: '双一流', rank: 55 },
+      { name: '郑州大学', province: '河南', type: '双一流', rank: 40 },
+      { name: '新疆大学', province: '新疆', type: '双一流', rank: 85 },
+      { name: '上海大学', province: '上海', type: '211', rank: 42 },
+      { name: '北京科技大学', province: '北京', type: '211', rank: 35 },
+      { name: '武汉理工大学', province: '湖北', type: '211', rank: 38 },
+      { name: '西南交通大学', province: '四川', type: '211', rank: 41 },
+      { name: '南京航空航天大学', province: '江苏', type: '211', rank: 36 },
+      { name: '南京理工大学', province: '江苏', type: '211', rank: 37 },
+      { name: '北京邮电大学', province: '北京', type: '211', rank: 39 },
+      { name: '西安电子科技大学', province: '陕西', type: '211', rank: 43 },
+      { name: '中国传媒大学', province: '北京', type: '211', rank: 48 },
+      { name: '中央财经大学', province: '北京', type: '211', rank: 45 },
+      { name: '对外经济贸易大学', province: '北京', type: '211', rank: 46 },
+      { name: '苏州大学', province: '江苏', type: '211', rank: 44 },
+      { name: '暨南大学', province: '广东', type: '211', rank: 47 },
+      { name: '深圳大学', province: '广东', type: '双一流', rank: 50 },
+      { name: '南方科技大学', province: '广东', type: '双一流', rank: 52 },
+      { name: '杭州电子科技大学', province: '浙江', type: '普通', rank: 65 },
+      { name: '浙江工业大学', province: '浙江', type: '普通', rank: 68 },
+      { name: '广东工业大学', province: '广东', type: '普通', rank: 72 },
+      { name: '南京邮电大学', province: '江苏', type: '双一流', rank: 60 },
+      { name: '北京交通大学', province: '北京', type: '211', rank: 49 },
+      { name: '华东理工大学', province: '上海', type: '211', rank: 51 },
+      { name: '东华大学', province: '上海', type: '211', rank: 58 },
+      { name: '华中师范大学', province: '湖北', type: '211', rank: 53 },
+      { name: '东北师范大学', province: '吉林', type: '211', rank: 56 },
+      { name: '西南大学', province: '重庆', type: '211', rank: 54 },
+      { name: '西北大学', province: '陕西', type: '211', rank: 57 },
+      { name: '合肥工业大学', province: '安徽', type: '211', rank: 59 },
+      { name: '南昌大学', province: '江西', type: '211', rank: 62 },
+      { name: '福州大学', province: '福建', type: '211', rank: 63 },
+      { name: '广西大学', province: '广西', type: '211', rank: 70 },
+      { name: '贵州大学', province: '贵州', type: '211', rank: 75 },
+      { name: '海南大学', province: '海南', type: '211', rank: 78 },
+      { name: '宁夏大学', province: '宁夏', type: '211', rank: 88 },
+      { name: '青海大学', province: '青海', type: '211', rank: 92 },
+      { name: '石河子大学', province: '新疆', type: '211', rank: 95 },
+      { name: '西藏大学', province: '西藏', type: '211', rank: 100 },
+      { name: '内蒙古大学', province: '内蒙古', type: '211', rank: 82 },
+      { name: '河北工业大学', province: '河北', type: '211', rank: 66 },
+      { name: '太原理工大学', province: '山西', type: '211', rank: 80 },
+      { name: '辽宁大学', province: '辽宁', type: '211', rank: 76 },
+      { name: '延边大学', province: '吉林', type: '211', rank: 90 },
+      { name: '哈尔滨工程大学', province: '黑龙江', type: '211', rank: 61 },
+      { name: '东北林业大学', province: '黑龙江', type: '211', rank: 83 },
+      { name: '长安大学', province: '陕西', type: '211', rank: 73 },
+      { name: '西北农林科技大学', province: '陕西', type: '985', rank: 64 },
+      { name: '中国海洋大学', province: '山东', type: '985', rank: 67 },
+      { name: '中国政法大学', province: '北京', type: '211', rank: 69 },
+      { name: '北京外国语大学', province: '北京', type: '211', rank: 71 },
+      { name: '上海财经大学', province: '上海', type: '211', rank: 74 },
+      { name: '中南财经政法大学', province: '湖北', type: '211', rank: 77 },
+      { name: '西南财经大学', province: '四川', type: '211', rank: 79 },
+      { name: '华北电力大学', province: '北京', type: '211', rank: 81 },
+      { name: '江南大学', province: '江苏', type: '211', rank: 84 },
+      { name: '中国矿业大学', province: '江苏', type: '211', rank: 86 },
+      { name: '中国石油大学', province: '山东', type: '211', rank: 87 },
+      { name: '中国地质大学', province: '湖北', type: '211', rank: 89 },
+      { name: '华中农业大学', province: '湖北', type: '211', rank: 91 },
+      { name: '南京农业大学', province: '江苏', type: '211', rank: 93 },
+      { name: '北京林业大学', province: '北京', type: '211', rank: 94 },
+      { name: '广州大学', province: '广东', type: '普通', rank: 96 },
+      { name: '扬州大学', province: '江苏', type: '普通', rank: 97 },
+      { name: '江苏大学', province: '江苏', type: '普通', rank: 98 },
+      { name: '宁波大学', province: '浙江', type: '双一流', rank: 99 }
+    ];
+
+    const searchInput = document.getElementById('search-input');
+    const filterType = document.getElementById('filter-type');
+    const filterProvince = document.getElementById('filter-province');
+    const tableContainer = document.getElementById('table-container');
+    const countInfo = document.getElementById('count-info');
+
+    const provinces = [...new Set(universities.map(u => u.province))].sort();
+    provinces.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p; opt.textContent = p;
+      filterProvince.appendChild(opt);
+    });
+
+    function renderTable(data) {
+      countInfo.textContent = `共 ${data.length} 所高校`;
+      if (data.length === 0) {
+        tableContainer.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--color-tm-text);">无匹配结果</div>';
+        return;
+      }
+      tableContainer.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.28rem;">
+        <thead><tr style="border-bottom:2px solid var(--color-border);">
+          <th style="padding:0.2rem;text-align:left;color:var(--color-tm-text);">排名</th>
+          <th style="padding:0.2rem;text-align:left;color:var(--color-tm-text);">学校名称</th>
+          <th style="padding:0.2rem;text-align:left;color:var(--color-tm-text);">省份</th>
+          <th style="padding:0.2rem;text-align:left;color:var(--color-tm-text);">类型</th>
+        </tr></thead>
+        <tbody>${data.map(u => `<tr style="border-bottom:1px solid var(--color-border);">
+          <td style="padding:0.2rem;color:var(--font-color-solid);">${u.rank}</td>
+          <td style="padding:0.2rem;color:var(--font-color-solid);font-weight:500;">${u.name}</td>
+          <td style="padding:0.2rem;color:var(--color-tm-text);">${u.province}</td>
+          <td style="padding:0.2rem;"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.22rem;
+            ${u.type === '985' ? 'background:#ff6b6b;color:white;' : u.type === '211' ? 'background:#ffa726;color:white;' : u.type === '双一流' ? 'background:#4ecdc4;color:white;' : 'background:var(--lable-card-bag);color:var(--color-tm-text);'}">${u.type}</span></td>
+        </tr>`).join('')}</tbody></table>`;
+    }
+
+    function filter() {
+      const keyword = searchInput.value.trim().toLowerCase();
+      const type = filterType.value;
+      const province = filterProvince.value;
+      let filtered = universities.filter(u => {
+        if (keyword && !u.name.toLowerCase().includes(keyword)) return false;
+        if (type !== 'all' && u.type !== type) return false;
+        if (province !== 'all' && u.province !== province) return false;
+        return true;
+      });
+      renderTable(filtered);
+    }
+
+    searchInput.addEventListener('input', filter);
+    filterType.addEventListener('change', filter);
+    filterProvince.addEventListener('change', filter);
+    renderTable(universities);
   });
 </script>

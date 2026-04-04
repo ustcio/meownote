@@ -23,14 +23,19 @@ const toolDesc = '实时查看各大平台热搜榜';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+          <div class="tab-buttons" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;flex-wrap:wrap;">
+            <button class="tab-btn btn-primary" data-tab="weibo">微博</button>
+            <button class="tab-btn btn-secondary" data-tab="zhihu">知乎</button>
+            <button class="tab-btn btn-secondary" data-tab="baidu">百度</button>
+            <button class="tab-btn btn-secondary" data-tab="douyin">抖音</button>
+          </div>
+          <div id="loading" style="display:none;text-align:center;padding:1rem;color:var(--color-cale-text);">加载中...</div>
+          <div id="hot-list"></div>
+          <div style="margin-top:0.4rem;text-align:center;">
+            <button id="refresh-btn" class="btn-secondary" style="font-size:0.22rem;">🔄 刷新</button>
+          </div>
+          <div style="margin-top:0.3rem;padding:0.3rem;background:var(--color-background-one);border-radius:15px;font-size:0.22rem;color:var(--color-tm-text);text-align:center;">
+            * 数据为模拟演示，实时热榜请访问各平台
           </div>
         </div>
       </main>
@@ -38,13 +43,95 @@ const toolDesc = '实时查看各大平台热搜榜';
   </section>
 </Layout>
 
-<style>
-  /* Inherits from hao-design.css */
-</style>
-
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('即时热榜 工具已加载');
+    const hotList = document.getElementById('hot-list');
+    const loading = document.getElementById('loading');
+    const refreshBtn = document.getElementById('refresh-btn');
+    let currentTab = 'weibo';
+
+    const hotData = {
+      weibo: [
+        { rank: 1, title: '春节档电影票房创新高', heat: '582万', tag: '热' },
+        { rank: 2, title: '全国多地迎来降雪', heat: '456万', tag: '新' },
+        { rank: 3, title: '2026年科技趋势展望', heat: '398万', tag: '热' },
+        { rank: 4, title: '新能源汽车销量再破纪录', heat: '345万', tag: '' },
+        { rank: 5, title: 'AI大模型最新进展', heat: '312万', tag: '热' },
+        { rank: 6, title: '春运返程高峰来了', heat: '289万', tag: '新' },
+        { rank: 7, title: '国产大飞机C929新消息', heat: '267万', tag: '' },
+        { rank: 8, title: '高校毕业生就业新政策', heat: '234万', tag: '' },
+        { rank: 9, title: '世界杯预选赛最新战报', heat: '215万', tag: '热' },
+        { rank: 10, title: '数字人民币使用指南', heat: '198万', tag: '' }
+      ],
+      zhihu: [
+        { rank: 1, title: '如何评价2026年AI发展趋势？', heat: '1.2万', tag: '热' },
+        { rank: 2, title: '中国芯片产业未来五年会怎样？', heat: '9876', tag: '热' },
+        { rank: 3, title: '为什么年轻人越来越不愿意结婚了？', heat: '8765', tag: '' },
+        { rank: 4, title: 'SpaceX星舰最新进展意味着什么？', heat: '7654', tag: '新' },
+        { rank: 5, title: '量子计算机距离实用还有多远？', heat: '6543', tag: '' },
+        { rank: 6, title: '如何看待国产替代的趋势？', heat: '5432', tag: '' },
+        { rank: 7, title: '996工作制真的会消失吗？', heat: '4321', tag: '热' },
+        { rank: 8, title: '全球变暖对中国的实际影响', heat: '3210', tag: '' },
+        { rank: 9, title: '房价还会继续下跌吗？', heat: '2987', tag: '' },
+        { rank: 10, title: '普通人如何学习编程？', heat: '2654', tag: '' }
+      ],
+      baidu: [
+        { rank: 1, title: '今日天气预警汇总', heat: '890万', tag: '热' },
+        { rank: 2, title: '春运火车票购票攻略', heat: '756万', tag: '' },
+        { rank: 3, title: '最新油价调整消息', heat: '623万', tag: '新' },
+        { rank: 4, title: '春节放假安排', heat: '589万', tag: '' },
+        { rank: 5, title: '健康养生小知识', heat: '456万', tag: '' },
+        { rank: 6, title: '热门旅游景点推荐', heat: '398万', tag: '' },
+        { rank: 7, title: '教育改革最新动态', heat: '345万', tag: '' },
+        { rank: 8, title: '手机新品发布会汇总', heat: '312万', tag: '新' },
+        { rank: 9, title: '养老金调整最新消息', heat: '289万', tag: '' },
+        { rank: 10, title: '食品安全抽检结果', heat: '256万', tag: '' }
+      ],
+      douyin: [
+        { rank: 1, title: '春晚经典节目回顾', heat: '1.5亿', tag: '热' },
+        { rank: 2, title: '各地年味大赏', heat: '9800万', tag: '热' },
+        { rank: 3, title: '萌宠过年趣事', heat: '7600万', tag: '' },
+        { rank: 4, title: '美食教程：年夜饭必备', heat: '6500万', tag: '新' },
+        { rank: 5, title: '旅行vlog：冬日美景', heat: '5400万', tag: '' },
+        { rank: 6, title: '健身打卡挑战', heat: '4300万', tag: '' },
+        { rank: 7, title: '科技产品开箱测评', heat: '3800万', tag: '' },
+        { rank: 8, title: '搞笑段子合集', heat: '3200万', tag: '热' },
+        { rank: 9, title: '音乐翻唱精选', heat: '2800万', tag: '' },
+        { rank: 10, title: '手工DIY教程', heat: '2300万', tag: '' }
+      ]
+    };
+
+    function renderHotList(platform) {
+      loading.style.display = 'block';
+      hotList.innerHTML = '';
+      setTimeout(() => {
+        const data = hotData[platform] || [];
+        hotList.innerHTML = data.map(item => `
+          <div class="result-area" style="margin-bottom:0.2rem;padding:0.3rem;">
+            <div style="display:flex;align-items:center;gap:0.3rem;">
+              <div style="width:0.6rem;text-align:center;font-size:0.3rem;font-weight:500;
+                ${item.rank <= 3 ? 'color:var(--top-color);' : 'color:var(--color-tm-text);'}">${item.rank}</div>
+              <div style="flex:1;font-size:0.28rem;color:var(--font-color-solid);">${item.title}</div>
+              ${item.tag ? `<span style="padding:2px 6px;border-radius:8px;font-size:0.2rem;
+                ${item.tag === '热' ? 'background:#ff6b6b;color:white;' : 'background:#4ecdc4;color:white;'}">${item.tag}</span>` : ''}
+              <div style="font-size:0.22rem;color:var(--color-tm-text);white-space:nowrap;">${item.heat}</div>
+            </div>
+          </div>`).join('');
+        loading.style.display = 'none';
+      }, 300);
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => { b.className = 'tab-btn btn-secondary'; });
+        btn.className = 'tab-btn btn-primary';
+        currentTab = btn.dataset.tab;
+        renderHotList(currentTab);
+      });
+    });
+
+    refreshBtn.addEventListener('click', () => renderHotList(currentTab));
+
+    renderHotList('weibo');
   });
 </script>

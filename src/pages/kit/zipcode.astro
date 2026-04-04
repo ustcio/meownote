@@ -23,28 +23,144 @@ const toolDesc = '查询全国邮政编码';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+          <div class="input-group" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;">
+            <input id="search-input" type="text" class="form-input" placeholder="搜索城市、区县或邮编" style="flex:1;padding:0.3rem 0.4rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:15px;color:var(--color-text);font-size:0.28rem;outline:none;">
           </div>
+          <div id="count-info" style="font-size:0.22rem;color:var(--color-tm-text);margin-bottom:0.3rem;"></div>
+          <div id="table-container" style="overflow-x:auto;"></div>
         </div>
       </main>
     </div>
   </section>
 </Layout>
 
-<style>
-  /* Inherits from hao-design.css */
-</style>
-
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('邮编查询 工具已加载');
+    const zipData = [
+      { city: '北京', district: '东城区', code: '100010' },
+      { city: '北京', district: '西城区', code: '100032' },
+      { city: '北京', district: '朝阳区', code: '100020' },
+      { city: '北京', district: '海淀区', code: '100080' },
+      { city: '北京', district: '丰台区', code: '100071' },
+      { city: '上海', district: '黄浦区', code: '200001' },
+      { city: '上海', district: '浦东新区', code: '200120' },
+      { city: '上海', district: '静安区', code: '200040' },
+      { city: '上海', district: '徐汇区', code: '200030' },
+      { city: '上海', district: '长宁区', code: '200050' },
+      { city: '广州', district: '天河区', code: '510630' },
+      { city: '广州', district: '越秀区', code: '510030' },
+      { city: '广州', district: '海珠区', code: '510220' },
+      { city: '广州', district: '荔湾区', code: '510140' },
+      { city: '深圳', district: '福田区', code: '518000' },
+      { city: '深圳', district: '南山区', code: '518052' },
+      { city: '深圳', district: '罗湖区', code: '518001' },
+      { city: '深圳', district: '宝安区', code: '518101' },
+      { city: '杭州', district: '西湖区', code: '310013' },
+      { city: '杭州', district: '上城区', code: '310002' },
+      { city: '杭州', district: '拱墅区', code: '310015' },
+      { city: '南京', district: '玄武区', code: '210018' },
+      { city: '南京', district: '鼓楼区', code: '210009' },
+      { city: '南京', district: '建邺区', code: '210019' },
+      { city: '成都', district: '锦江区', code: '610021' },
+      { city: '成都', district: '武侯区', code: '610041' },
+      { city: '成都', district: '青羊区', code: '610015' },
+      { city: '成都', district: '高新区', code: '610041' },
+      { city: '武汉', district: '江岸区', code: '430014' },
+      { city: '武汉', district: '武昌区', code: '430061' },
+      { city: '武汉', district: '洪山区', code: '430070' },
+      { city: '重庆', district: '渝中区', code: '400010' },
+      { city: '重庆', district: '江北区', code: '400020' },
+      { city: '重庆', district: '渝北区', code: '401120' },
+      { city: '天津', district: '和平区', code: '300041' },
+      { city: '天津', district: '南开区', code: '300110' },
+      { city: '天津', district: '河西区', code: '300202' },
+      { city: '西安', district: '雁塔区', code: '710061' },
+      { city: '西安', district: '碑林区', code: '710001' },
+      { city: '西安', district: '莲湖区', code: '710003' },
+      { city: '长沙', district: '岳麓区', code: '410013' },
+      { city: '长沙', district: '芙蓉区', code: '410011' },
+      { city: '长沙', district: '天心区', code: '410004' },
+      { city: '郑州', district: '金水区', code: '450003' },
+      { city: '郑州', district: '中原区', code: '450007' },
+      { city: '郑州', district: '二七区', code: '450000' },
+      { city: '青岛', district: '市南区', code: '266001' },
+      { city: '青岛', district: '市北区', code: '266011' },
+      { city: '青岛', district: '崂山区', code: '266100' },
+      { city: '济南', district: '历下区', code: '250014' },
+      { city: '济南', district: '市中区', code: '250001' },
+      { city: '大连', district: '中山区', code: '116001' },
+      { city: '大连', district: '沙河口区', code: '116023' },
+      { city: '厦门', district: '思明区', code: '361001' },
+      { city: '厦门', district: '湖里区', code: '361006' },
+      { city: '福州', district: '鼓楼区', code: '350001' },
+      { city: '福州', district: '台江区', code: '350004' },
+      { city: '昆明', district: '五华区', code: '650032' },
+      { city: '昆明', district: '盘龙区', code: '650051' },
+      { city: '哈尔滨', district: '南岗区', code: '150001' },
+      { city: '哈尔滨', district: '道里区', code: '150010' },
+      { city: '沈阳', district: '和平区', code: '110001' },
+      { city: '沈阳', district: '沈河区', code: '110011' },
+      { city: '长春', district: '朝阳区', code: '130021' },
+      { city: '长春', district: '南关区', code: '130022' },
+      { city: '石家庄', district: '桥西区', code: '050051' },
+      { city: '石家庄', district: '长安区', code: '050011' },
+      { city: '太原', district: '小店区', code: '030032' },
+      { city: '太原', district: '迎泽区', code: '030001' },
+      { city: '合肥', district: '蜀山区', code: '230031' },
+      { city: '合肥', district: '庐阳区', code: '230001' },
+      { city: '南昌', district: '东湖区', code: '330006' },
+      { city: '南昌', district: '西湖区', code: '330025' },
+      { city: '贵阳', district: '南明区', code: '550002' },
+      { city: '贵阳', district: '云岩区', code: '550001' },
+      { city: '南宁', district: '青秀区', code: '530022' },
+      { city: '南宁', district: '兴宁区', code: '530012' },
+      { city: '海口', district: '龙华区', code: '570102' },
+      { city: '海口', district: '美兰区', code: '570203' },
+      { city: '兰州', district: '城关区', code: '730030' },
+      { city: '兰州', district: '七里河区', code: '730050' },
+      { city: '银川', district: '兴庆区', code: '750001' },
+      { city: '银川', district: '金凤区', code: '750011' },
+      { city: '西宁', district: '城西区', code: '810000' },
+      { city: '西宁', district: '城中区', code: '810000' },
+      { city: '乌鲁木齐', district: '天山区', code: '830002' },
+      { city: '乌鲁木齐', district: '沙依巴克区', code: '830000' },
+      { city: '拉萨', district: '城关区', code: '850000' },
+      { city: '呼和浩特', district: '新城区', code: '010010' },
+      { city: '呼和浩特', district: '回民区', code: '010030' }
+    ];
+
+    const searchInput = document.getElementById('search-input');
+    const tableContainer = document.getElementById('table-container');
+    const countInfo = document.getElementById('count-info');
+
+    function renderTable(data) {
+      countInfo.textContent = `共 ${data.length} 条记录`;
+      if (data.length === 0) {
+        tableContainer.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--color-tm-text);">无匹配结果</div>';
+        return;
+      }
+      tableContainer.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.28rem;">
+        <thead><tr style="border-bottom:2px solid var(--color-border);">
+          <th style="padding:0.2rem;text-align:left;color:var(--color-tm-text);">城市</th>
+          <th style="padding:0.2rem;text-align:left;color:var(--color-tm-text);">区县</th>
+          <th style="padding:0.2rem;text-align:left;color:var(--color-tm-text);">邮政编码</th>
+        </tr></thead>
+        <tbody>${data.map(d => `<tr style="border-bottom:1px solid var(--color-border);">
+          <td style="padding:0.2rem;color:var(--font-color-solid);">${d.city}</td>
+          <td style="padding:0.2rem;color:var(--color-tm-text);">${d.district}</td>
+          <td style="padding:0.2rem;color:var(--font-color-solid);font-weight:500;font-family:monospace;">${d.code}</td>
+        </tr>`).join('')}</tbody></table>`;
+    }
+
+    searchInput.addEventListener('input', () => {
+      const keyword = searchInput.value.trim().toLowerCase();
+      if (!keyword) { renderTable(zipData); return; }
+      const filtered = zipData.filter(d =>
+        d.city.includes(keyword) || d.district.includes(keyword) || d.code.includes(keyword)
+      );
+      renderTable(filtered);
+    });
+
+    renderTable(zipData);
   });
 </script>

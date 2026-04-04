@@ -3,7 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import '@styles/hao-design.css';
 
 const toolName = '天气预报';
-const toolDesc = '查看天气预报';
+const toolDesc = '查看全球城市天气预报';
 ---
 
 <Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
@@ -23,14 +23,16 @@ const toolDesc = '查看天气预报';
 
       <main class="tool-main">
         <div class="tool-content" id="tool-content">
-          <!-- 工具内容区域 -->
-          <div class="tool-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p>工具开发中，敬请期待...</p>
+          <div class="input-group" style="display:flex;gap:0.2rem;margin-bottom:0.4rem;">
+            <input id="city-input" type="text" class="form-input" placeholder="输入城市名称，如 Beijing" style="flex:1;padding:0.3rem 0.4rem;background:var(--color-background-one);border:1px solid var(--color-border);border-radius:15px;color:var(--color-text);font-size:0.28rem;outline:none;">
+            <button id="search-btn" class="btn-primary">搜索</button>
+          </div>
+          <div id="loading" style="display:none;text-align:center;padding:1rem;color:var(--color-cale-text);">查询中...</div>
+          <div id="error" style="display:none;text-align:center;padding:1rem;color:#ff6b6b;"></div>
+          <div id="result-area" style="display:none;">
+            <div id="current-weather" class="result-area" style="margin-bottom:0.4rem;"></div>
+            <div class="result-header">未来3天预报</div>
+            <div id="forecast" style="display:flex;gap:0.3rem;flex-wrap:wrap;"></div>
           </div>
         </div>
       </main>
@@ -38,13 +40,80 @@ const toolDesc = '查看天气预报';
   </section>
 </Layout>
 
-<style>
-  /* Inherits from hao-design.css */
-</style>
-
 <script is:inline>
-  // 工具脚本 - 根据需要添加具体功能
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('天气预报 工具已加载');
+    const cityInput = document.getElementById('city-input');
+    const searchBtn = document.getElementById('search-btn');
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
+    const resultArea = document.getElementById('result-area');
+    const currentWeather = document.getElementById('current-weather');
+    const forecast = document.getElementById('forecast');
+
+    const weatherIcons = {
+      'Sunny': '☀️', 'Clear': '🌙', 'Partly cloudy': '🌤️', 'Cloudy': '☁️',
+      'Overcast': '☁️', 'Mist': '🌫️', 'Fog': '🌫️', 'Light rain': '🌧️',
+      'Moderate rain': '🌧️', 'Heavy rain': '🌧️', 'Rain': '🌧️', 'Snow': '❄️',
+      'Light snow': '❄️', 'Heavy snow': '❄️', 'Thunderstorm': '⛈️', 'Blizzard': '❄️',
+      'Patchy rain possible': '🌦️', 'Patchy snow possible': '🌨️'
+    };
+
+    function getIcon(desc) {
+      for (const [key, icon] of Object.entries(weatherIcons)) {
+        if (desc.toLowerCase().includes(key.toLowerCase())) return icon;
+      }
+      return '🌤️';
+    }
+
+    async function searchWeather(city) {
+      loading.style.display = 'block';
+      error.style.display = 'none';
+      resultArea.style.display = 'none';
+      try {
+        const res = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1`);
+        if (!res.ok) throw new Error('查询失败');
+        const data = await res.json();
+        if (!data.current_condition) throw new Error('未找到该城市');
+
+        const curr = data.current_condition[0];
+        const area = data.nearest_area[0];
+        currentWeather.innerHTML = `
+          <div class="result-header">${getIcon(curr.weatherDesc[0].value)} ${area.areaName[0].value}, ${area.country[0].value}</div>
+          <div class="file-info">
+            <div class="info-row"><span class="info-label">温度</span><span class="info-value">${curr.temp_C}°C (体感 ${curr.FeelsLikeC}°C)</span></div>
+            <div class="info-row"><span class="info-label">天气</span><span class="info-value">${curr.weatherDesc[0].value}</span></div>
+            <div class="info-row"><span class="info-label">湿度</span><span class="info-value">${curr.humidity}%</span></div>
+            <div class="info-row"><span class="info-label">风速</span><span class="info-value">${curr.windspeedKmph} km/h ${curr.winddir16Point}</span></div>
+            <div class="info-row"><span class="info-label">能见度</span><span class="info-value">${curr.visibility} km</span></div>
+            <div class="info-row"><span class="info-label">气压</span><span class="info-value">${curr.pressure} hPa</span></div>
+          </div>`;
+
+        forecast.innerHTML = data.weather.slice(0, 3).map(day => {
+          const mid = day.hourly[4];
+          return `<div class="result-area" style="flex:1;min-width:150px;text-align:center;">
+            <div style="font-size:0.3rem;font-weight:500;margin-bottom:0.2rem;">${day.date}</div>
+            <div style="font-size:0.6rem;margin-bottom:0.2rem;">${getIcon(mid.weatherDesc[0].value)}</div>
+            <div style="color:var(--font-color-solid);font-size:0.35rem;">${mid.tempC}°C</div>
+            <div style="color:var(--color-tm-text);font-size:0.22rem;margin-top:0.1rem;">${mid.weatherDesc[0].value}</div>
+            <div style="color:var(--color-tm-text);font-size:0.22rem;margin-top:0.1rem;">湿度 ${mid.humidity}%</div>
+          </div>`;
+        }).join('');
+
+        resultArea.style.display = 'block';
+      } catch (e) {
+        error.textContent = '查询失败: ' + e.message;
+        error.style.display = 'block';
+      } finally {
+        loading.style.display = 'none';
+      }
+    }
+
+    searchBtn.addEventListener('click', () => {
+      const city = cityInput.value.trim();
+      if (!city) { error.textContent = '请输入城市名称'; error.style.display = 'block'; return; }
+      searchWeather(city);
+    });
+
+    cityInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchBtn.click(); });
   });
 </script>
