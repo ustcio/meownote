@@ -67,25 +67,15 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
                       <div class="display-wrap">
                         {cat.tools.map(tool => (
                           <a href={tool.path} class="card" data-tool-id={tool.id} data-tool-name={tool.name} data-tool-desc={tool.desc}>
-                            <div class="card-content hert-col">
-                              <div class="fb-col-1">
-                                <span class="title">{tool.name}</span>
-                              </div>
-                              <div class="fb-col-2">
-                                <span class="cut-subject">{tool.desc}</span>
-                              </div>
-                              <div class="labelDiv">
-                                {tool.status === 'todo' ? <span>开发中</span> : <span>免费</span>}
-                              </div>
-                              <div class="card-action">
-                                <span class="cd2-1">
-                                  <span class="small-icon">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                      <polyline points="9 18 15 12 9 6"></polyline>
-                                    </svg>
-                                  </span>
-                                </span>
-                              </div>
+                            <span class="tool-title">{tool.name}</span>
+                            <span class="tool-desc">{tool.desc}</span>
+                            <div class="labelDiv">
+                              {tool.status === 'todo' ? <span>开发中</span> : <span>免费</span>}
+                            </div>
+                            <div class="card-action">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                              </svg>
                             </div>
                           </a>
                         ))}
@@ -103,29 +93,7 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
 </Layout>
 
 <style>
-  /* ===== HaoWallpaper Design System - Exact Replication ===== */
-  :root {
-    --hao-font-size: 15px;
-  }
-
-  *, *:after, *:before {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    position: relative;
-  }
-
-  * {
-    font-family: -apple-system, Arial, Helvetica, sans-serif;
-    text-decoration: none;
-  }
-
-  :root {
-    overflow-x: hidden;
-    overflow-y: scroll;
-  }
-
-  /* ===== Dark Theme (haowallpaper default) ===== */
+  /* ===== Dark Theme ===== */
   .darkBody {
     --main-bg-tw: #191919;
     --tm-bg-ty: rgba(0,0,0,0.6);
@@ -167,28 +135,16 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     --nt-box-dark-end: #514b51;
   }
 
-  /* ===== Neumorphic Shadows ===== */
+  /* ===== Neumorphic ===== */
   .is-nt-front {
     box-shadow: 2px 2px 6px var(--col-bg-start), -2px -2px 6px var(--col-bg-end);
   }
 
-  .is-nt-reverse {
-    box-shadow: inset 3px 3px 10px var(--col-bg-start), inset -3px -3px 10px var(--col-bg-end);
-  }
-
-  .is-nt-reverse-small {
-    box-shadow: inset 3px 3px 6px var(--col-bg-start), inset -3px -3px 6px var(--col-bg-end);
-  }
-
-  .nt-box-show {
-    box-shadow: 3px 3px 10px var(--col-bg-start), -3px -3px 10px var(--col-bg-end);
-  }
-
-  /* ===== Page Base ===== */
+  /* ===== Page ===== */
   .kit-page {
     min-height: 100vh;
     background: var(--main-bg-tw);
-    font-size: var(--hao-font-size);
+    font-size: 15px;
     color: var(--color-text);
   }
 
@@ -243,7 +199,7 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     min-height: 100vh;
     align-items: center;
     background: #232222;
-    font-size: var(--hao-font-size);
+    font-size: 15px;
   }
 
   /* ===== Top Bar ===== */
@@ -258,7 +214,6 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     padding: 0.1rem;
   }
 
-  /* Logo */
   .logo {
     display: flex;
     align-items: center;
@@ -285,7 +240,6 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     text-shadow: 0 0 30px #515050;
   }
 
-  /* Tabs */
   .header-tab-tight-top {
     width: 3.5rem;
   }
@@ -318,7 +272,6 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     color: var(--font-color-solid);
   }
 
-  /* Search */
   .header-top-view {
     height: 100%;
     width: 65%;
@@ -329,8 +282,8 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
 
   .TopBody {
     width: 100%;
-    display: flex;
     min-width: 80%;
+    display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50px;
@@ -343,15 +296,7 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     z-index: 110;
   }
 
-  @media (max-width: 1100px) {
-    .TopBody .tab {
-      display: none !important;
-    }
-  }
-
-  .search-bar-container {
-    width: 100%;
-  }
+  .search-bar-container { width: 100%; }
 
   .search-input-wrapper {
     display: flex;
@@ -416,19 +361,11 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     padding: 0 0.5rem;
   }
 
-  .pc-wallpaper-main {
-    width: 100%;
-  }
+  .pc-wallpaper-main { width: 100%; }
+  .masonry-div { border-radius: 30px; }
+  .masonry-div .waterfall-content-k1 { border-radius: inherit; }
 
-  .masonry-div {
-    border-radius: 30px;
-  }
-
-  .masonry-div .waterfall-content-k1 {
-    border-radius: inherit;
-  }
-
-  /* ===== Section Partition ===== */
+  /* ===== Section Title ===== */
   .partition {
     margin-bottom: 0.5rem;
     margin-top: 1rem;
@@ -448,10 +385,7 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     color: var(--font-color-solid);
   }
 
-  .twoTopLable .icon {
-    font-size: 0.4rem;
-  }
-
+  .twoTopLable .icon { font-size: 0.4rem; }
   .twoTopLable .top-name {
     font-weight: 500;
     text-shadow: 0 0 10px var(--fc-background-webkit);
@@ -478,24 +412,27 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
 
   /* ===== Card ===== */
   .card {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
     width: 21.5%;
     min-width: 200px;
     aspect-ratio: 1 / .7;
     border-radius: 15px;
-    background-color: #ffffff1a;
+    background: var(--card-background-webkit);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid hsla(0, 0%, 100%, 0.5);
     border-bottom: none;
     border-right: none;
     box-shadow: 20px 20px 50px rgba(0, 0, 0, 0.5);
     text-decoration: none;
-    animation-name: slideTop;
-    animation-duration: 0.6s;
-    animation-fill-mode: both;
+    padding: 0.6rem 0.5rem 0.4rem;
+    animation: slideTop 0.6s both;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
   }
 
   .card:nth-child(1) { animation-delay: 0.05s; }
@@ -509,226 +446,134 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
   .card:nth-child(n+9) { animation-delay: 0.45s; }
 
   .card:hover {
-    box-shadow: 20px 20px 50px rgba(0, 0, 0, 0.5), 0 0 15px var(--fc-background-webkit);
+    box-shadow: 20px 20px 50px rgba(0,0,0,0.5), 0 0 15px var(--fc-background-webkit);
+    transform: translateY(-2px);
   }
 
-  .card:hover .card-content {
-    box-shadow: 0 0 15px var(--fc-background-webkit);
-    transform: translateY(0) !important;
-    opacity: 1 !important;
-  }
+  .card.hidden { display: none; }
 
-  .card.hidden {
-    display: none;
-  }
-
-  /* Card Content - hidden by default, slides up on hover (haowallpaper style) */
-  .card-content {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow: hidden;
-    background-color: var(--card-background-webkit);
-    border-radius: 1.8vw;
-    width: 90%;
-    height: 80%;
-    opacity: 0;
-    transform: translateY(150px);
-    transition: opacity 0.5s, transform 0.5s !important;
-  }
-
-  .hert-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.15rem;
-    padding: 0.4rem 0;
-  }
-
-  .fb-col-1 {
-    display: flex;
-    justify-content: center;
-  }
-
-  .fb-col-1 .title {
+  /* -- Tool Name (large, centered, always visible) -- */
+  .tool-title {
+    display: block;
     color: var(--font-color-solid);
-    font-size: 0.35rem;
-    font-weight: 500;
-    display: block;
+    font-size: clamp(0.32rem, 0.5vw, 0.5rem);
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.3;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 12px var(--fc-background-webkit);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 90%;
-    text-shadow: 0 0 10px var(--fc-background-webkit);
+    width: 100%;
+    max-width: 95%;
   }
 
-  .fb-col-2 {
-    display: flex;
-    justify-content: center;
-  }
-
-  .fb-col-2 .cut-subject {
+  /* -- Tool Description (muted, smaller, centered, always visible) -- */
+  .tool-desc {
+    display: block;
     color: var(--color-tm-text);
-    font-size: 0.28rem;
-    display: block;
+    font-size: clamp(0.2rem, 0.35vw, 0.32rem);
+    text-align: center;
+    line-height: 1.4;
+    margin-top: 0.15rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    width: 100%;
     max-width: 90%;
   }
 
-  /* Label Div - circular neumorphic tags */
+  /* -- Circular Badge Label -- */
   .labelDiv {
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 0.2rem;
-    height: 70%;
-    overflow: auto;
-    width: 90%;
-    margin-top: 0.2rem;
-    text-shadow: 2px 2px 8px var(--fc-background-webkit);
+    gap: 0.3rem;
+    margin-top: auto;
+    padding-top: 0.15rem;
   }
 
   .labelDiv span {
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid #ccc;
+    border: 1px solid var(--lable-card-bag);
     border-radius: 50%;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
     color: var(--font-background-webkit);
-    font-size: 0.25rem;
+    font-size: clamp(0.18rem, 0.25vw, 0.28rem);
     font-weight: 500;
-    padding: 2%;
+    width: 1.2rem;
+    height: 1.2rem;
+    text-shadow: 0 0 8px var(--fc-background-webkit);
+    white-space: nowrap;
   }
 
-  /* Action Button (haowallpaper.com style - positioned at bottom of card) */
+  /* -- Arrow Icon -- */
   .card-action {
     position: absolute;
-    bottom: 15%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
-  .cd2-1 {
-    display: flex;
-    align-items: center;
-    position: relative;
-  }
-
-  .cd2-1 .small-icon {
-    font-size: 1rem;
-    color: var(--fc-background-webkit);
+    bottom: 4%;
+    right: 4%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.2s, color 0.3s;
-    text-shadow: 0 0 8px var(--fc-background-webkit);
-  }
-
-  .card:hover .cd2-1 .small-icon {
-    transform: scale(1.2);
-  }
-
-  .lableEnd {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    height: 100%;
-    font-size: 0.22rem;
     color: var(--color-cale-text);
-    background: var(--lable-card-bag);
-    padding: 2px 8px;
-    border-radius: 20px;
-    transition: color 0.3s ease, background-color 0.3s ease;
+    transition: color 0.2s, transform 0.2s;
   }
 
-  .card:hover .lableEnd {
+  .card:hover .card-action {
     color: var(--font-background-webkit);
+    transform: translateX(3px);
   }
+
+  .card-action svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* ===== Scrollbar ===== */
+  :root { scrollbar-width: none; }
+  * { scrollbar-color: #acb8bb #000; scrollbar-width: inherit; }
+  ::-webkit-scrollbar { height: 0; width: 0; }
+  ::-webkit-scrollbar-thumb { background: #000; border-radius: 30px; }
+  ::-webkit-scrollbar-track { background-color: #7d717a; border-radius: 30px; }
 
   /* ===== Responsive ===== */
-  @media screen and (max-width: 1100px) {
+  @media (max-width: 1100px) {
     .main-top .header-top-view {
       flex-grow: 1;
       overflow: auto;
       width: 100% !important;
       order: 3;
     }
-
-    .main-top .header-top-view .TopBody {
-      width: 100% !important;
-    }
-
+    .main-top .header-top-view .TopBody { width: 100% !important; }
     .main-top .header-tab-tight-top,
-    .main-top .logo {
-      margin-bottom: 0.25rem;
-    }
+    .main-top .logo { margin-bottom: 0.25rem; }
   }
 
-  @media screen and (max-width: 900px) {
+  @media (max-width: 900px) {
     .card {
       width: calc(33.333% - 0.2rem) !important;
       min-width: 180px;
     }
-
-    .hert-col {
-      border-radius: 20px !important;
-    }
-
-    .card-bottom .el-icon {
-      width: 40% !important;
-    }
-
-    .cdn-3 {
-      display: none !important;
-    }
-
-    .card-action {
-      bottom: 35% !important;
-    }
   }
 
-  @media screen and (max-width: 600px) {
+  @media (max-width: 600px) {
     .card {
       width: 46% !important;
       min-width: 160px;
     }
-
-    .main-top {
-      padding: 0.2rem;
-    }
-
-    .logo {
-      width: auto;
-    }
-
-    .header-tab-tight-top {
-      width: auto;
-    }
-
-    .header-top-view {
-      padding: 0.1rem;
-    }
-
-    .fb-col-1 .title {
-      font-size: 0.3rem;
-    }
-
-    .fb-col-2 .cut-subject {
-      font-size: 0.24rem;
-    }
+    .main-top { padding: 0.2rem; }
+    .logo, .header-tab-tight-top { width: auto; }
+    .header-top-view { padding: 0.1rem; }
+    .tool-title { font-size: clamp(0.28rem, 3.5vw, 0.4rem); }
+    .tool-desc { font-size: clamp(0.18rem, 2.5vw, 0.28rem); }
+    .labelDiv span { width: 1rem; height: 1rem; font-size: 0.2rem; }
   }
 
-  @media screen and (max-width: 400px) {
-    .card {
-      width: 100% !important;
-      min-width: auto;
-    }
+  @media (max-width: 400px) {
+    .card { width: 100% !important; min-width: auto; }
   }
 </style>
 
@@ -741,30 +586,24 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
 
   searchInput?.addEventListener('input', () => {
     const query = searchInput.value.toLowerCase().trim();
-    
     if (searchClear) {
       searchClear.style.display = query ? 'block' : 'none';
     }
-
     if (!query) {
       toolCards.forEach(card => card.classList.remove('hidden'));
       sections.forEach(section => section.style.display = '');
       return;
     }
-
     sections.forEach(section => {
       const sectionCards = section.querySelectorAll('.card');
       let hasVisible = false;
-      
       sectionCards.forEach(card => {
         const name = (card.dataset.toolName || '').toLowerCase();
         const desc = (card.dataset.toolDesc || '').toLowerCase();
         const matches = name.includes(query) || desc.includes(query);
-        
         card.classList.toggle('hidden', !matches);
         if (matches) hasVisible = true;
       });
-      
       section.style.display = hasVisible ? '' : 'none';
     });
   });
