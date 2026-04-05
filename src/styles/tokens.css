@@ -28,14 +28,14 @@
   /* -------- typography -------- */
   --text-xs: 0.75rem;       /* 12px */
   --text-sm: 0.8125rem;     /* 13px */
-  --text-base: 1.0625rem;   /* 17px — Claude: 19px, we compromise at 17px */
-  --text-lg: 1.1875rem;     /* 19px — Claude body-1 */
-  --text-xl: 1.375rem;      /* 22px — Claude body-large-1 */
+  --text-base: 1.0625rem;   /* 17px — Claude: 19px, compromise at 17px */
+  --text-lg: 1.1875rem;     /* 19px */
+  --text-xl: 1.375rem;      /* 22px */
   --text-2xl: 1.625rem;     /* 26px */
   --text-3xl: 2rem;         /* 32px */
-  --text-4xl: 2.75rem;      /* 44px — Claude h2 */
-  --text-5xl: 3.5rem;       /* 56px — Claude h1 (max) */
-  --text-6xl: 4.5rem;       /* 72px — Claude display-1 */
+  --text-4xl: 2.75rem;      /* 44px */
+  --text-5xl: 3.5rem;       /* 56px */
+  --text-6xl: 4.5rem;       /* 72px */
 
   --font-normal: 400;
   --font-medium: 500;
@@ -53,21 +53,23 @@
   --tracking-wide: 0.03em;
   --tracking-wider: 0.06em;
 
-  /* -------- spacing -------- */
-  --space-0: 0;
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  --space-20: 5rem;
-  --space-24: 6rem;
-  --space-32: 8rem;
+  /* -------- z -------- */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+  --z-mobile-cta: 550;
+
+  /* -------- layout -------- */
+  --container-sm: 640px;
+  --container-md: 760px;
+  --container-lg: 980px;
+  --container-xl: 1200px;
+  --container-2xl: 1320px;
+
+  --header-height: 56px;
 
   /* -------- radii -------- */
   --radius-sm: 0.5rem;
@@ -79,20 +81,10 @@
 
   /* -------- shadows — softer -------- */
   --shadow-none: none;
-  --shadow-sm: 0 1px 2px rgba(35 28 22 / 0.04);
-  --shadow-md: 0 8px 20px rgba(35 28 22 / 0.06);
-  --shadow-lg: 0 16px 36px rgba(35 28 22 / 0.07);
-  --shadow-xl: 0 24px 52px rgba(35 28 22 / 0.09);
-
-  /* -------- accent palette (Claude earth tones) -------- */
-  --accent-oat: #e3dacc;
-  --accent-olive: #788c5d;
-  --accent-cactus: #bcd1ca;
-  --accent-sky: #6a9bcc;
-  --accent-heather: #cbcADB;
-  --accent-fig: #c46686;
-  --accent-coral: #ebcece;
-  --accent-clay-hover: #c96442;
+  --shadow-sm: 0 1px 3px rgba(35 28 22 / 0.05);
+  --shadow-md: 0 6px 16px rgba(35 28 22 / 0.06);
+  --shadow-lg: 0 14px 32px rgba(35 28 22 / 0.08);
+  --shadow-xl: 0 22px 48px rgba(35 28 22 / 0.1);
 
   /* -------- easing -------- */
   --duration-fast: 150ms;
@@ -103,23 +95,11 @@
   --ease-out: cubic-bezier(0.17, 0.84, 0.44, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* -------- layout -------- */
-  --container-sm: 640px;
-  --container-md: 760px;
-  --container-lg: 980px;
-  --container-xl: 1180px;
-  --container-2xl: 1320px;
-
-  --header-height: 56px;
-  --header-total-height: 56px;
-
-  /* -------- z -------- */
-  --z-dropdown: 100;
-  --z-sticky: 200;
-  --z-fixed: 300;
-  --z-overlay: 400;
-  --z-modal: 500;
-  --z-toast: 600;
+  /* -------- breakpoints -------- */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1200px;
 }
 
 /* -------- light -------- */
@@ -130,6 +110,7 @@
   --bg-tertiary: #ede8e0;
   --bg-elevated: #fffefb;
   --bg-overlay: rgba(20 16 12 / 0.36);
+
   --bg-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 
   --text-primary: #1a1612;
@@ -143,15 +124,14 @@
   --border-secondary: rgba(55 44 33 / 0.06);
   --border-hover: rgba(55 44 33 / 0.16);
   --border-focus: var(--color-primary);
-  --border-primary-alpha-50: rgba(55 44 33 / 0.18);
 
   --card-bg: #fffefb;
   --card-bg-cream: #f1ece4;
   --card-bg-hover: #f8f3eb;
   --card-border: rgba(55 44 33 / 0.07);
   --card-border-hover: rgba(55 44 33 / 0.13);
-  --card-shadow: 0 12px 32px rgba(35 28 22 / 0.05);
-  --card-shadow-hover: 0 18px 44px rgba(35 28 22 / 0.08);
+  --card-shadow: 0 8px 24px rgba(35 28 22 / 0.05);
+  --card-shadow-hover: 0 14px 36px rgba(35 28 22 / 0.08);
 
   --input-bg: rgba(255 254 251 / 0.92);
   --input-border: rgba(55 44 33 / 0.1);
@@ -160,7 +140,7 @@
   --btn-primary-bg: #d4755a;
   --btn-primary-text: #fffefb;
   --btn-primary-hover: #c4644a;
-  --btn-primary-shadow: 0 8px 18px rgba(196 100 74 / 0.14);
+  --btn-primary-shadow: 0 6px 16px rgba(196 100 74 / 0.14);
 
   --btn-secondary-bg: rgba(255 254 251 / 0.7);
   --btn-secondary-text: #1a1612;
@@ -180,13 +160,14 @@
   --contribution-4: #b0876a;
 }
 
-/* -------- dark (pure black — Claude: gray-1000 = #000) -------- */
+/* -------- dark -------- */
 [data-theme="dark"] {
   --bg-primary: #000;
   --bg-secondary: #141413;
   --bg-tertiary: #1a1918;
   --bg-elevated: #0a0908;
   --bg-overlay: rgba(0 0 0 / 0.8);
+
   --bg-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
 
   --text-primary: #f0ece4;
@@ -200,15 +181,14 @@
   --border-secondary: rgba(240 230 218 / 0.06);
   --border-hover: rgba(240 230 218 / 0.16);
   --border-focus: var(--color-primary);
-  --border-primary-alpha-50: rgba(240 230 218 / 0.18);
 
   --card-bg: #181412;
   --card-bg-cream: #222019;
   --card-bg-hover: #1e1a16;
   --card-border: rgba(240 230 218 / 0.07);
   --card-border-hover: rgba(240 230 218 / 0.14);
-  --card-shadow: 0 16px 36px rgba(0 0 0 / 0.32);
-  --card-shadow-hover: 0 22px 48px rgba(0 0 0 / 0.4);
+  --card-shadow: 0 12px 32px rgba(0 0 0 / 0.32);
+  --card-shadow-hover: 0 20px 44px rgba(0 0 0 / 0.4);
 
   --input-bg: rgba(24 20 18 / 0.92);
   --input-border: rgba(240 230 218 / 0.085);
@@ -217,7 +197,7 @@
   --btn-primary-bg: #d4755a;
   --btn-primary-text: #fffefb;
   --btn-primary-hover: #c4644a;
-  --btn-primary-shadow: 0 10px 22px rgba(196 100 74 / 0.18);
+  --btn-primary-shadow: 0 8px 20px rgba(196 100 74 / 0.18);
 
   --btn-secondary-bg: rgba(240 230 218 / 0.04);
   --btn-secondary-text: #f0ece4;
