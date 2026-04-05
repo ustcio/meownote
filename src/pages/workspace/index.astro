@@ -1025,17 +1025,13 @@ import Layout from '@layouts/Layout.astro';
     }
   }
 
-  function getTimeAgo(date) {
-    const diff = Date.now() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m`;
-    if (hours < 24) return `${hours}h`;
-    if (days < 7) return `${days}d`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  function formatDateTime(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const h = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    return `${y}-${m}-${d} ${h}:${min}`;
   }
 
   function formatSize(bytes) {
@@ -1086,8 +1082,8 @@ import Layout from '@layouts/Layout.astro';
       .map((file) => {
         const ext = (file.type || 'txt').toLowerCase();
         const config = fileTypeConfig[ext] || { icon: 'document', type: 'document' };
-        const date = new Date(file.updatedAt || file.createdAt);
-        const timeAgo = getTimeAgo(date);
+        const date = new Date(file.createdAt);
+        const timeStr = formatDateTime(date);
         const editable = isEditableType(ext);
         const size = formatSize(file.fileSize || 0);
 
@@ -1099,7 +1095,7 @@ import Layout from '@layouts/Layout.astro';
                 <div class="file-title" style="font-size: 1rem; font-weight: 600; color: #171412; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(file.title)}</div>
                 <div class="file-meta" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #8a7f74;">
                   <span class="file-badge" style="background: rgba(217,119,87,0.12); color: #d97757; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">${escapeHtml(ext.toUpperCase())}</span>
-                  <span>${timeAgo}</span>
+                  <span>${timeStr}</span>
                   ${size ? `<span>·</span><span>${size}</span>` : ''}
                 </div>
               </div>
