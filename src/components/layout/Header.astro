@@ -2,82 +2,301 @@
 const currentPath = Astro.url.pathname;
 
 const navItems = [
-  { href: '/', label: 'Overview' },
+  { href: '/', label: 'Overview', shortLabel: 'Home' },
   { href: '/chatbot', label: 'Chat' },
   { href: '/workspace', label: 'Workspace' },
-  { href: '/kit', label: 'Tools' },
+  { href: '/kit', label: 'Kit' },
   { href: '/about', label: 'About' },
 ];
 
-const utilityItems = [
-  { href: '/claw', label: 'Claw' },
-  { href: '/research', label: 'Research' },
-  { href: '/trading', label: 'Trading' },
-];
-
-const isActive = (href: string) => currentPath === href || (href !== '/' && currentPath.startsWith(href));
+const isActive = (href: string) =>
+  currentPath === href || (href !== '/' && currentPath.startsWith(href));
 ---
 
 <header class="site-header">
   <div class="site-header__inner">
+
     <a href="/" class="site-logo" aria-label="Maxwell.Science home">
-      <span class="site-logo__mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M12 4L18.75 17H5.25L12 4Z" fill="currentColor"></path>
+      <span class="site-logo__icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M12 4L18.75 17H5.25L12 4Z" fill="currentColor"/>
         </svg>
       </span>
       <span class="site-logo__wordmark">
-        <span class="wordmark-brand">Maxwell</span><span class="wordmark-dot">.</span><span class="wordmark-domain">Science</span>
+        <span class="wordmark-brand">Maxwell</span>
+        <span class="wordmark-dot">.</span>
+        <span class="wordmark-domain">Science</span>
       </span>
     </a>
 
     <nav class="site-nav" aria-label="Primary">
       {navItems.map((item) => (
-        <a href={item.href} class:list={['site-nav__link', { active: isActive(item.href) }]}>
+        <a
+          href={item.href}
+          class:list={['site-nav__link', { active: isActive(item.href) }]}
+        >
           {item.label}
         </a>
       ))}
+      <a href="/kit" class="site-nav__link site-nav__link--secondary">Tools</a>
     </nav>
 
-    <div class="site-actions">
-      <a href="#" class="site-utility-link js-login-trigger">Sign in</a>
-      <a href="/chatbot" class="site-header__cta">Open chat</a>
+    <div class="header__actions">
+      <a href="https://github.com/ustcio/meownote" class="site-utility-link" target="_blank" rel="noopener">GitHub</a>
+      <a href="/chatbot" class="header__cta">Start</a>
     </div>
 
-    <button class="site-menu-button" id="mobile-menu-btn" aria-expanded="false" aria-controls="mobile-nav" aria-label="Open navigation">
-      <svg class="menu-icon menu-icon--open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <line x1="4" y1="7" x2="20" y2="7"></line>
-        <line x1="4" y1="12" x2="20" y2="12"></line>
-        <line x1="4" y1="17" x2="20" y2="17"></line>
+    <button class="mobile-toggle" id="mobile-menu-btn" aria-expanded="false" aria-label="Menu">
+      <svg class="mobile-toggle__open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <line x1="4" y1="7.5" x2="20" y2="7.5"/>
+        <line x1="4" y1="12" x2="20" y2="12"/>
+        <line x1="4" y1="16.5" x2="20" y2="16.5"/>
       </svg>
-      <svg class="menu-icon menu-icon--close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-        <line x1="18" y1="6" x2="6" y2="18"></line>
+      <svg class="mobile-toggle__close" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="6" y1="6" x2="18" y2="18"/>
+        <line x1="18" y1="6" x2="6" y2="18"/>
       </svg>
     </button>
   </div>
 
   <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile">
-    {[...navItems, ...utilityItems].map((item) => (
+    {navItems.map((item) => (
       <a href={item.href} class:list={['mobile-nav__link', { active: isActive(item.href) }]}>
         {item.label}
       </a>
     ))}
+    <a href="/kit" class="mobile-nav__link">Tools</a>
+    <a href="https://github.com/ustcio/meownote" class="mobile-nav__link" target="_blank" rel="noopener">GitHub</a>
     <div class="mobile-nav__actions">
-      <a href="#" class="mobile-nav__link js-login-trigger">Sign in</a>
-      <a href="/chatbot" class="site-header__cta mobile-nav__cta">Open chat</a>
+      <a href="/chatbot" class="header__cta mobile-nav__cta">Start</a>
     </div>
   </nav>
 </header>
+
+<style>
+  .site-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: var(--z-fixed);
+  }
+
+  .site-header__inner {
+    max-width: var(--container-2xl);
+    margin: 0 auto;
+    padding: 0 1.25rem;
+    min-height: var(--header-height);
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  @media (min-width: 768px) {
+    .site-header__inner {
+      padding: 0 2rem;
+    }
+  }
+
+  .site-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .site-logo__icon {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+  }
+
+  .site-logo__wordmark {
+    display: flex;
+    align-items: baseline;
+    line-height: 1;
+  }
+
+  .wordmark-brand {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+  }
+
+  .wordmark-dot {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0 0.02em;
+  }
+
+  .wordmark-domain {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: var(--text-quaternary);
+  }
+
+  .site-nav {
+    display: none;
+    align-items: center;
+    gap: 0.15rem;
+    margin-left: 1.25rem;
+  }
+
+  @media (min-width: 900px) {
+    .site-nav { display: flex; }
+  }
+
+  .site-nav__link {
+    padding: 0.5rem 0.75rem;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-tertiary);
+    border-radius: var(--radius-full);
+    transition:
+      color var(--duration-fast) var(--ease-default),
+      background-color var(--duration-fast) var(--ease-default);
+  }
+
+  .site-nav__link:hover {
+    color: var(--text-primary);
+  }
+
+  .site-nav__link.active {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+  }
+
+  .site-nav__link--secondary {
+    color: var(--text-quaternary);
+  }
+
+  .site-nav__link--secondary:hover {
+    color: var(--text-secondary);
+  }
+
+  .header__actions {
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto;
+  }
+
+  @media (min-width: 900px) {
+    .header__actions { display: flex; }
+  }
+
+  .site-utility-link {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-tertiary);
+    padding: 0.5rem 0.75rem;
+  }
+
+  .site-utility-link:hover {
+    color: var(--text-primary);
+  }
+
+  .header__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.3rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-full);
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    font-size: 0.82rem;
+    font-weight: var(--font-medium);
+    box-shadow: var(--btn-primary-shadow);
+    transition:
+      background var(--duration-fast) var(--ease-default),
+      transform var(--duration-fast) var(--ease-default);
+  }
+
+  .header__cta:hover {
+    background: var(--btn-primary-hover);
+    color: var(--btn-primary-text);
+    transform: translateY(-1px);
+  }
+
+  .header__cta:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(196 100 74 / 0.12);
+  }
+
+  /* ---------- mobile ---------- */
+  .mobile-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.3rem;
+    height: 2.3rem;
+    margin-left: auto;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-secondary);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+  }
+
+  @media (min-width: 900px) {
+    .mobile-toggle { display: none; }
+  }
+
+  .mobile-toggle__open { display: block; }
+  .mobile-toggle__close { display: none; }
+  .mobile-toggle.open .mobile-toggle__open { display: none; }
+  .mobile-toggle.open .mobile-toggle__close { display: block; }
+
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    top: var(--header-height);
+    left: 0; right: 0; bottom: 0;
+    z-index: calc(var(--z-fixed) - 1);
+    background: var(--bg-primary);
+    padding: 1rem 1.5rem 1.5rem;
+    flex-direction: column;
+    gap: 0.15rem;
+    overflow-y: auto;
+  }
+
+  .mobile-nav.open { display: flex; }
+
+  .mobile-nav__link {
+    padding: 0.75rem 0.25rem;
+    font-size: 1rem;
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-secondary);
+  }
+
+  .mobile-nav__link.active {
+    color: var(--text-primary);
+  }
+
+  .mobile-nav__actions {
+    padding-top: 0.75rem;
+  }
+
+  .mobile-nav__cta {
+    width: 100%;
+  }
+</style>
 
 <script>
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileNav = document.getElementById('mobile-nav');
 
   function setMenuState(open: boolean) {
-    mobileNav?.classList.toggle('open', open);
     mobileMenuBtn?.classList.toggle('open', open);
     mobileMenuBtn?.setAttribute('aria-expanded', String(open));
+    mobileNav?.classList.toggle('open', open);
     document.body.style.overflow = open ? 'hidden' : '';
   }
 
@@ -88,226 +307,4 @@ const isActive = (href: string) => currentPath === href || (href !== '/' && curr
   document.querySelectorAll('.mobile-nav__link').forEach((link) => {
     link.addEventListener('click', () => setMenuState(false));
   });
-
-  document.querySelectorAll('.js-login-trigger').forEach((link) => {
-    link.addEventListener('click', (event) => {
-      event.preventDefault();
-      (window as any).openAuthModal?.('login');
-      setMenuState(false);
-    });
-  });
 </script>
-
-<style>
-  .site-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: var(--z-fixed);
-    background: var(--nav-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--nav-border);
-  }
-
-  .site-header__inner {
-    max-width: var(--container-2xl);
-    margin: 0 auto;
-    padding: 0 1.2rem;
-    min-height: var(--header-height);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  @media (min-width: 768px) {
-    .site-header__inner {
-      padding: 0 2rem;
-    }
-  }
-
-  .site-logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-width: max-content;
-  }
-
-  .site-logo__mark {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--color-primary);
-    color: #fffdf9;
-    box-shadow: 0 8px 20px rgba(201, 105, 71, 0.18);
-  }
-
-  .site-logo__mark svg {
-    width: 0.95rem;
-    height: 0.95rem;
-  }
-
-  .site-logo__wordmark {
-    display: inline-flex;
-    align-items: baseline;
-    font-size: 1.05rem;
-    letter-spacing: -0.01em;
-    line-height: 1;
-  }
-
-  .wordmark-brand {
-    font-family: var(--font-display);
-    font-size: 1.15rem;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    color: var(--text-primary);
-  }
-
-  .wordmark-dot {
-    font-family: var(--font-display);
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    margin: 0 0.02em;
-  }
-
-  .wordmark-domain {
-    font-family: var(--font-body);
-    font-size: 0.95rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    color: var(--text-secondary);
-  }
-
-  .site-nav,
-  .site-actions {
-    display: none;
-  }
-
-  @media (min-width: 1024px) {
-    .site-nav {
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      margin-left: 1.5rem;
-    }
-
-    .site-actions {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-    }
-  }
-
-  .site-nav__link,
-  .site-utility-link {
-    color: var(--nav-link);
-    font-size: 0.92rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    padding: 0.25rem 0;
-  }
-
-  .site-nav__link.active,
-  .site-utility-link.active,
-  .site-nav__link:hover,
-  .site-utility-link:hover {
-    color: var(--nav-link-hover);
-  }
-
-  .site-header__cta {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 2.7rem;
-    padding: 0.75rem 1.15rem;
-    border-radius: 999px;
-    background: var(--btn-primary-bg);
-    color: var(--btn-primary-text);
-    font-size: 0.92rem;
-    font-weight: 500;
-    box-shadow: var(--btn-primary-shadow);
-  }
-
-  .site-header__cta:hover {
-    color: var(--btn-primary-text);
-    background: var(--btn-primary-hover);
-    transform: translateY(-1px);
-  }
-
-  .site-menu-button {
-    margin-left: auto;
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: 999px;
-    border: 1px solid var(--border-primary);
-    background: rgba(255, 253, 249, 0.78);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  @media (min-width: 1024px) {
-    .site-menu-button {
-      display: none;
-    }
-  }
-
-  .menu-icon {
-    width: 1.15rem;
-    height: 1.15rem;
-  }
-
-  .menu-icon--close {
-    display: none;
-  }
-
-  .site-menu-button.open .menu-icon--open {
-    display: none;
-  }
-
-  .site-menu-button.open .menu-icon--close {
-    display: block;
-  }
-
-  .mobile-nav {
-    display: none;
-    padding: 0 1.2rem 1.2rem;
-    border-top: 1px solid rgba(71, 57, 44, 0.05);
-    background: var(--bg-primary);
-  }
-
-  .mobile-nav.open {
-    display: grid;
-    gap: 0.4rem;
-  }
-
-  .mobile-nav__link {
-    display: flex;
-    align-items: center;
-    min-height: 3rem;
-    padding: 0 0.2rem;
-    border-bottom: 1px solid rgba(71, 57, 44, 0.06);
-    color: var(--text-secondary);
-    font-size: 1rem;
-  }
-
-  .mobile-nav__link.active {
-    color: var(--text-primary);
-  }
-
-  .mobile-nav__actions {
-    display: grid;
-    gap: 0.75rem;
-    padding-top: 0.75rem;
-  }
-
-  .mobile-nav__cta {
-    width: 100%;
-  }
-</style>

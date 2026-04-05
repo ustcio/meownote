@@ -159,7 +159,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
   }
 
   .contribution-aside__label {
-    font-size: 0.78rem;
+    font-size: var(--text-sm);
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -168,7 +168,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
 
   .contribution-aside p {
     margin: 0;
-    font-size: 0.98rem;
+    font-size: var(--text-base);
   }
 
   .contribution-aside__meta {
@@ -181,11 +181,11 @@ const totalWeeks = Math.ceil(totalDays / 7);
   }
 
   .contribution-panel {
-    padding: 1.4rem;
-    border-radius: 1.8rem;
-    border: 1px solid rgba(71, 57, 44, 0.1);
-    background: rgba(255, 253, 249, 0.96);
-    box-shadow: 0 22px 56px rgba(51, 38, 26, 0.08);
+    padding: 1.6rem;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-primary);
+    background: var(--card-bg, rgba(255, 253, 249, 0.96));
+    box-shadow: var(--shadow-lg, 0 22px 56px rgba(51, 38, 26, 0.08));
   }
 
   .contribution-header {

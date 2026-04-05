@@ -24,10 +24,7 @@ body {
   font-weight: var(--font-normal);
   line-height: var(--leading-normal);
   color: var(--text-primary);
-  background:
-    radial-gradient(circle at 78% 8%, rgba(217, 119, 87, 0.09), transparent 28%),
-    radial-gradient(circle at 12% 12%, rgba(180, 199, 192, 0.12), transparent 18%),
-    linear-gradient(180deg, #fbf8f3 0%, var(--bg-primary) 30%, #f6f1e8 100%);
+  background: var(--bg-primary);
   transition:
     background-color var(--duration-normal) var(--ease-default),
     color var(--duration-normal) var(--ease-default);
@@ -35,10 +32,19 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-h1,
-h2,
-h3,
-h4 {
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--bg-grain) repeat;
+  background-size: 180px;
+  opacity: 0.6;
+}
+
+/* -------- typography -------- */
+h1, h2, h3, h4 {
   font-family: var(--font-display);
   font-weight: var(--font-medium);
   line-height: var(--leading-tight);
@@ -47,23 +53,26 @@ h4 {
 }
 
 h1 {
-  font-size: clamp(3.25rem, 7vw, 5.75rem);
-  line-height: 0.98;
+  font-size: clamp(2.75rem, 6vw, 4.75rem);
+  line-height: 1.0;
+  letter-spacing: -0.035em;
+  font-weight: 600;
 }
 
 h2 {
-  font-size: clamp(2.1rem, 4.5vw, 3.45rem);
-  line-height: 1.02;
+  font-size: clamp(1.85rem, 3.5vw, 2.875rem);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  font-weight: 550;
 }
 
 h3 {
-  font-size: clamp(1.35rem, 2vw, 1.95rem);
-  line-height: 1.15;
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  line-height: 1.18;
+  letter-spacing: -0.025em;
 }
 
-h4,
-h5,
-h6 {
+h4, h5, h6 {
   font-family: var(--font-body);
   font-weight: var(--font-medium);
 }
@@ -74,9 +83,7 @@ p {
   margin-bottom: 1.1em;
 }
 
-p:last-child {
-  margin-bottom: 0;
-}
+p:last-child { margin-bottom: 0; }
 
 a {
   color: inherit;
@@ -88,9 +95,7 @@ a {
     transform var(--duration-fast) var(--ease-default);
 }
 
-a:hover {
-  color: var(--nav-link-hover);
-}
+a:hover { color: var(--nav-link-hover); }
 
 button {
   font-family: var(--font-body);
@@ -101,43 +106,38 @@ button {
   cursor: pointer;
 }
 
-input,
-textarea,
-select {
+input, textarea, select {
   font-family: var(--font-body);
   font-size: inherit;
   color: var(--text-primary);
   background: var(--input-bg);
   border: 1px solid var(--input-border);
-  border-radius: var(--radius-lg);
-  padding: 0.95rem 1rem;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.875rem;
   transition:
     border-color var(--duration-fast) var(--ease-default),
     box-shadow var(--duration-fast) var(--ease-default),
     background-color var(--duration-fast) var(--ease-default);
 }
 
-input:focus,
-textarea:focus,
-select:focus {
+input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px var(--input-focus-ring);
+  box-shadow: 0 0 0 3px var(--input-focus-ring);
 }
 
-input::placeholder,
-textarea::placeholder {
+input::placeholder, textarea::placeholder {
   color: var(--text-tertiary);
 }
 
 ::selection {
-  background: rgba(217, 119, 87, 0.18);
+  background: rgba(212, 117, 90, 0.16);
   color: var(--text-primary);
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -145,45 +145,45 @@ textarea::placeholder {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(95, 86, 78, 0.35);
+  background: rgba(95 86 78 / 0.3);
   border-radius: var(--radius-full);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(95, 86, 78, 0.5);
+  background: rgba(95 86 78 / 0.5);
 }
 
 :focus-visible {
-  outline: 2px solid rgba(217, 119, 87, 0.55);
+  outline: 2px solid rgba(212, 117, 90, 0.5);
   outline-offset: 2px;
 }
 
+/* -------- layout -------- */
 .container {
   width: 100%;
   max-width: var(--container-xl);
   margin-left: auto;
   margin-right: auto;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
 
 @media (min-width: 768px) {
   .container {
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 }
 
 .container-narrow {
-  max-width: 780px;
+  max-width: 720px;
 }
 
+/* -------- shared helpers -------- */
 .sr-only {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
@@ -193,15 +193,15 @@ textarea::placeholder {
 .claude-kicker {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.45rem 0.85rem;
-  border: 1px solid rgba(71, 57, 44, 0.08);
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--border-secondary);
   border-radius: var(--radius-full);
-  background: rgba(255, 253, 249, 0.72);
+  background: transparent;
   color: var(--text-tertiary);
-  font-size: 0.75rem;
-  font-weight: var(--font-medium);
-  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
@@ -213,16 +213,15 @@ textarea::placeholder {
   background: var(--color-primary);
 }
 
-.claude-button,
-.claude-button-secondary {
+.claude-button, .claude-button-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
-  min-height: 2.9rem;
-  padding: 0.8rem 1.2rem;
+  gap: 0.5rem;
+  min-height: 2.65rem;
+  padding: 0.7rem 1.1rem;
   border-radius: var(--radius-full);
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   font-weight: var(--font-medium);
   letter-spacing: -0.01em;
 }
@@ -239,6 +238,11 @@ textarea::placeholder {
   transform: translateY(-1px);
 }
 
+.claude-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(196 100 74 / 0.12);
+}
+
 .claude-button-secondary {
   background: var(--btn-secondary-bg);
   color: var(--btn-secondary-text);
@@ -252,14 +256,14 @@ textarea::placeholder {
 .claude-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  min-height: 2rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 0.85rem;
-  border: 1px solid var(--border-primary);
-  background: rgba(255, 253, 249, 0.82);
+  gap: 0.4rem;
+  min-height: 1.85rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-secondary);
+  background: transparent;
   color: var(--text-secondary);
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: var(--font-medium);
 }
 
@@ -283,39 +287,38 @@ textarea::placeholder {
 }
 
 .claude-section {
-  padding: clamp(4.5rem, 8vw, 7rem) 0;
+  padding: clamp(6rem, 10vw, 8rem) 0;
 }
 
 .claude-section--cream {
-  background: rgba(242, 236, 227, 0.82);
-  border-top: 1px solid rgba(71, 57, 44, 0.05);
-  border-bottom: 1px solid rgba(71, 57, 44, 0.05);
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-secondary);
+  border-bottom: 1px solid var(--border-secondary);
 }
 
 .claude-section-heading {
   display: grid;
-  gap: 1rem;
-  max-width: 42rem;
-  margin-bottom: clamp(2rem, 4vw, 3.5rem);
+  gap: 0.75rem;
+  max-width: 40rem;
+  margin-bottom: clamp(2rem, 3.5vw, 3rem);
 }
 
 .claude-section-heading p {
-  font-size: 1.05rem;
-  max-width: 36rem;
+  font-size: 1rem;
+  max-width: 34rem;
+  max-width: 34rem;
+  line-height: 1.6;
 }
 
 @media (max-width: 767px) {
-  a,
-  button {
+  a, button {
     min-height: 44px;
     min-width: 44px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

@@ -842,9 +842,9 @@ input[type="checkbox"] {
 }
 
 .strength-fill.weak { width: 25%; background: var(--color-danger); }
-.strength-fill.fair { width: 50%; background: var(--color-accent-orange); }
-.strength-fill.good { width: 75%; background: var(--color-accent-green); }
-.strength-fill.strong { width: 100%; background: var(--color-success); }
+.strength-fill.fair { width: 50%; background: var(--accent-coral, var(--color-accent-orange, #ebcece)); }
+.strength-fill.good { width: 75%; background: var(--accent-cactus, var(--color-accent-green, #7d9a88)); }
+.strength-fill.strong { width: 100%; background: var(--accent-olive, var(--color-success, #788c5d)); }
 
 .strength-text {
   font-size: var(--text-xs);

@@ -11,9 +11,9 @@ const workModes = [
     detail: 'Useful when the work is ambiguous and the next action is not obvious yet.',
   },
   {
-    title: 'Organize the mess',
+    title: 'Organise the mess',
     prompt: 'Review these files and propose a naming system, folder structure, and what should be archived.',
-    detail: 'Closer to the “do the work with me” feeling people associate with Claude.',
+    detail: 'Closer to the "do the work with me" feeling people associate with Claude.',
   },
 ];
 ---
@@ -24,14 +24,12 @@ const workModes = [
       <span class="claude-kicker">Ways to work</span>
       <h2>From a vague prompt to a useful next step.</h2>
       <p>
-        The best Claude pages show the shape of the work, not just a list of
-        features. This section does the same with real prompt patterns and a
-        calmer presentation.
+        The best pages show the shape of the work, not just a list of features.
       </p>
     </div>
 
     <div class="work-modes">
-      <div class="work-modes__demo claude-editorial-card">
+      <div class="work-modes__demo">
         <div class="demo-window">
           <span class="demo-window__label">Prompt</span>
           <p>{workModes[0].prompt}</p>
@@ -62,67 +60,76 @@ const workModes = [
 <style>
   .work-modes {
     display: grid;
-    gap: 1.5rem;
+    gap: 1.25rem;
     align-items: start;
   }
 
-  @media (min-width: 1100px) {
+  @media (min-width: 1000px) {
     .work-modes {
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 2rem;
     }
   }
 
   .work-modes__demo {
-    padding: 1.4rem;
+    padding: 1.25rem;
+    border-radius: var(--radius-xl);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     display: grid;
-    gap: 1rem;
+    gap: 0.85rem;
   }
 
   .demo-window {
-    padding: 1.2rem;
-    border-radius: 1.15rem;
-    background: rgba(255, 253, 249, 0.92);
-    border: 1px solid rgba(71, 57, 44, 0.08);
+    padding: 1rem 1.15rem;
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-secondary);
   }
 
   .demo-window--muted {
-    background: rgba(242, 236, 227, 0.72);
+    background: var(--bg-secondary);
   }
 
   .demo-window__label {
     display: inline-block;
-    margin-bottom: 0.75rem;
-    font-size: 0.76rem;
-    letter-spacing: 0.08em;
+    margin-bottom: 0.6rem;
+    font-size: 0.68rem;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.07em;
     text-transform: uppercase;
     color: var(--text-tertiary);
   }
 
-  .demo-window p,
-  .demo-window li {
-    font-size: 0.98rem;
+  .demo-window p {
+    font-size: var(--text-base);
     color: var(--text-secondary);
+    margin: 0;
+    line-height: var(--leading-relaxed);
   }
 
   .demo-window ul {
     list-style: none;
     display: grid;
-    gap: 0.55rem;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
   }
 
   .demo-window li {
     position: relative;
-    padding-left: 1rem;
+    padding-left: 0.95rem;
+    font-size: var(--text-base);
+    color: var(--text-secondary);
   }
 
   .demo-window li::before {
     content: '';
     position: absolute;
-    top: 0.62rem;
+    top: 0.55rem;
     left: 0;
-    width: 0.32rem;
-    height: 0.32rem;
+    width: 0.3rem;
+    height: 0.3rem;
     border-radius: 999px;
     background: var(--color-primary);
   }
@@ -133,10 +140,10 @@ const workModes = [
   }
 
   .work-mode {
-    padding-top: 1.1rem;
-    border-top: 1px solid var(--border-primary);
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-secondary);
     display: grid;
-    gap: 0.55rem;
+    gap: 0.4rem;
   }
 
   .work-mode:first-child {
@@ -145,11 +152,18 @@ const workModes = [
   }
 
   .work-mode h3 {
-    font-size: 1.8rem;
+    font-size: var(--text-2xl);
+    line-height: 1.15;
   }
 
   .work-mode__prompt {
     color: var(--text-primary);
-    font-size: 1rem;
+    font-size: var(--text-base);
+    margin-bottom: 0;
+  }
+
+  .work-mode p:last-child {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
   }
 </style>

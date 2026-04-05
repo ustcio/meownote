@@ -2,27 +2,27 @@
 const principles = [
   {
     title: 'Sharper hierarchy',
-    description: 'Headings, copy, and controls now guide attention in the same order people actually read the page.',
+    description: 'Headings, copy, and controls now guide attention in the order people actually read.',
   },
   {
     title: 'Warmer surfaces',
-    description: 'Panels lean on cream, white, and ink rather than loud gradients or dashboard styling.',
+    description: 'Panels lean on cream, off-white, and ink — not gradients or dashboard styling.',
   },
   {
     title: 'Measured interactions',
-    description: 'Buttons, shadows, and hover states now feel quieter and more deliberate.',
+    description: 'Buttons, shadows, and hover states feel quieter. Restraint is the point.',
   },
   {
     title: 'Editorial spacing',
-    description: 'Each block has more breathing room, fewer competing accents, and a clearer start and stop.',
+    description: 'Each block gets breathing room, fewer accents, and a clear start and stop.',
   },
   {
     title: 'Stronger voice',
-    description: 'Text reads less like generic AI marketing and more like a calm product for real work.',
+    description: 'Reads less like generic marketing and more like a calm product for real work.',
   },
   {
     title: 'System over patchwork',
-    description: 'Design tokens now support the look across inner pages instead of only the homepage.',
+    description: 'Design tokens support the whole site — inner pages included — not just the homepage.',
   },
 ];
 ---
@@ -31,18 +31,17 @@ const principles = [
   <div class="container">
     <div class="claude-section-heading">
       <span class="claude-kicker">Design principles</span>
-      <h2>Closer to Claude because the rules are clearer.</h2>
+      <h2>Restraint is a feature.</h2>
       <p>
-        Mimicry is not about copying one button radius. It comes from a whole
-        system of type, contrast, pacing, and interaction that feels composed.
+        Not about copying one button radius — it's about type, contrast, spacing, and pacing that feel composed.
       </p>
     </div>
 
     <div class="principles-grid">
-      {principles.map((principle) => (
-        <article class="principle-card">
-          <h3>{principle.title}</h3>
-          <p>{principle.description}</p>
+      {principles.map((p) => (
+        <article class="principle">
+          <h3>{p.title}</h3>
+          <p>{p.description}</p>
         </article>
       ))}
     </div>
@@ -53,36 +52,31 @@ const principles = [
   .principles-grid {
     display: grid;
     gap: 1px;
-    border: 1px solid var(--border-primary);
-    background: var(--border-primary);
+    background: var(--border-secondary);
+    border: 1px solid var(--border-secondary);
   }
 
-  @media (min-width: 760px) {
-    .principles-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  @media (min-width: 680px) {
+    .principles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 1000px) {
+    .principles-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
 
-  @media (min-width: 1100px) {
-    .principles-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  .principle-card {
-    min-height: 100%;
+  .principle {
     padding: 1.5rem;
     background: var(--card-bg);
     display: grid;
-    gap: 0.75rem;
+    gap: 0.65rem;
   }
 
-  .principle-card h3 {
-    font-size: 1.65rem;
+  .principle h3 {
+    font-size: var(--text-xl);
   }
 
-  .principle-card p {
+  .principle p {
     margin: 0;
-    font-size: 0.96rem;
+    font-size: var(--text-base);
+    line-height: 1.55;
   }
 </style>
