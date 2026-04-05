@@ -1084,8 +1084,7 @@ import Layout from '@layouts/Layout.astro';
       .map((file) => {
         const ext = (file.type || 'txt').toLowerCase();
         const config = fileTypeConfig[ext] || { icon: 'document', type: 'document' };
-        const date = new Date(file.createdAt);
-        const timeStr = formatDateTime(date);
+        const timeStr = formatDateTime(file.createdAt);
         const editable = isEditableType(ext);
         const size = formatSize(file.fileSize || 0);
 
