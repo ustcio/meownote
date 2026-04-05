@@ -38,9 +38,7 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: var(--bg-grain) repeat;
-  background-size: 180px;
-  opacity: 0.6;
+  background-image: none;
 }
 
 /* -------- typography -------- */
@@ -228,29 +226,29 @@ input::placeholder, textarea::placeholder {
 
 .claude-button {
   background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  box-shadow: var(--btn-primary-shadow);
+  color: #FFFFFF;
 }
 
 .claude-button:hover {
   background: var(--btn-primary-hover);
-  color: var(--btn-primary-text);
+  color: #FFFFFF;
   transform: translateY(-1px);
 }
 
 .claude-button:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(196 100 74 / 0.12);
+  box-shadow: none;
 }
 
 .claude-button-secondary {
-  background: var(--btn-secondary-bg);
-  color: var(--btn-secondary-text);
-  border: 1px solid var(--btn-secondary-border);
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
 }
 
 .claude-button-secondary:hover {
-  background: var(--btn-secondary-hover-bg);
+  background: var(--bg-secondary);
+  border-color: var(--border-hover);
 }
 
 .claude-chip {

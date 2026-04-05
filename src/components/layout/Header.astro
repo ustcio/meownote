@@ -78,6 +78,10 @@ const isActive = (href: string) =>
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: var(--z-fixed);
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--nav-border);
   }
 
   .site-header__inner {

@@ -36,7 +36,9 @@ const {
   <div class="hero-container">
     <div class="hero-content">
       <div class="hero-badge">
-        <span class="badge-icon">✨</span>
+        <svg class="badge-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+        </svg>
         <span class="badge-text">{subtitle}</span>
       </div>
       
@@ -111,7 +113,8 @@ const {
   }
 
   .badge-icon {
-    font-size: 16px;
+    color: var(--color-primary);
+    flex-shrink: 0;
   }
 
   .badge-text {
@@ -150,11 +153,11 @@ const {
     align-items: center;
     gap: 8px;
     padding: 14px 28px;
-    border-radius: 12px;
+    border-radius: 999px;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 500;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
     cursor: pointer;
     border: none;
   }
