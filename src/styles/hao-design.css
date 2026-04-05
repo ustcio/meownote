@@ -20,8 +20,8 @@
 .password-tool {
   min-height: 100vh;
   background: var(--bg-primary);
-  padding-top: var(--space-6);
-  padding-bottom: var(--space-16);
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-10);
 }
 
 .tool-container,
