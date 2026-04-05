@@ -1,0 +1,289 @@
+---
+const plans = [
+  {
+    name: 'Free',
+    price: '$0',
+    description: 'For everyone',
+    features: [
+      'Chat on web, iOS, and Android',
+      'Write, edit, and create content',
+      'Analyse text and images',
+      'Generate code and visualise data',
+      'Web search',
+    ],
+    cta: 'Start free',
+    href: '/chatbot',
+    highlighted: false,
+  },
+  {
+    name: 'Pro',
+    price: '$17',
+    period: '/month',
+    description: 'Everyday productivity',
+    features: [
+      'Everything in Free',
+      'More usage',
+      'Claude Code access',
+      'Unlimited projects',
+      'Memory across conversations',
+      'More Claude models',
+    ],
+    cta: 'Upgrade to Pro',
+    href: '/chatbot',
+    highlighted: true,
+  },
+  {
+    name: 'Max',
+    price: '$100',
+    period: '/month',
+    description: '5–20× more usage',
+    features: [
+      'Everything in Pro',
+      '5× or 20× more usage',
+      'Higher output limits',
+      'Early access to new features',
+      'Priority access at peak times',
+    ],
+    cta: 'Get Max',
+    href: '/chatbot',
+    highlighted: false,
+  },
+];
+---
+
+<section class="plans-section">
+  <div class="container">
+    <div class="plans-heading">
+      <span class="plans-kicker">Pricing</span>
+      <h2>Start free. Upgrade when you're ready.</h2>
+      <p>
+        Every plan gets the same powerful Claude models. You're paying for usage, not access.
+      </p>
+    </div>
+
+    <div class="plans-grid">
+      {plans.map((plan) => (
+        <div class:list={['plan-card', { 'plan-card--highlighted': plan.highlighted }]}>
+          {plan.highlighted && <span class="plan-card__badge">Popular</span>}
+          <div class="plan-card__header">
+            <span class="plan-card__name">{plan.name}</span>
+            <p class="plan-card__desc">{plan.description}</p>
+          </div>
+
+          <div class="plan-card__price">
+            <span class="plan-card__amount">{plan.price}</span>
+            {plan.period && <span class="plan-card__period">{plan.period}</span>}
+          </div>
+
+          <ul class="plan-card__features">
+            {plan.features.map((feature) => (
+              <li class="plan-feature">
+                <svg class="plan-feature__check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                {feature}
+              </li>
+            ))}
+          </ul>
+
+          <a href={plan.href} class:list={['plan-card__cta', { 'plan-card__cta--muted': !plan.highlighted }]}>
+            {plan.cta}
+          </a>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .plans-section {
+    padding: clamp(4rem, 7vw, 6.5rem) 0;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-secondary);
+    border-bottom: 1px solid var(--border-secondary);
+  }
+
+  .plans-heading {
+    text-align: center;
+    display: grid;
+    gap: 0.65rem;
+    max-width: 32rem;
+    margin: 0 auto clamp(2.5rem, 4vw, 3.5rem);
+  }
+
+  .plans-kicker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  .plans-heading h2 {
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  }
+
+  .plans-heading p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 auto;
+    max-width: 28rem;
+  }
+
+  .plans-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .plans-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+  }
+
+  .plan-card {
+    position: relative;
+    padding: 1.6rem;
+    border-radius: var(--radius-xl);
+    background: var(--card-bg);
+    border: 1px solid var(--border-secondary);
+    display: grid;
+    gap: 1.25rem;
+    transition:
+      border-color var(--duration-fast) var(--ease-default),
+      box-shadow var(--duration-fast) var(--ease-default);
+  }
+
+  .plan-card:hover {
+    border-color: var(--border-hover);
+  }
+
+  .plan-card--highlighted {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary), var(--shadow-lg);
+  }
+
+  .plan-card__badge {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .plan-card__badge {
+      position: absolute;
+      top: -0.65rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-primary);
+      color: #fffefb;
+      font-size: 0.65rem;
+      font-weight: var(--font-semibold);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-full);
+      display: block;
+      z-index: 1;
+    }
+  }
+
+  .plan-card__header {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .plan-card__name {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+  }
+
+  .plan-card__desc {
+    font-size: 0.82rem;
+    color: var(--text-tertiary);
+    margin: 0;
+  }
+
+  .plan-card__price {
+    display: flex;
+    align-items: baseline;
+    gap: 0.2rem;
+  }
+
+  .plan-card__amount {
+    font-family: var(--font-display);
+    font-size: 2.25rem;
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+  }
+
+  .plan-card__period {
+    font-size: 0.82rem;
+    color: var(--text-tertiary);
+  }
+
+  .plan-card__features {
+    list-style: none;
+    display: grid;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .plan-feature {
+    position: relative;
+    padding-left: 1.45rem;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+  }
+
+  .plan-feature__check {
+    position: absolute;
+    left: 0;
+    top: 0.1rem;
+    color: var(--color-primary);
+  }
+
+  .plan-card__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.6rem;
+    padding: 0.65rem 1.2rem;
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: var(--font-medium);
+    text-align: center;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    box-shadow: var(--btn-primary-shadow);
+    transition:
+      background var(--duration-fast) var(--ease-default),
+      transform var(--duration-fast) var(--ease-default);
+  }
+
+  .plan-card__cta:hover {
+    background: var(--btn-primary-hover);
+    color: var(--btn-primary-text);
+    transform: translateY(-1px);
+  }
+
+  .plan-card__cta--muted {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-primary);
+    box-shadow: none;
+  }
+
+  .plan-card__cta--muted:hover {
+    background: var(--bg-secondary);
+    border-color: var(--border-hover);
+  }
+</style>

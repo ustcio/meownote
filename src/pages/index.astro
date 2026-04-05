@@ -3,11 +3,8 @@ import Layout from '@layouts/Layout.astro';
 import ScrollAnimation from '@components/ui/ScrollAnimation.astro';
 import HeroEnhanced from '@components/sections/Hero-Enhanced.astro';
 import Features from '@components/sections/Features.astro';
-import ContributionGraph from '@components/sections/ContributionGraph.astro';
-import YearProgress from '@components/sections/YearProgress.astro';
 import Activity from '@components/sections/Activity.astro';
-import Research from '@components/sections/Research.astro';
-import Safety from '@components/sections/Safety.astro';
+import Plans from '@components/sections/Plans.astro';
 import CTA from '@components/sections/CTA.astro';
 ---
 
@@ -16,11 +13,7 @@ import CTA from '@components/sections/CTA.astro';
   description="Claude-inspired AI product design for chat, workspace, research, and practical daily workflows."
 >
   <HeroEnhanced />
-  <ScrollAnimation rootMargin="-80px"><Features /></ScrollAnimation>
-  <ScrollAnimation rootMargin="-60px"><ContributionGraph /></ScrollAnimation>
-  <ScrollAnimation rootMargin="-60px"><YearProgress /></ScrollAnimation>
+  <ScrollAnimation rootMargin="-60px"><Features /></ScrollAnimation>
   <ScrollAnimation rootMargin="-60px"><Activity /></ScrollAnimation>
-  <ScrollAnimation rootMargin="-60px"><Research /></ScrollAnimation>
-  <ScrollAnimation rootMargin="-60px"><Safety /></ScrollAnimation>
-  <ScrollAnimation rootMargin="-60px"><CTA /></ScrollAnimation>
+  <ScrollAnimation rootMargin="-60px"><Plans /></ScrollAnimation>
 </Layout>
