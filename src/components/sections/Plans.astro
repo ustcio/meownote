@@ -2,7 +2,8 @@
 const plans = [
   {
     name: 'Free',
-    price: '$0',
+    priceMonthly: '$0',
+    priceYearly: '$0',
     description: 'For everyone',
     features: [
       'Chat on web, iOS, and Android',
@@ -17,7 +18,8 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: '$17',
+    priceMonthly: '$17',
+    priceYearly: '$14',
     period: '/month',
     description: 'Everyday productivity',
     features: [
@@ -34,7 +36,8 @@ const plans = [
   },
   {
     name: 'Max',
-    price: '$100',
+    priceMonthly: '$100',
+    priceYearly: '$83',
     period: '/month',
     description: '5–20× more usage',
     features: [
@@ -59,19 +62,30 @@ const plans = [
       <p>
         Every plan gets the same powerful Claude models. You're paying for usage, not access.
       </p>
+
+      <div class="plans-toggle">
+        <span id="toggle-monthly" class="plans-toggle-label">Monthly</span>
+        <button class="plans-toggle-switch" id="billing-toggle" aria-label="Toggle billing period">
+          <span class="plans-toggle-handle"></span>
+        </button>
+        <span id="toggle-yearly" class="plans-toggle-label">
+          Yearly
+          <span class="plans-toggle-saving">Save 20%</span>
+        </span>
+      </div>
     </div>
 
     <div class="plans-grid">
       {plans.map((plan) => (
         <div class:list={['plan-card', { 'plan-card--highlighted': plan.highlighted }]}>
-          {plan.highlighted && <span class="plan-card__badge">Popular</span>}
+          {plan.highlighted && <span class="plan-card__badge">Most Popular</span>}
           <div class="plan-card__header">
             <span class="plan-card__name">{plan.name}</span>
             <p class="plan-card__desc">{plan.description}</p>
           </div>
 
           <div class="plan-card__price">
-            <span class="plan-card__amount">{plan.price}</span>
+            <span class="plan-card__amount" data-monthly={plan.priceMonthly} data-yearly={plan.priceYearly}>{plan.priceMonthly}</span>
             {plan.period && <span class="plan-card__period">{plan.period}</span>}
           </div>
 
@@ -134,6 +148,71 @@ const plans = [
     max-width: 28rem;
   }
 
+  /* -------- toggle -------- */
+  .plans-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+  }
+
+  .plans-toggle-label {
+    font-size: 0.88rem;
+    color: var(--text-tertiary);
+    font-weight: var(--font-medium);
+    transition: color var(--duration-fast) var(--ease-default);
+  }
+
+  .plans-toggle-label[aria-pressed="true"] {
+    color: var(--text-primary);
+  }
+
+  .plans-toggle-saving {
+    display: inline-block;
+    margin-left: 0.35rem;
+    font-size: 0.68rem;
+    font-weight: var(--font-semibold);
+    color: var(--accent-olive, #84a98c);
+    background: rgba(132, 169, 140, 0.1);
+    padding: 0.1rem 0.45rem;
+    border-radius: var(--radius-full);
+  }
+
+  .plans-toggle-switch {
+    position: relative;
+    width: 2.25rem;
+    height: 1.25rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-primary);
+    padding: 0;
+    cursor: pointer;
+    transition: background var(--duration-normal) var(--ease-default);
+  }
+
+  .plans-toggle-switch[aria-pressed="true"] {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  .plans-toggle-handle {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0 0 0 / 0.15);
+    transition: left var(--duration-normal) var(--ease-default);
+  }
+
+  .plans-toggle-switch[aria-pressed="true"] .plans-toggle-handle {
+    left: calc(100% - 0.85rem - 2px);
+  }
+
+  /* -------- grid -------- */
   .plans-grid {
     display: grid;
     gap: 1rem;
@@ -155,17 +234,25 @@ const plans = [
     display: grid;
     gap: 1.25rem;
     transition:
-      border-color var(--duration-fast) var(--ease-default),
-      box-shadow var(--duration-fast) var(--ease-default);
+      border-color var(--duration-normal) var(--ease-default),
+      box-shadow var(--duration-normal) var(--ease-default),
+      transform var(--duration-normal) var(--ease-default);
   }
 
   .plan-card:hover {
     border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
   }
 
   .plan-card--highlighted {
     border-color: var(--color-primary);
     box-shadow: 0 0 0 1px var(--color-primary), var(--shadow-lg);
+    background: linear-gradient(180deg, rgba(212, 117, 90, 0.04) 0%, var(--card-bg) 40%);
+  }
+
+  .plan-card--highlighted:hover {
+    box-shadow: 0 0 0 1px var(--color-primary), var(--shadow-xl);
   }
 
   .plan-card__badge {
@@ -175,7 +262,7 @@ const plans = [
   @media (min-width: 768px) {
     .plan-card__badge {
       position: absolute;
-      top: -0.65rem;
+      top: -0.7rem;
       left: 50%;
       transform: translateX(-50%);
       background: var(--color-primary);
@@ -184,7 +271,7 @@ const plans = [
       font-weight: var(--font-semibold);
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 0.25rem 0.75rem;
+      padding: 0.25rem 0.85rem;
       border-radius: var(--radius-full);
       display: block;
       z-index: 1;
@@ -221,6 +308,7 @@ const plans = [
     font-weight: var(--font-bold);
     color: var(--text-primary);
     letter-spacing: -0.03em;
+    transition: opacity var(--duration-normal) var(--ease-default);
   }
 
   .plan-card__period {
@@ -238,7 +326,7 @@ const plans = [
 
   .plan-feature {
     position: relative;
-    padding-left: 1.45rem;
+    padding-left: 1.5rem;
     font-size: 0.88rem;
     color: var(--text-secondary);
     line-height: 1.45;
@@ -248,7 +336,8 @@ const plans = [
     position: absolute;
     left: 0;
     top: 0.1rem;
-    color: var(--color-primary);
+    color: var(--accent-olive, #84a98c);
+    flex-shrink: 0;
   }
 
   .plan-card__cta {
@@ -287,3 +376,26 @@ const plans = [
     border-color: var(--border-hover);
   }
 </style>
+
+<script>
+  (function() {
+    const toggle = document.getElementById('billing-toggle');
+    if (!toggle) return;
+    const amounts = document.querySelectorAll('.plan-card__amount');
+
+    toggle.setAttribute('aria-pressed', 'false');
+
+    function updatePrice() {
+      const isYearly = toggle.getAttribute('aria-pressed') === 'true';
+      amounts.forEach((el) => {
+        el.textContent = isYearly ? el.dataset.yearly : el.dataset.monthly;
+      });
+    }
+
+    toggle.addEventListener('click', () => {
+      const current = toggle.getAttribute('aria-pressed') === 'true';
+      toggle.setAttribute('aria-pressed', (!current).toString());
+      updatePrice();
+    });
+  })();
+</script>

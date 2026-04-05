@@ -1,0 +1,142 @@
+---
+const faqs = [
+  {
+    q: 'Is there really a free plan?',
+    a: 'Yes. The Free plan gives you full access to chat, writing tools, and research features — no credit card required. Upgrade when you need more.',
+  },
+  {
+    q: 'Can I switch plans later?',
+    a: 'Yes. You can upgrade or downgrade at any time. Changes take effect immediately, and we will prorate the cost.',
+  },
+  {
+    q: 'What counts as "usage"?',
+    a: 'Each message you send counts as one unit. Longer conversations use proportionally more. We track usage transparently in your dashboard.',
+  },
+  {
+    q: 'How is this different from Claude.ai?',
+    a: 'Maxwell is built for people who want more than just chat. We include workspace tools, research features, file conversion utilities, and a growing set of daily tools — all in one place.',
+  },
+  {
+    q: 'Do you offer student or team discounts?',
+    a: 'We are working on team plans and discounts for students and non-profits. Contact us if you want early access.',
+  },
+];
+---
+
+<section class="faq-section">
+  <div class="container">
+    <div class="faq-header">
+      <span class="faq-kicker">Common questions</span>
+      <h2>Questions. Answered.</h2>
+    </div>
+
+    <div class="faq-list" role="list">
+      {faqs.map((faq, i) => (
+        <details class="faq-item" role="listitem" id={`faq-${i}`}>
+          <summary class="faq-question-btn" aria-expanded="false" aria-controls={`faq-body-${i}`}>
+            <span class="faq-question-text">{faq.q}</span>
+            <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <div class="faq-answer" id={`faq-body-${i}`}>
+            <p>{faq.a}</p>
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq-section {
+    padding: clamp(3rem, 6vw, 5rem) 0;
+    background: var(--bg-primary);
+  }
+
+  .faq-header {
+    text-align: center;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+  }
+
+  .faq-kicker {
+    font-size: 0.7rem;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  .faq-kicker::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+
+  .faq-header h2 {
+    margin-top: 0.4rem;
+  }
+
+  .faq-list {
+    max-width: 44rem;
+    margin: 0 auto;
+  }
+
+  .faq-item {
+    border-top: 1px solid var(--border-primary);
+  }
+
+  .faq-item:last-child {
+    border-bottom: 1px solid var(--border-primary);
+  }
+
+  .faq-question-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 1.1rem 0;
+    cursor: pointer;
+    list-style: none;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: var(--font-medium);
+    line-height: 1.5;
+    transition: color var(--duration-normal) var(--ease-default);
+  }
+
+  .faq-question-btn:hover {
+    color: var(--color-primary);
+  }
+
+  .faq-question-btn::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-chevron {
+    flex-shrink: 0;
+    transition: transform var(--duration-normal) var(--ease-default);
+    color: var(--text-tertiary);
+  }
+
+  .faq-item[open] .faq-chevron {
+    transform: rotate(180deg);
+    color: var(--color-primary);
+  }
+
+  .faq-answer {
+    padding-bottom: 1.1rem;
+  }
+
+  .faq-answer p {
+    color: var(--text-secondary);
+    line-height: 1.65;
+    margin: 0;
+    font-size: 0.92rem;
+  }
+</style>

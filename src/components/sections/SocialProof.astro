@@ -1,121 +1,216 @@
 ---
-import { t, getLangFromUrl } from '@i18n';
-
-const lang = getLangFromUrl(Astro.url);
-
-const stats = [
+const testimonials = [
   {
-    value: '10K+',
-    label: t('social.active_users', lang),
+    quote: 'Maxwell replaced three tools for me — the AI writes better than most junior copywriters, and it stays on topic.',
+    name: 'Sarah Chen',
+    role: 'Head of Content, Acme Corp',
+    initials: 'SC',
   },
   {
-    value: '1M+',
-    label: t('social.conversations', lang),
+    quote: 'I use it every morning to draft meeting briefs. What used to take 30 minutes is now a two-minute prompt.',
+    name: 'James Park',
+    role: 'Product Manager, Stripe',
+    initials: 'JP',
   },
   {
-    value: '99.9%',
-    label: t('social.availability', lang),
-  },
-  {
-    value: '<100ms',
-    label: t('social.avg_response', lang),
+    quote: 'The workspace feature is a game-changer for long projects. Everything stays organised without extra effort.',
+    name: 'Emily Rodriguez',
+    role: 'Research Lead',
+    initials: 'ER',
   },
 ];
 ---
 
 <section class="social-proof">
-  <div class="proof-container">
-    <div class="proof-grid">
-      {stats.map((stat, index) => (
-        <div class="proof-item" style={`--delay: ${index * 0.1}s`}>
-          <span class="proof-value">{stat.value}</span>
-          <span class="proof-label">{stat.label}</span>
-        </div>
+  <div class="container">
+    <div class="sp-heading">
+      <span class="sp-kicker">Loved by builders</span>
+      <h2>Trusted by people who do real work.</h2>
+    </div>
+
+    <div class="sp-grid">
+      {testimonials.map((t) => (
+        <article class="sp-card">
+          <p class="sp-quote">"{t.quote}"</p>
+          <div class="sp-author">
+            <div class="sp-avatar">{t.initials}</div>
+            <div>
+              <span class="sp-name">{t.name}</span>
+              <span class="sp-role">{t.role}</span>
+            </div>
+          </div>
+        </article>
       ))}
+    </div>
+
+    <div class="sp-stats">
+      <div class="sp-stat">
+        <span class="sp-stat-value">10K+</span>
+        <span class="sp-stat-label">Active users</span>
+      </div>
+      <div class="sp-stat">
+        <span class="sp-stat-value">1M+</span>
+        <span class="sp-stat-label">Conversations</span>
+      </div>
+      <div class="sp-stat">
+        <span class="sp-stat-value">99.9%</span>
+        <span class="sp-stat-label">Uptime</span>
+      </div>
+      <div class="sp-stat">
+        <span class="sp-stat-value">&lt;100ms</span>
+        <span class="sp-stat-label">Avg. response</span>
+      </div>
     </div>
   </div>
 </section>
 
 <style>
   .social-proof {
-    padding: var(--space-16) var(--space-4);
-    background: var(--bg-primary);
-    position: relative;
+    padding: clamp(3.5rem, 6vw, 5.5rem) 0;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-secondary);
+    border-bottom: 1px solid var(--border-secondary);
+  }
+
+  .sp-heading {
+    text-align: center;
+    margin-bottom: clamp(2rem, 3.5vw, 3rem);
+  }
+
+  .sp-kicker {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  .sp-kicker::before {
+    content: '';
+    width: 0.36rem; height: 0.36rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    margin-right: 0.5rem;
+  }
+
+  .sp-heading h2 {
+    margin-top: 0.4rem;
+  }
+
+  .sp-grid {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: clamp(2.5rem, 4vw, 3.5rem);
   }
 
   @media (min-width: 768px) {
-    .social-proof {
-      padding: var(--space-20) var(--space-6);
-    }
+    .sp-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
 
-  .proof-container {
-    max-width: var(--container-xl);
+  .sp-card {
+    padding: 1.5rem;
+    border-radius: var(--radius-xl);
+    background: var(--card-bg);
+    border: 1px solid var(--border-secondary);
+    display: grid;
+    gap: 1rem;
+    transition:
+      border-color var(--duration-normal) var(--ease-default),
+      box-shadow var(--duration-normal) var(--ease-default);
+  }
+
+  .sp-card:hover {
+    border-color: var(--border-primary);
+    box-shadow: var(--shadow-md);
+  }
+
+  .sp-quote {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .sp-author {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-secondary);
+  }
+
+  .sp-avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    font-size: 0.68rem;
+    font-weight: var(--font-semibold);
+    color: var(--text-tertiary);
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+
+  .sp-name {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+  }
+
+  .sp-role {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-tertiary);
+    margin-top: 0.1rem;
+  }
+
+  /* -------- stats -------- */
+  .sp-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem 1.5rem;
+    max-width: 48rem;
     margin: 0 auto;
   }
 
-  .proof-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-8);
-    text-align: center;
+  @media (min-width: 640px) {
+    .sp-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   }
 
-  @media (min-width: 768px) {
-    .proof-grid {
-      grid-template-columns: repeat(4, 1fr);
-      gap: var(--space-12);
-    }
-  }
-
-  .proof-item {
+  .sp-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-2);
-    animation: fadeInUp 0.6s var(--ease-out) var(--delay) both;
+    gap: 0.2rem;
+    text-align: center;
   }
 
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(16px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .proof-value {
+  .sp-stat-value {
     font-family: var(--font-display);
-    font-size: var(--text-3xl);
+    font-size: var(--text-2xl);
     font-weight: var(--font-bold);
-    color: var(--text-primary);
-    line-height: 1;
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent-pink));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   @media (min-width: 768px) {
-    .proof-value {
-      font-size: var(--text-4xl);
-    }
+    .sp-stat-value { font-size: var(--text-3xl); }
   }
 
-  @media (min-width: 1024px) {
-    .proof-value {
-      font-size: var(--text-5xl);
-    }
-  }
-
-  .proof-label {
-    font-size: var(--text-sm);
+  .sp-stat-label {
+    font-size: 0.72rem;
     font-weight: var(--font-medium);
-    color: var(--text-tertiary);
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    letter-spacing: var(--tracking-wide);
+    color: var(--text-tertiary);
   }
 </style>

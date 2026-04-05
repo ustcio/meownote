@@ -4,16 +4,21 @@ import ScrollAnimation from '@components/ui/ScrollAnimation.astro';
 import HeroEnhanced from '@components/sections/Hero-Enhanced.astro';
 import Features from '@components/sections/Features.astro';
 import Activity from '@components/sections/Activity.astro';
+import SocialProof from '@components/sections/SocialProof.astro';
 import Plans from '@components/sections/Plans.astro';
+import FAQ from '@components/sections/FAQ.astro';
 import CTA from '@components/sections/CTA.astro';
 ---
 
-<Layout 
-  title="Maxwell.Science - Calm, capable AI for writing, research, and real work"
-  description="Claude-inspired AI product design for chat, workspace, research, and practical daily workflows."
+<Layout
+  title="Maxwell.Science — AI that thinks. You decide."
+  description="Write better, plan faster, research deeper. One place for chat, workspace, research, and 170+ daily tools."
 >
   <HeroEnhanced />
   <ScrollAnimation rootMargin="-60px"><Features /></ScrollAnimation>
   <ScrollAnimation rootMargin="-60px"><Activity /></ScrollAnimation>
+  <ScrollAnimation rootMargin="-60px"><SocialProof /></ScrollAnimation>
   <ScrollAnimation rootMargin="-60px"><Plans /></ScrollAnimation>
+  <ScrollAnimation rootMargin="-60px"><FAQ /></ScrollAnimation>
+  <CTA />
 </Layout>
