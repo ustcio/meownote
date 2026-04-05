@@ -77,6 +77,9 @@ import Layout from '@layouts/Layout.astro';
             <button class="sort-option" data-sort="title">Name</button>
           </div>
         </div>
+        <div class="category-filters" id="category-filters">
+          <button class="filter-chip active" data-category="all">All</button>
+        </div>
         <p class="sort-hint" id="sort-hint">Everything in your workspace, sorted by latest change.</p>
       </div>
 
@@ -142,6 +145,25 @@ import Layout from '@layouts/Layout.astro';
           </button>
           <button class="claude-button" id="save-clipboard-btn">Save</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tag Picker Modal -->
+  <div class="modal" id="tag-modal">
+    <div class="modal-backdrop" id="tag-backdrop"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h3>Set category</h3>
+        <button class="btn-icon" id="tag-close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="tag-options" id="tag-options"></div>
       </div>
     </div>
   </div>
@@ -405,6 +427,42 @@ import Layout from '@layouts/Layout.astro';
     font-size: var(--text-sm);
     color: var(--text-secondary);
     margin: 0;
+  }
+
+  /* Category Filters */
+  .category-filters {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2rem;
+    padding: 0.4rem 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    white-space: nowrap;
+  }
+
+  .filter-chip:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+  }
+
+  .filter-chip.active {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
   }
 
   /* Files Grid */
@@ -744,6 +802,47 @@ import Layout from '@layouts/Layout.astro';
     background: var(--color-danger-hover);
   }
 
+  /* Tag Options */
+  .tag-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  .tag-option:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .tag-option.active {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  /* File Card Tag Button */
+  .file-card-btn .tag-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
   /* Toast */
   .toast {
     position: fixed;
@@ -813,6 +912,16 @@ import Layout from '@layouts/Layout.astro';
   let searchQuery = '';
   let deleteTargetId = null;
   let searchDebounce = null;
+  let categoryFilter = 'all';
+
+  const categoryTags = [
+    { key: 'all', label: 'All', color: '' },
+    { key: 'claude', label: 'Claude Code', color: 'var(--color-primary)' },
+    { key: 'literature', label: '文献', color: '#4A5E8A' },
+    { key: 'temp', label: '临时', color: '#6f8e7f' },
+    { key: 'notes', label: '笔记', color: '#a07850' },
+    { key: 'reference', label: '参考', color: '#8a7f74' },
+  ];
 
   function getAuthToken() {
     const token = localStorage.getItem(TOKEN_KEY);
@@ -929,8 +1038,35 @@ import Layout from '@layouts/Layout.astro';
   async function init() {
     await loadFiles();
     initSortDropdown();
+    initCategoryFilters();
     initModals();
     initGridActions();
+  }
+
+  function initCategoryFilters() {
+    const filterContainer = document.getElementById('category-filters');
+    if (!filterContainer) return;
+
+    categoryTags.forEach((cat, idx) => {
+      if (!cat.key || cat.key === 'all') return;
+      const chip = document.createElement('button');
+      chip.className = 'filter-chip';
+      chip.setAttribute('data-category', cat.key);
+      if (cat.color) {
+        chip.style.setProperty('--chip-color', cat.color);
+      }
+      chip.textContent = cat.label;
+      filterContainer.appendChild(chip);
+    });
+
+    filterContainer.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        filterContainer.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        categoryFilter = chip.getAttribute('data-category') || 'all';
+        renderFiles();
+      });
+    });
   }
 
   function initSortDropdown() {
@@ -987,6 +1123,8 @@ import Layout from '@layouts/Layout.astro';
 
         if (action === 'open') {
           window.location.href = `/workspace/edit?id=${id}`;
+        } else if (action === 'tag') {
+          openTagPicker(id);
         } else if (action === 'download') {
           if (file) {
             await downloadWorkspaceFile(id, file.title || 'download', file.type || 'txt');
@@ -1070,17 +1208,85 @@ import Layout from '@layouts/Layout.astro';
     sortHint.textContent = messages[sortBy] || messages.updated_at;
   }
 
+  const categoryDefs = [
+    { key: 'claude', label: 'Claude Code', color: '#d97757' },
+    { key: 'literature', label: '文献', color: '#4A5E8A' },
+    { key: 'temp', label: '临时', color: '#6f8e7f' },
+    { key: 'notes', label: '笔记', color: '#a07850' },
+    { key: 'reference', label: '参考', color: '#8a7f74' },
+  ];
+
+  function getCurrentTag(file) {
+    const currentTags = (file.tag || '').split(',').map(t => t.trim()).filter(Boolean);
+    return currentTags.find(t => categoryDefs.some(c => c.key === t)) || '';
+  }
+
+  function renderCategoryButton(file) {
+    const currentTag = getCurrentTag(file);
+    const cat = categoryDefs.find(c => c.key === currentTag);
+    if (!cat) {
+      return '<button class="file-card-btn secondary category-tag-btn" data-action="tag" data-id="${}" style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; background: var(--bg-secondary, #f5f0e8); color: var(--text-tertiary, #999); border: 1px dashed var(--border-primary, #ddd); border-radius: 20px; cursor: pointer; min-height: 2rem; font-size: 0.85rem;">Tag</button>';
+    }
+    return `<button class="file-card-btn secondary category-tag-btn" data-action="tag" data-id="${file.id}" style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; background: ${cat.color}15; color: ${cat.color}; border: 1px solid ${cat.color}40; border-radius: 20px; cursor: pointer; min-height: 2rem; font-size: 0.85rem;">${cat.label}</button>`;
+  }
+
+  let tagTargetId = null;
+
+  function openTagPicker(fileId) {
+    tagTargetId = fileId;
+    const file = files.find(f => f.id === fileId);
+    if (!file) return;
+
+    const currentTag = getCurrentTag(file);
+    const optionsEl = document.getElementById('tag-options');
+    if (!optionsEl) return;
+
+    optionsEl.innerHTML = categoryDefs.map(cat => {
+      const isActive = cat.key === currentTag;
+      return `<button class="tag-option${isActive ? ' active' : ''}" data-cat="${cat.key}" style="--cat-color: ${cat.color};">${cat.label}</button>`;
+    }).join('');
+
+    document.getElementById('tag-modal')?.classList.add('open');
+  }
+
+  async function saveCategory(category) {
+    if (!tagTargetId) return;
+    try {
+      const result = await apiRequest(`/api/workspace/${tagTargetId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ tag: category }),
+      });
+      if (result.success) {
+        const file = files.find(f => f.id === tagTargetId);
+        if (file) {
+          file.tag = category;
+        }
+        renderFiles();
+        showToast('Category updated', 'success');
+      }
+    } catch (error) {
+      showToast('Failed to update category', 'error');
+    }
+    tagTargetId = null;
+  }
+
   function renderFiles() {
     updateResultsCopy();
 
-    if (files.length === 0) {
+    const filteredFiles = files.filter(f => {
+      if (categoryFilter === 'all') return true;
+      const currentTag = getCurrentTag(f);
+      return currentTag === categoryFilter;
+    });
+
+    if (filteredFiles.length === 0) {
       filesGrid.innerHTML = '';
       emptyState.classList.add('visible');
       return;
     }
 
     emptyState.classList.remove('visible');
-    filesGrid.innerHTML = files
+    filesGrid.innerHTML = filteredFiles
       .map((file) => {
         const ext = (file.type || 'txt').toLowerCase();
         const config = fileTypeConfig[ext] || { icon: 'document', type: 'document' };
@@ -1117,6 +1323,7 @@ import Layout from '@layouts/Layout.astro';
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
               </button>
+              ${renderCategoryButton(file)}
               <button class="file-card-btn danger" data-action="delete" data-id="${file.id}" title="Delete" style="display: inline-flex; align-items: center; justify-content: center; padding: 8px; background: transparent; color: #999; border: none; cursor: pointer; margin-left: auto;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
