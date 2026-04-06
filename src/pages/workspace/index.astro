@@ -80,6 +80,17 @@ import Layout from '@layouts/Layout.astro';
         <div class="category-filters" id="category-filters">
           <button class="filter-chip active" data-category="all">All</button>
         </div>
+        <div class="sort-dropdown" id="category-dropdown">
+          <button class="sort-btn" id="category-btn">
+            <span id="category-label">All</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="sort-menu" id="category-menu">
+            <button class="category-option active" data-category="all">All</button>
+          </div>
+        </div>
         <p class="sort-hint" id="sort-hint">Everything in your workspace, sorted by latest change.</p>
       </div>
 
@@ -419,6 +430,29 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .sort-option.active {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+
+  .category-option {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.1s ease;
+  }
+
+  .category-option:hover {
+    background: var(--bg-secondary);
+  }
+
+  .category-option.active {
     background: var(--color-primary-light);
     color: var(--color-primary);
   }
@@ -977,12 +1011,15 @@ import Layout from '@layouts/Layout.astro';
 
   const categoryTags = [
     { key: 'all', label: 'All', color: '' },
-    { key: 'claude', label: 'Claude Code', color: 'var(--color-primary)' },
+    { key: 'claude', label: 'Claude Code', color: '#d97757' },
     { key: 'literature', label: '文献', color: '#4A5E8A' },
     { key: 'temp', label: '临时', color: '#6f8e7f' },
     { key: 'notes', label: '笔记', color: '#a07850' },
     { key: 'reference', label: '参考', color: '#8a7f74' },
   ];
+
+  // Use categoryTags as the single source of truth (exclude 'all' for picker/buttons)
+  const categoryDefs = categoryTags.filter(c => c.key !== 'all');
 
   function getAuthToken() {
     const token = localStorage.getItem(TOKEN_KEY);
@@ -1105,28 +1142,40 @@ import Layout from '@layouts/Layout.astro';
   }
 
   function initCategoryFilters() {
-    const filterContainer = document.getElementById('category-filters');
-    if (!filterContainer) return;
+    // Build dropdown menu options
+    const menuEl = document.getElementById('category-menu');
+    if (!menuEl) return;
 
-    categoryTags.forEach((cat, idx) => {
-      if (!cat.key || cat.key === 'all') return;
-      const chip = document.createElement('button');
-      chip.className = 'filter-chip';
-      chip.setAttribute('data-category', cat.key);
-      if (cat.color) {
-        chip.style.setProperty('--chip-color', cat.color);
-      }
-      chip.textContent = cat.label;
-      filterContainer.appendChild(chip);
+    categoryTags.forEach(cat => {
+      const option = document.createElement('button');
+      option.className = 'category-option' + (cat.key === 'all' ? ' active' : '');
+      option.setAttribute('data-category', cat.key);
+      option.textContent = cat.label;
+      menuEl.appendChild(option);
     });
 
-    filterContainer.querySelectorAll('.filter-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        filterContainer.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        categoryFilter = chip.getAttribute('data-category') || 'all';
+    // Toggle dropdown
+    const dropdown = document.getElementById('category-dropdown');
+    const btn = document.getElementById('category-btn');
+    btn?.addEventListener('click', () => dropdown?.classList.toggle('open'));
+
+    // Handle option selection
+    menuEl.querySelectorAll('.category-option').forEach(option => {
+      option.addEventListener('click', () => {
+        menuEl.querySelectorAll('.category-option').forEach(item => item.classList.remove('active'));
+        option.classList.add('active');
+        categoryFilter = option.getAttribute('data-category') || 'all';
+        document.getElementById('category-label').textContent = option.textContent;
+        dropdown?.classList.remove('open');
         renderFiles();
       });
+    });
+
+    // Close on outside click
+    document.addEventListener('click', (event) => {
+      if (!dropdown?.contains(event.target)) {
+        dropdown?.classList.remove('open');
+      }
     });
   }
 
@@ -1162,10 +1211,29 @@ import Layout from '@layouts/Layout.astro';
     deleteCancel?.addEventListener('click', () => deleteModal?.classList.remove('open'));
     deleteConfirm?.addEventListener('click', confirmDelete);
 
+    document.getElementById('tag-close')?.addEventListener('click', () => {
+      document.getElementById('tag-modal')?.classList.remove('open');
+      tagTargetId = null;
+    });
+    document.getElementById('tag-backdrop')?.addEventListener('click', () => {
+      document.getElementById('tag-modal')?.classList.remove('open');
+      tagTargetId = null;
+    });
+    document.getElementById('tag-options')?.addEventListener('click', (event) => {
+      const tagOption = event.target.closest('.tag-option');
+      if (tagOption) {
+        const cat = tagOption.getAttribute('data-cat');
+        saveCategory(cat);
+        document.getElementById('tag-modal')?.classList.remove('open');
+      }
+    });
+
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         clipboardModal?.classList.remove('open');
         deleteModal?.classList.remove('open');
+        document.getElementById('tag-modal')?.classList.remove('open');
+        tagTargetId = null;
       }
     });
   }
@@ -1269,14 +1337,6 @@ import Layout from '@layouts/Layout.astro';
     sortHint.textContent = messages[sortBy] || messages.updated_at;
   }
 
-  const categoryDefs = [
-    { key: 'claude', label: 'Claude Code', color: '#d97757' },
-    { key: 'literature', label: '文献', color: '#4A5E8A' },
-    { key: 'temp', label: '临时', color: '#6f8e7f' },
-    { key: 'notes', label: '笔记', color: '#a07850' },
-    { key: 'reference', label: '参考', color: '#8a7f74' },
-  ];
-
   function getCurrentTag(file) {
     const currentTags = (file.tag || '').split(',').map(t => t.trim()).filter(Boolean);
     return currentTags.find(t => categoryDefs.some(c => c.key === t)) || '';
@@ -1313,15 +1373,21 @@ import Layout from '@layouts/Layout.astro';
   async function saveCategory(category) {
     if (!tagTargetId) return;
     try {
+      const file = files.find(f => f.id === tagTargetId);
+      if (!file) return;
+
+      // Build new tag string: keep existing tags that aren't in the same category group, add new one
+      const currentTags = (file.tag || '').split(',').map(t => t.trim()).filter(Boolean);
+      const categoryKeys = categoryDefs.map(c => c.key);
+      const otherTags = currentTags.filter(t => !categoryKeys.includes(t));
+      const newTags = otherTags.length > 0 ? [...otherTags, category].join(',') : category;
+
       const result = await apiRequest(`/api/workspace/${tagTargetId}`, {
         method: 'PUT',
-        body: JSON.stringify({ tag: category }),
+        body: JSON.stringify({ tag: newTags }),
       });
       if (result.success) {
-        const file = files.find(f => f.id === tagTargetId);
-        if (file) {
-          file.tag = category;
-        }
+        file.tag = newTags;
         renderFiles();
         showToast('Category updated', 'success');
       }

@@ -12,6 +12,7 @@ export interface WorkspaceFile {
   updatedAt: string;
   fileUrl?: string;
   downloadUrl?: string;
+  tag?: string;
 }
 
 export interface CreateFileInput {
@@ -30,6 +31,7 @@ export interface UpdateFileInput {
   fileSize?: number;
   fileUrl?: string;
   downloadUrl?: string;
+  tag?: string;
 }
 
 export type SortBy = 'updated_at' | 'created_at' | 'title';
