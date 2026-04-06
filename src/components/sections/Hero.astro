@@ -236,4 +236,72 @@ const quickActions = [
       bottom: 0;
     }
   }
+
+  @media (max-width: 640px) {
+    .home-hero {
+      padding: calc(var(--header-height) + 3rem) 0 3rem;
+    }
+
+    .home-hero__grid {
+      gap: 2rem;
+    }
+
+    .home-hero__copy {
+      gap: 1.2rem;
+    }
+
+    .home-hero__lead {
+      font-size: 1rem;
+    }
+
+    .home-hero__composer {
+      padding: 0.6rem;
+    }
+
+    .home-hero__composer input {
+      padding: 0.75rem 0.8rem;
+      font-size: 0.95rem;
+    }
+
+    .home-hero__compiler button {
+      min-height: 2.8rem;
+      width: 100%;
+    }
+
+    .home-hero__chips {
+      gap: 0.5rem;
+    }
+
+    .claude-chip {
+      padding: 0.5rem 0.8rem;
+      font-size: 0.85rem;
+    }
+
+    .home-hero__visual {
+      padding-bottom: 10rem;
+      min-height: auto;
+    }
+
+    .hero-illustration {
+      max-width: 24rem;
+    }
+
+    .hero-spotlight {
+      width: min(18rem, calc(100vw - 2rem));
+      padding: 1.1rem;
+    }
+
+    .hero-spotlight h2 {
+      font-size: 1.5rem;
+    }
+
+    .hero-spotlight p {
+      font-size: 0.88rem;
+    }
+
+    .hero-spotlight__link {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 </style>

@@ -883,6 +883,10 @@ import Layout from '@layouts/Layout.astro';
       padding: calc(var(--header-height) + 2rem) 0 4rem;
     }
 
+    .workspace-sort {
+      gap: 0.75rem;
+    }
+
     .workspace-toolbar {
       padding: 0.9rem;
     }
@@ -890,6 +894,22 @@ import Layout from '@layouts/Layout.astro';
     .toolbar-actions {
       width: 100%;
       justify-content: space-between;
+    }
+
+    .category-filters {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 0.25rem;
+    }
+
+    .category-filters::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-chip {
+      flex-shrink: 0;
     }
 
     .files-grid {
@@ -900,8 +920,49 @@ import Layout from '@layouts/Layout.astro';
       padding: 1.1rem 1.2rem;
     }
 
+    .file-card-top {
+      gap: 0.75rem;
+    }
+
+    .file-icon {
+      width: 40px;
+      height: 40px;
+    }
+
+    .file-title {
+      font-size: 0.95rem;
+    }
+
+    .file-meta {
+      font-size: 0.8rem;
+    }
+
+    .file-card-actions {
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .file-card-btn {
+      padding: 7px 12px;
+      font-size: 0.85rem;
+    }
+
     .file-card-btn.danger {
       opacity: 1;
+    }
+
+    .category-tag-btn {
+      padding: 7px 10px !important;
+      font-size: 0.8rem !important;
+    }
+
+    .modal-content.modal-sm {
+      max-width: 92vw;
+    }
+
+    .tag-option {
+      padding: 0.35rem 0.6rem;
+      font-size: 0.85rem;
     }
   }
 </style>
@@ -1225,7 +1286,7 @@ import Layout from '@layouts/Layout.astro';
     const currentTag = getCurrentTag(file);
     const cat = categoryDefs.find(c => c.key === currentTag);
     if (!cat) {
-      return '<button class="file-card-btn secondary category-tag-btn" data-action="tag" data-id="${}" style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; background: var(--bg-secondary, #f5f0e8); color: var(--text-tertiary, #999); border: 1px dashed var(--border-primary, #ddd); border-radius: 20px; cursor: pointer; min-height: 2rem; font-size: 0.85rem;">Tag</button>';
+      return '<button class="file-card-btn secondary category-tag-btn" data-action="tag" data-id="' + file.id + '" style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; background: var(--bg-secondary, #f5f0e8); color: var(--text-tertiary, #999); border: 1px dashed var(--border-primary, #ddd); border-radius: 20px; cursor: pointer; min-height: 2rem; font-size: 0.85rem;">Tag</button>';
     }
     return `<button class="file-card-btn secondary category-tag-btn" data-action="tag" data-id="${file.id}" style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; background: ${cat.color}15; color: ${cat.color}; border: 1px solid ${cat.color}40; border-radius: 20px; cursor: pointer; min-height: 2rem; font-size: 0.85rem;">${cat.label}</button>`;
   }
