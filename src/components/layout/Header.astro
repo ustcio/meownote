@@ -293,11 +293,11 @@ const isActive = (href: string) =>
   }
 </style>
 
-<script>
+<script is:inline>
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileNav = document.getElementById('mobile-nav');
 
-  function setMenuState(open: boolean) {
+  function setMenuState(open) {
     mobileMenuBtn?.classList.toggle('open', open);
     mobileMenuBtn?.setAttribute('aria-expanded', String(open));
     mobileNav?.classList.toggle('open', open);
