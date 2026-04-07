@@ -2,10 +2,8 @@
 const currentPath = Astro.url.pathname;
 
 const navItems = [
-  { href: '/', label: 'Overview', shortLabel: 'Home' },
   { href: '/chatbot', label: 'Chat' },
   { href: '/workspace', label: 'Workspace' },
-  { href: '/kit', label: 'Kit' },
   { href: '/about', label: 'About' },
 ];
 
@@ -42,6 +40,7 @@ const isActive = (href: string) =>
     </nav>
 
     <div class="header__actions">
+      <a href="/kit" class="site-utility-link">Tools</a>
       <a href="https://github.com/ustcio/meownote" class="site-utility-link" target="_blank" rel="noopener">GitHub</a>
       <a href="/chatbot" class="header__cta">Start</a>
     </div>
@@ -76,12 +75,13 @@ const isActive = (href: string) =>
 <style>
   .site-header {
     position: fixed;
-    top: 0; left: 0; right: 0;
+    top: 8px; left: 16px; right: 16px;
     z-index: var(--z-fixed);
     background: var(--nav-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--nav-border);
+    border: 1px solid var(--nav-border);
+    border-radius: var(--radius-xl);
   }
 
   .site-header__inner {
@@ -96,7 +96,7 @@ const isActive = (href: string) =>
 
   @media (min-width: 768px) {
     .site-header__inner {
-      padding: 0 2rem;
+      padding: 0 1.5rem;
     }
   }
 
@@ -235,6 +235,15 @@ const isActive = (href: string) =>
   }
 
   /* ---------- mobile ---------- */
+  @media (max-width: 899px) {
+    .site-header {
+      top: 0; left: 0; right: 0;
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--nav-border);
+    }
+  }
+
   .mobile-toggle {
     display: flex;
     align-items: center;
@@ -260,7 +269,7 @@ const isActive = (href: string) =>
   .mobile-nav {
     display: none;
     position: fixed;
-    top: var(--header-height);
+    top: calc(var(--header-height) + 8px);
     left: 0; right: 0; bottom: 0;
     z-index: calc(var(--z-fixed) - 1);
     background: var(--bg-primary);
