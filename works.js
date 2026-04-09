@@ -414,11 +414,8 @@ async function handleChat(request, env, ctx) {
     return await handleWorkersAIChat(env, config, message, history, model);
   }
 
-  const apiKey = config.provider === 'qwen' ? env.MEOWNOTE_QWEN_API_KEY_2026 : env.DOUBAO_API_KEY;
-  
-  console.log('[Chat API] API key exists:', !!apiKey);
-  console.log('[Chat API] API key length:', apiKey ? apiKey.length : 0);
-  console.log('[Chat API] API key prefix:', apiKey ? apiKey.substring(0, 20) + '...' : 'none');
+  // TODO: Move to secret once dashboard variables are cleaned up
+  const apiKey = config.provider === 'qwen' ? 'sk-sp-24a60c0e374a44ea8572d107c2a640b7' : env.DOUBAO_API_KEY;
   
   if (!apiKey) {
     console.error('[Chat API] API key not configured for provider:', config.provider);
@@ -560,11 +557,7 @@ async function handleChat(request, env, ctx) {
       return jsonResponse({
         success: false,
         message: data.error.message || data.error.code || data.error.type || 'AI service error',
-        debug: {
-          ...data.error,
-          keyLength: apiKey ? apiKey.length : 0,
-          keyPrefix: apiKey ? apiKey.substring(0, 10) : 'none'
-        }
+        debug: data.error
       }, 500);
     }
 
