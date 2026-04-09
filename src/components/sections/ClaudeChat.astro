@@ -564,15 +564,14 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     flex-direction: column;
     gap: 4px;
-    max-width: 768px;
-    margin: 0 auto;
     padding: 20px 20px 0;
+    width: 100%;
   }
 
   .message {
     display: flex;
     flex-direction: column;
-    max-width: 80%;
+    max-width: 85%;
     padding: 0;
     border-bottom: none;
   }
@@ -586,6 +585,8 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .message-bubble {
+    width: fit-content;
+    max-width: 100%;
     padding: 10px 14px;
     border-radius: 16px;
     font-size: 15px;
