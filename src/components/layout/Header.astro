@@ -4,6 +4,7 @@ const currentPath = Astro.url.pathname;
 const navItems = [
   { href: '/chatbot', label: 'Chat' },
   { href: '/workspace', label: 'Workspace' },
+  { href: '/kit', label: 'Kit' },
   { href: '/about', label: 'About' },
 ];
 
@@ -36,11 +37,9 @@ const isActive = (href: string) =>
           {item.label}
         </a>
       ))}
-      <a href="/kit" class="site-nav__link site-nav__link--secondary">Tools</a>
     </nav>
 
     <div class="header__actions">
-      <a href="/kit" class="site-utility-link">Tools</a>
       <a href="https://github.com/ustcio/meownote" class="site-utility-link" target="_blank" rel="noopener">GitHub</a>
       <a href="/chatbot" class="header__cta">Start</a>
     </div>
@@ -64,7 +63,7 @@ const isActive = (href: string) =>
         {item.label}
       </a>
     ))}
-    <a href="/kit" class="mobile-nav__link">Tools</a>
+    <a href="/kit" class="mobile-nav__link">Kit</a>
     <a href="https://github.com/ustcio/meownote" class="mobile-nav__link" target="_blank" rel="noopener">GitHub</a>
     <div class="mobile-nav__actions">
       <a href="/chatbot" class="header__cta mobile-nav__cta">Start</a>

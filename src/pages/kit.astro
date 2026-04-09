@@ -1,25 +1,28 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import ScrollAnimation from '@components/ui/ScrollAnimation.astro';
 import { toolCategories } from '@data/tool-categories';
 
-const pageTitle = '工具箱';
-const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处理、编程工具等';
+const pageTitle = 'Kit';
+const pageDesc = '170+ free online tools — everyday utilities, text processing, image tools, developer tools and more.';
 ---
 
 <Layout title={`${pageTitle} - Maxwell.Science`} description={pageDesc}>
   <section class="kit-page">
     <div class="kit-container">
+
+      <!-- page header -->
       <div class="kit-page-header">
-        <h1 class="kit-page-title">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-          </svg>
-          工具箱
-        </h1>
-        <p class="kit-page-desc">免费实用的在线工具集合</p>
+        <span class="kit-kicker">Tools</span>
+        <h1 class="kit-page-title">Your kit, ready.</h1>
+        <p class="kit-page-desc">
+          {toolCategories.reduce((sum, c) => sum + c.tools.length, 0)}+ free tools. No sign-up. No ads. Just useful.
+        </p>
       </div>
 
       <div class="kit-main-layout">
+
+        <!-- sidebar -->
         <aside class="kit-sidebar" id="kit-sidebar">
           <nav class="kit-sidebar-nav">
             {toolCategories.map((cat) => (
@@ -35,13 +38,16 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
           </nav>
         </aside>
 
+        <!-- main -->
         <div class="kit-main">
+
+          <!-- search -->
           <div class="kit-search-bar">
             <svg class="kit-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input type="text" id="kit-search-input" class="kit-search-input" placeholder="搜索工具..." />
+            <input type="text" id="kit-search-input" class="kit-search-input" placeholder="Search tools..." />
             <button class="kit-search-clear" id="search-clear" style="display:none;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -50,6 +56,7 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
             </button>
           </div>
 
+          <!-- categories -->
           <div class="kit-content">
             {toolCategories.map(cat => (
               <section class="kit-section" id={cat.id} data-category>
@@ -58,13 +65,13 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
                     <span class="kit-section-emoji">{cat.icon}</span>
                     {cat.name}
                   </h2>
-                  <span class="kit-section-count">{cat.tools.length} 个工具</span>
+                  <span class="kit-section-count">{cat.tools.length}</span>
                 </div>
                 <div class="kit-tool-grid">
                   {cat.tools.map(tool => (
                     <a href={tool.path} class="kit-tool-card" data-tool-id={tool.id} data-tool-name={tool.name} data-tool-desc={tool.desc}>
                       <div class="kit-tool-card-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
                           {tool.id === 'hot-list' && <><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></>}
                           {tool.id === 'news' && <><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></>}
                           {tool.id === 'qrcode' && <><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/></>}
@@ -76,7 +83,7 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
                         <p class="kit-tool-card-desc">{tool.desc}</p>
                       </div>
                       {tool.status === 'todo' && (
-                        <span class="kit-tool-badge kit-tool-badge-todo">开发中</span>
+                        <span class="kit-tool-badge">Soon</span>
                       )}
                     </a>
                   ))}
@@ -84,123 +91,136 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
               </section>
             ))}
 
+            <!-- empty state -->
             <div class="kit-empty-state" id="kit-empty-state">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 <line x1="8" y1="11" x2="14" y2="11"></line>
               </svg>
-              <div class="kit-empty-state-title">没有找到匹配的工具</div>
-              <div class="kit-empty-state-desc">尝试使用其他关键词搜索</div>
+              <div class="kit-empty-state-title">No tools found</div>
+              <div class="kit-empty-state-desc">Try a different search term</div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- footer -->
+    <footer class="kit-footer">
+      <div class="kit-footer-inner">
+        <p>Maxwell.Science — {new Date().getFullYear()}</p>
+        <p>Free tools, no ads. Built with care.</p>
+      </div>
+    </footer>
   </section>
 </Layout>
 
 <style>
+  /* ===== Page ===== */
   .kit-page {
     min-height: 100vh;
     background: var(--bg-primary);
-    padding-top: calc(var(--header-height) + 1.5rem);
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-bottom: 4rem;
   }
 
   @media (min-width: 768px) {
-    .kit-page {
-      padding-top: calc(var(--header-height) + 2.5rem);
-    }
+    .kit-page { padding-top: calc(var(--header-height) + 3rem); padding-bottom: 5rem; }
   }
 
   .kit-container {
-    max-width: var(--container-2xl);
+    max-width: var(--container-xl);
     margin: 0 auto;
     padding: 0 var(--space-6);
   }
 
-  /* ===== Page Header ===== */
+  @media (min-width: 768px) {
+    .kit-container { padding: 0 var(--space-8); }
+  }
+
+  /* ===== Header ===== */
   .kit-page-header {
     margin-bottom: 2rem;
+    max-width: 40rem;
+  }
+
+  .kit-kicker {
+    font-size: 0.7rem;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    display: block;
+    margin-bottom: 0.6rem;
   }
 
   .kit-page-title {
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: var(--font-bold);
     color: var(--text-primary);
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .kit-page-title svg {
-    color: var(--color-primary);
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    margin: 0;
   }
 
   .kit-page-desc {
-    font-size: 0.875rem;
-    color: var(--text-tertiary);
-    margin-top: 0.3rem;
+    font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+    color: var(--text-secondary);
+    margin-top: 0.75rem;
+    line-height: 1.55;
   }
 
+  /* ===== Layout ===== */
   .kit-main-layout {
     display: flex;
-    gap: var(--space-8);
+    gap: var(--space-10);
     align-items: flex-start;
   }
 
   /* ===== Sidebar ===== */
   .kit-sidebar {
-    width: 200px;
-    min-width: 200px;
+    width: 190px;
+    min-width: 190px;
     flex-shrink: 0;
     position: sticky;
-    top: calc(var(--header-height) + 1.5rem);
+    top: calc(var(--header-height) + 2rem);
     max-height: calc(100vh - var(--header-height) - 4rem);
     overflow-y: auto;
-    padding: 0;
     scrollbar-width: none;
   }
 
-  .kit-sidebar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .kit-sidebar-logo {
-    display: none;
-  }
+  .kit-sidebar::-webkit-scrollbar { display: none; }
 
   .kit-sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 2px;
   }
 
   .kit-sidebar-item {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 7px 12px;
+    gap: 8px;
+    padding: 6px 10px;
     border-radius: var(--radius-lg);
-    font-size: 13px;
+    font-size: 0.82rem;
+    font-weight: var(--font-medium);
     color: var(--text-tertiary);
     text-decoration: none;
     transition: all 0.2s ease;
-    line-height: 1.3;
   }
 
   .kit-sidebar-item:hover {
-    background-color: var(--bg-secondary);
-    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
   }
 
   .kit-sidebar-item.active {
-    background-color: var(--color-primary-light);
+    background: var(--color-primary-subtle);
     color: var(--color-primary);
-    font-weight: 500;
+    font-weight: var(--font-semibold);
   }
 
   .kit-sidebar-item.active::before {
@@ -210,20 +230,16 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
-    height: 16px;
+    height: 14px;
     background: var(--color-primary);
     border-radius: 0 2px 2px 0;
   }
 
   .kit-sidebar-icon {
-    font-size: 16px;
-    line-height: 1;
+    font-size: 15px;
+    width: 18px;
+    text-align: center;
     flex-shrink: 0;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
   .kit-sidebar-text {
@@ -232,59 +248,47 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     text-overflow: ellipsis;
   }
 
-  /* ===== Main Content ===== */
-  .kit-main {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-  }
+  /* ===== Main ===== */
+  .kit-main { flex: 1; min-width: 0; }
 
-  /* ===== Search Bar ===== */
+  /* ===== Search ===== */
   .kit-search-bar {
     display: flex;
     align-items: center;
     gap: 10px;
     background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-xl);
-    padding: 10px 16px;
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-full);
+    padding: 10px 18px;
     margin-bottom: 2rem;
-    max-width: 480px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    max-width: 420px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .kit-search-bar:focus-within {
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px var(--color-primary-alpha-10);
-    background: var(--bg-elevated);
   }
 
   .kit-search-icon {
     flex-shrink: 0;
     color: var(--text-quaternary);
-    width: 18px;
-    height: 18px;
     transition: color 0.2s ease;
   }
 
-  .kit-search-bar:focus-within .kit-search-icon {
-    color: var(--color-primary);
-  }
+  .kit-search-bar:focus-within .kit-search-icon { color: var(--color-primary); }
 
   .kit-search-input {
     flex: 1;
     background: transparent;
     border: none;
     outline: none;
-    font-size: 14px;
+    font-size: 0.9rem;
     color: var(--text-primary);
     font-family: var(--font-body);
   }
 
-  .kit-search-input::placeholder {
-    color: var(--text-quaternary);
-  }
+  .kit-search-input::placeholder { color: var(--text-quaternary); }
 
   .kit-search-clear {
     display: flex;
@@ -299,20 +303,15 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     transition: color 0.2s ease, background-color 0.2s ease;
   }
 
-  .kit-search-clear:hover {
-    color: var(--text-primary);
-    background: var(--bg-tertiary);
-  }
+  .kit-search-clear:hover { color: var(--text-primary); background: var(--bg-tertiary); }
 
-  /* ===== Content ===== */
+  /* ===== Sections ===== */
   .kit-content {
     display: flex;
     flex-direction: column;
     gap: 2.5rem;
-    padding-bottom: 4rem;
   }
 
-  /* ===== Section ===== */
   .kit-section-header {
     display: flex;
     align-items: baseline;
@@ -323,8 +322,8 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
   }
 
   .kit-section-title {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 0.95rem;
+    font-weight: var(--font-semibold);
     color: var(--text-primary);
     display: flex;
     align-items: center;
@@ -332,15 +331,12 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     letter-spacing: -0.01em;
   }
 
-  .kit-section-emoji {
-    font-size: 18px;
-    line-height: 1;
-  }
+  .kit-section-emoji { font-size: 16px; }
 
   .kit-section-count {
-    font-size: 12px;
+    font-size: 0.72rem;
     color: var(--text-quaternary);
-    font-weight: 400;
+    font-weight: var(--font-medium);
     background: var(--bg-secondary);
     padding: 2px 8px;
     border-radius: var(--radius-full);
@@ -350,7 +346,7 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
   .kit-tool-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
+    gap: 10px;
   }
 
   /* ===== Tool Card ===== */
@@ -358,41 +354,34 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    background-color: var(--card-bg);
+    gap: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-primary);
+    border-radius: 10px;
     padding: 16px;
-    border-radius: var(--radius-xl);
-    border: 1px solid var(--card-border);
     text-decoration: none;
     transition: all 0.25s ease;
     cursor: pointer;
-    min-height: 100px;
+    min-height: 95px;
   }
 
   .kit-tool-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-    border-color: var(--card-border-hover);
+    border-color: var(--color-primary-alpha-20);
   }
 
-  .kit-tool-card:active {
-    transform: translateY(0);
-    box-shadow: var(--shadow-sm);
-  }
+  .kit-tool-card:active { transform: translateY(0); }
 
-  .kit-tool-card.hidden {
-    display: none;
-  }
+  .kit-tool-card.hidden { display: none; }
 
   .kit-tool-card-icon {
     width: 32px;
     height: 32px;
-    margin-bottom: 10px;
-    color: var(--text-tertiary);
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--text-tertiary);
     background: var(--bg-secondary);
     border-radius: var(--radius-lg);
     transition: all 0.25s ease;
@@ -403,21 +392,12 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     background: var(--color-primary-light);
   }
 
-  .kit-tool-card-icon svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .kit-tool-card-body {
-    flex: 1;
-    min-width: 0;
-  }
+  .kit-tool-card-body { flex: 1; min-width: 0; }
 
   .kit-tool-card-title {
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 0.88rem;
+    font-weight: var(--font-medium);
     color: var(--text-primary);
-    margin-bottom: 4px;
     line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
@@ -425,7 +405,7 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
   }
 
   .kit-tool-card-desc {
-    font-size: 12px;
+    font-size: 0.78rem;
     color: var(--text-tertiary);
     line-height: 1.4;
     display: -webkit-box;
@@ -438,20 +418,16 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     position: absolute;
     top: 10px;
     right: 10px;
-    font-size: 10px;
-    font-weight: 500;
+    font-size: 0.65rem;
+    font-weight: var(--font-semibold);
     padding: 2px 8px;
     border-radius: var(--radius-full);
-    white-space: nowrap;
+    background: var(--bg-secondary);
+    color: var(--text-quaternary);
     letter-spacing: 0.02em;
   }
 
-  .kit-tool-badge-todo {
-    background: var(--bg-tertiary);
-    color: var(--text-quaternary);
-  }
-
-  /* ===== Empty State ===== */
+  /* ===== Empty ===== */
   .kit-empty-state {
     display: none;
     flex-direction: column;
@@ -462,69 +438,59 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
     color: var(--text-tertiary);
   }
 
-  .kit-empty-state.visible {
-    display: flex;
-  }
-
-  .kit-empty-state svg {
-    margin-bottom: 1rem;
-    opacity: 0.4;
-  }
+  .kit-empty-state.visible { display: flex; }
+  .kit-empty-state svg { margin-bottom: 1rem; opacity: 0.4; }
 
   .kit-empty-state-title {
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: var(--font-medium);
     color: var(--text-secondary);
     margin-bottom: 0.3rem;
   }
 
-  .kit-empty-state-desc {
-    font-size: 13px;
-    color: var(--text-tertiary);
+  .kit-empty-state-desc { font-size: 0.82rem; }
+
+  /* ===== Footer ===== */
+  .kit-footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-secondary);
+  }
+
+  .kit-footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .kit-footer p {
+    font-size: 0.75rem;
+    color: var(--text-quaternary);
+    margin: 0;
+  }
+
+  @media (max-width: 600px) {
+    .kit-footer-inner { flex-direction: column; align-items: flex-start; }
+    .kit-footer { margin-top: 2rem; padding-top: 1rem; }
   }
 
   /* ===== Responsive ===== */
   @media (max-width: 900px) {
-    .kit-sidebar {
-      display: none;
-    }
-
-    .kit-main-layout {
-      gap: 0;
-    }
-
-    .kit-container {
-      padding: 0 16px;
-    }
-
-    .kit-search-bar {
-      max-width: 100%;
-    }
-
-    .kit-tool-grid {
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 10px;
-    }
+    .kit-sidebar { display: none; }
+    .kit-main-layout { gap: 0; }
+    .kit-container { padding: 0 16px; }
+    .kit-search-bar { max-width: 100%; }
+    .kit-tool-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
   }
 
   @media (max-width: 600px) {
-    .kit-page {
-      padding-top: calc(var(--header-height) + 1rem);
-    }
-
-    .kit-page-header {
-      margin-bottom: 1.25rem;
-    }
-
-    .kit-page-title {
-      font-size: 1.25rem;
-    }
-
-    .kit-tool-grid {
-      grid-template-columns: 1fr;
-      gap: 0;
-    }
-
+    .kit-page { padding-top: calc(var(--header-height) + 1rem); }
+    .kit-page-header { margin-bottom: 1.25rem; }
+    .kit-page-title { font-size: 1.75rem; }
+    .kit-page-desc { font-size: 0.9rem; }
+    .kit-tool-grid { grid-template-columns: 1fr; gap: 0; }
     .kit-tool-card {
       flex-direction: row;
       align-items: center;
@@ -535,7 +501,6 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
       border-bottom: 1px solid var(--border-secondary);
       background: transparent;
     }
-
     .kit-tool-card:hover {
       transform: none;
       box-shadow: none;
@@ -544,42 +509,10 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
       padding-left: 16px;
       padding-right: 16px;
     }
-
-    .kit-tool-card-icon {
-      width: 32px;
-      height: 32px;
-      margin-bottom: 0;
-      margin-right: 12px;
-      opacity: 0.7;
-      flex-shrink: 0;
-      border-radius: var(--radius-md);
-    }
-
-    .kit-tool-card:hover .kit-tool-card-icon {
-      opacity: 1;
-    }
-
-    .kit-tool-card-title {
-      font-size: 14px;
-      font-weight: 400;
-    }
-
-    .kit-tool-card-desc {
-      display: none;
-    }
-
-    .kit-tool-badge-todo {
-      background: var(--bg-tertiary);
-    }
-
-    .kit-section-title {
-      font-size: 15px;
-    }
-
-    .kit-content {
-      gap: 1.5rem;
-    }
-
+    .kit-tool-card-icon { margin-bottom: 0; margin-right: 12px; border-radius: var(--radius-md); }
+    .kit-tool-card-desc { display: none; }
+    .kit-section-title { font-size: 0.88rem; }
+    .kit-content { gap: 1.5rem; }
     .kit-section-header {
       position: sticky;
       top: var(--header-height);
@@ -600,71 +533,49 @@ const pageDesc = '在线工具集合 - 日常应用、文字处理、图片处�
 
   searchInput?.addEventListener('input', () => {
     const query = searchInput.value.toLowerCase().trim();
-    if (searchClear) {
-      searchClear.style.display = query ? 'flex' : 'none';
-    }
+    if (searchClear) searchClear.style.display = query ? 'flex' : 'none';
     let anyVisible = false;
     if (!query) {
       toolCards.forEach(card => { card.classList.remove('hidden'); anyVisible = true; });
       sections.forEach(section => section.style.display = '');
-      if (emptyState) emptyState.classList.remove('visible');
-      return;
-    }
-    sections.forEach(section => {
-      const sectionCards = section.querySelectorAll('.kit-tool-card');
-      let hasVisible = false;
-      sectionCards.forEach(card => {
-        const name = (card.dataset.toolName || '').toLowerCase();
-        const desc = (card.dataset.toolDesc || '').toLowerCase();
-        const matches = name.includes(query) || desc.includes(query);
-        card.classList.toggle('hidden', !matches);
-        if (matches) { hasVisible = true; anyVisible = true; }
+    } else {
+      sections.forEach(section => {
+        let sectionHasVisible = false;
+        section.querySelectorAll('.kit-tool-card').forEach(card => {
+          const name = (card.getAttribute('data-tool-name') || '').toLowerCase();
+          const desc = (card.getAttribute('data-tool-desc') || '').toLowerCase();
+          const visible = name.includes(query) || desc.includes(query);
+          card.classList.toggle('hidden', !visible);
+          if (visible) { sectionHasVisible = true; anyVisible = true; }
+        });
+        section.style.display = sectionHasVisible ? '' : 'none';
       });
-      (section as HTMLElement).style.display = hasVisible ? '' : 'none';
-    });
-    if (emptyState) emptyState.classList.toggle('visible', !anyVisible);
+    }
+    emptyState?.classList.toggle('visible', !anyVisible);
   });
 
   searchClear?.addEventListener('click', () => {
-    if (searchInput) {
-      searchInput.value = '';
-      searchInput.dispatchEvent(new Event('input'));
-      searchInput.focus();
-    }
+    if (searchInput) { searchInput.value = ''; searchInput.dispatchEvent(new Event('input')); searchInput.focus(); }
   });
 
-  const sectionEls = Array.from(sections) as HTMLElement[];
-  const sidebarItemEls = Array.from(sidebarItems) as HTMLAnchorElement[];
+  // Scroll spy
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        sidebarItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('data-sidebar-category') === entry.target.id);
+        });
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const id = entry.target.id;
-          sidebarItemEls.forEach(item => {
-            item.classList.toggle('active', item.dataset.sidebarCategory === id);
-          });
-        }
-      });
-    },
-    {
-      rootMargin: '-100px 0px -60% 0px',
-      threshold: 0,
-    }
-  );
+  sections.forEach(section => observer.observe(section));
 
-  sectionEls.forEach(section => observer.observe(section));
-
-  sidebarItemEls.forEach(item => {
+  sidebarItems.forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
-      const targetId = item.getAttribute('href')?.replace('#', '');
-      const target = targetId ? document.getElementById(targetId) : null;
-      if (target) {
-        const offset = 80;
-        const top = target.getBoundingClientRect().top + window.scrollY - offset;
-        window.scrollTo({ top, behavior: 'smooth' });
-      }
+      const target = document.getElementById(item.getAttribute('data-sidebar-category') || '');
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 </script>

@@ -1,14 +1,7 @@
 <script setup lang="ts">
 /**
- * KitToolWrapper - Vue component
- * haowallpaper.com 100% design clone
- * Usage: wrap tool content inside <KitToolWrapper title="..." description="...">
- * 
- * 完全照搬 haowallpaper.com 的设计语言：
- * - 深色新拟态 (dark neumorphism)
- * - 磨砂玻璃 (frosted glass)
- * - 自定义触控光标
- * - 0.85 比例按压动画
+ * KitToolWrapper - 工具页面统一包装
+ * 与首页设计语言一致
  */
 const props = defineProps<{
   title: string
@@ -19,18 +12,22 @@ const props = defineProps<{
 <template>
   <div class="tool-page">
     <div class="tool-container">
+
+      <!-- header -->
       <header class="tool-header">
-        <a href="/kit" class="hao-back-link">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <span class="tool-kicker">Kit</span>
+        <a href="/kit" class="tool-back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
-          返回工具箱
+          <span>Back to Kit</span>
         </a>
-        <h1 class="hao-tool-title">{{ props.title }}</h1>
-        <p class="hao-tool-desc">{{ props.description }}</p>
+        <h1 class="tool-title">{{ props.title }}</h1>
+        <p class="tool-desc">{{ props.description }}</p>
       </header>
 
-      <div class="hao-tool-card">
+      <!-- main card -->
+      <div class="tool-main">
         <slot />
       </div>
     </div>
@@ -38,10 +35,7 @@ const props = defineProps<{
 </template>
 
 <style scoped>
-/* ============================================
-   haowallpaper.com EXACT DESIGN CLONE
-   ============================================ */
-
+/* ===== Page ===== */
 .tool-page {
   min-height: 80vh;
   padding: 0.5rem 0 3rem;
@@ -54,7 +48,7 @@ const props = defineProps<{
 }
 
 .tool-container {
-  max-width: 820px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 0 1.2rem;
 }
@@ -63,70 +57,82 @@ const props = defineProps<{
   .tool-container { padding: 0 2rem; }
 }
 
-/* Back Link */
-.hao-back-link {
+/* ===== Header ===== */
+.tool-header {
+  margin-bottom: 1.5rem;
+}
+
+.tool-kicker {
+  font-size: 0.68rem;
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.tool-back-link {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-tertiary);
   text-decoration: none;
   transition: all 0.15s ease;
   padding: 4px 0;
+  margin-bottom: 0.75rem;
 }
 
-.hao-back-link:hover {
+.tool-back-link:hover {
   color: var(--color-primary);
-  transform: translateX(-3px);
 }
 
-.hao-back-link:hover svg {
+.tool-back-link:hover svg {
   transform: translateX(-2px);
 }
 
-.hao-back-link svg {
+.tool-back-link svg {
   transition: transform 0.15s ease;
 }
 
-/* Title & Description */
-.hao-tool-title {
-  font-size: 1.4rem;
-  font-weight: 600;
+.tool-title {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: var(--font-bold);
   color: var(--text-primary);
-  margin-top: 0.65rem;
-  margin-bottom: 0.3rem;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
 }
 
-.hao-tool-desc {
-  font-size: 0.82rem;
+.tool-desc {
+  font-size: 0.88rem;
   color: var(--text-tertiary);
   margin: 0;
+  line-height: 1.55;
+  max-width: 36rem;
 }
 
-/* --- Tool Card --- */
-.hao-tool-card {
+/* ===== Main Card ===== */
+.tool-main {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-xl);
   padding: 1.5rem;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 @media (min-width: 768px) {
-  .hao-tool-card {
-    padding: 2rem;
-  }
+  .tool-main { padding: 2rem; }
 }
 
-/* --- Input --- */
+/* ===== Input ===== */
 :deep(.hao-input) {
   width: 100%;
   background: var(--bg-secondary);
-  border: 1px solid var(--border-secondary);
-  border-radius: var(--radius-md);
-  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem;
   color: var(--text-primary);
   font-size: 0.88rem;
   outline: none;
@@ -145,54 +151,74 @@ const props = defineProps<{
   color: var(--text-quaternary);
 }
 
-/* --- Press Button --- */
-:deep(.hao-press-btn) {
+/* ===== Primary Button ===== */
+:deep(.hao-press-btn--primary) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  padding: 0.55rem 1rem;
-  border-radius: var(--radius-md);
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.2, 0, 0.2, 1);
-  user-select: none;
-  font-family: var(--font-body);
-}
-
-:deep(.hao-press-btn:active) {
-  transform: scale(0.96);
-}
-
-:deep(.hao-press-btn--primary) {
+  padding: 0.65rem var(--space-5);
+  border: none;
+  border-radius: var(--radius-full);
   background: var(--color-primary);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(217, 119, 87, 0.2);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-body);
+  min-height: 2.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 :deep(.hao-press-btn--primary:hover) {
-  background: var(--color-primary-hover);
-  box-shadow: 0 6px 16px rgba(217, 119, 87, 0.3);
+  background: var(--color-primary-active);
+  color: #fff;
   transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
 }
 
+:deep(.hao-press-btn--primary:active) {
+  transform: translateY(0);
+}
+
+/* ===== Secondary Button ===== */
 :deep(.hao-press-btn--secondary) {
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.6rem var(--space-5);
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-body);
+  min-height: 2.4rem;
 }
 
 :deep(.hao-press-btn--secondary:hover) {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border-color: var(--border-hover);
 }
 
-/* --- Result Area --- */
+:deep(.hao-press-btn) {
+  user-select: none;
+}
+
+:deep(.hao-press-btn:active) {
+  transform: scale(0.98);
+}
+
+/* ===== Result ===== */
 :deep(.hao-result) {
   background: var(--bg-secondary);
-  border: 1px solid var(--border-secondary);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
   padding: 0.85rem 1rem;
   color: var(--text-primary);
   font-family: 'JetBrains Mono', monospace;
@@ -205,30 +231,31 @@ const props = defineProps<{
   gap: 0.5rem;
 }
 
-/* --- Label --- */
+/* ===== Label ===== */
 :deep(.hao-label) {
-  font-size: 0.82rem;
-  font-weight: 500;
+  font-size: 0.8rem;
+  font-weight: var(--font-medium);
   color: var(--text-secondary);
   margin-bottom: 0.5rem;
   display: block;
+  letter-spacing: -0.01em;
 }
 
-/* --- Button Group --- */
+/* ===== Button Group ===== */
 :deep(.hao-btn-group) {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
 }
 
-/* --- Info Box --- */
+/* ===== Info Box ===== */
 :deep(.hao-info) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.65rem 0.85rem;
   background: var(--color-primary-light);
-  border-radius: 0.6rem;
+  border-radius: var(--radius-lg);
   font-size: 0.78rem;
   color: var(--text-secondary);
   line-height: 1.5;
@@ -239,17 +266,17 @@ const props = defineProps<{
   color: var(--color-primary);
 }
 
-/* --- Copy Button --- */
+/* ===== Copy Button ===== */
 :deep(.hao-copy-btn) {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   padding: 0.35rem 0.7rem;
   background: var(--bg-secondary);
-  border: 1px solid var(--border-secondary);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-full);
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: var(--font-medium);
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -265,7 +292,7 @@ const props = defineProps<{
   transform: scale(0.95);
 }
 
-/* --- Form Group --- */
+/* ===== Form Group ===== */
 :deep(.hao-form-group) {
   display: flex;
   flex-direction: column;
@@ -277,7 +304,7 @@ const props = defineProps<{
   margin-bottom: 0;
 }
 
-/* --- Char Counter --- */
+/* ===== Counter ===== */
 :deep(.hao-counter) {
   font-size: 0.72rem;
   color: var(--text-quaternary);
