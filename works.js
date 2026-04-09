@@ -455,13 +455,19 @@ async function handleChat(request, env, ctx) {
         max_tokens: config.maxTokens,
         messages: chatMessages,
         temperature: config.temperature,
-        ...(systemMessage && { system: systemMessage })
+        ...(systemMessage && { system: systemMessage }),
+        // Enable thinking for Coding Plan models
+        thinking: {
+          type: "enabled",
+          budget_tokens: 8192
+        }
       };
       
       headers = {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'User-Agent': 'opencode/1.0'
       };
     } else {
       // Standard OpenAI-compatible format
@@ -518,11 +524,13 @@ async function handleChat(request, env, ctx) {
     
     // Handle Anthropic response format
     if (config.provider === 'anthropic-coding') {
-      if (data.content?.[0]?.text) {
-        console.log('[Chat API] Success! Reply length:', data.content[0].text.length);
+      // Find the text block in content array (skip thinking blocks)
+      const textBlock = data.content?.find(block => block.type === 'text');
+      if (textBlock?.text) {
+        console.log('[Chat API] Success! Reply length:', textBlock.text.length);
         return jsonResponse({
           success: true,
-          reply: data.content[0].text,
+          reply: textBlock.text,
           model: model,
           usage: data.usage,
           latency: {
