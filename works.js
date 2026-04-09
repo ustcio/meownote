@@ -316,19 +316,26 @@ function buildContentDisposition(filename) {
 const CHAT_SYSTEM_PROMPT = 'You are Meow AI Assistant, a helpful, harmless, and honest AI assistant. You can help users with coding, analysis, creative writing, and various other tasks. Please respond in the same language as the user.';
 
 const MODEL_CONFIG = {
-  // Qwen Models
+  // Qwen Models (Coding Plan)
   'qwen-turbo': {
     provider: 'qwen',
     model: 'qwen-turbo',
-    endpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    endpoint: 'https://coding.dashscope.aliyuncs.com/v1/chat/completions',
     maxTokens: 2000,
     temperature: 0.7
   },
   'qwen-plus': {
     provider: 'qwen',
     model: 'qwen-plus',
-    endpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    endpoint: 'https://coding.dashscope.aliyuncs.com/v1/chat/completions',
     maxTokens: 2000,
+    temperature: 0.7
+  },
+  'qwen-3.6-plus': {
+    provider: 'qwen',
+    model: 'qwen-3.6-plus',
+    endpoint: 'https://coding.dashscope.aliyuncs.com/v1/chat/completions',
+    maxTokens: 4000,
     temperature: 0.7
   },
   // Doubao Models
