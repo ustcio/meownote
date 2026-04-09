@@ -2,9 +2,6 @@ name = "visitor-stats"
 main = "works.js"
 compatibility_date = "2024-01-01"
 
-[vars]
-DASHSCOPE_API_KEY = "sk-sp-24a60c0e374a44ea8572d107c2a640b7"
-
 [ai]
 binding = "AI"
 
