@@ -332,9 +332,9 @@ const MODEL_CONFIG = {
     temperature: 0.7
   },
   'qwen3.6-plus': {
-    provider: 'qwen',
+    provider: 'anthropic-coding',
     model: 'qwen3.6-plus',
-    endpoint: 'https://coding.dashscope.aliyuncs.com/apps/anthropic/v1/chat/completions',
+    endpoint: 'https://coding.dashscope.aliyuncs.com/apps/anthropic/v1/messages',
     maxTokens: 4000,
     temperature: 0.7
   },
@@ -442,27 +442,53 @@ async function handleChat(request, env, ctx) {
   console.log('[Chat API] Messages count:', messages.length);
 
   try {
-    const requestBody = {
-      model: config.model,
-      messages,
-      temperature: config.temperature,
-      max_tokens: config.maxTokens,
-      stream: stream  // Enable streaming if requested
-    };
+    let requestBody;
+    let headers;
+    
+    // Handle Anthropic Coding Plan format
+    if (config.provider === 'anthropic-coding') {
+      const systemMessage = messages.find(m => m.role === 'system')?.content || '';
+      const chatMessages = messages.filter(m => m.role !== 'system');
+      
+      requestBody = {
+        model: config.model,
+        max_tokens: config.maxTokens,
+        messages: chatMessages,
+        temperature: config.temperature,
+        ...(systemMessage && { system: systemMessage })
+      };
+      
+      headers = {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json'
+      };
+    } else {
+      // Standard OpenAI-compatible format
+      requestBody = {
+        model: config.model,
+        messages,
+        temperature: config.temperature,
+        max_tokens: config.maxTokens,
+        stream: stream
+      };
+      
+      headers = {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      };
+    }
     
     console.log('[Chat API] Request body to AI provider:', JSON.stringify({
       ...requestBody,
-      messages: requestBody.messages.slice(-2) // Only log last 2 messages for brevity
+      messages: requestBody.messages?.slice(-2) || requestBody.messages
     }, null, 2));
 
     const providerStartTime = Date.now();
     
     const response = await fetch(config.endpoint, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
+      headers,
       body: JSON.stringify(requestBody)
     });
 
@@ -490,7 +516,23 @@ async function handleChat(request, env, ctx) {
     const totalLatency = Date.now() - requestStartTime;
     console.log(`[Performance] Total latency: ${totalLatency}ms`);
     
-    if (data.choices?.[0]?.message?.content) {
+    // Handle Anthropic response format
+    if (config.provider === 'anthropic-coding') {
+      if (data.content?.[0]?.text) {
+        console.log('[Chat API] Success! Reply length:', data.content[0].text.length);
+        return jsonResponse({
+          success: true,
+          reply: data.content[0].text,
+          model: model,
+          usage: data.usage,
+          latency: {
+            provider: providerLatency,
+            total: totalLatency
+          }
+        });
+      }
+    } else if (data.choices?.[0]?.message?.content) {
+      // Handle OpenAI response format
       console.log('[Chat API] Success! Reply length:', data.choices[0].message.content.length);
       return jsonResponse({
         success: true,
@@ -508,7 +550,7 @@ async function handleChat(request, env, ctx) {
       console.error('[Chat API] AI provider error:', JSON.stringify(data.error, null, 2));
       return jsonResponse({
         success: false,
-        message: data.error.message || data.error.code || 'AI service error',
+        message: data.error.message || data.error.code || data.error.type || 'AI service error',
         debug: data.error
       }, 500);
     }
