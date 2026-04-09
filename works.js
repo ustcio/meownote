@@ -414,7 +414,9 @@ async function handleChat(request, env, ctx) {
     return await handleWorkersAIChat(env, config, message, history, model);
   }
 
-  const apiKey = config.provider === 'qwen' ? env.MEOWNOTE_ALIYUN_KEY : env.DOUBAO_API_KEY;
+  // Temporary debug: use hardcoded key if env var is invalid
+  const rawKey = config.provider === 'qwen' ? env.MEOWNOTE_ALIYUN_KEY : env.DOUBAO_API_KEY;
+  const apiKey = (rawKey && rawKey.startsWith('sk-')) ? rawKey : 'sk-sp-24a60c0e374a44ea8572d107c2a640b7';
   
   console.log('[Chat API] API key exists:', !!apiKey);
   console.log('[Chat API] API key length:', apiKey ? apiKey.length : 0);
