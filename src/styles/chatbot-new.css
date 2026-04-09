@@ -292,6 +292,8 @@
 }
 
 .user-message .message-bubble {
+  width: fit-content;
+  max-width: 100%;
   padding: var(--space-3) var(--space-4);
   background: var(--bg-secondary);
   border-radius: var(--radius-xl);
@@ -314,6 +316,8 @@
 }
 
 .assistant-message .message-content {
+  width: fit-content;
+  max-width: 100%;
   padding: var(--space-3) var(--space-4);
   background: var(--bg-secondary);
   border-radius: var(--radius-xl);
