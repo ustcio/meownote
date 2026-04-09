@@ -28,7 +28,7 @@
 
 .tool-container,
 .container {
-  max-width: 800px;
+  max-width: var(--container-xl);
   margin: 0 auto;
   padding: 0 var(--space-6);
   display: flex;

@@ -1,24 +1,24 @@
 ---
 const faqs = [
   {
-    q: 'Is there really a free plan?',
-    a: 'Yes. The Free plan gives you full access to chat, writing tools, and research features — no credit card required. Upgrade when you need more.',
+    q: 'What is your research focus?',
+    a: 'My PhD work centers on quantum transport and optoelectronic properties in topological quantum materials — specifically layered compounds like CoNb₃S₆, ZrAs₂, and Nb₃I₈. I combine Hall effect measurements, phonon analysis, and detector development to understand how electrons behave in these systems.',
   },
   {
-    q: 'Can I switch plans later?',
-    a: 'Yes. You can upgrade or downgrade at any time. Changes take effect immediately, and we will prorate the cost.',
+    q: 'What techniques do you use?',
+    a: 'I work with transport measurements (Hall effect, magnetoresistance), optoelectronic characterization (photoconductivity, spectral response), and first-principles calculations. I also design and test radiation detectors based on novel van der Waals materials.',
   },
   {
-    q: 'What counts as "usage"?',
-    a: 'Each message you send counts as one unit. Longer conversations use proportionally more. We track usage transparently in your dashboard.',
+    q: 'Why does this matter?',
+    a: 'Topological materials could enable next-generation electronics — faster, more efficient, and more robust. Understanding their transport and optical properties is a key step toward practical devices like quantum sensors and low-power transistors.',
   },
   {
-    q: 'How is this different from Claude.ai?',
-    a: 'Maxwell is built for people who want more than just chat. We include workspace tools, research features, file conversion utilities, and a growing set of daily tools — all in one place.',
+    q: 'Are you open to collaboration?',
+    a: 'Yes! I am interested in collaborations on quantum materials, detector development, and interdisciplinary applications. Feel free to reach out — I am always happy to discuss ideas over coffee or a video call.',
   },
   {
-    q: 'Do you offer student or team discounts?',
-    a: 'We are working on team plans and discounts for students and non-profits. Contact us if you want early access.',
+    q: 'What tools do you build here?',
+    a: 'This site hosts a collection of 170+ daily-use tools — file converters, text utilities, image processors, and more. I built them as a practical side project while doing research. They are free to use and open to suggestions.',
   },
 ];
 ---
@@ -32,7 +32,22 @@ const faqs = [
 
     <div class="faq-list" role="list">
       {faqs.map((faq, i) => (
-        <details class="faq-item" role="listitem" id={`faq-${i}`}>
+        <details class="faq-item" role="listitem" id={`faq-${i}`}
+  on:toggle={(e) => {
+    const details = e.currentTarget;
+    const body = details.querySelector('.faq-answer') as HTMLElement;
+    const chevron = details.querySelector('.faq-chevron') as SVGElement;
+    if (details.open) {
+      body.style.gridTemplateRows = '1fr';
+      body.style.opacity = '1';
+      chevron.style.transform = 'rotate(180deg)';
+    } else {
+      body.style.gridTemplateRows = '0fr';
+      body.style.opacity = '0';
+      chevron.style.transform = 'rotate(0deg)';
+    }
+  }}
+>
           <summary class="faq-question-btn" aria-expanded="false" aria-controls={`faq-body-${i}`}>
             <span class="faq-question-text">{faq.q}</span>
             <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -130,7 +145,19 @@ const faqs = [
   }
 
   .faq-answer {
-    padding-bottom: 1.1rem;
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s var(--ease-default), opacity 0.3s var(--ease-default);
+    opacity: 0;
+  }
+
+  .faq-item[open] > .faq-answer {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .faq-answer > * {
+    overflow: hidden;
   }
 
   .faq-answer p {
@@ -141,21 +168,17 @@ const faqs = [
   }
 
   @media (max-width: 640px) {
-    .faq-section {
-      padding: 2.5rem 0;
-    }
-
-    .faq-question-btn {
-      padding: 1rem 0;
-      font-size: 0.92rem;
-    }
-
-    .faq-answer {
-      padding-bottom: 1rem;
-    }
-
-    .faq-answer p {
-      font-size: 0.88rem;
-    }
+    .faq-section { padding: 2.5rem 0; }
+    .faq-question-btn { padding: 1rem 0; font-size: 0.92rem; }
+    .faq-answer p { font-size: 0.88rem; }
   }
 </style>
+
+<script>
+  document.querySelectorAll('.faq-item').forEach((item) => {
+    item.addEventListener('toggle', () => {
+      const btn = item.querySelector('.faq-question-btn');
+      if (btn) btn.setAttribute('aria-expanded', item.open.toString());
+    });
+  });
+</script>

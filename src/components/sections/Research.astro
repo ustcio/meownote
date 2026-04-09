@@ -1,110 +1,169 @@
 ---
-const notes = [
+const projects = [
   {
-    tag: 'Writing',
-    title: 'How we tune prompts for clearer first drafts',
-    description: 'A quieter interface matters, but better instructions matter more. This note looks at structure over style.',
-    href: '/research',
+    num: '01',
+    title: 'ZrAs₂ Transport',
+    desc: 'Anomalous Hall effect and magnetotransport in zirconium diarsenide thin films — revealing a new topological semimetal phase.',
+    tags: ['Hall effect', 'Magnetoresistance', 'Thin films'],
   },
   {
-    tag: 'Research',
-    title: 'When should AI summarise — and when should it stay out of the way?',
-    description: 'How to cut fluff while keeping summaries useful enough to actually decide from.',
-    href: '/research',
+    num: '02',
+    title: 'CoNb₃S₆ — Hall',
+    desc: 'Charge density wave order and unconventional Hall signatures in cobalt niobium trisulfide.',
+    tags: ['CDW', 'Nonlinear Hall', 'Layered magnet'],
   },
   {
-    tag: 'Workflow',
-    title: 'Why a workspace beats a pile of chat threads',
-    description: 'Longer projects need a home for notes, intermediate drafts, and all the thinking that doesn\'t fit in one reply.',
-    href: '/workspace',
+    num: '03',
+    title: 'CoNb₃S₆ — Phonon',
+    desc: 'Phonon-mediated transport and electron–phonon coupling analysis from first-principles calculations.',
+    tags: ['DFT', 'Phonon dispersion', 'EPC'],
   },
   {
-    tag: 'Design',
-    title: 'What changed in this redesign',
-    description: 'Typeface, pacing, spacing, surfaces, button hierarchy — and a more measured voice across the whole site.',
-    href: '/about',
+    num: '04',
+    title: 'Nb₃I₈ Detector',
+    desc: 'Niobium triiodide as a room-temperature radiation detector with high responsivity and low noise.',
+    tags: ['Photodetector', 'Van der Waals', 'Optoelectronics'],
   },
 ];
 ---
 
-<section class="claude-section">
+<section class="research-section">
   <div class="container">
-    <div class="research-section">
-      <div class="claude-section-heading">
-        <span class="claude-kicker">Recent notes</span>
-        <h2>Design, prompts, and product decisions worth keeping.</h2>
-        <p>
-          Each card is a topic you can read and act on — that's the editorial rhythm.
-        </p>
-      </div>
+    <div class="research-heading">
+      <span class="research-kicker">Research</span>
+      <h2>Four projects. One thread.</h2>
+      <p>
+        Each piece contributes to a broader picture: how electrons, phonons, and light interact in materials that break the usual rules.
+      </p>
+    </div>
 
-      <div class="research-grid">
-        {notes.map((note) => (
-          <a href={note.href} class="research-card">
-            <span class="research-card__tag">{note.tag}</span>
-            <h3>{note.title}</h3>
-            <p>{note.description}</p>
-            <span class="research-card__more">Read more</span>
-          </a>
-        ))}
-      </div>
+    <div class="research-grid">
+      {projects.map((p) => (
+        <article class="research-card">
+          <span class="research-card__num">{p.num}</span>
+          <h3>{p.title}</h3>
+          <p>{p.desc}</p>
+          <div class="research-card__tags">
+            {p.tags.map((tag) => (
+              <span class="research-tag">{tag}</span>
+            ))}
+          </div>
+        </article>
+      ))}
     </div>
   </div>
 </section>
 
 <style>
-  .research-grid {
-    display: grid;
-    gap: 1px;
-    background: var(--border-secondary);
-    border: 1px solid var(--border-secondary);
+  .research-section {
+    padding: clamp(3rem, 6vw, 5rem) 0;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-secondary);
+    border-bottom: 1px solid var(--border-secondary);
   }
 
-  @media (min-width: 700px) {
-    .research-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  .research-heading {
+    text-align: center;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+    max-width: 34rem;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-  .research-card {
-    display: grid;
-    gap: 0.8rem;
-    min-height: 100%;
-    padding: 1.75rem;
-    background: var(--card-bg);
-    transition: background var(--duration-fast) var(--ease-default);
-  }
-
-  .research-card:hover {
-    background: var(--card-bg-hover);
-  }
-
-  .research-card__tag {
-    font-size: 0.75rem;
+  .research-kicker {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.7rem;
     font-weight: var(--font-semibold);
-    letter-spacing: 0.07em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--text-tertiary);
   }
 
+  .research-kicker::before {
+    content: '';
+    width: 0.36rem; height: 0.36rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    margin-right: 0.5rem;
+  }
+
+  .research-heading h2 {
+    margin-top: 0.4rem;
+  }
+
+  .research-heading p {
+    margin-top: 0.6rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .research-grid {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 700px) {
+    .research-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  .research-card {
+    padding: 1.75rem;
+    border-radius: var(--radius-xl);
+    background: var(--card-bg);
+    border: 1px solid var(--border-secondary);
+    display: grid;
+    gap: 0.75rem;
+    transition:
+      border-color var(--duration-normal) var(--ease-default),
+      box-shadow var(--duration-normal) var(--ease-default),
+      transform var(--duration-normal) var(--ease-default);
+  }
+
+  .research-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+  }
+
+  .research-card__num {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.1em;
+    color: var(--color-primary);
+    text-transform: uppercase;
+  }
+
   .research-card h3 {
-    font-size: var(--text-2xl);
-    line-height: 1.15;
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    letter-spacing: -0.025em;
+    line-height: 1.2;
   }
 
   .research-card p {
-    margin: 0;
-    font-size: var(--text-base);
-    line-height: 1.55;
-  }
-
-  .research-card__more {
     font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
   }
 
-  .research-card:hover .research-card__more {
-    color: var(--text-primary);
+  .research-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding-top: 0.3rem;
+  }
+
+  .research-tag {
+    font-size: 0.68rem;
+    font-weight: var(--font-medium);
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-full);
+    background: var(--color-primary-subtle);
+    color: var(--color-primary);
+    letter-spacing: 0.02em;
   }
 </style>

@@ -32,6 +32,37 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       })();
     </script>
 
+    <script>
+      // Scroll progress
+      const progressBar = document.getElementById('scrollProgress');
+      function updateScrollProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (docHeight > 0) progressBar.style.width = ((scrollTop / docHeight) * 100) + '%';
+      }
+      window.addEventListener('scroll', updateScrollProgress, { passive: true });
+
+      // Custom cursor
+      const cursor = document.getElementById('customCursor');
+      if (cursor && window.matchMedia('(pointer: fine)').matches) {
+        let cursorX = 0, cursorY = 0, targetX = 0, targetY = 0, visible = false;
+        function animateCursor() {
+          cursorX += (targetX - cursorX) * 0.15;
+          cursorY += (targetY - cursorY) * 0.15;
+          cursor.style.transform = `translate(${cursorX - 10}px, ${cursorY - 10}px)`;
+          requestAnimationFrame(animateCursor);
+        }
+        document.addEventListener('mousemove', (e) => {
+          targetX = e.clientX; targetY = e.clientY;
+          if (!visible) { visible = true; cursor.classList.add('is-visible'); animateCursor(); }
+        });
+        document.addEventListener('mouseleave', () => { visible = false; cursor.classList.remove('is-visible'); });
+        const hovers = 'a, button, [role="button"], input, select, textarea, details, .btn, .card, .research-card, .sp-card';
+        document.addEventListener('mouseover', (e) => { if (e.target.closest(hovers)) cursor.classList.add('is-hovering'); });
+        document.addEventListener('mouseout', (e) => { if (e.target.closest(hovers)) cursor.classList.remove('is-hovering'); });
+      }
+    </script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
 
@@ -81,6 +112,12 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     </style>
   </head>
   <body>
+    <!-- Scroll progress bar -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Custom cursor (desktop only) -->
+    <div class="custom-cursor" id="customCursor" aria-hidden="true"></div>
+
     <Header />
     <main>
       <slot />
@@ -101,5 +138,44 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 <style>
   main {
     min-height: calc(100vh - var(--header-height));
+  }
+
+  /* scroll progress */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--color-primary), #e8a87c);
+    z-index: 10001;
+    transition: width 0.1s ease-out;
+  }
+
+  /* custom cursor */
+  .custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-primary);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10001;
+    opacity: 0;
+    transition: width 0.2s ease, height 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+    transform: translate(-50%, -50%);
+  }
+
+  .custom-cursor.is-visible { opacity: 1; }
+  .custom-cursor.is-hovering {
+    width: 40px;
+    height: 40px;
+    background: rgba(212, 117, 90, 0.1);
+  }
+
+  @media (pointer: coarse) {
+    .custom-cursor { display: none; }
   }
 </style>

@@ -1,64 +1,65 @@
 ---
-const testimonials = [
+const researchAreas = [
   {
-    quote: 'Maxwell replaced three tools for me — the AI writes better than most junior copywriters, and it stays on topic.',
-    name: 'Sarah Chen',
-    role: 'Head of Content, Acme Corp',
-    initials: 'SC',
+    icon: '⚛️',
+    title: 'Quantum Transport',
+    desc: 'Topological materials, edge states, and quantum Hall effects in novel 2D systems.',
   },
   {
-    quote: 'I use it every morning to draft meeting briefs. What used to take 30 minutes is now a two-minute prompt.',
-    name: 'James Park',
-    role: 'Product Manager, Stripe',
-    initials: 'JP',
+    icon: '🔬',
+    title: 'Optoelectronic Properties',
+    desc: 'Photoelectric response, phonon dynamics, and carrier dynamics in layered compounds.',
   },
   {
-    quote: 'The workspace feature is a game-changer for long projects. Everything stays organised without extra effort.',
-    name: 'Emily Rodriguez',
-    role: 'Research Lead',
-    initials: 'ER',
+    icon: '📡',
+    title: 'Detector Development',
+    desc: 'Nb₃I₈-based radiation detectors with enhanced sensitivity and stability.',
   },
+  {
+    icon: '🧮',
+    title: 'Computational Methods',
+    desc: 'First-principles calculations, DFT+U, and transport simulations for complex materials.',
+  },
+];
+
+const publications = [
+  { year: '2025', title: 'Phonon-mediated transport in CoNb₃S₆', venue: 'Phys. Rev. B' },
+  { year: '2024', title: 'Hall effect anomalies in ZrAs₂ thin films', venue: 'Adv. Mater.' },
+  { year: '2024', title: 'Nb₃I₈ detector response characterization', venue: 'Appl. Phys. Lett.' },
+  { year: '2023', title: 'Topological signatures in layered arsenides', venue: 'Nat. Commun.' },
 ];
 ---
 
 <section class="social-proof">
   <div class="container">
     <div class="sp-heading">
-      <span class="sp-kicker">Loved by builders</span>
-      <h2>Trusted by people who do real work.</h2>
+      <span class="sp-kicker">Research Focus</span>
+      <h2>What I work on.</h2>
+      <p>
+        Condensed matter physics — from quantum transport measurements to detector engineering.
+      </p>
     </div>
 
     <div class="sp-grid">
-      {testimonials.map((t) => (
+      {researchAreas.map((area) => (
         <article class="sp-card">
-          <p class="sp-quote">"{t.quote}"</p>
-          <div class="sp-author">
-            <div class="sp-avatar">{t.initials}</div>
-            <div>
-              <span class="sp-name">{t.name}</span>
-              <span class="sp-role">{t.role}</span>
-            </div>
-          </div>
+          <span class="sp-card-icon">{area.icon}</span>
+          <h3>{area.title}</h3>
+          <p>{area.desc}</p>
         </article>
       ))}
     </div>
 
-    <div class="sp-stats">
-      <div class="sp-stat">
-        <span class="sp-stat-value">10K+</span>
-        <span class="sp-stat-label">Active users</span>
-      </div>
-      <div class="sp-stat">
-        <span class="sp-stat-value">1M+</span>
-        <span class="sp-stat-label">Conversations</span>
-      </div>
-      <div class="sp-stat">
-        <span class="sp-stat-value">99.9%</span>
-        <span class="sp-stat-label">Uptime</span>
-      </div>
-      <div class="sp-stat">
-        <span class="sp-stat-value">&lt;100ms</span>
-        <span class="sp-stat-label">Avg. response</span>
+    <div class="sp-pubs">
+      <span class="sp-pubs-label">Selected Publications</span>
+      <div class="sp-pubs-list">
+        {publications.map((pub) => (
+          <div class="sp-pub-item">
+            <span class="sp-pub-year">{pub.year}</span>
+            <span class="sp-pub-title">{pub.title}</span>
+            <span class="sp-pub-venue">{pub.venue}</span>
+          </div>
+        ))}
       </div>
     </div>
   </div>
@@ -66,15 +67,17 @@ const testimonials = [
 
 <style>
   .social-proof {
-    padding: clamp(2.25rem, 5vw, 3.5rem) 0;
-    background: var(--bg-secondary);
+    padding: clamp(2.5rem, 5vw, 4rem) 0;
+    background: var(--bg-primary);
     border-top: 1px solid var(--border-secondary);
-    border-bottom: 1px solid var(--border-secondary);
   }
 
   .sp-heading {
     text-align: center;
-    margin-bottom: clamp(1.5rem, 3vw, 2rem);
+    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+    max-width: 32rem;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .sp-kicker {
@@ -99,115 +102,130 @@ const testimonials = [
     margin-top: 0.4rem;
   }
 
+  .sp-heading p {
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
   .sp-grid {
     display: grid;
     gap: 1rem;
-    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+    margin-bottom: clamp(2rem, 4vw, 3rem);
   }
 
-  @media (min-width: 768px) {
-    .sp-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  @media (min-width: 640px) {
+    .sp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (min-width: 960px) {
+    .sp-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   }
 
   .sp-card {
-    padding: 1.15rem;
+    padding: 1.5rem;
     border-radius: var(--radius-xl);
     background: var(--card-bg);
     border: 1px solid var(--border-secondary);
     display: grid;
-    gap: 1rem;
+    gap: 0.65rem;
     transition:
       border-color var(--duration-normal) var(--ease-default),
-      box-shadow var(--duration-normal) var(--ease-default);
+      box-shadow var(--duration-normal) var(--ease-default),
+      transform var(--duration-normal) var(--ease-default);
   }
 
   .sp-card:hover {
-    border-color: var(--border-primary);
+    border-color: var(--border-hover);
     box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
   }
 
-  .sp-quote {
-    font-size: 0.92rem;
-    line-height: 1.6;
+  .sp-card-icon {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  .sp-card h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    letter-spacing: -0.02em;
+  }
+
+  .sp-card p {
+    font-size: var(--text-sm);
     color: var(--text-secondary);
+    line-height: 1.55;
     margin: 0;
   }
 
-  .sp-author {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border-secondary);
-  }
-
-  .sp-avatar {
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-tertiary);
-    font-size: 0.68rem;
-    font-weight: var(--font-semibold);
-    color: var(--text-tertiary);
-    letter-spacing: 0.04em;
-    flex-shrink: 0;
-  }
-
-  .sp-name {
-    display: block;
-    font-size: 0.88rem;
-    font-weight: var(--font-medium);
-    color: var(--text-primary);
-  }
-
-  .sp-role {
-    display: block;
-    font-size: 0.78rem;
-    color: var(--text-tertiary);
-    margin-top: 0.1rem;
-  }
-
-  /* -------- stats -------- */
-  .sp-stats {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.25rem 1.5rem;
-    max-width: 48rem;
+  /* publications */
+  .sp-pubs {
+    max-width: 40rem;
     margin: 0 auto;
   }
 
-  @media (min-width: 640px) {
-    .sp-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  }
-
-  .sp-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.2rem;
+  .sp-pubs-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 1rem;
     text-align: center;
   }
 
-  .sp-stat-value {
+  .sp-pubs-list {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .sp-pub-item {
+    display: grid;
+    grid-template-columns: 3rem 1fr auto;
+    gap: 0.75rem;
+    align-items: baseline;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    background: var(--card-bg);
+    border: 1px solid var(--border-secondary);
+    transition: border-color var(--duration-fast) var(--ease-default);
+  }
+
+  .sp-pub-item:hover {
+    border-color: var(--border-hover);
+  }
+
+  .sp-pub-year {
+    font-size: 0.78rem;
+    font-weight: var(--font-semibold);
+    color: var(--color-primary);
     font-family: var(--font-display);
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    letter-spacing: -0.03em;
+  }
+
+  .sp-pub-title {
+    font-size: 0.9rem;
     color: var(--text-primary);
+    line-height: 1.4;
   }
 
-  @media (min-width: 768px) {
-    .sp-stat-value { font-size: var(--text-3xl); }
-  }
-
-  .sp-stat-label {
-    font-size: 0.72rem;
-    font-weight: var(--font-medium);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+  .sp-pub-venue {
+    font-size: 0.75rem;
     color: var(--text-tertiary);
+    font-style: italic;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .sp-pub-item {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
+    .sp-pub-venue {
+      font-size: 0.72rem;
+    }
   }
 </style>
