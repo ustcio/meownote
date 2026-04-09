@@ -502,10 +502,11 @@ async function handleChat(request, env, ctx) {
     }
     
     if (data.error) {
-      console.error('[Chat API] AI provider error:', data.error);
+      console.error('[Chat API] AI provider error:', JSON.stringify(data.error, null, 2));
       return jsonResponse({
         success: false,
-        message: data.error.message || 'AI service error'
+        message: data.error.message || data.error.code || 'AI service error',
+        debug: data.error
       }, 500);
     }
 
