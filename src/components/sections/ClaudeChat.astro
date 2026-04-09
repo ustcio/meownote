@@ -339,7 +339,7 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
+    padding: 12px 20px;
     border-bottom: 1px solid var(--border-primary);
     background: var(--bg-primary);
     z-index: 10;
@@ -1093,6 +1093,8 @@ const API_BASE = 'https://api.ustc.dev';
   function appendMessage(role, content) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message message-${role}`;
+    // 用内联样式确保左右对齐，优先级最高
+    messageDiv.style.alignSelf = role === 'user' ? 'flex-end' : 'flex-start';
     applyAstroScoped(messageDiv);
 
     let inner = '';
@@ -1116,6 +1118,7 @@ const API_BASE = 'https://api.ustc.dev';
   function appendTyping() {
     const typingDiv = document.createElement('div');
     typingDiv.className = 'message message-assistant';
+    typingDiv.style.alignSelf = 'flex-start';
     typingDiv.innerHTML = `
       <div class="message-header">
         <div class="message-avatar">C</div>
