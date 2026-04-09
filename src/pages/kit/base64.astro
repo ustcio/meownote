@@ -109,7 +109,6 @@ const toolDesc = '文本和图片的 Base64 编码与解码工具';
 </style>
 
 <script is:inline>
->
   // Tab switching
   const tabs = document.querySelectorAll('.tab');
   const tabContents = document.querySelectorAll('.tab-content');
@@ -132,7 +131,7 @@ const toolDesc = '文本和图片的 Base64 编码与解码工具';
   const textClearBtn = document.getElementById('text-clear');
   const base64CopyBtn = document.getElementById('base64-copy');
 
-  function encodeBase64(text: string): string {
+  function encodeBase64(text) {
     try {
       return btoa(unescape(encodeURIComponent(text)));
     } catch {
@@ -140,7 +139,7 @@ const toolDesc = '文本和图片的 Base64 编码与解码工具';
     }
   }
 
-  function decodeBase64(base64: string): string {
+  function decodeBase64(base64) {
     try {
       return decodeURIComponent(escape(atob(base64)));
     } catch {
@@ -222,7 +221,7 @@ const toolDesc = '文本和图片的 Base64 编码与解码工具';
     if (file) processImage(file);
   });
 
-  function processImage(file: File): void {
+  function processImage(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64 = e.target?.result;

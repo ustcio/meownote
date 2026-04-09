@@ -225,7 +225,6 @@ const toolDesc = 'Academic research tools collection';
 </style>
 
 <script is:inline>
->
   // @ts-nocheck
   const toolsGrid = document.getElementById('tools-grid');
   const panels = document.querySelectorAll('.panel');
@@ -375,7 +374,7 @@ const toolDesc = 'Academic research tools collection';
       preview.innerHTML = '';
       preview.appendChild(svg);
     } catch (e) {
-      preview.innerHTML = `<span style="color:#ef4444;">LaTeX 语法错误: ${(e as Error).message}</span>`;
+      preview.innerHTML = `<span style="color:#ef4444;">LaTeX 语法错误: ${e.message}</span>`;
     }
   });
 

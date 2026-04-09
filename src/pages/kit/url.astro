@@ -88,11 +88,10 @@ const toolDesc = 'URL 编码与解码工具，支持中文和特殊字符';
 </style>
 
 <script is:inline>
->
   const urlInput = document.getElementById('url-input');
   const urlOutput = document.getElementById('url-output');
-  const parseResult = document.getElementById('parse-result')!;
-  const extraOutput = document.getElementById('extra-output')!;
+  const parseResult = document.getElementById('parse-result');
+  const extraOutput = document.getElementById('extra-output');
   const extraResult = document.getElementById('extra-result');
 
   document.getElementById('encode-btn')?.addEventListener('click', () => {
@@ -114,7 +113,7 @@ const toolDesc = 'URL 编码与解码工具，支持中文和特殊字符';
     parseUrl(urlInput.value);
   });
 
-  function parseUrl(text: string) {
+  function parseUrl(text) {
     try {
       const url = new URL(text);
       parseResult.innerHTML = [
@@ -150,14 +149,14 @@ const toolDesc = 'URL 编码与解码工具，支持中文和特殊字符';
     try {
       const url = new URL(urlInput.value);
       const params = url.searchParams;
-      const lines: string[] = [];
+      const lines = [];
       params.forEach((v, k) => lines.push(`${k} = ${v}`));
       extraResult.value = lines.length ? lines.join('\n') : '无查询参数';
     } catch {
       // Try parsing as query string
       const text = urlInput.value.trim();
       const params = new URLSearchParams(text.startsWith('?') ? text : '?' + text);
-      const lines: string[] = [];
+      const lines = [];
       params.forEach((v, k) => lines.push(`${k} = ${v}`));
       extraResult.value = lines.length ? lines.join('\n') : '无查询参数';
     }

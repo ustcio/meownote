@@ -113,27 +113,26 @@ const toolDesc = '图片压缩、格式转换、尺寸调整';
 </style>
 
 <script is:inline>
->
-  const uploadArea = document.getElementById('upload-area')!;
+  const uploadArea = document.getElementById('upload-area');
   const imageInput = document.getElementById('image-input');
-  const infoCard = document.getElementById('info-card')!;
-  const optionsCard = document.getElementById('options-card')!;
-  const resultCard = document.getElementById('result-card')!;
+  const infoCard = document.getElementById('info-card');
+  const optionsCard = document.getElementById('options-card');
+  const resultCard = document.getElementById('result-card');
   const previewImg = document.getElementById('preview-img');
   const resultImg = document.getElementById('result-img');
-  const originalInfo = document.getElementById('original-info')!;
-  const resultInfo = document.getElementById('result-info')!;
+  const originalInfo = document.getElementById('original-info');
+  const resultInfo = document.getElementById('result-info');
   const outputFormat = document.getElementById('output-format');
   const qualitySlider = document.getElementById('quality-slider');
-  const qualityVal = document.getElementById('quality-val')!;
+  const qualityVal = document.getElementById('quality-val');
   const resizeWidth = document.getElementById('resize-width');
   const resizeHeight = document.getElementById('resize-height');
   const lockRatio = document.getElementById('lock-ratio');
-  const processBtn = document.getElementById('process-btn')!;
-  const downloadBtn = document.getElementById('download-btn')!;
-  const savingsText = document.getElementById('savings-text')!;
+  const processBtn = document.getElementById('process-btn');
+  const downloadBtn = document.getElementById('download-btn');
+  const savingsText = document.getElementById('savings-text');
 
-  let originalFile: File | null = null;
+  let originalFile = null;
   let originalWidth = 0;
   let originalHeight = 0;
   let resultBlobUrl = '';
@@ -152,7 +151,7 @@ const toolDesc = '图片压缩、格式转换、尺寸调整';
     if (file) loadImage(file);
   });
 
-  function loadImage(file: File) {
+  function loadImage(file) {
     originalFile = file;
     const url = URL.createObjectURL(file);
     const img = new Image();
@@ -202,7 +201,7 @@ const toolDesc = '图片压缩、格式转换、尺寸调整';
       const canvas = document.createElement('canvas');
       canvas.width = w;
       canvas.height = h;
-      const ctx = canvas.getContext('2d')!;
+      const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
 
       const quality = parseInt(qualitySlider.value) / 100;

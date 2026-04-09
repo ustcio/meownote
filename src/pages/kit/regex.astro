@@ -103,17 +103,16 @@ const toolDesc = '在线测试正则表达式，实时匹配高亮';
 </style>
 
 <script is:inline>
->
   const patternInput = document.getElementById('regex-pattern');
   const flagsInput = document.getElementById('regex-flags');
   const testText = document.getElementById('test-text');
-  const highlightBox = document.getElementById('highlight-box')!;
-  const matchCount = document.getElementById('match-count')!;
-  const regexError = document.getElementById('regex-error')!;
-  const groupsCard = document.getElementById('groups-card')!;
-  const groupsList = document.getElementById('groups-list')!;
+  const highlightBox = document.getElementById('highlight-box');
+  const matchCount = document.getElementById('match-count');
+  const regexError = document.getElementById('regex-error');
+  const groupsCard = document.getElementById('groups-card');
+  const groupsList = document.getElementById('groups-list');
 
-  function escapeHtml(text: string): string {
+  function escapeHtml(text) {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 

@@ -109,19 +109,18 @@ const toolDesc = '字数统计、大小写转换、文本差异对比';
 </style>
 
 <script is:inline>
->
   const textInput = document.getElementById('text-input');
   const textOutput = document.getElementById('text-output');
 
   function updateStats() {
     const text = textInput.value;
-    const el = (id: string) => document.getElementById(id);
-    el('stat-chars')!.textContent = text.length.toString();
-    el('stat-chars-no-space')!.textContent = text.replace(/\s/g, '').length.toString();
-    el('stat-words')!.textContent = text.trim() ? text.trim().split(/\s+/).length.toString() : '0';
-    el('stat-lines')!.textContent = text ? text.split('\n').length.toString() : '0';
-    el('stat-bytes')!.textContent = new Blob([text]).size.toString();
-    el('stat-chinese')!.textContent = (text.match(/[\u4e00-\u9fff]/g) || []).length.toString();
+    const el = (id) => document.getElementById(id);
+    el('stat-chars').textContent = text.length.toString();
+    el('stat-chars-no-space').textContent = text.replace(/\s/g, '').length.toString();
+    el('stat-words').textContent = text.trim() ? text.trim().split(/\s+/).length.toString() : '0';
+    el('stat-lines').textContent = text ? text.split('\n').length.toString() : '0';
+    el('stat-bytes').textContent = new Blob([text]).size.toString();
+    el('stat-chinese').textContent = (text.match(/[\u4e00-\u9fff]/g) || []).length.toString();
   }
 
   textInput.addEventListener('input', updateStats);
@@ -139,7 +138,7 @@ const toolDesc = '字数统计、大小写转换、文本差异对比';
     updateStats();
   });
 
-  function transform(fn: (text: string) => string) {
+  function transform(fn) {
     textOutput.value = fn(textInput.value);
   }
 

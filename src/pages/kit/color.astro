@@ -108,7 +108,6 @@ const toolDesc = 'HEX、RGB、HSL 颜色格式互转工具';
 </style>
 
 <script is:inline>
->
   const hexInput = document.getElementById('hex-input');
   const rgbInput = document.getElementById('rgb-input');
   const hslInput = document.getElementById('hsl-input');
@@ -126,19 +125,19 @@ const toolDesc = 'HEX、RGB、HSL 颜色格式互转工具';
 
   let r = 217, g = 119, b = 87, a = 1;
 
-  function clamp(v: number, min: number, max: number) { return Math.min(max, Math.max(min, v)); }
+  function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
 
-  function rgbToHex(r: number, g: number, b: number): string {
+  function rgbToHex(r, g, b) {
     return '#' + [r, g, b].map(c => clamp(Math.round(c), 0, 255).toString(16).padStart(2, '0')).join('');
   }
 
-  function hexToRgb(hex: string): [number, number, number] | null {
+  function hexToRgb(hex) {
     const m = hex.replace('#', '').match(/^([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
     if (!m) return null;
     return [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)];
   }
 
-  function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
+  function rgbToHsl(r, g, b) {
     r /= 255; g /= 255; b /= 255;
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
     let h = 0, s = 0;
@@ -153,7 +152,7 @@ const toolDesc = 'HEX、RGB、HSL 颜色格式互转工具';
     return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
   }
 
-  function updateAll(source: string) {
+  function updateAll(source) {
     const hex = rgbToHex(r, g, b);
     const [h, s, l] = rgbToHsl(r, g, b);
     const rgb = `rgb(${r}, ${g}, ${b})`;
@@ -172,10 +171,10 @@ const toolDesc = 'HEX、RGB、HSL 颜色格式互转工具';
       aSlider.value = Math.round(a * 100).toString();
     }
 
-    rVal!.textContent = r.toString();
-    gVal!.textContent = g.toString();
-    bVal!.textContent = b.toString();
-    aVal!.textContent = a.toFixed(2);
+    rVal.textContent = r.toString();
+    gVal.textContent = g.toString();
+    bVal.textContent = b.toString();
+    aVal.textContent = a.toFixed(2);
 
     colorPreview.style.backgroundColor = rgbaVal;
     nativePicker.value = hex;

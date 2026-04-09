@@ -77,7 +77,6 @@ const toolDesc = 'JSON 格式化、压缩、校验工具，支持语法高亮';
 </Layout>
 
 <script is:inline>
->
   const jsonInput = document.getElementById('json-input');
   const jsonOutput = document.getElementById('json-output');
   const status = document.getElementById('status');
@@ -87,9 +86,9 @@ const toolDesc = 'JSON 格式化、压缩、校验工具，支持语法高亮';
   const pasteBtn = document.getElementById('paste-btn');
   const clearBtn = document.getElementById('clear-btn');
 
-  let lastValidJson: string = '';
+  let lastValidJson = '';
 
-  function syntaxHighlight(json: string): string {
+  function syntaxHighlight(json) {
     return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
       let cls = 'number';
       if (/^"/.test(match)) {
@@ -109,7 +108,7 @@ const toolDesc = 'JSON 格式化、压缩、校验工具，支持语法高亮';
     });
   }
 
-  function formatJson(indent: number = 2): void {
+  function formatJson(indent = 2) {
     const input = jsonInput?.value.trim();
     if (!input) {
       if (jsonOutput) jsonOutput.innerHTML = '<span class="placeholder">格式化后的 JSON 将显示在这里...</span>';
@@ -135,7 +134,7 @@ const toolDesc = 'JSON 格式化、压缩、校验工具，支持语法高亮';
     }
   }
 
-  function minifyJson(): void {
+  function minifyJson() {
     const input = jsonInput?.value.trim();
     if (!input) return;
 
