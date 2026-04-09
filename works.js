@@ -415,7 +415,7 @@ async function handleChat(request, env, ctx) {
   }
 
   // TODO: Move to secret once dashboard variables are cleaned up
-  const apiKey = config.provider === 'qwen' ? 'sk-sp-24a60c0e374a44ea8572d107c2a640b7' : env.DOUBAO_API_KEY;
+  const apiKey = (config.provider === 'qwen' || config.provider === 'anthropic-coding') ? 'sk-sp-24a60c0e374a44ea8572d107c2a640b7' : env.DOUBAO_API_KEY;
   
   if (!apiKey) {
     console.error('[Chat API] API key not configured for provider:', config.provider);
