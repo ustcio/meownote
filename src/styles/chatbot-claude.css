@@ -592,78 +592,125 @@
 
 /* ==================== Input Area ==================== */
 .input-area {
-  padding: 16px 24px 24px;
-  border-top: 1px solid #E5E5E5;
-  background: #FFFFFF;
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--border-secondary, #E5E5E5);
+  background: var(--bg-primary, #FFFFFF);
 }
 
-.input-box {
+.input-container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-wrapper {
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  max-width: 800px;
-  margin: 0 auto;
-  background: #F9F9F9;
-  border: 1px solid #E5E5E5;
+  background: var(--bg-secondary, #F9F9F9);
+  border: 1px solid var(--border-primary, #E5E5E5);
   border-radius: 16px;
-  padding: 12px 16px;
-  transition: border-color 0.15s ease;
+  padding: 10px 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.input-box:focus-within {
-  border-color: #D97757;
+.input-wrapper:focus-within {
+  border-color: var(--color-primary, #D97757);
+  box-shadow: 0 0 0 3px var(--color-primary-alpha-10, rgba(217, 119, 87, 0.10));
+  background: var(--card-bg, #FFFFFF);
 }
 
-.input-field {
+.message-input {
   flex: 1;
   border: none;
   background: transparent;
-  font-size: 15px;
-  line-height: 1.5;
-  color: #1A1A1A;
+  font-size: var(--text-base, 15px);
+  line-height: 1.55;
+  color: var(--text-primary, #1A1A1A);
   resize: none;
   outline: none;
   min-height: 24px;
   max-height: 200px;
+  font-family: var(--font-body, inherit);
+  padding: 6px 4px;
 }
 
-.input-field::placeholder {
-  color: #999;
+.message-input::placeholder {
+  color: var(--text-quaternary, #999);
 }
 
-.send-btn {
-  width: 36px;
-  height: 36px;
+.input-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  flex-shrink: 0;
+}
+
+.input-action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #D97757;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-tertiary, #888);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.input-action-btn:hover {
+  background: var(--bg-tertiary, #F0F0F0);
+  color: var(--text-primary, #1A1A1A);
+}
+
+.send-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--color-primary, #D97757);
   border: none;
   border-radius: 50%;
   color: white;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.2s ease;
   flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(217, 119, 87, 0.25);
 }
 
 .send-btn:hover:not(:disabled) {
-  background: #C66A4A;
+  background: var(--color-primary-hover, #C66A4A);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(217, 119, 87, 0.35);
+}
+
+.send-btn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .send-btn:disabled {
-  background: #E5E5E5;
-  color: #999;
+  background: var(--bg-tertiary, #E5E5E5);
+  color: var(--text-quaternary, #999);
   cursor: not-allowed;
+  box-shadow: none;
+}
+
+.input-footer {
+  display: flex;
+  justify-content: center;
 }
 
 .input-hint {
+  font-size: 0.72rem;
+  color: var(--text-quaternary, #999);
   text-align: center;
-  font-size: 12px;
-  color: #999;
-  margin-top: 12px;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+  line-height: 1.4;
 }
 
 /* ==================== Responsive ==================== */
@@ -703,13 +750,9 @@
     padding: 16px;
   }
 
-  .input-area {
-    padding: 12px 16px 16px;
-  }
-
-  .input-box {
-    padding: 10px 12px;
-  }
+  .input-area { padding: 12px 16px 16px; }
+  .input-container { gap: 6px; }
+  .input-wrapper { padding: 8px 10px; }
 }
 
 /* ==================== Dark Mode ==================== */
@@ -887,28 +930,43 @@
 }
 
 [data-theme="dark"] .input-area {
-  border-top-color: #333;
-  background: #1A1A1A;
+  border-top-color: var(--border-secondary, #333);
+  background: var(--bg-primary, #1A1A1A);
 }
 
-[data-theme="dark"] .input-box {
-  background: #242424;
-  border-color: #333;
+[data-theme="dark"] .input-wrapper {
+  background: var(--bg-secondary, #242424);
+  border-color: var(--border-primary, #333);
 }
 
-[data-theme="dark"] .input-field {
-  color: #F5F5F5;
+[data-theme="dark"] .input-wrapper:focus-within {
+  border-color: var(--color-primary, #D97757);
+  box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.15);
+  background: var(--card-bg, #2A2A2A);
 }
 
-[data-theme="dark"] .input-field::placeholder {
-  color: #666;
+[data-theme="dark"] .message-input {
+  color: var(--text-primary, #F5F5F5);
+}
+
+[data-theme="dark"] .message-input::placeholder {
+  color: var(--text-quaternary, #666);
+}
+
+[data-theme="dark"] .input-action-btn {
+  color: var(--text-tertiary, #666);
+}
+
+[data-theme="dark"] .input-action-btn:hover {
+  background: var(--bg-tertiary, #333);
+  color: var(--text-primary, #F5F5F5);
 }
 
 [data-theme="dark"] .send-btn:disabled {
-  background: #333;
-  color: #666;
+  background: var(--bg-tertiary, #333);
+  color: var(--text-quaternary, #666);
 }
 
 [data-theme="dark"] .input-hint {
-  color: #666;
+  color: var(--text-quaternary, #666);
 }
