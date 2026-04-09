@@ -334,7 +334,7 @@ const MODEL_CONFIG = {
   'qwen3.6-plus': {
     provider: 'qwen',
     model: 'qwen3.6-plus',
-    endpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    endpoint: 'https://coding.dashscope.aliyuncs.com/apps/anthropic/v1/chat/completions',
     maxTokens: 4000,
     temperature: 0.7
   },
