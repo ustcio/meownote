@@ -414,7 +414,7 @@ async function handleChat(request, env, ctx) {
     return await handleWorkersAIChat(env, config, message, history, model);
   }
 
-  const apiKey = config.provider === 'qwen' ? env.DASHSCOPE_API_KEY : env.DOUBAO_API_KEY;
+  const apiKey = config.provider === 'qwen' ? env.ALIYUN_API_KEY : env.DOUBAO_API_KEY;
   
   console.log('[Chat API] API key exists:', !!apiKey);
   console.log('[Chat API] API key length:', apiKey ? apiKey.length : 0);
