@@ -417,7 +417,8 @@ async function handleChat(request, env, ctx) {
   const apiKey = config.provider === 'qwen' ? env.DASHSCOPE_API_KEY : env.DOUBAO_API_KEY;
   
   console.log('[Chat API] API key exists:', !!apiKey);
-  console.log('[Chat API] API key prefix:', apiKey ? apiKey.substring(0, 10) + '...' : 'none');
+  console.log('[Chat API] API key length:', apiKey ? apiKey.length : 0);
+  console.log('[Chat API] API key prefix:', apiKey ? apiKey.substring(0, 20) + '...' : 'none');
   
   if (!apiKey) {
     console.error('[Chat API] API key not configured for provider:', config.provider);
@@ -559,7 +560,11 @@ async function handleChat(request, env, ctx) {
       return jsonResponse({
         success: false,
         message: data.error.message || data.error.code || data.error.type || 'AI service error',
-        debug: data.error
+        debug: {
+          ...data.error,
+          keyLength: apiKey ? apiKey.length : 0,
+          keyPrefix: apiKey ? apiKey.substring(0, 10) : 'none'
+        }
       }, 500);
     }
 
