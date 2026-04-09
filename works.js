@@ -331,9 +331,9 @@ const MODEL_CONFIG = {
     maxTokens: 2000,
     temperature: 0.7
   },
-  'qwen-3.6-plus': {
+  'qwen3.6-plus': {
     provider: 'qwen',
-    model: 'qwen-3.6-plus',
+    model: 'qwen3.6-plus',
     endpoint: 'https://coding.dashscope.aliyuncs.com/v1/chat/completions',
     maxTokens: 4000,
     temperature: 0.7
