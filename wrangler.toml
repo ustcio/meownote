@@ -10,7 +10,7 @@ binding = "GOLD_PRICE_CACHE"
 id = "301ba411dab34e1993c94ec202448118"
 
 [[kv_namespaces]]
-binding = "TOKEN"
+binding = "Token"
 id = "91172d221ff149e2818602def31572f8"
 
 [[d1_databases]]
