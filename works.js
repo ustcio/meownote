@@ -4562,8 +4562,19 @@ async function checkDailyQuota(env, channelId, quota) {
   return { allowed: true, remaining: quota - count - 1, total: quota };
 }
 
-// GET /api/proxy/sources
+// /api/proxy/sources - dispatch by method
 async function handleProxySources(request, env, ctx) {
+  if (request.method === 'GET') {
+    return handleProxySourcesList(request, env, ctx);
+  }
+  if (request.method === 'POST') {
+    return handleProxySourcesCreate(request, env, ctx);
+  }
+  return jsonResponse({ error: 'Method not allowed' }, 405);
+}
+
+// GET /api/proxy/sources
+async function handleProxySourcesList(request, env, ctx) {
   const auth = await verifyAdminAuth(request, env);
   if (!auth.success) return jsonResponse({ error: auth.message }, 401);
 
