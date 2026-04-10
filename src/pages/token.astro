@@ -573,19 +573,24 @@ import Layout from '../layouts/Layout.astro';
         if (!container) return;
         container.innerHTML = '<div class="loading-state"><div class="skeleton" style="width:100%;height:100px;border-radius:var(--radius-xl);"></div></div>';
         try {
+          console.log('Fetching /api/proxy/sources from:', API_BASE + '/api/proxy/sources');
           var data = await apiCall('/api/proxy/sources');
           console.log('loadSources response:', JSON.stringify(data));
           if (!data.success) {
             var errMsg = data.error || data.message || 'Failed to load sources (API returned success: false)';
-            container.innerHTML = '<div class="empty-state"><p>' + errMsg + '</p><p style="font-size:var(--text-xs);margin-top:var(--space-2);color:var(--text-quaternary);">Response: ' + JSON.stringify(data).substring(0, 200) + '</p></div>';
+            container.innerHTML = '<div class="empty-state"><p>❌ ' + errMsg + '</p><p style="font-size:var(--text-xs);margin-top:var(--space-2);color:var(--text-quaternary);">Response: ' + JSON.stringify(data).substring(0, 300) + '</p></div>';
             return;
           }
           sourcesData = data.sources || [];
-          console.log('sourcesData:', sourcesData);
+          console.log('sourcesData count:', sourcesData.length, sourcesData);
+          if (sourcesData.length === 0) {
+            container.innerHTML = '<div class="empty-state"><p>📭 No sources found in database</p><p style="font-size:var(--text-xs);margin-top:var(--space-2);color:var(--text-quaternary);">API returned success but empty sources array. Try adding a source again.</p></div>';
+            return;
+          }
           renderSources();
         } catch(e) {
           console.error('loadSources error:', e);
-          container.innerHTML = '<div class="empty-state"><p>Network error: ' + e.message + '</p><p style="font-size:var(--text-xs);margin-top:var(--space-2);color:var(--text-quaternary);">Check console for details</p></div>';
+          container.innerHTML = '<div class="empty-state"><p>❌ Network error: ' + e.message + '</p><p style="font-size:var(--text-xs);margin-top:var(--space-2);color:var(--text-quaternary);">Check: 1) Is api.ustc.dev running? 2) Is token valid? 3) Open browser console for details</p></div>';
         }
       }
 
@@ -858,6 +863,7 @@ import Layout from '../layouts/Layout.astro';
             } else {
               result = await apiCall('/api/proxy/sources', { method: 'POST', body: JSON.stringify(data) });
             }
+            console.log('Save source result:', JSON.stringify(result));
             if (result.success || result.id) {
               closeModal('source-modal');
               loadSources();
@@ -865,6 +871,7 @@ import Layout from '../layouts/Layout.astro';
               showError(errorEl, result.error || result.message || 'Failed to save');
             }
           } catch(err) {
+            console.error('Save source error:', err);
             showError(errorEl, 'Network error: ' + err.message);
           } finally {
             hideLoading(btn);
