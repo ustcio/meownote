@@ -537,6 +537,11 @@ import Layout from '../layouts/Layout.astro';
         if (token) headers['Authorization'] = 'Bearer ' + token;
         if (options.headers) { for (var k in options.headers) headers[k] = options.headers[k]; }
         var res = await fetch(API_BASE + path, Object.assign({}, options, { headers: headers }));
+        if (!res.ok) {
+          var errData = null;
+          try { errData = await res.json(); } catch(e) {}
+          throw new Error(errData ? (errData.error || errData.message || 'HTTP ' + res.status) : 'HTTP ' + res.status);
+        }
         return res.json();
       }
 
