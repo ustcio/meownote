@@ -489,6 +489,14 @@ import Layout from '../layouts/Layout.astro';
       };
 
       var sourcesData = [];
+      var debugLog = '';
+      var debugBoxEl = null;
+
+      function debug(msg) {
+        debugLog += msg + '\n';
+        if (!debugBoxEl) debugBoxEl = document.getElementById('debug-box');
+        if (debugBoxEl) { debugBoxEl.textContent = debugLog; debugBoxEl.style.display = 'block'; }
+      }
 
       function getToken() { return localStorage.getItem(TOKEN_KEY); }
 
@@ -576,33 +584,29 @@ import Layout from '../layouts/Layout.astro';
 
       async function loadSources() {
         var container = document.getElementById('sources-list');
-        var debugBox = document.getElementById('debug-box');
         if (!container) return;
         container.innerHTML = '<div class="loading-state"><div class="skeleton" style="width:100%;height:100px;border-radius:var(--radius-xl);"></div></div>';
-        var log = '';
+        debug('--- loadSources ---');
+        debug('Token: ' + (getToken() ? getToken().substring(0, 30) + '...' : 'NONE'));
+        debug('API: ' + API_BASE + '/api/proxy/sources');
         try {
-          log += 'Token: ' + (getToken() ? getToken().substring(0, 30) + '...' : 'NONE') + '\n';
-          log += 'API: ' + API_BASE + '/api/proxy/sources\n';
           var data = await apiCall('/api/proxy/sources');
-          log += 'Response: ' + JSON.stringify(data, null, 2) + '\n';
+          debug('Response: ' + JSON.stringify(data, null, 2));
           if (!data.success) {
             container.innerHTML = '<div class="empty-state"><p>❌ ' + (data.error || data.message || 'Failed') + '</p></div>';
-            if (debugBox) { debugBox.textContent = log; debugBox.style.display = 'block'; }
             return;
           }
           sourcesData = data.sources || [];
-          log += 'Count: ' + sourcesData.length + '\n';
+          debug('Count: ' + sourcesData.length);
           if (sourcesData.length === 0) {
             container.innerHTML = '<div class="empty-state"><p>📭 No sources found. Click "Add Source" to get started.</p></div>';
-            if (debugBox) { debugBox.textContent = log; debugBox.style.display = 'block'; }
             return;
           }
           renderSources();
         } catch(e) {
-          log += 'Error: ' + e.message + '\n';
+          debug('Error: ' + e.message);
           container.innerHTML = '<div class="empty-state"><p>❌ ' + e.message + '</p></div>';
         }
-        if (debugBox) { debugBox.textContent = log; debugBox.style.display = 'block'; }
       }
 
       function renderSources() {
@@ -874,8 +878,7 @@ import Layout from '../layouts/Layout.astro';
             } else {
               result = await apiCall('/api/proxy/sources', { method: 'POST', body: JSON.stringify(data) });
             }
-            log += 'Save result: ' + JSON.stringify(result, null, 2) + '\n';
-            if (debugBox) { debugBox.textContent = log; debugBox.style.display = 'block'; }
+            debug('Save result: ' + JSON.stringify(result, null, 2));
             if (result.success || result.id) {
               closeModal('source-modal');
               loadSources();
@@ -883,8 +886,7 @@ import Layout from '../layouts/Layout.astro';
               showError(errorEl, result.error || result.message || 'Failed to save');
             }
           } catch(err) {
-            log += 'Save error: ' + err.message + '\n';
-            if (debugBox) { debugBox.textContent = log; debugBox.style.display = 'block'; }
+            debug('Save error: ' + err.message);
             showError(errorEl, 'Network error: ' + err.message);
           } finally {
             hideLoading(btn);
