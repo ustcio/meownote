@@ -604,54 +604,87 @@ import Layout from '@layouts/Layout.astro';
   .file-card-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 12px;
+    gap: 6px;
+    margin-top: 14px;
     padding-top: 12px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border-secondary);
   }
 
   .file-card-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 8px 16px;
-    background: #171412;
-    color: white;
+    gap: 5px;
+    height: 32px;
+    padding: 0 12px;
+    background: var(--text-primary);
+    color: #FFFFFF;
     border: none;
-    border-radius: 20px;
-    font-size: 0.9rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
     font-weight: 500;
+    font-family: var(--font-display);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--duration-fast) var(--ease-default);
+    white-space: nowrap;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .file-card-btn svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
   }
 
   .file-card-btn:hover {
     background: #333;
+    transform: translateY(-1px);
+  }
+
+  .file-card-btn:active {
+    transform: translateY(0);
   }
 
   .file-card-btn.secondary {
-    background: #f5f0e8;
-    color: #333;
-    border: 1px solid #ddd;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-primary);
   }
 
   .file-card-btn.secondary:hover {
-    background: #ebe4d9;
-    border-color: #ccc;
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
   }
 
   .file-card-btn.danger {
     background: transparent;
-    color: #999;
+    color: var(--text-tertiary);
     border: none;
     margin-left: auto;
-    padding: 8px;
+    padding: 0 8px;
+    height: 32px;
+    width: 32px;
   }
 
   .file-card-btn.danger:hover {
     background: rgba(191, 92, 70, 0.1);
-    color: #bf5c46;
+    color: var(--color-danger);
+  }
+
+  .file-card-btn.danger svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* Category tag button */
+  .category-tag-btn {
+    font-size: 0.78rem !important;
+    padding: 0 10px !important;
+    height: 32px !important;
+    border-radius: var(--radius-full) !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.01em !important;
   }
 
   /* Empty State */
@@ -972,22 +1005,26 @@ import Layout from '@layouts/Layout.astro';
     }
 
     .file-card-actions {
-      gap: 6px;
+      gap: 5px;
       flex-wrap: wrap;
     }
 
     .file-card-btn {
-      padding: 7px 12px;
-      font-size: 0.85rem;
+      padding: 0 10px;
+      height: 30px;
+      font-size: 0.75rem;
     }
 
     .file-card-btn.danger {
       opacity: 1;
+      width: 30px;
+      height: 30px;
     }
 
     .category-tag-btn {
-      padding: 7px 10px !important;
-      font-size: 0.8rem !important;
+      padding: 0 8px !important;
+      font-size: 0.75rem !important;
+      height: 30px !important;
     }
 
     .modal-content.modal-sm {
@@ -1346,9 +1383,9 @@ import Layout from '@layouts/Layout.astro';
     const currentTag = getCurrentTag(file);
     const cat = categoryDefs.find(c => c.key === currentTag);
     if (!cat) {
-      return '<button class="file-card-btn secondary category-tag-btn" data-action="tag" data-id="' + file.id + '" style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; background: var(--bg-secondary, #f5f0e8); color: var(--text-tertiary, #999); border: 1px dashed var(--border-primary, #ddd); border-radius: 20px; cursor: pointer; min-height: 2rem; font-size: 0.85rem;">Tag</button>';
+      return '<button class="file-card-btn secondary category-tag-btn" data-action="tag" data-id="' + file.id + '">Tag</button>';
     }
-    return `<button class="file-card-btn secondary category-tag-btn" data-action="tag" data-id="${file.id}" style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; background: ${cat.color}15; color: ${cat.color}; border: 1px solid ${cat.color}40; border-radius: 20px; cursor: pointer; min-height: 2rem; font-size: 0.85rem;">${cat.label}</button>`;
+    return `<button class="file-card-btn secondary category-tag-btn" data-action="tag" data-id="${file.id}" style="background: ${cat.color}15; color: ${cat.color}; border-color: ${cat.color}40;">${cat.label}</button>`;
   }
 
   let tagTargetId = null;
@@ -1422,37 +1459,37 @@ import Layout from '@layouts/Layout.astro';
         const size = formatSize(file.fileSize || 0);
 
         return `
-          <article class="file-card" data-id="${file.id}" style="display: flex; flex-direction: column; padding: 1.25rem; background: #ffffff; border: 1px solid rgba(71,57,44,0.15); border-radius: 1.25rem; box-shadow: 0 4px 16px rgba(47,35,22,0.08); cursor: pointer; transition: all 0.2s ease;">
-            <div class="file-card-top" style="display: flex; align-items: center; gap: 0.9rem;">
-              <div class="file-icon ${config.type}" style="width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; background: ${config.type === 'text' ? '#d97757' : config.type === 'document' ? '#4A5E8A' : config.type === 'image' ? '#6f8e7f' : config.type === 'archive' ? '#a07850' : '#bf5c46'};">${getFileIcon(config.icon)}</div>
-              <div class="file-content" style="flex: 1; min-width: 0;">
-                <div class="file-title" style="font-size: 1rem; font-weight: 600; color: #171412; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(file.title)}</div>
-                <div class="file-meta" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #8a7f74;">
-                  <span class="file-badge" style="background: rgba(217,119,87,0.12); color: #d97757; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">${escapeHtml(ext.toUpperCase())}</span>
+          <article class="file-card" data-id="${file.id}">
+            <div class="file-card-top">
+              <div class="file-icon ${config.type}">${getFileIcon(config.icon)}</div>
+              <div class="file-content">
+                <div class="file-title">${escapeHtml(file.title)}</div>
+                <div class="file-meta">
+                  <span class="file-badge">${escapeHtml(ext.toUpperCase())}</span>
                   <span>${timeStr}</span>
                   ${size ? `<span>·</span><span>${size}</span>` : ''}
                 </div>
               </div>
             </div>
-            <div class="file-card-actions" style="display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee;">
-              <button class="file-card-btn" data-action="open" data-id="${file.id}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #171412; color: white; border: none; border-radius: 20px; font-size: 0.9rem; font-weight: 500; cursor: pointer;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div class="file-card-actions">
+              <button class="file-card-btn" data-action="open" data-id="${file.id}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                   <polyline points="15 3 21 3 21 9"></polyline>
                   <line x1="10" y1="14" x2="21" y2="3"></line>
                 </svg>
                 Open
               </button>
-              <button class="file-card-btn secondary" data-action="download" data-id="${file.id}" style="display: inline-flex; align-items: center; justify-content: center; padding: 8px 12px; background: #f5f0e8; color: #333; border: 1px solid #ddd; border-radius: 20px; cursor: pointer;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <button class="file-card-btn secondary" data-action="download" data-id="${file.id}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
               </button>
               ${renderCategoryButton(file)}
-              <button class="file-card-btn danger" data-action="delete" data-id="${file.id}" title="Delete" style="display: inline-flex; align-items: center; justify-content: center; padding: 8px; background: transparent; color: #999; border: none; cursor: pointer; margin-left: auto;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <button class="file-card-btn danger" data-action="delete" data-id="${file.id}" title="Delete">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
