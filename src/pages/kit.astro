@@ -510,7 +510,15 @@ const pageDesc = '170+ free online tools — everyday utilities, text processing
       padding-right: 16px;
     }
     .kit-tool-card-icon { margin-bottom: 0; margin-right: 12px; border-radius: var(--radius-md); }
-    .kit-tool-card-desc { display: none; }
+    .kit-tool-card-desc { 
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-size: 0.72rem;
+      margin-top: 2px;
+    }
+    .kit-tool-card-body { flex: 1; min-width: 0; }
     .kit-section-title { font-size: 0.88rem; }
     .kit-content { gap: 1.5rem; }
     .kit-section-header {

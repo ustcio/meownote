@@ -13,6 +13,15 @@ const lang = getLangFromUrl(Astro.url);
         <a href="/chatbot" class="cta-btn cta-btn--primary">{t('cta.primary', lang)}</a>
         <a href="/about" class="cta-btn cta-btn--ghost">{t('cta.secondary', lang)}</a>
       </div>
+      <div class="home-cta__social-proof">
+        <div class="social-proof-avatars">
+          <span class="avatar" style="background: #d97757;">M</span>
+          <span class="avatar" style="background: #6a9bcc;">A</span>
+          <span class="avatar" style="background: #788c5d;">R</span>
+          <span class="avatar" style="background: #b0aea5;">+</span>
+        </div>
+        <span class="social-proof-text">Trusted by researchers, designers, and students worldwide</span>
+      </div>
     </div>
   </div>
 </section>
@@ -101,6 +110,46 @@ const lang = getLangFromUrl(Astro.url);
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.18);
     color: #fbf9f5;
+  }
+
+  /* Social Proof */
+  .home-cta__social-proof {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .social-proof-avatars {
+    display: flex;
+  }
+
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #FFFFFF;
+    border: 2px solid #171412;
+    margin-left: -8px;
+    font-family: var(--font-display);
+  }
+
+  .avatar:first-child {
+    margin-left: 0;
+  }
+
+  .social-proof-text {
+    font-size: 0.78rem;
+    color: rgba(251, 249, 245, 0.45);
+    font-family: var(--font-body);
   }
 
   @media (max-width: 640px) {
