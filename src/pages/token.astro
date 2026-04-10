@@ -71,42 +71,47 @@ import Layout from '../layouts/Layout.astro';
       <div class="modal">
         <div class="modal__header">
           <h2 id="source-modal-title" class="modal__title">Add Source API</h2>
-          <button class="modal__close" onclick="closeModal('source-modal')">
+          <button type="button" class="modal__close" id="source-modal-close">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
-        <form id="source-form" class="modal__body">
-          <input type="hidden" id="source-id" />
-          <div class="form-group">
-            <label class="form-label">Name</label>
-            <input type="text" id="source-name" class="form-input" placeholder="e.g. OpenAI" required />
+        <form id="source-form">
+          <div class="modal__body">
+            <input type="hidden" id="source-id" />
+            <div class="form-group">
+              <label class="form-label">Name</label>
+              <input type="text" id="source-name" class="form-input" placeholder="e.g. OpenAI" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Provider</label>
+              <select id="source-provider" class="form-input">
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="azure">Azure OpenAI</option>
+                <option value="dashscope">阿里云 DashScope</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Base URL</label>
+              <input type="text" id="source-baseurl" class="form-input" placeholder="https://api.openai.com/v1" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">API Key</label>
+              <input type="text" id="source-apikey" class="form-input" placeholder="sk-..." required />
+            </div>
+            <div id="source-error" class="form-error" style="display:none;"></div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Provider</label>
-            <select id="source-provider" class="form-input">
-              <option value="openai">OpenAI</option>
-              <option value="anthropic">Anthropic</option>
-              <option value="azure">Azure OpenAI</option>
-              <option value="dashscope">阿里云 DashScope</option>
-              <option value="custom">Custom</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Base URL</label>
-            <input type="text" id="source-baseurl" class="form-input" placeholder="https://api.openai.com/v1" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">API Key</label>
-            <input type="text" id="source-apikey" class="form-input" placeholder="sk-..." required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Default Model</label>
-            <input type="text" id="source-model" class="form-input" placeholder="gpt-4o" required />
-          </div>
-          <div id="source-error" class="form-error" style="display:none;"></div>
           <div class="modal__footer">
-            <button type="button" class="claude-button claude-button--ghost" onclick="closeModal('source-modal')">Cancel</button>
-            <button type="submit" class="claude-button">Save</button>
+            <button type="button" class="claude-button claude-button--ghost" id="source-cancel-btn">Cancel</button>
+            <button type="submit" class="claude-button" id="source-save-btn">
+              <span class="btn-text">Save</span>
+              <span class="btn-loader" style="display:none;">
+                <svg class="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
+                </svg>
+              </span>
+            </button>
           </div>
         </form>
       </div>
@@ -117,35 +122,40 @@ import Layout from '../layouts/Layout.astro';
       <div class="modal">
         <div class="modal__header">
           <h2 id="channel-modal-title" class="modal__title">Add Channel</h2>
-          <button class="modal__close" onclick="closeModal('channel-modal')">
+          <button type="button" class="modal__close" id="channel-modal-close">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
-        <form id="channel-form" class="modal__body">
-          <input type="hidden" id="channel-id" />
-          <input type="hidden" id="channel-source-id" />
-          <div class="form-group">
-            <label class="form-label">Channel Name</label>
-            <input type="text" id="channel-name" class="form-input" placeholder="e.g. ChatBot" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Model Override <span class="form-hint">(leave empty to use source default)</span></label>
-            <input type="text" id="channel-model" class="form-input" placeholder="gpt-4o" />
-          </div>
-          <div class="form-row">
+        <form id="channel-form">
+          <div class="modal__body">
+            <input type="hidden" id="channel-id" />
+            <input type="hidden" id="channel-source-id" />
             <div class="form-group">
-              <label class="form-label">Rate Limit <span class="form-hint">(req/min)</span></label>
-              <input type="number" id="channel-ratelimit" class="form-input" value="0" min="0" />
+              <label class="form-label">Channel Name</label>
+              <input type="text" id="channel-name" class="form-input" placeholder="e.g. ChatBot" required />
             </div>
-            <div class="form-group">
-              <label class="form-label">Daily Quota <span class="form-hint">(0=unlimited)</span></label>
-              <input type="number" id="channel-quota" class="form-input" value="0" min="0" />
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Rate Limit <span class="form-hint">(req/min)</span></label>
+                <input type="number" id="channel-ratelimit" class="form-input" value="0" min="0" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Daily Quota <span class="form-hint">(0=unlimited)</span></label>
+                <input type="number" id="channel-quota" class="form-input" value="0" min="0" />
+              </div>
             </div>
+            <div id="channel-error" class="form-error" style="display:none;"></div>
           </div>
-          <div id="channel-error" class="form-error" style="display:none;"></div>
           <div class="modal__footer">
-            <button type="button" class="claude-button claude-button--ghost" onclick="closeModal('channel-modal')">Cancel</button>
-            <button type="submit" class="claude-button">Save</button>
+            <button type="button" class="claude-button claude-button--ghost" id="channel-cancel-btn">Cancel</button>
+            <button type="submit" class="claude-button" id="channel-save-btn">
+              <span class="btn-text">Save</span>
+              <span class="btn-loader" style="display:none;">
+                <svg class="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
+                </svg>
+              </span>
+            </button>
           </div>
         </form>
       </div>
@@ -156,7 +166,7 @@ import Layout from '../layouts/Layout.astro';
       <div class="modal modal--wide">
         <div class="modal__header">
           <h2 id="stats-title" class="modal__title">Usage Statistics</h2>
-          <button class="modal__close" onclick="closeModal('stats-modal')">
+          <button type="button" class="modal__close" id="stats-modal-close">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
@@ -168,7 +178,7 @@ import Layout from '../layouts/Layout.astro';
           <div class="stats-channels" id="stats-channels"></div>
         </div>
         <div class="modal__footer">
-          <button class="claude-button claude-button--ghost" onclick="closeModal('stats-modal')">Close</button>
+          <button type="button" class="claude-button claude-button--ghost" id="stats-close-btn">Close</button>
         </div>
       </div>
     </div>
@@ -422,25 +432,6 @@ import Layout from '../layouts/Layout.astro';
     .status-badge--active .status-dot { background: var(--color-success); }
     .status-badge--inactive .status-dot { background: var(--text-quaternary); }
 
-    /* ===== Icon Buttons ===== */
-    .btn-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--card-border);
-      background: var(--card-bg);
-      color: var(--text-tertiary);
-      cursor: pointer;
-      transition: all var(--duration-fast) var(--ease-default);
-    }
-
-    .btn-icon:hover { border-color: var(--card-border-hover); color: var(--text-primary); background: var(--card-bg-hover); }
-    .btn-icon--danger:hover { border-color: rgba(179, 79, 61, 0.3); color: var(--color-danger); background: var(--color-danger-light); }
-    .btn-icon svg { width: 14px; height: 14px; }
-
     /* ===== Small Buttons ===== */
     .btn-sm {
       display: inline-flex;
@@ -505,12 +496,14 @@ import Layout from '../layouts/Layout.astro';
       inset: 0;
       background: var(--bg-overlay);
       z-index: var(--z-modal);
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       padding: var(--space-4);
       backdrop-filter: blur(4px);
     }
+
+    .modal-overlay.active { display: flex; }
 
     .modal {
       background: var(--card-bg);
@@ -642,520 +635,457 @@ import Layout from '../layouts/Layout.astro';
       .form-row { grid-template-columns: 1fr; }
       .source-card__stats { gap: var(--space-4); }
       .source-card__meta { flex-direction: column; gap: 2px; align-items: flex-start; }
-      .channel-table { font-size: var(--text-xs); }
-      .channel-table th, .channel-table td { padding: var(--space-2); }
       .stats-summary { grid-template-columns: repeat(3, 1fr); }
     }
   </style>
 
-  <script>
-    const API_BASE = 'https://api.ustc.dev';
-    const TOKEN_KEY = 'meownote_super_admin_token';
+  <script is:inline>
+    (function() {
+      var API_BASE = 'https://api.ustc.dev';
+      var TOKEN_KEY = 'meownote_super_admin_token';
 
-    const PROVIDER_PRESETS = {
-      openai: { baseUrl: 'https://api.openai.com/v1', format: 'openai', defaultModel: 'gpt-4o' },
-      anthropic: { baseUrl: 'https://api.anthropic.com/v1', format: 'anthropic', defaultModel: 'claude-3-5-sonnet-20241022' },
-      azure: { baseUrl: 'https://xxx.openai.azure.com/openai', format: 'openai', defaultModel: 'gpt-4' },
-      dashscope: { baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', format: 'openai', defaultModel: 'qwen-plus' },
-      custom: { baseUrl: '', format: 'openai', defaultModel: '' }
-    };
+      var PROVIDER_PRESETS = {
+        openai: { baseUrl: 'https://api.openai.com/v1', format: 'openai' },
+        anthropic: { baseUrl: 'https://api.anthropic.com/v1', format: 'anthropic' },
+        azure: { baseUrl: 'https://xxx.openai.azure.com/openai', format: 'openai' },
+        dashscope: { baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', format: 'openai' },
+        custom: { baseUrl: '', format: 'openai' }
+      };
 
-    let sourcesData = [];
-    let statsChartInstance = null;
+      var sourcesData = [];
+      var statsChartInstance = null;
 
-    function getToken() { return localStorage.getItem(TOKEN_KEY); }
+      function getToken() { return localStorage.getItem(TOKEN_KEY); }
 
-    function showLoading(btn) {
-      if (!btn) return;
-      btn.disabled = true;
-      const bt = btn.querySelector('.btn-text');
-      const bl = btn.querySelector('.btn-loader');
-      if (bt) bt.style.display = 'none';
-      if (bl) bl.style.display = 'inline-flex';
-    }
+      function showLoading(btn) {
+        if (!btn) return;
+        btn.disabled = true;
+        var bt = btn.querySelector('.btn-text');
+        var bl = btn.querySelector('.btn-loader');
+        if (bt) bt.style.display = 'none';
+        if (bl) bl.style.display = 'inline-flex';
+      }
 
-    function hideLoading(btn) {
-      if (!btn) return;
-      btn.disabled = false;
-      const bt = btn.querySelector('.btn-text');
-      const bl = btn.querySelector('.btn-loader');
-      if (bt) bt.style.display = 'inline';
-      if (bl) bl.style.display = 'none';
-    }
+      function hideLoading(btn) {
+        if (!btn) return;
+        btn.disabled = false;
+        var bt = btn.querySelector('.btn-text');
+        var bl = btn.querySelector('.btn-loader');
+        if (bt) bt.style.display = 'inline';
+        if (bl) bl.style.display = 'none';
+      }
 
-    function showError(el, msg) { if (el) { el.textContent = msg; el.style.display = 'block'; } }
-    function hideError(el) { if (el) el.style.display = 'none'; }
+      function showError(el, msg) { if (el) { el.textContent = msg; el.style.display = 'block'; } }
+      function hideError(el) { if (el) el.style.display = 'none'; }
 
-    function closeModal(id) {
-      var m = document.getElementById(id);
-      console.log('[Proxy] closeModal:', id, m ? 'found' : 'not found');
-      if (m) m.style.display = 'none';
-    }
-    function openModal(id) {
-      var m = document.getElementById(id);
-      console.log('[Proxy] openModal:', id, m ? 'found' : 'not found');
-      if (m) m.style.display = 'flex';
-    }
+      function closeModal(id) {
+        var m = document.getElementById(id);
+        if (m) m.classList.remove('active');
+      }
 
-    function maskKey(key) {
-      if (!key || key.length < 8) return '****';
-      return key.substring(0, 4) + '****' + key.substring(key.length - 4);
-    }
+      function openModal(id) {
+        var m = document.getElementById(id);
+        if (m) m.classList.add('active');
+      }
 
-    function formatNumber(n) { if (!n) return '0'; return Number(n).toLocaleString(); }
-    function formatLatency(ms) { if (!ms) return '-'; if (ms < 1000) return Math.round(ms) + 'ms'; return (ms / 1000).toFixed(1) + 's'; }
+      function maskKey(key) {
+        if (!key || key.length < 8) return '****';
+        return key.substring(0, 4) + '****' + key.substring(key.length - 4);
+      }
 
-    async function apiCall(path, options) {
-      options = options || {};
-      var token = getToken();
-      console.log('[Proxy] API call:', path, 'token:', token ? token.substring(0, 10) + '...' : 'none');
-      var headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = 'Bearer ' + token;
-      if (options.headers) { for (var k in options.headers) headers[k] = options.headers[k]; }
-      try {
+      function formatNumber(n) { if (!n) return '0'; return Number(n).toLocaleString(); }
+      function formatLatency(ms) { if (!ms) return '-'; if (ms < 1000) return Math.round(ms) + 'ms'; return (ms / 1000).toFixed(1) + 's'; }
+
+      async function apiCall(path, options) {
+        options = options || {};
+        var token = getToken();
+        var headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+        if (options.headers) { for (var k in options.headers) headers[k] = options.headers[k]; }
         var res = await fetch(API_BASE + path, Object.assign({}, options, { headers: headers }));
-        console.log('[Proxy] Response status:', res.status);
-        var data = await res.json();
-        console.log('[Proxy] Response data:', data);
-        return data;
-      } catch(err) {
-        console.error('[Proxy] Fetch error:', err);
-        throw err;
-      }
-    }
-
-    async function verifySession() {
-      var token = getToken();
-      if (!token) return false;
-      try {
-        var data = await apiCall('/api/superadmin/verify');
-        if (data.success) { showDashboard(data.user); return true; }
-      } catch(e) {}
-      localStorage.removeItem(TOKEN_KEY);
-      return false;
-    }
-
-    function showDashboard(user) {
-      var ls = document.getElementById('login-section');
-      var ds = document.getElementById('dashboard-section');
-      if (ls) ls.style.display = 'none';
-      if (ds) ds.style.display = 'block';
-      var an = document.getElementById('admin-name');
-      if (an && user) an.textContent = user.username;
-      loadSources();
-    }
-
-    function showLogin() {
-      var ls = document.getElementById('login-section');
-      var ds = document.getElementById('dashboard-section');
-      if (ls) ls.style.display = 'block';
-      if (ds) ds.style.display = 'none';
-    }
-
-    async function loadSources() {
-      var container = document.getElementById('sources-list');
-      if (!container) return;
-      container.innerHTML = '<div class="loading-state"><div class="skeleton" style="width:100%;height:100px;border-radius:var(--radius-xl);"></div></div>';
-      try {
-        var data = await apiCall('/api/proxy/sources');
-        if (!data.success) { container.innerHTML = '<div class="empty-state"><p>Failed to load sources</p></div>'; return; }
-        sourcesData = data.sources || [];
-        renderSources();
-      } catch(e) {
-        container.innerHTML = '<div class="empty-state"><p>Network error</p></div>';
-      }
-    }
-
-    function renderSources() {
-      var container = document.getElementById('sources-list');
-      if (!container) return;
-      if (sourcesData.length === 0) {
-        container.innerHTML = '<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><p>No API sources configured yet.</p><p style="font-size:var(--text-xs);margin-top:var(--space-2);color:var(--text-quaternary);">Click "Add Source" to get started.</p></div>';
-        return;
+        return res.json();
       }
 
-      var html = '';
-      for (var i = 0; i < sourcesData.length; i++) {
-        var s = sourcesData[i];
-        html += '<div class="source-card" data-source-id="' + s.id + '">';
-        html += '<div class="source-card__header" onclick="toggleSource(\'' + s.id + '\')">';
-        html += '<div class="source-card__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>';
-        html += '<div class="source-card__info"><div class="source-card__name">' + s.name + '</div>';
-        html += '<div class="source-card__meta"><span class="source-card__meta-item">' + s.base_url + '</span>';
-        html += '<span class="source-card__meta-item">Key: ' + maskKey(s.api_key) + '</span>';
-        html += '<span class="source-card__meta-item">' + s.api_format + '</span>';
-        html += '<span class="source-card__meta-item">' + s.default_model + '</span></div></div>';
-        html += '<div class="source-card__right"><span class="status-badge ' + (s.is_active ? 'status-badge--active' : 'status-badge--inactive') + '">';
-        html += '<span class="status-dot"></span>' + (s.is_active ? 'Active' : 'Disabled') + '</span>';
-        html += '<svg class="source-card__toggle" id="toggle-' + s.id + '" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
-        html += '</div></div>';
-        html += '<div class="source-card__body" id="body-' + s.id + '">';
-        html += '<div class="source-card__stats"><div class="source-card__stat"><div class="source-card__stat-value">' + formatNumber(s.total_usage) + '</div><div class="source-card__stat-label">Total Calls</div></div>';
-        html += '<div class="source-card__stat"><div class="source-card__stat-value">' + s.channel_count + '</div><div class="source-card__stat-label">Channels</div></div></div>';
-        html += '<div id="channels-' + s.id + '"></div>';
-        html += '<div class="source-card__actions">';
-        html += '<button class="btn-sm btn-sm--ghost" onclick="openAddChannel(\'' + s.id + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Channel</button>';
-        html += '<button class="btn-sm btn-sm--ghost" onclick="viewSourceStats(\'' + s.id + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>Stats</button>';
-        html += '<button class="btn-sm btn-sm--ghost" onclick="editSource(\'' + s.id + '\')">Edit</button>';
-        html += '<button class="btn-sm btn-sm--ghost" onclick="toggleSourceStatus(\'' + s.id + '\')">' + (s.is_active ? 'Disable' : 'Enable') + '</button>';
-        html += '<button class="btn-sm btn-sm--danger" onclick="deleteSource(\'' + s.id + '\')">Delete</button>';
-        html += '</div></div></div>';
+      async function verifySession() {
+        var token = getToken();
+        if (!token) return false;
+        try {
+          var data = await apiCall('/api/superadmin/verify');
+          if (data.success) { showDashboard(data.user); return true; }
+        } catch(e) {}
+        localStorage.removeItem(TOKEN_KEY);
+        return false;
       }
-      container.innerHTML = html;
 
-      for (var j = 0; j < sourcesData.length; j++) {
-        loadChannels(sourcesData[j].id);
+      function showDashboard(user) {
+        var ls = document.getElementById('login-section');
+        var ds = document.getElementById('dashboard-section');
+        if (ls) ls.style.display = 'none';
+        if (ds) ds.style.display = 'block';
+        var an = document.getElementById('admin-name');
+        if (an && user) an.textContent = user.username;
+        loadSources();
       }
-    }
 
-    function toggleSource(id) {
-      var body = document.getElementById('body-' + id);
-      var toggle = document.getElementById('toggle-' + id);
-      if (body) body.classList.toggle('open');
-      if (toggle) toggle.classList.toggle('open');
-    }
+      function showLogin() {
+        var ls = document.getElementById('login-section');
+        var ds = document.getElementById('dashboard-section');
+        if (ls) ls.style.display = 'block';
+        if (ds) ds.style.display = 'none';
+      }
 
-    async function loadChannels(sourceId) {
-      var container = document.getElementById('channels-' + sourceId);
-      if (!container) return;
-      try {
-        var data = await apiCall('/api/proxy/sources');
-        var source = null;
-        if (data.sources) {
-          for (var i = 0; i < data.sources.length; i++) {
-            if (data.sources[i].id === sourceId) { source = data.sources[i]; break; }
-          }
+      async function loadSources() {
+        var container = document.getElementById('sources-list');
+        if (!container) return;
+        container.innerHTML = '<div class="loading-state"><div class="skeleton" style="width:100%;height:100px;border-radius:var(--radius-xl);"></div></div>';
+        try {
+          var data = await apiCall('/api/proxy/sources');
+          if (!data.success) { container.innerHTML = '<div class="empty-state"><p>Failed to load sources</p></div>'; return; }
+          sourcesData = data.sources || [];
+          renderSources();
+        } catch(e) {
+          container.innerHTML = '<div class="empty-state"><p>Network error</p></div>';
         }
-        if (!source) return;
-        container.innerHTML = '<div style="padding:var(--space-3) var(--space-5);color:var(--text-tertiary);font-size:var(--text-xs);">Channels will appear here after adding.</div>';
-      } catch(e) {
-        container.innerHTML = '<div style="padding:var(--space-3) var(--space-5);color:var(--color-danger);font-size:var(--text-xs);">Failed to load channels</div>';
       }
-    }
 
-    // Provider preset auto-fill
-    var providerSelect = document.getElementById('source-provider');
-    if (providerSelect) {
-      providerSelect.addEventListener('change', function() {
-        var preset = PROVIDER_PRESETS[this.value];
-        if (preset) {
-          var bu = document.getElementById('source-baseurl');
-          var sm = document.getElementById('source-model');
-          if (bu) bu.value = preset.baseUrl;
-          if (sm) sm.value = preset.defaultModel;
-        }
-      });
-    }
-
-    // Source form submit
-    var sourceForm = document.getElementById('source-form');
-    if (sourceForm) {
-      sourceForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        var btn = this.querySelector('button[type="submit"]');
-        var errorEl = document.getElementById('source-error');
-        hideError(errorEl);
-        showLoading(btn);
-
-        var id = document.getElementById('source-id').value;
-        var nameVal = document.getElementById('source-name').value;
-        var baseUrlVal = document.getElementById('source-baseurl').value;
-        var apiKeyVal = document.getElementById('source-apikey').value;
-        var providerVal = document.getElementById('source-provider').value;
-        var modelVal = document.getElementById('source-model').value;
-
-        if (!nameVal || !baseUrlVal || !apiKeyVal || !modelVal) {
-          showError(errorEl, 'All fields are required');
-          hideLoading(btn);
+      function renderSources() {
+        var container = document.getElementById('sources-list');
+        if (!container) return;
+        if (sourcesData.length === 0) {
+          container.innerHTML = '<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><p>No API sources configured yet.</p><p style="font-size:var(--text-xs);margin-top:var(--space-2);color:var(--text-quaternary);">Click "Add Source" to get started.</p></div>';
           return;
         }
 
-        var data = {
-          name: nameVal,
-          base_url: baseUrlVal,
-          api_key: apiKeyVal,
-          api_format: providerVal,
-          default_model: modelVal
-        };
-
-        console.log('[Proxy] Saving source:', data);
-
-        try {
-          var result;
-          if (id) {
-            result = await apiCall('/api/proxy/sources/' + id, { method: 'PUT', body: JSON.stringify(data) });
-          } else {
-            result = await apiCall('/api/proxy/sources', { method: 'POST', body: JSON.stringify(data) });
-          }
-          console.log('[Proxy] Save result:', result);
-          if (result.success || result.id) {
-            closeModal('source-modal');
-            loadSources();
-          } else {
-            showError(errorEl, result.error || result.message || 'Failed to save');
-          }
-        } catch(err) {
-          console.error('[Proxy] Save error:', err);
-          showError(errorEl, 'Network error: ' + err.message);
-        } finally {
-          hideLoading(btn);
+        var html = '';
+        for (var i = 0; i < sourcesData.length; i++) {
+          var s = sourcesData[i];
+          html += '<div class="source-card" data-source-id="' + s.id + '">';
+          html += '<div class="source-card__header" onclick="window.toggleSource(\'' + s.id + '\')">';
+          html += '<div class="source-card__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>';
+          html += '<div class="source-card__info"><div class="source-card__name">' + s.name + '</div>';
+          html += '<div class="source-card__meta"><span class="source-card__meta-item">' + s.base_url + '</span>';
+          html += '<span class="source-card__meta-item">Key: ' + maskKey(s.api_key) + '</span>';
+          html += '<span class="source-card__meta-item">' + s.api_format + '</span></div></div>';
+          html += '<div class="source-card__right"><span class="status-badge ' + (s.is_active ? 'status-badge--active' : 'status-badge--inactive') + '">';
+          html += '<span class="status-dot"></span>' + (s.is_active ? 'Active' : 'Disabled') + '</span>';
+          html += '<svg class="source-card__toggle" id="toggle-' + s.id + '" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+          html += '</div></div>';
+          html += '<div class="source-card__body" id="body-' + s.id + '">';
+          html += '<div class="source-card__stats"><div class="source-card__stat"><div class="source-card__stat-value">' + formatNumber(s.total_usage) + '</div><div class="source-card__stat-label">Total Calls</div></div>';
+          html += '<div class="source-card__stat"><div class="source-card__stat-value">' + s.channel_count + '</div><div class="source-card__stat-label">Channels</div></div></div>';
+          html += '<div class="source-card__actions">';
+          html += '<button class="btn-sm btn-sm--ghost" onclick="window.openAddChannel(\'' + s.id + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Channel</button>';
+          html += '<button class="btn-sm btn-sm--ghost" onclick="window.viewSourceStats(\'' + s.id + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>Stats</button>';
+          html += '<button class="btn-sm btn-sm--ghost" onclick="window.editSource(\'' + s.id + '\')">Edit</button>';
+          html += '<button class="btn-sm btn-sm--ghost" onclick="window.toggleSourceStatus(\'' + s.id + '\')">' + (s.is_active ? 'Disable' : 'Enable') + '</button>';
+          html += '<button class="btn-sm btn-sm--danger" onclick="window.deleteSource(\'' + s.id + '\')">Delete</button>';
+          html += '</div></div></div>';
         }
-      });
-    } else {
-      console.error('[Proxy] Source form not found!');
-    }
+        container.innerHTML = html;
+      }
 
-    // Channel form submit
-    var channelForm = document.getElementById('channel-form');
-    if (channelForm) {
-      channelForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        var btn = this.querySelector('button[type="submit"]');
-        var errorEl = document.getElementById('channel-error');
-        hideError(errorEl);
-        showLoading(btn);
+      window.toggleSource = function(id) {
+        var body = document.getElementById('body-' + id);
+        var toggle = document.getElementById('toggle-' + id);
+        if (body) body.classList.toggle('open');
+        if (toggle) toggle.classList.toggle('open');
+      };
 
-        var id = document.getElementById('channel-id').value;
-        var sourceId = document.getElementById('channel-source-id').value;
-        var data = {
-          name: document.getElementById('channel-name').value,
-          model_override: document.getElementById('channel-model').value || null,
-          rate_limit: parseInt(document.getElementById('channel-ratelimit').value) || 0,
-          daily_quota: parseInt(document.getElementById('channel-quota').value) || 0
-        };
-
-        try {
-          var result;
-          if (id) {
-            result = await apiCall('/api/proxy/channels/' + id, { method: 'PUT', body: JSON.stringify(data) });
-          } else {
-            result = await apiCall('/api/proxy/sources/' + sourceId + '/channels', { method: 'POST', body: JSON.stringify(data) });
-          }
-          if (result.success || result.id) {
-            closeModal('channel-modal');
-            loadSources();
-          } else {
-            showError(errorEl, result.error || 'Failed to save');
-          }
-        } catch(err) {
-          showError(errorEl, 'Network error');
-        } finally {
-          hideLoading(btn);
+      window.editSource = function(id) {
+        var source = null;
+        for (var i = 0; i < sourcesData.length; i++) {
+          if (sourcesData[i].id === id) { source = sourcesData[i]; break; }
         }
-      });
-    }
-
-    // Login
-    var loginForm = document.getElementById('login-form');
-    if (loginForm) {
-      loginForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        var btn = document.getElementById('login-btn');
-        var errorEl = document.getElementById('login-error');
-        hideError(errorEl);
-        showLoading(btn);
-
-        try {
-          var res = await fetch(API_BASE + '/api/superadmin/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value })
-          });
-          var data = await res.json();
-          if (data.success) {
-            localStorage.setItem(TOKEN_KEY, data.token);
-            showDashboard(data.user);
-            this.reset();
-          } else {
-            showError(errorEl, data.error || 'Login failed');
-          }
-        } catch(err) {
-          showError(errorEl, 'Network error');
-        } finally {
-          hideLoading(btn);
-        }
-      });
-    }
-
-    var logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', function() {
-        localStorage.removeItem(TOKEN_KEY);
-        showLogin();
-      });
-    }
-
-    var addSourceBtn = document.getElementById('add-source-btn');
-    if (addSourceBtn) {
-      addSourceBtn.addEventListener('click', function() {
-        console.log('[Proxy] Add Source button clicked');
+        if (!source) return;
         var t = document.getElementById('source-modal-title');
-        if (t) t.textContent = 'Add Source API';
+        if (t) t.textContent = 'Edit Source';
         var sid = document.getElementById('source-id');
-        if (sid) sid.value = '';
-        var sf = document.getElementById('source-form');
-        if (sf) sf.reset();
+        if (sid) sid.value = source.id;
+        var sn = document.getElementById('source-name');
+        if (sn) sn.value = source.name;
         var sp = document.getElementById('source-provider');
-        if (sp) sp.value = 'openai';
+        if (sp) sp.value = source.api_format || 'openai';
         var sb = document.getElementById('source-baseurl');
-        if (sb) sb.value = PROVIDER_PRESETS.openai.baseUrl;
-        var sm = document.getElementById('source-model');
-        if (sm) sm.value = PROVIDER_PRESETS.openai.defaultModel;
+        if (sb) sb.value = source.base_url;
         var sa = document.getElementById('source-apikey');
-        if (sa) sa.value = '';
+        if (sa) sa.value = source.api_key;
         var se = document.getElementById('source-error');
         if (se) se.style.display = 'none';
         openModal('source-modal');
-      });
-    } else {
-      console.error('[Proxy] Add Source button not found!');
-    }
+      };
 
-    // Global handlers
-    window.closeModal = closeModal;
-    window.toggleSource = toggleSource;
+      window.toggleSourceStatus = async function(id) {
+        if (!confirm('Toggle this source?')) return;
+        await apiCall('/api/proxy/sources/' + id + '/toggle', { method: 'POST' });
+        loadSources();
+      };
 
-    window.editSource = function(id) {
-      var source = null;
-      for (var i = 0; i < sourcesData.length; i++) {
-        if (sourcesData[i].id === id) { source = sourcesData[i]; break; }
-      }
-      if (!source) return;
-      var t = document.getElementById('source-modal-title');
-      if (t) t.textContent = 'Edit Source';
-      var sid = document.getElementById('source-id');
-      if (sid) sid.value = source.id;
-      var sn = document.getElementById('source-name');
-      if (sn) sn.value = source.name;
-      var sp = document.getElementById('source-provider');
-      if (sp) sp.value = source.api_format || 'openai';
-      var sb = document.getElementById('source-baseurl');
-      if (sb) sb.value = source.base_url;
-      var sa = document.getElementById('source-apikey');
-      if (sa) sa.value = source.api_key;
-      var sm = document.getElementById('source-model');
-      if (sm) sm.value = source.default_model;
-      openModal('source-modal');
-    };
+      window.deleteSource = async function(id) {
+        if (!confirm('Delete this source? All channels will be deleted too.')) return;
+        var result = await apiCall('/api/proxy/sources/' + id, { method: 'DELETE' });
+        if (result.error) { alert(result.error); return; }
+        loadSources();
+      };
 
-    window.toggleSourceStatus = async function(id) {
-      if (!confirm('Toggle this source?')) return;
-      await apiCall('/api/proxy/sources/' + id + '/toggle', { method: 'POST' });
-      loadSources();
-    };
+      window.openAddChannel = function(sourceId) {
+        var t = document.getElementById('channel-modal-title');
+        if (t) t.textContent = 'Add Channel';
+        var cid = document.getElementById('channel-id');
+        if (cid) cid.value = '';
+        var csid = document.getElementById('channel-source-id');
+        if (csid) csid.value = sourceId;
+        var cn = document.getElementById('channel-name');
+        if (cn) cn.value = '';
+        var cr = document.getElementById('channel-ratelimit');
+        if (cr) cr.value = '0';
+        var cq = document.getElementById('channel-quota');
+        if (cq) cq.value = '0';
+        var ce = document.getElementById('channel-error');
+        if (ce) ce.style.display = 'none';
+        openModal('channel-modal');
+      };
 
-    window.deleteSource = async function(id) {
-      if (!confirm('Delete this source? All channels will be deleted too.')) return;
-      var result = await apiCall('/api/proxy/sources/' + id, { method: 'DELETE' });
-      if (result.error) { alert(result.error); return; }
-      loadSources();
-    };
+      window.viewSourceStats = async function(sourceId) {
+        var source = null;
+        for (var i = 0; i < sourcesData.length; i++) {
+          if (sourcesData[i].id === sourceId) { source = sourcesData[i]; break; }
+        }
+        if (!source) return;
+        var st = document.getElementById('stats-title');
+        if (st) st.textContent = source.name + ' — Statistics';
+        openModal('stats-modal');
+        var ss = document.getElementById('stats-summary');
+        if (ss) ss.innerHTML = '<div class="loading-state"><div class="skeleton" style="width:100%;height:80px;"></div></div>';
+        var sc = document.getElementById('stats-channels');
+        if (sc) sc.innerHTML = '';
 
-    window.openAddChannel = function(sourceId) {
-      var t = document.getElementById('channel-modal-title');
-      if (t) t.textContent = 'Add Channel';
-      var cid = document.getElementById('channel-id');
-      if (cid) cid.value = '';
-      var csid = document.getElementById('channel-source-id');
-      if (csid) csid.value = sourceId;
-      var cf = document.getElementById('channel-form');
-      if (cf) cf.reset();
-      openModal('channel-modal');
-    };
+        try {
+          var data = await apiCall('/api/proxy/sources/' + sourceId + '/stats');
+          if (!data.success) return;
 
-    window.viewSourceStats = async function(sourceId) {
-      var source = null;
-      for (var i = 0; i < sourcesData.length; i++) {
-        if (sourcesData[i].id === sourceId) { source = sourcesData[i]; break; }
-      }
-      if (!source) return;
-      var st = document.getElementById('stats-title');
-      if (st) st.textContent = source.name + ' — Statistics';
-      openModal('stats-modal');
-      var ss = document.getElementById('stats-summary');
-      if (ss) ss.innerHTML = '<div class="loading-state"><div class="skeleton" style="width:100%;height:80px;"></div></div>';
-      var sc = document.getElementById('stats-channels');
-      if (sc) sc.innerHTML = '';
+          var s = data.source || {};
+          var summaryHtml = '';
+          summaryHtml += '<div class="stats-summary-item"><div class="stats-summary-value">' + formatNumber(s.total_calls) + '</div><div class="stats-summary-label">Calls</div></div>';
+          summaryHtml += '<div class="stats-summary-item"><div class="stats-summary-value">' + formatNumber(s.success_count) + '</div><div class="stats-summary-label">Success</div></div>';
+          summaryHtml += '<div class="stats-summary-item"><div class="stats-summary-value">' + formatNumber(s.error_count) + '</div><div class="stats-summary-label">Errors</div></div>';
+          summaryHtml += '<div class="stats-summary-item"><div class="stats-summary-value">' + formatNumber(s.total_prompt_tokens) + '</div><div class="stats-summary-label">Input Tokens</div></div>';
+          summaryHtml += '<div class="stats-summary-item"><div class="stats-summary-value">' + formatNumber(s.total_completion_tokens) + '</div><div class="stats-summary-label">Output Tokens</div></div>';
+          summaryHtml += '<div class="stats-summary-item"><div class="stats-summary-value">' + formatLatency(s.avg_latency) + '</div><div class="stats-summary-label">Avg Latency</div></div>';
+          if (ss) ss.innerHTML = summaryHtml;
 
-      try {
-        var data = await apiCall('/api/proxy/sources/' + sourceId + '/stats');
-        if (!data.success) return;
-
-        var s = data.source || {};
-        var summaryHtml = '';
-        summaryHtml += '<div class="stats-summary-item"><div class="stats-summary-value">' + formatNumber(s.total_calls) + '</div><div class="stats-summary-label">Calls</div></div>';
-        summaryHtml += '<div class="stats-summary-item"><div class="stats-summary-value">' + formatNumber(s.success_count) + '</div><div class="stats-summary-label">Success</div></div>';
-        summaryHtml += '<div class="stats-summary-item"><div class="stats-summary-value">' + formatNumber(s.error_count) + '</div><div class="stats-summary-label">Errors</div></div>';
-        summaryHtml += '<div class="stats-summary-item"><div class="stats-summary-value">' + formatNumber(s.total_prompt_tokens) + '</div><div class="stats-summary-label">Input Tokens</div></div>';
-        summaryHtml += '<div class="stats-summary-item"><div class="stats-summary-value">' + formatNumber(s.total_completion_tokens) + '</div><div class="stats-summary-label">Output Tokens</div></div>';
-        summaryHtml += '<div class="stats-summary-item"><div class="stats-summary-value">' + formatLatency(s.avg_latency) + '</div><div class="stats-summary-label">Avg Latency</div></div>';
-        if (ss) ss.innerHTML = summaryHtml;
-
-        if (statsChartInstance) statsChartInstance.destroy();
-        var chartEl = document.getElementById('stats-chart');
-        if (chartEl) {
-          var ctx = chartEl.getContext('2d');
-          var daily = data.daily || [];
-          var labels = [];
-          var callsData = [];
-          var tokensData = [];
-          for (var d = 0; d < daily.length; d++) {
-            labels.push(daily[d].day);
-            callsData.push(daily[d].calls);
-            tokensData.push(daily[d].tokens);
-          }
-          statsChartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-              labels: labels,
-              datasets: [
-                { label: 'Calls', data: callsData, backgroundColor: 'rgba(217,119,87,0.5)', borderRadius: 4, yAxisID: 'y' },
-                { label: 'Tokens', data: tokensData, backgroundColor: 'rgba(176,196,183,0.5)', borderRadius: 4, yAxisID: 'y1' }
-              ]
-            },
-            options: {
-              responsive: true, maintainAspectRatio: false,
-              plugins: { legend: { labels: { font: { size: 11 }, color: '#9CA3AF' } } },
-              scales: {
-                y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Calls', font: { size: 11 }, color: '#9CA3AF' }, ticks: { color: '#9CA3AF', font: { size: 10 } }, grid: { color: 'rgba(224,224,224,0.5)' } },
-                y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Tokens', font: { size: 11 }, color: '#9CA3AF' }, ticks: { color: '#9CA3AF', font: { size: 10 } }, grid: { drawOnChartArea: false } },
-                x: { ticks: { color: '#9CA3AF', font: { size: 10 } }, grid: { display: false } }
-              }
+          var channels = data.channels || [];
+          if (channels.length > 0 && sc) {
+            var chHtml = '<h3 style="font-size:var(--text-sm);font-weight:600;color:var(--text-primary);margin:var(--space-4) 0 var(--space-3);">Channel Breakdown</h3>';
+            chHtml += '<table><thead><tr><th>Channel</th><th>Status</th><th>Calls</th><th>Tokens</th><th>Latency</th><th>Success</th><th>Errors</th></tr></thead><tbody>';
+            for (var c = 0; c < channels.length; c++) {
+              var ch = channels[c];
+              chHtml += '<tr><td class="channel-name">' + ch.name + '</td>';
+              chHtml += '<td><span class="status-badge ' + (ch.is_active ? 'status-badge--active' : 'status-badge--inactive') + '"><span class="status-dot"></span>' + (ch.is_active ? 'Active' : 'Disabled') + '</span></td>';
+              chHtml += '<td>' + formatNumber(ch.calls) + '</td>';
+              chHtml += '<td>' + formatNumber(ch.tokens) + '</td>';
+              chHtml += '<td>' + formatLatency(ch.avg_latency) + '</td>';
+              chHtml += '<td>' + formatNumber(ch.success_count) + '</td>';
+              chHtml += '<td>' + formatNumber(ch.error_count) + '</td></tr>';
             }
-          });
-        }
-
-        var channels = data.channels || [];
-        if (channels.length > 0 && sc) {
-          var chHtml = '<h3 style="font-size:var(--text-sm);font-weight:600;color:var(--text-primary);margin:var(--space-4) 0 var(--space-3);">Channel Breakdown</h3>';
-          chHtml += '<table><thead><tr><th>Channel</th><th>Status</th><th>Calls</th><th>Tokens</th><th>Latency</th><th>Success</th><th>Errors</th></tr></thead><tbody>';
-          for (var c = 0; c < channels.length; c++) {
-            var ch = channels[c];
-            chHtml += '<tr><td class="channel-name">' + ch.name + '</td>';
-            chHtml += '<td><span class="status-badge ' + (ch.is_active ? 'status-badge--active' : 'status-badge--inactive') + '"><span class="status-dot"></span>' + (ch.is_active ? 'Active' : 'Disabled') + '</span></td>';
-            chHtml += '<td>' + formatNumber(ch.calls) + '</td>';
-            chHtml += '<td>' + formatNumber(ch.tokens) + '</td>';
-            chHtml += '<td>' + formatLatency(ch.avg_latency) + '</td>';
-            chHtml += '<td>' + formatNumber(ch.success_count) + '</td>';
-            chHtml += '<td>' + formatNumber(ch.error_count) + '</td></tr>';
+            chHtml += '</tbody></table>';
+            sc.innerHTML = chHtml;
           }
-          chHtml += '</tbody></table>';
-          sc.innerHTML = chHtml;
+        } catch(e) {
+          if (ss) ss.innerHTML = '<div class="empty-state"><p>Failed to load stats</p></div>';
         }
-      } catch(e) {
-        if (ss) ss.innerHTML = '<div class="empty-state"><p>Failed to load stats</p></div>';
+      };
+
+      // Close modals on overlay click
+      var overlays = document.querySelectorAll('.modal-overlay');
+      for (var o = 0; o < overlays.length; o++) {
+        overlays[o].addEventListener('click', function(e) {
+          if (e.target === this) this.classList.remove('active');
+        });
       }
-    };
 
-    // Close modals on overlay click
-    var overlays = document.querySelectorAll('.modal-overlay');
-    for (var o = 0; o < overlays.length; o++) {
-      overlays[o].addEventListener('click', function(e) {
-        if (e.target === this) this.style.display = 'none';
-      });
-    }
+      // Close buttons
+      var closeBtns = document.querySelectorAll('.modal__close, .claude-button--ghost[id$="-close-btn"], .claude-button--ghost[id$="-cancel-btn"]');
+      for (var cb = 0; cb < closeBtns.length; cb++) {
+        closeBtns[cb].addEventListener('click', function() {
+          var modal = this.closest('.modal-overlay');
+          if (modal) modal.classList.remove('active');
+        });
+      }
 
-    // Init
-    verifySession();
+      // Login form
+      var loginForm = document.getElementById('login-form');
+      if (loginForm) {
+        loginForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          var btn = document.getElementById('login-btn');
+          var errorEl = document.getElementById('login-error');
+          hideError(errorEl);
+          showLoading(btn);
+
+          try {
+            var res = await fetch(API_BASE + '/api/superadmin/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value })
+            });
+            var data = await res.json();
+            if (data.success) {
+              localStorage.setItem(TOKEN_KEY, data.token);
+              showDashboard(data.user);
+              loginForm.reset();
+            } else {
+              showError(errorEl, data.error || 'Login failed');
+            }
+          } catch(err) {
+            showError(errorEl, 'Network error');
+          } finally {
+            hideLoading(btn);
+          }
+        });
+      }
+
+      // Logout
+      var logoutBtn = document.getElementById('logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+          localStorage.removeItem(TOKEN_KEY);
+          showLogin();
+        });
+      }
+
+      // Add Source button
+      var addSourceBtn = document.getElementById('add-source-btn');
+      if (addSourceBtn) {
+        addSourceBtn.addEventListener('click', function() {
+          var t = document.getElementById('source-modal-title');
+          if (t) t.textContent = 'Add Source API';
+          var sid = document.getElementById('source-id');
+          if (sid) sid.value = '';
+          var sn = document.getElementById('source-name');
+          if (sn) sn.value = '';
+          var sp = document.getElementById('source-provider');
+          if (sp) sp.value = 'openai';
+          var sb = document.getElementById('source-baseurl');
+          if (sb) sb.value = PROVIDER_PRESETS.openai.baseUrl;
+          var sa = document.getElementById('source-apikey');
+          if (sa) sa.value = '';
+          var se = document.getElementById('source-error');
+          if (se) se.style.display = 'none';
+          openModal('source-modal');
+        });
+      }
+
+      // Source form submit
+      var sourceForm = document.getElementById('source-form');
+      if (sourceForm) {
+        sourceForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          var btn = document.getElementById('source-save-btn');
+          var errorEl = document.getElementById('source-error');
+          hideError(errorEl);
+          showLoading(btn);
+
+          var id = document.getElementById('source-id').value;
+          var nameVal = document.getElementById('source-name').value.trim();
+          var baseUrlVal = document.getElementById('source-baseurl').value.trim();
+          var apiKeyVal = document.getElementById('source-apikey').value.trim();
+          var providerVal = document.getElementById('source-provider').value;
+
+          if (!nameVal || !baseUrlVal || !apiKeyVal) {
+            showError(errorEl, 'All fields are required');
+            hideLoading(btn);
+            return;
+          }
+
+          var data = {
+            name: nameVal,
+            base_url: baseUrlVal,
+            api_key: apiKeyVal,
+            api_format: providerVal
+          };
+
+          try {
+            var result;
+            if (id) {
+              result = await apiCall('/api/proxy/sources/' + id, { method: 'PUT', body: JSON.stringify(data) });
+            } else {
+              result = await apiCall('/api/proxy/sources', { method: 'POST', body: JSON.stringify(data) });
+            }
+            if (result.success || result.id) {
+              closeModal('source-modal');
+              loadSources();
+            } else {
+              showError(errorEl, result.error || result.message || 'Failed to save');
+            }
+          } catch(err) {
+            showError(errorEl, 'Network error: ' + err.message);
+          } finally {
+            hideLoading(btn);
+          }
+        });
+      }
+
+      // Channel form submit
+      var channelForm = document.getElementById('channel-form');
+      if (channelForm) {
+        channelForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          var btn = document.getElementById('channel-save-btn');
+          var errorEl = document.getElementById('channel-error');
+          hideError(errorEl);
+          showLoading(btn);
+
+          var id = document.getElementById('channel-id').value;
+          var sourceId = document.getElementById('channel-source-id').value;
+          var nameVal = document.getElementById('channel-name').value.trim();
+
+          if (!nameVal) {
+            showError(errorEl, 'Channel name is required');
+            hideLoading(btn);
+            return;
+          }
+
+          var data = {
+            name: nameVal,
+            rate_limit: parseInt(document.getElementById('channel-ratelimit').value) || 0,
+            daily_quota: parseInt(document.getElementById('channel-quota').value) || 0
+          };
+
+          try {
+            var result;
+            if (id) {
+              result = await apiCall('/api/proxy/channels/' + id, { method: 'PUT', body: JSON.stringify(data) });
+            } else {
+              result = await apiCall('/api/proxy/sources/' + sourceId + '/channels', { method: 'POST', body: JSON.stringify(data) });
+            }
+            if (result.success || result.id) {
+              closeModal('channel-modal');
+              loadSources();
+            } else {
+              showError(errorEl, result.error || result.message || 'Failed to save');
+            }
+          } catch(err) {
+            showError(errorEl, 'Network error: ' + err.message);
+          } finally {
+            hideLoading(btn);
+          }
+        });
+      }
+
+      // Provider preset auto-fill
+      var providerSelect = document.getElementById('source-provider');
+      if (providerSelect) {
+        providerSelect.addEventListener('change', function() {
+          var preset = PROVIDER_PRESETS[this.value];
+          if (preset) {
+            var sb = document.getElementById('source-baseurl');
+            if (sb) sb.value = preset.baseUrl;
+          }
+        });
+      }
+
+      // Init
+      verifySession();
+    })();
   </script>
 </Layout>
