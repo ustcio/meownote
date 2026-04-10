@@ -4590,9 +4590,9 @@ async function handleProxySourcesCreate(request, env, ctx) {
 
   try {
     const body = await request.json();
-    const { name, base_url, api_key, api_format = 'openai', default_model, sort_order = 0 } = body;
-    if (!name || !base_url || !api_key || !default_model) {
-      return jsonResponse({ error: 'name, base_url, api_key, default_model are required' }, 400);
+    const { name, base_url, api_key, api_format = 'openai', default_model = null, sort_order = 0 } = body;
+    if (!name || !base_url || !api_key) {
+      return jsonResponse({ error: 'name, base_url, api_key are required' }, 400);
     }
     const id = crypto.randomUUID();
     await env.DB.prepare(`
@@ -4922,7 +4922,7 @@ async function handleProxyChat(request, env, ctx) {
   let body;
   try { body = await request.json(); } catch { return jsonResponse({ error: 'Invalid JSON' }, 400); }
 
-  const { messages, stream = false } = body;
+  const { model, messages, stream = false } = body;
   if (!Array.isArray(messages) || messages.length === 0) {
     return jsonResponse({ error: 'messages array is required' }, 400);
   }
@@ -4933,20 +4933,25 @@ async function handleProxyChat(request, env, ctx) {
     }
   }
 
+  // 模型选择：用户传的 model > channel.model_override > source.default_model
+  const resolvedModel = model || channel.model_override || channel.default_model;
+  if (!resolvedModel) {
+    return jsonResponse({ error: 'No model specified. Please provide "model" in request body or set a default model.' }, 400);
+  }
+
   const startTime = Date.now();
-  const model = channel.model_override || channel.default_model;
   let endpoint, headers, requestBody;
 
   if (channel.api_format === 'openai') {
     endpoint = `${channel.base_url}/chat/completions`;
     headers = { 'Authorization': `Bearer ${channel.api_key}`, 'Content-Type': 'application/json' };
-    requestBody = { model, messages, stream };
+    requestBody = { model: resolvedModel, messages, stream };
   } else {
     endpoint = `${channel.base_url}/messages`;
     headers = { 'x-api-key': channel.api_key, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' };
     const systemMsg = messages.find(m => m.role === 'system')?.content || '';
     requestBody = {
-      model, messages: messages.filter(m => m.role !== 'system'),
+      model: resolvedModel, messages: messages.filter(m => m.role !== 'system'),
       max_tokens: 4096, stream, ...(systemMsg && { system: systemMsg })
     };
   }
@@ -4960,13 +4965,13 @@ async function handleProxyChat(request, env, ctx) {
     const latency = Date.now() - startTime;
 
     if (response.status === 401 || response.status === 403) {
-      await recordProxyUsage(env, channelId, channel.source_id, model, null, latency, 'error', 'API Key invalid or expired');
+      await recordProxyUsage(env, channelId, channel.source_id, resolvedModel, null, latency, 'error', 'API Key invalid or expired');
       return jsonResponse({ error: 'API Key invalid. Please contact administrator.' }, 401);
     }
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => '');
-      await recordProxyUsage(env, channelId, channel.source_id, model, null, latency, 'error', `HTTP ${response.status}: ${errorText.substring(0, 200)}`);
+      await recordProxyUsage(env, channelId, channel.source_id, resolvedModel, null, latency, 'error', `HTTP ${response.status}: ${errorText.substring(0, 200)}`);
       return new Response(JSON.stringify({ error: 'Proxy error', detail: errorText.substring(0, 200) }), {
         status: response.status, headers: { 'Content-Type': 'application/json' }
       });
@@ -4975,7 +4980,7 @@ async function handleProxyChat(request, env, ctx) {
     if (!stream) {
       const data = await response.json();
       const usage = data.usage || {};
-      await recordProxyUsage(env, channelId, channel.source_id, model, usage, latency, 'success', null);
+      await recordProxyUsage(env, channelId, channel.source_id, resolvedModel, usage, latency, 'success', null);
       return jsonResponse(data);
     }
 
@@ -5002,10 +5007,10 @@ async function handleProxyChat(request, env, ctx) {
           }
           await writer.write(value);
         }
-        await recordProxyUsage(env, channelId, channel.source_id, model, usage, latency, 'success', null);
+        await recordProxyUsage(env, channelId, channel.source_id, resolvedModel, usage, latency, 'success', null);
       } catch (error) {
         if (error.message !== 'Stream is closed') {
-          await recordProxyUsage(env, channelId, channel.source_id, model, null, latency, 'error', error.message);
+          await recordProxyUsage(env, channelId, channel.source_id, resolvedModel, null, latency, 'error', error.message);
         }
       } finally { try { writer.close(); } catch(e) {} }
     })();
@@ -5017,10 +5022,10 @@ async function handleProxyChat(request, env, ctx) {
     clearTimeout(timeout);
     const latency = Date.now() - startTime;
     if (error.name === 'AbortError') {
-      await recordProxyUsage(env, channelId, channel.source_id, model, null, latency, 'error', 'Request timeout');
+      await recordProxyUsage(env, channelId, channel.source_id, resolvedModel, null, latency, 'error', 'Request timeout');
       return jsonResponse({ error: 'Upstream API timeout' }, 504);
     }
-    await recordProxyUsage(env, channelId, channel.source_id, model, null, latency, 'error', error.message);
+    await recordProxyUsage(env, channelId, channel.source_id, resolvedModel, null, latency, 'error', error.message);
     return jsonResponse({ error: 'Proxy error', detail: error.message }, 500);
   }
 }

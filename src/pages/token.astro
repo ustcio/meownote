@@ -100,6 +100,10 @@ import Layout from '../layouts/Layout.astro';
               <label class="form-label">API Key</label>
               <input type="text" id="source-apikey" class="form-input" placeholder="sk-..." required />
             </div>
+            <div class="form-group">
+              <label class="form-label">Default Model <span class="form-hint">(optional, fallback when user doesn't specify)</span></label>
+              <input type="text" id="source-model" class="form-input" placeholder="e.g. gpt-4o, claude-sonnet-4-20250514" />
+            </div>
             <div id="source-error" class="form-error" style="display:none;"></div>
           </div>
           <div class="modal__footer">
@@ -476,11 +480,11 @@ import Layout from '../layouts/Layout.astro';
       var TOKEN_KEY = 'meownote_super_admin_token';
 
       var PROVIDER_PRESETS = {
-        openai: { baseUrl: 'https://api.openai.com/v1', format: 'openai' },
-        anthropic: { baseUrl: 'https://api.anthropic.com/v1', format: 'anthropic' },
-        azure: { baseUrl: 'https://xxx.openai.azure.com/openai', format: 'openai' },
-        dashscope: { baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', format: 'openai' },
-        custom: { baseUrl: '', format: 'openai' }
+        openai: { baseUrl: 'https://api.openai.com/v1', format: 'openai', defaultModel: 'gpt-4o' },
+        anthropic: { baseUrl: 'https://api.anthropic.com/v1', format: 'anthropic', defaultModel: 'claude-sonnet-4-20250514' },
+        azure: { baseUrl: 'https://xxx.openai.azure.com/openai', format: 'openai', defaultModel: 'gpt-4o' },
+        dashscope: { baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', format: 'openai', defaultModel: 'qwen-max' },
+        custom: { baseUrl: '', format: 'openai', defaultModel: '' }
       };
 
       var sourcesData = [];
@@ -570,11 +574,18 @@ import Layout from '../layouts/Layout.astro';
         container.innerHTML = '<div class="loading-state"><div class="skeleton" style="width:100%;height:100px;border-radius:var(--radius-xl);"></div></div>';
         try {
           var data = await apiCall('/api/proxy/sources');
-          if (!data.success) { container.innerHTML = '<div class="empty-state"><p>Failed to load sources</p></div>'; return; }
+          console.log('loadSources response:', JSON.stringify(data));
+          if (!data.success) {
+            var errMsg = data.error || data.message || 'Failed to load sources (API returned success: false)';
+            container.innerHTML = '<div class="empty-state"><p>' + errMsg + '</p><p style="font-size:var(--text-xs);margin-top:var(--space-2);color:var(--text-quaternary);">Response: ' + JSON.stringify(data).substring(0, 200) + '</p></div>';
+            return;
+          }
           sourcesData = data.sources || [];
+          console.log('sourcesData:', sourcesData);
           renderSources();
         } catch(e) {
-          container.innerHTML = '<div class="empty-state"><p>Network error</p></div>';
+          console.error('loadSources error:', e);
+          container.innerHTML = '<div class="empty-state"><p>Network error: ' + e.message + '</p><p style="font-size:var(--text-xs);margin-top:var(--space-2);color:var(--text-quaternary);">Check console for details</p></div>';
         }
       }
 
@@ -639,6 +650,8 @@ import Layout from '../layouts/Layout.astro';
         if (sb) sb.value = source.base_url;
         var sa = document.getElementById('source-apikey');
         if (sa) sa.value = source.api_key;
+        var sm = document.getElementById('source-model');
+        if (sm) sm.value = source.default_model || '';
         var se = document.getElementById('source-error');
         if (se) se.style.display = 'none';
         openModal('source-modal');
@@ -799,6 +812,8 @@ import Layout from '../layouts/Layout.astro';
           if (sb) sb.value = PROVIDER_PRESETS.openai.baseUrl;
           var sa = document.getElementById('source-apikey');
           if (sa) sa.value = '';
+          var sm = document.getElementById('source-model');
+          if (sm) sm.value = '';
           var se = document.getElementById('source-error');
           if (se) se.style.display = 'none';
           openModal('source-modal');
@@ -820,9 +835,10 @@ import Layout from '../layouts/Layout.astro';
           var baseUrlVal = document.getElementById('source-baseurl').value.trim();
           var apiKeyVal = document.getElementById('source-apikey').value.trim();
           var providerVal = document.getElementById('source-provider').value;
+          var modelVal = document.getElementById('source-model').value.trim();
 
           if (!nameVal || !baseUrlVal || !apiKeyVal) {
-            showError(errorEl, 'All fields are required');
+            showError(errorEl, 'Name, Base URL and API Key are required');
             hideLoading(btn);
             return;
           }
@@ -833,6 +849,7 @@ import Layout from '../layouts/Layout.astro';
             api_key: apiKeyVal,
             api_format: providerVal
           };
+          if (modelVal) data.default_model = modelVal;
 
           try {
             var result;
@@ -910,6 +927,8 @@ import Layout from '../layouts/Layout.astro';
           if (preset) {
             var sb = document.getElementById('source-baseurl');
             if (sb) sb.value = preset.baseUrl;
+            var sm = document.getElementById('source-model');
+            if (sm) sm.value = preset.defaultModel;
           }
         });
       }
