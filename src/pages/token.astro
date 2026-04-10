@@ -639,8 +639,8 @@ import Layout from '../layouts/Layout.astro';
     }
   </style>
 
-  <script is:inline>
-    (function() {
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
       var API_BASE = 'https://api.ustc.dev';
       var TOKEN_KEY = 'meownote_super_admin_token';
 
@@ -1086,6 +1086,6 @@ import Layout from '../layouts/Layout.astro';
 
       // Init
       verifySession();
-    })();
+    });
   </script>
 </Layout>
