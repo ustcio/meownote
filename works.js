@@ -63,6 +63,48 @@ export default {
         }
       }
 
+      // Proxy API routes
+      if (path.startsWith('/api/proxy/')) {
+        if (path.startsWith('/api/proxy/sources/') && path.endsWith('/channels')) {
+          const match = path.match(/^\/api\/proxy\/sources\/([^/]+)\/channels$/);
+          if (match) return await handleProxyChannelsCreate(request, env, ctx, match);
+        }
+        if (path.startsWith('/api/proxy/sources/') && path.endsWith('/toggle')) {
+          const match = path.match(/^\/api\/proxy\/sources\/([^/]+)\/toggle$/);
+          if (match) return await handleProxySourcesToggle(request, env, ctx, match);
+        }
+        if (path.startsWith('/api/proxy/sources/') && path.endsWith('/stats')) {
+          const match = path.match(/^\/api\/proxy\/sources\/([^/]+)\/stats$/);
+          if (match) return await handleProxySourceStats(request, env, ctx, match);
+        }
+        if (path.startsWith('/api/proxy/sources/')) {
+          const match = path.match(/^\/api\/proxy\/sources\/([^/]+)$/);
+          if (match) {
+            if (request.method === 'PUT') return await handleProxySourcesUpdate(request, env, ctx, match);
+            if (request.method === 'DELETE') return await handleProxySourcesDelete(request, env, ctx, match);
+          }
+        }
+        if (path.startsWith('/api/proxy/channels/') && path.endsWith('/toggle')) {
+          const match = path.match(/^\/api\/proxy\/channels\/([^/]+)\/toggle$/);
+          if (match) return await handleProxyChannelsToggle(request, env, ctx, match);
+        }
+        if (path.startsWith('/api/proxy/channels/') && path.endsWith('/test')) {
+          const match = path.match(/^\/api\/proxy\/channels\/([^/]+)\/test$/);
+          if (match) return await handleProxyChannelsTest(request, env, ctx, match);
+        }
+        if (path.startsWith('/api/proxy/channels/') && path.endsWith('/stats')) {
+          const match = path.match(/^\/api\/proxy\/channels\/([^/]+)\/stats$/);
+          if (match) return await handleProxyChannelStats(request, env, ctx, match);
+        }
+        if (path.startsWith('/api/proxy/channels/')) {
+          const match = path.match(/^\/api\/proxy\/channels\/([^/]+)$/);
+          if (match) {
+            if (request.method === 'PUT') return await handleProxyChannelsUpdate(request, env, ctx, match);
+            if (request.method === 'DELETE') return await handleProxyChannelsDelete(request, env, ctx, match);
+          }
+        }
+      }
+
       return jsonResponse({ error: 'Not Found' }, 404);
       
     } catch (error) {
@@ -142,6 +184,9 @@ const ROUTES = {
   '/api/trading/tolerance': { handler: handleToleranceSettings },
   '/api/superadmin/login': { handler: handleSuperAdminLogin },
   '/api/superadmin/verify': { handler: handleSuperAdminVerify },
+  '/api/proxy/sources': { handler: handleProxySources, pattern: null },
+  '/api/proxy/models': { handler: handleProxyModelsList },
+  '/api/v1': { handler: handleProxyChat },
   '/api/workspace': { handler: handleWorkspace, pattern: /^\/api\/workspace(?:\/([^/]+)(?:\/([^/]+))?)?$/ },
 };
 
@@ -4470,6 +4515,514 @@ async function handleSuperAdminVerify(request, env) {
   }
 
   return jsonResponse({ success: true, user: verification });
+}
+
+// ================================================================================
+// API Proxy 代理中转系统
+// ================================================================================
+
+const PROVIDER_PRESETS = {
+  openai: { baseUrl: 'https://api.openai.com/v1', format: 'openai', defaultModel: 'gpt-4o' },
+  anthropic: { baseUrl: 'https://api.anthropic.com/v1', format: 'anthropic', defaultModel: 'claude-3-5-sonnet-20241022' },
+  azure: { baseUrl: 'https://xxx.openai.azure.com/openai', format: 'openai', defaultModel: 'gpt-4' },
+  dashscope: { baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', format: 'openai', defaultModel: 'qwen-plus' },
+  custom: { baseUrl: '', format: 'openai', defaultModel: '' }
+};
+
+function maskApiKey(key) {
+  if (!key || key.length < 8) return '****';
+  return key.substring(0, 4) + '****' + key.substring(key.length - 4);
+}
+
+async function recordProxyUsage(env, channelId, sourceId, model, usage, latency, status, error) {
+  try {
+    await env.DB.prepare(`
+      INSERT INTO api_proxy_usage (channel_id, source_id, model, prompt_tokens, completion_tokens, total_tokens, latency_ms, status, error_message)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      channelId, sourceId, model,
+      usage?.prompt_tokens || 0,
+      usage?.completion_tokens || 0,
+      usage?.total_tokens || 0,
+      latency, status, error || null
+    ).run();
+  } catch (e) {
+    console.error('[Proxy Usage Record Error]', e);
+  }
+}
+
+async function checkDailyQuota(env, channelId, quota) {
+  if (quota <= 0) return { allowed: true };
+  const today = new Date().toISOString().split('T')[0];
+  const key = `quota:${channelId}:${today}`;
+  const current = await env.TOKEN.get(key);
+  const count = current ? parseInt(current) : 0;
+  if (count >= quota) return { allowed: false, remaining: 0, total: quota };
+  await env.TOKEN.put(key, String(count + 1), { expirationTtl: 86400 });
+  return { allowed: true, remaining: quota - count - 1, total: quota };
+}
+
+// GET /api/proxy/sources
+async function handleProxySources(request, env, ctx) {
+  const auth = await verifyAdminAuth(request, env);
+  if (!auth.success) return jsonResponse({ error: auth.message }, 401);
+
+  const sources = await env.DB.prepare(`
+    SELECT s.*, 
+      (SELECT COUNT(*) FROM api_proxy_channels WHERE source_id = s.id) as channel_count,
+      (SELECT COUNT(*) FROM api_proxy_usage WHERE source_id = s.id) as total_usage
+    FROM api_proxy_sources s ORDER BY s.sort_order, s.created_at
+  `).all();
+
+  const result = sources.results.map(s => ({
+    ...s,
+    api_key: maskApiKey(s.api_key)
+  }));
+
+  return jsonResponse({ success: true, sources: result });
+}
+
+// POST /api/proxy/sources
+async function handleProxySourcesCreate(request, env, ctx) {
+  const auth = await verifyAdminAuth(request, env);
+  if (!auth.success) return jsonResponse({ error: auth.message }, 401);
+  if (request.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
+
+  try {
+    const body = await request.json();
+    const { name, base_url, api_key, api_format = 'openai', default_model, sort_order = 0 } = body;
+    if (!name || !base_url || !api_key || !default_model) {
+      return jsonResponse({ error: 'name, base_url, api_key, default_model are required' }, 400);
+    }
+    const id = crypto.randomUUID();
+    await env.DB.prepare(`
+      INSERT INTO api_proxy_sources (id, name, base_url, api_key, api_format, default_model, sort_order)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).bind(id, name, base_url, api_key, api_format, default_model, sort_order).run();
+    return jsonResponse({ success: true, id });
+  } catch (error) {
+    console.error('[Proxy Source Create Error]', error);
+    return jsonResponse({ error: 'Failed to create source' }, 500);
+  }
+}
+
+// PUT /api/proxy/sources/:id
+async function handleProxySourcesUpdate(request, env, ctx, match) {
+  const auth = await verifyAdminAuth(request, env);
+  if (!auth.success) return jsonResponse({ error: auth.message }, 401);
+  if (request.method !== 'PUT') return jsonResponse({ error: 'Method not allowed' }, 405);
+
+  try {
+    const id = match[1];
+    const body = await request.json();
+    const { name, base_url, api_key, api_format, default_model, sort_order } = body;
+    const existing = await env.DB.prepare('SELECT * FROM api_proxy_sources WHERE id = ?').bind(id).first();
+    if (!existing) return jsonResponse({ error: 'Source not found' }, 404);
+
+    const updates = [];
+    const values = [];
+    if (name !== undefined) { updates.push('name = ?'); values.push(name); }
+    if (base_url !== undefined) { updates.push('base_url = ?'); values.push(base_url); }
+    if (api_key !== undefined) { updates.push('api_key = ?'); values.push(api_key); }
+    if (api_format !== undefined) { updates.push('api_format = ?'); values.push(api_format); }
+    if (default_model !== undefined) { updates.push('default_model = ?'); values.push(default_model); }
+    if (sort_order !== undefined) { updates.push('sort_order = ?'); values.push(sort_order); }
+    updates.push("updated_at = datetime('now')");
+    values.push(id);
+
+    await env.DB.prepare(`UPDATE api_proxy_sources SET ${updates.join(', ')} WHERE id = ?`).bind(...values).run();
+    return jsonResponse({ success: true });
+  } catch (error) {
+    console.error('[Proxy Source Update Error]', error);
+    return jsonResponse({ error: 'Failed to update source' }, 500);
+  }
+}
+
+// DELETE /api/proxy/sources/:id
+async function handleProxySourcesDelete(request, env, ctx, match) {
+  const auth = await verifyAdminAuth(request, env);
+  if (!auth.success) return jsonResponse({ error: auth.message }, 401);
+  if (request.method !== 'DELETE') return jsonResponse({ error: 'Method not allowed' }, 405);
+
+  try {
+    const id = match[1];
+    const activeChannels = await env.DB.prepare(
+      'SELECT COUNT(*) as cnt FROM api_proxy_channels WHERE source_id = ? AND is_active = 1'
+    ).bind(id).first();
+    if (activeChannels.cnt > 0) {
+      return jsonResponse({ error: 'Cannot delete source with active channels. Disable channels first.' }, 400);
+    }
+    await env.DB.prepare('DELETE FROM api_proxy_sources WHERE id = ?').bind(id).run();
+    return jsonResponse({ success: true });
+  } catch (error) {
+    console.error('[Proxy Source Delete Error]', error);
+    return jsonResponse({ error: 'Failed to delete source' }, 500);
+  }
+}
+
+// POST /api/proxy/sources/:id/toggle
+async function handleProxySourcesToggle(request, env, ctx, match) {
+  const auth = await verifyAdminAuth(request, env);
+  if (!auth.success) return jsonResponse({ error: auth.message }, 401);
+  if (request.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
+
+  try {
+    const id = match[1];
+    const existing = await env.DB.prepare('SELECT is_active FROM api_proxy_sources WHERE id = ?').bind(id).first();
+    if (!existing) return jsonResponse({ error: 'Source not found' }, 404);
+    await env.DB.prepare("UPDATE api_proxy_sources SET is_active = 1 - is_active, updated_at = datetime('now') WHERE id = ?").bind(id).run();
+    return jsonResponse({ success: true });
+  } catch (error) {
+    console.error('[Proxy Source Toggle Error]', error);
+    return jsonResponse({ error: 'Failed to toggle source' }, 500);
+  }
+}
+
+// POST /api/proxy/sources/:id/channels
+async function handleProxyChannelsCreate(request, env, ctx, match) {
+  const auth = await verifyAdminAuth(request, env);
+  if (!auth.success) return jsonResponse({ error: auth.message }, 401);
+  if (request.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
+
+  try {
+    const sourceId = match[1];
+    const source = await env.DB.prepare('SELECT id FROM api_proxy_sources WHERE id = ?').bind(sourceId).first();
+    if (!source) return jsonResponse({ error: 'Source not found' }, 404);
+
+    const body = await request.json();
+    const { name, model_override, rate_limit = 0, daily_quota = 0, sort_order = 0 } = body;
+    if (!name) return jsonResponse({ error: 'name is required' }, 400);
+
+    const id = crypto.randomUUID();
+    await env.DB.prepare(`
+      INSERT INTO api_proxy_channels (id, source_id, name, model_override, rate_limit, daily_quota, sort_order)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).bind(id, sourceId, name, model_override || null, rate_limit, daily_quota, sort_order).run();
+    return jsonResponse({ success: true, id });
+  } catch (error) {
+    console.error('[Proxy Channel Create Error]', error);
+    return jsonResponse({ error: 'Failed to create channel' }, 500);
+  }
+}
+
+// PUT /api/proxy/channels/:id
+async function handleProxyChannelsUpdate(request, env, ctx, match) {
+  const auth = await verifyAdminAuth(request, env);
+  if (!auth.success) return jsonResponse({ error: auth.message }, 401);
+  if (request.method !== 'PUT') return jsonResponse({ error: 'Method not allowed' }, 405);
+
+  try {
+    const id = match[1];
+    const body = await request.json();
+    const existing = await env.DB.prepare('SELECT * FROM api_proxy_channels WHERE id = ?').bind(id).first();
+    if (!existing) return jsonResponse({ error: 'Channel not found' }, 404);
+
+    const updates = [];
+    const values = [];
+    if (body.name !== undefined) { updates.push('name = ?'); values.push(body.name); }
+    if (body.model_override !== undefined) { updates.push('model_override = ?'); values.push(body.model_override || null); }
+    if (body.rate_limit !== undefined) { updates.push('rate_limit = ?'); values.push(body.rate_limit); }
+    if (body.daily_quota !== undefined) { updates.push('daily_quota = ?'); values.push(body.daily_quota); }
+    if (body.sort_order !== undefined) { updates.push('sort_order = ?'); values.push(body.sort_order); }
+    updates.push("updated_at = datetime('now')");
+    values.push(id);
+
+    await env.DB.prepare(`UPDATE api_proxy_channels SET ${updates.join(', ')} WHERE id = ?`).bind(...values).run();
+    return jsonResponse({ success: true });
+  } catch (error) {
+    console.error('[Proxy Channel Update Error]', error);
+    return jsonResponse({ error: 'Failed to update channel' }, 500);
+  }
+}
+
+// DELETE /api/proxy/channels/:id
+async function handleProxyChannelsDelete(request, env, ctx, match) {
+  const auth = await verifyAdminAuth(request, env);
+  if (!auth.success) return jsonResponse({ error: auth.message }, 401);
+  if (request.method !== 'DELETE') return jsonResponse({ error: 'Method not allowed' }, 405);
+
+  try {
+    const id = match[1];
+    await env.DB.prepare('DELETE FROM api_proxy_channels WHERE id = ?').bind(id).run();
+    return jsonResponse({ success: true });
+  } catch (error) {
+    console.error('[Proxy Channel Delete Error]', error);
+    return jsonResponse({ error: 'Failed to delete channel' }, 500);
+  }
+}
+
+// POST /api/proxy/channels/:id/toggle
+async function handleProxyChannelsToggle(request, env, ctx, match) {
+  const auth = await verifyAdminAuth(request, env);
+  if (!auth.success) return jsonResponse({ error: auth.message }, 401);
+  if (request.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
+
+  try {
+    const id = match[1];
+    const existing = await env.DB.prepare('SELECT is_active FROM api_proxy_channels WHERE id = ?').bind(id).first();
+    if (!existing) return jsonResponse({ error: 'Channel not found' }, 404);
+    await env.DB.prepare("UPDATE api_proxy_channels SET is_active = 1 - is_active, updated_at = datetime('now') WHERE id = ?").bind(id).run();
+    return jsonResponse({ success: true });
+  } catch (error) {
+    console.error('[Proxy Channel Toggle Error]', error);
+    return jsonResponse({ error: 'Failed to toggle channel' }, 500);
+  }
+}
+
+// POST /api/proxy/channels/:id/test
+async function handleProxyChannelsTest(request, env, ctx, match) {
+  const auth = await verifyAdminAuth(request, env);
+  if (!auth.success) return jsonResponse({ error: auth.message }, 401);
+  if (request.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
+
+  try {
+    const channelId = match[1];
+    const channel = await env.DB.prepare(`
+      SELECT c.*, s.base_url, s.api_key, s.api_format, s.default_model
+      FROM api_proxy_channels c JOIN api_proxy_sources s ON c.source_id = s.id WHERE c.id = ?
+    `).bind(channelId).first();
+    if (!channel) return jsonResponse({ error: 'Channel not found' }, 404);
+
+    const startTime = Date.now();
+    const model = channel.model_override || channel.default_model;
+    let endpoint, headers, requestBody;
+
+    if (channel.api_format === 'openai') {
+      endpoint = `${channel.base_url}/chat/completions`;
+      headers = { 'Authorization': `Bearer ${channel.api_key}`, 'Content-Type': 'application/json' };
+      requestBody = { model, messages: [{ role: 'user', content: 'Hello, connection test.' }], max_tokens: 10 };
+    } else {
+      endpoint = `${channel.base_url}/messages`;
+      headers = { 'x-api-key': channel.api_key, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' };
+      requestBody = { model, messages: [{ role: 'user', content: 'Hello, connection test.' }], max_tokens: 10 };
+    }
+
+    const response = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(requestBody) });
+    const latency = Date.now() - startTime;
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '');
+      return jsonResponse({ success: false, error: `HTTP ${response.status}`, detail: errorText.substring(0, 200), latency });
+    }
+
+    const data = await response.json();
+    return jsonResponse({ success: true, model: data.model || model, latency, message: 'Connection successful' });
+  } catch (error) {
+    return jsonResponse({ success: false, error: 'Connection failed', detail: error.message, latency: Date.now() - startTime });
+  }
+}
+
+// GET /api/proxy/sources/:id/stats
+async function handleProxySourceStats(request, env, ctx, match) {
+  const auth = await verifyAdminAuth(request, env);
+  if (!auth.success) return jsonResponse({ error: auth.message }, 401);
+
+  const sourceId = match[1];
+  const url = new URL(request.url);
+  const days = parseInt(url.searchParams.get('days') || '7');
+
+  const sourceStats = await env.DB.prepare(`
+    SELECT COUNT(*) as total_calls, SUM(prompt_tokens) as total_prompt_tokens,
+      SUM(completion_tokens) as total_completion_tokens, SUM(total_tokens) as total_tokens,
+      AVG(latency_ms) as avg_latency,
+      SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) as success_count,
+      SUM(CASE WHEN status = 'error' THEN 1 ELSE 0 END) as error_count
+    FROM api_proxy_usage WHERE source_id = ? AND created_at >= datetime('now', ?)
+  `).bind(sourceId, `-${days} days`).first();
+
+  const channelStats = await env.DB.prepare(`
+    SELECT c.id, c.name, c.is_active, COUNT(u.id) as calls,
+      COALESCE(SUM(u.total_tokens), 0) as tokens, COALESCE(AVG(u.latency_ms), 0) as avg_latency,
+      SUM(CASE WHEN u.status = 'success' THEN 1 ELSE 0 END) as success_count,
+      SUM(CASE WHEN u.status = 'error' THEN 1 ELSE 0 END) as error_count
+    FROM api_proxy_channels c LEFT JOIN api_proxy_usage u ON c.id = u.channel_id AND u.created_at >= datetime('now', ?)
+    WHERE c.source_id = ? GROUP BY c.id ORDER BY c.sort_order, c.created_at
+  `).bind(`-${days} days`, sourceId).all();
+
+  const daily = await env.DB.prepare(`
+    SELECT date(created_at) as day, COUNT(*) as calls, SUM(total_tokens) as tokens
+    FROM api_proxy_usage WHERE source_id = ? AND created_at >= datetime('now', ?)
+    GROUP BY date(created_at) ORDER BY day
+  `).bind(sourceId, `-${days} days`).all();
+
+  return jsonResponse({ success: true, source: sourceStats, channels: channelStats.results, daily: daily.results });
+}
+
+// GET /api/proxy/channels/:id/stats
+async function handleProxyChannelStats(request, env, ctx, match) {
+  const auth = await verifyAdminAuth(request, env);
+  if (!auth.success) return jsonResponse({ error: auth.message }, 401);
+
+  const channelId = match[1];
+  const url = new URL(request.url);
+  const days = parseInt(url.searchParams.get('days') || '7');
+
+  const stats = await env.DB.prepare(`
+    SELECT COUNT(*) as total_calls, SUM(prompt_tokens) as total_prompt_tokens,
+      SUM(completion_tokens) as total_completion_tokens, SUM(total_tokens) as total_tokens,
+      AVG(latency_ms) as avg_latency,
+      SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) as success_count,
+      SUM(CASE WHEN status = 'error' THEN 1 ELSE 0 END) as error_count
+    FROM api_proxy_usage WHERE channel_id = ? AND created_at >= datetime('now', ?)
+  `).bind(channelId, `-${days} days`).first();
+
+  const daily = await env.DB.prepare(`
+    SELECT date(created_at) as day, COUNT(*) as calls, SUM(total_tokens) as tokens
+    FROM api_proxy_usage WHERE channel_id = ? AND created_at >= datetime('now', ?)
+    GROUP BY date(created_at) ORDER BY day
+  `).bind(channelId, `-${days} days`).all();
+
+  return jsonResponse({ success: true, stats, daily: daily.results });
+}
+
+// GET /api/proxy/models
+async function handleProxyModelsList(request, env, ctx) {
+  const auth = await verifyAdminAuth(request, env);
+  if (!auth.success) return jsonResponse({ error: auth.message }, 401);
+
+  const sources = await env.DB.prepare(`
+    SELECT s.name, c.id as channel_id, c.name as channel_name,
+      COALESCE(c.model_override, s.default_model) as model
+    FROM api_proxy_sources s JOIN api_proxy_channels c ON s.id = c.source_id
+    WHERE s.is_active = 1 AND c.is_active = 1 ORDER BY s.sort_order, c.sort_order
+  `).all();
+
+  const grouped = {};
+  for (const row of sources.results) {
+    if (!grouped[row.name]) grouped[row.name] = [];
+    grouped[row.name].push({ id: row.channel_id, name: row.channel_name, model: row.model });
+  }
+
+  return jsonResponse({ success: true, models: grouped });
+}
+
+// POST /api/v1?channelId=xxx - 代理转发入口
+async function handleProxyChat(request, env, ctx) {
+  const url = new URL(request.url);
+  const channelId = url.searchParams.get('channelId');
+  if (!channelId) return jsonResponse({ error: 'channelId is required' }, 400);
+
+  const channel = await env.DB.prepare(`
+    SELECT c.*, s.base_url, s.api_key, s.api_format, s.default_model
+    FROM api_proxy_channels c JOIN api_proxy_sources s ON c.source_id = s.id
+    WHERE c.id = ? AND c.is_active = 1 AND s.is_active = 1
+  `).bind(channelId).first();
+
+  if (!channel) return jsonResponse({ error: 'Channel not found or disabled' }, 404);
+
+  // 配额检查
+  if (channel.daily_quota > 0) {
+    const quotaCheck = await checkDailyQuota(env, channelId, channel.daily_quota);
+    if (!quotaCheck.allowed) {
+      return jsonResponse({ error: 'Daily quota exceeded', remaining: 0, total: channel.daily_quota }, 429);
+    }
+  }
+
+  // 请求体验证
+  let body;
+  try { body = await request.json(); } catch { return jsonResponse({ error: 'Invalid JSON' }, 400); }
+
+  const { messages, stream = false } = body;
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return jsonResponse({ error: 'messages array is required' }, 400);
+  }
+  if (messages.length > 50) return jsonResponse({ error: 'Too many messages (max 50)' }, 400);
+  for (const msg of messages) {
+    if (typeof msg.content === 'string' && msg.content.length > 16000) {
+      return jsonResponse({ error: 'Message too long (max 16000 chars)' }, 400);
+    }
+  }
+
+  const startTime = Date.now();
+  const model = channel.model_override || channel.default_model;
+  let endpoint, headers, requestBody;
+
+  if (channel.api_format === 'openai') {
+    endpoint = `${channel.base_url}/chat/completions`;
+    headers = { 'Authorization': `Bearer ${channel.api_key}`, 'Content-Type': 'application/json' };
+    requestBody = { model, messages, stream };
+  } else {
+    endpoint = `${channel.base_url}/messages`;
+    headers = { 'x-api-key': channel.api_key, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' };
+    const systemMsg = messages.find(m => m.role === 'system')?.content || '';
+    requestBody = {
+      model, messages: messages.filter(m => m.role !== 'system'),
+      max_tokens: 4096, stream, ...(systemMsg && { system: systemMsg })
+    };
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 120000);
+
+  try {
+    const response = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(requestBody), signal: controller.signal });
+    clearTimeout(timeout);
+    const latency = Date.now() - startTime;
+
+    if (response.status === 401 || response.status === 403) {
+      await recordProxyUsage(env, channelId, channel.source_id, model, null, latency, 'error', 'API Key invalid or expired');
+      return jsonResponse({ error: 'API Key invalid. Please contact administrator.' }, 401);
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '');
+      await recordProxyUsage(env, channelId, channel.source_id, model, null, latency, 'error', `HTTP ${response.status}: ${errorText.substring(0, 200)}`);
+      return new Response(JSON.stringify({ error: 'Proxy error', detail: errorText.substring(0, 200) }), {
+        status: response.status, headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    if (!stream) {
+      const data = await response.json();
+      const usage = data.usage || {};
+      await recordProxyUsage(env, channelId, channel.source_id, model, usage, latency, 'success', null);
+      return jsonResponse(data);
+    }
+
+    // 流式响应透传
+    const { readable, writable } = new TransformStream();
+    const writer = writable.getWriter();
+    (async () => {
+      const reader = response.body.getReader();
+      let usage = null;
+      let buffer = '';
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += new TextDecoder().decode(value);
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') continue;
+              try { const parsed = JSON.parse(data); if (parsed.usage) usage = parsed.usage; } catch(e) {}
+            }
+          }
+          await writer.write(value);
+        }
+        await recordProxyUsage(env, channelId, channel.source_id, model, usage, latency, 'success', null);
+      } catch (error) {
+        if (error.message !== 'Stream is closed') {
+          await recordProxyUsage(env, channelId, channel.source_id, model, null, latency, 'error', error.message);
+        }
+      } finally { try { writer.close(); } catch(e) {} }
+    })();
+
+    return new Response(readable, {
+      headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' }
+    });
+  } catch (error) {
+    clearTimeout(timeout);
+    const latency = Date.now() - startTime;
+    if (error.name === 'AbortError') {
+      await recordProxyUsage(env, channelId, channel.source_id, model, null, latency, 'error', 'Request timeout');
+      return jsonResponse({ error: 'Upstream API timeout' }, 504);
+    }
+    await recordProxyUsage(env, channelId, channel.source_id, model, null, latency, 'error', error.message);
+    return jsonResponse({ error: 'Proxy error', detail: error.message }, 500);
+  }
 }
 
 async function handleBuyTransaction(request, env) {

@@ -2,426 +2,680 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Token Management | Maxwell.Science">
-  <main class="token-page">
-    <div class="token-container">
-      <!-- Login Form -->
-      <div id="login-section" class="token-login">
-        <div class="token-login__header">
-          <div class="token-login__icon">
+<Layout title="API Proxy Management | Maxwell.Science">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" defer></script>
+
+  <main class="proxy-page">
+    <div class="proxy-container">
+      <!-- Login Section -->
+      <div id="login-section" class="proxy-login">
+        <div class="proxy-login__header">
+          <div class="proxy-login__icon">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
           </div>
-          <h1 class="token-login__title">Token Management</h1>
-          <p class="token-login__subtitle">Super Admin Access</p>
+          <h1 class="proxy-login__title">API Proxy Management</h1>
+          <p class="proxy-login__subtitle">Super Admin Access</p>
         </div>
-
-        <form id="token-login-form" class="token-login__form">
+        <form id="login-form" class="proxy-login__form">
           <div class="form-group">
             <label for="username" class="form-label">Username</label>
-            <input 
-              type="text" 
-              id="username" 
-              name="username" 
-              class="form-input" 
-              placeholder="Enter username"
-              autocomplete="username"
-              required
-            />
+            <input type="text" id="username" name="username" class="form-input" placeholder="Enter username" required />
           </div>
-
           <div class="form-group">
             <label for="password" class="form-label">Password</label>
-            <input 
-              type="password" 
-              id="password" 
-              name="password" 
-              class="form-input" 
-              placeholder="Enter password"
-              autocomplete="current-password"
-              required
-            />
+            <input type="password" id="password" name="password" class="form-input" placeholder="Enter password" required />
           </div>
-
-          <div id="login-error" class="form-error" style="display: none;"></div>
-
-          <button type="submit" class="token-login__btn" id="login-btn">
+          <div id="login-error" class="form-error" style="display:none;"></div>
+          <button type="submit" class="proxy-btn proxy-btn--primary" id="login-btn">
             <span class="btn-text">Sign In</span>
-            <span class="btn-loader" style="display: none;">
+            <span class="btn-loader" style="display:none;">
               <svg class="spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
-                <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
+                <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
               </svg>
             </span>
           </button>
         </form>
       </div>
 
-      <!-- Token Dashboard (hidden by default) -->
-      <div id="dashboard-section" class="token-dashboard" style="display: none;">
+      <!-- Dashboard Section -->
+      <div id="dashboard-section" class="proxy-dashboard" style="display:none;">
         <div class="dashboard-header">
-          <div class="dashboard-header__left">
-            <h1 class="dashboard-title">Token Management</h1>
-            <p class="dashboard-subtitle">Welcome, <span id="admin-username"></span></p>
+          <div>
+            <h1 class="dashboard-title">API Proxy Management</h1>
+            <p class="dashboard-subtitle">Welcome, <span id="admin-name"></span></p>
           </div>
-          <button id="logout-btn" class="dashboard-logout">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-            Logout
-          </button>
+          <div class="dashboard-actions">
+            <button id="add-source-btn" class="proxy-btn proxy-btn--primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Source API
+            </button>
+            <button id="logout-btn" class="proxy-btn proxy-btn--outline">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Logout
+            </button>
+          </div>
         </div>
 
-        <div class="dashboard-content">
-          <div class="dashboard-placeholder">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.3;">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-            <p class="placeholder-text">Token management features coming soon...</p>
+        <div id="sources-list" class="sources-list">
+          <div class="loading-state">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Source Modal -->
+    <div id="source-modal" class="modal-overlay" style="display:none;">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="source-modal-title">Add Source API</h2>
+          <button class="modal-close" onclick="closeModal('source-modal')">&times;</button>
+        </div>
+        <form id="source-form" class="modal-body">
+          <input type="hidden" id="source-id" />
+          <div class="form-group">
+            <label class="form-label">Name</label>
+            <input type="text" id="source-name" class="form-input" placeholder="e.g. OpenAI" required />
           </div>
+          <div class="form-group">
+            <label class="form-label">Provider</label>
+            <select id="source-provider" class="form-input">
+              <option value="openai">OpenAI</option>
+              <option value="anthropic">Anthropic</option>
+              <option value="azure">Azure OpenAI</option>
+              <option value="dashscope">阿里云 DashScope</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Base URL</label>
+            <input type="text" id="source-baseurl" class="form-input" placeholder="https://api.openai.com/v1" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">API Key</label>
+            <input type="text" id="source-apikey" class="form-input" placeholder="sk-..." required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Default Model</label>
+            <input type="text" id="source-model" class="form-input" placeholder="gpt-4o" required />
+          </div>
+          <div id="source-error" class="form-error" style="display:none;"></div>
+          <div class="modal-footer">
+            <button type="button" class="proxy-btn proxy-btn--outline" onclick="closeModal('source-modal')">Cancel</button>
+            <button type="submit" class="proxy-btn proxy-btn--primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Channel Modal -->
+    <div id="channel-modal" class="modal-overlay" style="display:none;">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="channel-modal-title">Add Channel</h2>
+          <button class="modal-close" onclick="closeModal('channel-modal')">&times;</button>
+        </div>
+        <form id="channel-form" class="modal-body">
+          <input type="hidden" id="channel-id" />
+          <input type="hidden" id="channel-source-id" />
+          <div class="form-group">
+            <label class="form-label">Channel Name</label>
+            <input type="text" id="channel-name" class="form-input" placeholder="e.g. ChatBot" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Model Override <span class="form-hint">(leave empty to use source default)</span></label>
+            <input type="text" id="channel-model" class="form-input" placeholder="gpt-4o" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Rate Limit <span class="form-hint">(req/min, 0=unlimited)</span></label>
+              <input type="number" id="channel-ratelimit" class="form-input" value="0" min="0" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Daily Quota <span class="form-hint">(0=unlimited)</span></label>
+              <input type="number" id="channel-quota" class="form-input" value="0" min="0" />
+            </div>
+          </div>
+          <div id="channel-error" class="form-error" style="display:none;"></div>
+          <div class="modal-footer">
+            <button type="button" class="proxy-btn proxy-btn--outline" onclick="closeModal('channel-modal')">Cancel</button>
+            <button type="submit" class="proxy-btn proxy-btn--primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div id="stats-modal" class="modal-overlay" style="display:none;">
+      <div class="modal modal--wide">
+        <div class="modal-header">
+          <h2 id="stats-title">Usage Statistics</h2>
+          <button class="modal-close" onclick="closeModal('stats-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="stats-summary" id="stats-summary"></div>
+          <div class="stats-chart-container">
+            <canvas id="stats-chart"></canvas>
+          </div>
+          <div class="stats-channels" id="stats-channels"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="proxy-btn proxy-btn--outline" onclick="closeModal('stats-modal')">Close</button>
         </div>
       </div>
     </div>
   </main>
 
   <style>
-    .token-page {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1rem;
-      background: var(--bg-primary);
-    }
+    .proxy-page { min-height: 100vh; padding: 2rem 1rem; background: var(--bg-primary); }
+    .proxy-container { max-width: 1000px; margin: 0 auto; }
 
-    .token-container {
-      width: 100%;
-      max-width: 420px;
-    }
+    /* Login */
+    .proxy-login { max-width: 420px; margin: 4rem auto; background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-2xl); padding: 2.5rem 2rem; box-shadow: var(--shadow-lg); }
+    .proxy-login__header { text-align: center; margin-bottom: 2rem; }
+    .proxy-login__icon { display: inline-flex; align-items: center; justify-content: center; width: 72px; height: 72px; border-radius: 50%; background: var(--color-primary); color: white; margin-bottom: 1.25rem; }
+    .proxy-login__title { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin: 0 0 0.5rem; }
+    .proxy-login__subtitle { font-size: 0.875rem; color: var(--text-tertiary); margin: 0; }
+    .proxy-login__form { display: flex; flex-direction: column; gap: 1.25rem; }
 
-    /* Login Section */
-    .token-login {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-2xl);
-      padding: 2.5rem 2rem;
-      box-shadow: var(--shadow-lg);
-    }
+    /* Dashboard */
+    .dashboard-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+    .dashboard-title { font-size: 1.75rem; font-weight: 600; color: var(--text-primary); margin: 0 0 0.25rem; }
+    .dashboard-subtitle { font-size: 0.875rem; color: var(--text-tertiary); margin: 0; }
+    .dashboard-actions { display: flex; gap: 0.75rem; }
 
-    .token-login__header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
+    /* Source Cards */
+    .sources-list { display: flex; flex-direction: column; gap: 1rem; }
+    .source-card { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-xl); overflow: hidden; }
+    .source-card__header { padding: 1.25rem 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none; }
+    .source-card__header:hover { background: var(--bg-tertiary); }
+    .source-card__info { flex: 1; }
+    .source-card__name { font-size: 1.125rem; font-weight: 600; color: var(--text-primary); margin: 0 0 0.25rem; }
+    .source-card__meta { font-size: 0.8rem; color: var(--text-tertiary); display: flex; gap: 1rem; flex-wrap: wrap; }
+    .source-card__meta span { display: flex; align-items: center; gap: 0.25rem; }
+    .source-card__toggle { transition: transform 0.2s; color: var(--text-tertiary); }
+    .source-card__toggle.open { transform: rotate(180deg); }
+    .source-card__body { display: none; border-top: 1px solid var(--border-primary); }
+    .source-card__body.open { display: block; }
+    .source-card__stats { padding: 1rem 1.5rem; background: var(--bg-tertiary); display: flex; gap: 2rem; flex-wrap: wrap; }
+    .source-card__stat { text-align: center; }
+    .source-card__stat-value { font-size: 1.25rem; font-weight: 600; color: var(--text-primary); }
+    .source-card__stat-label { font-size: 0.75rem; color: var(--text-tertiary); }
+    .source-card__actions { padding: 0.75rem 1.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap; border-top: 1px solid var(--border-primary); }
 
-    .token-login__icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      background: var(--color-primary);
-      color: white;
-      margin-bottom: 1.25rem;
-    }
+    /* Channel Table */
+    .channel-table { width: 100%; border-collapse: collapse; }
+    .channel-table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-primary); }
+    .channel-table td { padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-primary); }
+    .channel-table tr:last-child td { border-bottom: none; }
+    .channel-table .actions { display: flex; gap: 0.25rem; }
 
-    .token-login__title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0 0 0.5rem;
-    }
+    /* Buttons */
+    .proxy-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1.25rem; border-radius: var(--radius-lg); font-size: 0.875rem; font-weight: 500; cursor: pointer; border: none; transition: all var(--duration-fast) var(--ease-default); }
+    .proxy-btn--primary { background: var(--color-primary); color: white; }
+    .proxy-btn--primary:hover { background: var(--color-primary-dark, #b45a3e); transform: translateY(-1px); }
+    .proxy-btn--outline { background: transparent; border: 1px solid var(--border-primary); color: var(--text-secondary); }
+    .proxy-btn--outline:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .proxy-btn--sm { padding: 0.375rem 0.75rem; font-size: 0.8rem; }
+    .proxy-btn--danger { background: transparent; border: 1px solid rgba(239,68,68,0.3); color: #ef4444; }
+    .proxy-btn--danger:hover { background: rgba(239,68,68,0.1); }
+    .proxy-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-    .token-login__subtitle {
-      font-size: 0.875rem;
-      color: var(--text-tertiary);
-      margin: 0;
-    }
+    /* Forms */
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-label { font-size: 0.875rem; font-weight: 500; color: var(--text-secondary); }
+    .form-hint { font-size: 0.75rem; color: var(--text-quaternary); font-weight: 400; }
+    .form-input { padding: 0.75rem 1rem; border: 1px solid var(--border-primary); border-radius: var(--radius-lg); background: var(--bg-primary); color: var(--text-primary); font-size: 0.9375rem; transition: border-color var(--duration-fast); }
+    .form-input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(196,100,74,0.1); }
+    .form-error { padding: 0.75rem 1rem; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: var(--radius-lg); color: #ef4444; font-size: 0.875rem; }
 
-    .token-login__form {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .modal { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-2xl); width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+    .modal--wide { max-width: 720px; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-primary); }
+    .modal-header h2 { font-size: 1.125rem; font-weight: 600; color: var(--text-primary); margin: 0; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; color: var(--text-tertiary); cursor: pointer; padding: 0.25rem; line-height: 1; }
+    .modal-close:hover { color: var(--text-primary); }
+    .modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-primary); display: flex; justify-content: flex-end; gap: 0.75rem; }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
+    /* Status Badge */
+    .status-badge { display: inline-flex; align-items: center; gap: 0.375rem; font-size: 0.8rem; font-weight: 500; }
+    .status-badge--active { color: #22c55e; }
+    .status-badge--inactive { color: var(--text-quaternary); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .status-badge--active .status-dot { background: #22c55e; }
+    .status-badge--inactive .status-dot { background: var(--text-quaternary); }
 
-    .form-label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
+    /* Stats */
+    .stats-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stats-summary-item { text-align: center; padding: 1rem; background: var(--bg-tertiary); border-radius: var(--radius-lg); }
+    .stats-summary-value { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); }
+    .stats-summary-label { font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.25rem; }
+    .stats-chart-container { margin-bottom: 1.5rem; height: 250px; }
+    .stats-channels table { width: 100%; border-collapse: collapse; }
+    .stats-channels th, .stats-channels td { padding: 0.5rem 0.75rem; text-align: left; font-size: 0.8rem; border-bottom: 1px solid var(--border-primary); }
+    .stats-channels th { color: var(--text-tertiary); font-weight: 500; }
 
-    .form-input {
-      padding: 0.75rem 1rem;
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-lg);
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      font-size: 0.9375rem;
-      transition: border-color var(--duration-fast) var(--ease-default);
-    }
+    /* Loading */
+    .loading-state { text-align: center; padding: 3rem; color: var(--text-tertiary); }
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-tertiary); }
+    .empty-state svg { margin-bottom: 1rem; opacity: 0.3; }
 
-    .form-input:focus {
-      outline: none;
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 3px rgba(196, 100, 74, 0.1);
-    }
-
-    .form-input::placeholder {
-      color: var(--text-quaternary);
-    }
-
-    .form-error {
-      padding: 0.75rem 1rem;
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      border-radius: var(--radius-lg);
-      color: #ef4444;
-      font-size: 0.875rem;
-    }
-
-    .token-login__btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.875rem 1.5rem;
-      border: none;
-      border-radius: var(--radius-lg);
-      background: var(--color-primary);
-      color: white;
-      font-size: 0.9375rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all var(--duration-fast) var(--ease-default);
-    }
-
-    .token-login__btn:hover {
-      background: var(--color-primary-dark, #b45a3e);
-      transform: translateY(-1px);
-    }
-
-    .token-login__btn:active {
-      transform: translateY(0);
-    }
-
-    .token-login__btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .spinner {
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Dashboard Section */
-    .token-dashboard {
-      width: 100%;
-      max-width: 800px;
-    }
-
-    .dashboard-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 2rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border-primary);
-    }
-
-    .dashboard-title {
-      font-size: 1.75rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0 0 0.25rem;
-    }
-
-    .dashboard-subtitle {
-      font-size: 0.875rem;
-      color: var(--text-tertiary);
-      margin: 0;
-    }
-
-    .dashboard-logout {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.625rem 1.25rem;
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-lg);
-      background: var(--bg-secondary);
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all var(--duration-fast) var(--ease-default);
-    }
-
-    .dashboard-logout:hover {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-    }
-
-    .dashboard-content {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-2xl);
-      padding: 3rem 2rem;
-      text-align: center;
-    }
-
-    .dashboard-placeholder {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .placeholder-text {
-      font-size: 1rem;
-      color: var(--text-tertiary);
-      margin: 0;
-    }
+    /* Spinner */
+    .spinner { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     @media (max-width: 640px) {
-      .token-login {
-        padding: 2rem 1.5rem;
-      }
-
-      .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-      }
+      .dashboard-header { flex-direction: column; align-items: flex-start; }
+      .form-row { grid-template-columns: 1fr; }
+      .source-card__stats { gap: 1rem; }
+      .channel-table { font-size: 0.8rem; }
+      .channel-table th, .channel-table td { padding: 0.5rem; }
     }
   </style>
 
   <script>
     const API_BASE = 'https://api.ustc.dev';
     const TOKEN_KEY = 'meownote_super_admin_token';
-    const USER_KEY = 'meownote_super_admin_user';
 
-    const loginSection = document.getElementById('login-section');
-    const dashboardSection = document.getElementById('dashboard-section');
-    const loginForm = document.getElementById('token-login-form');
-    const loginError = document.getElementById('login-error');
-    const loginBtn = document.getElementById('login-btn');
-    const btnText = loginBtn.querySelector('.btn-text');
-    const btnLoader = loginBtn.querySelector('.btn-loader');
-    const logoutBtn = document.getElementById('logout-btn');
-    const adminUsername = document.getElementById('admin-username');
+    const PROVIDER_PRESETS = {
+      openai: { baseUrl: 'https://api.openai.com/v1', format: 'openai', defaultModel: 'gpt-4o' },
+      anthropic: { baseUrl: 'https://api.anthropic.com/v1', format: 'anthropic', defaultModel: 'claude-3-5-sonnet-20241022' },
+      azure: { baseUrl: 'https://xxx.openai.azure.com/openai', format: 'openai', defaultModel: 'gpt-4' },
+      dashscope: { baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', format: 'openai', defaultModel: 'qwen-plus' },
+      custom: { baseUrl: '', format: 'openai', defaultModel: '' }
+    };
 
-    function showLoading() {
-      loginBtn.disabled = true;
-      btnText.style.display = 'none';
-      btnLoader.style.display = 'inline-flex';
+    let sourcesData = [];
+    let statsChartInstance = null;
+
+    function getToken() { return localStorage.getItem(TOKEN_KEY); }
+
+    function showLoading(btn) { btn.disabled = true; btn.querySelector('.btn-text').style.display = 'none'; btn.querySelector('.btn-loader').style.display = 'inline-flex'; }
+    function hideLoading(btn) { btn.disabled = false; btn.querySelector('.btn-text').style.display = 'inline'; btn.querySelector('.btn-loader').style.display = 'none'; }
+
+    function showError(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+    function hideError(el) { el.style.display = 'none'; }
+
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+
+    function maskKey(key) {
+      if (!key || key.length < 8) return '****';
+      return key.substring(0, 4) + '****' + key.substring(key.length - 4);
     }
 
-    function hideLoading() {
-      loginBtn.disabled = false;
-      btnText.style.display = 'inline';
-      btnLoader.style.display = 'none';
+    function formatNumber(n) {
+      if (!n) return '0';
+      return Number(n).toLocaleString();
     }
 
-    function showError(message) {
-      loginError.textContent = message;
-      loginError.style.display = 'block';
+    function formatLatency(ms) {
+      if (!ms) return '-';
+      if (ms < 1000) return ms + 'ms';
+      return (ms / 1000).toFixed(1) + 's';
     }
 
-    function hideError() {
-      loginError.style.display = 'none';
+    async function apiCall(path, options = {}) {
+      const token = getToken();
+      const headers = { 'Content-Type': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }), ...options.headers };
+      const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+      return res.json();
     }
 
-    function showDashboard(user) {
-      loginSection.style.display = 'none';
-      dashboardSection.style.display = 'block';
-      adminUsername.textContent = user.username;
-    }
-
-    function showLogin() {
-      loginSection.style.display = 'block';
-      dashboardSection.style.display = 'none';
-    }
-
-    async function verifyToken() {
-      const token = localStorage.getItem(TOKEN_KEY);
+    async function verifySession() {
+      const token = getToken();
       if (!token) return false;
-
       try {
-        const res = await fetch(`${API_BASE}/api/superadmin/verify`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-        
+        const data = await apiCall('/api/superadmin/verify');
         if (data.success) {
-          localStorage.setItem(USER_KEY, JSON.stringify(data.user));
           showDashboard(data.user);
           return true;
         }
-      } catch (e) {
-        console.error('Token verification failed:', e);
-      }
-      
+      } catch(e) {}
       localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
       return false;
     }
 
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideError();
-      showLoading();
+    function showDashboard(user) {
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('dashboard-section').style.display = 'block';
+      document.getElementById('admin-name').textContent = user.username;
+      loadSources();
+    }
 
-      const formData = new FormData(loginForm);
-      const username = formData.get('username');
-      const password = formData.get('password');
+    function showLogin() {
+      document.getElementById('login-section').style.display = 'block';
+      document.getElementById('dashboard-section').style.display = 'none';
+    }
+
+    async function loadSources() {
+      const container = document.getElementById('sources-list');
+      container.innerHTML = '<div class="loading-state">Loading...</div>';
+      try {
+        const data = await apiCall('/api/proxy/sources');
+        if (!data.success) { container.innerHTML = '<div class="empty-state">Failed to load</div>'; return; }
+        sourcesData = data.sources || [];
+        renderSources();
+      } catch(e) {
+        container.innerHTML = '<div class="empty-state">Network error</div>';
+      }
+    }
+
+    function renderSources() {
+      const container = document.getElementById('sources-list');
+      if (sourcesData.length === 0) {
+        container.innerHTML = '<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><p>No API sources configured yet.</p><p style="font-size:0.8rem;margin-top:0.5rem;">Click "Add Source API" to get started.</p></div>';
+        return;
+      }
+
+      container.innerHTML = sourcesData.map(s => `
+        <div class="source-card" data-source-id="${s.id}">
+          <div class="source-card__header" onclick="toggleSource('${s.id}')">
+            <div class="source-card__info">
+              <div class="source-card__name">${s.name}</div>
+              <div class="source-card__meta">
+                <span>${s.base_url}</span>
+                <span>Key: ${maskKey(s.api_key)}</span>
+                <span>${s.api_format}</span>
+                <span>Model: ${s.default_model}</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+              <span class="status-badge ${s.is_active ? 'status-badge--active' : 'status-badge--inactive'}">
+                <span class="status-dot"></span>${s.is_active ? 'Active' : 'Disabled'}
+              </span>
+              <svg class="source-card__toggle" id="toggle-${s.id}" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="source-card__body" id="body-${s.id}">
+            <div class="source-card__stats">
+              <div class="source-card__stat"><div class="source-card__stat-value">${formatNumber(s.total_usage)}</div><div class="source-card__stat-label">Total Calls</div></div>
+              <div class="source-card__stat"><div class="source-card__stat-value">${s.channel_count}</div><div class="source-card__stat-label">Channels</div></div>
+            </div>
+            <div id="channels-${s.id}"></div>
+            <div class="source-card__actions">
+              <button class="proxy-btn proxy-btn--sm proxy-btn--outline" onclick="openAddChannel('${s.id}')">+ Add Channel</button>
+              <button class="proxy-btn proxy-btn--sm proxy-btn--outline" onclick="viewSourceStats('${s.id}')">View Stats</button>
+              <button class="proxy-btn proxy-btn--sm proxy-btn--outline" onclick="editSource('${s.id}')">Edit</button>
+              <button class="proxy-btn proxy-btn--sm proxy-btn--outline" onclick="toggleSourceStatus('${s.id}')">${s.is_active ? 'Disable' : 'Enable'}</button>
+              <button class="proxy-btn proxy-btn--sm proxy-btn--danger" onclick="deleteSource('${s.id}')">Delete</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Load channels for each source
+      sourcesData.forEach(s => loadChannels(s.id));
+    }
+
+    function toggleSource(id) {
+      const body = document.getElementById(`body-${id}`);
+      const toggle = document.getElementById(`toggle-${id}`);
+      body.classList.toggle('open');
+      toggle.classList.toggle('open');
+    }
+
+    async function loadChannels(sourceId) {
+      const container = document.getElementById(`channels-${sourceId}`);
+      try {
+        const data = await apiCall('/api/proxy/sources');
+        const source = (data.sources || []).find(s => s.id === sourceId);
+        if (!source) return;
+
+        // Fetch channels via the source detail (we need to get channels from the source)
+        // Since we don't have a direct channels list endpoint per source, we'll use a workaround
+        // Actually we need to add a channels list endpoint. For now, let's show a placeholder
+        container.innerHTML = '<div style="padding:1rem 1.5rem;color:var(--text-tertiary);font-size:0.875rem;">Channels will appear here after adding.</div>';
+      } catch(e) {
+        container.innerHTML = '<div style="padding:1rem 1.5rem;color:#ef4444;font-size:0.875rem;">Failed to load channels</div>';
+      }
+    }
+
+    // Source Form
+    document.getElementById('source-provider').addEventListener('change', function() {
+      const preset = PROVIDER_PRESETS[this.value];
+      if (preset) {
+        document.getElementById('source-baseurl').value = preset.baseUrl;
+        document.getElementById('source-model').value = preset.defaultModel;
+      }
+    });
+
+    document.getElementById('source-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = this.querySelector('button[type="submit"]');
+      const errorEl = document.getElementById('source-error');
+      hideError(errorEl);
+      showLoading(btn);
+
+      const id = document.getElementById('source-id').value;
+      const data = {
+        name: document.getElementById('source-name').value,
+        base_url: document.getElementById('source-baseurl').value,
+        api_key: document.getElementById('source-apikey').value,
+        api_format: document.getElementById('source-provider').value,
+        default_model: document.getElementById('source-model').value
+      };
+
+      try {
+        let result;
+        if (id) {
+          result = await apiCall(`/api/proxy/sources/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+        } else {
+          result = await apiCall('/api/proxy/sources', { method: 'POST', body: JSON.stringify(data) });
+        }
+        if (result.success || result.id) {
+          closeModal('source-modal');
+          loadSources();
+        } else {
+          showError(errorEl, result.error || 'Failed to save');
+        }
+      } catch(err) {
+        showError(errorEl, 'Network error');
+      } finally {
+        hideLoading(btn);
+      }
+    });
+
+    // Channel Form
+    document.getElementById('channel-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = this.querySelector('button[type="submit"]');
+      const errorEl = document.getElementById('channel-error');
+      hideError(errorEl);
+      showLoading(btn);
+
+      const id = document.getElementById('channel-id').value;
+      const sourceId = document.getElementById('channel-source-id').value;
+      const data = {
+        name: document.getElementById('channel-name').value,
+        model_override: document.getElementById('channel-model').value || null,
+        rate_limit: parseInt(document.getElementById('channel-ratelimit').value) || 0,
+        daily_quota: parseInt(document.getElementById('channel-quota').value) || 0
+      };
+
+      try {
+        let result;
+        if (id) {
+          result = await apiCall(`/api/proxy/channels/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+        } else {
+          result = await apiCall(`/api/proxy/sources/${sourceId}/channels`, { method: 'POST', body: JSON.stringify(data) });
+        }
+        if (result.success || result.id) {
+          closeModal('channel-modal');
+          loadSources();
+        } else {
+          showError(errorEl, result.error || 'Failed to save');
+        }
+      } catch(err) {
+        showError(errorEl, 'Network error');
+      } finally {
+        hideLoading(btn);
+      }
+    });
+
+    // Login
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const errorEl = document.getElementById('login-error');
+      hideError(errorEl);
+      showLoading(btn);
 
       try {
         const res = await fetch(`${API_BASE}/api/superadmin/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
+          body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value })
         });
-
         const data = await res.json();
-
         if (data.success) {
           localStorage.setItem(TOKEN_KEY, data.token);
-          localStorage.setItem(USER_KEY, JSON.stringify(data.user));
           showDashboard(data.user);
-          loginForm.reset();
+          this.reset();
         } else {
-          showError(data.error || 'Login failed. Please check your credentials.');
+          showError(errorEl, data.error || 'Login failed');
         }
-      } catch (e) {
-        showError('Network error. Please try again.');
+      } catch(err) {
+        showError(errorEl, 'Network error');
       } finally {
-        hideLoading();
+        hideLoading(btn);
       }
     });
 
-    logoutBtn.addEventListener('click', () => {
+    document.getElementById('logout-btn').addEventListener('click', () => {
       localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
       showLogin();
     });
 
-    // Check for existing session on load
-    verifyToken();
+    document.getElementById('add-source-btn').addEventListener('click', () => {
+      document.getElementById('source-modal-title').textContent = 'Add Source API';
+      document.getElementById('source-id').value = '';
+      document.getElementById('source-form').reset();
+      document.getElementById('source-provider').value = 'openai';
+      document.getElementById('source-baseurl').value = PROVIDER_PRESETS.openai.baseUrl;
+      document.getElementById('source-model').value = PROVIDER_PRESETS.openai.defaultModel;
+      openModal('source-modal');
+    });
+
+    // Global functions for inline handlers
+    window.closeModal = closeModal;
+    window.toggleSource = toggleSource;
+
+    window.editSource = async function(id) {
+      const source = sourcesData.find(s => s.id === id);
+      if (!source) return;
+      document.getElementById('source-modal-title').textContent = 'Edit Source';
+      document.getElementById('source-id').value = source.id;
+      document.getElementById('source-name').value = source.name;
+      document.getElementById('source-provider').value = source.api_format || 'openai';
+      document.getElementById('source-baseurl').value = source.base_url;
+      document.getElementById('source-apikey').value = source.api_key;
+      document.getElementById('source-model').value = source.default_model;
+      openModal('source-modal');
+    };
+
+    window.toggleSourceStatus = async function(id) {
+      if (!confirm('Toggle this source?')) return;
+      await apiCall(`/api/proxy/sources/${id}/toggle`, { method: 'POST' });
+      loadSources();
+    };
+
+    window.deleteSource = async function(id) {
+      if (!confirm('Delete this source? All channels will be deleted too.')) return;
+      const result = await apiCall(`/api/proxy/sources/${id}`, { method: 'DELETE' });
+      if (result.error) { alert(result.error); return; }
+      loadSources();
+    };
+
+    window.openAddChannel = function(sourceId) {
+      document.getElementById('channel-modal-title').textContent = 'Add Channel';
+      document.getElementById('channel-id').value = '';
+      document.getElementById('channel-source-id').value = sourceId;
+      document.getElementById('channel-form').reset();
+      openModal('channel-modal');
+    };
+
+    window.viewSourceStats = async function(sourceId) {
+      const source = sourcesData.find(s => s.id === sourceId);
+      if (!source) return;
+      document.getElementById('stats-title').textContent = `${source.name} - Usage Statistics`;
+      openModal('stats-modal');
+      document.getElementById('stats-summary').innerHTML = '<div class="loading-state">Loading...</div>';
+      document.getElementById('stats-channels').innerHTML = '';
+
+      try {
+        const data = await apiCall(`/api/proxy/sources/${sourceId}/stats`);
+        if (!data.success) return;
+
+        const s = data.source || {};
+        document.getElementById('stats-summary').innerHTML = `
+          <div class="stats-summary-item"><div class="stats-summary-value">${formatNumber(s.total_calls)}</div><div class="stats-summary-label">Total Calls</div></div>
+          <div class="stats-summary-item"><div class="stats-summary-value">${formatNumber(s.success_count)}</div><div class="stats-summary-label">Success</div></div>
+          <div class="stats-summary-item"><div class="stats-summary-value">${formatNumber(s.error_count)}</div><div class="stats-summary-label">Errors</div></div>
+          <div class="stats-summary-item"><div class="stats-summary-value">${formatNumber(s.total_prompt_tokens)}</div><div class="stats-summary-label">Input Tokens</div></div>
+          <div class="stats-summary-item"><div class="stats-summary-value">${formatNumber(s.total_completion_tokens)}</div><div class="stats-summary-label">Output Tokens</div></div>
+          <div class="stats-summary-item"><div class="stats-summary-value">${formatLatency(s.avg_latency)}</div><div class="stats-summary-label">Avg Latency</div></div>
+        `;
+
+        // Chart
+        if (statsChartInstance) statsChartInstance.destroy();
+        const ctx = document.getElementById('stats-chart').getContext('2d');
+        const daily = data.daily || [];
+        statsChartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: daily.map(d => d.day),
+            datasets: [
+              { label: 'Calls', data: daily.map(d => d.calls), backgroundColor: 'rgba(196,100,74,0.6)', yAxisID: 'y' },
+              { label: 'Tokens', data: daily.map(d => d.tokens), backgroundColor: 'rgba(100,140,200,0.6)', yAxisID: 'y1' }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+              y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Calls' } },
+              y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Tokens' }, grid: { drawOnChartArea: false } }
+            }
+          }
+        });
+
+        // Channel breakdown
+        const channels = data.channels || [];
+        if (channels.length > 0) {
+          document.getElementById('stats-channels').innerHTML = `
+            <h3 style="font-size:0.9rem;font-weight:600;color:var(--text-primary);margin:1rem 0 0.5rem;">Channel Breakdown</h3>
+            <table>
+              <thead><tr><th>Channel</th><th>Status</th><th>Calls</th><th>Tokens</th><th>Avg Latency</th><th>Success</th><th>Errors</th></tr></thead>
+              <tbody>${channels.map(c => `<tr>
+                <td>${c.name}</td>
+                <td><span class="status-badge ${c.is_active ? 'status-badge--active' : 'status-badge--inactive'}"><span class="status-dot"></span>${c.is_active ? 'Active' : 'Disabled'}</span></td>
+                <td>${formatNumber(c.calls)}</td>
+                <td>${formatNumber(c.tokens)}</td>
+                <td>${formatLatency(c.avg_latency)}</td>
+                <td>${formatNumber(c.success_count)}</td>
+                <td>${formatNumber(c.error_count)}</td>
+              </tr>`).join('')}</tbody>
+            </table>`;
+        }
+      } catch(e) {
+        document.getElementById('stats-summary').innerHTML = '<div class="empty-state">Failed to load stats</div>';
+      }
+    };
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === this) this.style.display = 'none';
+      });
+    });
+
+    // Init
+    verifySession();
   </script>
 </Layout>
