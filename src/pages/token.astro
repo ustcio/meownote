@@ -686,8 +686,16 @@ import Layout from '../layouts/Layout.astro';
     function showError(el, msg) { if (el) { el.textContent = msg; el.style.display = 'block'; } }
     function hideError(el) { if (el) el.style.display = 'none'; }
 
-    function closeModal(id) { const m = document.getElementById(id); if (m) m.style.display = 'none'; }
-    function openModal(id) { const m = document.getElementById(id); if (m) m.style.display = 'flex'; }
+    function closeModal(id) {
+      var m = document.getElementById(id);
+      console.log('[Proxy] closeModal:', id, m ? 'found' : 'not found');
+      if (m) m.style.display = 'none';
+    }
+    function openModal(id) {
+      var m = document.getElementById(id);
+      console.log('[Proxy] openModal:', id, m ? 'found' : 'not found');
+      if (m) m.style.display = 'flex';
+    }
 
     function maskKey(key) {
       if (!key || key.length < 8) return '****';
@@ -700,11 +708,20 @@ import Layout from '../layouts/Layout.astro';
     async function apiCall(path, options) {
       options = options || {};
       var token = getToken();
+      console.log('[Proxy] API call:', path, 'token:', token ? token.substring(0, 10) + '...' : 'none');
       var headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = 'Bearer ' + token;
       if (options.headers) { for (var k in options.headers) headers[k] = options.headers[k]; }
-      var res = await fetch(API_BASE + path, Object.assign({}, options, { headers: headers }));
-      return res.json();
+      try {
+        var res = await fetch(API_BASE + path, Object.assign({}, options, { headers: headers }));
+        console.log('[Proxy] Response status:', res.status);
+        var data = await res.json();
+        console.log('[Proxy] Response data:', data);
+        return data;
+      } catch(err) {
+        console.error('[Proxy] Fetch error:', err);
+        throw err;
+      }
     }
 
     async function verifySession() {
@@ -841,13 +858,27 @@ import Layout from '../layouts/Layout.astro';
         showLoading(btn);
 
         var id = document.getElementById('source-id').value;
+        var nameVal = document.getElementById('source-name').value;
+        var baseUrlVal = document.getElementById('source-baseurl').value;
+        var apiKeyVal = document.getElementById('source-apikey').value;
+        var providerVal = document.getElementById('source-provider').value;
+        var modelVal = document.getElementById('source-model').value;
+
+        if (!nameVal || !baseUrlVal || !apiKeyVal || !modelVal) {
+          showError(errorEl, 'All fields are required');
+          hideLoading(btn);
+          return;
+        }
+
         var data = {
-          name: document.getElementById('source-name').value,
-          base_url: document.getElementById('source-baseurl').value,
-          api_key: document.getElementById('source-apikey').value,
-          api_format: document.getElementById('source-provider').value,
-          default_model: document.getElementById('source-model').value
+          name: nameVal,
+          base_url: baseUrlVal,
+          api_key: apiKeyVal,
+          api_format: providerVal,
+          default_model: modelVal
         };
+
+        console.log('[Proxy] Saving source:', data);
 
         try {
           var result;
@@ -856,18 +887,22 @@ import Layout from '../layouts/Layout.astro';
           } else {
             result = await apiCall('/api/proxy/sources', { method: 'POST', body: JSON.stringify(data) });
           }
+          console.log('[Proxy] Save result:', result);
           if (result.success || result.id) {
             closeModal('source-modal');
             loadSources();
           } else {
-            showError(errorEl, result.error || 'Failed to save');
+            showError(errorEl, result.error || result.message || 'Failed to save');
           }
         } catch(err) {
-          showError(errorEl, 'Network error');
+          console.error('[Proxy] Save error:', err);
+          showError(errorEl, 'Network error: ' + err.message);
         } finally {
           hideLoading(btn);
         }
       });
+    } else {
+      console.error('[Proxy] Source form not found!');
     }
 
     // Channel form submit
@@ -953,6 +988,7 @@ import Layout from '../layouts/Layout.astro';
     var addSourceBtn = document.getElementById('add-source-btn');
     if (addSourceBtn) {
       addSourceBtn.addEventListener('click', function() {
+        console.log('[Proxy] Add Source button clicked');
         var t = document.getElementById('source-modal-title');
         if (t) t.textContent = 'Add Source API';
         var sid = document.getElementById('source-id');
@@ -965,8 +1001,14 @@ import Layout from '../layouts/Layout.astro';
         if (sb) sb.value = PROVIDER_PRESETS.openai.baseUrl;
         var sm = document.getElementById('source-model');
         if (sm) sm.value = PROVIDER_PRESETS.openai.defaultModel;
+        var sa = document.getElementById('source-apikey');
+        if (sa) sa.value = '';
+        var se = document.getElementById('source-error');
+        if (se) se.style.display = 'none';
         openModal('source-modal');
       });
+    } else {
+      console.error('[Proxy] Add Source button not found!');
     }
 
     // Global handlers
