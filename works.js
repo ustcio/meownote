@@ -140,6 +140,8 @@ const ROUTES = {
   '/api/trading/alert': { handler: handleAlertOperation },
   '/api/trading/notifications': { handler: handleGetNotifications },
   '/api/trading/tolerance': { handler: handleToleranceSettings },
+  '/api/superadmin/login': { handler: handleSuperAdminLogin },
+  '/api/superadmin/verify': { handler: handleSuperAdminVerify },
   '/api/workspace': { handler: handleWorkspace, pattern: /^\/api\/workspace(?:\/([^/]+)(?:\/([^/]+))?)?$/ },
 };
 
@@ -4381,6 +4383,79 @@ async function handleTradingLogin(request, env) {
 }
 
 async function handleTradingVerify(request, env) {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return jsonResponse({ success: false, error: 'No token provided' }, 401);
+  }
+
+  const token = authHeader.substring(7);
+  const secret = env.JWT_SECRET || 'agiera-default-jwt-secret-2024';
+  const verification = await verifyAdminToken(token, secret);
+  
+  if (!verification) {
+    return jsonResponse({ success: false, error: 'Invalid token' }, 401);
+  }
+
+  return jsonResponse({ success: true, user: verification });
+}
+
+// ================================================================================
+// Super Admin Token Management
+// ================================================================================
+
+async function handleSuperAdminLogin(request, env) {
+  if (request.method !== 'POST') {
+    return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+  }
+
+  try {
+    const { username, password } = await request.json();
+    
+    if (!username || !password) {
+      return jsonResponse({ success: false, error: 'Username and password are required' }, 400);
+    }
+
+    // Use same auth as trading (admin_users table)
+    const stmt = env.DB.prepare('SELECT * FROM admin_users WHERE username = ?');
+    const result = await stmt.bind(username).first();
+
+    if (!result) {
+      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
+    }
+
+    const [salt, storedHash] = result.password_hash.split(':');
+    const encoder = new TextEncoder();
+    const data = encoder.encode(salt + password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    if (hash !== storedHash) {
+      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
+    }
+
+    const secret = env.JWT_SECRET || 'agiera-default-jwt-secret-2024';
+    const token = await createAdminToken({
+      userId: result.id,
+      username: result.username,
+      role: result.role
+    }, secret);
+
+    await env.DB.prepare('UPDATE admin_users SET last_login = ? WHERE id = ?')
+      .bind(new Date().toISOString(), result.id).run();
+
+    return jsonResponse({
+      success: true,
+      token,
+      user: { id: result.id, username: result.username, role: result.role }
+    });
+  } catch (error) {
+    console.error('[SuperAdmin Login Error]', error);
+    return jsonResponse({ success: false, error: 'Login failed' }, 500);
+  }
+}
+
+async function handleSuperAdminVerify(request, env) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return jsonResponse({ success: false, error: 'No token provided' }, 401);

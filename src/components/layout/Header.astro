@@ -6,6 +6,7 @@ const navItems = [
   { href: '/workspace', label: 'Workspace' },
   { href: '/kit', label: 'Kit' },
   { href: '/about', label: 'About' },
+  { href: '/token', label: 'Token', icon: 'lock' },
 ];
 
 const isActive = (href: string) =>
@@ -34,6 +35,12 @@ const isActive = (href: string) =>
           href={item.href}
           class:list={['site-nav__link', { active: isActive(item.href) }]}
         >
+          {item.icon === 'lock' && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: -2px;">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          )}
           {item.label}
         </a>
       ))}
@@ -60,10 +67,15 @@ const isActive = (href: string) =>
   <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile">
     {navItems.map((item) => (
       <a href={item.href} class:list={['mobile-nav__link', { active: isActive(item.href) }]}>
+        {item.icon === 'lock' && (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: -3px;">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        )}
         {item.label}
       </a>
     ))}
-    <a href="/kit" class="mobile-nav__link">Kit</a>
     <a href="https://github.com/ustcio/meownote" class="mobile-nav__link" target="_blank" rel="noopener">GitHub</a>
     <div class="mobile-nav__actions">
       <a href="/chatbot" class="header__cta mobile-nav__cta">Start</a>
