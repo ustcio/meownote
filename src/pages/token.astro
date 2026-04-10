@@ -874,7 +874,8 @@ import Layout from '../layouts/Layout.astro';
             } else {
               result = await apiCall('/api/proxy/sources', { method: 'POST', body: JSON.stringify(data) });
             }
-            console.log('Save source result:', JSON.stringify(result));
+            log += 'Save result: ' + JSON.stringify(result, null, 2) + '\n';
+            if (debugBox) { debugBox.textContent = log; debugBox.style.display = 'block'; }
             if (result.success || result.id) {
               closeModal('source-modal');
               loadSources();
@@ -882,7 +883,8 @@ import Layout from '../layouts/Layout.astro';
               showError(errorEl, result.error || result.message || 'Failed to save');
             }
           } catch(err) {
-            console.error('Save source error:', err);
+            log += 'Save error: ' + err.message + '\n';
+            if (debugBox) { debugBox.textContent = log; debugBox.style.display = 'block'; }
             showError(errorEl, 'Network error: ' + err.message);
           } finally {
             hideLoading(btn);
