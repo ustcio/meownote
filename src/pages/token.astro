@@ -5,7 +5,7 @@ import Layout from '../layouts/Layout.astro';
 <Layout title="API Proxy | Maxwell.Science">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" defer></script>
 
-  <main class="proxy-page">
+  <div class="proxy-page">
     <div class="proxy-container">
       <!-- Login Section -->
       <div id="login-section" class="proxy-login">
@@ -67,7 +67,7 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <!-- Source Modal -->
-    <div id="source-modal" class="modal-overlay" style="display:none;">
+    <div id="source-modal" class="modal-overlay">
       <div class="modal">
         <div class="modal__header">
           <h2 id="source-modal-title" class="modal__title">Add Source API</h2>
@@ -118,7 +118,7 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <!-- Channel Modal -->
-    <div id="channel-modal" class="modal-overlay" style="display:none;">
+    <div id="channel-modal" class="modal-overlay">
       <div class="modal">
         <div class="modal__header">
           <h2 id="channel-modal-title" class="modal__title">Add Channel</h2>
@@ -162,7 +162,7 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <!-- Stats Modal -->
-    <div id="stats-modal" class="modal-overlay" style="display:none;">
+    <div id="stats-modal" class="modal-overlay">
       <div class="modal modal--wide">
         <div class="modal__header">
           <h2 id="stats-title" class="modal__title">Usage Statistics</h2>
@@ -182,7 +182,7 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </div>
     </div>
-  </main>
+  </div>
 
   <style>
     .proxy-page {
@@ -471,7 +471,7 @@ import Layout from '../layouts/Layout.astro';
   </style>
 
   <script is:inline>
-    (function() {
+    document.addEventListener('DOMContentLoaded', function() {
       var API_BASE = 'https://api.ustc.dev';
       var TOKEN_KEY = 'meownote_super_admin_token';
 
@@ -916,6 +916,6 @@ import Layout from '../layouts/Layout.astro';
 
       // Init
       verifySession();
-    })();
+    });
   </script>
 </Layout>
