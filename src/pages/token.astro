@@ -63,6 +63,7 @@ import Layout from '../layouts/Layout.astro';
             <div class="skeleton" style="width:100%;height:100px;border-radius:var(--radius-xl);"></div>
           </div>
         </div>
+        <div id="debug-box" style="margin-top:16px;padding:12px;background:#111;border-radius:8px;font-size:11px;color:#0f0;font-family:monospace;white-space:pre-wrap;max-height:250px;overflow:auto;display:none;"></div>
       </div>
     </div>
 
@@ -575,25 +576,33 @@ import Layout from '../layouts/Layout.astro';
 
       async function loadSources() {
         var container = document.getElementById('sources-list');
+        var debugBox = document.getElementById('debug-box');
         if (!container) return;
         container.innerHTML = '<div class="loading-state"><div class="skeleton" style="width:100%;height:100px;border-radius:var(--radius-xl);"></div></div>';
+        var log = '';
         try {
+          log += 'Token: ' + (getToken() ? getToken().substring(0, 30) + '...' : 'NONE') + '\n';
+          log += 'API: ' + API_BASE + '/api/proxy/sources\n';
           var data = await apiCall('/api/proxy/sources');
+          log += 'Response: ' + JSON.stringify(data, null, 2) + '\n';
           if (!data.success) {
-            var errMsg = data.error || data.message || 'Failed to load sources';
-            container.innerHTML = '<div class="empty-state"><p>❌ ' + errMsg + '</p></div>';
+            container.innerHTML = '<div class="empty-state"><p>❌ ' + (data.error || data.message || 'Failed') + '</p></div>';
+            if (debugBox) { debugBox.textContent = log; debugBox.style.display = 'block'; }
             return;
           }
           sourcesData = data.sources || [];
+          log += 'Count: ' + sourcesData.length + '\n';
           if (sourcesData.length === 0) {
             container.innerHTML = '<div class="empty-state"><p>📭 No sources found. Click "Add Source" to get started.</p></div>';
+            if (debugBox) { debugBox.textContent = log; debugBox.style.display = 'block'; }
             return;
           }
           renderSources();
         } catch(e) {
-          console.error('loadSources error:', e);
-          container.innerHTML = '<div class="empty-state"><p>❌ Network error: ' + e.message + '</p></div>';
+          log += 'Error: ' + e.message + '\n';
+          container.innerHTML = '<div class="empty-state"><p>❌ ' + e.message + '</p></div>';
         }
+        if (debugBox) { debugBox.textContent = log; debugBox.style.display = 'block'; }
       }
 
       function renderSources() {
