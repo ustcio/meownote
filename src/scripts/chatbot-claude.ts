@@ -22,12 +22,14 @@ let sessions: ChatSession[] = [];
 let isGenerating = false;
 let currentModel = 'minimax-2.7';
 let abortController: AbortController | null = null;
+let proxyModels: Record<string, Array<{id: string; name: string; model: string}>> = {};
 
 // API Configuration
 const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 const TOKEN_KEY = 'meownote_auth_token';
 const USER_KEY = 'meownote_user_data';
 const SESSIONS_KEY = 'chatbot_sessions';
+const SUPER_ADMIN_TOKEN_KEY = 'meownote_super_admin_token';
 
 function getAuthToken(): string | null {
   const token = localStorage.getItem(TOKEN_KEY);
@@ -139,7 +141,6 @@ function setupEventListeners() {
         const modelNameEl = document.querySelector('.model-name');
         if (modelNameEl) modelNameEl.textContent = modelName;
         
-        // Update active state
         document.querySelectorAll('.model-option').forEach(o => o.classList.remove('active'));
         option.classList.add('active');
         
@@ -147,6 +148,9 @@ function setupEventListeners() {
       }
     });
   });
+
+  // Load proxy models
+  loadProxyModels();
 
   // Close model dropdown on outside click
   document.addEventListener('click', (e) => {
@@ -279,6 +283,45 @@ async function handleSendMessage() {
 async function getAIResponse(message: string): Promise<string> {
   abortController = new AbortController();
   try {
+    // Check if using a proxy channel
+    if (currentModel.startsWith('ch-')) {
+      const superAdminToken = localStorage.getItem(SUPER_ADMIN_TOKEN_KEY);
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (superAdminToken) headers['Authorization'] = `Bearer ${superAdminToken}`;
+
+      const response = await fetch(`${API_BASE}/api/v1?channelId=${currentModel}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: 'You are Meow AI Assistant, a helpful, harmless, and honest AI assistant.' },
+            ...(currentSession?.messages.map(m => ({
+              role: m.role === 'user' ? 'user' : 'assistant',
+              content: m.content
+            })) || []),
+            { role: 'user', content: message }
+          ],
+          stream: false
+        }),
+        signal: abortController.signal
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) throw new Error('API Key invalid. Please contact administrator.');
+        if (response.status === 429) throw new Error('Daily quota exceeded for this channel.');
+        if (response.status === 504) throw new Error('Upstream API timeout.');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.detail || `Proxy error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.choices?.[0]?.message?.content) return data.choices[0].message.content;
+      if (data.content?.[0]?.text) return data.content[0].text; // Anthropic format
+      if (data.error) throw new Error(data.error.message || data.error.detail || 'Proxy error');
+      throw new Error('Invalid response format from proxy API');
+    }
+
+    // Built-in models
     const response = await fetch(`${API_BASE}/api/chat`, {
       method: 'POST',
       headers: getAuthHeaders(),
@@ -561,6 +604,62 @@ function loadSessions() {
  */
 function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+/**
+ * Load proxy models from API
+ */
+async function loadProxyModels() {
+  const token = localStorage.getItem(SUPER_ADMIN_TOKEN_KEY);
+  if (!token) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/proxy/models`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (!data.success || !data.models) return;
+
+    proxyModels = data.models;
+    const modelDropdown = document.getElementById('model-dropdown');
+    if (!modelDropdown) return;
+
+    // Remove existing proxy groups
+    modelDropdown.querySelectorAll('.proxy-model-group').forEach(g => g.remove());
+
+    // Add proxy model groups
+    Object.entries(proxyModels).forEach(([sourceName, channels]) => {
+      const group = document.createElement('div');
+      group.className = 'model-group proxy-model-group';
+      group.innerHTML = `<div class="model-group-title">${sourceName}</div>`;
+
+      (channels as Array<{id: string; name: string; model: string}>).forEach(ch => {
+        const option = document.createElement('div');
+        option.className = 'model-option';
+        option.setAttribute('data-model', ch.id);
+        option.setAttribute('data-type', 'proxy');
+        option.innerHTML = `
+          <div class="model-info">
+            <div class="model-title">${ch.name}</div>
+            <div class="model-desc">${ch.model}</div>
+          </div>
+        `;
+        option.addEventListener('click', () => {
+          currentModel = ch.id;
+          const modelNameEl = document.querySelector('.model-name');
+          if (modelNameEl) modelNameEl.textContent = `${sourceName} - ${ch.name}`;
+          document.querySelectorAll('.model-option').forEach(o => o.classList.remove('active'));
+          option.classList.add('active');
+          modelDropdown.classList.remove('visible');
+        });
+        group.appendChild(option);
+      });
+
+      modelDropdown.appendChild(group);
+    });
+  } catch (e) {
+    console.error('Failed to load proxy models:', e);
+  }
 }
 
 /**
