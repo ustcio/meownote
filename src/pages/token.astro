@@ -63,9 +63,6 @@ import Layout from '../layouts/Layout.astro';
             <div class="skeleton" style="width:100%;height:100px;border-radius:var(--radius-xl);"></div>
           </div>
         </div>
-
-        <!-- Debug Panel -->
-        <div id="debug-panel" style="margin-top:20px;padding:16px;background:#1a1a2e;border-radius:12px;font-size:12px;color:#0f0;font-family:monospace;white-space:pre-wrap;max-height:300px;overflow:auto;display:none;"></div>
       </div>
     </div>
 
@@ -573,40 +570,24 @@ import Layout from '../layouts/Layout.astro';
 
       async function loadSources() {
         var container = document.getElementById('sources-list');
-        var debugPanel = document.getElementById('debug-panel');
         if (!container) return;
         container.innerHTML = '<div class="loading-state"><div class="skeleton" style="width:100%;height:100px;border-radius:var(--radius-xl);"></div></div>';
         try {
-          var debugInfo = 'Step 1: Fetching /api/proxy/sources\n';
-          debugInfo += 'URL: ' + API_BASE + '/api/proxy/sources\n';
-          debugInfo += 'Token: ' + (getToken() ? getToken().substring(0, 20) + '...' : 'NONE') + '\n\n';
           var data = await apiCall('/api/proxy/sources');
-          debugInfo += 'Step 2: Response received\n';
-          debugInfo += 'Response: ' + JSON.stringify(data, null, 2) + '\n\n';
           if (!data.success) {
-            var errMsg = data.error || data.message || 'Failed to load sources (API returned success: false)';
-            debugInfo += 'Step 3: ERROR - ' + errMsg + '\n';
-            container.innerHTML = '<div class="empty-state"><p>❌ ' + errMsg + '</p><p style="font-size:var(--text-xs);margin-top:var(--space-2);color:var(--text-quaternary);">Response: ' + JSON.stringify(data).substring(0, 300) + '</p></div>';
-            if (debugPanel) { debugPanel.textContent = debugInfo; debugPanel.style.display = 'block'; }
+            var errMsg = data.error || data.message || 'Failed to load sources';
+            container.innerHTML = '<div class="empty-state"><p>❌ ' + errMsg + '</p></div>';
             return;
           }
           sourcesData = data.sources || [];
-          debugInfo += 'Step 3: sourcesData count = ' + sourcesData.length + '\n';
-          debugInfo += 'sourcesData: ' + JSON.stringify(sourcesData, null, 2) + '\n';
           if (sourcesData.length === 0) {
-            container.innerHTML = '<div class="empty-state"><p>📭 No sources found in database</p><p style="font-size:var(--text-xs);margin-top:var(--space-2);color:var(--text-quaternary);">API returned success but empty sources array. Try adding a source again.</p></div>';
-            if (debugPanel) { debugPanel.textContent = debugInfo; debugPanel.style.display = 'block'; }
+            container.innerHTML = '<div class="empty-state"><p>📭 No sources found. Click "Add Source" to get started.</p></div>';
             return;
           }
-          debugInfo += 'Step 4: Calling renderSources()\n';
-          if (debugPanel) { debugPanel.textContent = debugInfo; debugPanel.style.display = 'block'; }
           renderSources();
         } catch(e) {
-          debugInfo += 'Step X: EXCEPTION - ' + e.message + '\n';
-          debugInfo += 'Stack: ' + (e.stack || 'N/A') + '\n';
           console.error('loadSources error:', e);
-          container.innerHTML = '<div class="empty-state"><p>❌ Network error: ' + e.message + '</p><p style="font-size:var(--text-xs);margin-top:var(--space-2);color:var(--text-quaternary);">Check: 1) Is api.ustc.dev running? 2) Is token valid? 3) Open browser console for details</p></div>';
-          if (debugPanel) { debugPanel.textContent = debugInfo; debugPanel.style.display = 'block'; }
+          container.innerHTML = '<div class="empty-state"><p>❌ Network error: ' + e.message + '</p></div>';
         }
       }
 
