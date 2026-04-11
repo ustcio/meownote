@@ -232,6 +232,9 @@ const totalWeeks = Math.ceil(totalDays / 7);
   }
 
   .contribution-graph {
+    --days-label-width: 3.25rem;
+    --cell-size: 1rem;
+    --cell-gap: 0.22rem;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -241,68 +244,67 @@ const totalWeeks = Math.ceil(totalDays / 7);
 
   .contribution-months {
     display: flex;
-    margin-left: 52px;
+    margin-left: var(--days-label-width);
     margin-bottom: var(--space-2);
     position: relative;
-    height: 18px;
-    width: calc(100% - 52px);
+    height: 1.4rem;
+    width: calc((var(--cell-size) * var(--total-weeks)) + (var(--cell-gap) * (var(--total-weeks) - 1)));
   }
 
   .contribution-month {
     position: absolute;
     left: calc(var(--week) / var(--total-weeks) * 100%);
     font-family: var(--font-sans);
-    font-size: 11px;
+    font-size: var(--text-xs);
     color: var(--text-tertiary);
     font-weight: 400;
   }
 
   .contribution-body {
     display: flex;
-    gap: var(--space-2);
-    width: 100%;
-    flex: 1;
-    min-width: 0;
+    gap: 0.5rem;
+    width: calc(var(--days-label-width) + (var(--cell-size) * var(--total-weeks)) + (var(--cell-gap) * (var(--total-weeks) - 1)));
+    align-items: start;
   }
 
   .contribution-days {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding-top: 2px;
+    display: grid;
+    grid-template-rows: repeat(7, var(--cell-size));
+    gap: var(--cell-gap);
     flex-shrink: 0;
-    width: 44px;
+    width: var(--days-label-width);
     padding-right: 0.35rem;
   }
 
   .contribution-day {
     font-family: var(--font-sans);
-    font-size: 11px;
+    font-size: var(--text-xs);
     color: var(--text-tertiary);
-    height: 11px;
-    line-height: 11px;
+    display: flex;
+    align-items: center;
+    height: var(--cell-size);
+    line-height: 1;
     text-align: left;
     white-space: nowrap;
   }
 
   .contribution-grid {
-    display: flex;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: var(--cell-size);
+    gap: var(--cell-gap);
+    width: calc((var(--cell-size) * var(--total-weeks)) + (var(--cell-gap) * (var(--total-weeks) - 1)));
   }
 
   .contribution-week {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    flex: 1;
-    min-width: 0;
+    display: grid;
+    grid-template-rows: repeat(7, var(--cell-size));
+    gap: var(--cell-gap);
   }
 
   .contribution-cell {
-    aspect-ratio: 1;
-    width: 100%;
+    width: var(--cell-size);
+    height: var(--cell-size);
     border-radius: 2px;
     background-color: var(--contribution-0);
     transition: transform 0.15s ease;
@@ -327,7 +329,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
 
   .legend-text {
     font-family: var(--font-sans);
-    font-size: 11px;
+    font-size: var(--text-xs);
     color: var(--text-tertiary);
   }
 
@@ -349,6 +351,12 @@ const totalWeeks = Math.ceil(totalDays / 7);
   .legend-cell[data-level="4"] { background-color: var(--contribution-4); }
 
   @media (max-width: 767px) {
+    .contribution-graph {
+      --days-label-width: 2.5rem;
+      --cell-size: 0.9rem;
+      --cell-gap: 0.18rem;
+    }
+
     .contribution-panel {
       padding: 1rem;
       border-radius: 1.4rem;
@@ -364,23 +372,13 @@ const totalWeeks = Math.ceil(totalDays / 7);
     }
 
     .contribution-months {
-      margin-left: 42px;
-      width: calc(100% - 42px);
-    }
-
-    .contribution-days {
-      width: 34px;
-      padding-right: 0.2rem;
-    }
-
-    .contribution-day {
-      font-size: 10px;
+      margin-left: var(--days-label-width);
     }
   }
 </style>
 
 <script>
-  const API_BASE = 'https://api.ustc.dev';
+  const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   const REFRESH_INTERVAL = 60000;
   
   async function fetchHeatmapData() {

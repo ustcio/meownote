@@ -40,8 +40,8 @@
   --color-danger-light: rgba(179, 79, 61, 0.1);
 
   /* -------- typography -------- */
-  --text-xs: 0.75rem;       /* 12px */
-  --text-sm: 0.8125rem;     /* 13px */
+  --text-xs: 0.8125rem;     /* 13px */
+  --text-sm: 0.875rem;      /* 14px */
   --text-base: 1.0625rem;   /* 17px — Claude: 19px, compromise at 17px */
   --text-lg: 1.1875rem;     /* 19px */
   --text-xl: 1.375rem;      /* 22px */

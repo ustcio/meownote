@@ -260,7 +260,7 @@ import Layout from '@layouts/Layout.astro';
 
   .stat-label {
     display: block;
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     font-weight: var(--font-medium);
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -508,6 +508,7 @@ import Layout from '@layouts/Layout.astro';
   .file-card {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     padding: 1rem 1.25rem;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
@@ -537,9 +538,11 @@ import Layout from '@layouts/Layout.astro';
 
   /* Card Top: Icon + Info + Actions */
   .file-card-top {
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
     gap: 0.9rem;
+    min-height: 4.75rem;
   }
 
   /* File Icon */
@@ -562,7 +565,10 @@ import Layout from '@layouts/Layout.astro';
 
   /* File Content */
   .file-content {
-    flex: 1;
+    display: grid;
+    align-content: start;
+    gap: 0.35rem;
+    min-height: 100%;
     min-width: 0;
   }
 
@@ -581,11 +587,25 @@ import Layout from '@layouts/Layout.astro';
   }
 
   .file-meta {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 6px;
     font-size: 0.85rem;
     color: #8a7f74;
+    min-height: 1.5rem;
+  }
+
+  .file-meta-date {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-meta-sep,
+  .file-meta-size {
+    white-space: nowrap;
   }
 
   .file-badge {
@@ -593,7 +613,7 @@ import Layout from '@layouts/Layout.astro';
     color: #d97757;
     padding: 2px 8px;
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     font-weight: 600;
     text-transform: uppercase;
   }
@@ -601,20 +621,33 @@ import Layout from '@layouts/Layout.astro';
   /* Card Actions Bar */
   .file-card-actions {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 14px;
-    padding-top: 12px;
+    gap: 0.65rem;
+    align-items: start;
+    margin-top: 16px;
+    padding-top: 14px;
     border-top: 1px solid var(--border-secondary);
   }
 
+  .file-card-actions-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
   .file-card-actions-main {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 0.5rem;
     min-width: 0;
-    flex-wrap: wrap;
+  }
+
+  .file-card-tag-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 2rem;
   }
 
   .file-card-btn {
@@ -663,7 +696,7 @@ import Layout from '@layouts/Layout.astro';
     background: var(--bg-secondary);
     color: var(--text-primary);
     border: 1px solid var(--border-primary);
-    min-width: 3.2rem;
+    min-width: 3.4rem;
   }
 
   .file-card-btn.secondary:hover {
@@ -693,13 +726,14 @@ import Layout from '@layouts/Layout.astro';
 
   /* Category tag button */
   .category-tag-btn {
-    font-size: 0.78rem !important;
+    font-size: var(--text-xs) !important;
     padding: 0 10px !important;
     height: 32px !important;
     border-radius: var(--radius-full) !important;
     font-weight: 500 !important;
     letter-spacing: 0.01em !important;
     max-width: 100%;
+    width: fit-content;
   }
 
   /* Empty State */
@@ -1004,6 +1038,7 @@ import Layout from '@layouts/Layout.astro';
 
     .file-card-top {
       gap: 0.75rem;
+      min-height: 0;
     }
 
     .file-icon {
@@ -1016,23 +1051,33 @@ import Layout from '@layouts/Layout.astro';
     }
 
     .file-meta {
+      grid-template-columns: auto minmax(0, 1fr);
       font-size: 0.8rem;
     }
 
+    .file-meta-sep,
+    .file-meta-size {
+      display: none;
+    }
+
     .file-card-actions {
-      grid-template-columns: 1fr;
       gap: 0.65rem;
     }
 
+    .file-card-actions-row {
+      grid-template-columns: 1fr;
+      gap: 0.55rem;
+    }
+
     .file-card-actions-main {
-      width: 100%;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 0.45rem;
     }
 
     .file-card-btn {
       padding: 0 10px;
       height: 30px;
-      font-size: 0.75rem;
+      font-size: var(--text-xs);
       min-width: 0;
     }
 
@@ -1049,7 +1094,7 @@ import Layout from '@layouts/Layout.astro';
 
     .category-tag-btn {
       padding: 0 8px !important;
-      font-size: 0.75rem !important;
+      font-size: var(--text-xs) !important;
       height: 30px !important;
     }
 
@@ -1083,6 +1128,15 @@ import Layout from '@layouts/Layout.astro';
 
   // Use categoryTags as the single source of truth (exclude 'all' for picker/buttons)
   const categoryDefs = categoryTags.filter(c => c.key !== 'all');
+
+  function normalizeCategoryTag(tag) {
+    if (!tag || typeof tag !== 'string') return '';
+    const normalized = tag.trim().toLowerCase();
+    const match = categoryDefs.find(cat =>
+      cat.key.toLowerCase() === normalized || cat.label.trim().toLowerCase() === normalized
+    );
+    return match?.key || '';
+  }
 
   function getAuthToken() {
     const token = localStorage.getItem(TOKEN_KEY);
@@ -1170,6 +1224,7 @@ import Layout from '@layouts/Layout.astro';
         ...options,
         headers,
         signal: controller.signal,
+        cache: 'no-store',
       };
 
       console.log(`[API] ${options.method || 'GET'} ${API_BASE}${path}`, { isFormData, hasBody: !!options.body, bodyType: options.body?.constructor?.name });
@@ -1345,6 +1400,7 @@ import Layout from '@layouts/Layout.astro';
       const params = [`sortBy=${sortBy}`, 'order=desc'];
       if (searchQuery) params.push(`search=${encodeURIComponent(searchQuery)}`);
 
+      params.push(`ts=${Date.now()}`);
       const result = await apiRequest(`/api/workspace?${params.join('&')}`);
       files = result.data || [];
       renderFiles();
@@ -1403,7 +1459,7 @@ import Layout from '@layouts/Layout.astro';
 
   function getCurrentTag(file) {
     const currentTags = (file.tag || '').split(',').map(t => t.trim()).filter(Boolean);
-    return currentTags.find(t => categoryDefs.some(c => c.key === t)) || '';
+    return currentTags.map(normalizeCategoryTag).find(Boolean) || '';
   }
 
   function renderCategoryButton(file) {
@@ -1439,20 +1495,21 @@ import Layout from '@layouts/Layout.astro';
     try {
       const file = files.find(f => f.id === tagTargetId);
       if (!file) return;
+      const normalizedCategory = normalizeCategoryTag(category);
+      if (!normalizedCategory) return;
 
       // Build new tag string: keep existing tags that aren't in the same category group, add new one
       const currentTags = (file.tag || '').split(',').map(t => t.trim()).filter(Boolean);
       const categoryKeys = categoryDefs.map(c => c.key);
       const otherTags = currentTags.filter(t => !categoryKeys.includes(t));
-      const newTags = otherTags.length > 0 ? [...otherTags, category].join(',') : category;
+      const newTags = otherTags.length > 0 ? [...otherTags, normalizedCategory].join(',') : normalizedCategory;
 
       const result = await apiRequest(`/api/workspace/${tagTargetId}`, {
         method: 'PUT',
         body: JSON.stringify({ tag: newTags }),
       });
       if (result.success) {
-        file.tag = result.data?.tag ?? newTags;
-        renderFiles();
+        await loadFiles();
         showToast('Category updated', 'success');
       }
     } catch (error) {
@@ -1493,36 +1550,40 @@ import Layout from '@layouts/Layout.astro';
                 <div class="file-title">${escapeHtml(file.title)}</div>
                 <div class="file-meta">
                   <span class="file-badge">${escapeHtml(ext.toUpperCase())}</span>
-                  <span>${timeStr}</span>
-                  ${size ? `<span>·</span><span>${size}</span>` : ''}
+                  <span class="file-meta-date">${timeStr}</span>
+                  ${size ? `<span class="file-meta-sep">·</span><span class="file-meta-size">${size}</span>` : ''}
                 </div>
               </div>
             </div>
             <div class="file-card-actions">
-              <div class="file-card-actions-main">
-              <button class="file-card-btn primary" data-action="open" data-id="${file.id}">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                  <polyline points="15 3 21 3 21 9"></polyline>
-                  <line x1="10" y1="14" x2="21" y2="3"></line>
-                </svg>
-                Open
-              </button>
-              <button class="file-card-btn secondary" data-action="download" data-id="${file.id}">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="7 10 12 15 17 10"></polyline>
-                  <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-              </button>
-              ${renderCategoryButton(file)}
+              <div class="file-card-actions-row">
+                <div class="file-card-actions-main">
+                  <button class="file-card-btn primary" data-action="open" data-id="${file.id}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      <polyline points="15 3 21 3 21 9"></polyline>
+                      <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                    Open
+                  </button>
+                  <button class="file-card-btn secondary" data-action="download" data-id="${file.id}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                  </button>
+                </div>
+                <button class="file-card-btn danger" data-action="delete" data-id="${file.id}" title="Delete">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
               </div>
-              <button class="file-card-btn danger" data-action="delete" data-id="${file.id}" title="Delete">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </button>
+              <div class="file-card-tag-row">
+                ${renderCategoryButton(file)}
+              </div>
             </div>
           </article>
         `;
