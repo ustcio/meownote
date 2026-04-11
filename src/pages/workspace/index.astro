@@ -1116,6 +1116,8 @@ import Layout from '@layouts/Layout.astro';
   let deleteTargetId = null;
   let searchDebounce = null;
   let categoryFilter = 'all';
+  const WORKSPACE_CACHE_KEY = 'workspace_files_cache_v2';
+  const WORKSPACE_CACHE_TTL = 60 * 1000;
 
   const categoryTags = [
     { key: 'all', label: 'All', color: '' },
@@ -1136,6 +1138,43 @@ import Layout from '@layouts/Layout.astro';
       cat.key.toLowerCase() === normalized || cat.label.trim().toLowerCase() === normalized
     );
     return match?.key || '';
+  }
+
+  function canUseWorkspaceCache() {
+    return !searchQuery && sortBy === 'updated_at';
+  }
+
+  function readWorkspaceCache() {
+    if (!canUseWorkspaceCache()) return null;
+    try {
+      const raw = localStorage.getItem(WORKSPACE_CACHE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.files) || !parsed.savedAt) return null;
+      if (Date.now() - parsed.savedAt > WORKSPACE_CACHE_TTL) return null;
+      return parsed.files;
+    } catch {
+      return null;
+    }
+  }
+
+  function writeWorkspaceCache(nextFiles) {
+    if (!canUseWorkspaceCache()) return;
+    try {
+      localStorage.setItem(WORKSPACE_CACHE_KEY, JSON.stringify({
+        files: nextFiles,
+        savedAt: Date.now(),
+      }));
+    } catch {}
+  }
+
+  function hydrateWorkspaceCache() {
+    const cachedFiles = readWorkspaceCache();
+    if (!cachedFiles) return false;
+    files = cachedFiles;
+    renderFiles();
+    hideLoading();
+    return true;
   }
 
   function getAuthToken() {
@@ -1252,11 +1291,15 @@ import Layout from '@layouts/Layout.astro';
   }
 
   async function init() {
-    await loadFiles();
     initSortDropdown();
     initCategoryFilters();
     initModals();
     initGridActions();
+    if (!hydrateWorkspaceCache()) {
+      await loadFiles();
+      return;
+    }
+    loadFiles({ background: true });
   }
 
   function initCategoryFilters() {
@@ -1393,8 +1436,9 @@ import Layout from '@layouts/Layout.astro';
     });
   }
 
-  async function loadFiles() {
-    showLoading();
+  async function loadFiles(options = {}) {
+    const { background = false } = options;
+    if (!background) showLoading();
 
     try {
       const params = [`sortBy=${sortBy}`, 'order=desc'];
@@ -1403,12 +1447,15 @@ import Layout from '@layouts/Layout.astro';
       params.push(`ts=${Date.now()}`);
       const result = await apiRequest(`/api/workspace?${params.join('&')}`);
       files = result.data || [];
+      writeWorkspaceCache(files);
       renderFiles();
     } catch (error) {
       console.error('Load failed:', error);
-      showToast('Failed to load files', 'error');
+      if (!background || files.length === 0) {
+        showToast('Failed to load files', 'error');
+      }
     } finally {
-      hideLoading();
+      if (!background || files.length === 0) hideLoading();
     }
   }
 

@@ -6682,22 +6682,25 @@ async function listWorkspaceFiles(request, env) {
     const validOrder = ['asc', 'desc'].includes(order.toLowerCase()) ? order.toUpperCase() : 'DESC';
     const validSortBy = validSortColumns.includes(sortBy) ? sortBy : 'updated_at';
 
-    let countQuery = 'SELECT COUNT(*) as total FROM workspace_files';
     let dataQuery = 'SELECT * FROM workspace_files';
     const params = [];
 
     if (search) {
       const where = ' WHERE title LIKE ? OR content LIKE ?';
-      countQuery += where;
       dataQuery += where;
       params.push(`%${search}%`, `%${search}%`);
     }
 
-    const countResult = await env.DB.prepare(countQuery).bind(...params).first();
-    const total = countResult?.total || 0;
-
     dataQuery += ` ORDER BY ${validSortBy} ${validOrder} LIMIT ? OFFSET ?`;
-    const result = await env.DB.prepare(dataQuery).bind(...params, limit, offset).all();
+    const [countResult, result] = await Promise.all([
+      env.DB.prepare(
+        search
+          ? 'SELECT COUNT(*) as total FROM workspace_files WHERE title LIKE ? OR content LIKE ?'
+          : 'SELECT COUNT(*) as total FROM workspace_files'
+      ).bind(...params).first(),
+      env.DB.prepare(dataQuery).bind(...params, limit, offset).all(),
+    ]);
+    const total = countResult?.total || 0;
 
     const files = (result.results || []).map(row => ({
       id: row.id,
