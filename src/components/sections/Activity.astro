@@ -61,7 +61,7 @@ const workModes = [
   .work-modes {
     display: grid;
     gap: 1rem;
-    align-items: start;
+    align-items: stretch;
   }
 
   @media (min-width: 1000px) {
@@ -78,6 +78,13 @@ const workModes = [
     border: 1px solid var(--card-border);
     display: grid;
     gap: 0.65rem;
+    height: 100%;
+  }
+
+  @media (min-width: 1000px) {
+    .work-modes__demo {
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    }
   }
 
   .demo-window {
@@ -85,6 +92,15 @@ const workModes = [
     border-radius: var(--radius-md);
     background: var(--bg-primary);
     border: 1px solid var(--border-secondary);
+  }
+
+  @media (min-width: 1000px) {
+    .demo-window {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
   }
 
   .demo-window--muted {
@@ -137,6 +153,13 @@ const workModes = [
   .work-modes__list {
     display: grid;
     gap: 1.25rem;
+    height: 100%;
+  }
+
+  @media (min-width: 1000px) {
+    .work-modes__list {
+      grid-template-rows: repeat(3, minmax(0, 1fr));
+    }
   }
 
   .work-mode {
@@ -144,6 +167,7 @@ const workModes = [
     border-top: 1px solid var(--border-secondary);
     display: grid;
     gap: 0.4rem;
+    align-content: start;
   }
 
   .work-mode:first-child {

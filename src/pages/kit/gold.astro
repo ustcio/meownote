@@ -1,96 +1,480 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import KitToolWrapper from '@components/vue/KitToolWrapper.vue';
 
 const dayTabs = [
-  { id: "today", label: "Today" },
-  { id: "yesterday", label: "Yesterday" },
+  { id: 'today', label: 'Today' },
+  { id: 'yesterday', label: 'Yesterday' },
 ];
 
 const toolName = 'Gold Price';
-const toolDesc = 'Track domestic and international gold prices';
+const toolDesc = 'Track domestic and international gold prices in a focused live dashboard.';
 ---
 
-<Layout title={`${toolName} - 工具箱 - Maxwell.Science`} description={toolDesc}>
-  <section class="tool-page-hao">
-    <KitToolWrapper title={toolName} description={toolDesc} client:load>
-<!-- Preload Chart.js for faster rendering -->
-  <link rel="preload" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" as="script" />
-  
-  <section >
-    <div class="hao-section-container">
-      <header class="hao-tool-header">
-        <a href="/kit/" class="hao-back-link">
+<Layout title={`${toolName} - Maxwell.Science`} description={toolDesc}>
+  <link
+    rel="preload"
+    href="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
+    as="script"
+  />
+
+  <section class="gold-page">
+    <div class="container gold-shell">
+      <header class="gold-hero">
+        <a href="/kit/" class="gold-back-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="15 18 9 12 15 6"/>
+            <path d="M15 18l-6-6 6-6"></path>
           </svg>
-          <span>Toolkit</span>
+          <span>Back to toolkit</span>
         </a>
-        <h1 class="hao-tool-title">Gold Price</h1>
-        <p class="desc">Track domestic and international gold price trends</p>
+
+        <div class="gold-hero__copy">
+          <span class="gold-kicker">Market tracker</span>
+          <h1>Gold prices, without the noise.</h1>
+          <p>
+            A quiet, live view of domestic and international gold moves, with just enough structure
+            to compare price, change, range, and intraday shape at a glance.
+          </p>
+        </div>
+
+        <div class="gold-hero__meta">
+          <div class="gold-chip">
+            <span class="gold-chip__dot"></span>
+            <span id="update-time">Updating...</span>
+          </div>
+
+          <div class="gold-tabs" id="day-tabs" role="tablist" aria-label="Gold price range">
+            {dayTabs.map((tab, index) => (
+              <button
+                class:list={['gold-tab', { 'is-active': index === 0 }]}
+                data-day={tab.id}
+                role="tab"
+                aria-selected={index === 0 ? 'true' : 'false'}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </header>
-      
-      <div class="hao-tabs" id="day-tabs">
-        {dayTabs.map((tab, index) => (
-          <button class:list={['tab', { active: index === 0 }]} data-day={tab.id}>
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      
-      <div class="cards">
-        <div class="hao-card">
-          <div class="card-head">
-            <h2 class="card-title">Domestic Gold</h2>
-            <span class="unit">CNY/g</span>
+
+      <div class="gold-grid">
+        <article class="gold-card gold-card--domestic">
+          <div class="gold-card__top">
+            <div>
+              <span class="gold-card__eyebrow">Domestic</span>
+              <h2>Shanghai / retail reference</h2>
+            </div>
+            <span class="gold-card__unit">CNY / g</span>
           </div>
-          <div class="price-row">
-            <span class="hao-price" id="domestic-price">--</span>
-            <span class="change" id="domestic-change">--</span>
+
+          <div class="gold-card__price-row">
+            <span class="gold-price" id="domestic-price">--</span>
+            <span class="gold-change" id="domestic-change">--</span>
           </div>
-          <div class="stats">
-            <div class="stat"><span class="lbl">High</span><span class="val" id="domestic-high">--</span></div>
-            <div class="stat"><span class="lbl">Low</span><span class="val" id="domestic-low">--</span></div>
-            <div class="stat"><span class="lbl">Open</span><span class="val" id="domestic-open">--</span></div>
+
+          <dl class="gold-stats">
+            <div class="gold-stat">
+              <dt>High</dt>
+              <dd id="domestic-high">--</dd>
+            </div>
+            <div class="gold-stat">
+              <dt>Low</dt>
+              <dd id="domestic-low">--</dd>
+            </div>
+            <div class="gold-stat">
+              <dt>Open</dt>
+              <dd id="domestic-open">--</dd>
+            </div>
+          </dl>
+
+          <div class="gold-chart-shell">
+            <canvas id="domestic-chart"></canvas>
+            <div class="gold-chart-empty" id="domestic-empty">Loading chart...</div>
           </div>
-          <div class="hao-chart"><canvas id="domestic-chart"></canvas><div class="chart-empty" id="domestic-empty">Loading data...</div></div>
-        </div>
-        
-        <div class="hao-card">
-          <div class="card-head">
-            <h2 class="card-title">International Gold</h2>
-            <span class="unit">USD/oz</span>
+        </article>
+
+        <article class="gold-card gold-card--international">
+          <div class="gold-card__top">
+            <div>
+              <span class="gold-card__eyebrow">International</span>
+              <h2>Global spot benchmark</h2>
+            </div>
+            <span class="gold-card__unit">USD / oz</span>
           </div>
-          <div class="price-row">
-            <span class="hao-price" id="international-price">--</span>
-            <span class="change" id="international-change">--</span>
+
+          <div class="gold-card__price-row">
+            <span class="gold-price" id="international-price">--</span>
+            <span class="gold-change" id="international-change">--</span>
           </div>
-          <div class="stats">
-            <div class="stat"><span class="lbl">High</span><span class="val" id="international-high">--</span></div>
-            <div class="stat"><span class="lbl">Low</span><span class="val" id="international-low">--</span></div>
-            <div class="stat"><span class="lbl">Open</span><span class="val" id="international-open">--</span></div>
+
+          <dl class="gold-stats">
+            <div class="gold-stat">
+              <dt>High</dt>
+              <dd id="international-high">--</dd>
+            </div>
+            <div class="gold-stat">
+              <dt>Low</dt>
+              <dd id="international-low">--</dd>
+            </div>
+            <div class="gold-stat">
+              <dt>Open</dt>
+              <dd id="international-open">--</dd>
+            </div>
+          </dl>
+
+          <div class="gold-chart-shell">
+            <canvas id="international-chart"></canvas>
+            <div class="gold-chart-empty" id="international-empty">Loading chart...</div>
           </div>
-          <div class="hao-chart"><canvas id="international-chart"></canvas><div class="chart-empty" id="international-empty">Loading data...</div></div>
-        </div>
-      </div>
-      
-      <div class="update">
-        <span id="update-time">Updating...</span>
+        </article>
       </div>
     </div>
-  </section>
-    </KitToolWrapper>
   </section>
 </Layout>
 
 <style>
-  .tool-page-hao {
-    padding-top: calc(var(--header-height) + 2rem);
-    padding-bottom: 4rem;
+  .gold-page {
+    --gold-ink: #2f2418;
+    --gold-muted: #7c6d5d;
+    --gold-soft: rgba(255, 251, 245, 0.8);
+    --gold-border: rgba(72, 56, 36, 0.12);
+    --gold-shadow: 0 24px 56px rgba(74, 52, 24, 0.08);
+    --gold-shadow-hover: 0 30px 68px rgba(74, 52, 24, 0.12);
+    padding: calc(var(--header-height) + 2rem) 0 4.5rem;
     min-height: 100vh;
+    background:
+      radial-gradient(circle at top left, rgba(214, 176, 112, 0.12), transparent 28%),
+      radial-gradient(circle at top right, rgba(217, 119, 87, 0.1), transparent 24%),
+      linear-gradient(180deg, #fbf7f1 0%, #f8f2ea 100%);
   }
+
+  .gold-shell {
+    display: grid;
+    gap: 1.75rem;
+  }
+
+  .gold-hero {
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .gold-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    width: fit-content;
+    font-size: 0.84rem;
+    font-weight: var(--font-medium);
+    color: var(--gold-muted);
+  }
+
+  .gold-back-link:hover {
+    color: var(--gold-ink);
+  }
+
+  .gold-back-link svg {
+    transition: transform var(--duration-fast) var(--ease-default);
+  }
+
+  .gold-back-link:hover svg {
+    transform: translateX(-2px);
+  }
+
+  .gold-hero__copy {
+    max-width: 46rem;
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .gold-kicker {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    gap: 0.5rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(72, 56, 36, 0.1);
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--gold-muted);
+    font-size: 0.72rem;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .gold-kicker::before {
+    content: '';
+    width: 0.36rem;
+    height: 0.36rem;
+    border-radius: 999px;
+    background: var(--color-primary);
+  }
+
+  .gold-hero__copy h1 {
+    max-width: 14ch;
+    color: var(--gold-ink);
+    text-wrap: balance;
+  }
+
+  .gold-hero__copy p {
+    margin: 0;
+    max-width: 40rem;
+    color: var(--gold-muted);
+    font-size: 1rem;
+  }
+
+  .gold-hero__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .gold-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(72, 56, 36, 0.08);
+    color: var(--gold-muted);
+    font-size: 0.82rem;
+    box-shadow: 0 10px 24px rgba(74, 52, 24, 0.05);
+  }
+
+  .gold-chip__dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: var(--color-success);
+    box-shadow: 0 0 0 6px rgba(106, 141, 123, 0.12);
+  }
+
+  .gold-tabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(72, 56, 36, 0.1);
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 10px 26px rgba(74, 52, 24, 0.06);
+  }
+
+  .gold-tab {
+    min-height: 2.4rem;
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius-full);
+    color: var(--gold-muted);
+    font-size: 0.86rem;
+    font-weight: var(--font-medium);
+  }
+
+  .gold-tab.is-active {
+    background: var(--gold-ink);
+    color: #fffaf3;
+  }
+
+  .gold-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 980px) {
+    .gold-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .gold-card {
+    position: relative;
+    display: grid;
+    gap: 1.4rem;
+    padding: 1.35rem;
+    border-radius: 1.5rem;
+    border: 1px solid var(--gold-border);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(253, 249, 243, 0.92)),
+      var(--gold-soft);
+    box-shadow: var(--gold-shadow);
+    overflow: hidden;
+    transition:
+      transform var(--duration-normal) var(--ease-default),
+      box-shadow var(--duration-normal) var(--ease-default);
+  }
+
+  .gold-card::after {
+    content: '';
+    position: absolute;
+    inset: auto -4rem -5rem auto;
+    width: 12rem;
+    height: 12rem;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255, 192, 92, 0.18), transparent 70%);
+    pointer-events: none;
+  }
+
+  .gold-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--gold-shadow-hover);
+  }
+
+  .gold-card--international::after {
+    background: radial-gradient(circle, rgba(122, 163, 214, 0.18), transparent 70%);
+  }
+
+  .gold-card__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .gold-card__eyebrow {
+    display: inline-block;
+    margin-bottom: 0.35rem;
+    font-size: 0.72rem;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold-muted);
+  }
+
+  .gold-card__top h2 {
+    margin: 0;
+    font-size: clamp(1.2rem, 2.4vw, 1.55rem);
+    line-height: 1.14;
+    color: var(--gold-ink);
+  }
+
+  .gold-card__unit {
+    padding: 0.4rem 0.7rem;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(72, 56, 36, 0.08);
+    color: var(--gold-muted);
+    font-size: 0.76rem;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .gold-card__price-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .gold-price {
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 6vw, 4.3rem);
+    line-height: 0.9;
+    color: var(--gold-ink);
+    letter-spacing: -0.05em;
+  }
+
+  .gold-change {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.1rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-full);
+    background: rgba(120, 140, 93, 0.12);
+    color: #677b4d;
+    font-size: 0.88rem;
+    font-weight: var(--font-semibold);
+  }
+
+  .gold-change.down {
+    background: rgba(179, 79, 61, 0.12);
+    color: var(--color-danger);
+  }
+
+  .gold-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .gold-stat {
+    padding: 0.85rem 0.9rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(72, 56, 36, 0.08);
+  }
+
+  .gold-stat dt {
+    margin: 0 0 0.3rem;
+    color: var(--gold-muted);
+    font-size: 0.75rem;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .gold-stat dd {
+    margin: 0;
+    color: var(--gold-ink);
+    font-size: 1.05rem;
+    font-weight: var(--font-semibold);
+  }
+
+  .gold-chart-shell {
+    position: relative;
+    min-height: 18rem;
+    padding: 1rem 0.75rem 0.5rem;
+    border-radius: 1.15rem;
+    background: rgba(250, 247, 241, 0.86);
+    border: 1px solid rgba(72, 56, 36, 0.08);
+  }
+
+  .gold-chart-shell canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  .gold-chart-empty {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--gold-muted);
+    font-size: 0.92rem;
+  }
+
+  .loading {
+    opacity: 0.55;
+  }
+
+  .error {
+    color: var(--color-danger);
+  }
+
   @media (max-width: 767px) {
-    .tool-page-hao { padding-top: calc(var(--header-height) + 1rem); }
+    .gold-page {
+      padding: calc(var(--header-height) + 1.2rem) 0 3.5rem;
+    }
+
+    .gold-card {
+      padding: 1.1rem;
+    }
+
+    .gold-card__top {
+      flex-direction: column;
+    }
+
+    .gold-stats {
+      grid-template-columns: 1fr;
+    }
+
+    .gold-chart-shell {
+      min-height: 15rem;
+      padding: 0.75rem 0.35rem 0.35rem;
+    }
   }
 </style>
 
@@ -98,177 +482,136 @@ const toolDesc = 'Track domestic and international gold prices';
   // @ts-nocheck
   const API_BASE = 'https://api.ustc.dev';
   const REFRESH_INTERVAL = 10000;
-  
+
   function showLoading() {
-    const ids = ['domestic-price', 'international-price'];
-    ids.forEach(id => {
+    ['domestic-price', 'international-price'].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.classList.add('loading');
     });
   }
-  
+
   function hideLoading() {
-    const ids = ['domestic-price', 'international-price'];
-    ids.forEach(id => {
+    ['domestic-price', 'international-price'].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.classList.remove('loading');
     });
   }
-  
+
   let currentDay = 'today';
   let domesticChart = null;
   let internationalChart = null;
   let todayData = null;
   let yesterdayData = null;
-  
-  const domesticCtx = document.getElementById('domestic-chart');
-  const internationalCtx = document.getElementById('international-chart');
-  
+
   function initCharts() {
-    const SF_PRO_FONT = '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif';
-    
+    const domesticCtx = document.getElementById('domestic-chart');
+    const internationalCtx = document.getElementById('international-chart');
+    const bodyFont = '"Instrument Serif", Georgia, serif';
+    const sansFont = '"Instrument Sans", "Helvetica Neue", sans-serif';
+
     const chartConfig = {
       type: 'line',
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { 
-          legend: { display: false }, 
-          tooltip: { 
-            backgroundColor: 'rgba(0, 0, 0, 0.85)', 
-            padding: 12, 
-            cornerRadius: 8,
-            titleFont: { family: SF_PRO_FONT, size: 13, weight: 'bold' },
-            bodyFont: { family: SF_PRO_FONT, size: 12 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(33, 24, 16, 0.92)',
+            padding: 12,
+            cornerRadius: 10,
+            titleFont: { family: sansFont, size: 12, weight: '600' },
+            bodyFont: { family: sansFont, size: 12 },
             callbacks: {
-              label: function(context) {
+              label(context) {
                 return `${context.parsed.y.toFixed(2)}`;
-              }
-            }
-          } 
+              },
+            },
+          },
         },
         scales: {
-          x: { 
-            display: true, 
-            grid: { display: false, drawBorder: false }, 
-            ticks: { 
-              color: '#888', 
+          x: {
+            display: true,
+            grid: { display: false, drawBorder: false },
+            ticks: {
+              color: '#7c6d5d',
               maxTicksLimit: 8,
-              font: { family: SF_PRO_FONT, size: 10 }
+              font: { family: sansFont, size: 10 },
             },
-            title: {
-              display: true,
-              text: 'Time',
-              color: '#666',
-              font: { family: SF_PRO_FONT, size: 11 }
-            }
           },
-          y: { 
-            display: true, 
-            grid: { 
-              color: 'rgba(255, 255, 255, 0.06)',
-              drawBorder: false
-            }, 
-            ticks: { 
-              color: '#888', 
+          y: {
+            display: true,
+            grid: {
+              color: 'rgba(72, 56, 36, 0.08)',
+              drawBorder: false,
+            },
+            ticks: {
+              color: '#7c6d5d',
               maxTicksLimit: 5,
-              font: { family: SF_PRO_FONT, size: 10 },
-              callback: function(value) {
+              font: { family: sansFont, size: 10 },
+              callback(value) {
                 return value.toFixed(1);
-              }
-            }
-          }
+              },
+            },
+          },
         },
-        elements: { 
-          point: { 
+        elements: {
+          point: {
             radius: 0,
-            hitRadius: 10,
+            hitRadius: 12,
             hoverRadius: 4,
             hoverBackgroundColor: '#fff',
             hoverBorderWidth: 2,
-            pointStyle: false
-          }, 
-          line: { 
-            tension: 0.4, 
-            borderWidth: 2,
+          },
+          line: {
+            tension: 0.36,
+            borderWidth: 2.5,
             borderJoinStyle: 'round',
-            borderCapStyle: 'round'
-          } 
+            borderCapStyle: 'round',
+          },
         },
         interaction: { intersect: false, mode: 'index' },
-        animation: {
-          duration: 300
-        }
-      }
+        animation: { duration: 300 },
+      },
     };
-    
+
     if (domesticCtx && window.Chart) {
       domesticChart = new window.Chart(domesticCtx, {
         ...chartConfig,
-        data: { 
-          labels: [], 
-          datasets: [{ 
-            data: [], 
-            borderColor: '#f97316', 
-            backgroundColor: 'rgba(249, 115, 22, 0.15)', 
-            fill: true,
-            borderWidth: 2.5
-          }] 
+        data: {
+          labels: [],
+          datasets: [
+            {
+              data: [],
+              borderColor: '#d98a2b',
+              backgroundColor: 'rgba(217, 138, 43, 0.16)',
+              fill: true,
+            },
+          ],
         },
-        options: {
-          ...chartConfig.options,
-          scales: {
-            ...chartConfig.options.scales,
-            y: {
-              ...chartConfig.options.scales.y,
-              title: {
-                display: true,
-                text: 'Price (CNY/g)',
-                color: '#f97316',
-                font: { family: SF_PRO_FONT, size: 11, weight: 'bold' }
-              }
-            }
-          }
-        }
       });
     }
 
     if (internationalCtx && window.Chart) {
       internationalChart = new window.Chart(internationalCtx, {
         ...chartConfig,
-        data: { 
-          labels: [], 
-          datasets: [{ 
-            data: [], 
-            borderColor: '#3b82f6', 
-            backgroundColor: 'rgba(59, 130, 246, 0.15)', 
-            fill: true,
-            borderWidth: 2.5
-          }] 
+        data: {
+          labels: [],
+          datasets: [
+            {
+              data: [],
+              borderColor: '#5b7ea9',
+              backgroundColor: 'rgba(91, 126, 169, 0.16)',
+              fill: true,
+            },
+          ],
         },
-        options: {
-          ...chartConfig.options,
-          scales: {
-            ...chartConfig.options.scales,
-            y: {
-              ...chartConfig.options.scales.y,
-              title: {
-                display: true,
-                text: 'Price (USD/oz)',
-                color: '#3b82f6',
-                font: { family: SF_PRO_FONT, size: 11, weight: 'bold' }
-              }
-            }
-          }
-        }
       });
     }
   }
-  
+
   function formatPrice(price, decimals = 2) {
-    if (price === undefined || price === null || isNaN(price)) {
-      return '--';
-    }
+    if (price === undefined || price === null || isNaN(price)) return '--';
     return price.toFixed(decimals);
   }
 
@@ -280,144 +623,107 @@ const toolDesc = 'Track domestic and international gold prices';
 
   function updateTime(timestamp) {
     const el = document.getElementById('update-time');
-    if (el) {
-      if (timestamp) {
-        const date = new Date(timestamp);
-        el.textContent = date.toLocaleString('zh-CN', { 
-          timeZone: 'Asia/Shanghai',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false
-        });
-      } else {
-        el.textContent = new Date().toLocaleString('zh-CN', { 
-          timeZone: 'Asia/Shanghai',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false
-        });
-      }
-    }
+    if (!el) return;
+
+    const date = timestamp ? new Date(timestamp) : new Date();
+    el.textContent = date.toLocaleString('zh-CN', {
+      timeZone: 'Asia/Shanghai',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
   }
-  
+
   async function fetchGoldPriceData(date = null) {
     try {
       showLoading();
-      
       const timestamp = Date.now();
       let url = `${API_BASE}/api/gold?t=${timestamp}`;
-      if (date) {
-        url += `&date=${date}`;
-      }
-      
-      console.log('[Gold] Fetching from:', url);
-      
+      if (date) url += `&date=${date}`;
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
-      
       const response = await fetch(url, {
-        headers: { 
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache'
+        headers: {
+          Accept: 'application/json',
+          'Cache-Control': 'no-cache',
         },
-        signal: controller.signal
+        signal: controller.signal,
       });
-      
       clearTimeout(timeoutId);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('[Gold] Data received:', data);
-        
-        if (data.success) {
-          return data;
-        } else {
-          console.error('[Gold] API returned success=false:', data.error);
-        }
-      } else {
-        console.error('[Gold] API error:', response.status);
-      }
-      
-      return null;
-      
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data : null;
     } catch (error) {
-      console.error('[Gold] Failed to fetch gold price:', error.name, error.message);
       return null;
     } finally {
       hideLoading();
     }
   }
-  
+
   function updateDisplay(data) {
     if (!data || !data.success) {
-      const elementsToUpdate = [
-        'domestic-price', 'domestic-change', 'domestic-high', 'domestic-low', 'domestic-open',
-        'international-price', 'international-change', 'international-high', 'international-low', 'international-open'
-      ];
-      
-      elementsToUpdate.forEach(id => {
+      [
+        'domestic-price',
+        'domestic-change',
+        'domestic-high',
+        'domestic-low',
+        'domestic-open',
+        'international-price',
+        'international-change',
+        'international-high',
+        'international-low',
+        'international-open',
+      ].forEach((id) => {
         const el = document.getElementById(id);
-        if (el) {
-          if (id.includes('price')) {
-            el.textContent = 'Error';
-            el.classList.add('error');
-          } else {
-            el.textContent = '--';
-          }
-        }
+        if (!el) return;
+        el.textContent = id.includes('price') ? 'Error' : '--';
+        if (id.includes('price')) el.classList.add('error');
       });
       return;
     }
-    
-    const domestic = data.domestic;
-    const international = data.international;
-    
-    const dp = document.getElementById('domestic-price');
-    const dc = document.getElementById('domestic-change');
-    const dh = document.getElementById('domestic-high');
-    const dl = document.getElementById('domestic-low');
-    const dopen = document.getElementById('domestic-open');
-    
-    if (dp && domestic && domestic.price !== undefined) dp.textContent = formatPrice(domestic.price);
-    if (dc && domestic && domestic.changePercent !== undefined) { 
-      dc.textContent = formatChange(domestic.changePercent); 
-      dc.className = `change ${domestic.changePercent >= 0 ? 'up' : 'down'}`; 
+
+    const { domestic, international } = data;
+
+    const setText = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    };
+
+    setText('domestic-price', formatPrice(domestic?.price));
+    setText('domestic-high', formatPrice(domestic?.high));
+    setText('domestic-low', formatPrice(domestic?.low));
+    setText('domestic-open', formatPrice(domestic?.open));
+    setText('international-price', formatPrice(international?.price));
+    setText('international-high', formatPrice(international?.high));
+    setText('international-low', formatPrice(international?.low));
+    setText('international-open', formatPrice(international?.open));
+
+    const domesticChange = document.getElementById('domestic-change');
+    if (domesticChange) {
+      domesticChange.textContent = formatChange(domestic?.changePercent);
+      domesticChange.className = `gold-change ${domestic?.changePercent >= 0 ? 'up' : 'down'}`;
     }
-    if (dh && domestic && domestic.high !== undefined) dh.textContent = formatPrice(domestic.high);
-    if (dl && domestic && domestic.low !== undefined) dl.textContent = formatPrice(domestic.low);
-    if (dopen && domestic && domestic.open !== undefined) dopen.textContent = formatPrice(domestic.open);
-    
-    const ip = document.getElementById('international-price');
-    const ic = document.getElementById('international-change');
-    const ih = document.getElementById('international-high');
-    const il = document.getElementById('international-low');
-    const iopen = document.getElementById('international-open');
-    
-    if (ip && international && international.price !== undefined) ip.textContent = formatPrice(international.price);
-    if (ic && international && international.changePercent !== undefined) { 
-      ic.textContent = formatChange(international.changePercent); 
-      ic.className = `change ${international.changePercent >= 0 ? 'up' : 'down'}`; 
+
+    const internationalChange = document.getElementById('international-change');
+    if (internationalChange) {
+      internationalChange.textContent = formatChange(international?.changePercent);
+      internationalChange.className = `gold-change ${international?.changePercent >= 0 ? 'up' : 'down'}`;
     }
-    if (ih && international && international.high !== undefined) ih.textContent = formatPrice(international.high);
-    if (il && international && international.low !== undefined) il.textContent = formatPrice(international.low);
-    if (iopen && international && international.open !== undefined) iopen.textContent = formatPrice(international.open);
-    
+
     updateCharts(data.history);
     updateTime(data.timestamp);
   }
-  
+
   function updateCharts(history) {
     const domesticEmpty = document.getElementById('domestic-empty');
     const internationalEmpty = document.getElementById('international-empty');
-    
+
     if (!history || !history.domestic || history.domestic.length === 0) {
       if (domesticChart) {
         domesticChart.data.labels = [];
@@ -429,120 +735,110 @@ const toolDesc = 'Track domestic and international gold prices';
         internationalChart.data.datasets[0].data = [];
         internationalChart.update('none');
       }
-      if (domesticEmpty) domesticEmpty.style.display = 'block';
-      if (internationalEmpty) internationalEmpty.style.display = 'block';
+      if (domesticEmpty) domesticEmpty.style.display = 'grid';
+      if (internationalEmpty) internationalEmpty.style.display = 'grid';
       return;
     }
-    
+
     if (domesticEmpty) domesticEmpty.style.display = 'none';
     if (internationalEmpty) internationalEmpty.style.display = 'none';
-    
+
     if (domesticChart && history.domestic) {
       domesticChart.data.labels = history.labels || [];
       domesticChart.data.datasets[0].data = history.domestic;
       domesticChart.update('active');
     }
-    
+
     if (internationalChart && history.international) {
       internationalChart.data.labels = history.labels || [];
       internationalChart.data.datasets[0].data = history.international;
       internationalChart.update('active');
     }
   }
-  
+
   async function loadTodayPrice() {
     const data = await fetchGoldPriceData();
     if (data) {
       todayData = data;
-      if (currentDay === 'today') {
-        updateDisplay(data);
-      }
+      if (currentDay === 'today') updateDisplay(data);
     }
   }
-  
+
   async function loadYesterdayPrice() {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const dateStr = yesterday.toISOString().split('T')[0];
-    
     const data = await fetchGoldPriceData(dateStr);
     if (data) {
       yesterdayData = data;
-      if (currentDay === 'yesterday') {
-        updateDisplay(data);
-      }
+      if (currentDay === 'yesterday') updateDisplay(data);
     }
   }
-  
+
   async function switchDay(day) {
     currentDay = day;
-    
     if (day === 'today') {
-      if (todayData) {
-        updateDisplay(todayData);
-      }
+      if (todayData) updateDisplay(todayData);
       await loadTodayPrice();
+    } else if (yesterdayData) {
+      updateDisplay(yesterdayData);
     } else {
-      if (yesterdayData) {
-        updateDisplay(yesterdayData);
-      } else {
-        await loadYesterdayPrice();
-      }
+      await loadYesterdayPrice();
     }
   }
-  
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', async () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      
-      const day = tab.getAttribute('data-day') || 'today';
-      await switchDay(day);
+
+  function bindTabs() {
+    document.querySelectorAll('.gold-tab').forEach((tab) => {
+      tab.addEventListener('click', async () => {
+        document.querySelectorAll('.gold-tab').forEach((node) => {
+          node.classList.remove('is-active');
+          node.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('is-active');
+        tab.setAttribute('aria-selected', 'true');
+
+        const day = tab.getAttribute('data-day') || 'today';
+        await switchDay(day);
+      });
     });
-  });
-  
+  }
+
   function initPage() {
-    if (window.Chart) {
+    bindTabs();
+
+    const boot = () => {
       initCharts();
       loadTodayPrice();
       if (!window.goldPriceInterval) {
         window.goldPriceInterval = setInterval(() => {
-          if (currentDay === 'today') {
-            loadTodayPrice();
-          }
+          if (currentDay === 'today') loadTodayPrice();
         }, REFRESH_INTERVAL);
       }
-    } else {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
-      script.async = true;
-      script.onload = () => {
-        initCharts();
-        loadTodayPrice();
-        if (!window.goldPriceInterval) {
-          window.goldPriceInterval = setInterval(() => {
-            if (currentDay === 'today') {
-              loadTodayPrice();
-            }
-          }, REFRESH_INTERVAL);
-        }
-      };
-      script.onerror = () => {
-        console.error('[Gold] Failed to load Chart.js');
-        const domesticEmpty = document.getElementById('domestic-empty');
-        const internationalEmpty = document.getElementById('international-empty');
-        if (domesticEmpty) domesticEmpty.textContent = 'Chart failed to load';
-        if (internationalEmpty) internationalEmpty.textContent = 'Chart failed to load';
-      };
-      document.head.appendChild(script);
+    };
+
+    if (window.Chart) {
+      boot();
+      return;
     }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
+    script.async = true;
+    script.onload = boot;
+    script.onerror = () => {
+      const domesticEmpty = document.getElementById('domestic-empty');
+      const internationalEmpty = document.getElementById('international-empty');
+      if (domesticEmpty) domesticEmpty.textContent = 'Chart failed to load';
+      if (internationalEmpty) internationalEmpty.textContent = 'Chart failed to load';
+    };
+    document.head.appendChild(script);
   }
-  
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPage);
   } else {
     initPage();
   }
-  
+
   document.addEventListener('astro:page-load', initPage);
 </script>
