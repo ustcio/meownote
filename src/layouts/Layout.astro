@@ -48,7 +48,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         function animateCursor() {
           cursorX += (targetX - cursorX) * 0.15;
           cursorY += (targetY - cursorY) * 0.15;
-          cursor.style.transform = `translate(${cursorX - 10}px, ${cursorY - 10}px)`;
+          cursor.style.left = `${cursorX}px`;
+          cursor.style.top = `${cursorY}px`;
           requestAnimationFrame(animateCursor);
         }
         document.addEventListener('mousemove', (e) => {
