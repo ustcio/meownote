@@ -87,9 +87,7 @@ import Layout from '@layouts/Layout.astro';
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
-          <div class="sort-menu" id="category-menu">
-            <button class="category-option active" data-category="all">All</button>
-          </div>
+          <div class="sort-menu" id="category-menu"></div>
         </div>
         <p class="sort-hint" id="sort-hint">Everything in your workspace, sorted by latest change.</p>
       </div>
@@ -602,12 +600,21 @@ import Layout from '@layouts/Layout.astro';
 
   /* Card Actions Bar */
   .file-card-actions {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 6px;
+    gap: 0.75rem;
     margin-top: 14px;
     padding-top: 12px;
     border-top: 1px solid var(--border-secondary);
+  }
+
+  .file-card-actions-main {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    flex-wrap: wrap;
   }
 
   .file-card-btn {
@@ -631,6 +638,12 @@ import Layout from '@layouts/Layout.astro';
     flex-shrink: 0;
   }
 
+  .file-card-btn.primary {
+    min-width: 9rem;
+    justify-content: center;
+    font-size: 0.84rem;
+  }
+
   .file-card-btn svg {
     width: 14px;
     height: 14px;
@@ -650,6 +663,7 @@ import Layout from '@layouts/Layout.astro';
     background: var(--bg-secondary);
     color: var(--text-primary);
     border: 1px solid var(--border-primary);
+    min-width: 3.2rem;
   }
 
   .file-card-btn.secondary:hover {
@@ -661,10 +675,10 @@ import Layout from '@layouts/Layout.astro';
     background: transparent;
     color: var(--text-tertiary);
     border: none;
-    margin-left: auto;
     padding: 0 8px;
     height: 32px;
     width: 32px;
+    justify-self: end;
   }
 
   .file-card-btn.danger:hover {
@@ -685,6 +699,7 @@ import Layout from '@layouts/Layout.astro';
     border-radius: var(--radius-full) !important;
     font-weight: 500 !important;
     letter-spacing: 0.01em !important;
+    max-width: 100%;
   }
 
   /* Empty State */
@@ -1005,20 +1020,31 @@ import Layout from '@layouts/Layout.astro';
     }
 
     .file-card-actions {
-      gap: 5px;
-      flex-wrap: wrap;
+      grid-template-columns: 1fr;
+      gap: 0.65rem;
+    }
+
+    .file-card-actions-main {
+      width: 100%;
+      gap: 0.45rem;
     }
 
     .file-card-btn {
       padding: 0 10px;
       height: 30px;
       font-size: 0.75rem;
+      min-width: 0;
+    }
+
+    .file-card-btn.primary {
+      min-width: 8rem;
     }
 
     .file-card-btn.danger {
       opacity: 1;
       width: 30px;
       height: 30px;
+      justify-self: start;
     }
 
     .category-tag-btn {
@@ -1182,6 +1208,7 @@ import Layout from '@layouts/Layout.astro';
     // Build dropdown menu options
     const menuEl = document.getElementById('category-menu');
     if (!menuEl) return;
+    menuEl.innerHTML = '';
 
     categoryTags.forEach(cat => {
       const option = document.createElement('button');
@@ -1424,7 +1451,7 @@ import Layout from '@layouts/Layout.astro';
         body: JSON.stringify({ tag: newTags }),
       });
       if (result.success) {
-        file.tag = newTags;
+        file.tag = result.data?.tag ?? newTags;
         renderFiles();
         showToast('Category updated', 'success');
       }
@@ -1472,7 +1499,8 @@ import Layout from '@layouts/Layout.astro';
               </div>
             </div>
             <div class="file-card-actions">
-              <button class="file-card-btn" data-action="open" data-id="${file.id}">
+              <div class="file-card-actions-main">
+              <button class="file-card-btn primary" data-action="open" data-id="${file.id}">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                   <polyline points="15 3 21 3 21 9"></polyline>
@@ -1488,6 +1516,7 @@ import Layout from '@layouts/Layout.astro';
                 </svg>
               </button>
               ${renderCategoryButton(file)}
+              </div>
               <button class="file-card-btn danger" data-action="delete" data-id="${file.id}" title="Delete">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>

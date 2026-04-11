@@ -6705,6 +6705,7 @@ async function listWorkspaceFiles(request, env) {
       fileUrl: row.file_url || '',
       downloadUrl: `/api/workspace/${row.id}/download`,
       fileSize: row.file_size || 0,
+      tag: row.tag || '',
       createdAt: row.created_at,
       updatedAt: row.updated_at
     }));
@@ -6744,6 +6745,7 @@ async function getWorkspaceFile(env, fileId) {
         fileUrl: result.file_url || '',
         downloadUrl: `/api/workspace/${result.id}/download`,
         fileSize: result.file_size || 0,
+        tag: result.tag || '',
         createdAt: result.created_at,
         updatedAt: result.updated_at
       }
@@ -6764,7 +6766,7 @@ async function createWorkspaceFile(request, env) {
       return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
     }
     
-    const { title, content, type, fileUrl, fileSize } = body;
+    const { title, content, type, fileUrl, fileSize, tag } = body;
     
     if (!title) {
       return jsonResponse({ success: false, message: 'Title is required' }, 400);
@@ -6776,11 +6778,12 @@ async function createWorkspaceFile(request, env) {
     const normalizedType = normalizeWorkspaceType(type);
     const normalizedFileUrl = typeof fileUrl === 'string' ? fileUrl : '';
     const normalizedFileSize = Number(fileSize) || 0;
+    const normalizedTag = typeof tag === 'string' ? tag.trim() : '';
     
     await env.DB.prepare(
-      `INSERT INTO workspace_files (id, title, content, type, file_url, file_size, created_at, updated_at) 
-       VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
-    ).bind(fileId, normalizedTitle, normalizedContent, normalizedType, normalizedFileUrl, normalizedFileSize).run();
+      `INSERT INTO workspace_files (id, title, content, type, file_url, file_size, tag, created_at, updated_at) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
+    ).bind(fileId, normalizedTitle, normalizedContent, normalizedType, normalizedFileUrl, normalizedFileSize, normalizedTag).run();
     
     console.log('[Workspace] Created file:', fileId, normalizedTitle);
     
@@ -6793,7 +6796,8 @@ async function createWorkspaceFile(request, env) {
         type: normalizedType,
         fileUrl: normalizedFileUrl,
         downloadUrl: `/api/workspace/${fileId}/download`,
-        fileSize: normalizedFileSize
+        fileSize: normalizedFileSize,
+        tag: normalizedTag
       }
     });
     
@@ -6844,9 +6848,9 @@ async function uploadWorkspaceFile(request, env) {
     }
 
     await env.DB.prepare(
-      `INSERT INTO workspace_files (id, title, content, type, file_url, file_size, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
-    ).bind(fileId, normalizedTitle, content, normalizedType, fileUrl, file.size || 0).run();
+      `INSERT INTO workspace_files (id, title, content, type, file_url, file_size, tag, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
+    ).bind(fileId, normalizedTitle, content, normalizedType, fileUrl, file.size || 0, '').run();
 
     return jsonResponse({
       success: true,
@@ -6858,6 +6862,7 @@ async function uploadWorkspaceFile(request, env) {
         fileUrl,
         downloadUrl: `/api/workspace/${fileId}/download`,
         fileSize: file.size || 0,
+        tag: '',
       }
     });
 
@@ -6884,14 +6889,15 @@ async function updateWorkspaceFile(request, env, fileId) {
       return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
     }
     
-    const { title, content } = body;
+    const { title, content, tag } = body;
     
     const newTitle = title !== undefined ? normalizeWorkspaceTitle(title) : existing.title;
     const newContent = content !== undefined ? normalizeWorkspaceContent(content) : existing.content;
+    const newTag = tag !== undefined && typeof tag === 'string' ? tag.trim() : (existing.tag || '');
     
     await env.DB.prepare(
-      `UPDATE workspace_files SET title = ?, content = ?, updated_at = datetime('now') WHERE id = ?`
-    ).bind(newTitle, newContent, fileId).run();
+      `UPDATE workspace_files SET title = ?, content = ?, tag = ?, updated_at = datetime('now') WHERE id = ?`
+    ).bind(newTitle, newContent, newTag, fileId).run();
     
     console.log('[Workspace] Updated file:', fileId);
     
@@ -6901,6 +6907,7 @@ async function updateWorkspaceFile(request, env, fileId) {
         id: fileId,
         title: newTitle,
         content: newContent,
+        tag: newTag,
         updatedAt: new Date().toISOString()
       }
     });
@@ -7015,9 +7022,9 @@ async function duplicateWorkspaceFile(env, fileId) {
     }
 
     await env.DB.prepare(
-      `INSERT INTO workspace_files (id, title, content, type, file_url, file_size, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
-    ).bind(newId, newTitle, newContent, existing.type || 'txt', duplicatedFileUrl, existing.file_size || 0).run();
+      `INSERT INTO workspace_files (id, title, content, type, file_url, file_size, tag, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
+    ).bind(newId, newTitle, newContent, existing.type || 'txt', duplicatedFileUrl, existing.file_size || 0, existing.tag || '').run();
 
     console.log('[Workspace] Duplicated file:', fileId, '->', newId);
 
@@ -7030,7 +7037,8 @@ async function duplicateWorkspaceFile(env, fileId) {
         type: existing.type || 'txt',
         fileUrl: duplicatedFileUrl,
         downloadUrl: `/api/workspace/${newId}/download`,
-        fileSize: existing.file_size || 0
+        fileSize: existing.file_size || 0,
+        tag: existing.tag || ''
       }
     });
 
