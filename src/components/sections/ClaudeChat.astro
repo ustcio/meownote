@@ -169,6 +169,11 @@ const API_BASE = 'https://api.ustc.dev';
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
               </svg>
             </button>
+            <button class="stop-btn" id="stop-btn" title="停止生成" hidden>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+              </svg>
+            </button>
             <button class="send-btn" id="send-btn" disabled>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -179,6 +184,7 @@ const API_BASE = 'https://api.ustc.dev';
         </div>
         
         <div class="input-footer">
+          <span class="input-status" id="input-status">Enter 发送，Shift + Enter 换行</span>
           <span class="input-hint">Claude 可能会犯错，请核实重要信息。</span>
         </div>
       </div>
@@ -512,7 +518,11 @@ const API_BASE = 'https://api.ustc.dev';
   .messages-container {
     flex: 1;
     overflow-y: auto;
-    padding: 0;
+    padding: 24px 24px 8px;
+    background:
+      radial-gradient(circle at top, rgba(217, 119, 87, 0.08), transparent 38%),
+      linear-gradient(180deg, rgba(250, 248, 243, 0.92) 0%, rgba(250, 248, 243, 0.55) 12%, rgba(250, 248, 243, 0) 24%);
+    scroll-behavior: smooth;
   }
 
   /* 欢迎屏幕 */
@@ -607,47 +617,72 @@ const API_BASE = 'https://api.ustc.dev';
   .messages-list {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 18px;
     padding: 0;
     width: 100%;
-    max-width: 768px;
+    max-width: 880px;
     margin: 0 auto;
   }
 
   .message {
     display: flex;
     flex-direction: column;
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--border-secondary);
     width: 100%;
   }
 
   .message-user {
-    background: transparent;
+    align-items: flex-end;
   }
 
   .message-assistant {
-    background: var(--bg-secondary);
+    align-items: flex-start;
+  }
+
+  .message-shell {
+    position: relative;
+    width: min(100%, 760px);
+  }
+
+  .message-user .message-shell {
+    width: min(100%, 680px);
   }
 
   .message-bubble {
     width: 100%;
     max-width: 100%;
-    padding: 0;
-    border-radius: 0;
+    padding: 16px 18px;
+    border-radius: 22px;
     font-size: 15px;
-    line-height: 1.7;
+    line-height: 1.72;
     word-wrap: break-word;
-    background: transparent;
+    transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .message-user .message-bubble {
-    color: var(--text-primary);
+    color: #fffdf9;
     font-weight: 500;
+    background: linear-gradient(135deg, #d97757 0%, #c86c4d 52%, #b85d42 100%);
+    border: 1px solid rgba(184, 93, 66, 0.58);
+    border-bottom-right-radius: 8px;
+    box-shadow: 0 18px 38px rgba(183, 94, 64, 0.18);
   }
 
   .message-assistant .message-bubble {
     color: var(--text-primary);
+    background: rgba(255, 253, 249, 0.9);
+    border: 1px solid rgba(71, 57, 44, 0.1);
+    border-bottom-left-radius: 10px;
+    box-shadow: 0 16px 34px rgba(34, 24, 18, 0.08);
+  }
+
+  .message:hover .message-bubble {
+    transform: translateY(-1px);
+  }
+
+  .message-assistant:hover .message-bubble {
+    box-shadow: 0 18px 36px rgba(34, 24, 18, 0.12);
   }
 
   .message-bubble .message-content {
@@ -663,7 +698,7 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .message-bubble .message-content code {
-    background: rgba(0, 0, 0, 0.08);
+    background: rgba(32, 25, 21, 0.08);
     padding: 2px 6px;
     border-radius: 4px;
     font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
@@ -675,11 +710,12 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .message-bubble .message-content pre {
-    background: rgba(0, 0, 0, 0.06);
-    padding: 12px;
-    border-radius: 8px;
+    background: rgba(21, 16, 13, 0.06);
+    padding: 14px 15px;
+    border-radius: 14px;
     overflow-x: auto;
-    margin: 8px 0;
+    margin: 10px 0;
+    border: 1px solid rgba(71, 57, 44, 0.08);
   }
 
   .message-user .message-bubble .message-content pre {
@@ -695,7 +731,8 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    padding: 0 4px;
   }
 
   .message-assistant .message-header {
@@ -703,26 +740,22 @@ const API_BASE = 'https://api.ustc.dev';
   }
 
   .message-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    border-radius: 11px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 12px;
     font-weight: 600;
     flex-shrink: 0;
-    background: var(--color-primary);
+    background: linear-gradient(135deg, #171412 0%, #3a2a22 100%);
     color: #FFFFFF;
+    box-shadow: 0 10px 20px rgba(23, 20, 18, 0.16);
   }
 
   .message-user .message-avatar {
     display: none;
-  }
-
-  .message-assistant .message-avatar {
-    background: var(--color-primary);
-    color: #FFFFFF;
   }
 
   .message-role {
@@ -736,12 +769,62 @@ const API_BASE = 'https://api.ustc.dev';
     display: none;
   }
 
+  .message-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .message-time {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.01em;
+  }
+
+  .message-toolbar {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+  }
+
+  .message:hover .message-toolbar,
+  .message:focus-within .message-toolbar {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .message-tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(71, 57, 44, 0.1);
+    border-radius: 999px;
+    background: rgba(255, 253, 249, 0.92);
+    color: var(--text-secondary);
+    transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+  }
+
+  .message-tool-btn:hover {
+    background: #fffdf9;
+    color: var(--text-primary);
+    transform: translateY(-1px);
+  }
+
   /* 加载动画 */
   .typing-indicator {
     display: flex;
     align-items: center;
     gap: 4px;
-    padding: 8px 0;
+    width: fit-content;
+    padding: 4px 0;
   }
 
   .typing-dot {
@@ -776,8 +859,9 @@ const API_BASE = 'https://api.ustc.dev';
      ============================================ */
   .input-area {
     padding: 16px 24px 24px;
-    background: var(--bg-primary);
-    border-top: 1px solid var(--border-secondary);
+    background:
+      linear-gradient(180deg, rgba(250, 248, 243, 0) 0%, rgba(250, 248, 243, 0.92) 24%, rgba(250, 248, 243, 1) 100%);
+    border-top: 1px solid rgba(71, 57, 44, 0.08);
   }
 
   .input-container {
@@ -790,16 +874,18 @@ const API_BASE = 'https://api.ustc.dev';
     align-items: flex-end;
     gap: 12px;
     padding: 14px 16px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: 12px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    background: rgba(255, 253, 249, 0.92);
+    border: 1px solid rgba(71, 57, 44, 0.12);
+    border-radius: 22px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 18px 44px rgba(27, 20, 16, 0.08);
   }
 
   .input-wrapper:focus-within {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px var(--color-primary-alpha-10);
-    background: var(--card-bg);
+    box-shadow: 0 0 0 4px rgba(217, 119, 87, 0.12), 0 24px 54px rgba(27, 20, 16, 0.12);
+    background: #fffdf9;
+    transform: translateY(-1px);
   }
 
   .message-input {
@@ -832,36 +918,56 @@ const API_BASE = 'https://api.ustc.dev';
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     padding: 0;
-    background: transparent;
-    border: none;
+    background: rgba(245, 239, 231, 0.82);
+    border: 1px solid rgba(71, 57, 44, 0.08);
     color: var(--text-tertiary);
     cursor: pointer;
-    border-radius: 8px;
-    transition: background 0.15s ease, color 0.15s ease;
+    border-radius: 12px;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
   }
 
   .input-action-btn:hover {
-    background: var(--bg-tertiary);
+    background: rgba(237, 226, 213, 0.96);
     color: var(--text-primary);
+    transform: translateY(-1px);
+  }
+
+  .stop-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 12px;
+    background: #171412;
+    color: #fffdf9;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  }
+
+  .stop-btn:hover {
+    background: #2a211d;
+    transform: translateY(-1px);
   }
 
   .send-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     padding: 0;
-    background: var(--color-primary);
+    background: linear-gradient(135deg, #d97757 0%, #bc6448 100%);
     border: none;
-    border-radius: 8px;
+    border-radius: 14px;
     color: #FFFFFF;
     cursor: pointer;
     transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.2s ease;
-    box-shadow: 0 2px 6px rgba(217, 119, 87, 0.25);
+    box-shadow: 0 12px 28px rgba(217, 119, 87, 0.3);
     flex-shrink: 0;
   }
 
@@ -885,13 +991,21 @@ const API_BASE = 'https://api.ustc.dev';
 
   .input-footer {
     margin-top: 10px;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
   }
 
+  .input-status,
   .input-hint {
     font-size: 12px;
     color: var(--text-tertiary);
     font-family: var(--font-body);
+  }
+
+  .input-status {
+    color: var(--text-secondary);
   }
 
   /* ============================================
@@ -962,17 +1076,26 @@ const API_BASE = 'https://api.ustc.dev';
       font-size: 14px;
     }
 
-    .message {
-      max-width: 90%;
+    .messages-container {
+      padding: 16px 16px 6px;
+    }
+
+    .message-shell {
+      width: 100%;
     }
 
     .message-bubble {
       font-size: 14px;
-      padding: 8px 12px;
+      padding: 14px 15px;
     }
 
     .input-area {
       padding: 12px 16px 20px;
+    }
+
+    .input-footer {
+      flex-direction: column;
+      align-items: flex-start;
     }
   }
 
@@ -984,6 +1107,10 @@ const API_BASE = 'https://api.ustc.dev';
     .model-btn {
       font-size: 13px;
       padding: 4px 8px;
+    }
+
+    .input-actions {
+      gap: 6px;
     }
   }
 </style>
@@ -1006,10 +1133,30 @@ const API_BASE = 'https://api.ustc.dev';
     welcomeScreen: document.getElementById('welcome-screen'),
     messageInput: document.getElementById('message-input'),
     sendBtn: document.getElementById('send-btn'),
+    stopBtn: document.getElementById('stop-btn'),
     modelBtn: document.getElementById('model-btn'),
     modelDropdown: document.getElementById('model-dropdown'),
     modelName: document.getElementById('model-name'),
+    inputStatus: document.getElementById('input-status'),
   };
+
+  function formatTime(date = new Date()) {
+    return new Intl.DateTimeFormat('zh-CN', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  }
+
+  function setComposerState(status = 'idle') {
+    if (!elements.stopBtn || !elements.sendBtn || !elements.inputStatus) return;
+
+    const isBusy = status === 'generating';
+    elements.stopBtn.hidden = !isBusy;
+    elements.sendBtn.hidden = isBusy;
+    elements.inputStatus.textContent = isBusy
+      ? '正在生成回复，点击停止可中断'
+      : 'Enter 发送，Shift + Enter 换行';
+  }
 
   // 侧边栏控制
   function openSidebar() {
@@ -1034,6 +1181,7 @@ const API_BASE = 'https://api.ustc.dev';
     elements.messageInput.value = '';
     elements.messageInput.style.height = 'auto';
     elements.sendBtn.disabled = true;
+    setComposerState('idle');
     closeSidebar();
   });
 
@@ -1085,6 +1233,7 @@ const API_BASE = 'https://api.ustc.dev';
 
     // 显示加载状态
     isGenerating = true;
+    setComposerState('generating');
     const typingIndicator = appendTyping();
 
     try {
@@ -1120,10 +1269,13 @@ const API_BASE = 'https://api.ustc.dev';
       typingIndicator?.remove();
       if (error.name !== 'AbortError') {
         appendMessage('assistant', '抱歉，出现了错误。请稍后重试。');
+      } else {
+        appendMessage('assistant', '已停止本次回复。你可以继续追问，或换个说法再试一次。');
       }
     } finally {
       isGenerating = false;
       abortController = null;
+      setComposerState('idle');
     }
   }
 
@@ -1142,8 +1294,7 @@ const API_BASE = 'https://api.ustc.dev';
   function appendMessage(role, content) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message message-${role}`;
-    // 用内联样式确保左右对齐，优先级最高
-    messageDiv.style.alignSelf = role === 'user' ? 'flex-end' : 'flex-start';
+    const timestamp = formatTime();
     applyAstroScoped(messageDiv);
 
     let inner = '';
@@ -1151,11 +1302,36 @@ const API_BASE = 'https://api.ustc.dev';
       inner += `
         <div class="message-header">
           <div class="message-avatar">C</div>
-          <div class="message-role">Claude</div>
+          <div class="message-meta">
+            <div class="message-role">Claude</div>
+            <div class="message-time">${timestamp}</div>
+          </div>
+        </div>
+      `;
+    } else {
+      inner += `
+        <div class="message-header">
+          <div class="message-meta">
+            <div class="message-time">${timestamp}</div>
+          </div>
         </div>
       `;
     }
-    inner += `<div class="message-bubble"><div class="message-content">${formatContent(content)}</div></div>`;
+    inner += `
+      <div class="message-shell">
+        <div class="message-toolbar">
+          <button class="message-tool-btn" type="button" data-copy-message title="复制消息" aria-label="复制消息">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="message-bubble">
+          <div class="message-content">${formatContent(content)}</div>
+        </div>
+      </div>
+    `;
 
     messageDiv.innerHTML = inner;
     applyAstroScoped(messageDiv);
@@ -1167,17 +1343,21 @@ const API_BASE = 'https://api.ustc.dev';
   function appendTyping() {
     const typingDiv = document.createElement('div');
     typingDiv.className = 'message message-assistant';
-    typingDiv.style.alignSelf = 'flex-start';
     typingDiv.innerHTML = `
       <div class="message-header">
         <div class="message-avatar">C</div>
-        <div class="message-role">Claude</div>
+        <div class="message-meta">
+          <div class="message-role">Claude</div>
+          <div class="message-time">思考中</div>
+        </div>
       </div>
-      <div class="message-bubble">
-        <div class="typing-indicator">
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
+      <div class="message-shell">
+        <div class="message-bubble">
+          <div class="typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
         </div>
       </div>
     `;
@@ -1206,6 +1386,7 @@ const API_BASE = 'https://api.ustc.dev';
 
   // 事件监听
   elements.sendBtn?.addEventListener('click', sendMessage);
+  elements.stopBtn?.addEventListener('click', () => window.stopGeneration());
   
   elements.messageInput?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -1233,6 +1414,24 @@ const API_BASE = 'https://api.ustc.dev';
     }
   };
 
+  elements.messagesList?.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-copy-message]');
+    if (!button) return;
+
+    const message = button.closest('.message');
+    const content = message?.querySelector('.message-content')?.textContent?.trim();
+    if (!content) return;
+
+    try {
+      await navigator.clipboard.writeText(content);
+      const oldTitle = button.getAttribute('title');
+      button.setAttribute('title', '已复制');
+      setTimeout(() => button.setAttribute('title', oldTitle || '复制消息'), 1200);
+    } catch (error) {
+      console.warn('Copy failed:', error);
+    }
+  });
+
   // 初始化
   const savedModel = localStorage.getItem('selected_model');
   if (savedModel) {
@@ -1241,4 +1440,6 @@ const API_BASE = 'https://api.ustc.dev';
       option.click();
     }
   }
+
+  setComposerState('idle');
 </script>
