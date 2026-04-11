@@ -1,15 +1,9 @@
 ---
 /**
- * ClaudeChat 组件 - 全面优化版
- * 
- * 设计参考: Claude 官网 (claude.ai)
- * - 精确的布局结构和尺寸比例
- * - Claude 官方色彩方案
- * - 统一的字体样式和间距规范
- * - 流畅的动态交互效果
+ * Chat 组件
  */
 
-const API_BASE = 'https://api.ustc.dev';
+const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 ---
 
 <section class="claude-chat-page">
@@ -56,23 +50,19 @@ const API_BASE = 'https://api.ustc.dev';
       
       <div class="model-selector">
         <button class="model-btn" id="model-btn">
-          <span class="model-name" id="model-name">Claude 3.5 Sonnet</span>
+          <span class="model-name" id="model-name">Qwen 3.6 Plus</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="6 9 12 15 18 9"></polyline>
           </svg>
         </button>
         <div class="model-dropdown" id="model-dropdown">
-          <button class="model-option active" data-model="claude-3-5-sonnet">
-            <span class="model-option-name">Claude 3.5 Sonnet</span>
-            <span class="model-option-badge">推荐</span>
+          <button class="model-option active" data-model="qwen3.6-plus">
+            <span class="model-option-name">Qwen 3.6 Plus</span>
+            <span class="model-option-badge">默认</span>
           </button>
-          <button class="model-option" data-model="claude-3-opus">
-            <span class="model-option-name">Claude 3 Opus</span>
-            <span class="model-option-badge">最强</span>
-          </button>
-          <button class="model-option" data-model="claude-3-haiku">
-            <span class="model-option-name">Claude 3 Haiku</span>
-            <span class="model-option-badge">快速</span>
+          <button class="model-option" data-model="minimax-2.7">
+            <span class="model-option-name">MiniMax 2.7</span>
+            <span class="model-option-badge">独立 API</span>
           </button>
         </div>
       </div>
@@ -159,7 +149,7 @@ const API_BASE = 'https://api.ustc.dev';
           <textarea 
             id="message-input" 
             class="message-input" 
-            placeholder="给 Claude 发消息..."
+            placeholder="给 AI 发消息..."
             rows="1"
           ></textarea>
           
@@ -185,7 +175,7 @@ const API_BASE = 'https://api.ustc.dev';
         
         <div class="input-footer">
           <span class="input-status" id="input-status">Enter 发送，Shift + Enter 换行</span>
-          <span class="input-hint">Claude 可能会犯错，请核实重要信息。</span>
+          <span class="input-hint">AI 可能会犯错，请核实重要信息。</span>
         </div>
       </div>
     </div>
@@ -197,7 +187,7 @@ const API_BASE = 'https://api.ustc.dev';
 
 <style>
   /* ============================================
-     Claude 风格聊天页面 - 全局样式
+     聊天页面 - 全局样式
      ============================================ */
   .claude-chat-page {
     display: flex;
@@ -1216,7 +1206,12 @@ const API_BASE = 'https://api.ustc.dev';
 </style>
 
 <script is:inline>
-  const API_BASE = 'https://api.ustc.dev';
+  const API_BASE = {JSON.stringify(API_BASE)};
+  const DEFAULT_MODEL = 'qwen3.6-plus';
+  const MODEL_META = {
+    'qwen3.6-plus': { name: 'Qwen 3.6 Plus', badge: '默认', avatar: 'Q' },
+    'minimax-2.7': { name: 'MiniMax 2.7', badge: '独立 API', avatar: 'M' },
+  };
   let currentConversationId = null;
   let isGenerating = false;
   let abortController = null;
@@ -1299,7 +1294,9 @@ const API_BASE = 'https://api.ustc.dev';
       const name = option.querySelector('.model-option-name').textContent;
       elements.modelName.textContent = name;
       elements.modelDropdown?.classList.remove('show');
-      localStorage.setItem('selected_model', model);
+      if (MODEL_META[model]) {
+        localStorage.setItem('selected_model', model);
+      }
     });
   });
 
@@ -1344,15 +1341,15 @@ const API_BASE = 'https://api.ustc.dev';
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: content,
-          model: localStorage.getItem('selected_model') || 'claude-3-5-sonnet',
+          model: MODEL_META[localStorage.getItem('selected_model')] ? localStorage.getItem('selected_model') : DEFAULT_MODEL,
           conversation_id: currentConversationId,
         }),
         signal: abortController.signal,
       });
-
-      if (!response.ok) throw new Error('请求失败');
-
       const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || '请求失败');
+      }
       
       // 移除加载指示器
       typingIndicator?.remove();
@@ -1368,7 +1365,7 @@ const API_BASE = 'https://api.ustc.dev';
     } catch (error) {
       typingIndicator?.remove();
       if (error.name !== 'AbortError') {
-        appendMessage('assistant', '抱歉，出现了错误。请稍后重试。');
+        appendMessage('assistant', `抱歉，出现了错误：${error.message || '请稍后重试。'}`);
       } else {
         appendMessage('assistant', '已停止本次回复。你可以继续追问，或换个说法再试一次。');
       }
@@ -1399,11 +1396,13 @@ const API_BASE = 'https://api.ustc.dev';
 
     let inner = '';
     if (role === 'assistant') {
+      const activeModel = MODEL_META[localStorage.getItem('selected_model')] ? localStorage.getItem('selected_model') : DEFAULT_MODEL;
+      const assistantMeta = MODEL_META[activeModel];
       inner += `
         <div class="message-header">
-          <div class="message-avatar">C</div>
+          <div class="message-avatar">${assistantMeta.avatar}</div>
           <div class="message-meta">
-            <div class="message-role">Claude</div>
+            <div class="message-role">${assistantMeta.name}</div>
             <div class="message-time">${timestamp}</div>
           </div>
         </div>
@@ -1441,13 +1440,15 @@ const API_BASE = 'https://api.ustc.dev';
 
   // 添加加载指示器
   function appendTyping() {
+    const activeModel = MODEL_META[localStorage.getItem('selected_model')] ? localStorage.getItem('selected_model') : DEFAULT_MODEL;
+    const assistantMeta = MODEL_META[activeModel];
     const typingDiv = document.createElement('div');
     typingDiv.className = 'message message-assistant';
     typingDiv.innerHTML = `
       <div class="message-header">
-        <div class="message-avatar">C</div>
+        <div class="message-avatar">${assistantMeta.avatar}</div>
         <div class="message-meta">
-          <div class="message-role">Claude</div>
+          <div class="message-role">${assistantMeta.name}</div>
           <div class="message-time">思考中</div>
         </div>
       </div>
@@ -1650,6 +1651,13 @@ const API_BASE = 'https://api.ustc.dev';
     if (option) {
       option.click();
     }
+  } else {
+    localStorage.setItem('selected_model', DEFAULT_MODEL);
+  }
+
+  if (!MODEL_META[localStorage.getItem('selected_model')]) {
+    localStorage.setItem('selected_model', DEFAULT_MODEL);
+    document.querySelector(`.model-option[data-model="${DEFAULT_MODEL}"]`)?.click();
   }
 
   setComposerState('idle');

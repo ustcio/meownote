@@ -7,6 +7,7 @@ import ClaudeChat from '@components/sections/ClaudeChat.astro';
 
 const title = 'AI 助手';
 const desc = '智能 AI 助手，提供专业的问题解答和创作支持';
+const apiBase = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 ---
 
 <!DOCTYPE html>
@@ -26,7 +27,7 @@ const desc = '智能 AI 助手，提供专业的问题解答和创作支持';
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=2" />
     <meta name="theme-color" content="#FAFAFA" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="preconnect" href="https://api.ustc.dev" crossorigin />
+    <link rel="preconnect" href={apiBase} crossorigin />
   </head>
   <body>
     <ClaudeChat />

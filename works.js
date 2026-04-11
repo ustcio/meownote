@@ -359,60 +359,24 @@ function buildContentDisposition(filename) {
 }
 
 // ================================================================================
-// 1. Unified Chat API (Qwen & Doubao Models)
+// 1. Unified Chat API (MiniMax & Qwen Relay)
 // ================================================================================
 
 const CHAT_SYSTEM_PROMPT = 'You are Meow AI Assistant, a helpful, harmless, and honest AI assistant. You can help users with coding, analysis, creative writing, and various other tasks. Please respond in the same language as the user.';
 
 const MODEL_CONFIG = {
-  // Qwen Models
-  'qwen-turbo': {
-    provider: 'qwen',
-    model: 'qwen-turbo',
-    endpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
-    maxTokens: 2000,
-    temperature: 0.7
-  },
-  'qwen-plus': {
-    provider: 'qwen',
-    model: 'qwen-plus',
-    endpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+  'minimax-2.7': {
+    provider: 'minimax',
+    model: 'MiniMax-Text-01',
+    endpoint: 'https://api.minimax.chat/v1/text/chatcompletion_v2',
     maxTokens: 2000,
     temperature: 0.7
   },
   'qwen3.6-plus': {
-    provider: 'anthropic-coding',
+    provider: 'relay-openai',
     model: 'qwen3.6-plus',
-    endpoint: 'https://coding.dashscope.aliyuncs.com/apps/anthropic/v1/messages',
+    endpoint: 'https://ustc.dev/v1/chat/completions',
     maxTokens: 4000,
-    temperature: 0.7
-  },
-  // Doubao Models
-  'doubao-2.0-pro': {
-    provider: 'doubao',
-    model: 'doubao-seed-2-0-pro-260215',
-    endpoint: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
-    maxTokens: 2000,
-    temperature: 0.7
-  },
-  'doubao-2.0-code': {
-    provider: 'doubao',
-    model: 'doubao-seed-2-0-code-preview-260215',
-    endpoint: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
-    maxTokens: 2000,
-    temperature: 0.7
-  },
-  // Cloudflare Workers AI - Llama 3
-  'llama-3-8b': {
-    provider: 'workers-ai',
-    model: '@cf/meta/llama-3-8b-instruct',
-    maxTokens: 2000,
-    temperature: 0.7
-  },
-  'llama-3.1-8b': {
-    provider: 'workers-ai',
-    model: '@cf/meta/llama-3.1-8b-instruct',
-    maxTokens: 2000,
     temperature: 0.7
   }
 };
@@ -435,7 +399,7 @@ async function handleChat(request, env, ctx) {
     return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
   }
 
-  const { message, model = 'qwen-turbo', history = [], stream = false } = body;
+  const { message, model = 'qwen3.6-plus', history = [], stream = false } = body;
   
   console.log('[Chat API] Message:', message?.substring(0, 50));
   console.log('[Chat API] Model:', model);
@@ -458,13 +422,9 @@ async function handleChat(request, env, ctx) {
     return jsonResponse({ success: false, message: 'Invalid model selected' }, 400);
   }
 
-  // Handle Workers AI models
-  if (config.provider === 'workers-ai') {
-    return await handleWorkersAIChat(env, config, message, history, model);
-  }
-
-  // TODO: Move to secret once dashboard variables are cleaned up
-  const apiKey = (config.provider === 'qwen' || config.provider === 'anthropic-coding') ? 'sk-sp-24a60c0e374a44ea8572d107c2a640b7' : env.DOUBAO_API_KEY;
+  const apiKey = config.provider === 'minimax'
+    ? env.MINIMAX_API_KEY
+    : env.CHAT_RELAY_API_KEY;
   
   if (!apiKey) {
     console.error('[Chat API] API key not configured for provider:', config.provider);
@@ -492,32 +452,19 @@ async function handleChat(request, env, ctx) {
     let requestBody;
     let headers;
     
-    // Handle Anthropic Coding Plan format
-    if (config.provider === 'anthropic-coding') {
-      const systemMessage = messages.find(m => m.role === 'system')?.content || '';
-      const chatMessages = messages.filter(m => m.role !== 'system');
-      
+    if (config.provider === 'minimax') {
       requestBody = {
         model: config.model,
+        messages,
         max_tokens: config.maxTokens,
-        messages: chatMessages,
-        temperature: config.temperature,
-        ...(systemMessage && { system: systemMessage }),
-        // Enable thinking for Coding Plan models
-        thinking: {
-          type: "enabled",
-          budget_tokens: 8192
-        }
+        temperature: config.temperature
       };
-      
+
       headers = {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json',
-        'User-Agent': 'opencode/1.0'
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
       };
     } else {
-      // Standard OpenAI-compatible format
       requestBody = {
         model: config.model,
         messages,
@@ -569,25 +516,29 @@ async function handleChat(request, env, ctx) {
     const totalLatency = Date.now() - requestStartTime;
     console.log(`[Performance] Total latency: ${totalLatency}ms`);
     
-    // Handle Anthropic response format
-    if (config.provider === 'anthropic-coding') {
-      // Find the text block in content array (skip thinking blocks)
-      const textBlock = data.content?.find(block => block.type === 'text');
-      if (textBlock?.text) {
-        console.log('[Chat API] Success! Reply length:', textBlock.text.length);
+    if (config.provider === 'minimax') {
+      const reply = data.reply || data.choices?.[0]?.message?.content || data.choices?.[0]?.text;
+      if (reply) {
+        console.log('[Chat API] Success! Reply length:', reply.length);
         return jsonResponse({
           success: true,
-          reply: textBlock.text,
+          reply,
           model: model,
-          usage: data.usage,
+          usage: data.usage || data.base_resp || null,
           latency: {
             provider: providerLatency,
             total: totalLatency
           }
         });
       }
+
+      if (data.base_resp?.status_msg) {
+        return jsonResponse({
+          success: false,
+          message: data.base_resp.status_msg
+        }, 500);
+      }
     } else if (data.choices?.[0]?.message?.content) {
-      // Handle OpenAI response format
       console.log('[Chat API] Success! Reply length:', data.choices[0].message.content.length);
       return jsonResponse({
         success: true,
