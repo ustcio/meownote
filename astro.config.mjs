@@ -4,8 +4,9 @@ import path from 'path';
 import vue from '@astrojs/vue';
 
 export default defineConfig({
-  site: 'https://ustc.dev',
+  site: 'https://maxwell.science',
   compressHTML: true,
+  trailingSlash: 'always',
 
   i18n: {
     defaultLocale: 'en',
