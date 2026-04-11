@@ -1,9 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@font-face {
+  font-family: 'Anthropic Sans';
+  src: url('/fonts/AnthropicSans-Roman-Web.woff2') format('woff2');
+  font-weight: 300 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Anthropic Sans';
+  src: url('/fonts/AnthropicSans-Italic-Web.woff2') format('woff2');
+  font-weight: 300 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Anthropic Serif';
+  src: url('/fonts/AnthropicSerif-Roman-Web.woff2') format('woff2');
+  font-weight: 300 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Anthropic Serif';
+  src: url('/fonts/AnthropicSerif-Italic-Web.woff2') format('woff2');
+  font-weight: 300 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Anthropic Mono';
+  src: url('/fonts/AnthropicMono-Roman-Web.woff2') format('woff2');
+  font-weight: 300 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Anthropic Mono';
+  src: url('/fonts/AnthropicMono-Italic-Web.woff2') format('woff2');
+  font-weight: 300 800;
+  font-style: italic;
+  font-display: swap;
+}
 
 :root {
-  /* Unified site typography */
   --font-display:
-    'Poppins',
+    'Anthropic Sans',
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -15,32 +60,38 @@
     sans-serif;
 
   --font-body:
-    'Times New Roman',
-    Times,
-    Georgia,
-    serif,
+    'Anthropic Sans',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
     'PingFang SC',
     'Hiragino Sans GB',
     'Microsoft YaHei',
     'Source Han Sans SC',
     'Noto Sans SC',
-    serif;
+    sans-serif;
 
   --font-sans: var(--font-display);
-  --font-serif: var(--font-body);
+  --font-serif:
+    'Anthropic Serif',
+    'Anthropic Sans',
+    Georgia,
+    'Times New Roman',
+    serif;
   --font-editorial:
-    'Poppins',
+    'Anthropic Serif',
+    'Anthropic Sans',
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
     'Songti SC',
     'STSong',
     'Noto Serif SC',
-    sans-serif;
+    serif;
   --font-brand: var(--font-display);
   --font-number: var(--font-display);
   --font-mono:
-    'IBM Plex Mono',
+    'Anthropic Mono',
     'SF Mono',
     'JetBrains Mono',
     'Cascadia Code',
