@@ -2,29 +2,29 @@
 import Layout from '@layouts/Layout.astro';
 import { t } from '@i18n/translate';
 
-const features = [
+const values = [
   {
     icon: 'zap',
-    title: t('about.features.performance.title'),
-    description: t('about.features.performance.desc'),
+    title: t('about.values.performance.title'),
+    description: t('about.values.performance.desc'),
     color: '#D97757'
   },
   {
     icon: 'shield',
-    title: t('about.features.security.title'),
-    description: t('about.features.security.desc'),
+    title: t('about.values.security.title'),
+    description: t('about.values.security.desc'),
     color: '#5B7E6A'
   },
   {
-    icon: 'cpu',
-    title: t('about.features.intelligence.title'),
-    description: t('about.features.intelligence.desc'),
+    icon: 'brain',
+    title: t('about.values.intelligence.title'),
+    description: t('about.values.intelligence.desc'),
     color: '#4A5E8A'
   },
   {
     icon: 'globe',
-    title: t('about.features.global.title'),
-    description: t('about.features.global.desc'),
+    title: t('about.values.global.title'),
+    description: t('about.values.global.desc'),
     color: '#7B5EAA'
   },
 ];
@@ -52,7 +52,7 @@ const stats = [
 const iconPaths: Record<string, string> = {
   zap: `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>`,
   shield: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>`,
-  cpu: `<rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>`,
+  brain: `<path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/><path d="M9 21h6"/><path d="M10 17v4"/><path d="M14 17v4"/>`,
   globe: `<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>`,
   rocket: `<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>`,
   code: `<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>`,
@@ -65,397 +65,571 @@ const iconPaths: Record<string, string> = {
   title={`${t('about.title')} - Maxwell.Science`}
   description={t('about.subtitle')}
 >
-  <section class="about">
+  <section class="about-page">
     <div class="about-container">
-      <!-- Hero -->
+      
+      <!-- Hero Section -->
       <div class="about-hero">
-        <div class="hero-label">
-          <span class="label-dot"></span>
-          <span class="label-text">{t('about.badge')}</span>
+        <div class="hero-kicker">
+          <span class="kicker-dot"></span>
+          <span class="kicker-text">{t('about.badge')}</span>
         </div>
-        <h1 class="about-title">{t('about.title')}</h1>
-        <p class="about-subtitle">{t('about.subtitle')}</p>
-      </div>
-      
-      <!-- Story -->
-      <div class="about-story">
-        <div class="story-content">
-          <h2 class="section-title">{t('about.story.title')}</h2>
-          <p class="story-text">{t('about.story.p1')}</p>
-          <p class="story-text">{t('about.story.p2')}</p>
+        <h1 class="hero-title">{t('about.title')}</h1>
+        <p class="hero-subtitle">{t('about.subtitle')}</p>
+        <div class="hero-actions">
+          <a href="/chatbot" class="hero-btn-primary">
+            <span>{t('about.cta.primary')}</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </a>
+          <a href="/kit" class="hero-btn-secondary">{t('about.cta.secondary')}</a>
         </div>
       </div>
-      
-      <!-- Stats -->
-      <div class="stats-grid">
-        {stats.map(stat => (
-          <div class="stat-card">
+
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        {stats.map((stat, i) => (
+          <div class="stat-item" data-index={i}>
             <span class="stat-value">{stat.value}</span>
             <span class="stat-label">{stat.label}</span>
           </div>
         ))}
       </div>
-      
-      <!-- Features -->
-      <div class="features-section">
-        <h2 class="section-title">{t('about.features.title')}</h2>
-        <div class="features-grid">
-          {features.map((feature) => (
-            <div class="feature-card">
-              <div class="feature-icon" style={`background: ${feature.color}18; color: ${feature.color};`}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <Fragment set:html={iconPaths[feature.icon]} />
+
+      <!-- Mission Section -->
+      <div class="mission-section">
+        <div class="mission-grid">
+          <div class="mission-heading">
+            <h2 class="section-heading">{t('about.story.title')}</h2>
+          </div>
+          <div class="mission-content">
+            <p class="mission-text">{t('about.story.p1')}</p>
+            <p class="mission-text">{t('about.story.p2')}</p>
+            <p class="mission-text mission-highlight">{t('about.story.p3')}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Values Section -->
+      <div class="values-section">
+        <h2 class="section-heading centered">{t('about.values.title')}</h2>
+        <div class="values-grid">
+          {values.map((value) => (
+            <div class="value-card">
+              <div class="value-icon" style={`background: ${value.color}15; color: ${value.color};`}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <Fragment set:html={iconPaths[value.icon]} />
                 </svg>
               </div>
-              <h3 class="feature-title">{feature.title}</h3>
-              <p class="feature-description">{feature.description}</p>
+              <h3 class="value-title">{value.title}</h3>
+              <p class="value-desc">{value.description}</p>
             </div>
           ))}
         </div>
       </div>
-      
-      <!-- Milestones -->
+
+      <!-- Milestones Section -->
       <div class="milestones-section">
-        <h2 class="section-title">{t('about.milestones.title')}</h2>
-        <div class="milestones-timeline">
-          {milestones.map((milestone, index) => (
-            <div class="milestone-item">
-              <div class="milestone-marker">
-                <span class="milestone-year">{milestone.year}</span>
-                <div class="milestone-dot"></div>
-                {index < milestones.length - 1 && <div class="milestone-line"></div>}
+        <div class="milestones-layout">
+          <div class="milestones-heading">
+            <h2 class="section-heading">{t('about.milestones.title')}</h2>
+          </div>
+          <div class="milestones-timeline">
+            {milestones.map((milestone, index) => (
+              <div class="milestone-item">
+                <div class="milestone-track">
+                  <span class="milestone-year">{milestone.year}</span>
+                  <div class="milestone-dot"></div>
+                  {index < milestones.length - 1 && <div class="milestone-line"></div>}
+                </div>
+                <div class="milestone-body">
+                  <h3 class="milestone-title">{milestone.title}</h3>
+                  <p class="milestone-desc">{milestone.desc}</p>
+                </div>
               </div>
-              <div class="milestone-content">
-                <h3 class="milestone-title">{milestone.title}</h3>
-                <p class="milestone-desc">{milestone.desc}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
-      
-      <!-- Tech Stack -->
+
+      <!-- Tech Stack Section -->
       <div class="tech-section">
-        <h2 class="section-title">{t('about.tech.title')}</h2>
-        <div class="tech-grid">
-          {techStack.map(tech => (
-            <div class="tech-card">
-              <div class="tech-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <Fragment set:html={iconPaths[tech.icon]} />
-                </svg>
+        <div class="tech-layout">
+          <div class="tech-heading">
+            <h2 class="section-heading">{t('about.tech.title')}</h2>
+            <p class="tech-subtitle">{t('about.tech.desc')}</p>
+          </div>
+          <div class="tech-grid">
+            {techStack.map(tech => (
+              <div class="tech-chip">
+                <div class="tech-chip-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <Fragment set:html={iconPaths[tech.icon]} />
+                  </svg>
+                </div>
+                <span class="tech-chip-name">{tech.name}</span>
               </div>
-              <span class="tech-name">{tech.name}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
-      
-      <!-- CTA -->
+
+      <!-- CTA Section -->
       <div class="cta-section">
-        <h2 class="cta-title">{t('about.cta.title')}</h2>
-        <p class="cta-desc">{t('about.cta.desc')}</p>
-        <div class="cta-actions">
-          <a href="/chatbot" class="cta-primary">{t('about.cta.primary')}</a>
-          <a href="https://github.com/maxwell-xyz" target="_blank" rel="noopener" class="cta-secondary">{t('about.cta.secondary')}</a>
+        <div class="cta-content">
+          <h2 class="cta-heading">{t('about.cta.title')}</h2>
+          <p class="cta-desc">{t('about.cta.desc')}</p>
+          <div class="cta-buttons">
+            <a href="/chatbot" class="cta-btn-primary">
+              <span>{t('about.cta.primary')}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </a>
+            <a href="/kit" class="cta-btn-secondary">{t('about.cta.secondary')}</a>
+          </div>
         </div>
       </div>
+
     </div>
   </section>
 </Layout>
 
 <style>
-  .about {
+  /* ===== Page Layout ===== */
+  .about-page {
     min-height: 100vh;
-    padding: calc(var(--header-total-height) + var(--space-4)) var(--space-4) var(--space-12);
+    padding: calc(var(--header-total-height, 72px) + var(--space-8)) var(--space-4) var(--space-16);
     background: var(--bg-primary);
   }
-  
+
   .about-container {
     max-width: var(--container-lg);
     margin: 0 auto;
   }
-  
+
+  /* ===== Hero Section ===== */
   .about-hero {
-    text-align: left;
-    margin-bottom: var(--space-8);
-    padding-top: var(--space-8);
-    max-width: 42rem;
+    max-width: 680px;
+    margin-bottom: var(--space-12);
+    padding-top: var(--space-4);
   }
-  
-  .hero-label {
+
+  .hero-kicker {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-5);
   }
-  
-  .label-dot {
+
+  .kicker-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
     background: var(--color-primary);
+    animation: pulse-dot 2s ease-in-out infinite;
   }
-  
-  .label-text {
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.2); }
+  }
+
+  .kicker-text {
     font-family: var(--font-sans);
     font-size: var(--text-xs);
     color: var(--text-tertiary);
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
+    font-weight: var(--font-semibold);
   }
-  
-  .about-title {
+
+  .hero-title {
     font-family: var(--font-display);
-    font-size: clamp(2.8rem, 5vw, 4.5rem);
+    font-size: clamp(2.5rem, 6vw, 4rem);
     font-weight: var(--font-medium);
-    line-height: 0.98;
+    line-height: 1.0;
     letter-spacing: var(--tracking-tight);
     color: var(--text-primary);
     margin-bottom: var(--space-4);
   }
-  
-  .about-subtitle {
+
+  .hero-subtitle {
     font-family: var(--font-sans);
     color: var(--text-secondary);
-    font-size: 1.05rem;
-    max-width: 600px;
-    margin: 0;
-    line-height: 1.7;
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    max-width: 560px;
+    margin: 0 0 var(--space-6);
+    line-height: 1.65;
   }
-  
-  .about-story {
-    max-width: 700px;
-    margin: 0 0 var(--space-16);
-    text-align: left;
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
   }
-  
-  .story-text {
+
+  .hero-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    background: var(--btn-primary-bg);
+    border-radius: var(--radius-full);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--btn-primary-text);
+    text-decoration: none;
+    transition: all var(--duration-fast) var(--ease-default);
+    cursor: pointer;
+  }
+
+  .hero-btn-primary:hover {
+    background: var(--btn-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--btn-primary-shadow);
+  }
+
+  .hero-btn-primary svg {
+    transition: transform var(--duration-fast) var(--ease-default);
+  }
+
+  .hero-btn-primary:hover svg {
+    transform: translateX(3px);
+  }
+
+  .hero-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-3) var(--space-5);
     color: var(--text-secondary);
-    font-size: var(--text-base);
-    line-height: 1.7;
-    margin-bottom: var(--space-4);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-default);
+    cursor: pointer;
   }
-  
-  .story-text:last-child {
-    margin-bottom: 0;
+
+  .hero-btn-secondary:hover {
+    color: var(--text-primary);
   }
-  
-  .stats-grid {
+
+  /* ===== Stats Bar ===== */
+  .stats-bar {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-4);
-    margin-bottom: var(--space-8);
-  }
-  
-  @media (min-width: 768px) {
-    .stats-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-  
-  .stat-card {
-    text-align: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-12);
     padding: var(--space-6);
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-xl);
-    box-shadow: var(--card-shadow);
   }
-  
+
+  @media (min-width: 768px) {
+    .stats-bar {
+      grid-template-columns: repeat(4, 1fr);
+      padding: var(--space-8);
+    }
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: var(--space-3);
+    opacity: 0;
+    animation: fade-in-up 0.5s ease forwards;
+  }
+
+  .stat-item:nth-child(1) { animation-delay: 0.1s; }
+  .stat-item:nth-child(2) { animation-delay: 0.2s; }
+  .stat-item:nth-child(3) { animation-delay: 0.3s; }
+  .stat-item:nth-child(4) { animation-delay: 0.4s; }
+
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .stat-value {
     display: block;
     font-family: var(--font-display);
     font-size: var(--text-2xl);
-    font-weight: var(--font-normal);
+    font-weight: var(--font-medium);
     color: var(--color-primary);
     margin-bottom: var(--space-1);
+    letter-spacing: -0.02em;
   }
-  
+
   .stat-label {
     font-family: var(--font-sans);
     font-size: var(--text-xs);
     color: var(--text-tertiary);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
+    font-weight: var(--font-medium);
   }
-  
-  .section-title {
+
+  /* ===== Section Headings ===== */
+  .section-heading {
     font-family: var(--font-display);
     font-size: clamp(1.5rem, 3vw, 2rem);
-    font-weight: var(--font-normal);
+    font-weight: var(--font-medium);
     color: var(--text-primary);
-    margin-bottom: var(--space-8);
+    letter-spacing: var(--tracking-tight);
+    line-height: 1.1;
+  }
+
+  .section-heading.centered {
     text-align: center;
-    letter-spacing: -0.01em;
-  }
-  
-  .features-section {
     margin-bottom: var(--space-8);
   }
-  
-  .features-grid {
+
+  /* ===== Mission Section ===== */
+  .mission-section {
+    margin-bottom: var(--space-12);
+    padding: var(--space-8) 0;
+    border-top: 1px solid var(--border-secondary);
+    border-bottom: 1px solid var(--border-secondary);
+  }
+
+  .mission-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 768px) {
+    .mission-grid {
+      grid-template-columns: 280px 1fr;
+      gap: var(--space-10);
+    }
+  }
+
+  .mission-heading {
+    position: sticky;
+    top: calc(var(--header-total-height, 72px) + var(--space-4));
+    align-self: start;
+  }
+
+  .mission-text {
+    color: var(--text-secondary);
+    font-size: var(--text-base);
+    line-height: 1.7;
+    margin-bottom: var(--space-4);
+  }
+
+  .mission-text:last-child {
+    margin-bottom: 0;
+  }
+
+  .mission-highlight {
+    color: var(--text-primary);
+    font-size: var(--text-lg);
+    font-weight: var(--font-medium);
+    line-height: 1.6;
+    padding-left: var(--space-4);
+    border-left: 3px solid var(--color-primary);
+  }
+
+  /* ===== Values Section ===== */
+  .values-section {
+    margin-bottom: var(--space-12);
+    padding: var(--space-8) 0;
+  }
+
+  .values-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--space-4);
   }
-  
+
   @media (min-width: 640px) {
-    .features-grid {
+    .values-grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
-  
-  @media (min-width: 1024px) {
-    .features-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-  
-  .feature-card {
-    text-align: center;
+
+  .value-card {
     padding: var(--space-6);
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: var(--radius-2xl);
+    border-radius: var(--radius-xl);
     transition: all var(--duration-normal) var(--ease-default);
-    cursor: pointer;
+    cursor: default;
   }
-  
-  .feature-card:hover {
-    transform: translateY(-4px);
+
+  .value-card:hover {
     border-color: var(--card-border-hover);
+    transform: translateY(-3px);
     box-shadow: var(--card-shadow-hover);
   }
-  
-  .feature-card:hover .feature-title {
-    color: var(--color-primary);
-  }
-  
-  .feature-icon {
-    display: flex;
+
+  .value-icon {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
-    margin: 0 auto var(--space-4);
+    width: 44px;
+    height: 44px;
     border-radius: var(--radius-lg);
-    transition: transform var(--duration-normal) var(--ease-default);
+    margin-bottom: var(--space-4);
+    transition: transform var(--duration-fast) var(--ease-default);
   }
-  
-  .feature-card:hover .feature-icon {
-    transform: scale(1.05);
+
+  .value-card:hover .value-icon {
+    transform: scale(1.08);
   }
-  
-  .feature-title {
+
+  .value-title {
     font-family: var(--font-display);
     font-size: var(--text-base);
-    font-weight: var(--font-normal);
+    font-weight: var(--font-medium);
     color: var(--text-primary);
     margin-bottom: var(--space-2);
-    transition: color var(--duration-normal) var(--ease-default);
   }
-  
-  .feature-description {
+
+  .value-desc {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
     color: var(--text-secondary);
-    line-height: 1.65;
+    line-height: 1.6;
   }
-  
+
+  /* ===== Milestones Section ===== */
   .milestones-section {
+    margin-bottom: var(--space-12);
+    padding: var(--space-8) 0;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-2xl);
+  }
+
+  .milestones-layout {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+  }
+
+  .milestones-heading {
     margin-bottom: var(--space-8);
   }
-  
+
   .milestones-timeline {
-    max-width: 600px;
-    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
   }
-  
+
   .milestone-item {
     display: flex;
-    gap: var(--space-4);
+    gap: var(--space-5);
   }
-  
-  .milestone-marker {
+
+  .milestone-track {
     display: flex;
     flex-direction: column;
     align-items: center;
     flex-shrink: 0;
+    width: 60px;
   }
-  
+
   .milestone-year {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
     font-weight: var(--font-semibold);
     color: var(--color-primary);
     margin-bottom: var(--space-2);
+    letter-spacing: -0.01em;
   }
-  
+
   .milestone-dot {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     background: var(--color-primary);
     border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 4px var(--bg-secondary);
   }
-  
+
   .milestone-line {
     width: 2px;
     flex: 1;
     background: var(--border-primary);
-    margin-top: var(--space-2);
+    margin-top: var(--space-1);
   }
-  
-  .milestone-content {
+
+  .milestone-body {
     flex: 1;
-    padding-bottom: var(--space-6);
+    padding-bottom: var(--space-8);
   }
-  
+
   .milestone-title {
     font-family: var(--font-display);
     font-size: var(--text-base);
-    font-weight: var(--font-normal);
+    font-weight: var(--font-medium);
     color: var(--text-primary);
-    margin-bottom: var(--space-1);
+    margin-bottom: var(--space-2);
   }
-  
+
   .milestone-desc {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
     color: var(--text-secondary);
+    line-height: 1.6;
   }
-  
+
+  /* ===== Tech Stack Section ===== */
   .tech-section {
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-12);
+    padding: var(--space-8) 0;
   }
-  
+
+  .tech-layout {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .tech-heading {
+    margin-bottom: var(--space-6);
+  }
+
+  .tech-subtitle {
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+    margin-top: var(--space-2);
+  }
+
   .tech-grid {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: var(--space-3);
   }
-  
-  .tech-card {
-    display: flex;
+
+  .tech-chip {
+    display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-2) var(--space-4);
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-full);
     transition: all var(--duration-fast) var(--ease-default);
-    cursor: pointer;
+    cursor: default;
   }
-  
-  .tech-card:hover {
+
+  .tech-chip:hover {
     border-color: var(--card-border-hover);
     transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
   }
-  
-  .tech-icon {
-    width: 28px;
-    height: 28px;
+
+  .tech-chip-icon {
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -463,66 +637,84 @@ const iconPaths: Record<string, string> = {
     border-radius: 6px;
     color: var(--text-inverse);
   }
-  
-  .tech-name {
+
+  .tech-chip-name {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    font-weight: var(--font-normal);
+    font-weight: var(--font-medium);
     color: var(--text-primary);
   }
-  
+
+  /* ===== CTA Section ===== */
   .cta-section {
-    text-align: center;
-    padding: var(--space-8);
+    padding: var(--space-10) var(--space-6);
     background: var(--bg-elevated);
+    border: 1px solid var(--card-border);
     border-radius: var(--radius-2xl);
-    box-shadow: var(--card-shadow);
+    text-align: center;
+    margin-bottom: var(--space-8);
   }
-  
-  .cta-title {
+
+  .cta-content {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .cta-heading {
     font-family: var(--font-display);
-    font-size: var(--text-2xl);
-    font-weight: var(--font-normal);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: var(--font-medium);
     color: var(--text-primary);
     margin-bottom: var(--space-3);
-    letter-spacing: -0.01em;
+    letter-spacing: var(--tracking-tight);
   }
-  
+
   .cta-desc {
     font-family: var(--font-sans);
     color: var(--text-secondary);
     font-size: var(--text-base);
     margin-bottom: var(--space-6);
-    line-height: 1.65;
+    line-height: 1.6;
   }
-  
-  .cta-actions {
+
+  .cta-buttons {
     display: flex;
     justify-content: center;
     gap: var(--space-3);
     flex-wrap: wrap;
   }
-  
-  .cta-primary {
+
+  .cta-btn-primary {
     display: inline-flex;
     align-items: center;
+    gap: var(--space-2);
     padding: var(--space-3) var(--space-6);
     background: var(--btn-primary-bg);
     border-radius: var(--radius-full);
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    font-weight: var(--font-normal);
+    font-weight: var(--font-medium);
     color: var(--btn-primary-text);
     text-decoration: none;
     transition: all var(--duration-fast) var(--ease-default);
+    cursor: pointer;
   }
-  
-  .cta-primary:hover {
+
+  .cta-btn-primary:hover {
     background: var(--btn-primary-hover);
     transform: translateY(-2px);
+    box-shadow: var(--btn-primary-shadow);
   }
-  
-  .cta-secondary {
+
+  .cta-btn-primary svg {
+    transition: transform var(--duration-fast) var(--ease-default);
+  }
+
+  .cta-btn-primary:hover svg {
+    transform: translateX(3px);
+  }
+
+  .cta-btn-secondary {
     display: inline-flex;
     align-items: center;
     padding: var(--space-3) var(--space-6);
@@ -531,23 +723,77 @@ const iconPaths: Record<string, string> = {
     border-radius: var(--radius-full);
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    font-weight: var(--font-normal);
+    font-weight: var(--font-medium);
     color: var(--btn-secondary-text);
     text-decoration: none;
     transition: all var(--duration-fast) var(--ease-default);
+    cursor: pointer;
   }
-  
-  .cta-secondary:hover {
+
+  .cta-btn-secondary:hover {
     background: var(--btn-secondary-hover-bg);
     border-color: var(--border-hover);
   }
 
-  .cta-primary,
-  .cta-secondary {
+  /* ===== Touch Targets ===== */
+  .hero-btn-primary,
+  .hero-btn-secondary,
+  .cta-btn-primary,
+  .cta-btn-secondary {
     min-height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 767px) {
+    .about-page {
+      padding-top: calc(var(--header-height, 56px) + var(--space-6));
+    }
+
+    .about-hero {
+      margin-bottom: var(--space-8);
+    }
+
+    .stats-bar {
+      padding: var(--space-4);
+    }
+
+    .mission-section,
+    .values-section,
+    .tech-section {
+      padding: var(--space-6) 0;
+    }
+
+    .milestones-section {
+      padding: var(--space-6) var(--space-4);
+    }
+
+    .milestones-layout {
+      padding: 0;
+    }
+
+    .cta-section {
+      padding: var(--space-8) var(--space-4);
+    }
+
+    .cta-buttons {
+      flex-direction: column;
+    }
+
+    .cta-btn-primary,
+    .cta-btn-secondary {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 </style>
