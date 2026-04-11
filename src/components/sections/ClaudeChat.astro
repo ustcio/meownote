@@ -1205,8 +1205,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   }
 </style>
 
-<script is:inline>
-  const API_BASE = {JSON.stringify(API_BASE)};
+<script is:inline define:vars={{ API_BASE }}>
   const DEFAULT_MODEL = 'qwen3.6-plus';
   const MODEL_META = {
     'qwen3.6-plus': { name: 'Qwen 3.6 Plus', badge: '默认', avatar: 'Q' },
