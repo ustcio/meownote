@@ -507,8 +507,8 @@ const toolDesc = 'Track domestic and international gold prices in a focused live
     const domesticCtx = document.getElementById('domestic-chart');
     const internationalCtx = document.getElementById('international-chart');
     const rootStyles = getComputedStyle(document.documentElement);
-    const bodyFont = rootStyles.getPropertyValue('--font-body').trim() || 'Manrope, sans-serif';
-    const sansFont = rootStyles.getPropertyValue('--font-display').trim() || 'Manrope, sans-serif';
+    const bodyFont = rootStyles.getPropertyValue('--font-body').trim() || '"Times New Roman", Times, serif';
+    const sansFont = rootStyles.getPropertyValue('--font-display').trim() || 'Poppins, sans-serif';
 
     const chartConfig = {
       type: 'line',

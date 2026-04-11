@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 :root {
   /* Unified site typography */
   --font-display:
-    'Manrope',
+    'Poppins',
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -15,30 +15,30 @@
     sans-serif;
 
   --font-body:
-    'Manrope',
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
+    'Times New Roman',
+    Times,
+    Georgia,
+    serif,
     'PingFang SC',
     'Hiragino Sans GB',
     'Microsoft YaHei',
     'Source Han Sans SC',
     'Noto Sans SC',
-    sans-serif;
+    serif;
 
   --font-sans: var(--font-display);
   --font-serif: var(--font-body);
   --font-editorial:
-    'Fraunces',
-    'Iowan Old Style',
-    'Palatino Linotype',
-    'Book Antiqua',
+    'Poppins',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
     'Songti SC',
     'STSong',
     'Noto Serif SC',
-    serif;
-  --font-brand: var(--font-editorial);
-  --font-number: var(--font-sans);
+    sans-serif;
+  --font-brand: var(--font-display);
+  --font-number: var(--font-display);
   --font-mono:
     'IBM Plex Mono',
     'SF Mono',
