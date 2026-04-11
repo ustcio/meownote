@@ -1,81 +1,121 @@
 ---
 const faqs = [
   {
-    q: 'What is your research focus?',
-    a: 'My PhD work centers on quantum transport and optoelectronic properties in topological quantum materials — specifically layered compounds like CoNb₃S₆, ZrAs₂, and Nb₃I₈. I combine Hall effect measurements, phonon analysis, and detector development to understand how electrons behave in these systems.',
+    q: 'What happens on this site?',
+    a: 'This site combines an AI chat space, a lightweight workspace, and a small research-oriented toolkit. It is designed to feel more like a calm working environment than a generic utility directory.',
   },
   {
-    q: 'What techniques do you use?',
-    a: 'I work with transport measurements (Hall effect, magnetoresistance), optoelectronic characterization (photoconductivity, spectral response), and first-principles calculations. I also design and test radiation detectors based on novel van der Waals materials.',
+    q: 'Why keep the toolkit minimal?',
+    a: 'I intentionally cut the toolkit down. Instead of maintaining dozens of unrelated tools, I keep only what is actually useful in my own workflow, including the gold price tracker.',
   },
   {
-    q: 'Why does this matter?',
-    a: 'Topological materials could enable next-generation electronics — faster, more efficient, and more robust. Understanding their transport and optical properties is a key step toward practical devices like quantum sensors and low-power transistors.',
+    q: 'How do chat and workspace fit together?',
+    a: 'Quick thoughts can start in chat, then move into workspace as notes, drafts, and reusable documents. The goal is not just answering questions, but helping work continue after the first response.',
   },
   {
-    q: 'Are you open to collaboration?',
-    a: 'Yes! I am interested in collaborations on quantum materials, detector development, and interdisciplinary applications. Feel free to reach out — I am always happy to discuss ideas over coffee or a video call.',
+    q: 'What kind of work is this built for?',
+    a: 'Writing, research, summarisation, planning, coding support, and everyday thinking work. The interface is meant to support long-form use without feeling noisy or disposable.',
   },
   {
-    q: 'What tools do you build here?',
-    a: 'Right now the toolkit is intentionally minimal. The only tool page I keep live is the gold price tracker, which lets me monitor domestic and international pricing without the noise of a giant utilities directory.',
+    q: 'What is the design trying to do?',
+    a: 'It aims for a softer editorial feel: warmer contrast, quieter surfaces, clearer hierarchy, and motion that feels alive without turning into decoration for its own sake.',
   },
 ];
 ---
 
 <section class="faq-section">
   <div class="container">
-    <div class="faq-header">
-      <span class="faq-kicker">Common questions</span>
-      <h2>Questions. Answered.</h2>
-    </div>
+    <div class="faq-shell">
+      <div class="faq-copy">
+        <div class="faq-header">
+          <span class="faq-kicker">Common questions</span>
+          <h2>Questions. Answered.</h2>
+          <p class="faq-intro">
+            A calmer front door for the site: what it does, why it is shaped this way, and
+            how the pieces fit together when you actually use it.
+          </p>
+        </div>
 
-    <div class="faq-list" role="list">
-      {faqs.map((faq, i) => (
-        <details class="faq-item" role="listitem" id={`faq-${i}`}
-  on:toggle={(e) => {
-    const details = e.currentTarget;
-    const body = details.querySelector('.faq-answer') as HTMLElement;
-    const chevron = details.querySelector('.faq-chevron') as SVGElement;
-    if (details.open) {
-      body.style.gridTemplateRows = '1fr';
-      body.style.opacity = '1';
-      chevron.style.transform = 'rotate(180deg)';
-    } else {
-      body.style.gridTemplateRows = '0fr';
-      body.style.opacity = '0';
-      chevron.style.transform = 'rotate(0deg)';
-    }
-  }}
->
-          <summary class="faq-question-btn" aria-expanded="false" aria-controls={`faq-body-${i}`}>
-            <span class="faq-question-text">{faq.q}</span>
-            <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </summary>
-          <div class="faq-answer" id={`faq-body-${i}`}>
-            <p>{faq.a}</p>
+        <div class="faq-list" role="list">
+          {faqs.map((faq, i) => (
+            <details class="faq-item" role="listitem" id={`faq-${i}`}>
+              <summary class="faq-question-btn" aria-expanded="false" aria-controls={`faq-body-${i}`}>
+                <span class="faq-question-text">{faq.q}</span>
+                <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </summary>
+              <div class="faq-answer" id={`faq-body-${i}`}>
+                <p>{faq.a}</p>
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
+
+      <div class="faq-visual" aria-hidden="true">
+        <div class="visual-stage">
+          <div class="visual-orbit orbit-one"></div>
+          <div class="visual-orbit orbit-two"></div>
+
+          <div class="visual-panel panel-main">
+            <div class="panel-dot"></div>
+            <div class="panel-lines">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="panel-message">
+              <span class="message-label">Question</span>
+              <p>How do chat, notes, and research stay connected?</p>
+            </div>
           </div>
-        </details>
-      ))}
+
+          <div class="visual-panel panel-reply">
+            <span class="message-label">Answer</span>
+            <p>Start in chat, save what matters, and keep working without losing the thread.</p>
+          </div>
+
+          <div class="visual-chip chip-one">Chat</div>
+          <div class="visual-chip chip-two">Workspace</div>
+          <div class="visual-chip chip-three">Research</div>
+
+          <div class="signal signal-one"></div>
+          <div class="signal signal-two"></div>
+          <div class="signal signal-three"></div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
 <style>
   .faq-section {
-    padding: clamp(2.5rem, 5vw, 4rem) 0;
-    background: var(--bg-primary);
+    padding: clamp(3.5rem, 7vw, 6.5rem) 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(233, 123, 81, 0.08), transparent 30%),
+      radial-gradient(circle at 85% 80%, rgba(120, 135, 158, 0.08), transparent 26%),
+      var(--bg-primary);
+    overflow: clip;
+  }
+
+  .faq-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.02fr) minmax(22rem, 0.98fr);
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: center;
+  }
+
+  .faq-copy {
+    min-width: 0;
   }
 
   .faq-header {
-    text-align: center;
     margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
   }
 
   .faq-kicker {
-    font-size: var(--text-xs);
+    font-size: max(0.82rem, var(--text-xs));
     font-weight: var(--font-semibold);
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -94,19 +134,26 @@ const faqs = [
   }
 
   .faq-header h2 {
-    margin-top: 0.4rem;
+    margin: 0.55rem 0 0;
+    font-size: clamp(2.3rem, 5vw, 4.5rem);
+    line-height: 0.94;
+    letter-spacing: -0.045em;
+    max-width: 10ch;
+  }
+
+  .faq-intro {
+    margin: 1rem 0 0;
+    max-width: 34rem;
+    font-size: clamp(1.02rem, 1.4vw, 1.18rem);
+    line-height: 1.78;
+    color: var(--text-secondary);
   }
 
   .faq-list {
-    max-width: 44rem;
-    margin: 0 auto;
-  }
-
-  .faq-item {
     border-top: 1px solid var(--border-primary);
   }
 
-  .faq-item:last-child {
+  .faq-item {
     border-bottom: 1px solid var(--border-primary);
   }
 
@@ -114,29 +161,34 @@ const faqs = [
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
     width: 100%;
-    padding: 1.1rem 0;
+    padding: 1.2rem 0;
     cursor: pointer;
     list-style: none;
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: var(--font-medium);
-    line-height: 1.5;
+    line-height: 1.45;
     transition: color var(--duration-normal) var(--ease-default);
-  }
-
-  .faq-question-btn:hover {
-    color: var(--color-primary);
   }
 
   .faq-question-btn::-webkit-details-marker {
     display: none;
   }
 
+  .faq-question-btn:hover {
+    color: var(--color-primary);
+  }
+
+  .faq-question-text {
+    max-width: 32rem;
+  }
+
   .faq-chevron {
     flex-shrink: 0;
-    transition: transform var(--duration-normal) var(--ease-default);
     color: var(--text-tertiary);
+    transition: transform var(--duration-normal) var(--ease-default), color var(--duration-normal) var(--ease-default);
   }
 
   .faq-item[open] .faq-chevron {
@@ -161,16 +213,282 @@ const faqs = [
   }
 
   .faq-answer p {
-    color: var(--text-secondary);
-    line-height: 1.65;
     margin: 0;
-    font-size: 0.92rem;
+    padding: 0 0 1.2rem;
+    color: var(--text-secondary);
+    font-size: 0.97rem;
+    line-height: 1.78;
+  }
+
+  .faq-visual {
+    position: relative;
+    min-width: 0;
+  }
+
+  .visual-stage {
+    position: relative;
+    min-height: clamp(24rem, 42vw, 34rem);
+    border-radius: 2rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 243, 236, 0.96)),
+      rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(219, 209, 195, 0.72);
+    box-shadow:
+      0 24px 60px rgba(56, 41, 24, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    overflow: hidden;
+  }
+
+  .visual-stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 18% 22%, rgba(233, 123, 81, 0.18), transparent 22%),
+      radial-gradient(circle at 82% 24%, rgba(166, 181, 200, 0.2), transparent 20%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0));
+    pointer-events: none;
+  }
+
+  .visual-orbit {
+    position: absolute;
+    inset: 50%;
+    border-radius: 999px;
+    border: 1px solid rgba(192, 181, 168, 0.36);
+    transform: translate(-50%, -50%);
+  }
+
+  .orbit-one {
+    width: 72%;
+    height: 72%;
+    animation: orbitPulse 7s ease-in-out infinite;
+  }
+
+  .orbit-two {
+    width: 92%;
+    height: 92%;
+    opacity: 0.65;
+    animation: orbitPulse 8.5s ease-in-out infinite reverse;
+  }
+
+  .visual-panel,
+  .visual-chip,
+  .signal {
+    position: absolute;
+    z-index: 1;
+  }
+
+  .visual-panel {
+    border: 1px solid rgba(214, 201, 186, 0.72);
+    background: rgba(255, 252, 247, 0.88);
+    box-shadow: 0 18px 40px rgba(72, 51, 28, 0.08);
+    backdrop-filter: blur(14px);
+  }
+
+  .panel-main {
+    top: 14%;
+    right: 10%;
+    width: min(25rem, 72%);
+    padding: 1rem 1rem 1.1rem;
+    border-radius: 1.55rem;
+    animation: floatPanel 8.5s ease-in-out infinite;
+  }
+
+  .panel-reply {
+    left: 10%;
+    bottom: 13%;
+    width: min(21rem, 64%);
+    padding: 1rem 1rem 1.1rem;
+    border-radius: 1.4rem;
+    animation: floatPanel 9s ease-in-out infinite reverse;
+  }
+
+  .panel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    box-shadow: 0 0 0 8px rgba(233, 123, 81, 0.12);
+  }
+
+  .panel-lines {
+    display: flex;
+    gap: 0.45rem;
+    margin: 0.75rem 0 1.1rem;
+  }
+
+  .panel-lines span {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(195, 183, 169, 0.5);
+  }
+
+  .panel-lines span:nth-child(1) { width: 28%; }
+  .panel-lines span:nth-child(2) { width: 18%; }
+  .panel-lines span:nth-child(3) { width: 39%; }
+
+  .message-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.32rem 0.62rem;
+    border-radius: 999px;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+    color: var(--color-primary);
+    background: rgba(233, 123, 81, 0.1);
+  }
+
+  .panel-message p,
+  .panel-reply p {
+    margin: 0.9rem 0 0;
+    font-size: clamp(1rem, 1.3vw, 1.14rem);
+    line-height: 1.65;
+    color: rgba(47, 39, 31, 0.86);
+  }
+
+  .visual-chip {
+    padding: 0.7rem 1rem;
+    border-radius: 999px;
+    background: rgba(255, 249, 242, 0.86);
+    border: 1px solid rgba(214, 201, 186, 0.72);
+    box-shadow: 0 12px 26px rgba(72, 51, 28, 0.08);
+    font-family: var(--font-display);
+    font-size: 0.88rem;
+    letter-spacing: 0.02em;
+    color: rgba(63, 53, 43, 0.82);
+  }
+
+  .chip-one {
+    top: 12%;
+    left: 9%;
+    animation: driftChip 9s ease-in-out infinite;
+  }
+
+  .chip-two {
+    top: 47%;
+    right: 12%;
+    animation: driftChip 10s ease-in-out infinite reverse;
+  }
+
+  .chip-three {
+    bottom: 12%;
+    left: 18%;
+    animation: driftChip 11s ease-in-out infinite;
+  }
+
+  .signal {
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(233, 123, 81, 0.95), rgba(201, 151, 116, 0.7));
+    box-shadow: 0 0 0 12px rgba(233, 123, 81, 0.08);
+  }
+
+  .signal-one {
+    top: 21%;
+    left: 43%;
+    animation: signalPulse 6.5s ease-in-out infinite;
+  }
+
+  .signal-two {
+    right: 19%;
+    bottom: 29%;
+    width: 11px;
+    height: 11px;
+    animation: signalPulse 7.8s ease-in-out infinite reverse;
+  }
+
+  .signal-three {
+    left: 21%;
+    bottom: 34%;
+    width: 9px;
+    height: 9px;
+    animation: signalPulse 8.2s ease-in-out infinite;
+  }
+
+  @keyframes floatPanel {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -12px, 0); }
+  }
+
+  @keyframes driftChip {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(8px, -10px, 0); }
+  }
+
+  @keyframes orbitPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.55; }
+    50% { transform: translate(-50%, -50%) scale(1.03); opacity: 0.85; }
+  }
+
+  @keyframes signalPulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.2); opacity: 0.5; }
+  }
+
+  @media (max-width: 960px) {
+    .faq-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .faq-header h2,
+    .faq-intro {
+      max-width: none;
+    }
+
+    .faq-visual {
+      order: -1;
+    }
+
+    .visual-stage {
+      min-height: 25rem;
+    }
   }
 
   @media (max-width: 640px) {
-    .faq-section { padding: 2.5rem 0; }
-    .faq-question-btn { padding: 1rem 0; font-size: 0.92rem; }
-    .faq-answer p { font-size: 0.88rem; }
+    .faq-section {
+      padding: 3.2rem 0;
+    }
+
+    .faq-header h2 {
+      font-size: clamp(2rem, 10vw, 2.8rem);
+    }
+
+    .faq-question-btn {
+      font-size: 0.96rem;
+      padding: 1rem 0;
+    }
+
+    .faq-answer p {
+      font-size: 0.94rem;
+      padding-bottom: 1rem;
+    }
+
+    .visual-stage {
+      min-height: 22rem;
+      border-radius: 1.45rem;
+    }
+
+    .panel-main,
+    .panel-reply {
+      width: min(18rem, 78%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orbit-one,
+    .orbit-two,
+    .panel-main,
+    .panel-reply,
+    .chip-one,
+    .chip-two,
+    .chip-three,
+    .signal-one,
+    .signal-two,
+    .signal-three {
+      animation: none;
+    }
   }
 </style>
 
