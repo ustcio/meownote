@@ -1,0 +1,355 @@
+---
+import '@styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  wrapMain?: boolean;
+  showProgress?: boolean;
+  showCursor?: boolean;
+  trackVisits?: boolean;
+}
+
+const {
+  title,
+  description = 'AI that works for you',
+  image = '/og-image.png',
+  wrapMain = true,
+  showProgress = true,
+  showCursor = true,
+  trackVisits = true,
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const apiBase = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <script is:inline>
+      (function() {
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(image, Astro.site)} />
+
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+
+    <link rel="icon" type="image/png" href="/claude-favicon.png" />
+    <meta name="theme-color" content="#FAF9F5" />
+
+    <link rel="preconnect" href="https://api.ustc.dev" crossorigin />
+    <link rel="dns-prefetch" href="https://api.ustc.dev" />
+
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="color-scheme" content="light dark" />
+
+    <style>
+      :root:not([data-theme]),
+      [data-theme="light"] {
+        --bg-primary: #FAF9F5;
+        --text-primary: #1A1A1A;
+        color-scheme: light;
+      }
+
+      [data-theme="dark"] {
+        --bg-primary: #0D0D0D;
+        --text-primary: #E5E5E5;
+        color-scheme: dark;
+      }
+    </style>
+  </head>
+  <body>
+    {showProgress && <div class="scroll-progress" id="scrollProgress"></div>}
+    {showCursor && <div class="custom-cursor" id="customCursor" aria-hidden="true"></div>}
+    <div class="toast-portal" id="toast-portal" aria-live="polite" aria-atomic="true"></div>
+
+    <slot name="header" />
+    {wrapMain ? (
+      <main>
+        <slot />
+      </main>
+    ) : (
+      <slot />
+    )}
+    <slot name="footer" />
+    <slot name="overlay" />
+
+    <script is:inline define:vars={{ apiBase, trackVisits, showProgress, showCursor }}>
+      (function() {
+        const BODY_SCROLL_LOCK_KEY = '__meownoteBodyScrollLock';
+        const previousApi = window[BODY_SCROLL_LOCK_KEY];
+        let lockCount = previousApi?.getCount?.() || 0;
+
+        function syncBodyScroll() {
+          document.body.style.overflow = lockCount > 0 ? 'hidden' : '';
+          document.body.dataset.scrollLock = String(lockCount);
+        }
+
+        window[BODY_SCROLL_LOCK_KEY] = {
+          lock() {
+            lockCount += 1;
+            syncBodyScroll();
+            return lockCount;
+          },
+          unlock() {
+            lockCount = Math.max(0, lockCount - 1);
+            syncBodyScroll();
+            return lockCount;
+          },
+          setLocked(locked) {
+            lockCount = locked ? Math.max(1, lockCount || 1) : 0;
+            syncBodyScroll();
+            return lockCount;
+          },
+          getCount() {
+            return lockCount;
+          }
+        };
+
+        if (!window.__meownoteToast) {
+          let activeToast = null;
+          let activeToastTimeout = 0;
+
+          const dismissToast = () => {
+            if (!activeToast) return;
+            const toastToRemove = activeToast;
+            activeToast = null;
+            window.clearTimeout(activeToastTimeout);
+            toastToRemove.classList.remove('is-visible');
+            window.setTimeout(() => {
+              toastToRemove.remove();
+            }, 220);
+          };
+
+          window.__meownoteToast = {
+            show(message, type = 'success', duration = 2500) {
+              const portal = document.getElementById('toast-portal');
+              if (!portal || !message) return;
+
+              dismissToast();
+
+              const toast = document.createElement('div');
+              toast.className = `app-toast app-toast--${type}`;
+              toast.setAttribute('role', 'alert');
+
+              const messageNode = document.createElement('span');
+              messageNode.className = 'app-toast__message';
+              messageNode.textContent = message;
+              toast.appendChild(messageNode);
+              portal.appendChild(toast);
+
+              requestAnimationFrame(() => {
+                toast.classList.add('is-visible');
+              });
+
+              activeToast = toast;
+              activeToastTimeout = window.setTimeout(dismissToast, duration);
+            },
+            dismiss: dismissToast,
+          };
+        }
+
+        syncBodyScroll();
+
+        function initChrome() {
+          if (showProgress) {
+            const progressBar = document.getElementById('scrollProgress');
+            if (progressBar && !progressBar.dataset.bound) {
+              progressBar.dataset.bound = 'true';
+              const updateScrollProgress = () => {
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollTop = window.scrollY;
+                progressBar.style.width = docHeight > 0 ? ((scrollTop / docHeight) * 100) + '%' : '0%';
+              };
+              updateScrollProgress();
+              window.addEventListener('scroll', updateScrollProgress, { passive: true });
+              window.addEventListener('resize', updateScrollProgress, { passive: true });
+            }
+          }
+
+          if (showCursor) {
+            const cursor = document.getElementById('customCursor');
+            if (cursor && !cursor.dataset.bound && window.matchMedia('(pointer: fine)').matches) {
+              cursor.dataset.bound = 'true';
+              let cursorX = 0;
+              let cursorY = 0;
+              let targetX = 0;
+              let targetY = 0;
+              let visible = false;
+              let rafId = 0;
+
+              const animateCursor = () => {
+                cursorX += (targetX - cursorX) * 0.15;
+                cursorY += (targetY - cursorY) * 0.15;
+                cursor.style.left = `${cursorX}px`;
+                cursor.style.top = `${cursorY}px`;
+                rafId = requestAnimationFrame(animateCursor);
+              };
+
+              document.addEventListener('mousemove', (event) => {
+                targetX = event.clientX;
+                targetY = event.clientY;
+                if (!visible) {
+                  visible = true;
+                  cursor.classList.add('is-visible');
+                  if (!rafId) rafId = requestAnimationFrame(animateCursor);
+                }
+              });
+
+              document.addEventListener('mouseleave', () => {
+                visible = false;
+                cursor.classList.remove('is-visible');
+              });
+
+              const hovers = 'a, button, [role="button"], input, select, textarea, details, .btn, .card, .research-card, .sp-card';
+              document.addEventListener('mouseover', (event) => {
+                if (event.target.closest?.(hovers)) cursor.classList.add('is-hovering');
+              });
+              document.addEventListener('mouseout', (event) => {
+                if (event.target.closest?.(hovers)) cursor.classList.remove('is-hovering');
+              });
+            }
+          }
+
+          if (trackVisits && !document.body.dataset.visitTracked) {
+            document.body.dataset.visitTracked = 'true';
+            const pathname = window.location.pathname;
+            const trackKey = `meownote_visit:${pathname}:${new Date().toISOString().slice(0, 16)}`;
+
+            if (!sessionStorage.getItem(trackKey)) {
+              sessionStorage.setItem(trackKey, '1');
+              window.addEventListener('load', () => {
+                fetch(`${apiBase}/stats/visit`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ page: pathname }),
+                  keepalive: true,
+                  cache: 'no-store',
+                }).catch(() => {});
+              }, { once: true });
+            }
+          }
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initChrome, { once: true });
+        } else {
+          initChrome();
+        }
+
+        document.addEventListener('astro:page-load', initChrome);
+
+        if (!window.__meownoteThemeListenerBound) {
+          window.__meownoteThemeListenerBound = true;
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+            if (!localStorage.getItem('theme')) {
+              document.documentElement.setAttribute('data-theme', event.matches ? 'dark' : 'light');
+            }
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
+
+<style>
+  main {
+    min-height: calc(100vh - var(--header-height));
+  }
+
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--color-primary), #e8a87c);
+    z-index: 10001;
+    transition: width 0.1s ease-out;
+  }
+
+  .custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-primary);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10001;
+    opacity: 0;
+    transition: width 0.2s ease, height 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+    transform: translate(-50%, -50%);
+  }
+
+  .custom-cursor.is-visible { opacity: 1; }
+
+  .custom-cursor.is-hovering {
+    width: 40px;
+    height: 40px;
+    background: rgba(212, 117, 90, 0.1);
+  }
+
+  @media (pointer: coarse) {
+    .custom-cursor { display: none; }
+  }
+
+  .toast-portal {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--space-6);
+    z-index: var(--z-toast);
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+  }
+
+  .app-toast {
+    min-width: min(22rem, calc(100vw - 2rem));
+    max-width: calc(100vw - 2rem);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-full);
+    color: #fff;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity var(--duration-normal) var(--ease-default),
+      transform var(--duration-normal) var(--ease-default);
+  }
+
+  .app-toast.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .app-toast--success { background: var(--color-success); }
+  .app-toast--error { background: var(--color-danger); }
+  .app-toast--warning { background: var(--color-warning); color: var(--text-primary); }
+  .app-toast--info { background: var(--text-primary); }
+</style>

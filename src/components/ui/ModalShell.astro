@@ -1,0 +1,41 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  closeId?: string;
+  backdropId?: string;
+  closeLabel?: string;
+  closeClass?: string;
+  contentClass?: string;
+  bodyClass?: string;
+}
+
+const {
+  id,
+  title,
+  closeId,
+  backdropId,
+  closeLabel = 'Close',
+  closeClass = 'modal-close',
+  contentClass = '',
+  bodyClass = 'modal-body',
+} = Astro.props;
+---
+
+<div class="modal" id={id}>
+  <div class="modal-backdrop" id={backdropId}></div>
+  <div class:list={['modal-content', contentClass].filter(Boolean)}>
+    <div class="modal-header">
+      <h3>{title}</h3>
+      <button class={closeClass} id={closeId} aria-label={closeLabel}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class={bodyClass}>
+      <slot />
+    </div>
+  </div>
+</div>

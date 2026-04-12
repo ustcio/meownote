@@ -126,7 +126,6 @@ import Layout from '@layouts/Layout.astro';
     </div>
   </section>
 
-  <div class="toast" id="toast"></div>
 </Layout>
 
 <style>
@@ -643,35 +642,6 @@ import Layout from '@layouts/Layout.astro';
     }
   }
 
-  .toast {
-    position: fixed;
-    bottom: var(--space-6);
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: var(--text-primary);
-    color: var(--text-inverse);
-    padding: var(--space-3) var(--space-6);
-    border-radius: var(--radius-full);
-    font-size: var(--text-sm);
-    z-index: 1000;
-    opacity: 0;
-    transition: all var(--duration-normal) var(--ease-default);
-    font-family: var(--font-sans);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  }
-
-  .toast.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-  }
-
-  .toast.success {
-    background: var(--color-success);
-  }
-
-  .toast.error {
-    background: var(--color-danger);
-  }
 </style>
 
 <script is:inline define:vars={{ API_BASE: 'https://api.ustc.dev', TOKEN_KEY: 'meownote_auth_token' }}>
@@ -706,7 +676,6 @@ import Layout from '@layouts/Layout.astro';
   const filePreviewContainer = document.getElementById('file-preview-container');
   const titleInput = document.getElementById('title-input');
   const contentTextarea = document.getElementById('content-textarea');
-  const toast = document.getElementById('toast');
   const wordCountEl = document.getElementById('word-count');
   const charCountEl = document.getElementById('char-count');
   const saveIndicator = document.getElementById('save-indicator');
@@ -1127,14 +1096,7 @@ import Layout from '@layouts/Layout.astro';
   }
 
   function showToast(message, type = 'success') {
-    if (toast) {
-      toast.textContent = message;
-      toast.className = 'toast show ' + type;
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => { toast.className = 'toast'; }, 300);
-      }, 2500);
-    }
+    window.__meownoteToast?.show(message, type);
   }
 
   document.getElementById('copy-btn')?.addEventListener('click', copyContent);

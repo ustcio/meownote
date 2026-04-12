@@ -1363,13 +1363,17 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
   // 侧边栏控制
   function openSidebar() {
+    const wasOpen = elements.sidebar?.classList.contains('open');
     elements.sidebar?.classList.add('open');
     elements.sidebarOverlay?.classList.add('show');
+    if (!wasOpen) window.__meownoteBodyScrollLock?.lock?.();
   }
 
   function closeSidebar() {
+    const wasOpen = elements.sidebar?.classList.contains('open');
     elements.sidebar?.classList.remove('open');
     elements.sidebarOverlay?.classList.remove('show');
+    if (wasOpen) window.__meownoteBodyScrollLock?.unlock?.();
   }
 
   elements.menuToggle?.addEventListener('click', openSidebar);

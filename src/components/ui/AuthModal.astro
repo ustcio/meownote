@@ -564,6 +564,7 @@ const lang = getLangFromUrl(Astro.url);
   const signupForm = document.getElementById('signup-form');
   const tabs = document.querySelectorAll('.auth-tab');
   const links = document.querySelectorAll('.auth-link');
+  const bodyScrollLock = window.__meownoteBodyScrollLock;
   
   // Get translations from data attributes
   const getTranslation = (key: string): string => {
@@ -571,14 +572,16 @@ const lang = getLangFromUrl(Astro.url);
   };
   
   function openModal(tab: string = 'login') {
+    const wasOpen = modal?.classList.contains('open');
     modal?.classList.add('open');
     switchTab(tab);
-    document.body.style.overflow = 'hidden';
+    if (!wasOpen) bodyScrollLock?.lock?.();
   }
   
   function closeModal() {
+    const wasOpen = modal?.classList.contains('open');
     modal?.classList.remove('open');
-    document.body.style.overflow = '';
+    if (wasOpen) bodyScrollLock?.unlock?.();
   }
   
   function switchTab(tab: string) {

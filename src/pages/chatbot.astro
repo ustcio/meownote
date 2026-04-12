@@ -1,41 +1,11 @@
 ---
-/**
- * Chat 页面 — 独立全屏布局（不套 Layout，避免 header/footer 冲突）
- */
-import '@styles/global.css';
+import AppLayout from '@layouts/AppLayout.astro';
 import ClaudeChat from '@components/sections/ClaudeChat.astro';
 
 const title = 'AI 助手';
 const desc = '智能 AI 助手，提供专业的问题解答和创作支持';
-const apiBase = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <script is:inline>
-      (function() {
-        const t = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', t);
-      })();
-    </script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} — Maxwell.Science</title>
-    <meta name="description" content={desc} />
-    <link rel="icon" type="image/png" href="/claude-favicon.png" />
-    <meta name="theme-color" content="#FAF9F5" />
-    <meta name="color-scheme" content="light dark" />
-    <link rel="preconnect" href={apiBase} crossorigin />
-  </head>
-  <body>
-    <ClaudeChat />
-    <script is:inline>
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        if (!localStorage.getItem('theme')) {
-          document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
-        }
-      });
-    </script>
-  </body>
-</html>
+<AppLayout title={`${title} — Maxwell.Science`} description={desc}>
+  <ClaudeChat />
+</AppLayout>

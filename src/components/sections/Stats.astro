@@ -144,6 +144,7 @@ const lang = getLangFromUrl(Astro.url);
 <script>
   const API_BASE = 'https://api.ustc.dev';
   const REFRESH_INTERVAL = 60000;
+  let statsInterval;
   
   async function fetchStats() {
     try {
@@ -179,8 +180,17 @@ const lang = getLangFromUrl(Astro.url);
     return num.toLocaleString();
   }
   
-  document.addEventListener('DOMContentLoaded', () => {
+  function initStatsSection() {
     fetchStats();
-    setInterval(fetchStats, REFRESH_INTERVAL);
-  });
+    if (statsInterval) clearInterval(statsInterval);
+    statsInterval = setInterval(fetchStats, REFRESH_INTERVAL);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStatsSection, { once: true });
+  } else {
+    initStatsSection();
+  }
+
+  document.addEventListener('astro:page-load', initStatsSection);
 </script>

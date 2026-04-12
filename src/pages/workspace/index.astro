@@ -1,5 +1,6 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import ModalShell from '@components/ui/ModalShell.astro';
 ---
 
 <Layout
@@ -129,78 +130,34 @@ import Layout from '@layouts/Layout.astro';
   <input type="file" id="file-upload" hidden multiple accept=".txt,.md,.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.zip,.rar" />
 
   <!-- Clipboard Modal -->
-  <div class="modal" id="clipboard-modal">
-    <div class="modal-backdrop" id="clipboard-backdrop"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Quick capture</h3>
-        <button class="workspace-modal-close" id="clipboard-close">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <input type="text" id="clipboard-title" placeholder="Title (optional)" class="input-field" />
-        <textarea id="clipboard-content" placeholder="Paste or write a note you want to save for later..." rows="5" class="input-field textarea"></textarea>
-        <div class="modal-actions">
-          <button class="btn-ghost" id="paste-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-            Paste
-          </button>
-          <button class="claude-button" id="save-clipboard-btn">Save</button>
-        </div>
-      </div>
+  <ModalShell id="clipboard-modal" title="Quick capture" closeId="clipboard-close" backdropId="clipboard-backdrop" closeClass="workspace-modal-close">
+    <input type="text" id="clipboard-title" placeholder="Title (optional)" class="input-field" />
+    <textarea id="clipboard-content" placeholder="Paste or write a note you want to save for later..." rows="5" class="input-field textarea"></textarea>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="paste-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        Paste
+      </button>
+      <button class="claude-button" id="save-clipboard-btn">Save</button>
     </div>
-  </div>
+  </ModalShell>
 
   <!-- Tag Picker Modal -->
-  <div class="modal" id="tag-modal">
-    <div class="modal-backdrop" id="tag-backdrop"></div>
-    <div class="modal-content modal-sm">
-      <div class="modal-header">
-        <h3>Set category</h3>
-        <button class="workspace-modal-close" id="tag-close">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="tag-options" id="tag-options"></div>
-      </div>
-    </div>
-  </div>
+  <ModalShell id="tag-modal" title="Set category" closeId="tag-close" backdropId="tag-backdrop" closeClass="workspace-modal-close" contentClass="modal-sm">
+    <div class="tag-options" id="tag-options"></div>
+  </ModalShell>
 
   <!-- Delete Modal -->
-  <div class="modal" id="delete-modal">
-    <div class="modal-backdrop" id="delete-backdrop"></div>
-    <div class="modal-content modal-sm">
-      <div class="modal-header">
-        <h3>Delete item</h3>
-        <button class="workspace-modal-close" id="delete-close">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <p>This will permanently remove the item from your workspace.</p>
-        <div class="modal-actions">
-          <button class="btn-ghost" id="delete-cancel">Cancel</button>
-          <button class="btn-danger" id="delete-confirm">Delete</button>
-        </div>
-      </div>
+  <ModalShell id="delete-modal" title="Delete item" closeId="delete-close" backdropId="delete-backdrop" closeClass="workspace-modal-close" contentClass="modal-sm">
+    <p>This will permanently remove the item from your workspace.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="delete-cancel">Cancel</button>
+      <button class="btn-danger" id="delete-confirm">Delete</button>
     </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
+  </ModalShell>
 </Layout>
 
 <style is:inline>
@@ -959,40 +916,6 @@ import Layout from '@layouts/Layout.astro';
     flex-shrink: 0;
   }
 
-  /* Toast */
-  .toast {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%) translateY(16px);
-    background: var(--text-primary);
-    color: var(--text-inverse);
-    padding: 0.65rem 1rem;
-    border-radius: var(--radius-full);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    z-index: var(--z-toast);
-    opacity: 0;
-    transition: all var(--duration-normal) var(--ease-default);
-    box-shadow: var(--shadow-lg);
-    pointer-events: none;
-  }
-
-  .toast.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-  }
-
-  .toast.success {
-    background: var(--color-success);
-    color: white;
-  }
-
-  .toast.error {
-    background: var(--color-danger);
-    color: white;
-  }
-
   /* Mobile */
   @media (max-width: 640px) {
     .workspace-page {
@@ -1206,7 +1129,6 @@ import Layout from '@layouts/Layout.astro';
   const newNoteBtn = document.getElementById('new-note-btn');
   const uploadBtn = document.getElementById('upload-btn');
   const clipboardBtn = document.getElementById('clipboard-btn');
-  const toast = document.getElementById('toast');
   const sortDropdown = document.getElementById('sort-dropdown');
   const sortBtn = document.getElementById('sort-btn');
   const sortLabel = document.getElementById('sort-label');
@@ -1224,6 +1146,8 @@ import Layout from '@layouts/Layout.astro';
   const deleteClose = document.getElementById('delete-close');
   const deleteCancel = document.getElementById('delete-cancel');
   const deleteConfirm = document.getElementById('delete-confirm');
+  const tagModal = document.getElementById('tag-modal');
+  const bodyScrollLock = window.__meownoteBodyScrollLock;
 
   const fileTypeConfig = {
     txt: { icon: 'text', type: 'text' },
@@ -1302,6 +1226,18 @@ import Layout from '@layouts/Layout.astro';
     loadFiles({ background: true });
   }
 
+  function openModal(modal) {
+    const wasOpen = modal?.classList.contains('open');
+    modal?.classList.add('open');
+    if (!wasOpen) bodyScrollLock?.lock?.();
+  }
+
+  function closeModal(modal) {
+    const wasOpen = modal?.classList.contains('open');
+    modal?.classList.remove('open');
+    if (wasOpen) bodyScrollLock?.unlock?.();
+  }
+
   function initCategoryFilters() {
     // Build dropdown menu options
     const menuEl = document.getElementById('category-menu');
@@ -1362,23 +1298,23 @@ import Layout from '@layouts/Layout.astro';
   }
 
   function initModals() {
-    clipboardBtn?.addEventListener('click', () => clipboardModal?.classList.add('open'));
-    clipboardBackdrop?.addEventListener('click', () => clipboardModal?.classList.remove('open'));
-    clipboardClose?.addEventListener('click', () => clipboardModal?.classList.remove('open'));
+    clipboardBtn?.addEventListener('click', () => openModal(clipboardModal));
+    clipboardBackdrop?.addEventListener('click', () => closeModal(clipboardModal));
+    clipboardClose?.addEventListener('click', () => closeModal(clipboardModal));
     pasteBtn?.addEventListener('click', pasteFromClipboard);
     saveClipboardBtn?.addEventListener('click', saveClipboard);
 
-    deleteBackdrop?.addEventListener('click', () => deleteModal?.classList.remove('open'));
-    deleteClose?.addEventListener('click', () => deleteModal?.classList.remove('open'));
-    deleteCancel?.addEventListener('click', () => deleteModal?.classList.remove('open'));
+    deleteBackdrop?.addEventListener('click', () => closeModal(deleteModal));
+    deleteClose?.addEventListener('click', () => closeModal(deleteModal));
+    deleteCancel?.addEventListener('click', () => closeModal(deleteModal));
     deleteConfirm?.addEventListener('click', confirmDelete);
 
     document.getElementById('tag-close')?.addEventListener('click', () => {
-      document.getElementById('tag-modal')?.classList.remove('open');
+      closeModal(tagModal);
       tagTargetId = null;
     });
     document.getElementById('tag-backdrop')?.addEventListener('click', () => {
-      document.getElementById('tag-modal')?.classList.remove('open');
+      closeModal(tagModal);
       tagTargetId = null;
     });
     document.getElementById('tag-options')?.addEventListener('click', (event) => {
@@ -1386,15 +1322,15 @@ import Layout from '@layouts/Layout.astro';
       if (tagOption) {
         const cat = tagOption.getAttribute('data-cat');
         saveCategory(cat);
-        document.getElementById('tag-modal')?.classList.remove('open');
+        closeModal(tagModal);
       }
     });
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
-        clipboardModal?.classList.remove('open');
-        deleteModal?.classList.remove('open');
-        document.getElementById('tag-modal')?.classList.remove('open');
+        closeModal(clipboardModal);
+        closeModal(deleteModal);
+        closeModal(tagModal);
         tagTargetId = null;
       }
     });
@@ -1422,7 +1358,7 @@ import Layout from '@layouts/Layout.astro';
           }
         } else if (action === 'delete') {
           deleteTargetId = id;
-          deleteModal?.classList.add('open');
+          openModal(deleteModal);
         }
         return;
       }
@@ -1534,7 +1470,7 @@ import Layout from '@layouts/Layout.astro';
       return `<button class="tag-option${isActive ? ' active' : ''}" data-cat="${cat.key}" style="--cat-color: ${cat.color};">${cat.label}</button>`;
     }).join('');
 
-    document.getElementById('tag-modal')?.classList.add('open');
+    openModal(tagModal);
   }
 
   async function saveCategory(category) {
@@ -1702,7 +1638,7 @@ import Layout from '@layouts/Layout.astro';
 
   async function confirmDelete() {
     if (!deleteTargetId) return;
-    deleteModal?.classList.remove('open');
+    closeModal(deleteModal);
 
     try {
       const result = await apiRequest(`/api/workspace/${deleteTargetId}`, { method: 'DELETE' });
@@ -1746,7 +1682,7 @@ import Layout from '@layouts/Layout.astro';
 
       if (result.success) {
         showToast('Saved', 'success');
-        clipboardModal?.classList.remove('open');
+        closeModal(clipboardModal);
         if (clipboardTitle) clipboardTitle.value = '';
         if (clipboardContent) clipboardContent.value = '';
         await loadFiles();
@@ -1844,10 +1780,7 @@ import Layout from '@layouts/Layout.astro';
   }
 
   function showToast(message, type = 'success') {
-    if (!toast) return;
-    toast.textContent = message;
-    toast.className = `toast show ${type}`;
-    setTimeout(() => toast.classList.remove('show'), 2500);
+    window.__meownoteToast?.show(message, type);
   }
 
   function escapeHtml(text) {

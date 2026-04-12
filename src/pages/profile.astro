@@ -1,5 +1,6 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import ModalShell from '@components/ui/ModalShell.astro';
 import { t } from '@i18n/translate';
 ---
 
@@ -126,18 +127,7 @@ import { t } from '@i18n/translate';
     </div>
   </section>
   
-  <div class="modal" id="edit-modal">
-    <div class="modal-backdrop" id="edit-backdrop"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>{t('profile.modal.editTitle')}</h3>
-        <button class="modal-close" id="edit-modal-close">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
+  <ModalShell id="edit-modal" title={t('profile.modal.editTitle')} closeId="edit-modal-close" backdropId="edit-backdrop">
       <form class="modal-form" id="edit-form">
         <div class="form-group">
           <label for="edit-username">{t('profile.fields.username')}</label>
@@ -152,21 +142,9 @@ import { t } from '@i18n/translate';
           <button type="submit" class="btn-primary">{t('common.save')}</button>
         </div>
       </form>
-    </div>
-  </div>
+  </ModalShell>
   
-  <div class="modal" id="password-modal">
-    <div class="modal-backdrop" id="password-backdrop"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>{t('profile.modal.passwordTitle')}</h3>
-        <button class="modal-close" id="password-modal-close">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
+  <ModalShell id="password-modal" title={t('profile.modal.passwordTitle')} closeId="password-modal-close" backdropId="password-backdrop">
       <form class="modal-form" id="password-form">
         <div class="form-group">
           <label for="current-password">{t('profile.modal.currentPassword')}</label>
@@ -185,8 +163,7 @@ import { t } from '@i18n/translate';
           <button type="submit" class="btn-primary">{t('profile.modal.updatePassword')}</button>
         </div>
       </form>
-    </div>
-  </div>
+  </ModalShell>
 </Layout>
 
 <style>
@@ -591,6 +568,7 @@ import { t } from '@i18n/translate';
   const passwordForm = document.getElementById('password-form');
   
   let currentUser = null;
+  const bodyScrollLock = window.__meownoteBodyScrollLock;
   
   function loadUserProfile() {
     const userStr = localStorage.getItem('user');
@@ -637,13 +615,15 @@ import { t } from '@i18n/translate';
   }
   
   function openModal(modal: HTMLElement | null) {
+    const wasOpen = modal?.classList.contains('open');
     modal?.classList.add('open');
-    document.body.style.overflow = 'hidden';
+    if (!wasOpen) bodyScrollLock?.lock?.();
   }
   
   function closeModal(modal: HTMLElement | null) {
+    const wasOpen = modal?.classList.contains('open');
     modal?.classList.remove('open');
-    document.body.style.overflow = '';
+    if (wasOpen) bodyScrollLock?.unlock?.();
   }
   
   document.getElementById('edit-btn')?.addEventListener('click', () => {
@@ -695,13 +675,13 @@ import { t } from '@i18n/translate';
         localStorage.setItem('user', JSON.stringify(currentUser));
         loadUserProfile();
         closeModal(editModal);
-        alert(t('profileUpdated'));
+        window.__meownoteToast?.show(t('profileUpdated'), 'success');
       } else {
-        alert(result.message || t('updateFailed'));
+        window.__meownoteToast?.show(result.message || t('updateFailed'), 'error');
       }
     } catch (error) {
       console.error('Update error:', error);
-      alert(t('retryError'));
+      window.__meownoteToast?.show(t('retryError'), 'error');
     }
   });
   
@@ -713,7 +693,7 @@ import { t } from '@i18n/translate';
     const confirmPassword = formData.get('confirmPassword');
     
     if (newPassword !== confirmPassword) {
-      alert(t('passwordMismatch'));
+      window.__meownoteToast?.show(t('passwordMismatch'), 'error');
       return;
     }
     
@@ -733,13 +713,13 @@ import { t } from '@i18n/translate';
       if (result.success) {
         closeModal(passwordModal);
         passwordForm.reset();
-        alert(t('passwordUpdated'));
+        window.__meownoteToast?.show(t('passwordUpdated'), 'success');
       } else {
-        alert(result.message || t('passwordUpdateFailed'));
+        window.__meownoteToast?.show(result.message || t('passwordUpdateFailed'), 'error');
       }
     } catch (error) {
       console.error('Password update error:', error);
-      alert(t('retryError'));
+      window.__meownoteToast?.show(t('retryError'), 'error');
     }
   });
   

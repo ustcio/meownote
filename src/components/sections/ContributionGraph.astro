@@ -380,6 +380,7 @@ const totalWeeks = Math.ceil(totalDays / 7);
 <script>
   const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   const REFRESH_INTERVAL = 60000;
+  let contributionInterval;
   
   async function fetchHeatmapData() {
     try {
@@ -474,8 +475,17 @@ const totalWeeks = Math.ceil(totalDays / 7);
     return 4;
   }
   
-  document.addEventListener('DOMContentLoaded', () => {
+  function initContributionGraph() {
     fetchHeatmapData();
-    setInterval(fetchHeatmapData, REFRESH_INTERVAL);
-  });
+    if (contributionInterval) clearInterval(contributionInterval);
+    contributionInterval = setInterval(fetchHeatmapData, REFRESH_INTERVAL);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initContributionGraph, { once: true });
+  } else {
+    initContributionGraph();
+  }
+
+  document.addEventListener('astro:page-load', initContributionGraph);
 </script>

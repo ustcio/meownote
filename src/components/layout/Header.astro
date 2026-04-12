@@ -294,12 +294,18 @@ const isActive = (href: string) =>
 <script is:inline>
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileNav = document.getElementById('mobile-nav');
+  const bodyScrollLock = window.__meownoteBodyScrollLock;
 
   function setMenuState(open) {
+    const wasOpen = mobileNav?.classList.contains('open');
     mobileMenuBtn?.classList.toggle('open', open);
     mobileMenuBtn?.setAttribute('aria-expanded', String(open));
     mobileNav?.classList.toggle('open', open);
-    document.body.style.overflow = open ? 'hidden' : '';
+    if (open && !wasOpen) {
+      bodyScrollLock?.lock?.();
+    } else if (!open && wasOpen) {
+      bodyScrollLock?.unlock?.();
+    }
   }
 
   mobileMenuBtn?.addEventListener('click', () => {
