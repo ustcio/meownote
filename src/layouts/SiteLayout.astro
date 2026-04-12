@@ -8,14 +8,15 @@ interface Props {
   title: string;
   description?: string;
   image?: string;
+  showAuthModal?: boolean;
 }
 
-const { title, description, image } = Astro.props;
+const { title, description, image, showAuthModal = true } = Astro.props;
 ---
 
 <BaseLayout title={title} description={description} image={image}>
   <Header slot="header" />
   <slot />
   <Footer slot="footer" />
-  <AuthModal slot="overlay" />
+  {showAuthModal && <AuthModal slot="overlay" />}
 </BaseLayout>

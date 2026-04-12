@@ -19,11 +19,7 @@ const isActive = (href: string) =>
 <header class="site-header">
   <div class="site-header__inner">
     <a href="/" class="site-logo" aria-label="Maxwell.Science home">
-      <span class="site-logo__wordmark">
-        <span class="wordmark-brand">Maxwell</span>
-        <span class="wordmark-dot">.</span>
-        <span class="wordmark-domain">Science</span>
-      </span>
+      <span class="site-logo__wordmark">Maxwell<span>.<span>Science</span></span></span>
     </a>
 
     <nav class="site-nav" aria-label="Primary">
@@ -116,34 +112,27 @@ const isActive = (href: string) =>
   }
 
   .site-logo__wordmark {
-    display: flex;
-    align-items: baseline;
+    font-family: var(--font-editorial);
+    font-size: 1.55rem;
+    font-weight: 500;
+    letter-spacing: -0.03em;
     line-height: 1;
     white-space: nowrap;
-  }
-
-  .wordmark-brand {
-    font-family: var(--font-editorial);
-    font-size: 1.16rem;
-    font-weight: 500;
-    letter-spacing: 0;
     color: var(--text-primary);
   }
 
-  .wordmark-dot {
-    font-family: var(--font-body);
-    font-size: 1.06rem;
-    font-weight: 500;
+  .site-logo__wordmark > span {
     color: var(--color-primary);
-    margin: 0 0.04em 0 0.015em;
   }
 
-  .wordmark-domain {
-    font-family: var(--font-body);
-    font-size: 0.91rem;
-    font-weight: 500;
-    color: #5f564e;
-    letter-spacing: -0.022em;
+  .site-logo__wordmark > span > span {
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 820px) {
+    .site-logo__wordmark {
+      font-size: 1.35rem;
+    }
   }
 
   .site-nav {
