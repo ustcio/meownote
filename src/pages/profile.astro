@@ -569,15 +569,16 @@ import { t } from '@i18n/translate';
   
   let currentUser = null;
   const bodyScrollLock = window.__meownoteBodyScrollLock;
+  const authStore = window.__meownoteAuth;
   
   function loadUserProfile() {
-    const userStr = localStorage.getItem('user');
-    if (!userStr) {
+    const storedUser = authStore?.getUser?.();
+    if (!storedUser) {
       window.location.href = '/';
       return;
     }
     
-    currentUser = JSON.parse(userStr);
+    currentUser = storedUser;
     
     document.getElementById('avatar-initial').textContent = currentUser.username?.charAt(0).toUpperCase() || '?';
     document.getElementById('profile-name').textContent = currentUser.username || '--';
@@ -645,9 +646,7 @@ import { t } from '@i18n/translate';
   document.getElementById('password-cancel')?.addEventListener('click', () => closeModal(passwordModal));
   
   document.getElementById('logout-btn')?.addEventListener('click', () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
-    window.dispatchEvent(new CustomEvent('auth:logout'));
+    authStore?.clearSession?.();
     window.location.href = '/';
   });
   
@@ -658,7 +657,7 @@ import { t } from '@i18n/translate';
     const email = formData.get('email');
     
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = authStore?.getToken?.();
       const response = await fetch(`${API_BASE}/api/user/profile`, {
         method: 'PUT',
         headers: { 
@@ -672,7 +671,7 @@ import { t } from '@i18n/translate';
       
       if (result.success) {
         currentUser = { ...currentUser, username, email };
-        localStorage.setItem('user', JSON.stringify(currentUser));
+        authStore?.setSession?.(token, currentUser);
         loadUserProfile();
         closeModal(editModal);
         window.__meownoteToast?.show(t('profileUpdated'), 'success');
@@ -698,7 +697,7 @@ import { t } from '@i18n/translate';
     }
     
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = authStore?.getToken?.();
       const response = await fetch(`${API_BASE}/api/user/password`, {
         method: 'PUT',
         headers: { 

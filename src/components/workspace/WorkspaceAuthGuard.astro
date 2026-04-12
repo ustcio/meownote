@@ -1,0 +1,24 @@
+---
+interface Props {
+  redirectTo?: string;
+}
+
+const { redirectTo = '/workspace/login/' } = Astro.props;
+---
+
+<script is:inline define:vars={{ redirectTo }}>
+  (function() {
+    const ADMIN_USERNAME = 'YangHao';
+    const authStore = window.__meownoteAuth;
+    const token = authStore?.getToken?.();
+    const user = authStore?.getUser?.();
+    const username = user?.username || user?.name || '';
+    const isAllowed = Boolean(token) && username === ADMIN_USERNAME;
+
+    if (!isAllowed) {
+      const current = window.location.pathname + window.location.search;
+      const next = `${redirectTo}?next=${encodeURIComponent(current)}`;
+      window.location.replace(next);
+    }
+  })();
+</script>

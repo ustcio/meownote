@@ -556,6 +556,7 @@ const lang = getLangFromUrl(Astro.url);
 
 <script>
   const API_BASE = 'https://api.ustc.dev';
+  const authStore = window.__meownoteAuth;
   
   const modal = document.getElementById('auth-modal');
   const backdrop = document.getElementById('auth-backdrop');
@@ -710,16 +711,14 @@ const lang = getLangFromUrl(Astro.url);
       const result = await response.json();
       
       if (result.success) {
-        localStorage.setItem('auth_token', result.token);
-        localStorage.setItem('user', JSON.stringify(result.user));
+        authStore?.setSession?.(result.token, result.user);
         closeModal();
-        window.dispatchEvent(new CustomEvent('auth:login', { detail: result.user }));
       } else {
-        alert(result.message || getTranslation('data-login-failed'));
+        window.__meownoteToast?.show(result.message || getTranslation('data-login-failed'), 'error');
       }
     } catch (error) {
       console.error('Login error:', error);
-      alert(getTranslation('data-login-failed') + ', ' + getTranslation('data-retry'));
+      window.__meownoteToast?.show(getTranslation('data-login-failed') + ', ' + getTranslation('data-retry'), 'error');
     } finally {
       setLoading('login-btn', false);
     }
@@ -736,7 +735,7 @@ const lang = getLangFromUrl(Astro.url);
     const confirmPassword = formData.get('confirmPassword') as string;
     
     if (password !== confirmPassword) {
-      alert(getTranslation('data-password-mismatch'));
+      window.__meownoteToast?.show(getTranslation('data-password-mismatch'), 'error');
       setLoading('signup-btn', false);
       return;
     }
@@ -751,16 +750,14 @@ const lang = getLangFromUrl(Astro.url);
       const result = await response.json();
       
       if (result.success) {
-        localStorage.setItem('auth_token', result.token);
-        localStorage.setItem('user', JSON.stringify(result.user));
+        authStore?.setSession?.(result.token, result.user);
         closeModal();
-        window.dispatchEvent(new CustomEvent('auth:login', { detail: result.user }));
       } else {
-        alert(result.message || getTranslation('data-signup-failed'));
+        window.__meownoteToast?.show(result.message || getTranslation('data-signup-failed'), 'error');
       }
     } catch (error) {
       console.error('Signup error:', error);
-      alert(getTranslation('data-signup-failed') + ', ' + getTranslation('data-retry'));
+      window.__meownoteToast?.show(getTranslation('data-signup-failed') + ', ' + getTranslation('data-retry'), 'error');
     } finally {
       setLoading('signup-btn', false);
     }

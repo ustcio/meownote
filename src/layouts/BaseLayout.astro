@@ -97,6 +97,7 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     <script is:inline define:vars={{ apiBase, trackVisits, showProgress, showCursor }}>
       (function() {
         const BODY_SCROLL_LOCK_KEY = '__meownoteBodyScrollLock';
+        const AUTH_KEY = '__meownoteAuth';
         const previousApi = window[BODY_SCROLL_LOCK_KEY];
         let lockCount = previousApi?.getCount?.() || 0;
 
@@ -125,6 +126,55 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
             return lockCount;
           }
         };
+
+        if (!window[AUTH_KEY]) {
+          const TOKEN_KEY = 'meownote_auth_token';
+          const USER_KEY = 'meownote_user_data';
+          const LEGACY_TOKEN_KEY = 'auth_token';
+          const LEGACY_USER_KEY = 'user';
+
+          const readJSON = (key) => {
+            try {
+              const raw = localStorage.getItem(key);
+              return raw ? JSON.parse(raw) : null;
+            } catch {
+              return null;
+            }
+          };
+
+          const writeJSON = (key, value) => {
+            localStorage.setItem(key, JSON.stringify(value));
+          };
+
+          const getToken = () => localStorage.getItem(TOKEN_KEY) || localStorage.getItem(LEGACY_TOKEN_KEY);
+          const getUser = () => readJSON(USER_KEY) || readJSON(LEGACY_USER_KEY);
+
+          window[AUTH_KEY] = {
+            keys: { token: TOKEN_KEY, user: USER_KEY },
+            getToken,
+            getUser,
+            isAuthenticated() {
+              return Boolean(getToken() && getUser());
+            },
+            setSession(token, user) {
+              const nextToken = token || getToken();
+              if (nextToken) {
+                localStorage.setItem(TOKEN_KEY, nextToken);
+                localStorage.setItem(LEGACY_TOKEN_KEY, nextToken);
+              }
+              writeJSON(USER_KEY, user);
+              writeJSON(LEGACY_USER_KEY, user);
+              window.dispatchEvent(new CustomEvent('auth:login', { detail: user }));
+            },
+            clearSession() {
+              localStorage.removeItem(TOKEN_KEY);
+              localStorage.removeItem(USER_KEY);
+              localStorage.removeItem(LEGACY_TOKEN_KEY);
+              localStorage.removeItem(LEGACY_USER_KEY);
+              window.dispatchEvent(new CustomEvent('auth:logout'));
+            },
+          };
+        }
 
         if (!window.__meownoteToast) {
           let activeToast = null;

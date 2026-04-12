@@ -1,11 +1,13 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
 ---
 
 <Layout 
   title="Edit Note - Workspace"
   description="Edit your note"
 >
+  <WorkspaceAuthGuard />
   <section class="editor-page">
     <div class="editor-container">
       <div class="editor-header">

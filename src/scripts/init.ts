@@ -16,8 +16,7 @@ export function initializeApp(): void {
 function setupAuthListener(): void {
   window.addEventListener('auth:unauthorized', () => {
     console.log('[Auth] Unauthorized - redirecting to login');
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_data');
+    window.__meownoteAuth?.clearSession?.();
     
     if (window.location.pathname !== '/') {
       window.location.href = '/';

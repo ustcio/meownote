@@ -1,12 +1,14 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import ModalShell from '@components/ui/ModalShell.astro';
+import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
 ---
 
 <Layout
   title={`Workspace - Maxwell.Science`}
   description="Personal workspace for notes and files"
 >
+  <WorkspaceAuthGuard />
   <section class="workspace-page">
     <div class="container">
       <!-- Header -->
