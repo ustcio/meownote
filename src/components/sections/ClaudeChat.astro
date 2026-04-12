@@ -389,8 +389,8 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     padding: 8px;
     width: max-content;
-    min-width: 220px;
-    max-width: min(320px, calc(100vw - 24px));
+    min-width: 260px;
+    max-width: min(360px, calc(100vw - 24px));
     max-height: min(420px, calc(100vh - 24px));
     overflow-y: auto;
     overflow-x: hidden;
@@ -408,7 +408,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     justify-content: space-between;
     width: 100%;
     gap: 12px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     background: none;
     border: none;
     border-radius: 6px;
@@ -431,16 +431,19 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   .model-option-name {
     flex: 1;
     min-width: 0;
+    white-space: normal;
+    line-height: 1.35;
   }
 
   .model-option-badge {
     flex-shrink: 0;
     font-size: var(--text-xs);
-    padding: 2px 6px;
+    padding: 4px 8px;
     background: var(--bg-tertiary);
-    border-radius: 4px;
+    border-radius: 6px;
     color: var(--text-secondary);
     margin-left: 8px;
+    line-height: 1;
   }
 
   .model-group {
@@ -1278,7 +1281,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     }
 
     .model-dropdown {
-      min-width: 200px;
+      min-width: 220px;
       max-width: calc(100vw - 16px);
     }
 
