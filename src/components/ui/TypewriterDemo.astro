@@ -1,0 +1,128 @@
+---
+// src/components/ui/TypewriterDemo.astro
+interface Props {
+  text: string;
+  speed?: number;
+  class?: string;
+}
+const { text, speed = 30, class: className = '' } = Astro.props;
+---
+
+<div class:list={["claude-typewriter", className]} data-text={text} data-speed={speed}>
+  <div class="writer-header">
+    <span class="dot red"></span>
+    <span class="dot yellow"></span>
+    <span class="dot green"></span>
+    <span class="title">Claude Output</span>
+  </div>
+  <div class="writer-body">
+    <span class="typed-content"></span><span class="cursor"></span>
+  </div>
+</div>
+
+<style>
+  .claude-typewriter {
+    background: var(--bg-tertiary, #1A1A1A);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    font-family: var(--font-mono, monospace);
+    font-size: var(--text-sm);
+    color: var(--text-inverse, #E5E5E5);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  }
+
+  /* Force dark mode styling for code blocks explicitly to match Claude */
+  :root[data-theme="light"] .claude-typewriter {
+    background: #1A1A1A;
+    color: #E5E5E5;
+    border: 1px solid #333;
+  }
+
+  .writer-header {
+    background: rgba(0,0,0,0.2);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block;}
+  .red { background: #ff5f57; }
+  .yellow { background: #febc2e; }
+  .green { background: #28c840; }
+  .title { margin-left: 8px; color: #888; font-size: 11px; font-weight: bold; text-transform: uppercase;}
+
+  .writer-body {
+    padding: 16px;
+    min-height: 200px;
+  }
+
+  .typed-content {
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: var(--color-primary, #D97757);
+    margin-left: 4px;
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+</style>
+
+<script>
+  function initTypewriters() {
+    const writers = document.querySelectorAll('.claude-typewriter');
+    
+    // Intersection observer to start typing when visible
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target as HTMLElement;
+          if (!el.hasAttribute('data-started')) {
+            el.setAttribute('data-started', 'true');
+            startTyping(el);
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    writers.forEach(w => observer.observe(w));
+
+    function startTyping(container: HTMLElement) {
+      const fullText = container.getAttribute('data-text') || '';
+      const speed = parseInt(container.getAttribute('data-speed') || '30', 10);
+      const output = container.querySelector('.typed-content') as HTMLElement;
+      
+      let i = 0;
+      function typeChar() {
+        if (i < fullText.length) {
+          // Add slight randomness to typing speed for realism
+          const randomSpeed = speed + (Math.random() * 20 - 10);
+          output.textContent += fullText.charAt(i);
+          i++;
+          setTimeout(typeChar, randomSpeed);
+        } else {
+          // Finished typing, you can optionally hide cursor here
+        }
+      }
+      typeChar();
+    }
+  }
+
+  document.addEventListener('astro:page-load', initTypewriters);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTypewriters);
+  } else {
+    initTypewriters();
+  }
+</script>

@@ -1,4 +1,6 @@
 ---
+import BentoGridClaude from '@components/ui/BentoGrid-Claude.astro';
+
 const products = [
   {
     name: 'Chat',
@@ -31,9 +33,9 @@ const products = [
     </div>
 
     <div class="models-layout">
-      <div class="models-grid">
+      <BentoGridClaude class="models-grid-bento">
         {products.map((product) => (
-          <article class="model-card claude-editorial-card">
+          <article class="model-card col-span-12 md-col-span-4">
             <span class="model-card__eyebrow">{product.eyebrow}</span>
             <h3>{product.name}</h3>
             <p>{product.description}</p>
@@ -44,7 +46,7 @@ const products = [
             </ul>
           </article>
         ))}
-      </div>
+      </BentoGridClaude>
 
       <aside class="models-aside claude-editorial-card">
         <span class="models-aside__label">Why this design</span>
@@ -74,6 +76,13 @@ const products = [
     }
   }
 
+    @media (min-width: 1100px) {
+      .models-layout {
+        grid-template-columns: minmax(0, 1.3fr) minmax(16rem, 0.7fr);
+        align-items: stretch;
+      }
+    }
+
   .models-grid {
     display: grid;
     gap: 0.9rem;
@@ -88,14 +97,10 @@ const products = [
   }
 
   .model-card {
-    padding: 1.5rem;
     display: grid;
     gap: 0.75rem;
     height: 100%;
     align-content: start;
-    background: var(--card-bg);
-    border: 1px solid var(--border-primary);
-    border-radius: 10px;
   }
 
   .model-card__eyebrow {

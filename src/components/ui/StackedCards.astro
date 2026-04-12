@@ -1,0 +1,129 @@
+---
+// src/components/ui/StackedCards.astro
+interface Props {
+  class?: string;
+  cards: {
+    title: string;
+    description: string;
+    tag?: string;
+    background?: string;
+  }[];
+}
+const { class: className = '', cards } = Astro.props;
+---
+
+<div class:list={["claude-stacked-container", className]}>
+  <div class="cards-wrapper">
+    {cards.map((card, index) => (
+      <div class="stacked-card" style={`--index: ${index}; --total: ${cards.length}; background: ${card.background || 'var(--card-bg)'}`}>
+        <div class="card-inner claude-surface">
+          {card.tag && <span class="card__tag">{card.tag}</span>}
+          <h3 class="card__title">{card.title}</h3>
+          <p class="card__description">{card.description}</p>
+          <slot name={`card-${index}`} />
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .claude-stacked-container {
+    position: relative;
+    width: 100%;
+    margin-top: var(--space-10);
+    margin-bottom: var(--space-20);
+  }
+
+  .cards-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 40px; /* spacing before they stack */
+    padding-bottom: 10vh; /* buffer space at bottom */
+  }
+
+  .stacked-card {
+    position: sticky;
+    /* Each card sticks a bit lower than the previous to create a cascade */
+    top: calc(var(--header-total-height, 72px) + 20px + (var(--index) * 20px));
+    height: 400px; /* fixed height for demonstration */
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    transform-origin: top center;
+  }
+
+  .card-inner {
+    width: 100%;
+    padding: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-2xl);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04);
+    border-top: 1px solid rgba(255, 255, 255, 0.5); /* sleek top highlight */
+  }
+
+  .card__tag {
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-4);
+  }
+
+  .card__title {
+    font-size: var(--text-3xl);
+    margin-bottom: var(--space-4);
+  }
+
+  .card__description {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    max-width: 600px;
+  }
+</style>
+
+<script>
+  // Adds scrolling scale-down to cards that hit the top stick point
+  function initStackedCards() {
+    const cards = document.querySelectorAll('.stacked-card') as NodeListOf<HTMLElement>;
+    if(!cards.length) return;
+
+    window.addEventListener('scroll', () => {
+      cards.forEach((card, i) => {
+        const rect = card.getBoundingClientRect();
+        const stickyTop = parseInt(getComputedStyle(card).top);
+        
+        // If the card is at or above its sticky point, and it's not the last card
+        if (rect.top <= stickyTop + 2 && i < cards.length - 1) {
+          // Calculate how far down we've scrolled past the sticky point
+          const scrollDistance = (stickyTop - rect.top) + window.scrollY;
+          // Scale it down slightly (min 0.9)
+          const scale = Math.max(0.9, 1 - (window.scrollY - card.offsetTop + stickyTop) * 0.0005);
+          // Darken the background slightly
+          const brightness = Math.max(0.6, 1 - (window.scrollY - card.offsetTop + stickyTop) * 0.001);
+          
+          if(card.offsetTop < window.scrollY + stickyTop) {
+             card.style.transform = `scale(${scale})`;
+             card.style.filter = `brightness(${brightness})`;
+          } else {
+             card.style.transform = `scale(1)`;
+             card.style.filter = `brightness(1)`;
+          }
+        } else {
+          card.style.transform = `scale(1)`;
+          card.style.filter = `brightness(1)`;
+        }
+      });
+    }, { passive: true });
+  }
+
+  document.addEventListener('astro:page-load', initStackedCards);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStackedCards);
+  } else {
+    initStackedCards();
+  }
+</script>

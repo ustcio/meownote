@@ -1,0 +1,176 @@
+---
+// src/components/ui/TabsShowcase.astro
+interface TabItem {
+  id: string;
+  label: string;
+  icon?: string;
+  contentTitle: string;
+  contentText: string;
+}
+
+interface Props {
+  class?: string;
+  tabs: TabItem[];
+}
+
+const { class: className = '', tabs } = Astro.props;
+---
+
+<div class:list={["claude-tabs-showcase", className]} id="tabs-showcase">
+  <div class="tabs-nav">
+    {tabs.map((tab, index) => (
+      <button 
+        class={`tab-btn ${index === 0 ? 'active' : ''}`} 
+        data-target={tab.id}
+      >
+        {tab.icon && <span class="tab-icon" set:html={tab.icon} />}
+        <span class="tab-label">{tab.label}</span>
+      </button>
+    ))}
+  </div>
+  
+  <div class="tabs-content-area claude-surface">
+    {tabs.map((tab, index) => (
+      <div 
+        class={`tab-panel ${index === 0 ? 'active' : ''}`} 
+        id={tab.id}
+      >
+        <div class="panel-info">
+          <h3>{tab.contentTitle}</h3>
+          <p>{tab.contentText}</p>
+        </div>
+        <div class="panel-visual">
+          <slot name={tab.id} />
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .claude-tabs-showcase {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    width: 100%;
+  }
+
+  .tabs-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    border-bottom: 1px solid var(--border-secondary);
+    padding-bottom: var(--space-4);
+  }
+
+  .tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    background: transparent;
+    transition: all 0.2s ease;
+  }
+
+  .tab-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+  }
+
+  .tab-btn.active {
+    color: var(--text-inverse);
+    background: var(--text-primary);
+  }
+
+  .tabs-content-area {
+    position: relative;
+    min-height: 400px;
+    overflow: hidden;
+    padding: var(--space-8);
+  }
+
+  .tab-panel {
+    display: none;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .tab-panel.active {
+    display: grid;
+    /* We use an animation to trigger the opacity transition securely */
+    animation: fadeUpIn 0.4s forwards;
+  }
+
+  @keyframes fadeUpIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .panel-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  
+  .panel-info h3 {
+    font-size: var(--text-2xl);
+  }
+  
+  .panel-info p {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 768px) {
+    .tab-panel {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  function initTabs() {
+    const showcases = document.querySelectorAll('.claude-tabs-showcase');
+    
+    showcases.forEach(showcase => {
+      const btns = showcase.querySelectorAll('.tab-btn');
+      const panels = showcase.querySelectorAll('.tab-panel');
+      
+      btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Remove active classes
+          btns.forEach(b => b.classList.remove('active'));
+          panels.forEach(p => p.classList.remove('active'));
+          
+          // Add active class to clicked button
+          btn.classList.add('active');
+          
+          // Add active class to target panel
+          const targetId = btn.getAttribute('data-target');
+          if (targetId) {
+            const targetPanel = showcase.querySelector(`#${targetId}`);
+            if (targetPanel) {
+              targetPanel.classList.add('active');
+            }
+          }
+        });
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initTabs);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTabs);
+  } else {
+    initTabs();
+  }
+</script>

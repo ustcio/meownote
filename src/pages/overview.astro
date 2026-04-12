@@ -1,0 +1,168 @@
+---
+// src/pages/overview.astro
+import Layout from '@layouts/Layout.astro';
+import StackedCards from '@components/ui/StackedCards.astro';
+import TabsShowcase from '@components/ui/TabsShowcase.astro';
+import TypewriterDemo from '@components/ui/TypewriterDemo.astro';
+import InfiniteMarquee from '@components/ui/InfiniteMarquee.astro';
+import TextReveal from '@components/ui/TextReveal.astro';
+
+// Demonstration content for Stacked Cards
+const capabilities = [
+  {
+    title: 'Break down problems together',
+    description: 'Claude builds on your ideas, expands on your logic, and simplifies complexity one step at a time.',
+    tag: 'Problem Solving',
+    background: 'var(--bg-secondary)'
+  },
+  {
+    title: 'Tackle your toughest work',
+    description: 'Claude provides expert-level collaboration on the things you need to get done—from coding a product to critical data analysis.',
+    tag: 'Collaboration',
+    background: 'var(--bg-tertiary)'
+  },
+  {
+    title: 'Explore what’s next',
+    description: 'Like an expert in your pocket, collaborating with Claude expands what you can build on your own or with teams.',
+    tag: 'Innovation',
+    background: 'var(--card-bg-cream)'
+  }
+];
+
+// Demonstration content for Tabs
+const tabsData = [
+  {
+    id: 'tab-code',
+    label: 'Code',
+    contentTitle: 'Write, debug, and ship faster.',
+    contentText: 'From small scripts to scalable infrastructure, bring an expert programming partner directly into your workflow.'
+  },
+  {
+    id: 'tab-write',
+    label: 'Write',
+    contentTitle: 'Draft with a thoughtful colleague.',
+    contentText: 'Need a tone check, a creative spark, or someone to restructure a long document? Claude helps you write clearly.'
+  },
+  {
+    id: 'tab-analyze',
+    label: 'Analyze',
+    contentTitle: 'Extract insights instantly.',
+    contentText: 'Upload PDFs, spreadsheets, or long-form research. Claude parses complex information so you can reach conclusions faster.'
+  }
+];
+---
+
+<Layout title="Product Overview - Dynamic Components Showcase">
+  <div class="overview-page">
+    
+    <!-- Hero Section -->
+    <header class="overview-header container">
+      <TextReveal tag="h1" text="The AI for Problem Solvers" class="heading-large" delay={100} />
+      <TextReveal tag="p" text="Tackle complex challenges, analyze data, write code, and think through your hardest work." class="subheading" delay={200} />
+    </header>
+
+    <!-- Marquee Section -->
+    <section class="marquee-section">
+      <InfiniteMarquee speed="30s">
+        {["🚀 Fast API", "🛡️ Enterprise Security", "⚡ Real-time processing", "📊 Advanced Analytics", "🧠 High Intelligence", "🌐 Global Infrastructure"].map(item => (
+          <span class="marquee-item">{item}</span>
+        ))}
+      </InfiniteMarquee>
+    </section>
+
+    <!-- Tabs Showcase Section -->
+    <section class="tabs-section container claude-section">
+      <h2>Capabilities</h2>
+      <TabsShowcase tabs={tabsData}>
+        <!-- Content for Tab 1 -->
+        <div slot="tab-code" class="tab-demo">
+          <TypewriterDemo 
+            text="function optimizeSearch(array, target) {\n  let left = 0;\n  let right = array.length - 1;\n  while (left <= right) {\n    const mid = Math.floor((left + right) / 2);\n    if (array[mid] === target) return mid;\n    if (array[mid] < target) left = mid + 1;\n    else right = mid - 1;\n  }\n  return -1;\n}" 
+            speed={20}
+          />
+        </div>
+        
+        <!-- Content for Tab 2 -->
+        <div slot="tab-write" class="tab-demo">
+          <TypewriterDemo 
+            text="Here is a revised draft of your project proposal, incorporating a more authoritative tone and highlighting the long-term ROI:\n\nThe adoption of this architecture fundamentally derisks our Q3 timeline while offering an estimated 40% reduction in cloud compute over the next fiscal year..." 
+            speed={35}
+          />
+        </div>
+        
+        <!-- Content for Tab 3 -->
+        <div slot="tab-analyze" class="tab-demo">
+          <TypewriterDemo 
+            text="Based on the uploaded Q2 Financial Report, here are the key takeaways:\n\n1. Revenue increased by 14.2% YoY, heavily driven by digital channels.\n2. Operating margins compressed slightly due to one-time R&D expenditures.\n3. The debt-to-equity ratio remains highly favorable for upcoming acquisitions." 
+            speed={30}
+          />
+        </div>
+      </TabsShowcase>
+    </section>
+
+    <!-- Stacked Cards Section -->
+    <section class="stacked-section container claude-section">
+      <h2>Built for scale</h2>
+      <StackedCards cards={capabilities} />
+    </section>
+
+  </div>
+</Layout>
+
+<style>
+  .overview-page {
+    padding-top: calc(var(--header-height) + var(--space-12));
+    padding-bottom: var(--space-20);
+  }
+
+  .overview-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto var(--space-16);
+  }
+
+  .heading-large {
+    font-family: var(--font-editorial);
+    font-size: clamp(3rem, 6vw, 5rem);
+    line-height: 1.05;
+    margin-bottom: var(--space-6);
+  }
+
+  .subheading {
+    font-size: var(--text-xl);
+    color: var(--text-secondary);
+    max-width: 600px;
+  }
+
+  .marquee-section {
+    padding: var(--space-8) 0;
+    border-top: 1px solid var(--border-secondary);
+    border-bottom: 1px solid var(--border-secondary);
+    background: var(--bg-secondary);
+  }
+
+  .marquee-item {
+    font-size: var(--text-lg);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-4);
+  }
+
+  .tabs-section h2, .stacked-section h2 {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-10);
+    text-align: center;
+  }
+
+  .tab-demo {
+    width: 100%;
+    height: 100%;
+    min-height: 250px;
+  }
+</style>

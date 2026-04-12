@@ -1,0 +1,58 @@
+---
+// src/components/ui/InfiniteMarquee.astro
+interface Props {
+  class?: string;
+  speed?: string; // e.g. "30s"
+  direction?: 'left' | 'right';
+}
+const { class: className = '', speed = '40s', direction = 'left' } = Astro.props;
+---
+
+<div class:list={["claude-marquee", className]} style={`--marquee-speed: ${speed}; --marquee-dir: ${direction === 'left' ? 'normal' : 'reverse'};`}>
+  <div class="marquee-track">
+    <div class="marquee-content">
+      <slot />
+    </div>
+    <!-- Duplicate content to ensure smooth infinity wrapping -->
+    <div class="marquee-content" aria-hidden="true">
+      <slot />
+    </div>
+  </div>
+</div>
+
+<style>
+  .claude-marquee {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    /* Add subtle fade at edges if desired, else keep clear */
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: scroll_marquee var(--marquee-speed) linear infinite var(--marquee-dir);
+  }
+
+  .marquee-track:hover {
+    animation-play-state: paused;
+  }
+
+  .marquee-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8, 32px);
+    padding-right: var(--space-8, 32px);
+  }
+
+  @keyframes scroll_marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+</style>

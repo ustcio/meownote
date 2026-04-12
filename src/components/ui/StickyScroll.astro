@@ -1,0 +1,51 @@
+---
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+<div class:list={["claude-sticky-scroll", className]}>
+  <slot />
+</div>
+
+<style>
+  .claude-sticky-scroll {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-10, 40px);
+    width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .claude-sticky-scroll {
+      flex-direction: column;
+    }
+  }
+
+  /* Usually slot features two children: sticky child and scrolling child */
+  .claude-sticky-scroll :global(> .sticky-content) {
+    position: sticky;
+    top: calc(var(--header-total-height, 72px) + var(--space-6, 24px));
+    flex: 1;
+    min-width: 300px;
+    height: fit-content;
+  }
+
+  .claude-sticky-scroll :global(> .scroll-content) {
+    flex: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8, 32px);
+  }
+
+  /* When on mobile, don't stick the side content, let it scroll normally */
+  @media (max-width: 768px) {
+    .claude-sticky-scroll :global(> .sticky-content) {
+      position: relative;
+      top: 0;
+      min-width: 100%;
+      margin-bottom: var(--space-6, 24px);
+    }
+  }
+</style>

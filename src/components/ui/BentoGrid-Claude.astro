@@ -1,0 +1,122 @@
+---
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+<div class:list={["claude-bento-grid", className]}>
+  <slot />
+</div>
+
+<style>
+  .claude-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--space-6, 24px);
+    width: 100%;
+  }
+
+  @media (max-width: 1024px) {
+    .claude-bento-grid {
+      grid-template-columns: repeat(8, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .claude-bento-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Global child matching for Bento items */
+  .claude-bento-grid :global(> *) {
+    position: relative;
+    background: var(--card-bg, #FFFFFF);
+    border: 1px solid var(--card-border, #E5E5E5);
+    border-radius: var(--radius-xl, 16px);
+    padding: var(--space-6, 24px);
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.3s ease;
+    box-shadow: var(--card-shadow, 0 1px 3px rgba(0,0,0,0.05));
+    /* Variables for JS mouse tracking */
+    --mouse-x: 50%;
+    --mouse-y: 50%;
+  }
+
+  .claude-bento-grid :global(> *:hover) {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-hover, 0 10px 15px rgba(0,0,0,0.1));
+    border-color: var(--card-border-hover, #D5D5D5);
+  }
+
+  /* Glow Element using pseudo-element */
+  .claude-bento-grid :global(> *::before) {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    background: radial-gradient(
+      600px circle at var(--mouse-x) var(--mouse-y),
+      var(--color-primary-alpha-10, rgba(217, 119, 87, 0.08)),
+      transparent 40%
+    );
+    z-index: 0;
+  }
+
+  .claude-bento-grid :global(> *:hover::before) {
+    opacity: 1;
+  }
+
+  /* Content should scale above the background pseudo-element */
+  .claude-bento-grid :global(> * > *) {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Specific column spans (e.g. using utility classes on children) */
+  .claude-bento-grid :global(.col-span-12) { grid-column: span 12; }
+  .claude-bento-grid :global(.col-span-8) { grid-column: span 8; }
+  .claude-bento-grid :global(.col-span-6) { grid-column: span 6; }
+  .claude-bento-grid :global(.col-span-4) { grid-column: span 4; }
+  .claude-bento-grid :global(.col-span-3) { grid-column: span 3; }
+  
+  @media (max-width: 1024px) {
+    .claude-bento-grid :global(.md-col-span-8) { grid-column: span 8; }
+    .claude-bento-grid :global(.md-col-span-4) { grid-column: span 4; }
+  }
+  @media (max-width: 640px) {
+    .claude-bento-grid :global(> *) { grid-column: span 1 !important; }
+  }
+</style>
+
+<script>
+  function initBentoGradients() {
+    const grids = document.querySelectorAll('.claude-bento-grid');
+    grids.forEach(grid => {
+      grid.addEventListener('mousemove', (e) => {
+        const mouseEvent = e as MouseEvent;
+        // Find all cards
+        const cards = Array.from(grid.children) as HTMLElement[];
+        cards.forEach(card => {
+          const rect = card.getBoundingClientRect();
+          const x = mouseEvent.clientX - rect.left;
+          const y = mouseEvent.clientY - rect.top;
+          card.style.setProperty('--mouse-x', `${x}px`);
+          card.style.setProperty('--mouse-y', `${y}px`);
+        });
+      });
+    });
+  }
+  
+  document.addEventListener('astro:page-load', initBentoGradients);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBentoGradients);
+  } else {
+    initBentoGradients();
+  }
+</script>

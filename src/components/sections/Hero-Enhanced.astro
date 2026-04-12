@@ -1,4 +1,6 @@
 ---
+import TextReveal from '@components/ui/TextReveal.astro';
+
 const trustLines = [
   'Trusted by researchers, designers, and students worldwide.',
   'Free to get started · No credit card required · Cancel anytime',
@@ -18,13 +20,9 @@ const trustLines = [
     <div class="hero__grid">
       <!-- left: copy -->
       <div class="hero__copy">
-        <h1 class="hero__title">
-          AI that thinks.<br>You decide.
-        </h1>
+        <TextReveal tag="h1" class="hero__title" text="AI that thinks. You decide." delay={100} />
 
-        <p class="hero__subtitle">
-          Write clearly. Plan confidently. Research thoroughly — in one calm, capable workspace.
-        </p>
+        <TextReveal tag="p" class="hero__subtitle" text="Write clearly. Plan confidently. Research thoroughly — in one calm, capable workspace." delay={200} />
 
         <div class="hero__actions">
           <a href="/chatbot/" class="hero__btn hero__btn--primary">Start free</a>
@@ -154,8 +152,15 @@ const trustLines = [
     letter-spacing: 0;
     font-weight: var(--font-normal);
     color: var(--text-primary);
-    opacity: 0;
-    animation: heroUp 0.6s var(--ease-out) 0.12s both;
+  }
+
+  .hero__title :global(br) {
+    display: none;
+  }
+  @media (min-width: 768px) {
+    .hero__title :global(br) {
+      display: block;
+    }
   }
 
   .hero__subtitle {
@@ -165,8 +170,6 @@ const trustLines = [
     margin-top: 1rem;
     margin-bottom: 0;
     max-width: 34rem;
-    opacity: 0;
-    animation: heroUp 0.6s var(--ease-out) 0.24s both;
   }
 
   .hero__actions {
