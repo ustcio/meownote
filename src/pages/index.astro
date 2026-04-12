@@ -63,16 +63,16 @@ const workflows = [
   <HeroEnhanced />
 
   <!-- 1.5. Visual App Mockup Section (Split Screen) -->
-  <section class="claude-section container presentation-section" style="padding-top: 4rem; padding-bottom: 2rem;">
+  <section class="claude-section container presentation-section presentation-section--workspace">
     <div class="split-layout">
       <div class="split-text">
-        <h2 style="font-family: var(--font-editorial); font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 1rem; font-weight: normal;">
+        <h2 class="split-text__title">
           Think fast,<br>build faster
         </h2>
-        <p style="font-size: var(--text-xl); color: var(--text-secondary); margin-bottom: 2rem;">
+        <p class="split-text__body">
           Brainstorm with Maxwell, execute locally with integrated workflows.
         </p>
-        <div class="split-actions" style="display: flex; gap: 1rem;">
+        <div class="split-actions">
           <a href="/downloads/" class="claude-button">Download desktop app</a>
         </div>
       </div>
@@ -185,6 +185,11 @@ const workflows = [
     padding-bottom: var(--space-12);
   }
 
+  .presentation-section--workspace {
+    padding-top: 4rem;
+    padding-bottom: 2rem;
+  }
+
   .tab-demo-wrapper {
     width: 100%;
     height: 100%;
@@ -215,6 +220,27 @@ const workflows = [
     flex-direction: column;
   }
 
+  .split-text__title {
+    font-family: var(--font-editorial);
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1.04;
+    margin-bottom: 1rem;
+    font-weight: var(--font-normal);
+    max-width: 10ch;
+  }
+
+  .split-text__body {
+    font-size: var(--text-xl);
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    max-width: 30rem;
+  }
+
+  .split-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
   .split-visual {
     background: var(--bg-secondary);
     border-radius: 20px;
@@ -225,5 +251,18 @@ const workflows = [
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+
+  @media (min-width: 900px) {
+    .split-text {
+      max-width: 46rem;
+      padding-left: clamp(3rem, 7vw, 7rem);
+    }
+  }
+
+  @media (max-width: 899px) {
+    .split-text__body {
+      max-width: 34rem;
+    }
   }
 </style>
