@@ -18,11 +18,6 @@ const trustLines = [
     <div class="hero__grid">
       <!-- left: copy -->
       <div class="hero__copy">
-        <span class="hero__badge">
-          <span class="hero__badge-dot"></span>
-          <span class="hero__badge-text">Now powered by Max AI</span>
-        </span>
-
         <h1 class="hero__title">
           AI that thinks.<br>You decide.
         </h1>
@@ -151,33 +146,6 @@ const trustLines = [
   .hero__copy {
     display: flex;
     flex-direction: column;
-  }
-
-  .hero__badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.75rem;
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-full);
-    background: var(--card-bg);
-    margin-bottom: 1.25rem;
-    opacity: 0;
-    animation: heroUp 0.6s var(--ease-out) both;
-  }
-
-  .hero__badge-dot {
-    width: 0.38rem;
-    height: 0.38rem;
-    border-radius: 50%;
-    background: var(--color-primary);
-  }
-
-  .hero__badge-text {
-    font-size: 0.72rem;
-    font-weight: var(--font-medium);
-    letter-spacing: 0.02em;
-    color: var(--text-secondary);
   }
 
   .hero__title {
