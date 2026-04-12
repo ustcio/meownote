@@ -288,7 +288,7 @@ input::placeholder, textarea::placeholder {
 }
 
 .claude-section--cream {
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border-top: 1px solid var(--border-secondary);
   border-bottom: 1px solid var(--border-secondary);
 }
