@@ -132,22 +132,26 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
           ></textarea>
           
           <div class="input-actions">
-            <button class="input-action-btn" id="attach-btn" title="添加附件">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-              </svg>
-            </button>
-            <button class="stop-btn" id="stop-btn" title="停止生成" hidden>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="6" y="6" width="12" height="12" rx="2"></rect>
-              </svg>
-            </button>
-            <button class="send-btn" id="send-btn" disabled>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
-            </button>
+            <div class="input-actions-left">
+              <button class="input-action-btn" id="attach-btn" title="添加附件">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+              </button>
+            </div>
+            <div class="input-actions-right">
+              <button class="stop-btn" id="stop-btn" title="停止生成" hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                </svg>
+              </button>
+              <button class="send-btn" id="send-btn" disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
         
@@ -170,9 +174,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   .claude-chat-page {
     display: flex;
     height: 100vh;
-    background:
-      radial-gradient(circle at top, rgba(230, 222, 210, 0.26), transparent 38%),
-      linear-gradient(180deg, #f8f6f1 0%, #f7f4ee 100%);
+    background: var(--bg-primary);
     font-family: var(--font-body);
     color: var(--text-primary);
     overflow: hidden;
@@ -184,9 +186,8 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   .sidebar {
     width: 276px;
     height: 100%;
-    background: rgba(247, 243, 236, 0.72);
+    background: var(--bg-primary);
     border-right: 1px solid rgba(71, 57, 44, 0.1);
-    backdrop-filter: blur(10px);
     display: flex;
     flex-direction: column;
     transition: transform 0.3s ease;
@@ -491,7 +492,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     flex: 1;
     overflow-y: auto;
     padding: 26px 24px 8px;
-    background: transparent;
+    background: var(--bg-primary);
     scroll-behavior: smooth;
   }
 
@@ -618,7 +619,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   }
 
   .message-user .message-shell {
-    width: min(100%, 260px);
+    width: min(100%, 360px);
   }
 
   .message-assistant .message-shell {
@@ -637,14 +638,14 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   }
 
   .message-user .message-bubble {
-    width: fit-content;
+    width: 100%;
     max-width: 100%;
-    padding: 13px 18px;
-    color: #201915;
+    padding: 0;
+    color: #171412;
     font-weight: 400;
-    background: rgba(243, 239, 232, 0.82);
+    background: transparent;
     border: none;
-    border-radius: 18px;
+    border-radius: 0;
     box-shadow: none;
   }
 
@@ -666,6 +667,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   .message-user .message-bubble .message-content {
     font-size: 14.5px;
     line-height: 1.5;
+    color: #171412;
   }
 
   .message-bubble .message-content p {
@@ -804,7 +806,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
   .message-user .message-header {
     justify-content: flex-end;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .message-role {
@@ -839,30 +841,32 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     position: static;
     display: flex;
     gap: 6px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.18s ease;
-    margin-top: 10px;
-  }
-
-  .message:hover .message-toolbar,
-  .message:focus-within .message-toolbar {
     opacity: 1;
     pointer-events: auto;
+    transition: opacity 0.18s ease;
+    margin-top: 12px;
+  }
+
+  .message-user .message-toolbar {
+    justify-content: flex-end;
   }
 
   .message-tool-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
+    gap: 6px;
+    width: auto;
     height: 30px;
+    padding: 0 10px;
     border: 1px solid rgba(71, 57, 44, 0.1);
     border-radius: 999px;
-    background: rgba(255, 253, 249, 0.96);
+    background: rgba(255, 253, 249, 0.88);
     color: var(--text-secondary);
     box-shadow: none;
     transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease, border-color 0.16s ease;
+    font-size: 12px;
+    font-weight: 500;
   }
 
   .message-tool-btn:hover {
@@ -913,25 +917,26 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
      ============================================ */
   .input-area {
     padding: 14px 24px 16px;
-    background: linear-gradient(180deg, rgba(247, 244, 238, 0) 0%, rgba(247, 244, 238, 0.94) 32%, rgba(247, 244, 238, 1) 100%);
+    background: var(--bg-primary);
   }
 
   .input-container {
-    max-width: 920px;
+    max-width: 860px;
     margin: 0 auto;
   }
 
   .input-wrapper {
     display: flex;
-    align-items: flex-end;
-    gap: 10px;
-    min-height: 76px;
-    padding: 14px 16px;
-    background: rgba(255, 253, 249, 0.96);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    min-height: 0;
+    padding: 16px 18px 14px;
+    background: #fffdf9;
     border: 1px solid rgba(71, 57, 44, 0.14);
-    border-radius: 24px;
+    border-radius: 28px;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
-    box-shadow: 0 8px 20px rgba(27, 20, 16, 0.035);
+    box-shadow: 0 10px 26px rgba(27, 20, 16, 0.04);
   }
 
   .input-wrapper:focus-within {
@@ -949,9 +954,10 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     color: var(--text-primary);
     resize: none;
     max-height: 180px;
+    min-height: 64px;
     font-family: var(--font-body);
     background: transparent;
-    padding: 4px 0 2px;
+    padding: 0;
   }
 
   .message-input::placeholder {
@@ -964,10 +970,18 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
   .input-actions {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
+    justify-content: space-between;
     gap: 6px;
     flex-shrink: 0;
-    padding-bottom: 2px;
+    padding-top: 2px;
+  }
+
+  .input-actions-left,
+  .input-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .input-action-btn {
@@ -1077,7 +1091,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
   .claude-chat-page.is-welcome .input-area {
     padding-top: 0;
-    background: transparent;
+    background: var(--bg-primary);
   }
 
   .claude-chat-page.is-welcome .input-container {
@@ -1180,9 +1194,8 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     }
 
     .input-wrapper {
-      min-height: 72px;
-      padding: 12px 13px;
-      border-radius: 22px;
+      padding: 14px 14px 12px;
+      border-radius: 24px;
     }
 
     .send-btn {
@@ -1207,7 +1220,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     }
 
     .message-user .message-bubble {
-      padding: 12px 16px;
+      padding: 0;
     }
   }
 </style>
@@ -1445,6 +1458,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
               <rect x="9" y="9" width="13" height="13" rx="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
             </svg>
+            <span>复制</span>
           </button>
         </div>
         <div class="message-bubble">

@@ -38,7 +38,11 @@ const footerGroups = [
             <path d="M12 4L18.75 17H5.25L12 4Z" fill="currentColor"></path>
           </svg>
         </span>
-        <span>Maxwell.Science</span>
+        <span class="site-footer__brand-wordmark">
+          <span class="site-footer__brand-maxwell">Maxwell</span>
+          <span class="site-footer__brand-dot">.</span>
+          <span class="site-footer__brand-science">Science</span>
+        </span>
       </a>
 
       <h2 class="site-footer__title">Think clearly. Keep context. Move work forward.</h2>
@@ -75,7 +79,14 @@ const footerGroups = [
   </div>
 
   <div class="site-footer__meta">
-    <span>© {currentYear} Maxwell.Science</span>
+    <span>
+      © {currentYear}
+      <span class="site-footer__meta-brand">
+        <span class="site-footer__brand-maxwell">Maxwell</span>
+        <span class="site-footer__brand-dot">.</span>
+        <span class="site-footer__brand-science">Science</span>
+      </span>
+    </span>
     <span>Designed for calm, capable work.</span>
   </div>
 </footer>
@@ -121,6 +132,37 @@ const footerGroups = [
     color: var(--text-primary);
     font-size: 0.98rem;
     font-weight: 600;
+  }
+
+  .site-footer__brand-wordmark,
+  .site-footer__meta-brand {
+    display: inline-flex;
+    align-items: baseline;
+    line-height: 1;
+  }
+
+  .site-footer__brand-maxwell {
+    font-family: var(--font-editorial);
+    font-size: 1.05em;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    color: var(--text-primary);
+  }
+
+  .site-footer__brand-dot {
+    font-family: var(--font-editorial);
+    font-size: 1.05em;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin: 0 0.02em;
+  }
+
+  .site-footer__brand-science {
+    font-family: var(--font-body);
+    font-size: 0.96em;
+    font-weight: 400;
+    color: var(--text-tertiary);
+    letter-spacing: -0.01em;
   }
 
   .site-footer__brand-mark {
