@@ -109,7 +109,6 @@ const trustLines = [
     }
   }
 
-  /* ambient */
   .hero__ambient {
     position: absolute;
     inset: 0;
@@ -136,7 +135,6 @@ const trustLines = [
     50% { transform: translateY(-30px) scale(1.5); opacity: 0.15; }
   }
 
-  /* grid layout */
   .hero__grid {
     display: grid;
     gap: 2rem;
@@ -150,13 +148,11 @@ const trustLines = [
     }
   }
 
-  /* left copy */
   .hero__copy {
     display: flex;
     flex-direction: column;
   }
 
-  /* badge */
   .hero__badge {
     display: inline-flex;
     align-items: center;
@@ -184,18 +180,16 @@ const trustLines = [
     color: var(--text-secondary);
   }
 
-  /* title */
   .hero__title {
     font-size: clamp(2.5rem, 5.5vw, 4.2rem);
     line-height: 1.05;
     letter-spacing: -0.04em;
-    font-weight: var(--font-bold);
+    font-weight: var(--font-medium);
     color: var(--text-primary);
     opacity: 0;
     animation: heroUp 0.6s var(--ease-out) 0.12s both;
   }
 
-  /* subtitle */
   .hero__subtitle {
     font-size: clamp(1rem, 1.8vw, 1.15rem);
     line-height: 1.6;
@@ -207,7 +201,6 @@ const trustLines = [
     animation: heroUp 0.6s var(--ease-out) 0.24s both;
   }
 
-  /* actions */
   .hero__actions {
     margin-top: 1.5rem;
     display: flex;
@@ -230,16 +223,16 @@ const trustLines = [
   }
 
   .hero__btn--primary {
-    background: var(--color-primary);
-    color: #FFFFFF;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    box-shadow: var(--btn-primary-shadow);
   }
 
   .hero__btn--primary:hover {
-    background: var(--color-primary-active);
-    color: #FFFFFF;
+    background: var(--btn-primary-hover);
+    color: var(--btn-primary-text);
     transform: translateY(-1px);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-lg);
   }
 
   .hero__btn--ghost {
@@ -253,7 +246,6 @@ const trustLines = [
     border-color: var(--border-hover);
   }
 
-  /* trust */
   .hero__trust {
     font-size: var(--text-xs);
     color: var(--text-quaternary);
@@ -268,7 +260,6 @@ const trustLines = [
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* -------- right visual -------- */
   .hero__visual {
     position: relative;
     display: none;
@@ -280,7 +271,6 @@ const trustLines = [
     }
   }
 
-  /* chat preview window */
   .hero__preview {
     background: var(--card-bg);
     border: 1px solid var(--border-primary);
@@ -371,7 +361,6 @@ const trustLines = [
     margin: 0;
   }
 
-  /* typing indicator */
   .preview__typing {
     display: flex;
     gap: 4px;
@@ -409,7 +398,6 @@ const trustLines = [
     margin-bottom: 2px;
   }
 
-  /* floating cards */
   .hero__float {
     position: absolute;
     z-index: 2;
@@ -469,7 +457,6 @@ const trustLines = [
     font-size: 1rem;
   }
 
-  /* dark mode adjustments */
   [data-theme="dark"] .hero__preview {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }

@@ -18,11 +18,10 @@ const isActive = (href: string) =>
 
 <header class="site-header">
   <div class="site-header__inner">
-
     <a href="/" class="site-logo" aria-label="Maxwell.Science home">
       <span class="site-logo__icon" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path d="M12 4L18.75 17H5.25L12 4Z" fill="currentColor"/>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 4L18.75 17H5.25L12 4Z" fill="currentColor" />
         </svg>
       </span>
       <span class="site-logo__wordmark">
@@ -34,24 +33,16 @@ const isActive = (href: string) =>
 
     <nav class="site-nav" aria-label="Primary">
       {navItems.map((item) => (
-        <a
-          href={item.href}
-          class:list={['site-nav__link', { active: isActive(item.href) }]}
-        >
+        <a href={item.href} class:list={['site-nav__link', { active: isActive(item.href) }]}>
           {item.label}
         </a>
       ))}
       {externalItems.map((item) => (
-        <a
-          href={item.href}
-          class="site-nav__link"
-          target="_blank"
-          rel="noopener"
-        >
+        <a href={item.href} class="site-nav__link" target="_blank" rel="noopener">
           {item.icon === 'lock' && (
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: -2px;">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
           )}
           {item.label}
@@ -61,17 +52,18 @@ const isActive = (href: string) =>
 
     <div class="header__actions">
       <a href="https://github.com/ustcio/meownote" class="site-utility-link" target="_blank" rel="noopener">GitHub</a>
+      <a href="/chatbot/" class="header__cta">Try Maxwell</a>
     </div>
 
     <button class="mobile-toggle" id="mobile-menu-btn" aria-expanded="false" aria-label="Menu">
       <svg class="mobile-toggle__open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <line x1="4" y1="7.5" x2="20" y2="7.5"/>
-        <line x1="4" y1="12" x2="20" y2="12"/>
-        <line x1="4" y1="16.5" x2="20" y2="16.5"/>
+        <line x1="4" y1="7.5" x2="20" y2="7.5" />
+        <line x1="4" y1="12" x2="20" y2="12" />
+        <line x1="4" y1="16.5" x2="20" y2="16.5" />
       </svg>
       <svg class="mobile-toggle__close" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="6" y1="6" x2="18" y2="18"/>
-        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18" />
+        <line x1="18" y1="6" x2="6" y2="18" />
       </svg>
     </button>
   </div>
@@ -86,55 +78,51 @@ const isActive = (href: string) =>
       <a href={item.href} class="mobile-nav__link" target="_blank" rel="noopener">
         {item.icon === 'lock' && (
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: -3px;">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
         )}
         {item.label}
       </a>
     ))}
     <a href="https://github.com/ustcio/meownote" class="mobile-nav__link" target="_blank" rel="noopener">GitHub</a>
+    <a href="/chatbot/" class="mobile-nav__cta">Try Maxwell</a>
   </nav>
 </header>
 
 <style>
   .site-header {
     position: fixed;
-    top: 8px; left: 16px; right: 16px;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: var(--z-fixed);
     background: var(--nav-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--nav-border);
-    border-radius: var(--radius-xl);
+    border-bottom: 1px solid var(--nav-border);
   }
 
   .site-header__inner {
-    max-width: var(--container-2xl);
-    margin: 0 auto;
-    padding: 0 1.25rem;
+    max-width: var(--container-xl);
+    width: calc(100% - (2 * clamp(1.5rem, 1.07rem + 2.14vw, 3rem)));
     min-height: var(--header-height);
+    margin: 0 auto;
     display: flex;
     align-items: center;
-    gap: 0;
-  }
-
-  @media (min-width: 768px) {
-    .site-header__inner {
-      padding: 0 1.5rem;
-    }
+    justify-content: space-between;
+    gap: 1.5rem;
   }
 
   .site-logo {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.55rem;
+    gap: 0.5rem;
+    min-height: var(--header-height);
   }
 
   .site-logo__icon {
-    width: 2rem;
-    height: 2rem;
-    display: flex;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     color: var(--text-primary);
@@ -148,7 +136,7 @@ const isActive = (href: string) =>
 
   .wordmark-brand {
     font-family: var(--font-brand);
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 600;
     letter-spacing: -0.03em;
     color: var(--text-primary);
@@ -156,7 +144,7 @@ const isActive = (href: string) =>
 
   .wordmark-dot {
     font-family: var(--font-brand);
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--color-primary);
     margin: 0 0.02em;
@@ -164,166 +152,153 @@ const isActive = (href: string) =>
 
   .wordmark-domain {
     font-family: var(--font-body);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 400;
-    letter-spacing: 0.01em;
-    color: var(--text-quaternary);
+    color: var(--text-tertiary);
   }
 
   .site-nav {
     display: none;
     align-items: center;
-    gap: 0.15rem;
-    margin-left: 1.25rem;
+    gap: 1.4rem;
+    margin-left: auto;
   }
 
-  @media (min-width: 900px) {
-    .site-nav { display: flex; }
+  @media (min-width: 960px) {
+    .site-nav {
+      display: flex;
+    }
   }
 
   .site-nav__link {
-    padding: 0.5rem 0.75rem;
-    font-size: var(--text-sm);
+    padding: 0;
+    font-size: 0.95rem;
     font-weight: var(--font-medium);
-    color: var(--text-tertiary);
-    border-radius: var(--radius-full);
-    transition:
-      color var(--duration-fast) var(--ease-default),
-      background-color var(--duration-fast) var(--ease-default);
+    color: var(--nav-link);
+    transition: color var(--duration-fast) var(--ease-default);
   }
 
-  .site-nav__link:hover {
-    color: var(--text-primary);
-  }
-
+  .site-nav__link:hover,
   .site-nav__link.active {
-    color: var(--text-primary);
-    background: var(--bg-secondary);
-  }
-
-  .site-nav__link--secondary {
-    color: var(--text-quaternary);
-  }
-
-  .site-nav__link--secondary:hover {
-    color: var(--text-secondary);
+    color: var(--nav-link-hover);
   }
 
   .header__actions {
     display: none;
     align-items: center;
-    gap: 0.75rem;
-    margin-left: auto;
+    gap: 1rem;
   }
 
-  @media (min-width: 900px) {
-    .header__actions { display: flex; }
+  @media (min-width: 960px) {
+    .header__actions {
+      display: flex;
+    }
   }
 
   .site-utility-link {
-    font-size: var(--text-sm);
+    font-size: 0.95rem;
     font-weight: var(--font-medium);
-    color: var(--text-tertiary);
-    padding: 0.5rem 0.75rem;
+    color: var(--nav-link);
   }
 
   .site-utility-link:hover {
-    color: var(--text-primary);
+    color: var(--nav-link-hover);
   }
 
-  .header__cta {
+  .header__cta,
+  .mobile-nav__cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 2.3rem;
-    padding: 0.5rem 1rem;
+    min-height: 2.75rem;
+    padding: 0.72rem 1rem;
     border-radius: var(--radius-full);
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);
-    font-size: 0.82rem;
+    font-size: 0.92rem;
     font-weight: var(--font-medium);
     box-shadow: var(--btn-primary-shadow);
-    transition:
-      background var(--duration-fast) var(--ease-default),
-      transform var(--duration-fast) var(--ease-default);
+    transition: background var(--duration-fast) var(--ease-default), transform var(--duration-fast) var(--ease-default);
   }
 
-  .header__cta:hover {
+  .header__cta:hover,
+  .mobile-nav__cta:hover {
     background: var(--btn-primary-hover);
     color: var(--btn-primary-text);
     transform: translateY(-1px);
   }
 
-  .header__cta:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(196 100 74 / 0.12);
-  }
-
-  /* ---------- mobile ---------- */
-  @media (max-width: 899px) {
-    .site-header {
-      top: 0; left: 0; right: 0;
-      border-radius: 0;
-      border: none;
-      border-bottom: 1px solid var(--nav-border);
-    }
-  }
-
   .mobile-toggle {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.3rem;
-    height: 2.3rem;
+    width: 2.75rem;
+    height: 2.75rem;
     margin-left: auto;
-    border-radius: var(--radius-full);
-    border: 1px solid var(--border-secondary);
-    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-primary);
+    background: transparent;
     color: var(--text-secondary);
   }
 
-  @media (min-width: 900px) {
-    .mobile-toggle { display: none; }
+  @media (min-width: 960px) {
+    .mobile-toggle {
+      display: none;
+    }
   }
 
-  .mobile-toggle__open { display: block; }
-  .mobile-toggle__close { display: none; }
-  .mobile-toggle.open .mobile-toggle__open { display: none; }
-  .mobile-toggle.open .mobile-toggle__close { display: block; }
+  .mobile-toggle__open {
+    display: block;
+  }
+
+  .mobile-toggle__close {
+    display: none;
+  }
+
+  .mobile-toggle.open .mobile-toggle__open {
+    display: none;
+  }
+
+  .mobile-toggle.open .mobile-toggle__close {
+    display: block;
+  }
 
   .mobile-nav {
     display: none;
     position: fixed;
-    top: calc(var(--header-height) + 8px);
-    left: 0; right: 0; bottom: 0;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: calc(var(--z-fixed) - 1);
+    width: calc(100% - (2 * clamp(1.5rem, 1.07rem + 2.14vw, 3rem)));
+    margin: 0 auto;
+    padding: 1rem 0 1.5rem;
     background: var(--bg-primary);
-    padding: 1rem 1.5rem 1.5rem;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.1rem;
     overflow-y: auto;
   }
 
-  .mobile-nav.open { display: flex; }
+  .mobile-nav.open {
+    display: flex;
+  }
 
   .mobile-nav__link {
-    padding: 0.75rem 0.25rem;
+    padding: 0.9rem 0;
     font-size: 1rem;
     font-weight: var(--font-medium);
-    color: var(--text-secondary);
+    color: var(--nav-link);
     border-bottom: 1px solid var(--border-secondary);
   }
 
   .mobile-nav__link.active {
-    color: var(--text-primary);
-  }
-
-  .mobile-nav__actions {
-    padding-top: 0.75rem;
+    color: var(--nav-link-hover);
   }
 
   .mobile-nav__cta {
-    width: 100%;
+    margin-top: 1rem;
+    width: fit-content;
   }
 </style>
 
@@ -342,7 +317,7 @@ const isActive = (href: string) =>
     setMenuState(!mobileNav?.classList.contains('open'));
   });
 
-  document.querySelectorAll('.mobile-nav__link').forEach((link) => {
+  document.querySelectorAll('.mobile-nav__link, .mobile-nav__cta').forEach((link) => {
     link.addEventListener('click', () => setMenuState(false));
   });
 </script>

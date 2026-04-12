@@ -15,14 +15,15 @@ const footerGroups = [
     links: [
       { href: '/kit/', label: 'Tools' },
       { href: '/research/', label: 'Research' },
+      { href: '/about/', label: 'About' },
     ],
   },
   {
-    title: 'Company',
+    title: 'Contact',
     links: [
-      { href: '/about/', label: 'About' },
       { href: 'https://github.com/maxwell-xyz', label: 'GitHub' },
-      { href: 'mailto:maxwell@ustc.dev', label: 'Contact' },
+      { href: 'mailto:maxwell@ustc.dev', label: 'Email' },
+      { href: 'https://ustc.dev', label: 'Token access' },
     ],
   },
 ];
@@ -32,16 +33,19 @@ const footerGroups = [
   <div class="site-footer__inner">
     <div class="site-footer__lead">
       <a href="/" class="site-footer__brand">
-        <span class="site-footer__mark">
+        <span class="site-footer__brand-mark">
           <svg viewBox="0 0 24 24" fill="none">
             <path d="M12 4L18.75 17H5.25L12 4Z" fill="currentColor"></path>
           </svg>
         </span>
         <span>Maxwell.Science</span>
       </a>
+
+      <h2 class="site-footer__title">Think clearly. Keep context. Move work forward.</h2>
       <p class="site-footer__copy">
-        Calm, capable AI for writing, coding, research, and the work around the work.
+        Maxwell brings chat, workspace, research, and focused tools into one warm, quiet interface for daily work.
       </p>
+
       <form class="site-footer__prompt" action="/chatbot/">
         <input
           type="text"
@@ -72,148 +76,164 @@ const footerGroups = [
 
   <div class="site-footer__meta">
     <span>© {currentYear} Maxwell.Science</span>
-    <span>Built with a Claude-inspired editorial UI system.</span>
+    <span>Designed for calm, capable work.</span>
   </div>
 </footer>
 
 <style>
   .site-footer {
-    background: #0D0D0D;
-    color: rgba(229, 229, 229, 0.88);
-    padding: 3.5rem 1.5rem 1.5rem;
-    margin-top: 0;
+    padding: 5rem 0 2rem;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-secondary);
   }
 
   .site-footer__inner,
   .site-footer__meta {
-    max-width: var(--container-2xl);
+    max-width: var(--container-xl);
+    width: calc(100% - (2 * clamp(1.5rem, 1.07rem + 2.14vw, 3rem)));
     margin: 0 auto;
   }
 
   .site-footer__inner {
     display: grid;
-    gap: 2.5rem;
+    gap: 3rem;
   }
 
-  @media (min-width: 900px) {
+  @media (min-width: 980px) {
     .site-footer__inner {
-      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr);
+      align-items: start;
       gap: 5rem;
     }
+  }
+
+  .site-footer__lead {
+    display: grid;
+    gap: 1rem;
+    max-width: 38rem;
   }
 
   .site-footer__brand {
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
-    color: #fffdf9;
+    gap: 0.65rem;
+    width: fit-content;
+    color: var(--text-primary);
+    font-size: 0.98rem;
     font-weight: 600;
-    margin-bottom: 1rem;
   }
 
-  .site-footer__mark {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 999px;
-    background: var(--color-primary);
+  .site-footer__brand-mark {
+    width: 1.75rem;
+    height: 1.75rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #fffdf9;
+    color: var(--color-primary);
   }
 
-  .site-footer__mark svg {
-    width: 0.95rem;
-    height: 0.95rem;
+  .site-footer__brand-mark svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .site-footer__title {
+    max-width: 13ch;
+    font-size: clamp(2rem, 3.4vw, 2.9rem);
+    line-height: 1.04;
   }
 
   .site-footer__copy {
-    max-width: 28rem;
-    color: rgba(253, 250, 245, 0.62);
-    font-size: 0.98rem;
-    margin-bottom: 1.5rem;
+    max-width: 31rem;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0;
   }
 
   .site-footer__prompt {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
     gap: 0.75rem;
-    max-width: 34rem;
-    padding: 0.8rem;
-    border-radius: 1.5rem;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    max-width: 36rem;
+    padding: 0.75rem;
+    border-radius: 1.75rem;
+    background: rgba(255, 253, 249, 0.88);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+  }
+
+  @media (min-width: 720px) {
+    .site-footer__prompt {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+    }
   }
 
   .site-footer__prompt input {
     min-width: 0;
     border: none;
     background: transparent;
-    color: #fffdf9;
-    padding: 0.7rem 0.9rem;
     box-shadow: none;
-  }
-
-  .site-footer__prompt input::placeholder {
-    color: rgba(253, 250, 245, 0.38);
+    padding: 0.85rem 0.95rem;
   }
 
   .site-footer__prompt button {
-    min-height: 2.7rem;
-    padding: 0.7rem 1rem;
+    min-height: 3rem;
+    padding: 0.8rem 1rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.92);
-    color: #171412;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
     font-size: 0.92rem;
     font-weight: 500;
+    box-shadow: var(--btn-primary-shadow);
   }
 
   .site-footer__links {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem 2rem;
+    gap: 2rem 2.25rem;
+    align-content: start;
   }
 
-  @media (min-width: 640px) {
+  @media (min-width: 720px) {
     .site-footer__links {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 
   .site-footer__group h3 {
+    margin-bottom: 0.85rem;
     font-family: var(--font-body);
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(253, 250, 245, 0.45);
-    margin-bottom: 1rem;
+    color: var(--text-tertiary);
   }
 
   .site-footer__group ul {
     list-style: none;
     display: grid;
-    gap: 0.75rem;
+    gap: 0.7rem;
   }
 
   .site-footer__group a {
-    color: rgba(253, 250, 245, 0.72);
     font-size: 0.95rem;
+    color: var(--text-secondary);
   }
 
   .site-footer__group a:hover {
-    color: #fffdf9;
+    color: var(--text-primary);
   }
 
   .site-footer__meta {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    margin-top: 2.25rem;
+    margin-top: 2rem;
     padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--border-secondary);
     font-size: 0.84rem;
-    color: rgba(253, 250, 245, 0.42);
+    color: var(--text-tertiary);
   }
 
   @media (min-width: 768px) {
