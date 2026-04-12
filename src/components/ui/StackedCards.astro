@@ -20,7 +20,6 @@ const { class: className = '', cards } = Astro.props;
           {card.tag && <span class="card__tag">{card.tag}</span>}
           <h3 class="card__title">{card.title}</h3>
           <p class="card__description">{card.description}</p>
-          <slot name={`card-${index}`} />
         </div>
       </div>
     ))}

@@ -2,26 +2,227 @@
 import Layout from '@layouts/Layout.astro';
 import ScrollAnimation from '@components/ui/ScrollAnimation.astro';
 import HeroEnhanced from '@components/sections/Hero-Enhanced.astro';
-import Features from '@components/sections/Features.astro';
-import Activity from '@components/sections/Activity.astro';
-import Research from '@components/sections/Research.astro';
 import ContributionGraph from '@components/sections/ContributionGraph.astro';
 import FAQ from '@components/sections/FAQ.astro';
-import CTA from '@components/sections/CTA.astro';
+
+// New dynamic components
+import InfiniteMarquee from '@components/ui/InfiniteMarquee.astro';
+import TabsShowcase from '@components/ui/TabsShowcase.astro';
+import TypewriterDemo from '@components/ui/TypewriterDemo.astro';
+import StackedCards from '@components/ui/StackedCards.astro';
+import MockBrowserUI from '@components/ui/MockBrowserUI.astro';
+
+const coreTabs = [
+  {
+    id: 'tab-code',
+    label: 'Code Generation',
+    contentTitle: 'Write, debug, and trace quantum circuits.',
+    contentText: 'From single defect calculations to scalable HPC cluster deployments, bring a domain-expert partner directly into your Vim/VSCode workflow.'
+  },
+  {
+    id: 'tab-write',
+    label: 'Academic Writing',
+    contentTitle: 'Draft with a thoughtful colleague.',
+    contentText: 'Need a tone check, a creative spark for your introduction, or someone to restructure a long nature-style letter? Maxwell helps you write clearly.'
+  },
+  {
+    id: 'tab-analyze',
+    label: 'Data Analysis',
+    contentTitle: 'Extract insights instantly.',
+    contentText: 'Upload PDFs, Origin spreadsheets, or raw PPMS dat files. Maxwell parses complex transport information so you can reach conclusions faster.'
+  }
+];
+
+const workflows = [
+  {
+    title: 'Break down physics problems',
+    description: 'Maxwell builds on your Hamiltonian logic, expands on your derivations, and simplifies complexity one perturbation step at a time.',
+    tag: 'Problem Solving',
+    background: 'var(--bg-secondary)'
+  },
+  {
+    title: 'Tackle your toughest synthesis',
+    description: 'Provides expert-level collaboration on the things you need to get done—from planning a flux growth recipe to analyzing XRD patterns.',
+    tag: 'Collaboration',
+    background: 'var(--bg-tertiary)'
+  },
+  {
+    title: 'Explore what’s next',
+    description: 'Like an expert postdoc in your pocket, collaborating with Maxwell expands what you can discover on your own.',
+    tag: 'Innovation',
+    background: 'var(--card-bg-cream)'
+  }
+];
 ---
 
 <Layout
   title="Maxwell.Science — AI that thinks. You decide."
   description="Write better, plan faster, research deeper. One place for chat, workspace, research, and a live gold price tracker."
 >
+  <!-- 1. The Hero Section -->
   <HeroEnhanced />
-  <ScrollAnimation rootMargin="-20px"><Features /></ScrollAnimation>
-  <ScrollAnimation rootMargin="-20px"><Activity /></ScrollAnimation>
-  <ScrollAnimation rootMargin="-20px"><Research /></ScrollAnimation>
-  <ScrollAnimation rootMargin="-20px"><ContributionGraph /></ScrollAnimation>
-  <ScrollAnimation rootMargin="-20px"><FAQ /></ScrollAnimation>
 
-  <div style="text-align: center; margin: 40px 0;">
-    <a href="/overview/" class="claude-button">View Dynamic Showcase (Claude Product Overview clone)</a>
-  </div>
+  <!-- 1.5. Visual App Mockup Section (Split Screen) -->
+  <section class="claude-section container presentation-section" style="padding-top: 4rem; padding-bottom: 2rem;">
+    <div class="split-layout">
+      <div class="split-text">
+        <h2 style="font-family: var(--font-editorial); font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 1rem; font-weight: normal;">
+          Think fast,<br>build faster
+        </h2>
+        <p style="font-size: var(--text-xl); color: var(--text-secondary); margin-bottom: 2rem;">
+          Brainstorm with Maxwell, execute locally with integrated workflows.
+        </p>
+        <div class="split-actions" style="display: flex; gap: 1rem;">
+          <a href="/downloads/" class="claude-button">Download desktop app</a>
+        </div>
+      </div>
+      <div class="split-visual">
+        <MockBrowserUI />
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. The Marquee (Infinite Trust Banner) -->
+  <section class="marquee-wrapper">
+    <div class="container">
+      <p class="marquee-label">Trusted by leading condensed matter physics labs worldwide</p>
+    </div>
+    <InfiniteMarquee speed="25s" class="hero-marquee">
+      {["🚀 Rapid DFT Calculations", "🛡️ Secure Data Sandboxing", "⚡ PPMS Real-time processing", "📊 Advanced Hall Analysis", "🧠 Domain Specific Intelligence", "🌐 Global HPC Infrastructure"].map(item => (
+        <span class="marquee-item">{item}</span>
+      ))}
+    </InfiniteMarquee>
+  </section>
+
+  <!-- 3. Dynamic Tabs Showcase (Replaces static Features) -->
+  <section class="claude-section container presentation-section">
+    <div class="claude-section-heading" style="margin: 0 auto 3rem; text-align: center;">
+      <h2>Three surfaces. One steady workflow.</h2>
+      <p style="margin: 0 auto;">Fewer tricks, better pacing, more room for the actual research.</p>
+    </div>
+    
+    <ScrollAnimation rootMargin="-20px">
+      <TabsShowcase tabs={coreTabs}>
+        <div slot="tab-code" class="tab-demo-wrapper">
+          <TypewriterDemo 
+            text="def calc_berry_curvature(H, kx, ky):\n    '''Calculate Berry curvature for given Hamiltonian'''\n    eigenvals, eigenvecs = np.linalg.eigh(H(kx, ky))\n    # Summing over occupied bands...\n    omega = np.zeros(len(kx))\n    for n in range(n_occ):\n        for m in range(n_occ, n_tot):\n            numerator = np.imag(np.conj(velocity_x[n,m]) * velocity_y[m,n])\n            denominator = (eigenvals[n] - eigenvals[m])**2\n            omega += -2 * numerator / denominator\n    return omega" 
+            speed={15}
+          />
+        </div>
+        
+        <div slot="tab-write" class="tab-demo-wrapper">
+          <TypewriterDemo 
+            text="Here is a revised draft of your Physical Review Letter abstract, incorporating a more authoritative tone and highlighting the long-term impact:\n\nThe emergence of a nonlinear Hall effect in the noncentrosymmetric magnetic Weyl semimetal CoNb3S6 fundamentally bridges the gap between band topology and correlation physics, offering an estimated 40% enhancement in room-temperature responsivity..." 
+            speed={25}
+          />
+        </div>
+        
+        <div slot="tab-analyze" class="tab-demo-wrapper">
+          <TypewriterDemo 
+            text="Based on the uploaded PPMS transport data (Sample_A_300K.dat), here are the key takeaways:\n\n1. Longitudinal resistivity (rho_xx) shows metallic behavior down to 28K.\n2. A sharp anomaly near 28K coincides precisely with the onset of the AFM transition observed in your magnetization data.\n3. The Hall carrier concentration assumes a hole-dominated pocket at low T." 
+            speed={20}
+          />
+        </div>
+      </TabsShowcase>
+    </ScrollAnimation>
+  </section>
+
+  <!-- 4. Stacked Cards Section (Engaging deep dive workflows) -->
+  <section class="claude-section container">
+    <div class="claude-section-heading" style="margin: 0 auto 1rem; text-align: center;">
+      <h2>Built for deep exploration</h2>
+    </div>
+    <StackedCards cards={workflows} />
+  </section>
+
+  <!-- 5. Original Sections (Animated standard pieces) -->
+  <section class="claude-section container">
+    <ScrollAnimation rootMargin="-20px"><ContributionGraph /></ScrollAnimation>
+  </section>
+  
+  <section class="claude-section container cl-cream-bg">
+    <ScrollAnimation rootMargin="-20px"><FAQ /></ScrollAnimation>
+  </section>
+
 </Layout>
+
+<style>
+  .marquee-wrapper {
+    padding: var(--space-8) 0;
+    border-top: 1px solid var(--border-secondary);
+    border-bottom: 1px solid var(--border-secondary);
+    background: var(--bg-secondary);
+    margin-bottom: var(--space-12);
+  }
+
+  .marquee-label {
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: var(--font-semibold);
+    margin-bottom: var(--space-6);
+  }
+
+  .marquee-item {
+    font-size: var(--text-lg);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-6);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-full);
+    height: 48px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+
+  .presentation-section {
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-12);
+  }
+
+  .tab-demo-wrapper {
+    width: 100%;
+    height: 100%;
+  }
+
+  .cl-cream-bg {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-2xl);
+    padding-top: var(--space-10);
+    padding-bottom: var(--space-10);
+  }
+
+  .split-layout {
+    display: grid;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  @media (min-width: 900px) {
+    .split-layout {
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+    }
+  }
+
+  .split-text {
+    max-width: 500px;
+  }
+
+  .split-visual {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    padding: 2rem;
+    /* subtle pattern behind the mock browser */
+    background-image: radial-gradient(var(--border-primary) 1px, transparent 1px);
+    background-size: 20px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+</style>

@@ -35,19 +35,32 @@ const tabsData = [
     id: 'tab-code',
     label: 'Code',
     contentTitle: 'Write, debug, and ship faster.',
-    contentText: 'From small scripts to scalable infrastructure, bring an expert programming partner directly into your workflow.'
+    contentText: 'From small scripts to scalable infrastructure, bring an expert programming partner directly into your workflow.',
+    visualHtml: `<div class="tab-demo"><div class="type-demo-shell"><pre class="type-demo-code">function optimizeSearch(array, target) {
+  let left = 0;
+  let right = array.length - 1;
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    if (array[mid] === target) return mid;
+    if (array[mid] < target) left = mid + 1;
+    else right = mid - 1;
+  }
+  return -1;
+}</pre></div></div>`
   },
   {
     id: 'tab-write',
     label: 'Write',
     contentTitle: 'Draft with a thoughtful colleague.',
-    contentText: 'Need a tone check, a creative spark, or someone to restructure a long document? Claude helps you write clearly.'
+    contentText: 'Need a tone check, a creative spark, or someone to restructure a long document? Claude helps you write clearly.',
+    visualHtml: `<div class="tab-demo"><div class="type-demo-shell"><p class="type-demo-text">Here is a revised draft of your project proposal, incorporating a more authoritative tone and highlighting the long-term ROI:<br><br>The adoption of this architecture fundamentally derisks our Q3 timeline while offering an estimated 40% reduction in cloud compute over the next fiscal year...</p></div></div>`
   },
   {
     id: 'tab-analyze',
     label: 'Analyze',
     contentTitle: 'Extract insights instantly.',
-    contentText: 'Upload PDFs, spreadsheets, or long-form research. Claude parses complex information so you can reach conclusions faster.'
+    contentText: 'Upload PDFs, spreadsheets, or long-form research. Claude parses complex information so you can reach conclusions faster.',
+    visualHtml: `<div class="tab-demo"><div class="type-demo-shell"><p class="type-demo-text">Based on the uploaded Q2 Financial Report, here are the key takeaways:<br><br>1. Revenue increased by 14.2% YoY, heavily driven by digital channels.<br>2. Operating margins compressed slightly due to one-time R&D expenditures.<br>3. The debt-to-equity ratio remains highly favorable for upcoming acquisitions.</p></div></div>`
   }
 ];
 ---
@@ -73,31 +86,7 @@ const tabsData = [
     <!-- Tabs Showcase Section -->
     <section class="tabs-section container claude-section">
       <h2>Capabilities</h2>
-      <TabsShowcase tabs={tabsData}>
-        <!-- Content for Tab 1 -->
-        <div slot="tab-code" class="tab-demo">
-          <TypewriterDemo 
-            text="function optimizeSearch(array, target) {\n  let left = 0;\n  let right = array.length - 1;\n  while (left <= right) {\n    const mid = Math.floor((left + right) / 2);\n    if (array[mid] === target) return mid;\n    if (array[mid] < target) left = mid + 1;\n    else right = mid - 1;\n  }\n  return -1;\n}" 
-            speed={20}
-          />
-        </div>
-        
-        <!-- Content for Tab 2 -->
-        <div slot="tab-write" class="tab-demo">
-          <TypewriterDemo 
-            text="Here is a revised draft of your project proposal, incorporating a more authoritative tone and highlighting the long-term ROI:\n\nThe adoption of this architecture fundamentally derisks our Q3 timeline while offering an estimated 40% reduction in cloud compute over the next fiscal year..." 
-            speed={35}
-          />
-        </div>
-        
-        <!-- Content for Tab 3 -->
-        <div slot="tab-analyze" class="tab-demo">
-          <TypewriterDemo 
-            text="Based on the uploaded Q2 Financial Report, here are the key takeaways:\n\n1. Revenue increased by 14.2% YoY, heavily driven by digital channels.\n2. Operating margins compressed slightly due to one-time R&D expenditures.\n3. The debt-to-equity ratio remains highly favorable for upcoming acquisitions." 
-            speed={30}
-          />
-        </div>
-      </TabsShowcase>
+      <TabsShowcase tabs={tabsData} />
     </section>
 
     <!-- Stacked Cards Section -->
@@ -164,5 +153,25 @@ const tabsData = [
     width: 100%;
     height: 100%;
     min-height: 250px;
+  }
+
+  .type-demo-shell {
+    width: 100%;
+    min-height: 250px;
+    padding: 1.25rem;
+    border-radius: var(--radius-xl);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-secondary);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+  }
+
+  .type-demo-code,
+  .type-demo-text {
+    margin: 0;
+    white-space: pre-wrap;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
   }
 </style>

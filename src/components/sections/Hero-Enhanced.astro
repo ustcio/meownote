@@ -1,4 +1,5 @@
 ---
+import AbstractThread from '@components/ui/AbstractThread.astro';
 import TextReveal from '@components/ui/TextReveal.astro';
 
 const trustLines = [
@@ -32,56 +33,9 @@ const trustLines = [
         <p class="hero__trust">{trustLines[0]}</p>
       </div>
 
-      <!-- right: animated preview -->
+      <!-- right: animated abstract thread visualization -->
       <div class="hero__visual" aria-hidden="true">
-        <div class="hero__preview">
-          <!-- fake chat UI -->
-          <div class="preview__header">
-            <span class="preview__dot preview__dot--red"></span>
-            <span class="preview__dot preview__dot--yellow"></span>
-            <span class="preview__dot preview__dot--green"></span>
-            <span class="preview__title">Maxwell Chat</span>
-          </div>
-          <div class="preview__body">
-            <div class="preview__msg preview__msg--user">
-              <span class="preview__msg-label">You</span>
-              <p>Summarise the key findings from the latest CoNb₃S₆ transport data.</p>
-            </div>
-            <div class="preview__msg preview__msg--ai">
-              <span class="preview__msg-label">Max</span>
-              <p class="preview__typing">
-                <span class="preview__typing-dot" style="--d: 0s"></span>
-                <span class="preview__typing-dot" style="--d: 0.2s"></span>
-                <span class="preview__typing-dot" style="--d: 0.4s"></span>
-              </p>
-              <p class="preview__response">Three key observations stand out:</p>
-              <ul class="preview__response-list">
-                <li>Nonlinear Hall signal emerges below 28 K</li>
-                <li>Magnetoresistance shows CDW signature</li>
-                <li>Anomalous scaling suggests Berry curvature origin</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <!-- floating cards -->
-        <div class="hero__float hero__float--card1">
-          <div class="float-card">
-            <span class="float-card__icon">📝</span>
-            <span class="float-card__text">Draft ready</span>
-          </div>
-        </div>
-        <div class="hero__float hero__float--card2">
-          <div class="float-card">
-            <span class="float-card__icon">🔬</span>
-            <span class="float-card__text">12 papers found</span>
-          </div>
-        </div>
-        <div class="hero__float hero__float--card3">
-          <div class="float-card">
-            <span class="float-card__icon">✨</span>
-            <span class="float-card__text">Summary generated</span>
-          </div>
-        </div>
+        <AbstractThread />
       </div>
     </div>
   </div>

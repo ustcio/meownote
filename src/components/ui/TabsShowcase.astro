@@ -6,6 +6,7 @@ interface TabItem {
   icon?: string;
   contentTitle: string;
   contentText: string;
+  visualHtml?: string;
 }
 
 interface Props {
@@ -40,7 +41,11 @@ const { class: className = '', tabs } = Astro.props;
           <p>{tab.contentText}</p>
         </div>
         <div class="panel-visual">
-          <slot name={tab.id} />
+          {tab.visualHtml ? (
+            <Fragment set:html={tab.visualHtml} />
+          ) : (
+            <div class="panel-visual-placeholder" aria-hidden="true"></div>
+          )}
         </div>
       </div>
     ))}
@@ -128,6 +133,18 @@ const { class: className = '', tabs } = Astro.props;
   .panel-info p {
     font-size: var(--text-base);
     color: var(--text-secondary);
+  }
+
+  .panel-visual {
+    min-height: 250px;
+  }
+
+  .panel-visual-placeholder {
+    width: 100%;
+    min-height: 250px;
+    border-radius: var(--radius-xl);
+    background: linear-gradient(180deg, var(--bg-secondary), var(--bg-tertiary));
+    border: 1px solid var(--border-secondary);
   }
 
   @media (max-width: 768px) {

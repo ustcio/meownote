@@ -1,0 +1,27 @@
+---
+import Layout from '@layouts/Layout.astro';
+import ScrollAnimation from '@components/ui/ScrollAnimation.astro';
+import HeroEnhanced from '@components/sections/Hero-Enhanced.astro';
+import Features from '@components/sections/Features.astro';
+import Activity from '@components/sections/Activity.astro';
+import Research from '@components/sections/Research.astro';
+import ContributionGraph from '@components/sections/ContributionGraph.astro';
+import FAQ from '@components/sections/FAQ.astro';
+import CTA from '@components/sections/CTA.astro';
+---
+
+<Layout
+  title="Maxwell.Science — AI that thinks. You decide."
+  description="Write better, plan faster, research deeper. One place for chat, workspace, research, and a live gold price tracker."
+>
+  <HeroEnhanced />
+  <ScrollAnimation rootMargin="-20px"><Features /></ScrollAnimation>
+  <ScrollAnimation rootMargin="-20px"><Activity /></ScrollAnimation>
+  <ScrollAnimation rootMargin="-20px"><Research /></ScrollAnimation>
+  <ScrollAnimation rootMargin="-20px"><ContributionGraph /></ScrollAnimation>
+  <ScrollAnimation rootMargin="-20px"><FAQ /></ScrollAnimation>
+
+  <div style="text-align: center; margin: 40px 0;">
+    <a href="/overview/" class="claude-button">View Dynamic Showcase (Claude Product Overview clone)</a>
+  </div>
+</Layout>
