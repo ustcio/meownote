@@ -9,13 +9,11 @@ const { redirectTo = '/workspace/login/' } = Astro.props;
 <script is:inline define:vars={{ redirectTo }}>
   (function() {
     const ADMIN_USERNAME = 'YangHao';
-    const ADMIN_EMAIL = 'YangHao@Trading.com';
     const authStore = window.__meownoteAuth;
     const token = authStore?.getToken?.();
     const user = authStore?.getUser?.();
     const username = user?.username || user?.name || '';
-    const email = user?.email || '';
-    const isAllowed = Boolean(token) && (username === ADMIN_USERNAME || email === ADMIN_EMAIL);
+    const isAllowed = Boolean(token) && username === ADMIN_USERNAME;
 
     if (!isAllowed) {
       const current = window.location.pathname + window.location.search;

