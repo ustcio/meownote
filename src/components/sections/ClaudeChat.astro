@@ -312,6 +312,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     flex-direction: column;
     min-width: 0;
     position: relative;
+    overflow: visible;
   }
 
   /* 顶部导航栏 - padding 与 sidebar-header 对齐 */
@@ -325,6 +326,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     z-index: 10;
     height: 74px;
     box-sizing: border-box;
+    overflow: visible;
   }
 
   .sidebar-header {
@@ -353,6 +355,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
   .model-selector {
     position: relative;
+    z-index: 220;
   }
 
   .model-btn {
@@ -376,18 +379,23 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   }
 
   .model-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: none;
     background: var(--bg-primary);
     border: 1px solid var(--border-primary);
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     padding: 8px;
+    width: max-content;
     min-width: 220px;
+    max-width: min(320px, calc(100vw - 24px));
+    max-height: min(420px, calc(100vh - 24px));
+    overflow-y: auto;
+    overflow-x: hidden;
     display: none;
-    z-index: 200;
+    z-index: 1000;
   }
 
   .model-dropdown.show {
@@ -399,6 +407,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    gap: 12px;
     padding: 10px 12px;
     background: none;
     border: none;
@@ -421,9 +430,11 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
   .model-option-name {
     flex: 1;
+    min-width: 0;
   }
 
   .model-option-badge {
+    flex-shrink: 0;
     font-size: var(--text-xs);
     padding: 2px 6px;
     background: var(--bg-tertiary);
@@ -1266,6 +1277,11 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
       padding: 4px 8px;
     }
 
+    .model-dropdown {
+      min-width: 200px;
+      max-width: calc(100vw - 16px);
+    }
+
     .input-actions {
       gap: 6px;
     }
@@ -1368,9 +1384,41 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   });
 
   // 模型选择
+  function positionModelDropdown() {
+    if (!elements.modelDropdown || !elements.modelBtn) return;
+
+    const dropdown = elements.modelDropdown;
+    const buttonRect = elements.modelBtn.getBoundingClientRect();
+    const margin = 12;
+
+    const dropdownRect = dropdown.getBoundingClientRect();
+    const dropdownWidth = dropdownRect.width || Math.min(320, window.innerWidth - margin * 2);
+    const dropdownHeight = dropdownRect.height || 160;
+
+    let left = buttonRect.left + (buttonRect.width / 2) - (dropdownWidth / 2);
+    left = Math.max(margin, Math.min(left, window.innerWidth - dropdownWidth - margin));
+
+    const spaceBelow = window.innerHeight - buttonRect.bottom - margin;
+    const spaceAbove = buttonRect.top - margin;
+    const openUpward = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+
+    let top = openUpward
+      ? buttonRect.top - dropdownHeight - 8
+      : buttonRect.bottom + 8;
+
+    top = Math.max(margin, Math.min(top, window.innerHeight - dropdownHeight - margin));
+
+    dropdown.style.left = `${left}px`;
+    dropdown.style.top = `${top}px`;
+  }
+
   elements.modelBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
+    const isOpening = !elements.modelDropdown?.classList.contains('show');
     elements.modelDropdown?.classList.toggle('show');
+    if (isOpening) {
+      requestAnimationFrame(positionModelDropdown);
+    }
   });
 
   document.querySelectorAll('.model-option').forEach(option => {
@@ -1390,6 +1438,18 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   document.addEventListener('click', () => {
     elements.modelDropdown?.classList.remove('show');
   });
+
+  window.addEventListener('resize', () => {
+    if (elements.modelDropdown?.classList.contains('show')) {
+      positionModelDropdown();
+    }
+  });
+
+  window.addEventListener('scroll', () => {
+    if (elements.modelDropdown?.classList.contains('show')) {
+      positionModelDropdown();
+    }
+  }, true);
 
   // 输入框自动调整高度
   elements.messageInput?.addEventListener('input', function() {
