@@ -1,0 +1,1047 @@
+---
+const title = 'The AI for Problem Solvers | Claude by Anthropic';
+const desc = 'Meet your thinking partner. Tackle any big, bold, bewildering challenge with Claude.';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content={desc} />
+  <link rel="icon" type="image/png" href="/claude-favicon.png" />
+  
+  <style>
+    /* ===== DESIGN TOKENS ===== */
+    :root {
+      /* Colors */
+      --color-dark: #141413;
+      --color-light: #faf9f5;
+      --color-mid-gray: #b0aea5;
+      --color-light-gray: #e8e6dc;
+      --color-warm-gray: #f0eee6;
+      --color-medium-gray: #87867f;
+      --color-dark-accent: #3d3d3a;
+      --color-off-white: #a1a0a0;
+      --color-orange: #d97757;
+      --color-warm-beige: #e3dacc;
+      --color-white: #ffffff;
+      
+      /* Typography */
+      --font-primary: "Anthropic Sans", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      
+      /* Spacing (8px grid) */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+      --space-3xl: 64px;
+      --space-4xl: 96px;
+      
+      /* Border Radius */
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --radius-full: 9999px;
+      
+      /* Shadows */
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.05);
+      --shadow-hover: 0 8px 32px rgba(0,0,0,0.08);
+      --shadow-dropdown: 0 4px 16px rgba(0,0,0,0.1);
+      
+      /* Layout */
+      --max-width: 1200px;
+      --navbar-height: 64px;
+    }
+    
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      font-family: var(--font-primary);
+      background: var(--color-light);
+      color: var(--color-dark);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+    
+    ul, ol {
+      list-style: none;
+    }
+    
+    img {
+      max-width: 100%;
+      display: block;
+    }
+    
+    /* ===== NAVIGATION ===== */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(250, 249, 245, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-light-gray);
+      height: var(--navbar-height);
+    }
+    
+    .navbar-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 var(--space-lg);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xl);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo svg {
+      height: 24px;
+      width: auto;
+    }
+    
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+    
+    .nav-item {
+      position: relative;
+    }
+    
+    .nav-link {
+      padding: var(--space-sm) var(--space-md);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-dark);
+      border-radius: var(--radius-md);
+      transition: background 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .nav-link:hover {
+      background: var(--color-warm-gray);
+    }
+    
+    .nav-link svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0.6;
+    }
+    
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    
+    .nav-cta-secondary {
+      padding: var(--space-sm) var(--space-md);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-dark);
+      border-radius: var(--radius-full);
+      transition: background 0.15s ease;
+    }
+    
+    .nav-cta-secondary:hover {
+      background: var(--color-warm-gray);
+    }
+    
+    .nav-cta-primary {
+      padding: var(--space-sm) var(--space-lg);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-light);
+      background: var(--color-dark);
+      border-radius: var(--radius-full);
+      transition: all 0.15s ease;
+    }
+    
+    .nav-cta-primary:hover {
+      background: var(--color-dark-accent);
+      transform: scale(1.02);
+    }
+    
+    /* ===== HERO SECTION ===== */
+    .hero {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: var(--space-4xl) var(--space-lg) var(--space-3xl);
+      text-align: center;
+    }
+    
+    .hero h1 {
+      font-size: clamp(40px, 6vw, 72px);
+      font-weight: 400;
+      line-height: 1.1;
+      color: var(--color-dark);
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-md);
+    }
+    
+    .hero-subtitle {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--color-medium-gray);
+      max-width: 600px;
+      margin: 0 auto var(--space-xl);
+    }
+    
+    /* Prompt Input */
+    .prompt-container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    .prompt-input {
+      background: var(--color-white);
+      border: 1px solid var(--color-light-gray);
+      border-radius: var(--radius-xl);
+      padding: var(--space-md) var(--space-lg);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      transition: all 0.2s ease;
+    }
+    
+    .prompt-input:focus-within {
+      border-color: var(--color-mid-gray);
+      box-shadow: var(--shadow-hover);
+    }
+    
+    .prompt-input input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      font-family: var(--font-primary);
+      color: var(--color-dark);
+      background: transparent;
+    }
+    
+    .prompt-input input::placeholder {
+      color: var(--color-off-white);
+    }
+    
+    .prompt-submit {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-dark);
+      border-radius: var(--radius-md);
+      color: var(--color-light);
+      transition: all 0.15s ease;
+    }
+    
+    .prompt-submit:hover {
+      background: var(--color-dark-accent);
+      transform: scale(1.05);
+    }
+    
+    .prompt-submit svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    /* Action Chips */
+    .action-chips {
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: center;
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+    
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--color-warm-gray);
+      border-radius: var(--radius-full);
+      font-size: 14px;
+      color: var(--color-dark);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+    }
+    
+    .chip:hover {
+      background: var(--color-light-gray);
+      border-color: var(--color-mid-gray);
+    }
+    
+    .chip-icon {
+      width: 16px;
+      height: 16px;
+      opacity: 0.7;
+    }
+    
+    /* ===== NEWS TICKER ===== */
+    .news-ticker {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: var(--space-md) var(--space-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .news-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-medium-gray);
+    }
+    
+    .news-cards {
+      display: flex;
+      gap: var(--space-md);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      flex: 1;
+      margin-left: var(--space-lg);
+    }
+    
+    .news-cards::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .news-card {
+      flex-shrink: 0;
+      scroll-snap-align: start;
+      padding: var(--space-sm) var(--space-lg);
+      background: var(--color-warm-gray);
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      color: var(--color-dark);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    
+    .news-card:hover {
+      background: var(--color-light-gray);
+    }
+    
+    .news-next-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-warm-gray);
+      border-radius: var(--radius-md);
+      margin-left: var(--space-md);
+      transition: all 0.15s ease;
+    }
+    
+    .news-next-btn:hover {
+      background: var(--color-light-gray);
+    }
+    
+    .news-next-btn svg {
+      width: 16px;
+      height: 16px;
+      color: var(--color-dark);
+    }
+    
+    /* ===== FEATURE SECTIONS ===== */
+    .feature-section {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: var(--space-3xl) var(--space-lg);
+    }
+    
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-lg);
+    }
+    
+    .feature-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-light-gray);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    
+    .feature-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+    
+    .feature-card-image {
+      width: 100%;
+      aspect-ratio: 16/10;
+      background: linear-gradient(135deg, var(--color-warm-gray) 0%, var(--color-light-gray) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .feature-card-image-placeholder {
+      width: 60%;
+      height: 60%;
+      background: var(--color-light);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      opacity: 0.3;
+    }
+    
+    .feature-card-content {
+      padding: var(--space-lg);
+    }
+    
+    .feature-card h3 {
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: var(--space-sm);
+      color: var(--color-dark);
+      line-height: 1.3;
+    }
+    
+    .feature-card p {
+      font-size: 14px;
+      color: var(--color-medium-gray);
+      line-height: 1.6;
+    }
+    
+    /* ===== STICKY SECTION ===== */
+    .sticky-section {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: var(--space-3xl) var(--space-lg);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-2xl);
+      align-items: start;
+    }
+    
+    .sticky-image-wrap {
+      position: sticky;
+      top: calc(var(--navbar-height) + var(--space-lg));
+    }
+    
+    .sticky-image {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: linear-gradient(135deg, var(--color-warm-gray) 0%, var(--color-warm-beige) 100%);
+      border-radius: var(--radius-xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .sticky-image-placeholder {
+      font-size: 64px;
+      opacity: 0.2;
+    }
+    
+    .sticky-content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2xl);
+    }
+    
+    .sticky-block h2 {
+      font-size: clamp(24px, 3vw, 32px);
+      font-weight: 500;
+      margin-bottom: var(--space-md);
+      color: var(--color-dark);
+      line-height: 1.2;
+    }
+    
+    .sticky-block p {
+      font-size: 16px;
+      color: var(--color-medium-gray);
+      line-height: 1.7;
+      margin-bottom: var(--space-md);
+    }
+    
+    /* ===== CTA BANNER ===== */
+    .cta-banner {
+      max-width: var(--max-width);
+      margin: var(--space-2xl) auto;
+      padding: 0 var(--space-lg);
+    }
+    
+    .cta-banner-inner {
+      background: var(--color-warm-gray);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl) var(--space-2xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-xl);
+    }
+    
+    .cta-banner-content h2 {
+      font-size: clamp(20px, 2.5vw, 28px);
+      font-weight: 500;
+      color: var(--color-dark);
+      margin-bottom: var(--space-sm);
+      line-height: 1.3;
+    }
+    
+    .cta-banner-content p {
+      font-size: 16px;
+      color: var(--color-medium-gray);
+    }
+    
+    .cta-link {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      color: var(--color-orange);
+      font-size: 16px;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    
+    .cta-link:hover {
+      gap: var(--space-sm);
+    }
+    
+    .cta-link svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.15s ease;
+    }
+    
+    .cta-link:hover svg {
+      transform: translateX(2px);
+    }
+    
+    /* ===== FOOTER ===== */
+    .footer {
+      background: var(--color-light);
+      border-top: 1px solid var(--color-light-gray);
+      padding: var(--space-3xl) var(--space-lg) var(--space-lg);
+      margin-top: var(--space-3xl);
+    }
+    
+    .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+    
+    .footer-prompt {
+      max-width: 700px;
+      margin: 0 auto var(--space-3xl);
+    }
+    
+    .footer-prompt .prompt-input {
+      margin-bottom: var(--space-md);
+    }
+    
+    .footer-chips {
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-xl);
+      margin-bottom: var(--space-2xl);
+    }
+    
+    .footer-column h4 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-medium-gray);
+      margin-bottom: var(--space-md);
+    }
+    
+    .footer-column a {
+      display: block;
+      color: var(--color-dark);
+      font-size: 14px;
+      padding: var(--space-xs) 0;
+      transition: color 0.15s ease;
+    }
+    
+    .footer-column a:hover {
+      color: var(--color-orange);
+    }
+    
+    .footer-bottom {
+      padding-top: var(--space-lg);
+      border-top: 1px solid var(--color-light-gray);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    
+    .footer-logo svg {
+      height: 20px;
+      width: auto;
+      opacity: 0.6;
+    }
+    
+    .footer-copyright {
+      font-size: 12px;
+      color: var(--color-medium-gray);
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .footer-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      :root {
+        --navbar-height: 56px;
+      }
+      
+      .nav-menu {
+        display: none;
+      }
+      
+      .hero {
+        padding: var(--space-2xl) var(--space-md) var(--space-xl);
+      }
+      
+      .hero h1 {
+        font-size: 32px;
+      }
+      
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .sticky-section {
+        grid-template-columns: 1fr;
+      }
+      
+      .sticky-image-wrap {
+        position: relative;
+        top: 0;
+      }
+      
+      .cta-banner-inner {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .footer-bottom {
+        flex-direction: column;
+        gap: var(--space-md);
+        text-align: center;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .action-chips {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .chip {
+        width: 100%;
+        max-width: 200px;
+        justify-content: center;
+      }
+      
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .animate-in {
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    .animate-delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .animate-delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .animate-delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .animate-delay-4 { animation-delay: 0.4s; opacity: 0; }
+  </style>
+</head>
+<body>
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-left">
+        <a href="/" class="logo">
+          <svg viewBox="0 0 120 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 0C6.716 0 0 6.716 0 15s6.716 15 15 15c2.97 0 5.737-.866 8.07-2.352L15 15l8.07-12.648A14.93 14.93 0 0015 0z" fill="#141413"/>
+            <text x="32" y="22" font-family="Anthropic Sans, -apple-system, sans-serif" font-size="18" font-weight="500" fill="#141413">Claude</text>
+          </svg>
+        </a>
+        
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              Products
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              Platform
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              Solutions
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              Pricing
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              Resources
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="navbar-right">
+        <a href="#" class="nav-cta-secondary">Log in</a>
+        <a href="#" class="nav-cta-primary">Try Claude</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero">
+    <h1 class="animate-in">Meet your<br/>thinking partner</h1>
+    <p class="hero-subtitle animate-in animate-delay-1">Tackle any big, bold, bewildering challenge with Claude.</p>
+    
+    <div class="prompt-container animate-in animate-delay-2">
+      <div class="prompt-input">
+        <input type="text" placeholder="How can I help you today?" />
+        <button class="prompt-submit" aria-label="Submit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="action-chips">
+        <button class="chip">
+          <svg class="chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+          Write
+        </button>
+        <button class="chip">
+          <svg class="chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          Learn
+        </button>
+        <button class="chip">
+          <svg class="chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          Code
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== NEWS TICKER ===== -->
+  <section class="news-ticker">
+    <span class="news-label">Latest news</span>
+    <div class="news-cards">
+      <a href="#" class="news-card">Introducing Claude 4.1</a>
+      <a href="#" class="news-card">Claude Code is now generally available</a>
+      <a href="#" class="news-card">New: Claude for Enterprise</a>
+      <a href="#" class="news-card">Building with Claude: Best practices</a>
+    </div>
+    <button class="news-next-btn" aria-label="Next">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+  </section>
+
+  <!-- ===== FEATURE CARDS ===== -->
+  <section class="feature-section">
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-card-image">
+          <div class="feature-card-image-placeholder">💬</div>
+        </div>
+        <div class="feature-card-content">
+          <h3>Chat with Claude</h3>
+          <p>Get help with writing, analysis, coding, math, and more. Claude is ready to tackle any challenge.</p>
+        </div>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-card-image">
+          <div class="feature-card-image-placeholder">🎨</div>
+        </div>
+        <div class="feature-card-content">
+          <h3>Create with Claude</h3>
+          <p>Generate images, write code, draft emails, and brainstorm ideas. Claude helps you create faster.</p>
+        </div>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-card-image">
+          <div class="feature-card-image-placeholder">📊</div>
+        </div>
+        <div class="feature-card-content">
+          <h3>Analyze with Claude</h3>
+          <p>Upload documents, charts, and data. Claude can analyze, summarize, and extract key insights.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== STICKY SECTION ===== -->
+  <section class="sticky-section">
+    <div class="sticky-image-wrap">
+      <div class="sticky-image">
+        <div class="sticky-image-placeholder">🚀</div>
+      </div>
+    </div>
+    
+    <div class="sticky-content">
+      <div class="sticky-block">
+        <h2>Built for deep work</h2>
+        <p>Claude excels at tasks that require reasoning, analysis, and nuanced understanding. From complex coding problems to strategic planning, Claude helps you think through challenges.</p>
+      </div>
+      
+      <div class="sticky-block">
+        <h2>Context that matters</h2>
+        <p>With a 200K token context window, Claude can process hundreds of pages of information. Upload entire documents, codebases, or research papers and get meaningful insights.</p>
+      </div>
+      
+      <div class="sticky-block">
+        <h2>Safe and reliable</h2>
+        <p>Built with constitutional AI, Claude is designed to be helpful, honest, and harmless. Get reliable results you can trust for important decisions.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA BANNER ===== -->
+  <section class="cta-banner">
+    <div class="cta-banner-inner">
+      <div class="cta-banner-content">
+        <h2>Make the switch to Claude without starting over</h2>
+        <p>Import memory from another AI provider to bring your preferences and context to Claude.</p>
+      </div>
+      <a href="#" class="cta-link">
+        Learn more
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <!-- Footer Prompt -->
+      <div class="footer-prompt">
+        <div class="prompt-input">
+          <input type="text" placeholder="How can I help you today?" />
+          <button class="prompt-submit" aria-label="Submit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="footer-chips">
+          <button class="chip">
+            <svg class="chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+            Write
+          </button>
+          <button class="chip">
+            <svg class="chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            Learn
+          </button>
+          <button class="chip">
+            <svg class="chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="16 18 22 12 16 6"></polyline>
+              <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+            Code
+          </button>
+        </div>
+      </div>
+      
+      <!-- Footer Links -->
+      <div class="footer-grid">
+        <div class="footer-column">
+          <h4>Products</h4>
+          <a href="#">Claude</a>
+          <a href="#">Claude Code</a>
+          <a href="#">Claude Code for Enterprise</a>
+          <a href="#">Claude Cowork</a>
+          <a href="#">Pro plan</a>
+          <a href="#">Max plan</a>
+          <a href="#">Team plan</a>
+          <a href="#">Enterprise plan</a>
+          <a href="#">Download app</a>
+          <a href="#">Pricing</a>
+          <a href="#">Log in</a>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Features</h4>
+          <a href="#">Claude Code Security</a>
+          <a href="#">Claude for Chrome</a>
+          <a href="#">Claude for Slack</a>
+          <a href="#">Claude for Excel</a>
+          <a href="#">Claude for PowerPoint</a>
+          <a href="#">Claude for Word</a>
+          <a href="#">Skills</a>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Models</h4>
+          <a href="#">Opus</a>
+          <a href="#">Sonnet</a>
+          <a href="#">Haiku</a>
+          
+          <h4 style="margin-top: var(--space-lg);">Platform</h4>
+          <a href="#">API Overview</a>
+          <a href="#">Developer docs</a>
+          <a href="#">Pricing</a>
+          <a href="#">Console login</a>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Solutions</h4>
+          <a href="#">AI agents</a>
+          <a href="#">Coding</a>
+          <a href="#">Security</a>
+          <a href="#">Customer support</a>
+          <a href="#">Education</a>
+          <a href="#">Financial services</a>
+          <a href="#">Government</a>
+          <a href="#">Healthcare</a>
+          
+          <h4 style="margin-top: var(--space-lg);">Resources</h4>
+          <a href="#">Blog</a>
+          <a href="#">Customer stories</a>
+          <a href="#">Anthropic news</a>
+          <a href="#">Community</a>
+        </div>
+      </div>
+      
+      <!-- Footer Bottom -->
+      <div class="footer-bottom">
+        <div class="footer-logo">
+          <svg viewBox="0 0 120 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 0C6.716 0 0 6.716 0 15s6.716 15 15 15c2.97 0 5.737-.866 8.07-2.352L15 15l8.07-12.648A14.93 14.93 0 0015 0z" fill="#141413"/>
+            <text x="32" y="22" font-family="Anthropic Sans, -apple-system, sans-serif" font-size="18" font-weight="500" fill="#141413">Anthropic</text>
+          </svg>
+        </div>
+        <p class="footer-copyright">© 2026 Anthropic PBC</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
