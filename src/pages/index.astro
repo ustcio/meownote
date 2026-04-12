@@ -199,19 +199,20 @@ const workflows = [
 
   .split-layout {
     display: grid;
-    gap: 3rem;
+    gap: 2rem;
     align-items: center;
   }
 
   @media (min-width: 900px) {
     .split-layout {
       grid-template-columns: 1fr 1fr;
-      gap: 4rem;
+      gap: 3rem;
     }
   }
 
   .split-text {
-    max-width: 500px;
+    display: flex;
+    flex-direction: column;
   }
 
   .split-visual {
