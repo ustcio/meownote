@@ -968,6 +968,16 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     outline: none;
   }
 
+  .message-input:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .message-input:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
   .input-actions {
     display: flex;
     align-items: center;
