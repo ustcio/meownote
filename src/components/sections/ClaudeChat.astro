@@ -362,7 +362,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     background: none;
     border: 1px solid transparent;
     border-radius: 12px;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     color: var(--text-primary);
     cursor: pointer;
@@ -630,8 +630,8 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     max-width: 100%;
     padding: 0;
     border-radius: 0;
-    font-size: 15px;
-    line-height: 1.72;
+    font-size: 14px;
+    line-height: 1.68;
     word-wrap: break-word;
     transition: color 0.2s ease;
   }
@@ -639,7 +639,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   .message-user .message-bubble {
     width: fit-content;
     max-width: 100%;
-    padding: 16px 21px;
+    padding: 13px 18px;
     color: #201915;
     font-weight: 400;
     background: rgba(243, 239, 232, 0.82);
@@ -658,18 +658,18 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
   .message-assistant .message-bubble .message-content {
     max-width: 70ch;
-    font-size: 17px;
-    line-height: 1.72;
+    font-size: 15px;
+    line-height: 1.66;
     color: #171412;
   }
 
   .message-user .message-bubble .message-content {
-    font-size: 16px;
-    line-height: 1.55;
+    font-size: 14.5px;
+    line-height: 1.5;
   }
 
   .message-bubble .message-content p {
-    margin-bottom: 10px;
+    margin-bottom: 9px;
   }
 
   .message-bubble .message-content p:last-child {
@@ -678,7 +678,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
   .message-bubble .message-content ul,
   .message-bubble .message-content ol {
-    margin: 12px 0 12px 1.25rem;
+    margin: 10px 0 10px 1.15rem;
     padding: 0;
   }
 
@@ -718,15 +718,15 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   }
 
   .message-bubble .message-content h1 {
-    font-size: 1.45rem;
+    font-size: 1.28rem;
   }
 
   .message-bubble .message-content h2 {
-    font-size: 1.2rem;
+    font-size: 1.08rem;
   }
 
   .message-bubble .message-content h3 {
-    font-size: 1.05rem;
+    font-size: 1rem;
   }
 
   .message-bubble .message-content blockquote {
@@ -747,7 +747,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     padding: 2px 7px;
     border-radius: 6px;
     font-family: var(--font-mono);
-    font-size: 13.5px;
+    font-size: 12.5px;
   }
 
   .message-user .message-bubble .message-content code {
@@ -756,8 +756,8 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
   .message-bubble .message-content pre {
     background: rgba(247, 243, 236, 0.95);
-    padding: 15px 16px;
-    border-radius: 16px;
+    padding: 13px 14px;
+    border-radius: 14px;
     overflow-x: auto;
     margin: 12px 0;
     border: 1px solid rgba(71, 57, 44, 0.08);
@@ -775,8 +775,8 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   .message-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 9px;
+    margin-bottom: 10px;
     padding: 0 2px;
   }
 
@@ -785,9 +785,9 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   }
 
   .message-avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 11px;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -808,7 +808,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   }
 
   .message-role {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 600;
     color: #171412;
     font-family: var(--font-body);
@@ -826,7 +826,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   }
 
   .message-time {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-tertiary);
     letter-spacing: 0.01em;
   }
@@ -842,7 +842,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.18s ease;
-    margin-top: 14px;
+    margin-top: 10px;
   }
 
   .message:hover .message-toolbar,
@@ -912,31 +912,31 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
      输入区域 - Claude 风格
      ============================================ */
   .input-area {
-    padding: 18px 24px 22px;
+    padding: 14px 24px 16px;
     background: linear-gradient(180deg, rgba(247, 244, 238, 0) 0%, rgba(247, 244, 238, 0.94) 32%, rgba(247, 244, 238, 1) 100%);
   }
 
   .input-container {
-    max-width: 980px;
+    max-width: 920px;
     margin: 0 auto;
   }
 
   .input-wrapper {
     display: flex;
-    align-items: stretch;
-    gap: 12px;
-    min-height: 112px;
-    padding: 20px 22px 18px;
+    align-items: flex-end;
+    gap: 10px;
+    min-height: 76px;
+    padding: 14px 16px;
     background: rgba(255, 253, 249, 0.96);
     border: 1px solid rgba(71, 57, 44, 0.14);
-    border-radius: 28px;
+    border-radius: 24px;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
-    box-shadow: 0 10px 26px rgba(27, 20, 16, 0.04);
+    box-shadow: 0 8px 20px rgba(27, 20, 16, 0.035);
   }
 
   .input-wrapper:focus-within {
-    border-color: rgba(23, 20, 18, 0.22);
-    box-shadow: 0 0 0 4px rgba(23, 20, 18, 0.035), 0 16px 32px rgba(27, 20, 16, 0.06);
+    border-color: rgba(71, 57, 44, 0.18);
+    box-shadow: 0 0 0 3px rgba(23, 20, 18, 0.025), 0 12px 24px rgba(27, 20, 16, 0.045);
     background: #fffdf9;
   }
 
@@ -944,24 +944,28 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     flex: 1;
     border: none;
     outline: none;
-    font-size: 17px;
-    line-height: 1.6;
+    font-size: 15px;
+    line-height: 1.5;
     color: var(--text-primary);
     resize: none;
-    max-height: 200px;
+    max-height: 180px;
     font-family: var(--font-body);
     background: transparent;
-    padding: 6px 0 0;
+    padding: 4px 0 2px;
   }
 
   .message-input::placeholder {
     color: var(--text-quaternary);
   }
 
+  .message-input:focus-visible {
+    outline: none;
+  }
+
   .input-actions {
     display: flex;
     align-items: flex-end;
-    gap: 8px;
+    gap: 6px;
     flex-shrink: 0;
     padding-bottom: 2px;
   }
@@ -970,14 +974,14 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     padding: 0;
     background: transparent;
     border: 1px solid rgba(71, 57, 44, 0.08);
     color: var(--text-tertiary);
     cursor: pointer;
-    border-radius: 14px;
+    border-radius: 13px;
     transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
   }
 
@@ -991,10 +995,10 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border: none;
-    border-radius: 14px;
+    border-radius: 13px;
     background: #171412;
     color: #fffdf9;
     cursor: pointer;
@@ -1014,12 +1018,12 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 60px;
-    height: 60px;
+    width: 48px;
+    height: 48px;
     padding: 0;
     background: #171412;
     border: none;
-    border-radius: 20px;
+    border-radius: 16px;
     color: #FFFFFF;
     cursor: pointer;
     transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.2s ease;
@@ -1046,7 +1050,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   }
 
   .input-footer {
-    margin-top: 12px;
+    margin-top: 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1055,7 +1059,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
   .input-status,
   .input-hint {
-    font-size: var(--text-xs);
+    font-size: 12px;
     color: var(--text-tertiary);
     font-family: var(--font-body);
     line-height: 1.45;
@@ -1077,7 +1081,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   }
 
   .claude-chat-page.is-welcome .input-container {
-    max-width: 910px;
+    max-width: 860px;
   }
 
   .claude-chat-page.is-welcome .input-footer {
@@ -1142,7 +1146,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     }
 
     .welcome-title {
-      font-size: 42px;
+      font-size: 36px;
     }
 
     .welcome-desc {
@@ -1162,12 +1166,12 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     }
 
     .message-assistant .message-bubble .message-content {
-      font-size: 14.5px;
-      line-height: 1.72;
+      font-size: 14px;
+      line-height: 1.62;
     }
 
     .input-area {
-      padding: 12px 16px 18px;
+      padding: 12px 16px 16px;
     }
 
     .input-footer {
@@ -1176,14 +1180,14 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     }
 
     .input-wrapper {
-      min-height: 92px;
-      padding: 16px 16px 14px;
-      border-radius: 24px;
+      min-height: 72px;
+      padding: 12px 13px;
+      border-radius: 22px;
     }
 
     .send-btn {
-      width: 52px;
-      height: 52px;
+      width: 46px;
+      height: 46px;
       border-radius: 16px;
     }
   }
@@ -1200,6 +1204,10 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
     .input-actions {
       gap: 6px;
+    }
+
+    .message-user .message-bubble {
+      padding: 12px 16px;
     }
   }
 </style>
