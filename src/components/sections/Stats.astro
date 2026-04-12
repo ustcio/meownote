@@ -145,23 +145,11 @@ const lang = getLangFromUrl(Astro.url);
   const API_BASE = 'https://api.ustc.dev';
   const REFRESH_INTERVAL = 60000;
   
-  async function recordVisit() {
-    try {
-      await fetch(`${API_BASE}/stats/visit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ page: window.location.pathname })
-      });
-    } catch (error) {
-      // Silent fail
-    }
-  }
-  
   async function fetchStats() {
     try {
-      await recordVisit();
-      
-      const response = await fetch(`${API_BASE}/stats/visitor`);
+      const response = await fetch(`${API_BASE}/stats/visitor?ts=${Date.now()}`, {
+        cache: 'no-store'
+      });
       const result = await response.json();
       
       if (result.success) {

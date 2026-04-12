@@ -987,17 +987,21 @@ async function getStatsResponse(env) {
 async function handleHeatmap(request, env, ctx) {
   try {
     const url = new URL(request.url);
-    const year = parseInt(url.searchParams.get('year')) || new Date().getFullYear();
+    const requestedYear = parseInt(url.searchParams.get('year'), 10);
+    const year = Number.isFinite(requestedYear) ? requestedYear : new Date().getFullYear();
+    const yearStart = `${year}-01-01`;
+    const nextYearStart = `${year + 1}-01-01`;
 
     const result = await env.DB.prepare(`
       SELECT 
         date(created_at) as date,
         COUNT(*) as count
       FROM page_views
-      WHERE created_at >= datetime('now', '-1 year')
+      WHERE date(created_at) >= date(?)
+        AND date(created_at) < date(?)
       GROUP BY date(created_at)
       ORDER BY date
-    `).all();
+    `).bind(yearStart, nextYearStart).all();
 
     const heatmapData = {};
     (result.results || []).forEach(row => {

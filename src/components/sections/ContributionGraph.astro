@@ -385,21 +385,36 @@ const totalWeeks = Math.ceil(totalDays / 7);
   async function fetchHeatmapData() {
     try {
       const graph = document.getElementById('contribution-graph');
-      const year = graph?.getAttribute('data-year') || new Date().getFullYear();
-      
-      const response = await fetch(`${API_BASE}/stats/heatmap?year=${year}`);
-      
-      if (!response.ok) return;
-      
-      const result = await response.json();
-      
-      let heatmapData: Record<string, number> = {};
-      
-      if (result.data && typeof result.data === 'object') {
-        heatmapData = result.data;
-      } else if (typeof result === 'object' && Object.keys(result).length > 0) {
-        heatmapData = result;
-      }
+      const year = Number(graph?.getAttribute('data-year') || new Date().getFullYear());
+      const yearsToFetch = [year - 1, year];
+
+      const results = await Promise.all(
+        yearsToFetch.map(async (targetYear) => {
+          const response = await fetch(`${API_BASE}/stats/heatmap?year=${targetYear}&ts=${Date.now()}`, {
+            cache: 'no-store',
+          });
+
+          if (!response.ok) return null;
+          return response.json();
+        })
+      );
+
+      const heatmapData: Record<string, number> = {};
+
+      results.forEach((result) => {
+        if (!result || typeof result !== 'object') return;
+
+        const source =
+          result.data && typeof result.data === 'object'
+            ? result.data
+            : result;
+
+        Object.entries(source).forEach(([date, count]) => {
+          if (typeof count === 'number') {
+            heatmapData[date] = Math.max(heatmapData[date] || 0, count);
+          }
+        });
+      });
       
       if (Object.keys(heatmapData).length > 0) {
         updateHeatmap(heatmapData, 'visits');

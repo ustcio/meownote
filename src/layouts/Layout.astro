@@ -17,6 +17,7 @@ const {
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const apiBase = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 ---
 
 <!DOCTYPE html>
@@ -61,6 +62,27 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         document.addEventListener('mouseover', (e) => { if (e.target.closest(hovers)) cursor.classList.add('is-hovering'); });
         document.addEventListener('mouseout', (e) => { if (e.target.closest(hovers)) cursor.classList.remove('is-hovering'); });
       }
+    </script>
+
+    <script is:inline define:vars={{ apiBase }}>
+      (function() {
+        const API_BASE = apiBase;
+        const pathname = window.location.pathname;
+        const trackKey = `meownote_visit:${pathname}:${new Date().toISOString().slice(0, 16)}`;
+
+        if (sessionStorage.getItem(trackKey)) return;
+        sessionStorage.setItem(trackKey, '1');
+
+        window.addEventListener('load', () => {
+          fetch(`${API_BASE}/stats/visit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ page: pathname }),
+            keepalive: true,
+            cache: 'no-store',
+          }).catch(() => {});
+        }, { once: true });
+      })();
     </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
