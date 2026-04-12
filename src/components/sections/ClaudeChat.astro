@@ -178,6 +178,11 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     font-family: var(--font-body);
     color: var(--text-primary);
     overflow: hidden;
+    width: min(1440px, calc(100vw - 32px));
+    margin: 16px auto;
+    border: 1px solid rgba(71, 57, 44, 0.08);
+    border-radius: 24px;
+    box-shadow: 0 18px 48px rgba(27, 20, 16, 0.08);
   }
 
   /* ============================================
@@ -312,7 +317,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     flex-direction: column;
     min-width: 0;
     position: relative;
-    overflow: visible;
+    overflow: hidden;
   }
 
   /* 顶部导航栏 - padding 与 sidebar-header 对齐 */
@@ -355,7 +360,6 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
   .model-selector {
     position: relative;
-    z-index: 220;
   }
 
   .model-btn {
@@ -379,23 +383,18 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   }
 
   .model-dropdown {
-    position: fixed;
-    top: 0;
-    left: 0;
-    transform: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
     background: var(--bg-primary);
     border: 1px solid var(--border-primary);
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     padding: 8px;
-    width: max-content;
-    min-width: 260px;
-    max-width: min(360px, calc(100vw - 24px));
-    max-height: min(420px, calc(100vh - 24px));
-    overflow-y: auto;
-    overflow-x: hidden;
+    min-width: 220px;
     display: none;
-    z-index: 1000;
+    z-index: 200;
   }
 
   .model-dropdown.show {
@@ -407,8 +406,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    gap: 12px;
-    padding: 12px 14px;
+    padding: 10px 12px;
     background: none;
     border: none;
     border-radius: 6px;
@@ -430,20 +428,15 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
   .model-option-name {
     flex: 1;
-    min-width: 0;
-    white-space: normal;
-    line-height: 1.35;
   }
 
   .model-option-badge {
-    flex-shrink: 0;
     font-size: var(--text-xs);
-    padding: 4px 8px;
+    padding: 2px 6px;
     background: var(--bg-tertiary);
-    border-radius: 6px;
+    border-radius: 4px;
     color: var(--text-secondary);
     margin-left: 8px;
-    line-height: 1;
   }
 
   .model-group {
@@ -1208,6 +1201,15 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
      响应式设计
      ============================================ */
   @media (max-width: 768px) {
+    .claude-chat-page {
+      width: 100%;
+      height: 100vh;
+      margin: 0;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
     .sidebar {
       position: fixed;
       left: 0;
@@ -1281,8 +1283,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     }
 
     .model-dropdown {
-      min-width: 220px;
-      max-width: calc(100vw - 16px);
+      min-width: 200px;
     }
 
     .input-actions {
@@ -1387,41 +1388,9 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   });
 
   // 模型选择
-  function positionModelDropdown() {
-    if (!elements.modelDropdown || !elements.modelBtn) return;
-
-    const dropdown = elements.modelDropdown;
-    const buttonRect = elements.modelBtn.getBoundingClientRect();
-    const margin = 12;
-
-    const dropdownRect = dropdown.getBoundingClientRect();
-    const dropdownWidth = dropdownRect.width || Math.min(320, window.innerWidth - margin * 2);
-    const dropdownHeight = dropdownRect.height || 160;
-
-    let left = buttonRect.left + (buttonRect.width / 2) - (dropdownWidth / 2);
-    left = Math.max(margin, Math.min(left, window.innerWidth - dropdownWidth - margin));
-
-    const spaceBelow = window.innerHeight - buttonRect.bottom - margin;
-    const spaceAbove = buttonRect.top - margin;
-    const openUpward = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
-
-    let top = openUpward
-      ? buttonRect.top - dropdownHeight - 8
-      : buttonRect.bottom + 8;
-
-    top = Math.max(margin, Math.min(top, window.innerHeight - dropdownHeight - margin));
-
-    dropdown.style.left = `${left}px`;
-    dropdown.style.top = `${top}px`;
-  }
-
   elements.modelBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
-    const isOpening = !elements.modelDropdown?.classList.contains('show');
     elements.modelDropdown?.classList.toggle('show');
-    if (isOpening) {
-      requestAnimationFrame(positionModelDropdown);
-    }
   });
 
   document.querySelectorAll('.model-option').forEach(option => {
@@ -1441,18 +1410,6 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
   document.addEventListener('click', () => {
     elements.modelDropdown?.classList.remove('show');
   });
-
-  window.addEventListener('resize', () => {
-    if (elements.modelDropdown?.classList.contains('show')) {
-      positionModelDropdown();
-    }
-  });
-
-  window.addEventListener('scroll', () => {
-    if (elements.modelDropdown?.classList.contains('show')) {
-      positionModelDropdown();
-    }
-  }, true);
 
   // 输入框自动调整高度
   elements.messageInput?.addEventListener('input', function() {
