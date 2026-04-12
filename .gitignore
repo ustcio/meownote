@@ -41,3 +41,20 @@ lerna-debug.log*
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Playwright CLI
+.playwright-cli/
+claude-icons/.playwright-cli/
+
+# Firecrawl
+.firecrawl/
+
+# Claude skills (project-level)
+.claude/
+
+# Temporary files
+.tmp-*
+*.tmp
+
+# Logo concepts
+public/logo-concepts/
