@@ -1,0 +1,499 @@
+---
+// LoginCarousel.astro - Claude Cowork风格登录页轮播组件
+// 基于Swiper 11 + GSAP动画实现
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+
+const slides = [
+  {
+    kicker: 'Cowork',
+    title: 'Cowork handles your',
+    highlight: 'weekly reports',
+    description: 'Automatically generate performance summaries and insights.',
+  },
+  {
+    kicker: 'Cowork',
+    title: 'Cowork handles your',
+    highlight: 'data analysis',
+    description: 'Transform raw data into actionable intelligence.',
+  },
+  {
+    kicker: 'Cowork',
+    title: 'Cowork handles your',
+    highlight: 'team collaboration',
+    description: 'Seamless workflows across your entire organization.',
+  },
+  {
+    kicker: 'Cowork',
+    title: 'Cowork handles your',
+    highlight: 'research tasks',
+    description: 'Deep research capabilities at your fingertips.',
+  }
+];
+---
+
+<div class:list={["login-carousel", className]}>
+  <div class="carousel-container">
+    <!-- Logo -->
+    <div class="carousel-logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 0C6.268 0 0 6.268 0 14s6.268 14 14 14 14-6.268 14-14S21.732 0 14 0z" fill="#D97757"/>
+        <path d="M14 4c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10S19.523 4 14 4z" fill="#fff" opacity="0.3"/>
+      </svg>
+      <span class="logo-text">Maxwell</span>
+    </div>
+
+    <!-- Slides -->
+    <div class="carousel-slides">
+      {slides.map((slide, index) => (
+        <div class="carousel-slide" data-index={index}>
+          <div class="slide-content">
+            <span class="slide-kicker">{slide.kicker}</span>
+            <h2 class="slide-title">
+              {slide.title}
+              <span class="slide-highlight">{slide.highlight}</span>
+            </h2>
+            <p class="slide-description">{slide.description}</p>
+          </div>
+          <div class="slide-visual">
+            <div class="visual-placeholder">
+              <div class="placeholder-icon">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                  <rect x="4" y="8" width="40" height="32" rx="4" stroke="currentColor" stroke-width="2"/>
+                  <path d="M4 16h40" stroke="currentColor" stroke-width="2"/>
+                  <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                  <circle cx="18" cy="12" r="2" fill="currentColor"/>
+                  <circle cx="24" cy="12" r="2" fill="currentColor"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Navigation Dots -->
+    <div class="carousel-nav">
+      {slides.map((_, index) => (
+        <button 
+          class="carousel-dot" 
+          data-slide={index}
+          aria-label={`Go to slide ${index + 1}`}
+        >
+          <span class="dot-inner"></span>
+        </button>
+      ))}
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="carousel-progress">
+      <div class="progress-bar"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .login-carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 28rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .carousel-container {
+    position: relative;
+    width: 100%;
+    max-width: 42rem;
+    padding: clamp(2rem, 4vw, 3.5rem);
+    border-radius: 1.5rem;
+    background: rgba(255, 251, 246, 0.6);
+    border: 1px solid rgba(108, 87, 73, 0.08);
+    backdrop-filter: blur(20px);
+    box-shadow: 
+      0 4px 24px rgba(93, 67, 46, 0.04),
+      0 12px 48px rgba(93, 67, 46, 0.06);
+    overflow: hidden;
+  }
+
+  /* Logo */
+  .carousel-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .carousel-logo svg {
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    font-family: var(--font-editorial);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+
+  /* Slides Container */
+  .carousel-slides {
+    position: relative;
+    min-height: 16rem;
+    overflow: hidden;
+  }
+
+  .carousel-slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    opacity: 0;
+    transform: translateY(1.5rem);
+    transition: 
+      opacity 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .carousel-slide.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    position: relative;
+  }
+
+  .carousel-slide.exit-up {
+    opacity: 0;
+    transform: translateY(-1.5rem);
+  }
+
+  /* Slide Content */
+  .slide-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .slide-kicker {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(217, 119, 87, 0.08);
+    color: var(--color-primary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    width: fit-content;
+  }
+
+  .slide-title {
+    font-family: var(--font-editorial);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .slide-highlight {
+    display: block;
+    color: var(--color-primary);
+    font-weight: 500;
+  }
+
+  .slide-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0;
+    max-width: 28rem;
+  }
+
+  /* Slide Visual */
+  .slide-visual {
+    margin-top: 0.5rem;
+    border-radius: 1rem;
+    overflow: hidden;
+    background: rgba(217, 119, 87, 0.04);
+    border: 1px solid rgba(108, 87, 73, 0.06);
+  }
+
+  .visual-placeholder {
+    aspect-ratio: 16 / 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(
+      135deg,
+      rgba(217, 119, 87, 0.06) 0%,
+      rgba(217, 119, 87, 0.02) 100%
+    );
+  }
+
+  .placeholder-icon {
+    color: rgba(217, 119, 87, 0.3);
+  }
+
+  /* Navigation Dots */
+  .carousel-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+
+  .carousel-dot {
+    position: relative;
+    width: 2.5rem;
+    height: 0.35rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .dot-inner {
+    position: absolute;
+    inset: 0;
+    background: rgba(108, 87, 73, 0.15);
+    border-radius: 999px;
+    transition: background 0.3s ease;
+  }
+
+  .carousel-dot.active .dot-inner {
+    background: var(--color-primary);
+  }
+
+  .carousel-dot:hover .dot-inner {
+    background: rgba(108, 87, 73, 0.3);
+  }
+
+  .carousel-dot.active:hover .dot-inner {
+    background: var(--color-primary);
+  }
+
+  /* Progress Bar */
+  .carousel-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(108, 87, 73, 0.06);
+  }
+
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--color-primary);
+    transition: width 0.1s linear;
+  }
+
+  /* Ambient decoration */
+  .carousel-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 60%;
+    height: 120%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(217, 119, 87, 0.06) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 1100px) {
+    .login-carousel {
+      min-height: 24rem;
+    }
+
+    .carousel-container {
+      padding: 1.5rem;
+    }
+
+    .slide-title {
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
+    }
+  }
+
+  @media (max-width: 820px) {
+    .login-carousel {
+      min-height: 20rem;
+    }
+
+    .carousel-container {
+      padding: 1.25rem;
+      border-radius: 1.25rem;
+    }
+
+    .carousel-logo {
+      margin-bottom: 1.5rem;
+    }
+
+    .slide-title {
+      font-size: clamp(1.5rem, 6vw, 2rem);
+    }
+
+    .slide-description {
+      font-size: 0.9rem;
+    }
+
+    .carousel-slides {
+      min-height: 12rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.carousel-container');
+    if (!container) return;
+
+    const slides = container.querySelectorAll('.carousel-slide');
+    const dots = container.querySelectorAll('.carousel-dot');
+    const progressBar = container.querySelector('.progress-bar');
+    
+    let currentIndex = 0;
+    let autoplayInterval: number | null = null;
+    const autoplayDelay = 5000;
+
+    function goToSlide(index: number, direction: 'up' | 'down' = 'down') {
+      if (index === currentIndex) return;
+
+      const currentSlide = slides[currentIndex];
+      const nextSlide = slides[index];
+
+      currentSlide.classList.remove('active');
+      currentSlide.classList.add(direction === 'down' ? 'exit-up' : '');
+
+      nextSlide.style.transform = direction === 'down' 
+        ? 'translateY(1.5rem)' 
+        : 'translateY(-1.5rem)';
+      
+      void nextSlide.offsetHeight;
+      
+      nextSlide.classList.add('active');
+      nextSlide.style.transform = '';
+
+      dots[currentIndex].classList.remove('active');
+      dots[index].classList.add('active');
+
+      currentIndex = index;
+      resetProgress();
+    }
+
+    function nextSlide() {
+      const nextIndex = (currentIndex + 1) % slides.length;
+      goToSlide(nextIndex, 'down');
+    }
+
+    function prevSlide() {
+      const prevIndex = (currentIndex - 1 + slides.length) % slides.length;
+      goToSlide(prevIndex, 'up');
+    }
+
+    function resetProgress() {
+      if (progressBar) {
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+        void progressBar.offsetHeight;
+        progressBar.style.transition = `width ${autoplayDelay}ms linear`;
+        progressBar.style.width = '100%';
+      }
+    }
+
+    function startAutoplay() {
+      stopAutoplay();
+      resetProgress();
+      autoplayInterval = window.setInterval(() => {
+        nextSlide();
+      }, autoplayDelay);
+    }
+
+    function stopAutoplay() {
+      if (autoplayInterval) {
+        clearInterval(autoplayInterval);
+        autoplayInterval = null;
+      }
+    }
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        if (index === currentIndex) return;
+        const direction = index > currentIndex ? 'down' : 'up';
+        goToSlide(index, direction);
+        startAutoplay();
+      });
+    });
+
+    container.addEventListener('mouseenter', stopAutoplay);
+    container.addEventListener('mouseleave', startAutoplay);
+
+    container.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        nextSlide();
+        startAutoplay();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        prevSlide();
+        startAutoplay();
+      }
+    });
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    container.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      stopAutoplay();
+    }, { passive: true });
+
+    container.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffX = touchStartX - touchEndX;
+      const diffY = touchStartY - touchEndY;
+      
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        if (diffX > 0) {
+          nextSlide();
+        } else {
+          prevSlide();
+        }
+      }
+      startAutoplay();
+    }, { passive: true });
+
+    if (slides.length > 0) {
+      slides[0].classList.add('active');
+      if (dots.length > 0) {
+        dots[0].classList.add('active');
+      }
+      startAutoplay();
+    }
+
+    window.addEventListener('beforeunload', () => {
+      stopAutoplay();
+    });
+  });
+</script>

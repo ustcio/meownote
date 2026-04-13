@@ -1,6 +1,6 @@
 ---
 import AppLayout from '@layouts/AppLayout.astro';
-import AbstractThread from '@components/ui/AbstractThread.astro';
+import LoginCarousel from '@components/ui/LoginCarousel.astro';
 
 const title = 'Workspace Admin Login - Maxwell.Science';
 const description = 'Secure access for the Maxwell workspace.';
@@ -72,22 +72,7 @@ const description = 'Secure access for the Maxwell workspace.';
       </div>
 
       <aside class="workspace-login-visual" aria-hidden="true">
-        <div class="visual-ambient">
-          <span class="visual-dot" style="--x: 10%; --y: 22%; --s: 4px; --delay: 0s"></span>
-          <span class="visual-dot" style="--x: 88%; --y: 18%; --s: 6px; --delay: 0.5s"></span>
-          <span class="visual-dot" style="--x: 54%; --y: 76%; --s: 5px; --delay: 1s"></span>
-          <span class="visual-dot" style="--x: 78%; --y: 84%; --s: 3px; --delay: 1.4s"></span>
-        </div>
-
-        <div class="workspace-login-visual__copy">
-          <span class="visual-kicker">Calm operator workspace</span>
-          <h2>AI that thinks.<br />You decide.</h2>
-          <p>Write clearly. Plan confidently. Research thoroughly in one calm, capable workspace.</p>
-        </div>
-
-        <div class="workspace-login-visual__thread">
-          <AbstractThread class="workspace-thread-art" />
-        </div>
+        <LoginCarousel />
       </aside>
     </div>
   </section>
@@ -511,92 +496,14 @@ const description = 'Secure access for the Maxwell workspace.';
     padding: clamp(1rem, 3vw, 2rem);
   }
 
-  .visual-ambient {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
-
-  .visual-dot {
-    position: absolute;
-    left: var(--x);
-    top: var(--y);
-    width: var(--s);
-    height: var(--s);
-    border-radius: 50%;
-    background: var(--color-primary);
-    opacity: 0.08;
-    animation: heroDotFloat 10s ease-in-out infinite;
-    animation-delay: var(--delay);
-  }
-
   .workspace-login-visual__copy,
   .workspace-login-visual__thread {
     position: relative;
     z-index: 1;
   }
 
-  .workspace-login-visual__copy {
-    max-width: 36rem;
-    margin-bottom: 2rem;
-    opacity: 0;
-    animation: visualUp 0.7s var(--ease-out) 0.18s both;
-  }
-
-  .visual-kicker {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2rem;
-    padding: 0.32rem 0.78rem;
-    border-radius: 999px;
-    background: rgba(217, 119, 87, 0.08);
-    color: var(--color-primary);
-    font-size: 0.76rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .workspace-login-visual__copy h2 {
-    margin: 1rem 0 0;
-    font-family: var(--font-editorial);
-    font-size: clamp(3.1rem, 6vw, 5.6rem);
-    line-height: 0.95;
-    letter-spacing: -0.05em;
-  }
-
-  .workspace-login-visual__copy p {
-    max-width: 34rem;
-    margin: 1rem 0 0;
-    font-size: clamp(1rem, 1.8vw, 1.14rem);
-    line-height: 1.6;
-    color: var(--text-secondary);
-  }
-
-  .workspace-login-visual__thread {
-    min-height: 30rem;
-    opacity: 0;
-    animation: visualUp 0.8s var(--ease-out) 0.3s both;
-  }
-
-  .workspace-thread-art {
-    min-height: 100%;
-  }
-
-  .workspace-thread-art :global(.cognitive-sphere) {
-    box-shadow:
-      inset -15px -15px 30px rgba(0, 0, 0, 0.08),
-      0 18px 48px rgba(217, 119, 87, 0.28);
-  }
-
   @keyframes workspace-spin {
     to { transform: rotate(360deg); }
-  }
-
-  @keyframes heroDotFloat {
-    0%, 100% { transform: translateY(0) scale(1); opacity: 0.08; }
-    50% { transform: translateY(-30px) scale(1.5); opacity: 0.15; }
   }
 
   @keyframes visualUp {
