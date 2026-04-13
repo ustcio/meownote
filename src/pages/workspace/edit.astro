@@ -20,6 +20,14 @@ import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
           <span>Back to workspace</span>
         </a>
         <div class="header-actions">
+          <button class="editor-action-btn" id="logout-btn" title="Sign out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Sign out</span>
+          </button>
           <span class="save-status" id="save-status">
             <span class="status-dot"></span>
             Saved
@@ -1103,6 +1111,10 @@ import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
   document.getElementById('copy-btn')?.addEventListener('click', copyContent);
   document.getElementById('download-btn')?.addEventListener('click', downloadCurrentFile);
   document.getElementById('delete-btn')?.addEventListener('click', deleteFile);
+  document.getElementById('logout-btn')?.addEventListener('click', () => {
+    window.__meownoteAuth?.clearSession?.();
+    window.location.href = '/workspace/login';
+  });
 
   init();
 </script>
