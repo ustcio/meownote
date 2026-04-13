@@ -38,24 +38,26 @@ const slides = [
 
 <AppLayout title={title} description={description}>
   <section class="workspace-login-page">
-    <header class="workspace-login-nav">
-      <a href="/" class="workspace-login-brand" aria-label="Back to Maxwell home">
-        <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
-          <path d="M14 0C6.268 0 0 6.268 0 14s6.268 14 14 14 14-6.268 14-14S21.732 0 14 0z" fill="#D97757"/>
-          <path d="M14 4c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10S19.523 4 14 4z" fill="#fff" opacity="0.3"/>
-        </svg>
-        <span class="workspace-login-brand__wordmark">Maxwell</span>
-      </a>
+    <nav class="workspace-login-nav">
+      <div class="workspace-login-nav__inner">
+        <a href="/" class="workspace-login-brand" aria-label="Back to Maxwell home">
+          <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
+            <path d="M14 0C6.268 0 0 6.268 0 14s6.268 14 14 14 14-6.268 14-14S21.732 0 14 0z" fill="#D97757"/>
+            <path d="M14 4c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10S19.523 4 14 4z" fill="#fff" opacity="0.3"/>
+          </svg>
+          <span class="workspace-login-brand__wordmark">Maxwell</span>
+        </a>
 
-      <nav class="workspace-login-nav__links" aria-label="Workspace navigation">
-        <a href="/chatbot/">Chat</a>
-        <a href="/workspace/">Workspace</a>
-        <a href="/kit/">Kit</a>
-        <a href="/about/">About</a>
-      </nav>
+        <div class="workspace-login-nav__links" aria-label="Workspace navigation">
+          <a href="/chatbot/">Chat</a>
+          <a href="/workspace/">Workspace</a>
+          <a href="/kit/">Kit</a>
+          <a href="/about/">About</a>
+        </div>
 
-      <a href="/" class="workspace-login-nav__home">Back home</a>
-    </header>
+        <a href="/" class="workspace-login-nav__home">Back home</a>
+      </div>
+    </nav>
 
     <div class="workspace-login-shell">
       <!-- Left: Login Card -->
@@ -414,8 +416,19 @@ const slides = [
 
   /* ── Nav ── */
   .workspace-login-nav {
+    width: 100%;
+    padding: 0 clamp(1.5rem, 3vw, 3rem);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    min-height: 3.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .workspace-login-nav__inner {
     width: min(1200px, 100%);
-    margin: 0 auto 2.5rem;
+    margin: 0 auto;
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
