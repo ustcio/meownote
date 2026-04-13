@@ -113,39 +113,45 @@ const slides = [
         </div>
       </div>
 
-      <!-- Right: Carousel Card -->
+      <!-- Right: Carousel Card (fixed size) -->
       <div class="workspace-login-right">
         <div class="carousel-card">
-          <div class="carousel-card__logo">
-            <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
-              <path d="M14 0C6.268 0 0 6.268 0 14s6.268 14 14 14 14-6.268 14-14S21.732 0 14 0z" fill="#D97757"/>
-              <path d="M14 4c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10S19.523 4 14 4z" fill="#fff" opacity="0.3"/>
-            </svg>
-            <span>Maxwell</span>
+          <div class="carousel-card__header">
+            <div class="carousel-card__logo">
+              <svg width="18" height="18" viewBox="0 0 28 28" fill="none">
+                <path d="M14 0C6.268 0 0 6.268 0 14s6.268 14 14 14 14-6.268 14-14S21.732 0 14 0z" fill="#D97757"/>
+                <path d="M14 4c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10S19.523 4 14 4z" fill="#fff" opacity="0.3"/>
+              </svg>
+              <span>Maxwell</span>
+            </div>
+            <span class="carousel-card__kicker">Cowork</span>
           </div>
 
-          <div class="carousel-slides">
+          <div class="carousel-viewport">
             {slides.map((slide, index) => (
               <div class="carousel-slide" data-index={index}>
-                <span class="slide-kicker">{slide.kicker}</span>
-                <h2 class="slide-title">
-                  {slide.title}
-                  <span class="slide-highlight">{slide.highlight}</span>
-                </h2>
-                <p class="slide-description">{slide.description}</p>
-                <div class="slide-image">
+                <div class="slide-text">
+                  <h2 class="slide-title">
+                    {slide.title}
+                    <span class="slide-highlight">{slide.highlight}</span>
+                  </h2>
+                  <p class="slide-description">{slide.description}</p>
+                </div>
+                <div class="slide-image-wrapper">
                   <img src={slide.image} alt={slide.highlight} loading="lazy" />
                 </div>
               </div>
             ))}
           </div>
 
-          <div class="carousel-dots">
-            {slides.map((_, index) => (
-              <button class="carousel-dot" data-slide={index} aria-label={`Slide ${index + 1}`}>
-                <span class="dot-inner"></span>
-              </button>
-            ))}
+          <div class="carousel-footer">
+            <div class="carousel-dots">
+              {slides.map((_, index) => (
+                <button class="carousel-dot" data-slide={index} aria-label={`Slide ${index + 1}`}>
+                  <span class="dot-inner"></span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div class="carousel-progress">
@@ -343,7 +349,7 @@ const slides = [
           const nextSlide = slides[index];
           currentSlide.classList.remove('active');
           currentSlide.classList.add(direction === 'down' ? 'exit-up' : '');
-          nextSlide.style.transform = direction === 'down' ? 'translateY(1.5rem)' : 'translateY(-1.5rem)';
+          nextSlide.style.transform = direction === 'down' ? 'translateY(1rem)' : 'translateY(-1rem)';
           void nextSlide.offsetHeight;
           nextSlide.classList.add('active');
           nextSlide.style.transform = '';
@@ -411,9 +417,10 @@ const slides = [
     color: #171412;
   }
 
+  /* ── Nav ── */
   .workspace-login-nav {
     width: min(1200px, 100%);
-    margin: 0 auto 2rem;
+    margin: 0 auto 2.5rem;
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
@@ -472,20 +479,22 @@ const slides = [
     background: var(--bg-primary);
   }
 
+  /* ── Shell ── */
   .workspace-login-shell {
     width: min(1200px, 100%);
     margin: 0 auto;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
-    align-items: stretch;
+    align-items: start;
   }
 
-  /* Left side */
+  /* ── Left: Login Card ── */
   .workspace-login-left {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+    padding-top: 1rem;
   }
 
   .workspace-login-card {
@@ -658,10 +667,10 @@ const slides = [
     color: var(--color-danger);
   }
 
-  /* Right side */
+  /* ── Right: Carousel Card (FIXED SIZE) ── */
   .workspace-login-right {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
   }
 
@@ -669,21 +678,31 @@ const slides = [
     position: relative;
     width: 100%;
     max-width: 28rem;
-    padding: 2rem;
+    height: 34rem;
+    padding: 1.75rem;
     border-radius: 1.5rem;
     background: var(--bg-primary);
     border: 1px solid rgba(108, 87, 73, 0.08);
     box-shadow: 0 8px 32px rgba(94, 66, 41, 0.08);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .carousel-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    flex-shrink: 0;
   }
 
   .carousel-card__logo {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    gap: 0.45rem;
     font-family: var(--font-editorial);
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 500;
     color: #1f1b18;
   }
@@ -692,9 +711,25 @@ const slides = [
     flex-shrink: 0;
   }
 
-  .carousel-slides {
+  .carousel-card__kicker {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(217, 119, 87, 0.08);
+    color: var(--color-primary);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Fixed viewport */
+  .carousel-viewport {
     position: relative;
-    min-height: 20rem;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .carousel-slide {
@@ -702,7 +737,7 @@ const slides = [
     inset: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.75rem;
     opacity: 0;
     transform: translateY(1rem);
     transition:
@@ -723,28 +758,18 @@ const slides = [
     transform: translateY(-1rem);
   }
 
-  .slide-kicker {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.2rem 0.55rem;
-    border-radius: 999px;
-    background: rgba(217, 119, 87, 0.1);
-    color: var(--color-primary);
-    font-size: 0.6rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    width: fit-content;
+  .slide-text {
+    flex-shrink: 0;
   }
 
   .slide-title {
     font-family: var(--font-editorial);
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 400;
-    line-height: 1.15;
+    line-height: 1.2;
     letter-spacing: -0.03em;
     color: #1f1b18;
-    margin: 0;
+    margin: 0 0 0.35rem;
   }
 
   .slide-highlight {
@@ -754,25 +779,32 @@ const slides = [
   }
 
   .slide-description {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     line-height: 1.5;
     color: #6a625b;
     margin: 0;
   }
 
-  .slide-image {
-    margin-top: 0.75rem;
+  .slide-image-wrapper {
+    flex: 1;
+    min-height: 0;
     border-radius: 0.75rem;
     overflow: hidden;
-    background: rgba(217, 119, 87, 0.06);
-    border: 1px solid rgba(217, 119, 87, 0.08);
+    background: rgba(217, 119, 87, 0.04);
+    border: 1px solid rgba(108, 87, 73, 0.06);
   }
 
-  .slide-image img {
+  .slide-image-wrapper img {
     width: 100%;
-    height: auto;
-    display: block;
+    height: 100%;
     object-fit: cover;
+    display: block;
+  }
+
+  /* Footer */
+  .carousel-footer {
+    flex-shrink: 0;
+    padding-top: 1rem;
   }
 
   .carousel-dots {
@@ -780,7 +812,6 @@ const slides = [
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
-    margin-top: 1.25rem;
   }
 
   .carousel-dot {
@@ -815,13 +846,14 @@ const slides = [
     background: var(--color-primary);
   }
 
+  /* Progress bar */
   .carousel-progress {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
     height: 2px;
-    background: rgba(217, 119, 87, 0.08);
+    background: rgba(108, 87, 73, 0.06);
   }
 
   .progress-bar {
@@ -835,6 +867,7 @@ const slides = [
     to { transform: rotate(360deg); }
   }
 
+  /* ── Responsive ── */
   @media (max-width: 900px) {
     .workspace-login-nav {
       grid-template-columns: 1fr auto;
