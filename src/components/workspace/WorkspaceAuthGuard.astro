@@ -9,9 +9,20 @@ const { redirectTo = '/workspace/login/' } = Astro.props;
 <script is:inline define:vars={{ redirectTo }}>
   (function() {
     const ADMIN_USERNAME = 'YangHao';
-    const authStore = window.__meownoteAuth;
-    const token = authStore?.getToken?.();
-    const user = authStore?.getUser?.();
+    const TOKEN_KEYS = ['meownote_auth_token', 'auth_token'];
+    const USER_KEYS = ['meownote_user_data', 'user'];
+
+    function readJSON(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    const token = TOKEN_KEYS.map((key) => localStorage.getItem(key)).find(Boolean);
+    const user = USER_KEYS.map((key) => readJSON(key)).find(Boolean);
     const username = user?.username || user?.name || '';
     const isAllowed = Boolean(token) && username === ADMIN_USERNAME;
 

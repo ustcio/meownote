@@ -95,7 +95,8 @@ const description = 'Secure access for the Maxwell workspace.';
   <script is:inline define:vars={{ API_BASE: 'https://api.ustc.dev' }}>
     (function() {
       const ADMIN_USERNAME = 'YangHao';
-      const authStore = window.__meownoteAuth;
+      const TOKEN_KEYS = ['meownote_auth_token', 'auth_token'];
+      const USER_KEYS = ['meownote_user_data', 'user'];
 
       const form = document.getElementById('workspace-login-form');
       const passwordInput = document.getElementById('workspace-admin-password');
@@ -114,6 +115,43 @@ const description = 'Secure access for the Maxwell workspace.';
         if (submitBtn instanceof HTMLButtonElement) submitBtn.disabled = loading;
       }
 
+      function readJSON(key) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw ? JSON.parse(raw) : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function writeJSON(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+      }
+
+      function getStoredToken() {
+        return TOKEN_KEYS.map((key) => localStorage.getItem(key)).find(Boolean) || null;
+      }
+
+      function getStoredUser() {
+        return USER_KEYS.map((key) => readJSON(key)).find(Boolean) || null;
+      }
+
+      function persistSession(token, user) {
+        if (window.__meownoteAuth?.setSession) {
+          window.__meownoteAuth.setSession(token, user);
+          return;
+        }
+
+        const nextToken = token || getStoredToken();
+        if (nextToken) {
+          localStorage.setItem('meownote_auth_token', nextToken);
+          localStorage.setItem('auth_token', nextToken);
+        }
+        writeJSON('meownote_user_data', user);
+        writeJSON('user', user);
+        window.dispatchEvent(new CustomEvent('auth:login', { detail: user }));
+      }
+
       function isAdminUser(user) {
         const username = user?.username || user?.name || '';
         return username === ADMIN_USERNAME;
@@ -130,8 +168,8 @@ const description = 'Secure access for the Maxwell workspace.';
       }
 
       function hydrateIfLoggedIn() {
-        const token = authStore?.getToken?.();
-        const user = authStore?.getUser?.();
+        const token = window.__meownoteAuth?.getToken?.() || getStoredToken();
+        const user = window.__meownoteAuth?.getUser?.() || getStoredUser();
         const next = resolveNextPath();
 
         if (token && isAdminUser(user)) {
@@ -191,7 +229,7 @@ const description = 'Secure access for the Maxwell workspace.';
             throw new Error('当前账号没有 Workspace 超级管理员权限。');
           }
 
-          authStore?.setSession?.(result.token, user);
+          persistSession(result.token, user);
           window.__meownoteToast?.show('Workspace access granted', 'success');
           window.location.replace(next);
         } catch (error) {
