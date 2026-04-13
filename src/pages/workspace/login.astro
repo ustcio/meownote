@@ -164,12 +164,21 @@ const description = 'Secure access for the Maxwell workspace.';
       }
 
       function hydrateIfLoggedIn() {
+        const redirectCount = parseInt(localStorage.getItem('meownote_redirect_count') || '0', 10);
+        if (redirectCount > 3) {
+          localStorage.removeItem('meownote_redirect_count');
+          return;
+        }
+
         const token = window.__meownoteAuth?.getToken?.() || getStoredToken();
         const user = window.__meownoteAuth?.getUser?.() || getStoredUser();
         const next = resolveNextPath();
 
         if (token && isAdminUser(user)) {
+          localStorage.setItem('meownote_redirect_count', String(redirectCount + 1));
           redirectToWorkspace(next);
+        } else {
+          localStorage.removeItem('meownote_redirect_count');
         }
       }
 
