@@ -1361,6 +1361,28 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     }
   }
 
+  function hydratePromptFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const prompt = params.get('q')?.trim();
+    const autorun = params.get('autorun') === '1';
+
+    if (!prompt || !elements.messageInput) return;
+
+    elements.messageInput.value = prompt;
+    elements.messageInput.dispatchEvent(new Event('input'));
+
+    // Clear the query so a manual refresh won't resend the same prompt.
+    window.history.replaceState({}, '', window.location.pathname);
+
+    if (autorun) {
+      window.setTimeout(() => {
+        sendMessage();
+      }, 0);
+    } else {
+      elements.messageInput.focus();
+    }
+  }
+
   // 侧边栏控制
   function openSidebar() {
     const wasOpen = elements.sidebar?.classList.contains('open');
@@ -1772,4 +1794,5 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
 
   setComposerState('idle');
   setViewState('welcome');
+  hydratePromptFromUrl();
 </script>

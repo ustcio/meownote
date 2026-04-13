@@ -97,6 +97,7 @@ const description = 'Secure access for the Maxwell workspace.';
       const ADMIN_USERNAME = 'YangHao';
       const TOKEN_KEYS = ['meownote_auth_token', 'auth_token'];
       const USER_KEYS = ['meownote_user_data', 'user'];
+      let isRedirecting = false;
 
       const form = document.getElementById('workspace-login-form');
       const passwordInput = document.getElementById('workspace-admin-password');
@@ -136,6 +137,10 @@ const description = 'Secure access for the Maxwell workspace.';
         return USER_KEYS.map((key) => readJSON(key)).find(Boolean) || null;
       }
 
+      function isSafeWorkspacePath(path) {
+        return Boolean(path) && path.startsWith('/workspace') && !path.startsWith('/workspace/login');
+      }
+
       function persistSession(token, user) {
         if (window.__meownoteAuth?.setSession) {
           window.__meownoteAuth.setSession(token, user);
@@ -160,11 +165,17 @@ const description = 'Secure access for the Maxwell workspace.';
       function resolveNextPath() {
         const params = new URLSearchParams(window.location.search);
         const next = params.get('next');
-        if (next && next.startsWith('/workspace')) {
+        if (next && isSafeWorkspacePath(next)) {
           nextInput.value = next;
           return next;
         }
         return nextInput.value || '/workspace/';
+      }
+
+      function redirectToWorkspace(path) {
+        if (isRedirecting) return;
+        isRedirecting = true;
+        window.location.replace(isSafeWorkspacePath(path) ? path : '/workspace/');
       }
 
       function hydrateIfLoggedIn() {
@@ -173,7 +184,7 @@ const description = 'Secure access for the Maxwell workspace.';
         const next = resolveNextPath();
 
         if (token && isAdminUser(user)) {
-          window.location.replace(next);
+          redirectToWorkspace(next);
         }
       }
 
@@ -231,7 +242,7 @@ const description = 'Secure access for the Maxwell workspace.';
 
           persistSession(result.token, user);
           window.__meownoteToast?.show('Workspace access granted', 'success');
-          window.location.replace(next);
+          redirectToWorkspace(next);
         } catch (error) {
           setError(error instanceof Error ? error.message : '登录失败，请稍后重试。');
           window.__meownoteToast?.show('Workspace login failed', 'error');

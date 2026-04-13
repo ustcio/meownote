@@ -59,7 +59,7 @@ export const translations = {
   // Chatbot Page
   'chatbot.title': 'Chat',
   'chatbot.welcome.title': 'What can I help you with?',
-  'chatbot.welcome.subtitle': 'I\'m Claude, an AI assistant made by Anthropic. I can help with writing, analysis, coding, math, and much more.',
+  'chatbot.welcome.subtitle': 'I\'m Maxwell, your AI assistant. I can help with writing, analysis, coding, math, and much more.',
   'chatbot.quickstart': 'Try asking',
   'chatbot.quickstart.code': 'Write a function',
   'chatbot.quickstart.explain': 'Explain a concept',

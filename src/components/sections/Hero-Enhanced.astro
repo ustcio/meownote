@@ -23,12 +23,13 @@ const trustLines = [
       <div class="hero__copy">
         <h1 class="hero__title">Meet your<br/>thinking partner</h1>
 
-        <p class="hero__subtitle">Tackle any big, bold, bewildering challenge with Claude.</p>
+        <p class="hero__subtitle">Tackle any big, bold, bewildering challenge with Maxwell.</p>
 
-        <div class="hero__input-container">
-          <input type="text" class="hero__input" placeholder="How can I help you today?" />
-          <button class="hero__submit">Ask Claude <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
-        </div>
+        <form class="hero__input-container" action="/chatbot/" method="get">
+          <input type="text" class="hero__input" name="q" placeholder="How can I help you today?" />
+          <input type="hidden" name="autorun" value="1" />
+          <button class="hero__submit" type="submit">Ask Maxwell <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+        </form>
 
         <div class="hero__chips">
           <button class="hero__chip">
