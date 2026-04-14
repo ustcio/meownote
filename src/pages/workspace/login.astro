@@ -509,14 +509,15 @@ const slides = [
   .workspace-login-shell {
     width: min(1200px, 100%);
     margin: 0 auto;
-    padding-top: calc(72px + 2rem);
+    padding-top: 72px;
     padding-left: clamp(1.5rem, 3vw, 3rem);
     padding-right: clamp(1.5rem, 3vw, 3rem);
-    padding-bottom: 3rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    padding-bottom: 0;
+    min-height: calc(100vh - 72px);
+    display: flex;
     align-items: center;
+    justify-content: center;
+    gap: 2rem;
   }
 
   /* ── Left: Login Card ── */
@@ -529,8 +530,6 @@ const slides = [
   .workspace-login-card {
     width: 100%;
     max-width: 26rem;
-    min-height: 24rem;
-    height: auto;
     padding: 2rem;
     border-radius: 1.5rem;
     background: #fff;
@@ -712,8 +711,6 @@ const slides = [
     position: relative;
     width: 100%;
     max-width: 26rem;
-    min-height: 24rem;
-    height: auto;
     padding: 2rem;
     border-radius: 1.5rem;
     background: var(--bg-primary);
@@ -904,16 +901,12 @@ const slides = [
 
   /* ── Responsive ── */
   @media (max-width: 900px) {
-    .workspace-login-nav {
-      grid-template-columns: 1fr auto;
-    }
-
     .workspace-login-nav__links {
       display: none;
     }
 
     .workspace-login-shell {
-      grid-template-columns: 1fr;
+      flex-direction: column;
       max-width: 26rem;
     }
 
