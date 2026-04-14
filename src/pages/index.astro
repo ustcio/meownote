@@ -5,7 +5,6 @@ import HeroEnhanced from '@components/sections/Hero-Enhanced.astro';
 import ContributionGraph from '@components/sections/ContributionGraph.astro';
 
 // New dynamic components
-import InfiniteMarquee from '@components/ui/InfiniteMarquee.astro';
 import TabsShowcase from '@components/ui/TabsShowcase.astro';
 import TypewriterDemo from '@components/ui/TypewriterDemo.astro';
 import StackedCards from '@components/ui/StackedCards.astro';
@@ -86,19 +85,7 @@ const workflows = [
     </div>
   </section>
 
-  <!-- 2. The Marquee (Infinite Trust Banner) -->
-  <section class="marquee-wrapper">
-    <div class="container">
-      <p class="marquee-label">Trusted by leading condensed matter physics labs worldwide</p>
-    </div>
-    <InfiniteMarquee speed="25s" class="hero-marquee">
-      {["🚀 Rapid DFT Calculations", "🛡️ Secure Data Sandboxing", "⚡ PPMS Real-time processing", "📊 Advanced Hall Analysis", "🧠 Domain Specific Intelligence", "🌐 Global HPC Infrastructure"].map(item => (
-        <span class="marquee-item">{item}</span>
-      ))}
-    </InfiniteMarquee>
-  </section>
-
-  <!-- 3. Dynamic Tabs Showcase (Replaces static Features) -->
+  <!-- 2. Dynamic Tabs Showcase (Replaces static Features) -->
   <section class="claude-section container presentation-section">
     <div class="claude-section-heading" style="margin: 0 auto 3rem; text-align: center;">
       <h2>Three surfaces. One steady workflow.</h2>
@@ -131,7 +118,7 @@ const workflows = [
     </ScrollAnimation>
   </section>
 
-  <!-- 4. Stacked Cards Section (Engaging deep dive workflows) -->
+  <!-- 3. Stacked Cards Section (Engaging deep dive workflows) -->
   <section class="claude-section container">
     <div class="claude-section-heading" style="margin: 0 auto 1rem; text-align: center;">
       <h2>Built for deep exploration</h2>
@@ -139,7 +126,7 @@ const workflows = [
     <StackedCards cards={workflows} />
   </section>
 
-  <!-- 5. Original Sections (Animated standard pieces) -->
+  <!-- 4. Original Sections (Animated standard pieces) -->
   <section class="claude-section container">
     <ScrollAnimation rootMargin="-20px"><ContributionGraph /></ScrollAnimation>
   </section>
@@ -147,39 +134,6 @@ const workflows = [
 </Layout>
 
 <style>
-  .marquee-wrapper {
-    padding: var(--space-8) 0;
-    border-top: 1px solid var(--border-secondary);
-    border-bottom: 1px solid var(--border-secondary);
-    background: var(--bg-secondary);
-    margin-bottom: var(--space-12);
-  }
-
-  .marquee-label {
-    text-align: center;
-    font-size: var(--text-sm);
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: var(--font-semibold);
-    margin-bottom: var(--space-6);
-  }
-
-  .marquee-item {
-    font-size: var(--text-lg);
-    font-weight: var(--font-medium);
-    color: var(--text-secondary);
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    padding: 0 var(--space-6);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-full);
-    height: 48px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-  }
-
   .presentation-section {
     padding-top: var(--space-12);
     padding-bottom: var(--space-12);
