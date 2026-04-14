@@ -405,7 +405,9 @@ const slides = [
     min-height: 100vh;
     display: grid;
     align-content: start;
-    padding: 1.5rem;
+    padding: 0 clamp(1.5rem, 3vw, 3rem);
+    padding-top: calc(var(--header-height, 4rem) + 2rem);
+    padding-bottom: 3rem;
     background: var(--bg-primary);
     color: #171412;
   }
@@ -507,28 +509,24 @@ const slides = [
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
-    align-items: start;
+    align-items: center;
   }
 
   /* ── Left: Login Card ── */
   .workspace-login-left {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
   }
 
   .workspace-login-card {
     width: 100%;
-    max-width: 30rem;
-    height: 34rem;
+    max-width: 26rem;
     padding: 2rem;
     border-radius: 1.5rem;
     background: #fff;
     border: 1px solid rgba(108, 87, 73, 0.08);
     box-shadow: 0 8px 32px rgba(94, 66, 41, 0.08);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
   }
 
   .workspace-login-card__head {
@@ -691,19 +689,19 @@ const slides = [
     color: var(--color-danger);
   }
 
-  /* ── Right: Carousel Card (FIXED SIZE) ── */
+  /* ── Right: Carousel Card ── */
   .workspace-login-right {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
   }
 
   .carousel-card {
     position: relative;
     width: 100%;
-    max-width: 30rem;
-    height: 34rem;
-    padding: 1.75rem;
+    max-width: 26rem;
+    height: 28rem;
+    padding: 1.5rem;
     border-radius: 1.5rem;
     background: var(--bg-primary);
     border: 1px solid rgba(108, 87, 73, 0.08);
@@ -717,7 +715,7 @@ const slides = [
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
     flex-shrink: 0;
   }
 
@@ -761,7 +759,7 @@ const slides = [
     inset: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
     opacity: 0;
     transform: translateY(1rem);
     transition:
@@ -788,12 +786,12 @@ const slides = [
 
   .slide-title {
     font-family: var(--font-editorial);
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 400;
     line-height: 1.2;
     letter-spacing: -0.03em;
     color: #1f1b18;
-    margin: 0 0 0.35rem;
+    margin: 0 0 0.25rem;
   }
 
   .slide-highlight {
@@ -903,7 +901,7 @@ const slides = [
 
     .workspace-login-shell {
       grid-template-columns: 1fr;
-      max-width: 30rem;
+      max-width: 26rem;
     }
 
     .workspace-login-right {
