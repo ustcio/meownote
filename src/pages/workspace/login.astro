@@ -504,7 +504,8 @@ const slides = [
     flex-direction: column;
     align-items: flex-start;
     gap: 1.5rem;
-    max-width: 28rem;
+    max-width: 32rem;
+    padding-left: clamp(2rem, 4vw, 4rem);
   }
 
   .workspace-login-copy {
@@ -513,19 +514,20 @@ const slides = [
 
   .workspace-login-title {
     font-family: var(--font-editorial);
-    font-size: clamp(2.2rem, 4.5vw, 3rem);
-    font-weight: 400;
+    font-size: clamp(3rem, 6vw, 4.8rem);
+    font-weight: 500;
     line-height: 1.1;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.02em;
     color: var(--text-primary);
-    margin: 0 0 0.75rem;
+    margin: 0 0 1.2rem;
   }
 
   .workspace-login-subtitle {
-    font-size: 1rem;
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
     line-height: 1.5;
     color: var(--text-secondary);
     margin: 0;
+    max-width: 32rem;
   }
 
   .workspace-login-card {
@@ -934,6 +936,7 @@ const slides = [
       max-width: 100%;
       align-items: center;
       text-align: center;
+      padding-left: 0;
     }
 
     .workspace-login-copy {
@@ -952,7 +955,7 @@ const slides = [
     }
 
     .workspace-login-title {
-      font-size: 2rem;
+      font-size: clamp(2.2rem, 8vw, 3rem);
     }
   }
 </style>
