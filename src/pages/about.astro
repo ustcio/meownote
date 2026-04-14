@@ -91,20 +91,17 @@ const iconPaths: Record<string, string> = {
           </div>
           
           <div class="hero-visual">
-            <div class="hero-animation-frame">
-              <div class="hero-animation-glow"></div>
-              <LottieAnimation 
-                src="/animations/lottie/Solutions-Agents-animation.json"
-                loop={true}
-                autoplay={true}
-                speed={0.8}
-                framesIn="0,108"
-                framesLoop="109,168"
-                scrollDriven={true}
-                className="hero-lottie"
-              />
-              <div class="hero-animation-border"></div>
-            </div>
+            <div class="hero-animation-glow"></div>
+            <LottieAnimation 
+              src="/animations/lottie/Solutions-Agents-animation.json"
+              loop={true}
+              autoplay={true}
+              speed={0.8}
+              framesIn="0,108"
+              framesLoop="109,168"
+              scrollDriven={true}
+              className="hero-lottie"
+            />
             <div class="hero-float-card hero-float-card--stats">
               <span class="float-card-label">Active Users</span>
               <span class="float-card-value">10K+</span>
@@ -390,16 +387,6 @@ const iconPaths: Record<string, string> = {
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  .hero-animation-frame {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    border-radius: var(--radius-2xl);
-    overflow: hidden;
-    background: var(--bg-secondary);
-    border: 1px solid var(--card-border);
-  }
-
   .hero-animation-glow {
     position: absolute;
     inset: -40%;
@@ -418,29 +405,12 @@ const iconPaths: Record<string, string> = {
     position: relative;
     z-index: 1;
     width: 100%;
-    height: 100%;
+    aspect-ratio: 4 / 3;
   }
 
   .hero-lottie :global(svg) {
     width: 100%;
     height: 100%;
-  }
-
-  .hero-animation-border {
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius-2xl);
-    box-shadow: 
-      0 0 0 1px var(--card-border),
-      0 20px 60px -15px rgba(0, 0, 0, 0.15);
-    pointer-events: none;
-    z-index: 2;
-  }
-
-  [data-theme="dark"] .hero-animation-border {
-    box-shadow: 
-      0 0 0 1px var(--card-border),
-      0 20px 60px -15px rgba(0, 0, 0, 0.5);
   }
 
   .hero-float-card {
@@ -971,7 +941,7 @@ const iconPaths: Record<string, string> = {
       display: block;
     }
 
-    .hero-animation-frame {
+    .hero-lottie {
       aspect-ratio: 3 / 2;
     }
 
