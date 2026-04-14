@@ -406,7 +406,7 @@ const slides = [
     display: grid;
     align-content: start;
     padding: 0 clamp(1.5rem, 3vw, 3rem);
-    padding-top: calc(72px + 2rem);
+    padding-top: 72px;
     padding-bottom: 3rem;
     background: var(--bg-primary);
     color: #171412;
@@ -414,8 +414,14 @@ const slides = [
 
   /* ── Nav ── */
   .workspace-login-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-fixed);
     width: 100%;
     padding: 0 clamp(1.5rem, 3vw, 3rem);
+    background: var(--bg-primary);
   }
 
   .workspace-login-nav__inner {
