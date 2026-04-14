@@ -3,6 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import ScrollAnimation from '@components/ui/ScrollAnimation.astro';
 import HeroEnhanced from '@components/sections/Hero-Enhanced.astro';
 import ContributionGraph from '@components/sections/ContributionGraph.astro';
+import LottieShowcase from '@components/sections/LottieShowcase.astro';
 
 // New dynamic components
 import TabsShowcase from '@components/ui/TabsShowcase.astro';
@@ -118,7 +119,12 @@ const workflows = [
     </ScrollAnimation>
   </section>
 
-  <!-- 3. Stacked Cards Section (Engaging deep dive workflows) -->
+  <!-- 3. Lottie Animation Showcase -->
+  <section class="claude-section container">
+    <LottieShowcase />
+  </section>
+
+  <!-- 4. Stacked Cards Section (Engaging deep dive workflows) -->
   <section class="claude-section container">
     <div class="claude-section-heading" style="margin: 0 auto 1rem; text-align: center;">
       <h2>Built for deep exploration</h2>
@@ -126,7 +132,7 @@ const workflows = [
     <StackedCards cards={workflows} />
   </section>
 
-  <!-- 4. Original Sections (Animated standard pieces) -->
+  <!-- 5. Original Sections (Animated standard pieces) -->
   <section class="claude-section container">
     <ScrollAnimation rootMargin="-20px"><ContributionGraph /></ScrollAnimation>
   </section>

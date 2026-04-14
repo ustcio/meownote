@@ -1,0 +1,206 @@
+---
+import LottieAnimation from '@components/ui/LottieAnimation.astro';
+
+const features = [
+  {
+    lottie: '/animations/lottie/Hand-Link.lottie',
+    title: 'Connect ideas',
+    desc: 'Link concepts across papers, notes, and datasets into a coherent research thread.'
+  },
+  {
+    lottie: '/animations/lottie/Object-CodeCheck.lottie',
+    title: 'Verify results',
+    desc: 'Cross-check derivations, validate code output, and catch subtle errors before they propagate.'
+  },
+  {
+    lottie: '/animations/lottie/Hand-Eye.lottie',
+    title: 'See patterns',
+    desc: 'Spot trends in noisy data that would take hours of manual inspection to uncover.'
+  },
+  {
+    lottie: '/animations/lottie/Node-LineChart.lottie',
+    title: 'Track progress',
+    desc: 'Monitor experiments, visualize trends, and let the data guide your next hypothesis.'
+  },
+];
+---
+
+<section class="lottie-showcase">
+  <div class="lottie-showcase__container">
+    <div class="lottie-showcase__header">
+      <h2 class="lottie-showcase__title">Four modes. One fluid workspace.</h2>
+      <p class="lottie-showcase__subtitle">Each animation represents a different way Maxwell helps you move research forward.</p>
+    </div>
+
+    <div class="lottie-showcase__grid">
+      {features.map((feature, i) => (
+        <div class="lottie-showcase__card" data-index={i}>
+          <div class="lottie-showcase__visual">
+            <LottieAnimation 
+              src={feature.lottie}
+              loop={true}
+              autoplay={true}
+              speed={1}
+              className="lottie-showcase__anim"
+            />
+          </div>
+          <div class="lottie-showcase__content">
+            <h3 class="lottie-showcase__card-title">{feature.title}</h3>
+            <p class="lottie-showcase__card-desc">{feature.desc}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .lottie-showcase {
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-12);
+  }
+
+  .lottie-showcase__container {
+    max-width: var(--container-lg, 1120px);
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+  }
+
+  .lottie-showcase__header {
+    text-align: center;
+    margin-bottom: var(--space-10);
+  }
+
+  .lottie-showcase__title {
+    font-family: var(--font-editorial);
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+    line-height: 1.1;
+    font-weight: var(--font-normal);
+    letter-spacing: 0;
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+  }
+
+  .lottie-showcase__subtitle {
+    font-size: clamp(1rem, 1.8vw, 1.1rem);
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 48rem;
+    margin: 0 auto;
+  }
+
+  .lottie-showcase__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 640px) {
+    .lottie-showcase__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .lottie-showcase__grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-5);
+    }
+  }
+
+  .lottie-showcase__card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    transition: all var(--duration-normal) var(--ease-default);
+    opacity: 0;
+    animation: cardFadeIn 0.5s var(--ease-out) both;
+  }
+
+  .lottie-showcase__card:nth-child(1) { animation-delay: 0.1s; }
+  .lottie-showcase__card:nth-child(2) { animation-delay: 0.2s; }
+  .lottie-showcase__card:nth-child(3) { animation-delay: 0.3s; }
+  .lottie-showcase__card:nth-child(4) { animation-delay: 0.4s; }
+
+  @keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .lottie-showcase__card:hover {
+    border-color: var(--card-border-hover);
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  .lottie-showcase__visual {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .lottie-showcase__visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(var(--border-primary) 1px, transparent 1px);
+    background-size: 16px 16px;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .lottie-showcase__anim {
+    width: 75%;
+    height: 75%;
+    position: relative;
+    z-index: 1;
+  }
+
+  .lottie-showcase__anim :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .lottie-showcase__content {
+    padding: var(--space-5);
+  }
+
+  .lottie-showcase__card-title {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .lottie-showcase__card-desc {
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 767px) {
+    .lottie-showcase {
+      padding-top: var(--space-8);
+      padding-bottom: var(--space-8);
+    }
+
+    .lottie-showcase__header {
+      margin-bottom: var(--space-8);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lottie-showcase__card {
+      animation: none;
+      opacity: 1;
+    }
+  }
+</style>
