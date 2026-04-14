@@ -166,16 +166,52 @@
 <body>
   <div class="header">
     <h1>Claude Lottie 动画全集</h1>
-    <p>从 Claude 桌面应用提取的所有 Lottie 动画资源</p>
+    <p>从 Claude 桌面应用和登录页面提取的所有 Lottie 动画资源</p>
   </div>
 
   <div class="animation-grid">
+    <!-- Overview 主动画 -->
+    <div class="animation-card" style="grid-column: 1 / -1;">
+      <h3>🎬 Overview - 登录页面 Hero 主动画</h3>
+      <div class="animation-wrapper" style="min-height: 400px;">
+        <div id="overview-animation-container" style="width: 100%; height: 400px;"></div>
+      </div>
+      <div class="controls">
+        <button onclick="playOverviewAnimation()">▶ 播放</button>
+        <button onclick="pauseOverviewAnimation()">⏸ 暂停</button>
+        <button onclick="stopOverviewAnimation()">⏹ 停止</button>
+        <button onclick="setOverviewSpeed(0.5)">0.5x</button>
+        <button onclick="setOverviewSpeed(1)">1x</button>
+        <button onclick="setOverviewSpeed(2)">2x</button>
+      </div>
+    </div>
+
     <!-- Hand Link 动画 -->
     <div class="animation-card">
       <h3>🤝 Hand Link - 握手连接</h3>
       <div class="animation-wrapper">
         <dotlottie-player 
           src="./lottie/Hand-Link.lottie" 
+          autoplay 
+          loop
+          style="width: 100%; height: 300px;"
+        ></dotlottie-player>
+      </div>
+      <div class="controls">
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').play()">▶ 播放</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').pause()">⏸ 暂停</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(0.5)">0.5x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(1)">1x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(2)">2x</button>
+      </div>
+    </div>
+
+    <!-- Hand Bolt 动画 -->
+    <div class="animation-card">
+      <h3>⚡ Hand Bolt - 手闪电</h3>
+      <div class="animation-wrapper">
+        <dotlottie-player 
+          src="./lottie/68c2c5f0d67e39645f94ee03_Hand-Bolt.lottie" 
           autoplay 
           loop
           style="width: 100%; height: 300px;"
@@ -210,12 +246,52 @@
       </div>
     </div>
 
+    <!-- Object Megaphone 动画 -->
+    <div class="animation-card">
+      <h3>📢 Object Megaphone - 扩音器</h3>
+      <div class="animation-wrapper">
+        <dotlottie-player 
+          src="./lottie/68c386e1eb9f56957a1ef6f9_Object-Megaphone.lottie" 
+          autoplay 
+          loop
+          style="width: 100%; height: 300px;"
+        ></dotlottie-player>
+      </div>
+      <div class="controls">
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').play()">▶ 播放</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').pause()">⏸ 暂停</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(0.5)">0.5x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(1)">1x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(2)">2x</button>
+      </div>
+    </div>
+
     <!-- Hand Eye 动画 -->
     <div class="animation-card">
       <h3>👁️ Hand Eye - 手眼协调</h3>
       <div class="animation-wrapper">
         <dotlottie-player 
           src="./lottie/Hand-Eye.lottie" 
+          autoplay 
+          loop
+          style="width: 100%; height: 300px;"
+        ></dotlottie-player>
+      </div>
+      <div class="controls">
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').play()">▶ 播放</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').pause()">⏸ 暂停</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(0.5)">0.5x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(1)">1x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(2)">2x</button>
+      </div>
+    </div>
+
+    <!-- Object Clouds 动画 -->
+    <div class="animation-card">
+      <h3>☁️ Object Clouds - 云朵</h3>
+      <div class="animation-wrapper">
+        <dotlottie-player 
+          src="./lottie/68c2c5f0478dd7dc6b7d18bf_Object-Clouds.lottie" 
           autoplay 
           loop
           style="width: 100%; height: 300px;"
@@ -250,6 +326,46 @@
       </div>
     </div>
 
+    <!-- Node Sequence Coding 动画 -->
+    <div class="animation-card">
+      <h3>💻 Node Sequence Coding - 序列编码</h3>
+      <div class="animation-wrapper">
+        <dotlottie-player 
+          src="./lottie/68c2c5f078af5993ae430951_Node-SequenceCoding.lottie" 
+          autoplay 
+          loop
+          style="width: 100%; height: 300px;"
+        ></dotlottie-player>
+      </div>
+      <div class="controls">
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').play()">▶ 播放</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').pause()">⏸ 暂停</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(0.5)">0.5x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(1)">1x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(2)">2x</button>
+      </div>
+    </div>
+
+    <!-- Object Confetti 动画 -->
+    <div class="animation-card">
+      <h3>🎉 Object Confetti - 彩纸庆祝</h3>
+      <div class="animation-wrapper">
+        <dotlottie-player 
+          src="./lottie/68c2c5f1c29637d94c6e1422_Object-Confetti.lottie" 
+          autoplay 
+          loop
+          style="width: 100%; height: 300px;"
+        ></dotlottie-player>
+      </div>
+      <div class="controls">
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').play()">▶ 播放</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').pause()">⏸ 暂停</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(0.5)">0.5x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(1)">1x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(2)">2x</button>
+      </div>
+    </div>
+
     <!-- Solutions Agents 主动画 -->
     <div class="animation-card" style="grid-column: 1 / -1;">
       <h3>🎬 Solutions Agents - 主动画</h3>
@@ -270,10 +386,10 @@
   <div class="info">
     <h3>📋 技术信息</h3>
     <p>
-      <strong>动画数量:</strong> 5 个 Lottie 动画<br>
+      <strong>动画数量:</strong> 11 个 Lottie 动画<br>
       <strong>动画格式:</strong> DotLottie (.lottie) + Lottie JSON<br>
       <strong>渲染引擎:</strong> @dotlottie/player-component + lottie-web v5.12.2<br>
-      <strong>来源:</strong> Claude 桌面应用 / claude.com/solutions/agents<br>
+      <strong>来源:</strong> Claude 桌面应用 / claude.ai/login / claude.com/solutions/agents<br>
       <strong>CDN:</strong> cdn.prod.website-files.com (Webflow)<br>
       <strong>特性:</strong> 自动播放、循环播放、速度控制、响应式布局
     </p>
@@ -283,6 +399,45 @@
   <script src="./libs/dotlottie-player.js"></script>
   <script>
     let heroAnimation = null;
+    let overviewAnimation = null;
+
+    function initOverviewAnimation() {
+      const container = document.getElementById('overview-animation-container');
+      if (container && typeof lottie !== 'undefined') {
+        overviewAnimation = lottie.loadAnimation({
+          container: container,
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          path: './lottie/68c004190c4e4446cd87c39e_Overview.json'
+        });
+
+        overviewAnimation.addEventListener('data_failed', () => {
+          console.error('Overview 动画加载失败');
+          container.innerHTML = '<p class="loading">动画加载失败</p>';
+        });
+
+        overviewAnimation.addEventListener('data_ready', () => {
+          console.log('Overview 动画加载成功');
+        });
+      }
+    }
+
+    function playOverviewAnimation() {
+      if (overviewAnimation) overviewAnimation.play();
+    }
+
+    function pauseOverviewAnimation() {
+      if (overviewAnimation) overviewAnimation.pause();
+    }
+
+    function stopOverviewAnimation() {
+      if (overviewAnimation) overviewAnimation.stop();
+    }
+
+    function setOverviewSpeed(speed) {
+      if (overviewAnimation) overviewAnimation.setSpeed(speed);
+    }
 
     function initHeroAnimation() {
       const container = document.getElementById('hero-animation-container');
@@ -322,7 +477,10 @@
       if (heroAnimation) heroAnimation.setSpeed(speed);
     }
 
-    window.addEventListener('DOMContentLoaded', initHeroAnimation);
+    window.addEventListener('DOMContentLoaded', () => {
+      initOverviewAnimation();
+      initHeroAnimation();
+    });
   </script>
 </body>
 </html>

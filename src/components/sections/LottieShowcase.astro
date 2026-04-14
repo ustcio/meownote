@@ -1,63 +1,226 @@
 ---
-import LottieAnimation from '@components/ui/LottieAnimation.astro';
-
 const features = [
   {
     lottie: '/animations/lottie/Hand-Link.lottie',
-    title: 'Connect ideas',
-    desc: 'Link concepts across papers, notes, and datasets into a coherent research thread.'
+    label: 'Connect',
+    title: 'Link ideas across your research.',
+    desc: 'Maxwell weaves connections between papers, notes, and datasets — surfacing relationships you might otherwise miss.'
   },
   {
     lottie: '/animations/lottie/Object-CodeCheck.lottie',
-    title: 'Verify results',
-    desc: 'Cross-check derivations, validate code output, and catch subtle errors before they propagate.'
+    label: 'Verify',
+    title: 'Trust every result.',
+    desc: 'Cross-check derivations, validate code output, and catch subtle errors before they propagate through your workflow.'
   },
   {
     lottie: '/animations/lottie/Hand-Eye.lottie',
-    title: 'See patterns',
-    desc: 'Spot trends in noisy data that would take hours of manual inspection to uncover.'
+    label: 'Discover',
+    title: 'See what the data hides.',
+    desc: 'Spot patterns in noisy measurements that would take hours of manual inspection to uncover.'
   },
   {
     lottie: '/animations/lottie/Node-LineChart.lottie',
-    title: 'Track progress',
-    desc: 'Monitor experiments, visualize trends, and let the data guide your next hypothesis.'
+    label: 'Track',
+    title: 'Follow the trend, not the noise.',
+    desc: 'Monitor experiments, visualize trajectories, and let the data guide your next hypothesis.'
   },
 ];
 ---
 
 <section class="lottie-showcase">
   <div class="lottie-showcase__container">
-    <div class="lottie-showcase__header">
-      <h2 class="lottie-showcase__title">Four modes. One fluid workspace.</h2>
-      <p class="lottie-showcase__subtitle">Each animation represents a different way Maxwell helps you move research forward.</p>
-    </div>
-
-    <div class="lottie-showcase__grid">
-      {features.map((feature, i) => (
-        <div class="lottie-showcase__card" data-index={i}>
-          <div class="lottie-showcase__visual">
-            <LottieAnimation 
-              src={feature.lottie}
-              loop={true}
-              autoplay={true}
-              speed={1}
-              className="lottie-showcase__anim"
-            />
-          </div>
-          <div class="lottie-showcase__content">
-            <h3 class="lottie-showcase__card-title">{feature.title}</h3>
-            <p class="lottie-showcase__card-desc">{feature.desc}</p>
-          </div>
+    <div class="lottie-showcase__layout">
+      
+      <!-- Left: Text Content -->
+      <div class="lottie-showcase__copy">
+        <span class="lottie-showcase__kicker">How it works</span>
+        <h2 class="lottie-showcase__title">Four modes.<br/>One steady partner.</h2>
+        <p class="lottie-showcase__subtitle">Maxwell adapts to the way you work — connecting, verifying, discovering, and tracking — so you can focus on what matters.</p>
+        
+        <div class="lottie-showcase__steps">
+          {features.map((feature, i) => (
+            <div class="lottie-showcase__step" data-index={i}>
+              <span class="lottie-showcase__step-label">{feature.label}</span>
+              <h3 class="lottie-showcase__step-title">{feature.title}</h3>
+              <p class="lottie-showcase__step-desc">{feature.desc}</p>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
+
+      <!-- Right: Animation Stage -->
+      <div class="lottie-showcase__stage">
+        <div class="lottie-showcase__viewport">
+          {features.map((feature, i) => (
+            <div class="lottie-showcase__slide" data-slide={i} data-src={feature.lottie}>
+              <div class="lottie-showcase__anim-container" id={`lottie-slide-${i}`}></div>
+              <span class="lottie-showcase__slide-label">{feature.label}</span>
+            </div>
+          ))}
+        </div>
+        <div class="lottie-showcase__progress">
+          {features.map((_, i) => (
+            <div class="lottie-showcase__progress-dot" data-dot={i}></div>
+          ))}
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
+
+<script>
+  const ANIMATION_DURATION = 3000;
+  const TRANSITION_DURATION = 600;
+  const TOTAL_SLIDES = 4;
+
+  let currentSlide = 0;
+  let animationInstances = [];
+  let autoplayTimer = null;
+  let isTransitioning = false;
+
+  function initLottieSlides() {
+    const slides = document.querySelectorAll('.lottie-showcase__slide');
+    
+    slides.forEach((slide, index) => {
+      const container = document.getElementById('lottie-slide-' + index);
+      if (!container) return;
+
+      const lottieSrc = slide.getAttribute('data-src');
+      if (!lottieSrc) return;
+
+      const isDotLottie = lottieSrc.endsWith('.lottie');
+
+      if (isDotLottie && window.customElements && window.customElements.get('dotlottie-player')) {
+        const player = document.createElement('dotlottie-player');
+        player.setAttribute('src', lottieSrc);
+        player.setAttribute('autoplay', 'true');
+        player.setAttribute('loop', 'true');
+        player.style.width = '100%';
+        player.style.height = '100%';
+        container.appendChild(player);
+        animationInstances[index] = player;
+      } else if (!isDotLottie && window.lottie) {
+        const anim = window.lottie.loadAnimation({
+          container: container,
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          path: lottieSrc,
+        });
+        animationInstances[index] = anim;
+      }
+    });
+
+    showSlide(0);
+    startAutoplay();
+  }
+
+  function showSlide(index) {
+    if (isTransitioning) return;
+    isTransitioning = true;
+
+    const slides = document.querySelectorAll('.lottie-showcase__slide');
+    const dots = document.querySelectorAll('.lottie-showcase__progress-dot');
+    const steps = document.querySelectorAll('.lottie-showcase__step');
+
+    slides.forEach(function(slide, i) {
+      if (i === index) {
+        slide.classList.add('is-active');
+        slide.classList.remove('is-exit');
+      } else if (slide.classList.contains('is-active')) {
+        slide.classList.add('is-exit');
+        slide.classList.remove('is-active');
+      }
+    });
+
+    dots.forEach(function(dot, i) {
+      if (i === index) {
+        dot.classList.add('is-active');
+      } else {
+        dot.classList.remove('is-active');
+      }
+    });
+
+    steps.forEach(function(step, i) {
+      if (i === index) {
+        step.classList.add('is-active');
+      } else {
+        step.classList.remove('is-active');
+      }
+    });
+
+    currentSlide = index;
+
+    setTimeout(function() {
+      isTransitioning = false;
+    }, TRANSITION_DURATION);
+  }
+
+  function nextSlide() {
+    var next = (currentSlide + 1) % TOTAL_SLIDES;
+    showSlide(next);
+  }
+
+  function startAutoplay() {
+    stopAutoplay();
+    autoplayTimer = setInterval(nextSlide, ANIMATION_DURATION);
+  }
+
+  function stopAutoplay() {
+    if (autoplayTimer) {
+      clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    }
+  }
+
+  function waitForLottie(callback, retries) {
+    if (retries === undefined) retries = 0;
+    var hasLottie = window.lottie;
+    var hasDotLottie = window.customElements && window.customElements.get('dotlottie-player');
+    if ((hasLottie && hasDotLottie) || retries > 50) {
+      callback();
+      return;
+    }
+    setTimeout(function() {
+      waitForLottie(callback, retries + 1);
+    }, 100);
+  }
+
+  function loadDotLottiePlayer(callback) {
+    if (window.customElements && window.customElements.get('dotlottie-player')) {
+      callback();
+      return;
+    }
+    var script = document.createElement('script');
+    script.src = '/animations/libs/dotlottie-player.js';
+    script.onload = callback;
+    script.onerror = callback;
+    document.head.appendChild(script);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    loadDotLottiePlayer(function() {
+      waitForLottie(function() {
+        setTimeout(initLottieSlides, 200);
+      });
+    });
+  });
+
+  document.addEventListener('astro:page-load', function() {
+    loadDotLottiePlayer(function() {
+      waitForLottie(function() {
+        setTimeout(initLottieSlides, 200);
+      });
+    });
+  });
+</script>
 
 <style>
   .lottie-showcase {
     padding-top: var(--space-12);
     padding-bottom: var(--space-12);
+    overflow: hidden;
   }
 
   .lottie-showcase__container {
@@ -66,9 +229,33 @@ const features = [
     padding: 0 var(--space-4);
   }
 
-  .lottie-showcase__header {
-    text-align: center;
-    margin-bottom: var(--space-10);
+  .lottie-showcase__layout {
+    display: grid;
+    gap: var(--space-8);
+    align-items: center;
+  }
+
+  @media (min-width: 900px) {
+    .lottie-showcase__layout {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-12);
+    }
+  }
+
+  /* ===== Left: Copy ===== */
+  .lottie-showcase__copy {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lottie-showcase__kicker {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--color-primary);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: var(--font-semibold);
+    margin-bottom: var(--space-3);
   }
 
   .lottie-showcase__title {
@@ -78,129 +265,196 @@ const features = [
     font-weight: var(--font-normal);
     letter-spacing: 0;
     color: var(--text-primary);
-    margin-bottom: var(--space-3);
+    margin-bottom: var(--space-4);
   }
 
   .lottie-showcase__subtitle {
     font-size: clamp(1rem, 1.8vw, 1.1rem);
     line-height: 1.6;
     color: var(--text-secondary);
-    max-width: 48rem;
-    margin: 0 auto;
+    margin-bottom: var(--space-8);
+    max-width: 32rem;
   }
 
-  .lottie-showcase__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-6);
-  }
-
-  @media (min-width: 640px) {
-    .lottie-showcase__grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .lottie-showcase__grid {
-      grid-template-columns: repeat(4, 1fr);
-      gap: var(--space-5);
-    }
-  }
-
-  .lottie-showcase__card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    transition: all var(--duration-normal) var(--ease-default);
-    opacity: 0;
-    animation: cardFadeIn 0.5s var(--ease-out) both;
-  }
-
-  .lottie-showcase__card:nth-child(1) { animation-delay: 0.1s; }
-  .lottie-showcase__card:nth-child(2) { animation-delay: 0.2s; }
-  .lottie-showcase__card:nth-child(3) { animation-delay: 0.3s; }
-  .lottie-showcase__card:nth-child(4) { animation-delay: 0.4s; }
-
-  @keyframes cardFadeIn {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .lottie-showcase__card:hover {
-    border-color: var(--card-border-hover);
-    transform: translateY(-4px);
-    box-shadow: var(--card-shadow-hover);
-  }
-
-  .lottie-showcase__visual {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    background: var(--bg-secondary);
+  .lottie-showcase__steps {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
+    flex-direction: column;
+    gap: var(--space-5);
   }
 
-  .lottie-showcase__visual::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(var(--border-primary) 1px, transparent 1px);
-    background-size: 16px 16px;
+  .lottie-showcase__step {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border-left: 3px solid transparent;
+    transition: all var(--duration-normal) var(--ease-default);
     opacity: 0.4;
-    pointer-events: none;
   }
 
-  .lottie-showcase__anim {
-    width: 75%;
-    height: 75%;
-    position: relative;
-    z-index: 1;
+  .lottie-showcase__step.is-active {
+    opacity: 1;
+    border-left-color: var(--color-primary);
+    background: var(--bg-secondary);
   }
 
-  .lottie-showcase__anim :global(svg) {
-    width: 100%;
-    height: 100%;
+  .lottie-showcase__step-label {
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    color: var(--color-primary);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: var(--font-semibold);
+    display: block;
+    margin-bottom: var(--space-1);
   }
 
-  .lottie-showcase__content {
-    padding: var(--space-5);
-  }
-
-  .lottie-showcase__card-title {
+  .lottie-showcase__step-title {
     font-family: var(--font-display);
     font-size: var(--text-base);
     font-weight: var(--font-medium);
     color: var(--text-primary);
-    margin-bottom: var(--space-2);
+    margin-bottom: var(--space-1);
     letter-spacing: var(--tracking-tight);
   }
 
-  .lottie-showcase__card-desc {
+  .lottie-showcase__step-desc {
     font-size: var(--text-sm);
     line-height: 1.6;
     color: var(--text-secondary);
   }
 
+  /* ===== Right: Stage ===== */
+  .lottie-showcase__stage {
+    position: relative;
+  }
+
+  .lottie-showcase__viewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-2xl);
+    overflow: hidden;
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+  }
+
+  .lottie-showcase__viewport::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(var(--border-primary) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .lottie-showcase__slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity var(--transition-smooth) var(--ease-out),
+                transform var(--transition-smooth) var(--ease-out);
+    pointer-events: none;
+  }
+
+  .lottie-showcase__slide.is-active {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+
+  .lottie-showcase__slide.is-exit {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  .lottie-showcase__anim-container {
+    width: 80%;
+    height: 80%;
+    position: relative;
+    z-index: 2;
+  }
+
+  .lottie-showcase__anim-container :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .lottie-showcase__slide-label {
+    position: absolute;
+    bottom: var(--space-5);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: var(--font-semibold);
+    z-index: 3;
+    opacity: 0;
+    transition: opacity var(--duration-normal) var(--ease-default) 0.3s;
+  }
+
+  .lottie-showcase__slide.is-active .lottie-showcase__slide-label {
+    opacity: 1;
+  }
+
+  .lottie-showcase__progress {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+  }
+
+  .lottie-showcase__progress-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border-primary);
+    transition: all var(--duration-normal) var(--ease-default);
+  }
+
+  .lottie-showcase__progress-dot.is-active {
+    background: var(--color-primary);
+    transform: scale(1.3);
+  }
+
+  /* ===== Responsive ===== */
   @media (max-width: 767px) {
     .lottie-showcase {
       padding-top: var(--space-8);
       padding-bottom: var(--space-8);
     }
 
-    .lottie-showcase__header {
-      margin-bottom: var(--space-8);
+    .lottie-showcase__layout {
+      gap: var(--space-6);
+    }
+
+    .lottie-showcase__viewport {
+      aspect-ratio: 4 / 3;
+    }
+
+    .lottie-showcase__subtitle {
+      margin-bottom: var(--space-6);
+    }
+
+    .lottie-showcase__steps {
+      gap: var(--space-3);
+    }
+
+    .lottie-showcase__step {
+      padding: var(--space-3);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .lottie-showcase__card {
-      animation: none;
-      opacity: 1;
+    .lottie-showcase__slide {
+      transition: none;
     }
   }
 </style>
