@@ -403,11 +403,8 @@ const slides = [
 <style>
   .workspace-login-page {
     min-height: 100vh;
-    display: grid;
-    align-content: start;
-    padding: 0 clamp(1.5rem, 3vw, 3rem);
-    padding-top: 72px;
-    padding-bottom: 3rem;
+    display: flex;
+    flex-direction: column;
     background: var(--bg-primary);
     color: #171412;
   }
@@ -431,7 +428,7 @@ const slides = [
     align-items: center;
     justify-content: space-between;
     gap: 1.5rem;
-    min-height: 72px;
+    height: 72px;
   }
 
   .workspace-login-brand {
@@ -512,6 +509,10 @@ const slides = [
   .workspace-login-shell {
     width: min(1200px, 100%);
     margin: 0 auto;
+    padding-top: calc(72px + 2rem);
+    padding-left: clamp(1.5rem, 3vw, 3rem);
+    padding-right: clamp(1.5rem, 3vw, 3rem);
+    padding-bottom: 3rem;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
