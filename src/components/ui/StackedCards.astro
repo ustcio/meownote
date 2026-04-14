@@ -16,13 +16,7 @@ const { class: className = '', cards } = Astro.props;
   <div class="cards-wrapper">
     {cards.map((card, index) => (
       <div class="stacked-card" style={`--index: ${index}; --total: ${cards.length}; background: ${card.background || 'var(--card-bg)'}`}>
-        <div class:list={[
-          "card-inner",
-          "claude-surface",
-          index === 0 ? 'card-inner--first' : '',
-          index === 1 ? 'card-inner--second' : '',
-          index === cards.length - 1 ? 'card-inner--last' : ''
-        ]}>
+        <div class="card-inner claude-surface">
           {card.tag && <span class="card__tag">{card.tag}</span>}
           <h3 class="card__title">{card.title}</h3>
           <p class="card__description">{card.description}</p>
@@ -67,20 +61,6 @@ const { class: className = '', cards } = Astro.props;
     border-radius: var(--radius-2xl);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04);
     border-top: 1px solid rgba(255, 255, 255, 0.5); /* sleek top highlight */
-  }
-
-  .card-inner--first {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
-  .card-inner--second {
-    border-radius: 0;
-  }
-
-  .card-inner--last {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
   }
 
   .card__tag {
