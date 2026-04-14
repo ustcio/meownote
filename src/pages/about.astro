@@ -1,6 +1,7 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import { t } from '@i18n/translate';
+import LottieAnimation from '@components/ui/LottieAnimation.astro';
 
 const values = [
   {
@@ -68,22 +69,51 @@ const iconPaths: Record<string, string> = {
   <section class="about-page">
     <div class="about-container">
       
-      <!-- Hero Section -->
+      <!-- Hero Section with Lottie Animation -->
       <div class="about-hero">
-        <div class="hero-kicker">
-          <span class="kicker-dot"></span>
-          <span class="kicker-text">{t('about.badge')}</span>
-        </div>
-        <h1 class="hero-title">{t('about.title')}</h1>
-        <p class="hero-subtitle">{t('about.subtitle')}</p>
-        <div class="hero-actions">
-          <a href="/chatbot/" class="hero-btn-primary">
-            <span>{t('about.cta.primary')}</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </a>
-          <a href="/kit/" class="hero-btn-secondary">{t('about.cta.secondary')}</a>
+        <div class="hero-layout">
+          <div class="hero-content">
+            <div class="hero-kicker">
+              <span class="kicker-dot"></span>
+              <span class="kicker-text">{t('about.badge')}</span>
+            </div>
+            <h1 class="hero-title">{t('about.title')}</h1>
+            <p class="hero-subtitle">{t('about.subtitle')}</p>
+            <div class="hero-actions">
+              <a href="/chatbot/" class="hero-btn-primary">
+                <span>{t('about.cta.primary')}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </a>
+              <a href="/kit/" class="hero-btn-secondary">{t('about.cta.secondary')}</a>
+            </div>
+          </div>
+          
+          <div class="hero-visual">
+            <div class="hero-animation-frame">
+              <div class="hero-animation-glow"></div>
+              <LottieAnimation 
+                src="/animations/lottie/Solutions-Agents-animation.json"
+                loop={true}
+                autoplay={true}
+                speed={0.8}
+                framesIn="0,108"
+                framesLoop="109,168"
+                scrollDriven={true}
+                className="hero-lottie"
+              />
+              <div class="hero-animation-border"></div>
+            </div>
+            <div class="hero-float-card hero-float-card--stats">
+              <span class="float-card-label">Active Users</span>
+              <span class="float-card-value">10K+</span>
+            </div>
+            <div class="hero-float-card hero-float-card--uptime">
+              <span class="float-card-dot"></span>
+              <span class="float-card-text">99.9% uptime</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -211,9 +241,26 @@ const iconPaths: Record<string, string> = {
 
   /* ===== Hero Section ===== */
   .about-hero {
-    max-width: 680px;
     margin-bottom: var(--space-12);
     padding-top: var(--space-4);
+  }
+
+  .hero-layout {
+    display: grid;
+    gap: var(--space-8);
+    align-items: center;
+  }
+
+  @media (min-width: 900px) {
+    .hero-layout {
+      grid-template-columns: 1fr 1.1fr;
+      gap: var(--space-12);
+    }
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
   }
 
   .hero-kicker {
@@ -253,6 +300,8 @@ const iconPaths: Record<string, string> = {
     letter-spacing: 0;
     color: var(--text-primary);
     margin-bottom: var(--space-4);
+    opacity: 0;
+    animation: heroUp 0.6s var(--ease-out) 0.1s both;
   }
 
   .hero-subtitle {
@@ -262,6 +311,8 @@ const iconPaths: Record<string, string> = {
     max-width: 560px;
     margin: 0 0 var(--space-6);
     line-height: 1.65;
+    opacity: 0;
+    animation: heroUp 0.6s var(--ease-out) 0.2s both;
   }
 
   .hero-actions {
@@ -269,6 +320,8 @@ const iconPaths: Record<string, string> = {
     align-items: center;
     gap: var(--space-3);
     flex-wrap: wrap;
+    opacity: 0;
+    animation: heroUp 0.6s var(--ease-out) 0.3s both;
   }
 
   .hero-btn-primary {
@@ -315,6 +368,155 @@ const iconPaths: Record<string, string> = {
   }
 
   .hero-btn-secondary:hover {
+    color: var(--text-primary);
+  }
+
+  /* ===== Hero Visual / Animation ===== */
+  .hero-visual {
+    position: relative;
+    display: none;
+  }
+
+  @media (min-width: 900px) {
+    .hero-visual {
+      display: block;
+      opacity: 0;
+      animation: heroVisualIn 0.8s var(--ease-out) 0.3s both;
+    }
+  }
+
+  @keyframes heroVisualIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .hero-animation-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-2xl);
+    overflow: hidden;
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+  }
+
+  .hero-animation-glow {
+    position: absolute;
+    inset: -40%;
+    background: radial-gradient(ellipse at center, var(--color-primary-alpha-10) 0%, transparent 70%);
+    animation: glowPulse 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes glowPulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.05); }
+  }
+
+  .hero-lottie {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-lottie :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-animation-border {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-2xl);
+    box-shadow: 
+      0 0 0 1px var(--card-border),
+      0 20px 60px -15px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  [data-theme="dark"] .hero-animation-border {
+    box-shadow: 
+      0 0 0 1px var(--card-border),
+      0 20px 60px -15px rgba(0, 0, 0, 0.5);
+  }
+
+  .hero-float-card {
+    position: absolute;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3) var(--space-4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(12px);
+    z-index: 3;
+  }
+
+  [data-theme="dark"] .hero-float-card {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .hero-float-card--stats {
+    top: -16px;
+    right: -12px;
+    animation: floatCard1 6s ease-in-out infinite;
+  }
+
+  .hero-float-card--uptime {
+    bottom: 24px;
+    left: -20px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    animation: floatCard2 7s ease-in-out infinite;
+    animation-delay: 1s;
+  }
+
+  @keyframes floatCard1 {
+    0%, 100% { transform: translateY(0) rotate(2deg); }
+    50% { transform: translateY(-8px) rotate(-1deg); }
+  }
+
+  @keyframes floatCard2 {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-6px) rotate(1deg); }
+  }
+
+  .float-card-label {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: var(--font-semibold);
+    margin-bottom: 2px;
+  }
+
+  .float-card-value {
+    font-family: var(--font-number);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  .float-card-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #28c840;
+    box-shadow: 0 0 0 3px rgba(40, 200, 64, 0.2);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  .float-card-text {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
     color: var(--text-primary);
   }
 
@@ -759,6 +961,28 @@ const iconPaths: Record<string, string> = {
 
     .about-hero {
       margin-bottom: var(--space-8);
+    }
+
+    .hero-layout {
+      gap: var(--space-6);
+    }
+
+    .hero-visual {
+      display: block;
+    }
+
+    .hero-animation-frame {
+      aspect-ratio: 3 / 2;
+    }
+
+    .hero-float-card--stats {
+      top: -10px;
+      right: 4px;
+    }
+
+    .hero-float-card--uptime {
+      bottom: 12px;
+      left: 4px;
     }
 
     .stats-bar {

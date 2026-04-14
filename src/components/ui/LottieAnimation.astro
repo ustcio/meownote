@@ -1,0 +1,190 @@
+---
+interface Props {
+  src: string;
+  loop?: boolean;
+  autoplay?: boolean;
+  speed?: number;
+  framesIn?: string;
+  framesLoop?: string;
+  className?: string;
+  scrollDriven?: boolean;
+}
+
+const { 
+  src, 
+  loop = true, 
+  autoplay = true, 
+  speed = 1,
+  framesIn,
+  framesLoop,
+  className = '',
+  scrollDriven = false
+} = Astro.props;
+
+const isDotLottie = src.endsWith('.lottie');
+const containerId = `lottie-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div 
+  id={containerId} 
+  class={`lottie-container ${className}`}
+  data-lottie-src={src}
+  data-lottie-loop={loop.toString()}
+  data-lottie-autoplay={autoplay.toString()}
+  data-lottie-speed={speed.toString()}
+  data-lottie-frames-in={framesIn || ''}
+  data-lottie-frames-loop={framesLoop || ''}
+  data-lottie-scroll-driven={scrollDriven.toString()}
+  data-lottie-type={isDotLottie ? 'dotlottie' : 'json'}
+></div>
+
+{isDotLottie ? (
+  <script is:inline>
+    function initDotLottiePlayer() {
+      const containers = document.querySelectorAll('[data-lottie-type="dotlottie"]');
+      if (!containers.length || !window.customElements?.get('dotlottie-player')) {
+        setTimeout(initDotLottiePlayer, 100);
+        return;
+      }
+
+      containers.forEach(container => {
+        const player = document.createElement('dotlottie-player');
+        player.setAttribute('src', container.dataset.lottieSrc);
+        player.setAttribute('autoplay', container.dataset.lottieAutoplay);
+        player.setAttribute('loop', container.dataset.lottieLoop);
+        player.setAttribute('speed', container.dataset.lottieSpeed);
+        player.style.width = '100%';
+        player.style.height = '100%';
+        container.appendChild(player);
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initDotLottiePlayer);
+    } else {
+      initDotLottiePlayer();
+    }
+  </script>
+) : (
+  <script is:inline>
+    function initLottieAnimations() {
+      const containers = document.querySelectorAll('[data-lottie-type="json"]');
+      if (!containers.length || !window.lottie) {
+        if (!window.lottie) {
+          setTimeout(initLottieAnimations, 100);
+        }
+        return;
+      }
+
+      containers.forEach(container => {
+        const config = {
+          container: container,
+          renderer: 'svg',
+          loop: container.dataset.lottieLoop === 'true',
+          autoplay: container.dataset.lottieAutoplay === 'true',
+          path: container.dataset.lottieSrc,
+        };
+
+        const anim = window.lottie.loadAnimation(config);
+        const speed = parseFloat(container.dataset.lottieSpeed) || 1;
+        if (speed !== 1) anim.setSpeed(speed);
+
+        const framesIn = container.dataset.lottieFramesIn;
+        const framesLoop = container.dataset.lottieFramesLoop;
+        const scrollDriven = container.dataset.lottieScrollDriven === 'true';
+
+        if (framesIn || framesLoop) {
+          const inRange = framesIn ? framesIn.split(',').map(Number) : [0, 0];
+          const loopRange = framesLoop ? framesLoop.split(',').map(Number) : null;
+          let hasPlayedIntro = false;
+
+          anim.addEventListener('DOMLoaded', () => {
+            const totalFrames = anim.totalFrames;
+            if (scrollDriven) {
+              container._lottieAnim = anim;
+              container._lottieConfig = { inRange, loopRange, totalFrames };
+            } else {
+              anim.goToAndStop(inRange[0], true);
+              anim.playSegments([inRange[0], inRange[1]], true);
+              if (loopRange) {
+                anim.addEventListener('complete', () => {
+                  anim.playSegments([loopRange[0], loopRange[1]], true);
+                });
+              }
+            }
+          });
+        }
+
+        container._lottieAnim = anim;
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLottieAnimations);
+    } else {
+      initLottieAnimations();
+    }
+  </script>
+)}
+
+{scrollDriven && (
+  <script is:inline>
+    function setupScrollDrivenAnimations() {
+      const scrollContainers = document.querySelectorAll('[data-lottie-scroll-driven="true"]');
+      if (!scrollContainers.length) return;
+
+      let ticking = false;
+
+      function updateScrollAnimations() {
+        scrollContainers.forEach(container => {
+          const anim = container._lottieAnim;
+          const config = container._lottieConfig;
+          if (!anim || !config) return;
+
+          const rect = container.getBoundingClientRect();
+          const windowHeight = window.innerHeight;
+          
+          const startTrigger = windowHeight * 0.8;
+          const endTrigger = -rect.height * 0.2;
+          
+          let progress = 1 - (rect.top / startTrigger);
+          progress = Math.max(0, Math.min(1, progress));
+
+          const { inRange, loopRange, totalFrames } = config;
+          let targetFrame;
+
+          if (progress < 0.5 && inRange[1] > inRange[0]) {
+            const introProgress = progress / 0.5;
+            targetFrame = inRange[0] + (inRange[1] - inRange[0]) * introProgress;
+          } else if (loopRange) {
+            const loopProgress = (progress - 0.5) / 0.5;
+            const loopFrames = loopRange[1] - loopRange[0];
+            targetFrame = loopRange[0] + (loopFrames * (loopProgress % 1));
+          } else {
+            targetFrame = inRange[0] + (inRange[1] - inRange[0]) * progress;
+          }
+
+          anim.goToAndStop(targetFrame, true);
+        });
+
+        ticking = false;
+      }
+
+      function onScroll() {
+        if (!ticking) {
+          requestAnimationFrame(updateScrollAnimations);
+          ticking = true;
+        }
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      updateScrollAnimations();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupScrollDrivenAnimations);
+    } else {
+      setupScrollDrivenAnimations();
+    }
+  </script>
+)}

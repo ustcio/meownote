@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Lottie 动画全集</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem 0;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #d97706 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      color: #888;
+      font-size: 1rem;
+    }
+
+    .animation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .animation-card {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .animation-card:hover {
+      border-color: #d97706;
+      box-shadow: 0 0 20px rgba(217, 119, 6, 0.1);
+    }
+
+    .animation-card h3 {
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #e5e5e5;
+    }
+
+    .animation-wrapper {
+      width: 100%;
+      min-height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f0f0f;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .animation-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(217, 119, 6, 0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .animation-wrapper dotlottie-player,
+    .animation-wrapper lottie-player {
+      width: 100%;
+      height: 300px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: #2a2a2a;
+      color: #fff;
+      border: 1px solid #3a3a3a;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: #3a3a3a;
+      border-color: #d97706;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    .info {
+      max-width: 1400px;
+      margin: 3rem auto 0;
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .info h3 {
+      margin-bottom: 0.75rem;
+      font-size: 1.1rem;
+      color: #d97706;
+    }
+
+    .info p {
+      color: #888;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+
+    .loading {
+      color: #666;
+      font-size: 0.9rem;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @media (max-width: 768px) {
+      .animation-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .header h1 {
+        font-size: 1.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Claude Lottie 动画全集</h1>
+    <p>从 Claude 桌面应用提取的所有 Lottie 动画资源</p>
+  </div>
+
+  <div class="animation-grid">
+    <!-- Hand Link 动画 -->
+    <div class="animation-card">
+      <h3>🤝 Hand Link - 握手连接</h3>
+      <div class="animation-wrapper">
+        <dotlottie-player 
+          src="./lottie/Hand-Link.lottie" 
+          autoplay 
+          loop
+          style="width: 100%; height: 300px;"
+        ></dotlottie-player>
+      </div>
+      <div class="controls">
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').play()">▶ 播放</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').pause()">⏸ 暂停</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(0.5)">0.5x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(1)">1x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(2)">2x</button>
+      </div>
+    </div>
+
+    <!-- Object Code Check 动画 -->
+    <div class="animation-card">
+      <h3>✅ Object Code Check - 代码检查</h3>
+      <div class="animation-wrapper">
+        <dotlottie-player 
+          src="./lottie/Object-CodeCheck.lottie" 
+          autoplay 
+          loop
+          style="width: 100%; height: 300px;"
+        ></dotlottie-player>
+      </div>
+      <div class="controls">
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').play()">▶ 播放</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').pause()">⏸ 暂停</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(0.5)">0.5x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(1)">1x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(2)">2x</button>
+      </div>
+    </div>
+
+    <!-- Hand Eye 动画 -->
+    <div class="animation-card">
+      <h3>👁️ Hand Eye - 手眼协调</h3>
+      <div class="animation-wrapper">
+        <dotlottie-player 
+          src="./lottie/Hand-Eye.lottie" 
+          autoplay 
+          loop
+          style="width: 100%; height: 300px;"
+        ></dotlottie-player>
+      </div>
+      <div class="controls">
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').play()">▶ 播放</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').pause()">⏸ 暂停</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(0.5)">0.5x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(1)">1x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(2)">2x</button>
+      </div>
+    </div>
+
+    <!-- Node Line Chart 动画 -->
+    <div class="animation-card">
+      <h3>📈 Node Line Chart - 节点折线图</h3>
+      <div class="animation-wrapper">
+        <dotlottie-player 
+          src="./lottie/Node-LineChart.lottie" 
+          autoplay 
+          loop
+          style="width: 100%; height: 300px;"
+        ></dotlottie-player>
+      </div>
+      <div class="controls">
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').play()">▶ 播放</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').pause()">⏸ 暂停</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(0.5)">0.5x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(1)">1x</button>
+        <button onclick="this.closest('.animation-card').querySelector('dotlottie-player').setSpeed(2)">2x</button>
+      </div>
+    </div>
+
+    <!-- Solutions Agents 主动画 -->
+    <div class="animation-card" style="grid-column: 1 / -1;">
+      <h3>🎬 Solutions Agents - 主动画</h3>
+      <div class="animation-wrapper" style="min-height: 400px;">
+        <div id="hero-animation-container" style="width: 100%; height: 400px;"></div>
+      </div>
+      <div class="controls">
+        <button onclick="playHeroAnimation()">▶ 播放</button>
+        <button onclick="pauseHeroAnimation()">⏸ 暂停</button>
+        <button onclick="stopHeroAnimation()">⏹ 停止</button>
+        <button onclick="setHeroSpeed(0.5)">0.5x</button>
+        <button onclick="setHeroSpeed(1)">1x</button>
+        <button onclick="setHeroSpeed(2)">2x</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="info">
+    <h3>📋 技术信息</h3>
+    <p>
+      <strong>动画数量:</strong> 5 个 Lottie 动画<br>
+      <strong>动画格式:</strong> DotLottie (.lottie) + Lottie JSON<br>
+      <strong>渲染引擎:</strong> @dotlottie/player-component + lottie-web v5.12.2<br>
+      <strong>来源:</strong> Claude 桌面应用 / claude.com/solutions/agents<br>
+      <strong>CDN:</strong> cdn.prod.website-files.com (Webflow)<br>
+      <strong>特性:</strong> 自动播放、循环播放、速度控制、响应式布局
+    </p>
+  </div>
+
+  <script src="./libs/lottie.min.js"></script>
+  <script src="./libs/dotlottie-player.js"></script>
+  <script>
+    let heroAnimation = null;
+
+    function initHeroAnimation() {
+      const container = document.getElementById('hero-animation-container');
+      if (container && typeof lottie !== 'undefined') {
+        heroAnimation = lottie.loadAnimation({
+          container: container,
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          path: './lottie/Solutions-Agents-animation.json'
+        });
+
+        heroAnimation.addEventListener('data_failed', () => {
+          console.error('Hero 动画加载失败');
+          container.innerHTML = '<p class="loading">动画加载失败</p>';
+        });
+
+        heroAnimation.addEventListener('data_ready', () => {
+          console.log('Hero 动画加载成功');
+        });
+      }
+    }
+
+    function playHeroAnimation() {
+      if (heroAnimation) heroAnimation.play();
+    }
+
+    function pauseHeroAnimation() {
+      if (heroAnimation) heroAnimation.pause();
+    }
+
+    function stopHeroAnimation() {
+      if (heroAnimation) heroAnimation.stop();
+    }
+
+    function setHeroSpeed(speed) {
+      if (heroAnimation) heroAnimation.setSpeed(speed);
+    }
+
+    window.addEventListener('DOMContentLoaded', initHeroAnimation);
+  </script>
+</body>
+</html>
