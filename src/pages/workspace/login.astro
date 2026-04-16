@@ -46,6 +46,7 @@ const slides = [
 
         <div class="workspace-login-nav__links" aria-label="Workspace navigation">
           <a href="/chatbot/">Chat</a>
+          <a href="/calendar/">Calendar</a>
           <a href="/workspace/">Workspace</a>
           <a href="/kit/">Kit</a>
           <a href="/about/">About</a>
@@ -186,8 +187,10 @@ const slides = [
         return USER_KEYS.map((key) => readJSON(key)).find(Boolean) || null;
       }
 
-      function isSafeWorkspacePath(path) {
-        return Boolean(path) && path.startsWith('/workspace') && !path.startsWith('/workspace/login');
+      function isSafeReturnPath(path) {
+        return Boolean(path)
+          && (path.startsWith('/workspace') || path.startsWith('/calendar'))
+          && !path.startsWith('/workspace/login');
       }
 
       function persistSession(token, user) {
@@ -214,7 +217,7 @@ const slides = [
       function redirectToWorkspace(path) {
         if (isRedirecting) return;
         isRedirecting = true;
-        window.location.replace(isSafeWorkspacePath(path) ? path : '/workspace/');
+        window.location.replace(isSafeReturnPath(path) ? path : '/workspace/');
       }
 
       function hydrateIfLoggedIn() {
