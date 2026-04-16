@@ -193,6 +193,12 @@ const slides = [
           && !path.startsWith('/workspace/login');
       }
 
+      function getReturnPath() {
+        const params = new URLSearchParams(window.location.search);
+        const next = params.get('next') || '';
+        return isSafeReturnPath(next) ? next : '/workspace/';
+      }
+
       function persistSession(token, user) {
         if (window.__meownoteAuth?.setSession) {
           window.__meownoteAuth.setSession(token, user);
@@ -232,7 +238,7 @@ const slides = [
 
         if (token && isAdminUser(user)) {
           localStorage.setItem('meownote_redirect_count', String(redirectCount + 1));
-          redirectToWorkspace('/workspace/');
+          redirectToWorkspace(getReturnPath());
         } else {
           localStorage.removeItem('meownote_redirect_count');
         }
@@ -291,7 +297,7 @@ const slides = [
 
           persistSession(result.token, user);
           window.__meownoteToast?.show('Workspace access granted', 'success');
-          redirectToWorkspace('/workspace/');
+          redirectToWorkspace(getReturnPath());
         } catch (error) {
           setError(error instanceof Error ? error.message : '登录失败，请稍后重试。');
           window.__meownoteToast?.show('Workspace login failed', 'error');
