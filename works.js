@@ -1813,8 +1813,9 @@ async function scheduledGoldAnalysis(env, ctx) {
       const COOLDOWN = 30 * 60 * 1000;
       
       if (!lastNotify || (now - parseInt(lastNotify)) > COOLDOWN) {
-        console.log('[Scheduled Analysis] Buy signal detected, sending notifications...');
-        await sendAnalysisNotification(result.analysis, env);
+        console.log('[Scheduled Analysis] Buy signal detected, would send notifications (DISABLED)...');
+        // 推送已禁用
+        // await sendAnalysisNotification(result.analysis, env);
         await env.GOLD_PRICE_CACHE.put(lastNotifyKey, String(now), { expirationTtl: 3600 });
       } else {
         console.log('[Scheduled Analysis] Buy signal detected but in cooldown period');
@@ -3307,10 +3308,15 @@ function analyzeShortTerm(prices, threshold) {
 async function sendAlertEmail(alerts, env) {
   const RESEND_API_KEY = env.RESEND_API_KEY;
   
-  sendFeishuAlert(alerts, env);
-  sendWeComAlert(alerts, env);
-  sendMeoWAlert(alerts, env);
+  // 推送已禁用
+  // sendFeishuAlert(alerts, env);
+  // sendWeComAlert(alerts, env);
+  // sendMeoWAlert(alerts, env);
   
+  console.log('[Gold Alert] Push notifications DISABLED - skipping all channels');
+  return;
+  
+  /* 原始推送代码已禁用
   const hasDownward = alerts.some(a => a.direction === 'down');
   const hasVolatile = alerts.some(a => a.direction === 'volatile');
   const alertEmoji = hasDownward ? '🚨' : (hasVolatile ? '⚡' : '📈');
@@ -3425,9 +3431,15 @@ async function sendAlertEmail(alerts, env) {
   } catch (error) {
     console.error('[Gold Alert] Exception:', error);
   }
+  */
 }
 
 async function sendFeishuAlert(alerts, env) {
+  // 推送已禁用
+  console.log('[Gold Alert] Feishu push DISABLED - skipping');
+  return { method: 'disabled', error: 'Push notifications disabled' };
+  
+  /* 原始代码已禁用
   const FEISHU_WEBHOOK = env.FEISHU_WEBHOOK;
   const FEISHU_APP_ID = env.FEISHU_APP_ID;
   const FEISHU_APP_SECRET = env.FEISHU_APP_SECRET;
@@ -3454,6 +3466,7 @@ async function sendFeishuAlert(alerts, env) {
   
   console.log('[Gold Alert] No Feishu configuration found');
   return { method: 'none', error: 'No Feishu configuration found' };
+  */
 }
 
 async function sendFeishuWebhook(webhookUrl, alerts) {
@@ -3600,6 +3613,10 @@ async function sendFeishuAppMessage(appId, appSecret, chatId, alerts) {
 }
 
 async function sendWeComAlert(alerts, env) {
+  // 推送已禁用
+  console.log('[Gold Alert] WeCom push DISABLED - skipping');
+  return;
+  /* 原始代码已禁用
   const WECOM_WEBHOOK = env.WECOM_WEBHOOK;
   
   if (!WECOM_WEBHOOK) {
@@ -3642,9 +3659,14 @@ async function sendWeComAlert(alerts, env) {
   } catch (error) {
     console.error('[Gold Alert] WeCom error:', error);
   }
+  */
 }
 
 async function sendMeoWAlert(alerts, env) {
+  // 推送已禁用
+  console.log('[Gold Alert] MeoW push DISABLED - skipping');
+  return { success: false, error: 'Push notifications disabled' };
+  /* 原始代码已禁用
   const MEOW_USER_ID = env.MEOW_USER_ID || '5bf48882';
   
   const hasDownward = alerts.some(a => a.direction === 'down');
@@ -3686,6 +3708,7 @@ async function sendMeoWAlert(alerts, env) {
     console.error('[Gold Alert] MeoW error:', error);
     return { success: false, error: error.message };
   }
+  */
 }
 
 // ================================================================================
@@ -3988,7 +4011,9 @@ async function handleGoldAnalysis(request, env, ctx) {
                            result.analysis.international.signal.isBuySignal;
       
       if (shouldNotify) {
-        await sendAnalysisNotification(result.analysis, env);
+        // 推送已禁用
+        // await sendAnalysisNotification(result.analysis, env);
+        console.log('[API Analysis] Would send notification (DISABLED)');
       }
     }
     
@@ -4061,11 +4086,13 @@ async function sendAnalysisNotification(analysis, env) {
     content
   }];
   
-  await sendFeishuAlert(alerts, env);
-  await sendMeoWAlert(alerts, env);
-  await sendAlertEmail(alerts, env);
+  // 推送已禁用
+  console.log('[Gold Analysis] Push notifications DISABLED - skipping all channels');
+  // await sendFeishuAlert(alerts, env);
+  // await sendMeoWAlert(alerts, env);
+  // await sendAlertEmail(alerts, env);
   
-  console.log('[Gold Analysis] Notification sent successfully');
+  console.log('[Gold Analysis] Notification would have been sent (disabled)');
 }
 
 // 工具函数 - 密码哈希（增强安全）
@@ -4108,47 +4135,44 @@ async function handleGoldAlertTest(request, env, ctx) {
   };
   
   try {
+    // 推送已禁用
+    console.log('[Gold Alert Test] Push notifications DISABLED - returning disabled status');
+    
     if (type === 'email') {
-      await sendAlertEmail(testAlerts, env);
-      return new Response(JSON.stringify({ success: true, message: 'Email alert test sent', config }), {
+      return new Response(JSON.stringify({ success: false, message: 'Push notifications are DISABLED', config }), {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
     }
     
     if (type === 'feishu' || type === 'webhook') {
-      const result = await sendFeishuAlert(testAlerts, env);
       return new Response(JSON.stringify({ 
-        success: result.method !== 'none', 
-        message: 'Feishu alert test completed',
+        success: false, 
+        message: 'Push notifications are DISABLED',
         config,
-        feishuResult: result
+        feishuResult: { method: 'disabled', error: 'Push notifications disabled' }
       }), {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
     }
     
     if (type === 'meow') {
-      const result = await sendMeoWAlert(testAlerts, env);
       return new Response(JSON.stringify({ 
-        success: result.success, 
-        message: 'MeoW alert test completed',
+        success: false, 
+        message: 'Push notifications are DISABLED',
         config,
-        meowResult: result
+        meowResult: { success: false, error: 'Push notifications disabled' }
       }), {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
     }
     
     if (type === 'all') {
-      await sendAlertEmail(testAlerts, env);
-      const feishuResult = await sendFeishuAlert(testAlerts, env);
-      const meowResult = await sendMeoWAlert(testAlerts, env);
       return new Response(JSON.stringify({ 
-        success: true, 
-        message: 'All alerts test sent',
+        success: false, 
+        message: 'Push notifications are DISABLED',
         config,
-        feishuResult,
-        meowResult
+        feishuResult: { method: 'disabled', error: 'Push notifications disabled' },
+        meowResult: { success: false, error: 'Push notifications disabled' }
       }), {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
@@ -5706,6 +5730,14 @@ async function checkAndSendTradingAlerts(currentPrice, env) {
 }
 
 async function sendTradingMultiChannelAlert(alert, env) {
+  // 推送已禁用
+  console.log('[Trading Alert] Push notifications DISABLED - skipping all channels');
+  return {
+    email: { success: false, error: 'Push notifications disabled' },
+    feishu: { success: false, error: 'Push notifications disabled' },
+    meow: { success: false, error: 'Push notifications disabled' }
+  };
+  /* 原始代码已禁用
   const results = await Promise.allSettled([
     sendTradingAlertEmail(alert, env),
     sendTradingFeishuAlert(alert, env),
@@ -5725,6 +5757,7 @@ async function sendTradingMultiChannelAlert(alert, env) {
     feishu: feishuResult.status === 'fulfilled' ? feishuResult.value : { success: false, error: feishuResult.reason },
     meow: meowResult.status === 'fulfilled' ? meowResult.value : { success: false, error: meowResult.reason }
   };
+  */
 }
 
 async function sendTradingAlertEmail(alert, env) {
@@ -6350,13 +6383,15 @@ async function sendIntelligentTradingAdvice(env, aiAnalysis, currentPrice, tradi
 </body>
 </html>`;
 
-  await sendMultiChannelNotification(env, {
-    title: `${title} - ¥${currentPrice}/克`,
-    emailSubject: `${title} - ${timeStr}`,
-    emailHtml,
-    feishuContent: `**${title}**\n\n> 时间：${timeStr}\n\n**当前金价：** ¥${currentPrice}/克\n\n**AI分析结论：**\n${aiAnalysis.recommendation === 'buy' ? '建议买入' : aiAnalysis.recommendation === 'sell' ? '建议卖出' : '建议观望'}\n\n[查看详细分析](https://ustc.dev/trading/)`,
-    meowContent: `${title}\n\n当前金价: ¥${currentPrice}/克\nAI建议: ${aiAnalysis.recommendation === 'buy' ? '买入' : aiAnalysis.recommendation === 'sell' ? '卖出' : '观望'}\n\n点击查看详细分析`
-  });
+  // 推送已禁用
+  console.log('[AI Analysis] Would send multi-channel notification (DISABLED)');
+  // await sendMultiChannelNotification(env, {
+  //   title: `${title} - ¥${currentPrice}/克`,
+  //   emailSubject: `${title} - ${timeStr}`,
+  //   emailHtml,
+  //   feishuContent: `**${title}**\n\n> 时间：${timeStr}\n\n**当前金价：** ¥${currentPrice}/克\n\n**AI分析结论：**\n${aiAnalysis.recommendation === 'buy' ? '建议买入' : aiAnalysis.recommendation === 'sell' ? '建议卖出' : '建议观望'}\n\n[查看详细分析](https://ustc.dev/trading/)`,
+  //   meowContent: `${title}\n\n当前金价: ¥${currentPrice}/克\nAI建议: ${aiAnalysis.recommendation === 'buy' ? '买入' : aiAnalysis.recommendation === 'sell' ? '卖出' : '观望'}\n\n点击查看详细分析`
+  // });
 }
 
 async function sendProfitOpportunityAlerts(env, opportunities, currentPrice) {
@@ -6365,13 +6400,15 @@ async function sendProfitOpportunityAlerts(env, opportunities, currentPrice) {
   for (const opp of opportunities) {
     const emoji = opp.type === 'profit_taking' ? '💰' : opp.type === 'stop_loss' ? '⚠️' : '🎯';
 
-    await sendMultiChannelNotification(env, {
-      title: `${emoji} ${opp.title}`,
-      emailSubject: `${emoji} ${opp.title} - ${timeStr}`,
-      emailHtml: buildOpportunityEmailHtml(opp, currentPrice, timeStr),
-      feishuContent: `**${emoji} ${opp.title}**\n\n> 时间：${timeStr}\n\n${opp.message}\n\n当前价格：¥${currentPrice}/克\n\n[查看交易详情](https://ustc.dev/trading/)`,
-      meowContent: `${emoji} ${opp.title}\n\n${opp.message}\n\n当前: ¥${currentPrice}/克`
-    });
+    // 推送已禁用
+    console.log(`[Opportunity Alert] Would send notification: ${opp.title} (DISABLED)`);
+    // await sendMultiChannelNotification(env, {
+    //   title: `${emoji} ${opp.title}`,
+    //   emailSubject: `${emoji} ${opp.title} - ${timeStr}`,
+    //   emailHtml: buildOpportunityEmailHtml(opp, currentPrice, timeStr),
+    //   feishuContent: `**${emoji} ${opp.title}**\n\n> 时间：${timeStr}\n\n${opp.message}\n\n当前价格：¥${currentPrice}/克\n\n[查看交易详情](https://ustc.dev/trading/)`,
+    //   meowContent: `${emoji} ${opp.title}\n\n${opp.message}\n\n当前: ¥${currentPrice}/克`
+    // });
 
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
@@ -6425,6 +6462,14 @@ function buildOpportunityEmailHtml(opp, currentPrice, timeStr) {
 }
 
 async function sendMultiChannelNotification(env, content) {
+  // 推送已禁用
+  console.log('[Multi-Channel] Push notifications DISABLED - skipping all channels');
+  return {
+    email: { success: false, error: 'Push notifications disabled' },
+    feishu: { success: false, error: 'Push notifications disabled' },
+    meow: { success: false, error: 'Push notifications disabled' }
+  };
+  /* 原始代码已禁用
   const results = await Promise.allSettled([
     sendEmailNotification(env, content.emailSubject, content.emailHtml),
     sendFeishuNotification(env, content.feishuContent),
@@ -6436,6 +6481,7 @@ async function sendMultiChannelNotification(env, content) {
     feishu: results[1].status,
     meow: results[2].status
   });
+  */
 }
 
 async function sendEmailNotification(env, subject, html) {
@@ -6538,47 +6584,48 @@ async function cleanupDailyPriceAlerts(env) {
     const resetResult = await resetActiveStmt.run();
     console.log('[Cleanup] Reset active alerts:', resetResult.meta?.changes || 0);
     
-    // 发送清理完成通知
-    await sendMultiChannelNotification(env, {
-      title: '🧹 每日预警清理完成',
-      emailSubject: '🧹 每日预警清理完成 - ' + new Date().toLocaleDateString('zh-CN'),
-      emailHtml: `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; }
-    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
-    .stats { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
-    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 12px; text-align: center; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🧹 每日预警清理完成</h1>
-      <p>${new Date().toLocaleDateString('zh-CN')}</p>
-    </div>
-    <div class="content">
-      <div class="stats">
-        <h3>清理统计</h3>
-        <p>已删除已触发的预警: ${triggeredResult.meta?.changes || 0} 条</p>
-        <p>已重置活跃预警: ${resetResult.meta?.changes || 0} 条</p>
-      </div>
-      <p>系统已自动清理昨日预警数据，今日预警任务已重置。</p>
-      <div class="footer">
-        <p><a href="https://ustc.dev/trading/">查看交易详情</a></p>
-      </div>
-    </div>
-  </div>
-</body>
-</html>`,
-      feishuContent: `**🧹 每日预警清理完成**\n\n日期：${new Date().toLocaleDateString('zh-CN')}\n\n清理统计：\n- 已删除已触发预警：${triggeredResult.meta?.changes || 0} 条\n- 已重置活跃预警：${resetResult.meta?.changes || 0} 条\n\n今日预警任务已重置，请重新设置交易策略。`,
-      meowContent: `🧹 每日预警清理完成\n\n已删除已触发预警: ${triggeredResult.meta?.changes || 0} 条\n已重置活跃预警: ${resetResult.meta?.changes || 0} 条\n\n今日预警任务已重置`
-    });
+    // 推送已禁用
+    console.log('[Cleanup] Would send cleanup notification (DISABLED)');
+    // await sendMultiChannelNotification(env, {
+    //   title: '🧹 每日预警清理完成',
+    //   emailSubject: '🧹 每日预警清理完成 - ' + new Date().toLocaleDateString('zh-CN'),
+    //   emailHtml: `
+    // <!DOCTYPE html>
+    // <html>
+    // <head>
+    //   <meta charset="UTF-8">
+    //   <style>
+    //     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; }
+    //     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    //     .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; }
+    //     .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
+    //     .stats { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    //     .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 12px; text-align: center; }
+    //   </style>
+    // </head>
+    // <body>
+    //   <div class="container">
+    //     <div class="header">
+    //       <h1>🧹 每日预警清理完成</h1>
+    //       <p>${new Date().toLocaleDateString('zh-CN')}</p>
+    //     </div>
+    //     <div class="content">
+    //       <div class="stats">
+    //         <h3>清理统计</h3>
+    //         <p>已删除已触发的预警: ${triggeredResult.meta?.changes || 0} 条</p>
+    //         <p>已重置活跃预警: ${resetResult.meta?.changes || 0} 条</p>
+    //       </div>
+    //       <p>系统已自动清理昨日预警数据，今日预警任务已重置。</p>
+    //       <div class="footer">
+    //         <p><a href="https://ustc.dev/trading/">查看交易详情</a></p>
+    //       </div>
+    //     </div>
+    //   </div>
+    // </body>
+    // </html>`,
+    //   feishuContent: `**🧹 每日预警清理完成**\n\n日期：${new Date().toLocaleDateString('zh-CN')}\n\n清理统计：\n- 已删除已触发预警：${triggeredResult.meta?.changes || 0} 条\n- 已重置活跃预警：${resetResult.meta?.changes || 0} 条\n\n今日预警任务已重置，请重新设置交易策略。`,
+    //   meowContent: `🧹 每日预警清理完成\n\n已删除已触发预警: ${triggeredResult.meta?.changes || 0} 条\n已重置活跃预警: ${resetResult.meta?.changes || 0} 条\n\n今日预警任务已重置`
+    // });
     
     console.log('[Cleanup] Daily cleanup completed successfully');
     return { 
