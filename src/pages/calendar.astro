@@ -3,7 +3,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import WorkspaceAuthGuard from '../components/workspace/WorkspaceAuthGuard.astro';
 ---
 
-<SiteLayout title="Calendar - Meownote" description="Manage your events and reminders with the Meownote calendar.">
+<SiteLayout title="Calendar - Maxwell.Science" description="Manage your events and reminders with the Maxwell.Science calendar.">
   <WorkspaceAuthGuard />
   <main class="calendar-page" role="main">
     <div class="calendar-container">
@@ -74,6 +74,11 @@ import WorkspaceAuthGuard from '../components/workspace/WorkspaceAuthGuard.astro
           <span class="meow-status-dot"></span>
           Ready for calendar reminders
         </div>
+      </div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Storage</h3>
+        <p class="calendar-storage-status" id="calendarStorageStatus">Loading account sync...</p>
+        <p class="calendar-storage-note">Reminders run while Maxwell.Science is open in this browser. Server-side background reminders need a scheduled worker.</p>
       </div>
     </div>
 
@@ -697,6 +702,20 @@ import WorkspaceAuthGuard from '../components/workspace/WorkspaceAuthGuard.astro
     background: var(--color-success);
     box-shadow: 0 0 0 4px var(--color-success-light);
     flex: 0 0 auto;
+  }
+
+  .calendar-storage-status,
+  .calendar-storage-note {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: var(--leading-snug);
+    margin: 0;
+  }
+
+  .calendar-storage-note {
+    margin-top: var(--space-3);
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
   }
 
   .delete-confirm { padding: var(--space-6); }

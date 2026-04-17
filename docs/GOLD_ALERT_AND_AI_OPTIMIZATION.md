@@ -14,7 +14,7 @@
 
 ### 3. AI 交易信号只打日志、不推送
 
-- `sendAITradingSignal` 里仅 `console.log('[AI Signal] Would send email notification:', message)`，没有调用 Resend/飞书/MeoW，导致 AI 信号从未真正触达用户。
+- `sendAITradingSignal` 里仅 `console.log('[AI Signal] Would send email notification:', message)`，没有调用 Resend/飞书，导致 AI 信号从未真正触达用户。
 
 ### 4. Cron 冗余
 
@@ -41,8 +41,8 @@
 
 ### 3. AI 交易信号：真实三端推送
 
-- `sendAITradingSignal` 改为调用 `sendMultiChannelNotification(env, { title, emailSubject, emailHtml, feishuContent, meowContent })`。
-- 邮件（Resend）、飞书、MeoW 均按现有通道发送，AI 买入/卖出建议能真正推送到用户。
+- `sendAITradingSignal` 改为调用 `sendMultiChannelNotification(env, { title, emailSubject, emailHtml, feishuContent })`。
+- 邮件（Resend）、飞书按现有通道发送，AI 买入/卖出建议能真正推送到用户。
 
 ### 4. 移除冗余 Cron
 
@@ -58,7 +58,7 @@
 | 环节           | 频率/时机     | 说明 |
 |----------------|----------------|------|
 | 金价爬取       | 每 1 分钟      | Cron `*/1`，写 KV + D1，更新当日历史。 |
-| 预设到价预警   | 每次爬取成功后 | `checkAndSendTradingAlerts(currentPrice)`，到价即发邮件/飞书/MeoW。 |
+| 预设到价预警   | 每次爬取成功后 | `checkAndSendTradingAlerts(currentPrice)`，到价即发邮件/飞书。 |
 | 即时波动预警   | 每次爬取成功后 | 对比「上一分钟 vs 当前」，满足 `INSTANT_CHANGE_THRESHOLD`(2 元) 或 `INSTANT_CHANGE_PERCENT`(0.3%) 即触发。 |
 | 窗口/短期波动  | 每次爬取成功后 | 使用含当前价的序列，滑动窗口与短期偏差超过阈值即触发。 |
 | 冷却           | 即时 15s / 非即时 30s | 由 `ALERT_CONFIG.COOLDOWN_MINUTES` 与 `last_alert` 控制，避免刷屏。 |
@@ -83,4 +83,4 @@
 ## 五、部署与入口
 
 - Worker 入口为 `works.js`（本地开发为 `src/works.js`）。部署时需保证 wrangler 的 `main` 指向实际入口（例如构建输出根目录的 `works.js` 或配置 `main = "src/works.js"`）。
-- 确保环境变量/密钥已配置：`RESEND_API_KEY`、`FEISHU_WEBHOOK`、MeoW 等，否则对应通道不会发送。
+- 确保环境变量/密钥已配置：`RESEND_API_KEY`、`FEISHU_WEBHOOK` 等，否则对应通道不会发送。

@@ -154,12 +154,6 @@
    - 应用消息方式
    - 交互式卡片消息
 
-3. **Meow通知**：
-   - 简洁文本推送
-   - 包含关键指标
-
----
-
 ## 部署建议
 
 ### 1. 环境变量配置
@@ -170,7 +164,6 @@ FEISHU_WEBHOOK=your_feishu_webhook_url
 FEISHU_APP_ID=your_feishu_app_id
 FEISHU_APP_SECRET=your_feishu_app_secret
 FEISHU_CHAT_ID=your_feishu_chat_id
-MEOW_USER_ID=your_meow_user_id
 ```
 
 ### 2. 部署命令

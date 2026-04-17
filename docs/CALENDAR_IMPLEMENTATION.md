@@ -1,13 +1,14 @@
-# Meownote Calendar Implementation
+# Maxwell.Science Calendar Implementation
 
 ## Overview
 
 The calendar page lives at `/calendar/` and is implemented with:
 
 - `src/pages/calendar.astro` for layout, form controls, modal structure, and page-scoped styling.
-- `src/scripts/calendar-app.ts` for calendar rendering, event persistence, reminders, meow delivery, and UI interactions.
+- `src/scripts/calendar-app.ts` for calendar rendering, event persistence, and UI interactions.
+- `src/scripts/calendar-reminders.ts` for site-wide reminder delivery while any Maxwell.Science page is open.
 
-The page follows the existing Meownote design language: warm cream backgrounds, restrained borders, editorial serif headings, Anthropic Sans body text, low-saturation clay and olive accents, soft shadows, and small motion transitions.
+The page follows the existing Maxwell.Science design language: warm cream backgrounds, restrained borders, editorial serif headings, Anthropic Sans body text, low-saturation clay and olive accents, soft shadows, and small motion transitions.
 
 ## Features
 
@@ -18,13 +19,15 @@ The page follows the existing Meownote design language: warm cream backgrounds, 
 - Reminder methods: meow channel, browser notification, and in-app toast.
 - Reminder frequency: once, every 5 minutes, every 15 minutes, or hourly until event start.
 - Category color indicators and reminder markers in calendar cells, event chips, and details.
-- Local persistence through `localStorage`.
+- Account-backed persistence through `/api/calendar/events`, with `localStorage` as a fast local cache and offline fallback.
 
 ## Meow Channel
 
-Calendar reminders are sent to the built-in meow notification channel from `sendMeowNotification()` in `src/scripts/calendar-app.ts`. The payload includes event title, time, location, reminder offset, priority, and frequency.
+Calendar reminders are sent to the built-in meow notification channel from `sendMeowNotification()` in `src/scripts/calendar-reminders.ts`. The MeoW API payload uses `title` and `msg`, and the message includes event title, time, location, reminder offset, priority, and frequency.
 
-The implementation also dispatches a `meow:notification` browser event after a meow reminder is sent so other Meownote interfaces can listen for consistent channel behavior.
+Reminder checks are initialized from `BaseLayout.astro`, so they run while any Maxwell.Science page is open in the browser. Fully background delivery after the browser is closed still requires a scheduled worker or push-notification backend.
+
+The implementation also dispatches a `meow:notification` browser event after a meow reminder is sent so other Maxwell.Science interfaces can listen for consistent channel behavior.
 
 ## Usage
 
@@ -45,4 +48,6 @@ The implementation also dispatches a `meow:notification` browser event after a m
 
 ## Storage
 
-Events are stored in `localStorage` under `meownote_calendar_events`. Reminder delivery state is stored under `meownote_reminder_checked` to prevent duplicate notification sends while still supporting repeated reminder frequencies.
+Events are stored in the authenticated calendar API at `/api/calendar/events`. The browser also keeps a local cache under `meownote_calendar_events` so the calendar can render quickly and keep working if cloud sync is temporarily unavailable.
+
+Reminder delivery state is stored under `meownote_reminder_checked` to prevent duplicate notification sends while still supporting repeated reminder frequencies.

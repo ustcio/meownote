@@ -29,7 +29,18 @@ interface ReminderSentState {
   sentAt: number;
 }
 
+declare global {
+  interface Window {
+    __maxwellCalendarReminders?: {
+      checkNow: () => Promise<void>;
+    };
+  }
+}
+
 const STORAGE_KEY = 'meownote_calendar_events';
+const SYNC_STATUS_KEY = 'meownote_calendar_sync_status';
+const API_BASE = 'https://api.ustc.dev';
+const TOKEN_KEY = 'meownote_auth_token';
 const MEOW_API_URL = 'https://api.chuckfang.com/5bf48882';
 
 const categoryColors: Record<string, string> = {
@@ -66,8 +77,8 @@ export class CalendarApp {
     this.events = this.loadEvents();
     this.renderCalendar();
     this.initEventListeners();
-    setInterval(() => this.checkReminders(), 60000);
-    this.checkReminders();
+    this.loadCloudEvents();
+    window.__maxwellCalendarReminders?.checkNow?.();
   }
 
   private ensureRuntimeStyles(): void {
@@ -141,8 +152,72 @@ export class CalendarApp {
     };
   }
 
+  private getAuthToken(): string | null {
+    const token = localStorage.getItem(TOKEN_KEY) || localStorage.getItem('auth_token');
+    if (!token) return null;
+    try {
+      return decodeURIComponent(atob(token));
+    } catch {
+      return token;
+    }
+  }
+
+  private getAuthHeaders(): HeadersInit {
+    const token = this.getAuthToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  private updateSyncStatus(message: string): void {
+    localStorage.setItem(SYNC_STATUS_KEY, message);
+    const el = document.getElementById('calendarStorageStatus');
+    if (el) el.textContent = message;
+  }
+
+  private async loadCloudEvents(): Promise<void> {
+    try {
+      const response = await fetch(`${API_BASE}/api/calendar/events`, {
+        headers: this.getAuthHeaders(),
+        cache: 'no-store'
+      });
+      const result = await response.json().catch(() => null) as { success?: boolean; data?: unknown } | null;
+      if (!response.ok || !result?.success || !Array.isArray(result.data)) {
+        throw new Error('Cloud calendar unavailable');
+      }
+
+      this.events = result.data.map(event => this.normalizeEvent(event as Partial<CalendarEvent>));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.events));
+      this.updateSyncStatus('Synced to your Maxwell.Science account');
+      this.renderCalendar();
+    } catch (error) {
+      console.warn('[Calendar] Cloud load failed, using local cache:', error);
+      this.updateSyncStatus('Saved on this device; cloud sync unavailable');
+    }
+  }
+
   private saveEvents(eventsToSave: CalendarEvent[]): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(eventsToSave));
+    this.syncCloudEvents(eventsToSave);
+  }
+
+  private async syncCloudEvents(eventsToSave: CalendarEvent[]): Promise<void> {
+    try {
+      const response = await fetch(`${API_BASE}/api/calendar/events`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeaders()
+        },
+        body: JSON.stringify({ events: eventsToSave })
+      });
+      const result = await response.json().catch(() => null) as { success?: boolean; message?: string } | null;
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.message || 'Cloud calendar save failed');
+      }
+      this.updateSyncStatus('Synced to your Maxwell.Science account');
+    } catch (error) {
+      console.error('[Calendar] Cloud save failed:', error);
+      this.updateSyncStatus('Saved locally; cloud sync failed');
+    }
   }
 
   private showToast(options: ToastOptions): void {
@@ -238,17 +313,20 @@ export class CalendarApp {
       }
 
       const payload = {
-        text: 'Meownote Calendar Reminder',
-        desp: `Event: ${event.title}\nTime: ${this.formatEventTime(event)}\nLocation: ${event.location || 'N/A'}\nReminder: ${reminderText} before\nPriority: ${event.priority}\nFrequency: ${this.formatFrequency(event.reminderFrequency)}`,
+        title: 'Maxwell.Science Calendar Reminder',
+        msg: `Event: ${event.title}\nTime: ${this.formatEventTime(event)}\nLocation: ${event.location || 'N/A'}\nReminder: ${reminderText} before\nPriority: ${event.priority}\nFrequency: ${this.formatFrequency(event.reminderFrequency)}`,
         type: 'calendar_reminder'
       };
 
-      await fetch(MEOW_API_URL, {
+      const response = await fetch(MEOW_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        mode: 'no-cors'
+        body: JSON.stringify(payload)
       });
+      const result = await response.json().catch(() => null) as { data?: boolean; msg?: string } | null;
+      if (!response.ok || result?.data !== true) {
+        throw new Error(result?.msg || 'Meow notification failed');
+      }
 
       this.updateMeowStatus(`Sent "${event.title}" through meow`);
       window.dispatchEvent(new CustomEvent('meow:notification', { detail: payload }));
@@ -256,6 +334,7 @@ export class CalendarApp {
     } catch (error) {
       this.updateMeowStatus('Meow delivery failed');
       console.error('[Meow] Failed to send notification:', error);
+      throw error;
     }
   }
 
@@ -300,10 +379,12 @@ export class CalendarApp {
         await Notification.requestPermission();
       }
       if (Notification.permission === 'granted') {
-        new Notification('Meownote Calendar Reminder', {
+        new Notification('Maxwell.Science Calendar Reminder', {
           body: `${event.title} starts ${this.formatReminderOffset(reminderMinutes)}`,
           tag: `${event.id}-${reminderMinutes}`
         });
+      } else {
+        throw new Error('Browser notifications not allowed');
       }
     }
 
@@ -338,7 +419,7 @@ export class CalendarApp {
     return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
   }
 
-  private checkReminders(): void {
+  private async checkReminders(): Promise<void> {
     const now = new Date();
     const checkedKey = 'meownote_reminder_checked';
     let checked: Record<string, ReminderSentState> = {};
@@ -347,32 +428,38 @@ export class CalendarApp {
       checked = stored ? JSON.parse(stored) : {};
     } catch {}
 
-    this.events.forEach(event => {
-      if (!event.reminders || event.reminders.length === 0) return;
+    for (const event of this.events) {
+      if (!event.reminders || event.reminders.length === 0) continue;
 
       const eventStart = this.getNextReminderOccurrence(event, now);
-      if (!eventStart) return;
+      if (!eventStart) continue;
       const minutesUntilEvent = (eventStart.getTime() - now.getTime()) / (1000 * 60);
       const occurrenceKey = this.formatDate(eventStart);
+      const repeatAnchor = Math.min(...event.reminders);
 
-      event.reminders.forEach(minutes => {
+      for (const minutes of event.reminders) {
         const reminderKey = `${event.id}_${occurrenceKey}_${minutes}`;
         const sentState = checked[reminderKey];
         const lastSentAt = typeof sentState?.sentAt === 'number' ? sentState.sentAt : 0;
         const frequencyMinutes = this.getFrequencyMinutes(event.reminderFrequency);
-        const canRepeat = frequencyMinutes > 0;
+        const canRepeat = frequencyMinutes > 0 && minutes === repeatAnchor;
         const intervalElapsed = lastSentAt
           ? now.getTime() - lastSentAt >= frequencyMinutes * 60 * 1000
           : true;
         
         if (minutesUntilEvent <= minutes && minutesUntilEvent >= 0) {
           if (!lastSentAt || (canRepeat && intervalElapsed)) {
-            this.deliverReminder(event, minutes);
-            checked[reminderKey] = { sentAt: now.getTime() };
+            try {
+              await this.deliverReminder(event, minutes);
+              checked[reminderKey] = { sentAt: now.getTime() };
+              localStorage.setItem(checkedKey, JSON.stringify(checked));
+            } catch (error) {
+              console.error('[Calendar] Reminder delivery failed:', error);
+            }
           }
         }
-      });
-    });
+      }
+    }
 
     localStorage.setItem(checkedKey, JSON.stringify(checked));
   }
@@ -427,7 +514,10 @@ export class CalendarApp {
   private getEventsForDate(dateStr: string): CalendarEvent[] {
     return this.events.filter(event => {
       if (event.recurrence === 'none') {
-        return event.startDate === dateStr;
+        const targetDate = new Date(`${dateStr}T00:00`);
+        const eventStart = new Date(`${event.startDate}T00:00`);
+        const eventEnd = new Date(`${event.endDate || event.startDate}T00:00`);
+        return targetDate >= eventStart && targetDate <= eventEnd;
       }
       
       const eventStart = new Date(event.startDate);
@@ -450,6 +540,19 @@ export class CalendarApp {
         default: return event.startDate === dateStr;
       }
     });
+  }
+
+  private getTimeMinutes(time: string): number {
+    const [hours, minutes] = time.split(':').map(Number);
+    return (hours * 60) + minutes;
+  }
+
+  private getEventSegmentForDate(event: CalendarEvent, dateStr: string): { start: string; end: string } {
+    const eventStartDate = event.recurrence === 'none' ? event.startDate : dateStr;
+    const eventEndDate = event.recurrence === 'none' ? event.endDate : dateStr;
+    const start = dateStr === eventStartDate ? event.startTime : '00:00';
+    const end = dateStr === eventEndDate ? event.endTime : '23:59';
+    return { start, end };
   }
 
   private escapeHtml(text: string): string {
@@ -615,18 +718,20 @@ export class CalendarApp {
         date.setDate(date.getDate() + i);
         const dateStr = this.formatDate(date);
         const hourEvents = this.getEventsForDate(dateStr).filter(event => {
-          const eventHour = parseInt(event.startTime.split(':')[0]);
+          const segment = this.getEventSegmentForDate(event, dateStr);
+          const eventHour = parseInt(segment.start.split(':')[0]);
           return eventHour === hour;
         });
 
         html += `<div class="week-time-cell" data-date="${dateStr}" data-hour="${hour}">`;
         hourEvents.forEach(event => {
           const color = categoryColors[event.category] || categoryColors.other;
-          const startMinutes = parseInt(event.startTime.split(':')[0]) * 60 + parseInt(event.startTime.split(':')[1]);
-          const endMinutes = parseInt(event.endTime.split(':')[0]) * 60 + parseInt(event.endTime.split(':')[1]);
+          const segment = this.getEventSegmentForDate(event, dateStr);
+          const startMinutes = this.getTimeMinutes(segment.start);
+          const endMinutes = this.getTimeMinutes(segment.end);
           const duration = endMinutes - startMinutes;
           const topOffset = ((startMinutes % 60) / 60) * 100;
-          const height = Math.max((duration / 60) * 100, 25);
+          const height = Math.max((Math.max(duration, 15) / 60) * 100, 25);
           const hasReminder = event.reminders && event.reminders.length > 0;
 
           html += `<div class="week-event" data-event-id="${event.id}" style="background: ${color}25; border-left: 3px solid ${color}; top: ${topOffset}%; height: ${height}%;">`;
@@ -681,7 +786,8 @@ export class CalendarApp {
     html += '<div class="day-time-list">';
     for (let hour = 0; hour < 24; hour++) {
       const hourEvents = dayEvents.filter(event => {
-        const eventHour = parseInt(event.startTime.split(':')[0]);
+        const segment = this.getEventSegmentForDate(event, dateStr);
+        const eventHour = parseInt(segment.start.split(':')[0]);
         return eventHour === hour;
       });
 
@@ -698,9 +804,10 @@ export class CalendarApp {
       hourEvents.forEach(event => {
         const color = categoryColors[event.category] || categoryColors.other;
         const hasReminder = event.reminders && event.reminders.length > 0;
+        const segment = this.getEventSegmentForDate(event, dateStr);
 
         html += `<div class="day-event" data-event-id="${event.id}" style="background: ${color}20; border-left: 3px solid ${color};">`;
-        html += `<div class="day-event-time">${event.startTime} - ${event.endTime}</div>`;
+        html += `<div class="day-event-time">${segment.start} - ${segment.end}</div>`;
         html += `<div class="day-event-title">${this.escapeHtml(event.title)}</div>`;
         if (event.location) {
           html += `<div class="day-event-location">${this.escapeHtml(event.location)}</div>`;
@@ -1045,6 +1152,11 @@ export class CalendarApp {
 
     const priorityRadio = document.querySelector('input[name="priority"]:checked') as HTMLInputElement;
     const priority = priorityRadio ? priorityRadio.value : 'low';
+    const title = ((formData.get('title') as string) || '').trim();
+    if (!title) {
+      this.showToast({ message: 'Event title is required', type: 'error' });
+      return;
+    }
     const startDate = formData.get('startDate') as string;
     const startTime = this.normalizeTimeInput(formData.get('startTime') as string);
     const endDate = formData.get('endDate') as string;
@@ -1068,7 +1180,7 @@ export class CalendarApp {
 
     const eventData: CalendarEvent = {
       id: eventId || this.generateId(),
-      title: ((formData.get('title') as string) || '').trim(),
+      title,
       description: formData.get('description') as string,
       startDate,
       startTime,

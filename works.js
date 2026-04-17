@@ -188,6 +188,7 @@ const ROUTES = {
   '/api/proxy/models': { handler: handleProxyModelsList },
   '/api/v1': { handler: handleProxyChat },
   '/api/workspace': { handler: handleWorkspace, pattern: /^\/api\/workspace(?:\/([^/]+)(?:\/([^/]+))?)?$/ },
+  '/api/calendar/events': { handler: handleCalendarEvents },
 };
 
 // ================================================================================
@@ -3311,7 +3312,6 @@ async function sendAlertEmail(alerts, env) {
   // 推送已禁用
   // sendFeishuAlert(alerts, env);
   // sendWeComAlert(alerts, env);
-  // sendMeoWAlert(alerts, env);
   
   console.log('[Gold Alert] Push notifications DISABLED - skipping all channels');
   return;
@@ -3658,55 +3658,6 @@ async function sendWeComAlert(alerts, env) {
     console.log('[Gold Alert] WeCom notification sent');
   } catch (error) {
     console.error('[Gold Alert] WeCom error:', error);
-  }
-  */
-}
-
-async function sendMeoWAlert(alerts, env) {
-  // 推送已禁用
-  console.log('[Gold Alert] MeoW push DISABLED - skipping');
-  return { success: false, error: 'Push notifications disabled' };
-  /* 原始代码已禁用
-  const MEOW_USER_ID = env.MEOW_USER_ID || '5bf48882';
-  
-  const hasDownward = alerts.some(a => a.direction === 'down');
-  const hasVolatile = alerts.some(a => a.direction === 'volatile');
-  const alertEmoji = hasDownward ? '🚨' : (hasVolatile ? '⚡' : '📈');
-  const alertTitle = hasDownward ? '金价暴跌预警' : (hasVolatile ? '金价剧烈波动' : '金价快速上涨');
-  
-  let msgContent = `时间: ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}\n`;
-  
-  for (const alert of alerts) {
-    msgContent += `${alert.name}: ${alert.current} ${alert.unit} (波动${alert.range})\n`;
-  }
-  
-  const meowUrl = `https://api.chuckfang.com/${MEOW_USER_ID}`;
-  
-  console.log('[Gold Alert] Sending to MeoW...');
-  
-  try {
-    const response = await fetch(meowUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: `${alertEmoji}${alertTitle}`,
-        msg: msgContent.trim(),
-        url: 'https://ustc.dev/kit/gold/'
-      })
-    });
-    const result = await response.json();
-    console.log('[Gold Alert] MeoW response:', JSON.stringify(result));
-    
-    if (result.status === 200) {
-      console.log('[Gold Alert] MeoW notification sent successfully');
-      return { success: true, response: result };
-    } else {
-      console.error('[Gold Alert] MeoW notification failed:', result.msg);
-      return { success: false, error: result.msg };
-    }
-  } catch (error) {
-    console.error('[Gold Alert] MeoW error:', error);
-    return { success: false, error: error.message };
   }
   */
 }
@@ -4089,7 +4040,6 @@ async function sendAnalysisNotification(analysis, env) {
   // 推送已禁用
   console.log('[Gold Analysis] Push notifications DISABLED - skipping all channels');
   // await sendFeishuAlert(alerts, env);
-  // await sendMeoWAlert(alerts, env);
   // await sendAlertEmail(alerts, env);
   
   console.log('[Gold Analysis] Notification would have been sent (disabled)');
@@ -4130,8 +4080,7 @@ async function handleGoldAlertTest(request, env, ctx) {
     hasAppId: !!env.FEISHU_APP_ID,
     hasAppSecret: !!env.FEISHU_APP_SECRET,
     hasChatId: !!env.FEISHU_CHAT_ID,
-    hasEmailKey: !!env.RESEND_API_KEY,
-    hasMeoWUserId: !!(env.MEOW_USER_ID || '5bf48882')
+    hasEmailKey: !!env.RESEND_API_KEY
   };
   
   try {
@@ -4155,24 +4104,12 @@ async function handleGoldAlertTest(request, env, ctx) {
       });
     }
     
-    if (type === 'meow') {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        message: 'Push notifications are DISABLED',
-        config,
-        meowResult: { success: false, error: 'Push notifications disabled' }
-      }), {
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-      });
-    }
-    
     if (type === 'all') {
       return new Response(JSON.stringify({ 
         success: false, 
         message: 'Push notifications are DISABLED',
         config,
-        feishuResult: { method: 'disabled', error: 'Push notifications disabled' },
-        meowResult: { success: false, error: 'Push notifications disabled' }
+        feishuResult: { method: 'disabled', error: 'Push notifications disabled' }
       }), {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
@@ -4180,8 +4117,8 @@ async function handleGoldAlertTest(request, env, ctx) {
     
     return new Response(JSON.stringify({ 
       success: false, 
-      error: 'Invalid type. Use: email, feishu, meow, or all',
-      usage: '/api/gold/alert/test?type=email|feishu|meow|all',
+      error: 'Invalid type. Use: email, feishu, or all',
+      usage: '/api/gold/alert/test?type=email|feishu|all',
       config
     }), {
       status: 400,
@@ -5716,7 +5653,7 @@ async function checkAndSendTradingAlerts(currentPrice, env) {
         `).bind(
           notificationResults.email.success ? 1 : 0,
           notificationResults.feishu.success ? 1 : 0,
-          notificationResults.meow.success ? 1 : 0,
+          0,
           alert.id
         ).run();
       }
@@ -5734,28 +5671,24 @@ async function sendTradingMultiChannelAlert(alert, env) {
   console.log('[Trading Alert] Push notifications DISABLED - skipping all channels');
   return {
     email: { success: false, error: 'Push notifications disabled' },
-    feishu: { success: false, error: 'Push notifications disabled' },
-    meow: { success: false, error: 'Push notifications disabled' }
+    feishu: { success: false, error: 'Push notifications disabled' }
   };
   /* 原始代码已禁用
   const results = await Promise.allSettled([
     sendTradingAlertEmail(alert, env),
-    sendTradingFeishuAlert(alert, env),
-    sendTradingMeoWAlert(alert, env)
+    sendTradingFeishuAlert(alert, env)
   ]);
   
-  const [emailResult, feishuResult, meowResult] = results;
+  const [emailResult, feishuResult] = results;
   
   console.log('[Trading Alert] Multi-channel results:', {
     email: emailResult.status === 'fulfilled' ? emailResult.value : { success: false, error: emailResult.reason },
-    feishu: feishuResult.status === 'fulfilled' ? feishuResult.value : { success: false, error: feishuResult.reason },
-    meow: meowResult.status === 'fulfilled' ? meowResult.value : { success: false, error: meowResult.reason }
+    feishu: feishuResult.status === 'fulfilled' ? feishuResult.value : { success: false, error: feishuResult.reason }
   });
   
   return {
     email: emailResult.status === 'fulfilled' ? emailResult.value : { success: false, error: emailResult.reason },
-    feishu: feishuResult.status === 'fulfilled' ? feishuResult.value : { success: false, error: feishuResult.reason },
-    meow: meowResult.status === 'fulfilled' ? meowResult.value : { success: false, error: meowResult.reason }
+    feishu: feishuResult.status === 'fulfilled' ? feishuResult.value : { success: false, error: feishuResult.reason }
   };
   */
 }
@@ -5889,44 +5822,6 @@ async function sendTradingFeishuAlert(alert, env) {
     }
   } catch (error) {
     console.error('[Trading Alert] Feishu webhook error:', error);
-    return { success: false, error: error.message };
-  }
-}
-
-async function sendTradingMeoWAlert(alert, env) {
-  const MEOW_USER_ID = env.MEOW_USER_ID || '5bf48882';
-
-  const isBuy = alert.alert_type === 'buy';
-  const emoji = isBuy ? '🟢' : '🔴';
-  const title = isBuy ? '买入提醒' : '卖出提醒';
-  const action = isBuy ? '买入' : '卖出';
-  const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
-
-  const msgContent = `时间: ${timeStr}\n\n目标${action}价格: ¥${alert.target_price}/克\n当前价格: ¥${alert.currentPrice}/克\n\n金价已达到您预设的${action}价格，请及时关注市场动态。`;
-
-  const meowUrl = `https://api.chuckfang.com/${MEOW_USER_ID}`;
-
-  try {
-    const response = await fetch(meowUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: `${emoji} ${title}`,
-        msg: msgContent,
-        url: 'https://ustc.dev/trading/'
-      })
-    });
-    const result = await response.json();
-
-    if (result.status === 200) {
-      console.log('[Trading Alert] MeoW notification sent successfully');
-      return { success: true };
-    } else {
-      console.error('[Trading Alert] MeoW notification failed:', result.msg);
-      return { success: false, error: result.msg };
-    }
-  } catch (error) {
-    console.error('[Trading Alert] MeoW error:', error);
     return { success: false, error: error.message };
   }
 }
@@ -6389,8 +6284,7 @@ async function sendIntelligentTradingAdvice(env, aiAnalysis, currentPrice, tradi
   //   title: `${title} - ¥${currentPrice}/克`,
   //   emailSubject: `${title} - ${timeStr}`,
   //   emailHtml,
-  //   feishuContent: `**${title}**\n\n> 时间：${timeStr}\n\n**当前金价：** ¥${currentPrice}/克\n\n**AI分析结论：**\n${aiAnalysis.recommendation === 'buy' ? '建议买入' : aiAnalysis.recommendation === 'sell' ? '建议卖出' : '建议观望'}\n\n[查看详细分析](https://ustc.dev/trading/)`,
-  //   meowContent: `${title}\n\n当前金价: ¥${currentPrice}/克\nAI建议: ${aiAnalysis.recommendation === 'buy' ? '买入' : aiAnalysis.recommendation === 'sell' ? '卖出' : '观望'}\n\n点击查看详细分析`
+  //   feishuContent: `**${title}**\n\n> 时间：${timeStr}\n\n**当前金价：** ¥${currentPrice}/克\n\n**AI分析结论：**\n${aiAnalysis.recommendation === 'buy' ? '建议买入' : aiAnalysis.recommendation === 'sell' ? '建议卖出' : '建议观望'}\n\n[查看详细分析](https://ustc.dev/trading/)`
   // });
 }
 
@@ -6406,8 +6300,7 @@ async function sendProfitOpportunityAlerts(env, opportunities, currentPrice) {
     //   title: `${emoji} ${opp.title}`,
     //   emailSubject: `${emoji} ${opp.title} - ${timeStr}`,
     //   emailHtml: buildOpportunityEmailHtml(opp, currentPrice, timeStr),
-    //   feishuContent: `**${emoji} ${opp.title}**\n\n> 时间：${timeStr}\n\n${opp.message}\n\n当前价格：¥${currentPrice}/克\n\n[查看交易详情](https://ustc.dev/trading/)`,
-    //   meowContent: `${emoji} ${opp.title}\n\n${opp.message}\n\n当前: ¥${currentPrice}/克`
+    //   feishuContent: `**${emoji} ${opp.title}**\n\n> 时间：${timeStr}\n\n${opp.message}\n\n当前价格：¥${currentPrice}/克\n\n[查看交易详情](https://ustc.dev/trading/)`
     // });
 
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -6466,20 +6359,17 @@ async function sendMultiChannelNotification(env, content) {
   console.log('[Multi-Channel] Push notifications DISABLED - skipping all channels');
   return {
     email: { success: false, error: 'Push notifications disabled' },
-    feishu: { success: false, error: 'Push notifications disabled' },
-    meow: { success: false, error: 'Push notifications disabled' }
+    feishu: { success: false, error: 'Push notifications disabled' }
   };
   /* 原始代码已禁用
   const results = await Promise.allSettled([
     sendEmailNotification(env, content.emailSubject, content.emailHtml),
-    sendFeishuNotification(env, content.feishuContent),
-    sendMeowNotification(env, content.title, content.meowContent)
+    sendFeishuNotification(env, content.feishuContent)
   ]);
 
   console.log('[Multi-Channel] Notification results:', {
     email: results[0].status,
-    feishu: results[1].status,
-    meow: results[2].status
+    feishu: results[1].status
   });
   */
 }
@@ -6528,26 +6418,6 @@ async function sendFeishuNotification(env, content) {
       })
     });
     return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-}
-
-async function sendMeowNotification(env, title, content) {
-  const MEOW_USER_ID = env.MEOW_USER_ID || '5bf48882';
-
-  try {
-    const response = await fetch(`https://api.chuckfang.com/${MEOW_USER_ID}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title,
-        msg: content,
-        url: 'https://ustc.dev/trading/'
-      })
-    });
-    const result = await response.json();
-    return { success: result.status === 200 };
   } catch (error) {
     return { success: false, error: error.message };
   }
@@ -6623,8 +6493,7 @@ async function cleanupDailyPriceAlerts(env) {
     //   </div>
     // </body>
     // </html>`,
-    //   feishuContent: `**🧹 每日预警清理完成**\n\n日期：${new Date().toLocaleDateString('zh-CN')}\n\n清理统计：\n- 已删除已触发预警：${triggeredResult.meta?.changes || 0} 条\n- 已重置活跃预警：${resetResult.meta?.changes || 0} 条\n\n今日预警任务已重置，请重新设置交易策略。`,
-    //   meowContent: `🧹 每日预警清理完成\n\n已删除已触发预警: ${triggeredResult.meta?.changes || 0} 条\n已重置活跃预警: ${resetResult.meta?.changes || 0} 条\n\n今日预警任务已重置`
+    //   feishuContent: `**🧹 每日预警清理完成**\n\n日期：${new Date().toLocaleDateString('zh-CN')}\n\n清理统计：\n- 已删除已触发预警：${triggeredResult.meta?.changes || 0} 条\n- 已重置活跃预警：${resetResult.meta?.changes || 0} 条\n\n今日预警任务已重置，请重新设置交易策略。`
     // });
     
     console.log('[Cleanup] Daily cleanup completed successfully');
@@ -6709,6 +6578,69 @@ async function handleWorkspace(request, env, ctx, match) {
   }
 
   return jsonResponse({ error: 'Method not allowed' }, 405);
+}
+
+async function handleCalendarEvents(request, env) {
+  const authResult = await verifyAdminAuth(request, env);
+  if (!authResult.success) {
+    return jsonResponse({ success: false, message: authResult.message }, 401);
+  }
+
+  const userId = String(authResult.user.userId || authResult.user.id || authResult.user.username || 'admin');
+  const rowId = `calendar:${userId}`;
+
+  if (request.method === 'GET') {
+    try {
+      const row = await env.DB.prepare(
+        'SELECT events_json, updated_at FROM calendar_events WHERE id = ?'
+      ).bind(rowId).first();
+
+      let events = [];
+      if (row?.events_json) {
+        try {
+          const parsed = JSON.parse(row.events_json);
+          events = Array.isArray(parsed) ? parsed : [];
+        } catch {
+          events = [];
+        }
+      }
+
+      return jsonResponse({
+        success: true,
+        data: events,
+        updatedAt: row?.updated_at || null
+      });
+    } catch (error) {
+      console.error('[Calendar] Get events error:', error);
+      return jsonResponse({ success: false, message: 'Failed to load calendar events' }, 500);
+    }
+  }
+
+  if (request.method === 'PUT') {
+    try {
+      const body = await request.json().catch(() => null);
+      const events = Array.isArray(body?.events) ? body.events : null;
+      if (!events) {
+        return jsonResponse({ success: false, message: 'Events array is required' }, 400);
+      }
+
+      const eventsJson = JSON.stringify(events);
+      await env.DB.prepare(`
+        INSERT INTO calendar_events (id, user_id, events_json, created_at, updated_at)
+        VALUES (?, ?, ?, datetime('now'), datetime('now'))
+        ON CONFLICT(id) DO UPDATE SET
+          events_json = excluded.events_json,
+          updated_at = datetime('now')
+      `).bind(rowId, userId, eventsJson).run();
+
+      return jsonResponse({ success: true, data: events });
+    } catch (error) {
+      console.error('[Calendar] Save events error:', error);
+      return jsonResponse({ success: false, message: 'Failed to save calendar events' }, 500);
+    }
+  }
+
+  return jsonResponse({ success: false, message: 'Method not allowed' }, 405);
 }
 
 async function listWorkspaceFiles(request, env) {
