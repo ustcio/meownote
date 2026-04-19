@@ -33,4 +33,8 @@ interface Window {
   __meownoteToast?: {
     show: (message: string, type?: string, duration?: number) => void;
   };
+  __meownoteWelcomeGates?: Record<string, {
+    show: () => void;
+    close: () => void;
+  }>;
 }

@@ -1,4 +1,5 @@
 ---
+import LoginWelcomeGate from '@components/ui/LoginWelcomeGate.astro';
 import { t, getLangFromUrl } from '@i18n';
 
 const lang = getLangFromUrl(Astro.url);
@@ -27,6 +28,17 @@ const lang = getLangFromUrl(Astro.url);
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
     </button>
+
+    <LoginWelcomeGate
+      id="auth-login-welcome"
+      mode="modal"
+      autoShow={false}
+      name="YangHao"
+      eyebrow="MoonSun sign in"
+      title="Welcome,"
+      description="YangHao is the highlighted workspace account. Continue now, or this welcome page will close automatically."
+      closeLabel="Continue to login"
+    />
     
     <div class="auth-header">
       <div class="auth-logo">
@@ -217,6 +229,10 @@ const lang = getLangFromUrl(Astro.url);
     padding: var(--space-6);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     animation: modalIn 0.3s ease-out;
+  }
+
+  .auth-close {
+    z-index: 4;
   }
   
   @keyframes modalIn {
@@ -577,11 +593,13 @@ const lang = getLangFromUrl(Astro.url);
     const wasOpen = modal?.classList.contains('open');
     modal?.classList.add('open');
     switchTab(tab);
+    window.__meownoteWelcomeGates?.['auth-login-welcome']?.show?.();
     if (!wasOpen) bodyScrollLock?.lock?.();
   }
   
   function closeModal() {
     const wasOpen = modal?.classList.contains('open');
+    window.__meownoteWelcomeGates?.['auth-login-welcome']?.close?.();
     modal?.classList.remove('open');
     if (wasOpen) bodyScrollLock?.unlock?.();
   }

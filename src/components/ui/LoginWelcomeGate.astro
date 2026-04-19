@@ -1,0 +1,348 @@
+---
+interface Props {
+  id: string;
+  mode?: 'page' | 'modal';
+  name?: string;
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+  closeLabel?: string;
+  autoCloseSeconds?: number;
+  autoShow?: boolean;
+}
+
+const {
+  id,
+  mode = 'page',
+  name = 'YangHao',
+  eyebrow = 'MoonSun access',
+  title = 'Welcome back,',
+  description = 'Your workspace is ready. Continue when you are ready, or let this page close automatically.',
+  closeLabel = 'Continue',
+  autoCloseSeconds = 5,
+  autoShow = true,
+} = Astro.props as Props;
+---
+
+<div
+  class:list={['login-welcome', `login-welcome--${mode}`]}
+  id={id}
+  data-open={autoShow ? 'true' : 'false'}
+  data-seconds={autoCloseSeconds}
+  data-mode={mode}
+  role={mode === 'page' ? 'dialog' : 'region'}
+  aria-modal={mode === 'page' ? 'true' : undefined}
+  aria-labelledby={`${id}-title`}
+>
+  <button class="login-welcome__backdrop" type="button" data-welcome-close aria-label="Close welcome page"></button>
+  <section class="login-welcome__panel">
+    <div class="login-welcome__mark" aria-hidden="true">
+      <span></span>
+      <span></span>
+    </div>
+    <p class="login-welcome__eyebrow">{eyebrow}</p>
+    <h2 class="login-welcome__title" id={`${id}-title`}>
+      {title} <strong>{name}</strong>
+    </h2>
+    <p class="login-welcome__description">{description}</p>
+    <div class="login-welcome__actions">
+      <button class="login-welcome__button" type="button" data-welcome-close>{closeLabel}</button>
+      <span class="login-welcome__timer">
+        Auto closes in <strong data-welcome-count>{autoCloseSeconds}</strong>s
+      </span>
+    </div>
+  </section>
+</div>
+
+<style>
+  .login-welcome {
+    --welcome-panel-bg: rgba(255, 253, 249, 0.96);
+    --welcome-border: rgba(108, 87, 73, 0.16);
+    --welcome-shadow: 0 24px 70px rgba(23, 20, 18, 0.18);
+    display: grid;
+    place-items: center;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      opacity var(--duration-normal) var(--ease-default),
+      visibility var(--duration-normal) var(--ease-default);
+  }
+
+  .login-welcome--page {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    padding: 1.5rem;
+  }
+
+  .login-welcome--modal {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    padding: 1.25rem;
+    border-radius: inherit;
+    overflow: hidden;
+  }
+
+  .login-welcome[data-open="false"] {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .login-welcome__backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background:
+      linear-gradient(135deg, rgba(23, 20, 18, 0.74), rgba(70, 56, 44, 0.48)),
+      var(--bg-grain);
+  }
+
+  .login-welcome--modal .login-welcome__backdrop {
+    background:
+      linear-gradient(180deg, rgba(250, 249, 245, 0.98), rgba(246, 241, 232, 0.96)),
+      var(--bg-grain);
+  }
+
+  .login-welcome__panel {
+    position: relative;
+    width: min(100%, 34rem);
+    padding: 2rem;
+    border: 1px solid var(--welcome-border);
+    border-radius: var(--radius-xl);
+    background:
+      linear-gradient(180deg, var(--welcome-panel-bg), rgba(246, 241, 232, 0.94)),
+      var(--bg-grain);
+    box-shadow: var(--welcome-shadow);
+    color: var(--text-primary);
+    overflow: hidden;
+    transform: translateY(0) scale(1);
+    transition: transform var(--duration-normal) var(--ease-out);
+  }
+
+  .login-welcome--modal .login-welcome__panel {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: none;
+  }
+
+  .login-welcome[data-open="false"] .login-welcome__panel {
+    transform: translateY(0.75rem) scale(0.98);
+  }
+
+  .login-welcome__mark {
+    position: relative;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--btn-primary-bg);
+    box-shadow: var(--btn-primary-shadow);
+  }
+
+  .login-welcome__mark span:first-child,
+  .login-welcome__mark span:last-child {
+    position: absolute;
+    border-radius: 999px;
+    background: var(--color-primary);
+  }
+
+  .login-welcome__mark span:first-child {
+    width: 1.7rem;
+    height: 0.45rem;
+    left: 0.65rem;
+    top: 1.28rem;
+  }
+
+  .login-welcome__mark span:last-child {
+    width: 0.45rem;
+    height: 1.7rem;
+    left: 1.28rem;
+    top: 0.65rem;
+    background: var(--bg-primary);
+  }
+
+  .login-welcome__eyebrow {
+    margin: 0 0 0.65rem;
+    font-size: 0.78rem;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  .login-welcome__title {
+    margin: 0;
+    font-family: var(--font-editorial);
+    font-size: 3rem;
+    font-weight: 400;
+    line-height: 1.04;
+    letter-spacing: 0;
+    color: var(--text-primary);
+  }
+
+  .login-welcome__title strong {
+    display: block;
+    margin-top: 0.1rem;
+    color: var(--color-primary);
+    font-weight: 500;
+  }
+
+  .login-welcome__description {
+    max-width: 27rem;
+    margin: 1rem 0 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .login-welcome__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.9rem;
+    margin-top: 1.6rem;
+  }
+
+  .login-welcome__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0.75rem 1.15rem;
+    border-radius: var(--radius-full);
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    font-size: 0.92rem;
+    font-weight: var(--font-medium);
+    box-shadow: var(--btn-primary-shadow);
+    transition:
+      background var(--duration-fast) var(--ease-default),
+      transform var(--duration-fast) var(--ease-default);
+  }
+
+  .login-welcome__button:hover {
+    background: var(--btn-primary-hover);
+    color: var(--btn-primary-text);
+    transform: translateY(-1px);
+  }
+
+  .login-welcome__timer {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    color: var(--text-tertiary);
+    font-size: 0.86rem;
+  }
+
+  .login-welcome__timer strong {
+    min-width: 1.1em;
+    margin: 0 0.15rem;
+    color: var(--text-primary);
+    text-align: center;
+  }
+
+  @media (max-width: 560px) {
+    .login-welcome--page {
+      padding: 1rem;
+    }
+
+    .login-welcome__panel {
+      padding: 1.5rem;
+    }
+
+    .login-welcome__title {
+      font-size: 2.25rem;
+    }
+
+    .login-welcome__actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .login-welcome__timer {
+      justify-content: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .login-welcome,
+    .login-welcome__panel,
+    .login-welcome__button {
+      transition: none;
+    }
+  }
+</style>
+
+<script is:inline define:vars={{ gateId: id, seconds: autoCloseSeconds, shouldAutoShow: autoShow, gateMode: mode }}>
+  (function() {
+    const root = document.getElementById(gateId);
+    if (!root) return;
+
+    const countEl = root.querySelector('[data-welcome-count]');
+    let timer = 0;
+    let remaining = seconds;
+    let hasLock = false;
+
+    window.__meownoteWelcomeGates = window.__meownoteWelcomeGates || {};
+
+    function setCount(value) {
+      if (countEl) countEl.textContent = String(Math.max(0, value));
+    }
+
+    function clearTimer() {
+      if (timer) {
+        window.clearInterval(timer);
+        timer = 0;
+      }
+    }
+
+    function close() {
+      clearTimer();
+      root.dataset.open = 'false';
+      if (hasLock) {
+        window.__meownoteBodyScrollLock?.unlock?.();
+        hasLock = false;
+      }
+    }
+
+    function show() {
+      clearTimer();
+      remaining = seconds;
+      setCount(remaining);
+      root.dataset.open = 'true';
+
+      if (gateMode === 'page' && !hasLock) {
+        window.__meownoteBodyScrollLock?.lock?.();
+        hasLock = true;
+      }
+
+      timer = window.setInterval(() => {
+        remaining -= 1;
+        setCount(remaining);
+        if (remaining <= 0) close();
+      }, 1000);
+    }
+
+    root.addEventListener('click', (event) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest('[data-welcome-close]')) {
+        close();
+      }
+    });
+
+    window.__meownoteWelcomeGates[gateId] = { show, close };
+
+    if (shouldAutoShow) {
+      window.requestAnimationFrame(show);
+    } else {
+      close();
+    }
+  })();
+</script>
