@@ -11,7 +11,7 @@ import CTA from '@components/sections/CTA.astro';
 ---
 
 <Layout
-  title="Maxwell.Science — AI that thinks. You decide."
+  title="MoonSun.ai — AI that thinks. You decide."
   description="Write better, plan faster, research deeper. One place for chat, workspace, research, and a live gold price tracker."
 >
   <HeroEnhanced />

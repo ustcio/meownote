@@ -1,4 +1,4 @@
-# Maxwell.Science Calendar Implementation
+# MoonSun.ai Calendar Implementation
 
 ## Overview
 
@@ -6,9 +6,9 @@ The calendar page lives at `/calendar/` and is implemented with:
 
 - `src/pages/calendar.astro` for layout, form controls, modal structure, and page-scoped styling.
 - `src/scripts/calendar-app.ts` for calendar rendering, event persistence, and UI interactions.
-- `src/scripts/calendar-reminders.ts` for site-wide reminder delivery while any Maxwell.Science page is open.
+- `src/scripts/calendar-reminders.ts` for site-wide reminder delivery while any MoonSun.ai page is open.
 
-The page follows the existing Maxwell.Science design language: warm cream backgrounds, restrained borders, editorial serif headings, Anthropic Sans body text, low-saturation clay and olive accents, soft shadows, and small motion transitions.
+The page follows the existing MoonSun.ai design language: warm cream backgrounds, restrained borders, editorial serif headings, Anthropic Sans body text, low-saturation clay and olive accents, soft shadows, and small motion transitions.
 
 ## Features
 
@@ -25,9 +25,9 @@ The page follows the existing Maxwell.Science design language: warm cream backgr
 
 Calendar reminders are sent to the built-in meow notification channel from `sendMeowNotification()` in `src/scripts/calendar-reminders.ts`. The MeoW API payload uses `title` and `msg`, and the message includes event title, time, location, reminder offset, priority, and frequency.
 
-Reminder checks are initialized from `BaseLayout.astro`, so they run while any Maxwell.Science page is open in the browser. Fully background delivery after the browser is closed still requires a scheduled worker or push-notification backend.
+Reminder checks are initialized from `BaseLayout.astro`, so they run while any MoonSun.ai page is open in the browser. Fully background delivery after the browser is closed still requires a scheduled worker or push-notification backend.
 
-The implementation also dispatches a `meow:notification` browser event after a meow reminder is sent so other Maxwell.Science interfaces can listen for consistent channel behavior.
+The implementation also dispatches a `meow:notification` browser event after a meow reminder is sent so other MoonSun.ai interfaces can listen for consistent channel behavior.
 
 ## Usage
 

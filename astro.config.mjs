@@ -4,7 +4,7 @@ import path from 'path';
 import vue from '@astrojs/vue';
 
 export default defineConfig({
-  site: 'https://maxwell.science',
+  site: 'https://moonsun.ai',
   compressHTML: true,
   trailingSlash: 'always',
 

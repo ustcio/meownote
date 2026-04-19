@@ -4,7 +4,7 @@
 
 export const translations = {
   // Meta
-  'meta.title': 'Maxwell.Science - AI that works for you',
+  'meta.title': 'MoonSun.ai - AI that works for you',
   'meta.description': 'Meet the AI assistant that helps you create, code, and collaborate with confidence.',
   
   // Navigation - Clean & Simple
@@ -22,7 +22,7 @@ export const translations = {
   'hero.title.word1': 'AI that',
   'hero.title.word2': 'understands',
   'hero.title.word3': 'you',
-  'hero.subtitle': 'Maxwell.Science is an AI assistant built to help you think deeper, work smarter, and create freely. No shortcuts, just genuine intelligence.',
+  'hero.subtitle': 'MoonSun.ai is an AI assistant built to help you think deeper, work smarter, and create freely. No shortcuts, just genuine intelligence.',
   'hero.cta.primary': 'Start chatting',
   'hero.cta.secondary': 'See what it can do',
   'hero.stats.models': 'Models',
@@ -59,14 +59,14 @@ export const translations = {
   // Chatbot Page
   'chatbot.title': 'Chat',
   'chatbot.welcome.title': 'What can I help you with?',
-  'chatbot.welcome.subtitle': 'I\'m Maxwell, your AI assistant. I can help with writing, analysis, coding, math, and much more.',
+  'chatbot.welcome.subtitle': 'I\'m MoonSun, your AI assistant. I can help with writing, analysis, coding, math, and much more.',
   'chatbot.quickstart': 'Try asking',
   'chatbot.quickstart.code': 'Write a function',
   'chatbot.quickstart.explain': 'Explain a concept',
   'chatbot.quickstart.write': 'Draft an email',
   'chatbot.quickstart.brainstorm': 'Brainstorm ideas',
-  'chatbot.input.placeholder': 'Message Maxwell.Science...',
-  'chatbot.input.hint': 'Maxwell.Science may produce inaccurate information. Verify important details.',
+  'chatbot.input.placeholder': 'Message MoonSun.ai...',
+  'chatbot.input.hint': 'MoonSun.ai may produce inaccurate information. Verify important details.',
   'chatbot.select_model': 'Model',
   'chatbot.new_chat': 'New chat',
   'chatbot.export': 'Export',
@@ -179,7 +179,7 @@ export const translations = {
   'about.title': 'AI that works for you',
   'about.subtitle': 'We\'re building thoughtful AI tools that help you think deeper, create better, and work smarter.',
   'about.story.title': 'Our mission',
-  'about.story.p1': 'Maxwell.Science was born from a simple belief: AI should amplify human potential, not replace it. We build tools that help you think clearer, create better, and work smarter.',
+  'about.story.p1': 'MoonSun.ai was born from a simple belief: AI should amplify human potential, not replace it. We build tools that help you think clearer, create better, and work smarter.',
   'about.story.p2': 'Our mission is to make advanced AI accessible to everyone—developers, creators, researchers, and curious minds alike. Every feature we ship is designed with intention, tested with care, and refined through real use.',
   'about.story.p3': 'We believe the best technology fades into the background, letting you focus on what matters most: your ideas, your work, your impact.',
   'about.values.title': 'What guides us',
@@ -207,7 +207,7 @@ export const translations = {
   'about.team.title': 'Behind the scenes',
   'about.team.desc': 'A small, focused team passionate about AI and user experience.',
   'about.cta.title': 'Ready to experience the difference?',
-  'about.cta.desc': 'Join thousands who use Maxwell.Science daily for writing, coding, research, and more.',
+  'about.cta.desc': 'Join thousands who use MoonSun.ai daily for writing, coding, research, and more.',
   'about.cta.primary': 'Start chatting',
   'about.cta.secondary': 'Explore tools',
   

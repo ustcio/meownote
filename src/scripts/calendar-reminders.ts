@@ -22,7 +22,7 @@ interface ReminderSentState {
 
 declare global {
   interface Window {
-    __maxwellCalendarReminders?: {
+    __moonSunCalendarReminders?: {
       checkNow: () => Promise<void>;
     };
     __meownoteToast?: {
@@ -156,7 +156,7 @@ async function sendMeowNotification(event: CalendarReminderEvent, reminderMinute
   const start = new Date(`${event.startDate}T${event.startTime}`);
   const end = new Date(`${event.endDate}T${event.endTime}`);
   const payload = {
-    title: 'Maxwell.Science Calendar Reminder',
+    title: 'MoonSun.ai Calendar Reminder',
     msg: `Event: ${event.title}\nTime: ${start.toLocaleString()} - ${end.toLocaleTimeString()}\nLocation: ${event.location || 'N/A'}\nReminder: ${reminderText} before\nPriority: ${event.priority}\nFrequency: ${formatFrequency(event.reminderFrequency)}`,
     type: 'calendar_reminder'
   };
@@ -191,7 +191,7 @@ async function deliverReminderMethod(event: CalendarReminderEvent, reminderMinut
     if (Notification.permission !== 'granted') {
       throw new Error('Browser notifications not allowed');
     }
-    new Notification('Maxwell.Science Calendar Reminder', {
+    new Notification('MoonSun.ai Calendar Reminder', {
       body: `${event.title} starts ${formatReminderOffset(reminderMinutes)}`,
       tag: `${event.id}-${reminderMinutes}`
     });
@@ -245,7 +245,7 @@ async function checkCalendarReminders(): Promise<void> {
 }
 
 function initCalendarReminderRunner(): void {
-  if (window.__maxwellCalendarReminders) return;
+  if (window.__moonSunCalendarReminders) return;
 
   let running = false;
   const checkNow = async () => {
@@ -258,7 +258,7 @@ function initCalendarReminderRunner(): void {
     }
   };
 
-  window.__maxwellCalendarReminders = { checkNow };
+  window.__moonSunCalendarReminders = { checkNow };
   window.setInterval(checkNow, 60 * 1000);
   window.addEventListener('focus', checkNow);
   document.addEventListener('visibilitychange', () => {

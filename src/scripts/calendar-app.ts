@@ -31,7 +31,7 @@ interface ReminderSentState {
 
 declare global {
   interface Window {
-    __maxwellCalendarReminders?: {
+    __moonSunCalendarReminders?: {
       checkNow: () => Promise<void>;
     };
   }
@@ -78,7 +78,7 @@ export class CalendarApp {
     this.renderCalendar();
     this.initEventListeners();
     this.loadCloudEvents();
-    window.__maxwellCalendarReminders?.checkNow?.();
+    window.__moonSunCalendarReminders?.checkNow?.();
   }
 
   private ensureRuntimeStyles(): void {
@@ -186,7 +186,7 @@ export class CalendarApp {
 
       this.events = result.data.map(event => this.normalizeEvent(event as Partial<CalendarEvent>));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.events));
-      this.updateSyncStatus('Synced to your Maxwell.Science account');
+      this.updateSyncStatus('Synced to your MoonSun.ai account');
       this.renderCalendar();
     } catch (error) {
       console.warn('[Calendar] Cloud load failed, using local cache:', error);
@@ -213,7 +213,7 @@ export class CalendarApp {
       if (!response.ok || !result?.success) {
         throw new Error(result?.message || 'Cloud calendar save failed');
       }
-      this.updateSyncStatus('Synced to your Maxwell.Science account');
+      this.updateSyncStatus('Synced to your MoonSun.ai account');
     } catch (error) {
       console.error('[Calendar] Cloud save failed:', error);
       this.updateSyncStatus('Saved locally; cloud sync failed');
@@ -313,7 +313,7 @@ export class CalendarApp {
       }
 
       const payload = {
-        title: 'Maxwell.Science Calendar Reminder',
+        title: 'MoonSun.ai Calendar Reminder',
         msg: `Event: ${event.title}\nTime: ${this.formatEventTime(event)}\nLocation: ${event.location || 'N/A'}\nReminder: ${reminderText} before\nPriority: ${event.priority}\nFrequency: ${this.formatFrequency(event.reminderFrequency)}`,
         type: 'calendar_reminder'
       };
@@ -379,7 +379,7 @@ export class CalendarApp {
         await Notification.requestPermission();
       }
       if (Notification.permission === 'granted') {
-        new Notification('Maxwell.Science Calendar Reminder', {
+        new Notification('MoonSun.ai Calendar Reminder', {
           body: `${event.title} starts ${this.formatReminderOffset(reminderMinutes)}`,
           tag: `${event.id}-${reminderMinutes}`
         });
