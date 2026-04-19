@@ -1,4 +1,6 @@
 ---
+import SiteLogo from '@components/ui/SiteLogo.astro';
+
 interface Props {
   id: string;
   mode?: 'page' | 'modal';
@@ -19,7 +21,7 @@ const {
   title = 'Welcome back,',
   description = 'Your workspace is ready. Continue when you are ready, or let this page close automatically.',
   closeLabel = 'Continue',
-  autoCloseSeconds = 5,
+  autoCloseSeconds = 10,
   autoShow = true,
 } = Astro.props as Props;
 ---
@@ -36,9 +38,8 @@ const {
 >
   <button class="login-welcome__backdrop" type="button" data-welcome-close aria-label="Close welcome page"></button>
   <section class="login-welcome__panel">
-    <div class="login-welcome__mark" aria-hidden="true">
-      <span></span>
-      <span></span>
+    <div class="login-welcome__logo">
+      <SiteLogo as="span" size="footer" label="MoonSun.ai" />
     </div>
     <p class="login-welcome__eyebrow">{eyebrow}</p>
     <h2 class="login-welcome__title" id={`${id}-title`}>
@@ -136,36 +137,9 @@ const {
     transform: translateY(0.75rem) scale(0.98);
   }
 
-  .login-welcome__mark {
-    position: relative;
-    width: 3rem;
-    height: 3rem;
+  .login-welcome__logo {
+    display: inline-flex;
     margin-bottom: 1.25rem;
-    border-radius: var(--radius-lg);
-    background: var(--btn-primary-bg);
-    box-shadow: var(--btn-primary-shadow);
-  }
-
-  .login-welcome__mark span:first-child,
-  .login-welcome__mark span:last-child {
-    position: absolute;
-    border-radius: 999px;
-    background: var(--color-primary);
-  }
-
-  .login-welcome__mark span:first-child {
-    width: 1.7rem;
-    height: 0.45rem;
-    left: 0.65rem;
-    top: 1.28rem;
-  }
-
-  .login-welcome__mark span:last-child {
-    width: 0.45rem;
-    height: 1.7rem;
-    left: 1.28rem;
-    top: 0.65rem;
-    background: var(--bg-primary);
   }
 
   .login-welcome__eyebrow {
