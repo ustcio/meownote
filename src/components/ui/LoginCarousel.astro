@@ -349,12 +349,12 @@ const slides = [
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const container = document.querySelector('.carousel-container');
+    const container = document.querySelector<HTMLElement>('.carousel-container');
     if (!container) return;
 
-    const slides = container.querySelectorAll('.carousel-slide');
-    const dots = container.querySelectorAll('.carousel-dot');
-    const progressBar = container.querySelector('.progress-bar');
+    const slides = container.querySelectorAll<HTMLElement>('.carousel-slide');
+    const dots = container.querySelectorAll<HTMLElement>('.carousel-dot');
+    const progressBar = container.querySelector<HTMLElement>('.progress-bar');
     
     let currentIndex = 0;
     let autoplayInterval: number | null = null;
@@ -432,7 +432,7 @@ const slides = [
     container.addEventListener('mouseenter', stopAutoplay);
     container.addEventListener('mouseleave', startAutoplay);
 
-    container.addEventListener('keydown', (e) => {
+    container.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
         e.preventDefault();
         nextSlide();
@@ -447,13 +447,13 @@ const slides = [
     let touchStartX = 0;
     let touchStartY = 0;
 
-    container.addEventListener('touchstart', (e) => {
+    container.addEventListener('touchstart', (e: TouchEvent) => {
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
       stopAutoplay();
     }, { passive: true });
 
-    container.addEventListener('touchend', (e) => {
+    container.addEventListener('touchend', (e: TouchEvent) => {
       const touchEndX = e.changedTouches[0].clientX;
       const touchEndY = e.changedTouches[0].clientY;
       const diffX = touchStartX - touchEndX;

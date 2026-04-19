@@ -73,13 +73,13 @@ node test-ai-integration.js
 
 ```bash
 # 测试金价数据接口
-curl https://api.ustc.dev/api/gold
+curl https://api.moonsun.ai/api/gold
 
 # 测试AI分析接口
-curl https://api.ustc.dev/api/gold/ai-analysis
+curl https://api.moonsun.ai/api/gold/ai-analysis
 
 # 测试AI信号接口
-curl https://api.ustc.dev/api/gold/ai-signals
+curl https://api.moonsun.ai/api/gold/ai-signals
 ```
 
 ## 📊 数据流
@@ -111,14 +111,14 @@ curl https://api.ustc.dev/api/gold/ai-signals
 
 ```bash
 # 查看今天的AI分析记录
-curl "https://api.ustc.dev/api/gold/ai-analysis?date=$(date +%Y-%m-%d)"
+curl "https://api.moonsun.ai/api/gold/ai-analysis?date=$(date +%Y-%m-%d)"
 ```
 
 ### 2. 查看AI交易信号
 
 ```bash
 # 查看今天的AI交易信号
-curl "https://api.ustc.dev/api/gold/ai-signals?date=$(date +%Y-%m-%d)"
+curl "https://api.moonsun.ai/api/gold/ai-signals?date=$(date +%Y-%m-%d)"
 ```
 
 ### 3. 查看Worker日志
@@ -154,7 +154,7 @@ wrangler tail
 
 **检查**: 
 ```bash
-curl https://api.ustc.dev/api/gold/ai-analysis
+curl https://api.moonsun.ai/api/gold/ai-analysis
 ```
 
 **可能原因**:

@@ -113,10 +113,10 @@ const COOLDOWN = 2 * 60 * 1000; // 2分钟冷却期
 ### 测试方法
 ```bash
 # 测试价格波动预警（1分钟冷却）
-curl "https://api.ustc.dev/api/gold/alert/test?type=all"
+curl "https://api.moonsun.ai/api/gold/alert/test?type=all"
 
 # 查看通知历史
-curl "https://api.ustc.dev/api/gold/ai-analysis"
+curl "https://api.moonsun.ai/api/gold/ai-analysis"
 ```
 
 ---

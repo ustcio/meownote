@@ -302,13 +302,13 @@ const BACKTEST_CONFIG = {
 3. **验证测试**
    ```bash
    # 健康检查
-   curl https://api.ustc.dev/api/health
+   curl https://api.moonsun.ai/api/health
    
    # 数据接口测试
-   curl https://api.ustc.dev/api/gold
+   curl https://api.moonsun.ai/api/gold
    
    # 分析接口测试
-   curl https://api.ustc.dev/api/analysis
+   curl https://api.moonsun.ai/api/analysis
    ```
 
 ---

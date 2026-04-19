@@ -1,6 +1,9 @@
+const DEFAULT_API_BASE = 'https://api.moonsun.ai';
+const apiBase = import.meta.env.PUBLIC_API_BASE || DEFAULT_API_BASE;
+
 export const config = {
   api: {
-    baseUrl: import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev',
+    baseUrl: apiBase,
     timeout: 30000,
     retryAttempts: 3,
     retryDelay: 1000,
@@ -46,9 +49,12 @@ export const config = {
   },
 
   workspace: {
-    apiBase: import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev',
+    apiBase,
     endpoint: '/api/workspace',
   },
 } as const;
+
+export const API_BASE = config.api.baseUrl;
+export const AUTH_TOKEN_KEY = config.auth.tokenKey;
 
 export type Config = typeof config;

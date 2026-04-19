@@ -206,7 +206,7 @@ option.addEventListener('keydown', (e: Event) => {
 
 **接口配置**:
 ```javascript
-const API_BASE = 'https://api.ustc.dev';
+const API_BASE = 'https://api.moonsun.ai';
 ```
 
 **支持的模型**:

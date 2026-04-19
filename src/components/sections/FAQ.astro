@@ -495,8 +495,9 @@ const faqs = [
 <script>
   document.querySelectorAll('.faq-item').forEach((item) => {
     item.addEventListener('toggle', () => {
+      const detail = item as HTMLDetailsElement;
       const btn = item.querySelector('.faq-question-btn');
-      if (btn) btn.setAttribute('aria-expanded', item.open.toString());
+      if (btn) btn.setAttribute('aria-expanded', detail.open.toString());
     });
   });
 </script>

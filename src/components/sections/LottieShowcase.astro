@@ -74,8 +74,8 @@ const features = [
   const TOTAL_SLIDES = 4;
 
   let currentSlide = 0;
-  let animationInstances = [];
-  let autoplayTimer = null;
+  let animationInstances: unknown[] = [];
+  let autoplayTimer: ReturnType<typeof setInterval> | null = null;
   let isTransitioning = false;
 
   function initLottieSlides() {
@@ -115,7 +115,7 @@ const features = [
     startAutoplay();
   }
 
-  function showSlide(index) {
+  function showSlide(index: number) {
     if (isTransitioning) return;
     isTransitioning = true;
 
@@ -173,7 +173,7 @@ const features = [
     }
   }
 
-  function waitForLottie(callback, retries) {
+  function waitForLottie(callback: () => void, retries: number = 0) {
     if (retries === undefined) retries = 0;
     var hasLottie = window.lottie;
     var hasDotLottie = window.customElements && window.customElements.get('dotlottie-player');
@@ -186,7 +186,7 @@ const features = [
     }, 100);
   }
 
-  function loadDotLottiePlayer(callback) {
+  function loadDotLottiePlayer(callback: () => void) {
     if (window.customElements && window.customElements.get('dotlottie-player')) {
       callback();
       return;

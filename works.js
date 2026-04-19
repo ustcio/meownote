@@ -11,7 +11,7 @@
 // 6. R2 大文件上传（Multipart Upload）
 //
 // 域名：
-// - https://api.ustc.dev (自定义域名)
+// - https://api.moonsun.ai (自定义域名)
 // - https://visitor-stats.metanext.workers.dev (Workers域名)
 //
 // ================================================================================

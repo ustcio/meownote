@@ -555,7 +555,8 @@ const lang = getLangFromUrl(Astro.url);
 </style>
 
 <script>
-  const API_BASE = 'https://api.ustc.dev';
+  import { API_BASE } from '@/config';
+
   const authStore = window.__meownoteAuth;
   
   const modal = document.getElementById('auth-modal');

@@ -78,7 +78,7 @@ id = ""  # 替换为 wrangler kv:namespace create "GOLD_PRICE_CACHE" 输出的 I
 
 **Before**:
 ```typescript
-const API_BASE = 'https://api.ustc.dev';
+const API_BASE = 'https://api.moonsun.ai';
 const TOKEN_KEY = 'auth_token';
 // fetch 无认证头
 headers: { 'Content-Type': 'application/json' }
@@ -86,7 +86,7 @@ headers: { 'Content-Type': 'application/json' }
 
 **After**:
 ```typescript
-const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
+const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.moonsun.ai';
 const TOKEN_KEY = 'meownote_auth_token';
 
 function getAuthToken(): string | null {
@@ -122,7 +122,7 @@ headers: getAuthHeaders()
 
 **Before**: 独立的 API 客户端实现，硬编码 URL，无重试
 ```typescript
-const API_BASE = 'https://api.ustc.dev';
+const API_BASE = 'https://api.moonsun.ai';
 const token = localStorage.getItem('meownote_auth_token');
 // 独立的 fetch 实现
 ```

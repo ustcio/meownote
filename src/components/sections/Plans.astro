@@ -381,20 +381,21 @@ const plans = [
   (function() {
     const toggle = document.getElementById('billing-toggle');
     if (!toggle) return;
-    const amounts = document.querySelectorAll('.plan-card__amount');
+    const billingToggle = toggle;
+    const amounts = document.querySelectorAll<HTMLElement>('.plan-card__amount');
 
-    toggle.setAttribute('aria-pressed', 'false');
+    billingToggle.setAttribute('aria-pressed', 'false');
 
     function updatePrice() {
-      const isYearly = toggle.getAttribute('aria-pressed') === 'true';
+      const isYearly = billingToggle.getAttribute('aria-pressed') === 'true';
       amounts.forEach((el) => {
-        el.textContent = isYearly ? el.dataset.yearly : el.dataset.monthly;
+        el.textContent = (isYearly ? el.dataset.yearly : el.dataset.monthly) ?? '';
       });
     }
 
-    toggle.addEventListener('click', () => {
-      const current = toggle.getAttribute('aria-pressed') === 'true';
-      toggle.setAttribute('aria-pressed', (!current).toString());
+    billingToggle.addEventListener('click', () => {
+      const current = billingToggle.getAttribute('aria-pressed') === 'true';
+      billingToggle.setAttribute('aria-pressed', (!current).toString());
       updatePrice();
     });
   })();

@@ -1,6 +1,6 @@
 ---
 name: workspace API调用路径修复方案
-overview: 修复workspace页面的API调用问题。核心发现：works.js已实现完整的/api/workspace REST API，但前端使用相对路径导致跨域/路径错误。解决方案：将相对路径改为绝对路径 https://api.ustc.dev/api/workspace。
+overview: 修复workspace页面的API调用问题。核心发现：works.js已实现完整的/api/workspace REST API，但前端使用相对路径导致跨域/路径错误。解决方案：将相对路径改为绝对路径 https://api.moonsun.ai/api/workspace。
 todos:
   - id: add-workspace-config
     content: 在 src/config/index.ts 中添加 WORKSPACE_API 配置常量
@@ -27,10 +27,10 @@ todos:
 
 ### 根本原因
 
-前端workspace页面使用**相对路径** `/api/workspace`，但Cloudflare Worker API部署在 `https://api.ustc.dev`。
+前端workspace页面使用**相对路径** `/api/workspace`，但Cloudflare Worker API部署在 `https://api.moonsun.ai`。
 
 - 静态站点：`https://ustc.dev`
-- API Worker：`https://api.ustc.dev`
+- API Worker：`https://api.moonsun.ai`
 - 相对路径错误调用：`https://ustc.dev/api/workspace`（不存在 → 404）
 
 ### works.js API实现（已完整）
@@ -58,7 +58,7 @@ todos:
 
 - **前端框架**：Astro 6.x + TypeScript
 - **后端服务**：Cloudflare Worker (works.js) + D1 Database
-- **API端点**：https://api.ustc.dev
+- **API端点**：https://api.moonsun.ai
 
 ## 解决方案
 
@@ -76,7 +76,7 @@ todos:
 
 ```
 src/pages/workspace/index.astro  ──┐
-                                   ├──► API_BASE = 'https://api.ustc.dev'
+                                   ├──► API_BASE = 'https://api.moonsun.ai'
 src/pages/workspace/edit.astro   ──┘        │
                                            ▼
                                     Cloudflare Worker (works.js)
@@ -102,7 +102,7 @@ src/
 
 ```typescript
 workspace: {
-  apiBase: 'https://api.ustc.dev',
+  apiBase: 'https://api.moonsun.ai',
   endpoint: '/api/workspace',
 },
 ```

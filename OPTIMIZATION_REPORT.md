@@ -132,7 +132,7 @@
 - ✅ 字体显示优化设置
 
 #### 资源预加载
-- ✅ API域名预连接(api.ustc.dev)
+- ✅ API域名预连接(api.moonsun.ai)
 - ✅ CDN域名预连接(cdn.hmos.dongs.xyz)
 - ✅ DNS预解析配置
 

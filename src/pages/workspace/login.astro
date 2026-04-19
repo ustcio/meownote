@@ -1,5 +1,6 @@
 ---
 import AppLayout from '@layouts/AppLayout.astro';
+import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
 
 const title = 'Workspace Admin Login - MoonSun.ai';
 const description = 'Secure access for the MoonSun workspace.';
@@ -143,10 +144,10 @@ const slides = [
     </div>
   </section>
 
-  <script is:inline define:vars={{ API_BASE: 'https://api.ustc.dev' }}>
+  <script is:inline define:vars={{ API_BASE, TOKEN_KEY: AUTH_TOKEN_KEY }}>
     (function() {
       const ADMIN_USERNAME = 'YangHao';
-      const TOKEN_KEYS = ['meownote_auth_token', 'auth_token'];
+      const TOKEN_KEYS = [TOKEN_KEY, 'auth_token'];
       const USER_KEYS = ['meownote_user_data', 'user'];
       let isRedirecting = false;
 
@@ -207,7 +208,7 @@ const slides = [
 
         const nextToken = token || getStoredToken();
         if (nextToken) {
-          localStorage.setItem('meownote_auth_token', nextToken);
+          localStorage.setItem(TOKEN_KEY, nextToken);
           localStorage.setItem('auth_token', nextToken);
         }
         writeJSON('meownote_user_data', user);

@@ -16,7 +16,7 @@
 
 **测试结果**:
 ```bash
-curl -s https://api.ustc.dev/api/gold
+curl -s https://api.moonsun.ai/api/gold
 ```
 
 **响应**:
@@ -52,7 +52,7 @@ curl -s https://api.ustc.dev/api/gold
 
 **测试结果**:
 ```bash
-curl -s "https://api.ustc.dev/api/gold/ai-analysis"
+curl -s "https://api.moonsun.ai/api/gold/ai-analysis"
 ```
 
 **响应**:
@@ -100,7 +100,7 @@ curl -s "https://api.ustc.dev/api/gold/ai-analysis"
 
 **测试结果**:
 ```bash
-curl -s "https://api.ustc.dev/api/gold/ai-signals"
+curl -s "https://api.moonsun.ai/api/gold/ai-signals"
 ```
 
 **响应**:
@@ -192,7 +192,7 @@ curl -s "https://api.ustc.dev/api/gold/ai-signals"
 ### 如果AI分析没有数据
 ```bash
 # 检查API响应
-curl -s "https://api.ustc.dev/api/gold/ai-analysis"
+curl -s "https://api.moonsun.ai/api/gold/ai-analysis"
 
 # 等待几分钟让系统积累数据
 ```
@@ -206,7 +206,7 @@ npx wrangler tail
 ### 如果需要手动触发分析
 ```bash
 # 调用分析API
-curl -s "https://api.ustc.dev/api/gold/analysis?action=analyze"
+curl -s "https://api.moonsun.ai/api/gold/analysis?action=analyze"
 ```
 
 ---

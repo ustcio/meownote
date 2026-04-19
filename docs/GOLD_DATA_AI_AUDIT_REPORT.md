@@ -293,7 +293,7 @@ console.log('[Pipeline] Completed in', totalLatency, 'ms', {
 
 | 数据源 | URL | 权重 | 可靠性 |
 |-------|-----|------|--------|
-| 上海黄金交易所 | `https://api.ustc.dev/api/gold` | 0.4 | 0.95 |
+| 上海黄金交易所 | `https://api.moonsun.ai/api/gold` | 0.4 | 0.95 |
 | CoinGecko (国际) | `https://api.coingecko.com/...` | 0.3 | 0.90 |
 | ExchangeRate-API (汇率) | `https://api.exchangerate-api.com/...` | 0.3 | 0.95 |
 

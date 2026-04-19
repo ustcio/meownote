@@ -96,7 +96,6 @@ const containerId = `lottie-${Math.random().toString(36).slice(2, 9)}`;
         if (framesIn || framesLoop) {
           const inRange = framesIn ? framesIn.split(',').map(Number) : [0, 0];
           const loopRange = framesLoop ? framesLoop.split(',').map(Number) : null;
-          let hasPlayedIntro = false;
 
           anim.addEventListener('DOMLoaded', () => {
             const totalFrames = anim.totalFrames;
@@ -145,12 +144,11 @@ const containerId = `lottie-${Math.random().toString(36).slice(2, 9)}`;
           const windowHeight = window.innerHeight;
           
           const startTrigger = windowHeight * 0.8;
-          const endTrigger = -rect.height * 0.2;
           
           let progress = 1 - (rect.top / startTrigger);
           progress = Math.max(0, Math.min(1, progress));
 
-          const { inRange, loopRange, totalFrames } = config;
+          const { inRange, loopRange } = config;
           let targetFrame;
 
           if (progress < 0.5 && inRange[1] > inRange[0]) {

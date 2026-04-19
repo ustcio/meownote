@@ -2,6 +2,7 @@
 import Layout from '@layouts/Layout.astro';
 import ModalShell from '@components/ui/ModalShell.astro';
 import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
+import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
 ---
 
 <Layout
@@ -1040,7 +1041,7 @@ import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
   }
 </style>
 
-<script is:inline define:vars={{ API_BASE: 'https://api.ustc.dev', TOKEN_KEY: 'meownote_auth_token' }}>
+<script is:inline define:vars={{ API_BASE, TOKEN_KEY: AUTH_TOKEN_KEY }}>
   let files = [];
   let sortBy = 'updated_at';
   let searchQuery = '';
@@ -1421,10 +1422,6 @@ import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  function isEditableType(type) {
-    return ['txt', 'md', 'markdown', 'json', 'js', 'ts', 'css', 'html', 'clipboard'].includes((type || '').toLowerCase());
-  }
-
   function updateResultsCopy() {
     if (filesCount) {
       filesCount.textContent = `${files.length} item${files.length === 1 ? '' : 's'}`;
@@ -1530,7 +1527,6 @@ import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
         const ext = (file.type || 'txt').toLowerCase();
         const config = fileTypeConfig[ext] || { icon: 'document', type: 'document' };
         const timeStr = formatDateTime(file.createdAt);
-        const editable = isEditableType(ext);
         const size = formatSize(file.fileSize || 0);
 
         return `

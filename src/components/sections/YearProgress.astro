@@ -330,6 +330,7 @@ const quarterData = [
   function animateCounter(elementId: string, target: number, duration: number = 1400) {
     const el = document.getElementById(elementId);
     if (!el) return;
+    const display = el;
 
     const start = performance.now();
     const startValue = 0;
@@ -339,7 +340,7 @@ const quarterData = [
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       const current = Math.round(startValue + (target - startValue) * eased);
-      el.textContent = current.toLocaleString();
+      display.textContent = current.toLocaleString();
       if (progress < 1) requestAnimationFrame(tick);
     }
 
@@ -349,6 +350,7 @@ const quarterData = [
   function animatePercent(elementId: string, target: number, duration: number = 1400) {
     const el = document.getElementById(elementId);
     if (!el) return;
+    const display = el;
 
     const start = performance.now();
 
@@ -357,7 +359,7 @@ const quarterData = [
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       const current = (target * eased).toFixed(2);
-      el.textContent = `${current}%`;
+      display.textContent = `${current}%`;
       if (progress < 1) requestAnimationFrame(tick);
     }
 

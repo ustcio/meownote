@@ -525,7 +525,7 @@ import { t } from '@i18n/translate';
 
 <script>
   // @ts-nocheck
-  const API_BASE = 'https://api.ustc.dev';
+  import { API_BASE } from '@/config';
   
   // Get language from localStorage or default to 'en'
   const getLang = () => localStorage.getItem('lang') || 'en';

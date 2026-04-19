@@ -142,9 +142,10 @@ const lang = getLangFromUrl(Astro.url);
 </style>
 
 <script>
-  const API_BASE = 'https://api.ustc.dev';
+  import { API_BASE } from '@/config';
+
   const REFRESH_INTERVAL = 60000;
-  let statsInterval;
+  let statsInterval: ReturnType<typeof setInterval> | undefined;
   
   async function fetchStats() {
     try {

@@ -88,7 +88,7 @@
 #### 测试通义千问
 
 ```bash
-curl -X POST https://api.ustc.dev/api/test-qwen \
+curl -X POST https://api.moonsun.ai/api/test-qwen \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "【市场数据】\n当前价格：¥618.5/克\n请分析。"
@@ -98,7 +98,7 @@ curl -X POST https://api.ustc.dev/api/test-qwen \
 #### 测试豆包
 
 ```bash
-curl -X POST https://api.ustc.dev/api/test-doubao \
+curl -X POST https://api.moonsun.ai/api/test-doubao \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "【市场数据】\n当前价格：¥618.5/克\n请分析。"
@@ -221,7 +221,7 @@ wrangler secret put DOUBAO_API_KEY
 ### 访问地址
 - **Worker API**: https://visitor-stats.metanext.workers.dev
 - **测试页面**: https://ustc.dev/test-ai-api/
-- **自定义域名**: https://api.ustc.dev
+- **自定义域名**: https://api.moonsun.ai
 
 ### 文档
 - [测试指南](AI_LIVE_TEST.md)

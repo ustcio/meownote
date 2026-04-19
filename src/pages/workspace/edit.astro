@@ -1,6 +1,7 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
+import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
 ---
 
 <Layout 
@@ -653,7 +654,7 @@ import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
 
 </style>
 
-<script is:inline define:vars={{ API_BASE: 'https://api.ustc.dev', TOKEN_KEY: 'meownote_auth_token' }}>
+<script is:inline define:vars={{ API_BASE, TOKEN_KEY: AUTH_TOKEN_KEY }}>
   let fileId = null;
   let currentFile = null;
   let saveTimeout = null;

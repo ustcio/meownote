@@ -100,8 +100,6 @@ const { class: className = '', cards } = Astro.props;
         
         // If the card is at or above its sticky point, and it's not the last card
         if (rect.top <= stickyTop + 2 && i < cards.length - 1) {
-          // Calculate how far down we've scrolled past the sticky point
-          const scrollDistance = (stickyTop - rect.top) + window.scrollY;
           // Scale it down slightly (min 0.9)
           const scale = Math.max(0.9, 1 - (window.scrollY - card.offsetTop + stickyTop) * 0.0005);
           // Darken the background slightly

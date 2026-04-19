@@ -1,6 +1,7 @@
 /**
  * Claude-Style Chat Interface
  */
+import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
 
 // Types
 interface ChatMessage {
@@ -25,10 +26,8 @@ let abortController: AbortController | null = null;
 let proxyModels: Record<string, Array<{id: string; name: string; model: string}>> = {};
 
 // API Configuration
-const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
-const TOKEN_KEY = 'meownote_auth_token';
-const USER_KEY = 'meownote_user_data';
-const SESSIONS_KEY = 'chatbot_sessions';
+const TOKEN_KEY = AUTH_TOKEN_KEY;
+const SESSIONS_KEY = 'claude-chat-sessions';
 const SUPER_ADMIN_TOKEN_KEY = 'meownote_super_admin_token';
 
 function getAuthToken(): string | null {
@@ -577,7 +576,7 @@ function scrollToBottom() {
  */
 function saveSessions() {
   try {
-    localStorage.setItem('claude-chat-sessions', JSON.stringify(sessions));
+    localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
   } catch (e) {
     console.error('Failed to save sessions:', e);
   }
@@ -588,7 +587,7 @@ function saveSessions() {
  */
 function loadSessions() {
   try {
-    const saved = localStorage.getItem('claude-chat-sessions');
+    const saved = localStorage.getItem(SESSIONS_KEY);
     if (saved) {
       sessions = JSON.parse(saved);
       renderChatList();

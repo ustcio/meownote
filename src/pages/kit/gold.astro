@@ -1,5 +1,6 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import { API_BASE } from '@/config';
 
 const dayTabs = [
   { id: 'today', label: 'Today' },
@@ -478,9 +479,8 @@ const toolDesc = 'Track domestic and international gold prices in a focused live
   }
 </style>
 
-<script is:inline>
+<script is:inline define:vars={{ API_BASE }}>
   // @ts-nocheck
-  const API_BASE = 'https://api.ustc.dev';
   const REFRESH_INTERVAL = 10000;
 
   function showLoading() {

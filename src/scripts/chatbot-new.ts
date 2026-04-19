@@ -1,6 +1,7 @@
 // ================================================================================
 // Chatbot Module - macOS Window Style Chat Component
 // ================================================================================
+import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -28,8 +29,7 @@ let abortController: AbortController | null = null;
 let isWindowMaximized = false;
 
 // Constants
-const API_BASE = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
-const TOKEN_KEY = 'meownote_auth_token';
+const TOKEN_KEY = AUTH_TOKEN_KEY;
 
 // ================================================================================
 // Auth Helpers

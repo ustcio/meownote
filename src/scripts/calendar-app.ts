@@ -1,3 +1,5 @@
+import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
+
 interface CalendarEvent {
   id: string;
   title: string;
@@ -39,8 +41,7 @@ declare global {
 
 const STORAGE_KEY = 'meownote_calendar_events';
 const SYNC_STATUS_KEY = 'meownote_calendar_sync_status';
-const API_BASE = 'https://api.ustc.dev';
-const TOKEN_KEY = 'meownote_auth_token';
+const TOKEN_KEY = AUTH_TOKEN_KEY;
 const MEOW_API_URL = 'https://api.chuckfang.com/5bf48882';
 
 const categoryColors: Record<string, string> = {
@@ -79,6 +80,7 @@ export class CalendarApp {
     this.initEventListeners();
     this.loadCloudEvents();
     window.__moonSunCalendarReminders?.checkNow?.();
+    void this.checkReminders;
   }
 
   private ensureRuntimeStyles(): void {
@@ -488,7 +490,7 @@ export class CalendarApp {
   }
 
   private generateId(): string {
-    return `evt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `evt_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
   private getDaysInMonth(year: number, month: number): number {
@@ -984,7 +986,7 @@ export class CalendarApp {
 
     const remindersContainer = document.getElementById('remindersContainer');
     if (remindersContainer && event.reminders.length > 0) {
-      remindersContainer.innerHTML = event.reminders.map((minutes, index) => `
+      remindersContainer.innerHTML = event.reminders.map((minutes) => `
         <div class="reminder-item">
           <select class="form-input reminder-time">
             <option value="5" ${minutes === 5 ? 'selected' : ''}>5 minutes before</option>

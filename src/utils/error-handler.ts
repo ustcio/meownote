@@ -1,3 +1,5 @@
+import { API_BASE } from '@/config';
+
 export interface ErrorInfo {
   message: string;
   stack?: string;
@@ -59,8 +61,7 @@ class ErrorHandler {
   
   private async reportError(error: ErrorInfo): Promise<void> {
     try {
-      const apiBase = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
-      await fetch(`${apiBase}/api/errors`, {
+      await fetch(`${API_BASE}/api/errors`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(error),

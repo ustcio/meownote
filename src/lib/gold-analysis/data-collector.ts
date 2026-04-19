@@ -4,6 +4,7 @@
 
 import type { GoldPriceData, PriceHistoryPoint, DataQualityReport } from './types';
 import { validateAndLog } from './data-validator';
+import { API_BASE } from '@/config';
 
 // 数据源配置
 const DATA_SOURCES = {
@@ -121,7 +122,7 @@ export class GoldDataCollector {
   private async fetchSGEData(): Promise<Partial<GoldPriceData>> {
     try {
       // 使用现有的金价爬取Worker
-      const response = await fetch('https://api.ustc.dev/api/gold');
+      const response = await fetch(`${API_BASE}/api/gold`);
       if (!response.ok) throw new Error(`SGE API error: ${response.status}`);
       
       const data = await response.json();

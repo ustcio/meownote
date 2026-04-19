@@ -1339,7 +1339,7 @@ const iconPaths: Record<string, string> = {
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const animatedElements = document.querySelectorAll('.about-page [data-animate]');
+    const animatedElements = document.querySelectorAll<HTMLElement>('.about-page [data-animate]');
     
     if (animatedElements.length === 0) return;
 
@@ -1356,7 +1356,7 @@ const iconPaths: Record<string, string> = {
       (entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            const el = entry.target;
+            const el = entry.target as HTMLElement;
             const delay = el.dataset.delay || 0;
             el.style.setProperty('--anim-delay', `${delay}ms`);
             el.classList.add('is-visible');

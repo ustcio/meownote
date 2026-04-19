@@ -1,5 +1,6 @@
 ---
 import '@styles/global.css';
+import { API_BASE } from '@/config';
 
 interface Props {
   title: string;
@@ -22,7 +23,7 @@ const {
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const apiBase = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
+const apiBase = API_BASE;
 ---
 
 <!DOCTYPE html>
@@ -57,10 +58,10 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || 'https://api.ustc.dev';
     <link rel="icon" type="image/png" href="/claude-favicon.png" />
     <meta name="theme-color" content="#FAF9F5" />
 
-    <link rel="preconnect" href="https://api.ustc.dev" crossorigin />
-    <link rel="dns-prefetch" href="https://api.ustc.dev" />
+    <link rel="preconnect" href={apiBase} crossorigin />
+    <link rel="dns-prefetch" href={apiBase} />
 
-    <script src="/animations/libs/lottie.min.js" defer></script>
+    <script is:inline src="/animations/libs/lottie.min.js" defer></script>
 
     <meta name="format-detection" content="telephone=no" />
     <meta name="color-scheme" content="light dark" />

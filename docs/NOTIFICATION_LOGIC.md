@@ -322,20 +322,20 @@ const history = await getNotificationHistory(env, '2026-02-19');
 ### 测试所有渠道
 
 ```bash
-curl "https://api.ustc.dev/api/gold/alert/test?type=all"
+curl "https://api.moonsun.ai/api/gold/alert/test?type=all"
 ```
 
 ### 测试单个渠道
 
 ```bash
 # 测试Email
-curl "https://api.ustc.dev/api/gold/alert/test?type=email"
+curl "https://api.moonsun.ai/api/gold/alert/test?type=email"
 
 # 测试飞书
-curl "https://api.ustc.dev/api/gold/alert/test?type=feishu"
+curl "https://api.moonsun.ai/api/gold/alert/test?type=feishu"
 
 # 测试MeoW
-curl "https://api.ustc.dev/api/gold/alert/test?type=meow"
+curl "https://api.moonsun.ai/api/gold/alert/test?type=meow"
 ```
 
 ---
@@ -382,7 +382,7 @@ npx wrangler tail
 
 ```bash
 # 检查配置状态
-curl "https://api.ustc.dev/api/gold/alert/test?type=all"
+curl "https://api.moonsun.ai/api/gold/alert/test?type=all"
 ```
 
 ---

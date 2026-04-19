@@ -6,6 +6,7 @@ interface RequestConfig extends RequestInit {
   retryAttempts?: number;
   skipAuth?: boolean;
   cacheTTL?: number;
+  includeCsrf?: boolean;
 }
 
 interface ApiResponse<T = unknown> {
@@ -33,7 +34,7 @@ class ApiError extends Error {
 }
 
 const pendingRequests = new Map<string, Promise<ApiResponse<unknown>>>();
-const responseCache = new Map<string, CacheEntry>();
+const responseCache = new Map<string, CacheEntry<unknown>>();
 
 function getCacheKey(endpoint: string, options: RequestConfig): string {
   return `${options.method || 'GET'}:${endpoint}`;
@@ -46,7 +47,7 @@ function getFromCache<T>(cacheKey: string, ttl: number): ApiResponse<T> | null {
     responseCache.delete(cacheKey);
     return null;
   }
-  return entry.data;
+  return entry.data as ApiResponse<T>;
 }
 
 function setCache<T>(cacheKey: string, data: ApiResponse<T>): void {
@@ -108,6 +109,7 @@ export async function apiRequest<T = unknown>(
     retryAttempts = config.api.retryAttempts,
     skipAuth = false,
     cacheTTL = 0,
+    includeCsrf = true,
     headers: customHeaders = {},
     ...fetchOptions
   } = options;
@@ -136,9 +138,11 @@ export async function apiRequest<T = unknown>(
     }
   }
   
-  const csrfToken = getCSRFToken();
-  if (csrfToken) {
-    headers[config.security.csrfHeaderName] = csrfToken;
+  if (includeCsrf) {
+    const csrfToken = getCSRFToken();
+    if (csrfToken) {
+      headers[config.security.csrfHeaderName] = csrfToken;
+    }
   }
   
   const requestPromise = (async () => {
