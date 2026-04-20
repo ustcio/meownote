@@ -1411,6 +1411,32 @@ let realtimeCache = {
 };
 
 const REALTIME_CACHE_TTL = 8000; // 8秒内存缓存
+const GOLD_PUSH_NOTIFICATIONS_ENABLED = false;
+
+function areGoldPushNotificationsEnabled(env) {
+  return env?.GOLD_PUSH_NOTIFICATIONS_ENABLED === 'true' || GOLD_PUSH_NOTIFICATIONS_ENABLED;
+}
+
+async function disablePendingGoldPushNotifications(env) {
+  if (!env?.DB) return;
+
+  try {
+    await env.DB.prepare(`
+      UPDATE notification_queue
+      SET status = 'disabled'
+      WHERE status = 'pending'
+      AND (
+        type = 'push'
+        OR title LIKE '%金价%'
+        OR title LIKE '%买入%'
+        OR title LIKE '%卖出%'
+        OR message LIKE '%金价%'
+      )
+    `).run();
+  } catch (error) {
+    console.log('[Gold Notifications] Pending queue cleanup skipped:', error.message);
+  }
+}
 
 async function handleTodayGoldPrice(env, ctx, forceRefresh) {
   const today = getBeijingDate();
@@ -1526,7 +1552,7 @@ async function handleTodayGoldPrice(env, ctx, forceRefresh) {
   }
   
   // 异步检查价格预警
-  if (data.success && data.domestic?.price) {
+  if (areGoldPushNotificationsEnabled(env) && data.success && data.domestic?.price) {
     ctx.waitUntil((async () => {
       try {
         await checkAndSendTradingAlerts(data.domestic.price, env);
@@ -1534,12 +1560,16 @@ async function handleTodayGoldPrice(env, ctx, forceRefresh) {
         console.error('[Trading Alerts] Error:', e);
       }
     })());
+  } else {
+    console.log('[Gold Notifications] Trading price alerts disabled for /api/gold');
   }
   
   // 异步发送价格变动预警
-  if (data.success && data.domestic && data.international) {
+  if (areGoldPushNotificationsEnabled(env) && data.success && data.domestic && data.international) {
     const history = await getDayHistory(env, today);
     ctx.waitUntil(sendGoldPriceAlert(data.domestic, data.international, history, env));
+  } else {
+    console.log('[Gold Notifications] Price movement alerts disabled for /api/gold');
   }
   
   const history = await getDayHistory(env, today);
@@ -1757,9 +1787,11 @@ async function scheduledGoldCrawlWithRetry(event, env, ctx) {
         await logCrawlStatus(env, 'success', result);
         
         // 检查并发送交易价格预警
-        if (result.domesticPrice) {
+        if (areGoldPushNotificationsEnabled(env) && result.domesticPrice) {
           console.log('[Scheduled] Checking trading price alerts...');
           await checkAndSendTradingAlerts(result.domesticPrice, env);
+        } else {
+          console.log('[Gold Notifications] Scheduled trading alerts disabled');
         }
         
         return result;
@@ -3151,6 +3183,11 @@ const ALERT_CONFIG = {
 };
 
 async function sendGoldPriceAlert(domestic, international, history, env) {
+  if (!areGoldPushNotificationsEnabled(env)) {
+    console.log('[Gold Alert] Gold push notifications disabled - skipping price movement alert');
+    return;
+  }
+
   const RESEND_API_KEY = env.RESEND_API_KEY;
   
   if (!RESEND_API_KEY) {
@@ -3995,6 +4032,11 @@ async function handleGoldAnalysis(request, env, ctx) {
 }
 
 async function sendAnalysisNotification(analysis, env) {
+  if (!areGoldPushNotificationsEnabled(env)) {
+    console.log('[Gold Analysis] Gold push notifications disabled - skipping analysis notification');
+    return;
+  }
+
   console.log('[Gold Analysis] Sending notification for buy signal...');
   
   const hasDomesticSignal = analysis.domestic.signal.isBuySignal;
@@ -5484,8 +5526,17 @@ async function handleGetNotifications(request, env) {
   }
 
   try {
+    if (!areGoldPushNotificationsEnabled(env)) {
+      await disablePendingGoldPushNotifications(env);
+      return jsonResponse({
+        success: true,
+        notifications: [],
+        message: 'Gold push notifications are disabled'
+      });
+    }
+
     const stmt = env.DB.prepare(`SELECT * FROM notification_queue WHERE status = 'pending' ORDER BY created_at DESC LIMIT 50`);
-    result = await stmt.all();
+    const result = await stmt.all();
 
     return jsonResponse({ success: true, notifications: result.results });
   } catch (error) {
@@ -5598,6 +5649,12 @@ async function generateVisitorId(ip, userAgent) {
 // ================================================================================
 
 async function checkAndSendTradingAlerts(currentPrice, env) {
+  if (!areGoldPushNotificationsEnabled(env)) {
+    await disablePendingGoldPushNotifications(env);
+    console.log('[Trading Alerts] Gold push notifications disabled - skipping alert checks');
+    return [];
+  }
+
   try {
     const stmt = env.DB.prepare(`
       SELECT * FROM price_alerts 
@@ -5663,6 +5720,30 @@ async function checkAndSendTradingAlerts(currentPrice, env) {
   } catch (error) {
     console.error('[Check Trading Alerts Error]', error);
     return [];
+  }
+}
+
+async function queueNotification(env, notification) {
+  if (!areGoldPushNotificationsEnabled(env)) {
+    console.log('[Notification Queue] Gold push notifications disabled - dropping notification:', notification?.title || notification?.type);
+    return { success: false, error: 'Gold push notifications disabled' };
+  }
+
+  try {
+    await env.DB.prepare(`
+      INSERT INTO notification_queue (type, title, message, data, status, created_at)
+      VALUES (?, ?, ?, ?, 'pending', ?)
+    `).bind(
+      notification.type || 'push',
+      notification.title || '',
+      notification.message || '',
+      notification.data || null,
+      new Date().toISOString()
+    ).run();
+    return { success: true };
+  } catch (error) {
+    console.error('[Notification Queue] Failed to queue notification:', error);
+    return { success: false, error: error.message };
   }
 }
 
@@ -5861,23 +5942,33 @@ async function scheduledIntelligentGoldAnalysis(env, ctx) {
     const marketAnalysis = analyzeMarketTrend(historyData);
     console.log('[Intelligent Analysis] Market trend:', marketAnalysis);
 
-    const tradingAlerts = await checkAndSendTradingAlerts(currentPrice, env);
+    const tradingAlerts = areGoldPushNotificationsEnabled(env)
+      ? await checkAndSendTradingAlerts(currentPrice, env)
+      : [];
+    if (!areGoldPushNotificationsEnabled(env)) {
+      await disablePendingGoldPushNotifications(env);
+      console.log('[Intelligent Analysis] Gold push notifications disabled - skipping trading alert checks');
+    }
 
     const aiAnalysis = await performAIAnalysis(env, historyData, tradingParams, marketAnalysis);
 
     // 只在有活跃价格预警时才发送AI持仓建议
     const hasActiveAlerts = tradingParams.alerts && tradingParams.alerts.length > 0;
     
-    if (aiAnalysis.hasValue && hasActiveAlerts) {
+    if (areGoldPushNotificationsEnabled(env) && aiAnalysis.hasValue && hasActiveAlerts) {
       console.log('[Intelligent Analysis] Sending AI advice - active alerts:', tradingParams.alerts.length);
       await sendIntelligentTradingAdvice(env, aiAnalysis, currentPrice, tradingParams);
+    } else if (!areGoldPushNotificationsEnabled(env)) {
+      console.log('[Intelligent Analysis] Gold push notifications disabled - skipping AI advice');
     } else {
       console.log('[Intelligent Analysis] Skipping AI advice - no active alerts');
     }
 
     const profitOpportunities = await calculateProfitOpportunities(currentPrice, tradingParams, marketAnalysis, env);
-    if (profitOpportunities.length > 0) {
+    if (areGoldPushNotificationsEnabled(env) && profitOpportunities.length > 0) {
       await sendProfitOpportunityAlerts(env, profitOpportunities, currentPrice);
+    } else if (!areGoldPushNotificationsEnabled(env) && profitOpportunities.length > 0) {
+      console.log('[Intelligent Analysis] Gold push notifications disabled - skipping profit opportunity alerts');
     }
 
     console.log('[Intelligent Analysis] Completed successfully');
@@ -6216,6 +6307,11 @@ async function calculateProfitOpportunities(currentPrice, tradingParams, marketA
 }
 
 async function sendIntelligentTradingAdvice(env, aiAnalysis, currentPrice, tradingParams) {
+  if (!areGoldPushNotificationsEnabled(env)) {
+    console.log('[AI Analysis] Gold push notifications disabled - skipping intelligent trading advice');
+    return;
+  }
+
   const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
 
   const titleMap = {
@@ -6289,6 +6385,11 @@ async function sendIntelligentTradingAdvice(env, aiAnalysis, currentPrice, tradi
 }
 
 async function sendProfitOpportunityAlerts(env, opportunities, currentPrice) {
+  if (!areGoldPushNotificationsEnabled(env)) {
+    console.log('[Opportunity Alert] Gold push notifications disabled - skipping profit opportunity alerts');
+    return;
+  }
+
   const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
 
   for (const opp of opportunities) {
