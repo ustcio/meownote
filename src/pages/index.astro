@@ -103,17 +103,59 @@ const workflows = [
         </div>
         
         <div slot="tab-write" class="tab-demo-wrapper">
-          <TypewriterDemo 
-            text="Here is a revised draft of your Physical Review Letter abstract, incorporating a more authoritative tone and highlighting the long-term impact:\n\nThe emergence of a nonlinear Hall effect in the noncentrosymmetric magnetic Weyl semimetal CoNb3S6 fundamentally bridges the gap between band topology and correlation physics, offering an estimated 40% enhancement in room-temperature responsivity..." 
-            speed={25}
-          />
+          <div class="writing-demo" aria-label="Academic writing preview">
+            <div class="writing-demo__toolbar">
+              <span>PRL abstract</span>
+              <span>tone tightened</span>
+            </div>
+            <div class="writing-demo__paper">
+              <div class="writing-demo__kicker">Revision pass</div>
+              <p>
+                The emergence of a nonlinear Hall effect in
+                <mark>noncentrosymmetric magnetic Weyl semimetal CoNb3S6</mark>
+                bridges band topology and correlation physics.
+              </p>
+              <p class="writing-demo__muted">
+                We show that symmetry breaking reshapes the Berry curvature landscape,
+                producing a measurable response under modest current bias.
+              </p>
+              <aside class="writing-demo__note">
+                <span>Suggestion</span>
+                Lead with the physical mechanism before the device implication.
+              </aside>
+            </div>
+          </div>
         </div>
         
         <div slot="tab-analyze" class="tab-demo-wrapper">
-          <TypewriterDemo 
-            text="Based on the uploaded PPMS transport data (Sample_A_300K.dat), here are the key takeaways:\n\n1. Longitudinal resistivity (rho_xx) shows metallic behavior down to 28K.\n2. A sharp anomaly near 28K coincides precisely with the onset of the AFM transition observed in your magnetization data.\n3. The Hall carrier concentration assumes a hole-dominated pocket at low T." 
-            speed={20}
-          />
+          <div class="analysis-demo" aria-label="Data analysis preview">
+            <div class="analysis-demo__header">
+              <span>Sample_A_300K.dat</span>
+              <span>parsed</span>
+            </div>
+            <div class="analysis-demo__plot">
+              <svg viewBox="0 0 420 180" role="img" aria-label="Transport curve with anomaly near 28K">
+                <path class="analysis-demo__grid" d="M20 35H400M20 80H400M20 125H400" />
+                <path class="analysis-demo__axis" d="M28 18V155H402" />
+                <path
+                  class="analysis-demo__curve analysis-demo__curve--rho"
+                  d="M34 40 C82 48 112 58 151 72 C188 88 214 106 243 116 C292 132 340 140 396 146"
+                />
+                <path
+                  class="analysis-demo__curve analysis-demo__curve--hall"
+                  d="M35 132 C86 127 119 115 158 101 C194 88 220 72 248 58 C292 38 340 31 395 29"
+                />
+                <line class="analysis-demo__marker" x1="183" x2="183" y1="24" y2="156" />
+                <circle class="analysis-demo__point" cx="183" cy="88" r="5" />
+              </svg>
+              <span class="analysis-demo__tag">AFM transition near 28K</span>
+            </div>
+            <div class="analysis-demo__insights">
+              <span>rho_xx metallic</span>
+              <span>hole pocket likely</span>
+              <span>export ready</span>
+            </div>
+          </div>
         </div>
       </TabsShowcase>
     </ScrollAnimation>
@@ -153,6 +195,237 @@ const workflows = [
   .tab-demo-wrapper {
     width: 100%;
     height: 100%;
+    min-height: 250px;
+    display: grid;
+  }
+
+  .tab-demo-wrapper :global(.claude-typewriter) {
+    height: 100%;
+    min-height: 250px;
+  }
+
+  .writing-demo,
+  .analysis-demo {
+    position: relative;
+    min-height: 250px;
+    border: 1px solid var(--border-secondary);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: var(--bg-primary);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  }
+
+  .writing-demo {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    background:
+      linear-gradient(90deg, rgba(217, 119, 87, 0.08) 0 1px, transparent 1px 100%),
+      linear-gradient(180deg, #fffdf8, var(--bg-secondary));
+    background-size: 22px 100%, 100% 100%;
+  }
+
+  .writing-demo__toolbar,
+  .analysis-demo__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 0.95rem;
+    border-bottom: 1px solid var(--border-secondary);
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .writing-demo__toolbar span:last-child,
+  .analysis-demo__header span:last-child {
+    color: var(--color-primary);
+  }
+
+  .writing-demo__paper {
+    position: relative;
+    display: grid;
+    align-content: center;
+    gap: 0.8rem;
+    padding: clamp(1rem, 3vw, 1.5rem);
+  }
+
+  .writing-demo__kicker {
+    width: fit-content;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    background: rgba(217, 119, 87, 0.12);
+    color: var(--color-primary);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+  }
+
+  .writing-demo p {
+    max-width: 27rem;
+    margin: 0;
+    color: var(--text-primary);
+    font-family: var(--font-editorial);
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    line-height: 1.5;
+  }
+
+  .writing-demo mark {
+    padding: 0.05rem 0.2rem;
+    border-radius: var(--radius-sm);
+    background: rgba(14, 165, 233, 0.16);
+    color: inherit;
+  }
+
+  .writing-demo__muted {
+    color: var(--text-secondary) !important;
+    font-family: var(--font-sans) !important;
+    font-size: var(--text-sm) !important;
+  }
+
+  .writing-demo__note {
+    justify-self: end;
+    max-width: 15rem;
+    padding: 0.75rem;
+    border: 1px solid rgba(217, 119, 87, 0.28);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 253, 248, 0.86);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+  }
+
+  .writing-demo__note span {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: var(--color-primary);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  .analysis-demo {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    background:
+      radial-gradient(circle at 18% 22%, rgba(14, 165, 233, 0.12), transparent 32%),
+      linear-gradient(180deg, #f8fbfa, var(--bg-secondary));
+  }
+
+  .analysis-demo__plot {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+  }
+
+  .analysis-demo__plot svg {
+    width: 100%;
+    max-width: 28rem;
+    height: auto;
+    overflow: visible;
+  }
+
+  .analysis-demo__grid,
+  .analysis-demo__axis {
+    fill: none;
+    stroke: var(--border-secondary);
+    stroke-width: 1;
+  }
+
+  .analysis-demo__axis {
+    stroke: var(--text-tertiary);
+  }
+
+  .analysis-demo__curve {
+    fill: none;
+    stroke-width: 5;
+    stroke-linecap: round;
+    filter: drop-shadow(0 8px 14px rgba(26, 26, 26, 0.12));
+    stroke-dasharray: 520;
+    stroke-dashoffset: 520;
+    animation: drawCurve 1.2s var(--ease-out) forwards;
+  }
+
+  .analysis-demo__curve--rho {
+    stroke: #0e7490;
+  }
+
+  .analysis-demo__curve--hall {
+    stroke: #d97757;
+    animation-delay: 0.16s;
+  }
+
+  .analysis-demo__marker {
+    stroke: rgba(217, 119, 87, 0.58);
+    stroke-width: 2;
+    stroke-dasharray: 6 6;
+  }
+
+  .analysis-demo__point {
+    fill: #fffdf8;
+    stroke: #d97757;
+    stroke-width: 3;
+  }
+
+  .analysis-demo__tag {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.9rem;
+    padding: 0.35rem 0.55rem;
+    border-radius: var(--radius-sm);
+    background: rgba(26, 26, 26, 0.84);
+    color: var(--text-inverse);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+  }
+
+  .analysis-demo__insights {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .analysis-demo__insights span {
+    min-height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 0.5rem;
+    border-radius: var(--radius-md);
+    background: rgba(255, 253, 248, 0.72);
+    border: 1px solid var(--border-secondary);
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    text-align: center;
+  }
+
+  @keyframes drawCurve {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .writing-demo__note {
+      justify-self: stretch;
+      max-width: none;
+    }
+
+    .analysis-demo__insights {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .analysis-demo__curve {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
   }
 
   .split-layout {

@@ -12,17 +12,38 @@ interface TabItem {
 interface Props {
   class?: string;
   tabs: TabItem[];
+  ariaLabel?: string;
 }
 
-const { class: className = '', tabs } = Astro.props;
+const {
+  class: className = '',
+  tabs,
+  ariaLabel = 'Workflow surfaces',
+} = Astro.props;
+
+const showcaseId = `tabs-${Math.random().toString(36).slice(2, 9)}`;
+const visualHtmlByTab = new Map(
+  await Promise.all(
+    tabs.map(async (tab) => [
+      tab.id,
+      Astro.slots.has(tab.id) ? await Astro.slots.render(tab.id) : tab.visualHtml || '',
+    ])
+  )
+);
 ---
 
-<div class:list={["claude-tabs-showcase", className]} id="tabs-showcase">
-  <div class="tabs-nav">
+<div class:list={["claude-tabs-showcase", className]} id={showcaseId} data-tabs-showcase>
+  <div class="tabs-nav" role="tablist" aria-label={ariaLabel}>
     {tabs.map((tab, index) => (
       <button 
+        type="button"
         class={`tab-btn ${index === 0 ? 'active' : ''}`} 
-        data-target={tab.id}
+        id={`${showcaseId}-${tab.id}-tab`}
+        role="tab"
+        aria-selected={index === 0 ? 'true' : 'false'}
+        aria-controls={`${showcaseId}-${tab.id}-panel`}
+        data-target={`${showcaseId}-${tab.id}-panel`}
+        tabindex={index === 0 ? '0' : '-1'}
       >
         {tab.icon && <span class="tab-icon" set:html={tab.icon} />}
         <span class="tab-label">{tab.label}</span>
@@ -34,15 +55,18 @@ const { class: className = '', tabs } = Astro.props;
     {tabs.map((tab, index) => (
       <div 
         class={`tab-panel ${index === 0 ? 'active' : ''}`} 
-        id={tab.id}
+        id={`${showcaseId}-${tab.id}-panel`}
+        role="tabpanel"
+        aria-labelledby={`${showcaseId}-${tab.id}-tab`}
+        hidden={index !== 0}
       >
         <div class="panel-info">
           <h3>{tab.contentTitle}</h3>
           <p>{tab.contentText}</p>
         </div>
         <div class="panel-visual">
-          {tab.visualHtml ? (
-            <Fragment set:html={tab.visualHtml} />
+          {visualHtmlByTab.get(tab.id) ? (
+            <Fragment set:html={visualHtmlByTab.get(tab.id)} />
           ) : (
             <div class="panel-visual-placeholder" aria-hidden="true"></div>
           )}
@@ -79,11 +103,17 @@ const { class: className = '', tabs } = Astro.props;
     color: var(--text-secondary);
     background: transparent;
     transition: all 0.2s ease;
+    cursor: pointer;
   }
 
   .tab-btn:hover {
     color: var(--text-primary);
     background: var(--bg-secondary);
+  }
+
+  .tab-btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
   }
 
   .tab-btn.active {
@@ -102,6 +132,7 @@ const { class: className = '', tabs } = Astro.props;
     display: none;
     grid-template-columns: 1fr 1fr;
     gap: var(--space-8);
+    align-items: stretch;
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.4s ease, transform 0.4s ease;
@@ -124,6 +155,7 @@ const { class: className = '', tabs } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
+    justify-content: center;
   }
   
   .panel-info h3 {
@@ -137,6 +169,8 @@ const { class: className = '', tabs } = Astro.props;
 
   .panel-visual {
     min-height: 250px;
+    display: grid;
+    align-items: stretch;
   }
 
   .panel-visual-placeholder {
@@ -151,33 +185,69 @@ const { class: className = '', tabs } = Astro.props;
     .tab-panel {
       grid-template-columns: 1fr;
     }
+
+    .tabs-content-area {
+      padding: var(--space-5);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tab-panel.active {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
   }
 </style>
 
 <script>
   function initTabs() {
-    const showcases = document.querySelectorAll('.claude-tabs-showcase');
+    const showcases = document.querySelectorAll('[data-tabs-showcase]');
     
     showcases.forEach(showcase => {
-      const btns = showcase.querySelectorAll('.tab-btn');
-      const panels = showcase.querySelectorAll('.tab-panel');
+      if ((showcase as HTMLElement).dataset.tabsReady === 'true') return;
+      (showcase as HTMLElement).dataset.tabsReady = 'true';
+
+      const btns = Array.from(showcase.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+      const panels = Array.from(showcase.querySelectorAll<HTMLElement>('[role="tabpanel"]'));
       
-      btns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          // Remove active classes
-          btns.forEach(b => b.classList.remove('active'));
-          panels.forEach(p => p.classList.remove('active'));
-          
-          // Add active class to clicked button
-          btn.classList.add('active');
-          
-          // Add active class to target panel
-          const targetId = btn.getAttribute('data-target');
-          if (targetId) {
-            const targetPanel = showcase.querySelector(`#${targetId}`);
-            if (targetPanel) {
-              targetPanel.classList.add('active');
-            }
+      function activateTab(nextBtn: HTMLButtonElement, shouldFocus = false) {
+        btns.forEach(btn => {
+          const isActive = btn === nextBtn;
+          btn.classList.toggle('active', isActive);
+          btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          btn.tabIndex = isActive ? 0 : -1;
+
+          const panelId = btn.getAttribute('aria-controls');
+          if (!panelId) return;
+
+          const panel = panels.find(item => item.id === panelId);
+          if (panel) {
+            panel.classList.toggle('active', isActive);
+            panel.hidden = !isActive;
+          }
+        });
+
+        if (shouldFocus) {
+          nextBtn.focus();
+        }
+      }
+
+      btns.forEach((btn, index) => {
+        btn.addEventListener('click', () => activateTab(btn));
+
+        btn.addEventListener('keydown', (event) => {
+          const lastIndex = btns.length - 1;
+          let nextIndex = index;
+
+          if (event.key === 'ArrowRight') nextIndex = index === lastIndex ? 0 : index + 1;
+          if (event.key === 'ArrowLeft') nextIndex = index === 0 ? lastIndex : index - 1;
+          if (event.key === 'Home') nextIndex = 0;
+          if (event.key === 'End') nextIndex = lastIndex;
+
+          if (nextIndex !== index) {
+            event.preventDefault();
+            activateTab(btns[nextIndex], true);
           }
         });
       });
