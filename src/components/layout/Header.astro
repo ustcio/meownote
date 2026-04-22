@@ -3,13 +3,26 @@ import SiteLogo from '@components/ui/SiteLogo.astro';
 
 const currentPath = Astro.url.pathname;
 
-const navItems = [
-  { href: '/chatbot/', label: 'Chat' },
-  { href: '/calendar/', label: 'Calendar' },
-  { href: '/workspace/', label: 'Workspace' },
-  { href: '/experiments/', label: '实验记录' },
-  { href: '/kit/', label: 'Kit' },
-  { href: '/about/', label: 'About' },
+interface NavItem {
+  label: string;
+  href: string;
+  children?: { label: string; href: string }[];
+}
+
+const navItems: NavItem[] = [
+  { label: 'Chat', href: '/chatbot/' },
+  { label: 'Calendar', href: '/calendar/' },
+  { label: 'Workspace', href: '/workspace/' },
+  {
+    label: 'Kit',
+    href: '/kit/',
+    children: [
+      { label: 'Kit 主页', href: '/kit/' },
+      { label: '金价追踪', href: '/kit/gold/' },
+      { label: '实验记录', href: '/experiments/' },
+    ],
+  },
+  { label: 'About', href: '/about/' },
 ];
 
 const externalItems = [
@@ -26,9 +39,43 @@ const isActive = (href: string) =>
 
     <nav class="site-nav" aria-label="Primary">
       {navItems.map((item) => (
-        <a href={item.href} class:list={['site-nav__link', { active: isActive(item.href) }]}>
-          {item.label}
-        </a>
+        item.children ? (
+          <div class="nav-dropdown" data-dropdown>
+            <a
+              href={item.href}
+              class:list={['site-nav__link', { active: isActive(item.href) }]}
+            >
+              {item.label}
+            </a>
+            <button
+              class="nav-dropdown__toggle"
+              aria-label={`${item.label} 子菜单`}
+              aria-expanded="false"
+              data-dropdown-toggle
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            <div class="nav-dropdown__menu">
+              {item.children.map((child) => (
+                <a
+                  href={child.href}
+                  class:list={['nav-dropdown__item', { active: isActive(child.href) }]}
+                >
+                  {child.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <a
+            href={item.href}
+            class:list={['site-nav__link', { active: isActive(item.href) }]}
+          >
+            {item.label}
+          </a>
+        )
       ))}
       {externalItems.map((item) => (
         <a href={item.href} class="site-nav__link" target="_blank" rel="noopener">
@@ -63,9 +110,34 @@ const isActive = (href: string) =>
 
   <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile">
     {navItems.map((item) => (
-      <a href={item.href} class:list={['mobile-nav__link', { active: isActive(item.href) }]}>
-        {item.label}
-      </a>
+      item.children ? (
+        <div class="mobile-dropdown" data-mobile-dropdown>
+          <div class="mobile-dropdown__header">
+            <a href={item.href} class:list={['mobile-nav__link', { active: isActive(item.href) }]}>
+              {item.label}
+            </a>
+            <button class="mobile-dropdown__toggle" aria-label={`展开 ${item.label}`} aria-expanded="false">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+          </div>
+          <div class="mobile-dropdown__menu">
+            {item.children.map((child) => (
+              <a
+                href={child.href}
+                class:list={['mobile-dropdown__item', { active: isActive(child.href) }]}
+              >
+                {child.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <a href={item.href} class:list={['mobile-nav__link', { active: isActive(item.href) }]}>
+          {item.label}
+        </a>
+      )
     ))}
     {externalItems.map((item) => (
       <a href={item.href} class="mobile-nav__link" target="_blank" rel="noopener">
@@ -128,6 +200,84 @@ const isActive = (href: string) =>
   .site-nav__link:hover,
   .site-nav__link.active {
     color: var(--nav-link-hover);
+  }
+
+  /* Dropdown */
+  .nav-dropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+  }
+
+  .nav-dropdown__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: none;
+    background: transparent;
+    color: var(--nav-link);
+    cursor: pointer;
+    transition: transform var(--duration-fast) var(--ease-default);
+    padding: 0;
+  }
+
+  .nav-dropdown:hover .nav-dropdown__toggle,
+  .nav-dropdown.open .nav-dropdown__toggle {
+    color: var(--nav-link-hover);
+  }
+
+  .nav-dropdown.open .nav-dropdown__toggle {
+    transform: rotate(180deg);
+  }
+
+  .nav-dropdown__menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    min-width: 10rem;
+    padding: 0.4rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-default),
+                transform var(--duration-fast) var(--ease-default);
+    z-index: var(--z-dropdown);
+  }
+
+  .nav-dropdown:hover .nav-dropdown__menu,
+  .nav-dropdown.open .nav-dropdown__menu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .nav-dropdown__item {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: var(--font-medium);
+    color: var(--nav-link);
+    white-space: nowrap;
+    transition: background var(--duration-fast) var(--ease-default),
+                color var(--duration-fast) var(--ease-default);
+  }
+
+  .nav-dropdown__item:hover {
+    background: var(--bg-secondary);
+    color: var(--nav-link-hover);
+  }
+
+  .nav-dropdown__item.active {
+    color: var(--color-primary);
+    background: var(--color-primary-light);
   }
 
   .header__actions {
@@ -247,6 +397,73 @@ const isActive = (href: string) =>
     margin-top: 1rem;
     width: fit-content;
   }
+
+  /* Mobile dropdown */
+  .mobile-dropdown {
+    border-bottom: 1px solid var(--border-secondary);
+  }
+
+  .mobile-dropdown__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mobile-dropdown__header .mobile-nav__link {
+    flex: 1;
+    border-bottom: none;
+  }
+
+  .mobile-dropdown__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: none;
+    background: transparent;
+    color: var(--nav-link);
+    cursor: pointer;
+    transition: transform var(--duration-fast) var(--ease-default);
+  }
+
+  .mobile-dropdown__toggle[aria-expanded="true"] {
+    transform: rotate(180deg);
+  }
+
+  .mobile-dropdown__menu {
+    display: none;
+    padding: 0 0 0.5rem 1rem;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .mobile-dropdown.open .mobile-dropdown__menu {
+    display: flex;
+  }
+
+  .mobile-dropdown__item {
+    padding: 0.6rem 0;
+    font-size: 0.95rem;
+    font-weight: var(--font-medium);
+    color: var(--nav-link);
+    border-bottom: 1px solid var(--border-secondary);
+    padding-left: 0.75rem;
+    border-left: 2px solid var(--border-secondary);
+  }
+
+  .mobile-dropdown__item:last-child {
+    border-bottom: none;
+  }
+
+  .mobile-dropdown__item:hover {
+    color: var(--nav-link-hover);
+  }
+
+  .mobile-dropdown__item.active {
+    color: var(--color-primary);
+    border-left-color: var(--color-primary);
+  }
 </style>
 
 <script is:inline>
@@ -272,5 +489,42 @@ const isActive = (href: string) =>
 
   document.querySelectorAll('.mobile-nav__link, .mobile-nav__cta').forEach((link) => {
     link.addEventListener('click', () => setMenuState(false));
+  });
+
+  // Mobile dropdown toggles
+  document.querySelectorAll('[data-mobile-dropdown]').forEach((dropdown) => {
+    const toggle = dropdown.querySelector('.mobile-dropdown__toggle');
+    toggle?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isOpen = dropdown.classList.contains('open');
+      dropdown.classList.toggle('open', !isOpen);
+      toggle.setAttribute('aria-expanded', String(!isOpen));
+    });
+  });
+
+  // Desktop dropdown click support (for touch devices without hover)
+  document.querySelectorAll('[data-dropdown]').forEach((dropdown) => {
+    const toggle = dropdown.querySelector('[data-dropdown-toggle]');
+    toggle?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isOpen = dropdown.classList.contains('open');
+      // Close other dropdowns
+      document.querySelectorAll('[data-dropdown].open').forEach((d) => {
+        if (d !== dropdown) d.classList.remove('open');
+      });
+      dropdown.classList.toggle('open', !isOpen);
+      toggle.setAttribute('aria-expanded', String(!isOpen));
+    });
+  });
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', () => {
+    document.querySelectorAll('[data-dropdown].open').forEach((d) => {
+      d.classList.remove('open');
+      const toggle = d.querySelector('[data-dropdown-toggle]');
+      toggle?.setAttribute('aria-expanded', 'false');
+    });
   });
 </script>

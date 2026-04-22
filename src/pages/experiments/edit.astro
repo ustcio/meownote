@@ -2,8 +2,8 @@
 import Layout from '@layouts/Layout.astro';
 import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
 
-const pageTitle = 'Edit Experiment';
-const pageDesc = 'Create or edit an experiment record.';
+const pageTitle = '编辑实验';
+const pageDesc = '创建或编辑一条实验记录。';
 ---
 
 <Layout title={`${pageTitle} - MoonSun.ai`} description={pageDesc}>
@@ -16,150 +16,152 @@ const pageDesc = 'Create or edit an experiment record.';
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M15 18l-6-6 6-6"></path>
           </svg>
-          <span>Back to records</span>
+          <span>返回记录列表</span>
         </a>
-        <h1 id="page-title">New experiment record</h1>
+        <h1 id="page-title">新建实验记录</h1>
       </header>
 
       <!-- Form -->
-      <form class="edit-form" id="experiment-form">
-        <input type="hidden" id="record-id" />
+      <div class="claude-surface edit-card">
+        <form class="edit-form" id="experiment-form">
+          <input type="hidden" id="record-id" />
 
-        <div class="form-grid">
-          <!-- Date & Time -->
+          <div class="form-grid">
+            <!-- Date & Time -->
+            <div class="form-group form-group--wide">
+              <label for="dateTime">
+                日期时间
+                <span class="required">*</span>
+              </label>
+              <input
+                type="datetime-local"
+                id="dateTime"
+                name="dateTime"
+                required
+              />
+            </div>
+
+            <!-- Target Material -->
+            <div class="form-group">
+              <label for="target">
+                靶材材料
+                <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="target"
+                name="target"
+                placeholder="例如：CoNb3S6"
+                required
+              />
+            </div>
+
+            <!-- Pressure -->
+            <div class="form-group">
+              <label for="pressure">
+                气压 (Pa)
+                <span class="required">*</span>
+              </label>
+              <input
+                type="number"
+                id="pressure"
+                name="pressure"
+                step="any"
+                placeholder="例如：0.0025"
+                required
+              />
+              <span class="field-hint">沉积过程中的工作气压</span>
+            </div>
+
+            <!-- Gate Valve -->
+            <div class="form-group">
+              <label for="gateValve">
+                闸板阀
+                <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="gateValve"
+                name="gateValve"
+                placeholder="例如：50%"
+                required
+              />
+            </div>
+
+            <!-- Growth Temperature -->
+            <div class="form-group">
+              <label for="growthTemp">
+                生长温度 (°C)
+                <span class="required">*</span>
+              </label>
+              <input
+                type="number"
+                id="growthTemp"
+                name="growthTemp"
+                step="1"
+                placeholder="例如：850"
+                required
+              />
+            </div>
+
+            <!-- Annealing Temperature -->
+            <div class="form-group">
+              <label for="annealingTemp">
+                退火温度 (°C)
+                <span class="required">*</span>
+              </label>
+              <input
+                type="number"
+                id="annealingTemp"
+                name="annealingTemp"
+                step="1"
+                placeholder="例如：400"
+                required
+              />
+            </div>
+
+            <!-- Sample Height -->
+            <div class="form-group">
+              <label for="sampleHeight">
+                样品高度 (mm)
+                <span class="required">*</span>
+              </label>
+              <input
+                type="number"
+                id="sampleHeight"
+                name="sampleHeight"
+                step="0.1"
+                placeholder="例如：12.5"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Notes -->
           <div class="form-group form-group--wide">
-            <label for="dateTime">
-              Date & Time
-              <span class="required">*</span>
-            </label>
-            <input
-              type="datetime-local"
-              id="dateTime"
-              name="dateTime"
-              required
-            />
+            <label for="notes">备注</label>
+            <textarea
+              id="notes"
+              name="notes"
+              rows="5"
+              placeholder="观察记录、衬底类型、薄膜厚度、XRD 结果等"
+            ></textarea>
           </div>
 
-          <!-- Target Material -->
-          <div class="form-group">
-            <label for="target">
-              Target Material
-              <span class="required">*</span>
-            </label>
-            <input
-              type="text"
-              id="target"
-              name="target"
-              placeholder="e.g. CoNb3S6"
-              required
-            />
+          <!-- Actions -->
+          <div class="form-actions">
+            <button type="submit" class="claude-button" id="save-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+              </svg>
+              保存记录
+            </button>
+            <a href="/experiments/" class="claude-button-secondary">取消</a>
           </div>
-
-          <!-- Pressure -->
-          <div class="form-group">
-            <label for="pressure">
-              Pressure (Pa)
-              <span class="required">*</span>
-            </label>
-            <input
-              type="number"
-              id="pressure"
-              name="pressure"
-              step="any"
-              placeholder="e.g. 0.0025"
-              required
-            />
-            <span class="field-hint">Working pressure during deposition</span>
-          </div>
-
-          <!-- Gate Valve -->
-          <div class="form-group">
-            <label for="gateValve">
-              Gate Valve
-              <span class="required">*</span>
-            </label>
-            <input
-              type="text"
-              id="gateValve"
-              name="gateValve"
-              placeholder="e.g. 50%"
-              required
-            />
-          </div>
-
-          <!-- Growth Temperature -->
-          <div class="form-group">
-            <label for="growthTemp">
-              Growth Temperature (°C)
-              <span class="required">*</span>
-            </label>
-            <input
-              type="number"
-              id="growthTemp"
-              name="growthTemp"
-              step="1"
-              placeholder="e.g. 850"
-              required
-            />
-          </div>
-
-          <!-- Annealing Temperature -->
-          <div class="form-group">
-            <label for="annealingTemp">
-              Annealing Temperature (°C)
-              <span class="required">*</span>
-            </label>
-            <input
-              type="number"
-              id="annealingTemp"
-              name="annealingTemp"
-              step="1"
-              placeholder="e.g. 400"
-              required
-            />
-          </div>
-
-          <!-- Sample Height -->
-          <div class="form-group">
-            <label for="sampleHeight">
-              Sample Height (mm)
-              <span class="required">*</span>
-            </label>
-            <input
-              type="number"
-              id="sampleHeight"
-              name="sampleHeight"
-              step="0.1"
-              placeholder="e.g. 12.5"
-              required
-            />
-          </div>
-        </div>
-
-        <!-- Notes -->
-        <div class="form-group form-group--wide">
-          <label for="notes">Notes</label>
-          <textarea
-            id="notes"
-            name="notes"
-            rows="5"
-            placeholder="Observations, substrate type, film thickness, XRD results, etc."
-          ></textarea>
-        </div>
-
-        <!-- Actions -->
-        <div class="form-actions">
-          <button type="submit" class="edit-btn edit-btn--primary" id="save-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-              <polyline points="17 21 17 13 7 13 7 21"></polyline>
-              <polyline points="7 3 7 8 15 8"></polyline>
-            </svg>
-            Save record
-          </button>
-          <a href="/experiments/" class="edit-btn edit-btn--secondary">Cancel</a>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </section>
 
@@ -169,7 +171,6 @@ const pageDesc = 'Create or edit an experiment record.';
 
     experimentStorage.init();
 
-    // Check if editing existing record
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('id');
 
@@ -198,7 +199,7 @@ const pageDesc = 'Create or edit an experiment record.';
     if (editId) {
       const record = experimentStorage.get(editId);
       if (record) {
-        if (pageTitle) pageTitle.textContent = 'Edit experiment record';
+        if (pageTitle) pageTitle.textContent = '编辑实验记录';
         recordIdInput.value = record.id;
 
         (document.getElementById('dateTime') as HTMLInputElement).value = formatDateTimeLocal(record.dateTime);
@@ -210,11 +211,10 @@ const pageDesc = 'Create or edit an experiment record.';
         (document.getElementById('sampleHeight') as HTMLInputElement).value = String(record.sampleHeight);
         (document.getElementById('notes') as HTMLTextAreaElement).value = record.notes;
       } else {
-        showToast('Record not found', 'error');
+        showToast('记录未找到', 'error');
         window.location.href = '/experiments/';
       }
     } else {
-      // Default to current time for new record
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       (document.getElementById('dateTime') as HTMLInputElement).value = now.toISOString().slice(0, 16);
@@ -238,10 +238,10 @@ const pageDesc = 'Create or edit an experiment record.';
       const id = recordIdInput.value;
       if (id) {
         experimentStorage.update(id, data);
-        showToast('Record updated successfully');
+        showToast('记录已更新');
       } else {
         experimentStorage.create(data);
-        showToast('Record created successfully');
+        showToast('记录已创建');
       }
 
       window.location.href = '/experiments/';
@@ -250,20 +250,20 @@ const pageDesc = 'Create or edit an experiment record.';
 
   <style>
     .experiment-edit-page {
-      padding: calc(var(--header-height) + 2.5rem) 0 4rem;
       min-height: 100vh;
+      padding: calc(var(--header-height) + 2rem) 0 4rem;
       background: var(--bg-primary);
     }
 
     .edit-shell {
-      max-width: 720px;
+      max-width: 760px;
       margin: 0 auto;
     }
 
     .edit-header {
       display: grid;
       gap: 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .edit-back-link {
@@ -297,7 +297,10 @@ const pageDesc = 'Create or edit an experiment record.';
       color: var(--text-primary);
     }
 
-    /* Form */
+    .edit-card {
+      padding: clamp(1.5rem, 3vw, 2.5rem);
+    }
+
     .edit-form {
       display: grid;
       gap: 1.5rem;
@@ -375,51 +378,10 @@ const pageDesc = 'Create or edit an experiment record.';
       line-height: 1.55;
     }
 
-    /* Actions */
     .form-actions {
       display: flex;
       gap: 0.75rem;
       padding-top: 0.5rem;
-    }
-
-    .edit-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.4rem;
-      min-height: 2.65rem;
-      padding: 0.65rem 1.25rem;
-      border-radius: var(--radius-full);
-      font-size: 0.875rem;
-      font-weight: var(--font-medium);
-      font-family: var(--font-body);
-      cursor: pointer;
-      transition: all var(--duration-fast) var(--ease-default);
-      border: none;
-      text-decoration: none;
-      white-space: nowrap;
-    }
-
-    .edit-btn--primary {
-      background: var(--btn-primary-bg);
-      color: var(--btn-primary-text);
-      box-shadow: var(--btn-primary-shadow);
-    }
-
-    .edit-btn--primary:hover {
-      background: var(--btn-primary-hover);
-      transform: translateY(-1px);
-    }
-
-    .edit-btn--secondary {
-      background: var(--btn-secondary-bg);
-      color: var(--btn-secondary-text);
-      border: 1px solid var(--btn-secondary-border);
-    }
-
-    .edit-btn--secondary:hover {
-      background: var(--btn-secondary-hover-bg);
-      border-color: var(--border-hover);
     }
   </style>
 </Layout>
