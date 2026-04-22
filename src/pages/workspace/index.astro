@@ -139,7 +139,7 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
     </div>
   </section>
 
-  <input type="file" id="file-upload" hidden multiple accept=".txt,.md,.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.zip,.rar" />
+  <input type="file" id="file-upload" hidden multiple accept=".txt,.md,.markdown,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.zip,.rar" />
 
   <!-- Clipboard Modal -->
   <ModalShell id="clipboard-modal" title="Quick capture" closeId="clipboard-close" backdropId="clipboard-backdrop" closeClass="workspace-modal-close">
@@ -1170,6 +1170,8 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
     pdf: { icon: 'document', type: 'document' },
     doc: { icon: 'document', type: 'document' },
     docx: { icon: 'document', type: 'document' },
+    ppt: { icon: 'presentation', type: 'document' },
+    pptx: { icon: 'presentation', type: 'document' },
     xls: { icon: 'document', type: 'document' },
     xlsx: { icon: 'document', type: 'document' },
     png: { icon: 'image', type: 'image' },
@@ -1582,6 +1584,7 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
     const icons = {
       text: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>',
       document: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>',
+      presentation: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4h18v12H3z"></path><path d="M8 20h8"></path><path d="M12 16v4"></path><path d="M8 9h3"></path><path d="M8 12h8"></path><path d="M14 8l3 3-3 3"></path></svg>',
       image: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>',
       archive: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>',
       clipboard: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>',

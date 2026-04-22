@@ -285,7 +285,20 @@ function normalizeWorkspaceContent(content) {
 
 function normalizeWorkspaceType(type) {
   if (typeof type !== 'string' || !type.trim()) return 'txt';
-  return type.trim().toLowerCase().substring(0, 20);
+  const normalized = type.trim().toLowerCase().replace(/^\./, '');
+  const aliases = {
+    'text': 'txt',
+    'plain': 'txt',
+    'text/plain': 'txt',
+    'x-markdown': 'md',
+    'text/x-markdown': 'md',
+    'text/markdown': 'md',
+    'vnd.ms-powerpoint': 'ppt',
+    'application/vnd.ms-powerpoint': 'ppt',
+    'vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
+  };
+  return (aliases[normalized] || normalized).substring(0, 20);
 }
 
 function isWorkspaceTextType(type) {
@@ -318,6 +331,8 @@ function getWorkspaceMimeType(type) {
     pdf: 'application/pdf',
     doc: 'application/msword',
     docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ppt: 'application/vnd.ms-powerpoint',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     xls: 'application/vnd.ms-excel',
     xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     png: 'image/png',

@@ -722,7 +722,7 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
   }
 
   function isTextType(type) {
-    return ['txt', 'md', 'markdown', 'clipboard', 'json', 'js', 'ts', 'css', 'html'].includes((type || '').toLowerCase());
+    return ['txt', 'md', 'markdown', 'clipboard', 'json', 'js', 'jsx', 'ts', 'tsx', 'css', 'html', 'csv'].includes((type || '').toLowerCase());
   }
 
   function getTypeLabel(type) {

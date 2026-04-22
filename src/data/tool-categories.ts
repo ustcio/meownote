@@ -15,6 +15,20 @@ export interface Tool {
 
 export const toolCategories: ToolCategory[] = [
   {
+    id: 'lab',
+    name: 'Lab',
+    icon: '🧪',
+    tools: [
+      {
+        id: 'experiments',
+        name: 'Experiment Records',
+        desc: 'Log and track thin-film growth parameters in a structured notebook.',
+        path: '/experiments/',
+        status: 'done',
+      },
+    ],
+  },
+  {
     id: 'market',
     name: 'Market',
     icon: '🥇',
