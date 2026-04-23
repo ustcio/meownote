@@ -210,7 +210,10 @@ export const experimentStorage = {
 
   importFromJSON(json: string): { success: number; failed: number } {
     try {
-      const parsed = JSON.parse(json);
+      let parsed = JSON.parse(json);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        parsed = parsed.experiments;
+      }
       if (!Array.isArray(parsed)) return { success: 0, failed: 0 };
 
       let success = 0;
@@ -221,7 +224,7 @@ export const experimentStorage = {
         if (
           item.id &&
           item.dateTime &&
-          typeof item.target === 'string'
+          (typeof item.targetBatch === 'string' || typeof item.target === 'string')
         ) {
           const index = existing.findIndex((r) => r.id === item.id);
           if (index !== -1) {

@@ -1,0 +1,256 @@
+---
+import Layout from '@layouts/Layout.astro';
+
+const pageTitle = '设备故障详情';
+const pageDesc = '查看设备故障记录详情。';
+---
+
+<Layout title={`${pageTitle} - MoonSun.ai`} description={pageDesc} showHeader={false} showAuthModal={false} showFooter={false}>
+  <section class="equipment-detail-page">
+    <div class="container detail-shell">
+      <!-- Header -->
+      <header class="detail-header">
+        <div class="detail-header__top">
+          <a href="/experiments/" class="detail-back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18l-6-6 6-6"></path>
+            </svg>
+            <span>返回记录列表</span>
+          </a>
+          <div class="detail-actions">
+            <a id="edit-link" href="/experiments/equipment/edit/" class="claude-button-secondary">编辑</a>
+            <button id="delete-btn" class="btn-danger">删除</button>
+          </div>
+        </div>
+        <h1 id="detail-title">设备故障详情</h1>
+      </header>
+
+      <!-- Detail Card -->
+      <div class="claude-surface detail-card">
+        <div class="detail-meta">
+          <div class="meta-item">
+            <span class="meta-label">记录时间</span>
+            <span class="meta-value" id="detail-datetime">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">记录人</span>
+            <span class="meta-value" id="detail-user">—</span>
+          </div>
+        </div>
+        <div class="detail-section">
+          <h2>故障概述</h2>
+          <p id="detail-summary">—</p>
+        </div>
+        <div class="detail-section">
+          <h2>故障详情</h2>
+          <p id="detail-details">—</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Delete Modal -->
+  <div class="modal-overlay" id="delete-overlay" style="display: none;">
+    <div class="modal-panel">
+      <h3>确认删除</h3>
+      <p>此操作将永久删除该设备故障记录，无法撤销。</p>
+      <div class="modal-actions">
+        <button class="claude-button-secondary" id="delete-cancel">取消</button>
+        <button class="btn-danger" id="delete-confirm">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { equipmentStorage } from '@/lib/equipment/storage';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const recordId = urlParams.get('id');
+
+    function showToast(message: string, type: 'success' | 'error' = 'success') {
+      if (window.__meownoteToast) {
+        window.__meownoteToast.show(message, type);
+      } else {
+        alert(message);
+      }
+    }
+
+    if (!recordId) {
+      showToast('缺少记录 ID', 'error');
+      window.location.href = '/experiments/';
+    } else {
+      const record = equipmentStorage.get(recordId);
+      if (!record) {
+        showToast('记录未找到', 'error');
+        window.location.href = '/experiments/';
+      } else {
+        document.getElementById('detail-title')!.textContent = record.summary;
+        document.getElementById('detail-datetime')!.textContent = new Date(record.dateTime).toLocaleString('zh-CN');
+        document.getElementById('detail-user')!.textContent = record.user;
+        document.getElementById('detail-summary')!.textContent = record.summary || '无概述';
+        document.getElementById('detail-details')!.textContent = record.details || '无详情';
+        (document.getElementById('edit-link') as HTMLAnchorElement).href = `/experiments/equipment/edit/?id=${record.id}`;
+      }
+    }
+
+    const deleteOverlay = document.getElementById('delete-overlay');
+    document.getElementById('delete-btn')?.addEventListener('click', () => {
+      if (deleteOverlay) deleteOverlay.style.display = 'flex';
+    });
+    document.getElementById('delete-cancel')?.addEventListener('click', () => {
+      if (deleteOverlay) deleteOverlay.style.display = 'none';
+    });
+    document.getElementById('delete-overlay')?.addEventListener('click', (e) => {
+      if (e.target === deleteOverlay) deleteOverlay.style.display = 'none';
+    });
+    document.getElementById('delete-confirm')?.addEventListener('click', () => {
+      if (recordId) {
+        equipmentStorage.remove(recordId);
+        showToast('记录已删除');
+        window.location.href = '/experiments/';
+      }
+    });
+  </script>
+
+  <style>
+    .equipment-detail-page {
+      min-height: 100vh;
+      padding: calc(var(--header-height) + 2rem) 0 4rem;
+      background: var(--bg-primary);
+    }
+
+    .detail-shell {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .detail-header {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-header__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .detail-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      width: fit-content;
+      font-size: 0.84rem;
+      font-weight: var(--font-medium);
+      color: var(--text-tertiary);
+      transition: color var(--duration-fast) var(--ease-default);
+    }
+
+    .detail-back-link:hover {
+      color: var(--text-primary);
+    }
+
+    .detail-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .detail-header h1 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      line-height: 1.2;
+      font-weight: var(--font-medium);
+      word-break: break-word;
+    }
+
+    .detail-card {
+      padding: 1.5rem;
+      border-radius: var(--radius-xl);
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .detail-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .meta-label {
+      font-size: 0.78rem;
+      font-weight: var(--font-medium);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .meta-value {
+      font-size: 0.92rem;
+      color: var(--text-primary);
+      font-weight: var(--font-medium);
+    }
+
+    .detail-section h2 {
+      font-size: 1rem;
+      font-weight: var(--font-semibold);
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .detail-section p {
+      font-size: 0.95rem;
+      line-height: var(--leading-relaxed);
+      color: var(--text-primary);
+      white-space: pre-wrap;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-modal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      max-width: 24rem;
+      width: calc(100% - 2rem);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-panel h3 {
+      font-size: 1.1rem;
+      font-weight: var(--font-semibold);
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-panel p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.25rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+  </style>
+</Layout>
