@@ -6,11 +6,12 @@ interface Props {
   description?: string;
   image?: string;
   showAuthModal?: boolean;
+  showHeader?: boolean;
 }
 
-const { title, description, image, showAuthModal = true } = Astro.props;
+const { title, description, image, showAuthModal = true, showHeader = true } = Astro.props;
 ---
 
-<SiteLayout title={title} description={description} image={image} showAuthModal={showAuthModal}>
+<SiteLayout title={title} description={description} image={image} showAuthModal={showAuthModal} showHeader={showHeader}>
   <slot />
 </SiteLayout>
