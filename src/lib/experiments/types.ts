@@ -18,6 +18,7 @@ export interface ExperimentRecord {
   coercivity: number;          // 矫顽力 (T)
   saturationMagnetization: number; // 饱和磁化强度 (T)
   notes: string;              // 备注
+  performanceOk?: boolean;     // 样品性能是否符合预期
   createdAt: string;
   updatedAt: string;
 }
@@ -37,6 +38,7 @@ export interface CreateExperimentInput {
   coercivity: number;
   saturationMagnetization: number;
   notes: string;
+  performanceOk?: boolean;
 }
 
 export interface UpdateExperimentInput {
@@ -54,6 +56,7 @@ export interface UpdateExperimentInput {
   coercivity?: number;
   saturationMagnetization?: number;
   notes?: string;
+  performanceOk?: boolean;
 }
 
 export type SortField = 'dateTime' | 'targetBatch' | 'pressure' | 'growthTemp' | 'createdAt';

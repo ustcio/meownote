@@ -258,6 +258,17 @@ const pageDesc = '创建或编辑一条实验记录。';
         </form>
       </div>
     </div>
+    <!-- Performance Confirm Modal -->
+    <div class="modal-overlay" id="performance-modal">
+      <div class="modal-panel">
+        <h3>样品性能确认</h3>
+        <p>该样品性能是否符合预期？</p>
+        <div class="modal-actions">
+          <button class="claude-button-secondary" id="performance-no">不符合</button>
+          <button class="claude-button" id="performance-yes">符合</button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <script>
@@ -321,11 +332,38 @@ const pageDesc = '创建或编辑一条实验记录。';
       (document.getElementById('dateTime') as HTMLInputElement).value = now.toISOString().slice(0, 16);
     }
 
+    const performanceModal = document.getElementById('performance-modal');
+    const performanceYes = document.getElementById('performance-yes');
+    const performanceNo = document.getElementById('performance-no');
+    let pendingData: any = null;
+
+    function closePerformanceModal() {
+      performanceModal?.classList.remove('open');
+      pendingData = null;
+    }
+
+    function submitData(performanceOk: boolean) {
+      if (!pendingData) return;
+      const data = { ...pendingData, performanceOk };
+      const id = recordIdInput.value;
+      if (id) {
+        experimentStorage.update(id, data);
+        showToast('记录已更新');
+      } else {
+        experimentStorage.create(data);
+        showToast('记录已创建');
+      }
+      window.location.href = '/experiments/';
+    }
+
+    performanceYes?.addEventListener('click', () => submitData(true));
+    performanceNo?.addEventListener('click', () => submitData(false));
+
     form?.addEventListener('submit', (e) => {
       e.preventDefault();
 
       const formData = new FormData(form);
-      const data = {
+      pendingData = {
         dateTime: (formData.get('dateTime') as string) || new Date().toISOString(),
         user: (formData.get('user') as string).trim(),
         targetBatch: (formData.get('targetBatch') as string).trim(),
@@ -342,16 +380,7 @@ const pageDesc = '创建或编辑一条实验记录。';
         notes: (formData.get('notes') as string).trim(),
       };
 
-      const id = recordIdInput.value;
-      if (id) {
-        experimentStorage.update(id, data);
-        showToast('记录已更新');
-      } else {
-        experimentStorage.create(data);
-        showToast('记录已创建');
-      }
-
-      window.location.href = '/experiments/';
+      performanceModal?.classList.add('open');
     });
   </script>
 
