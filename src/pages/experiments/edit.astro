@@ -57,35 +57,35 @@ const pageDesc = '创建或编辑一条实验记录。';
               />
             </div>
 
-            <!-- Target Batch -->
+            <!-- Operation -->
             <div class="form-group">
-              <label for="targetBatch">
-                靶材批次
+              <label for="operation">
+                实验操作
                 <span class="required">*</span>
               </label>
-              <input
-                type="text"
-                id="targetBatch"
-                name="targetBatch"
-                placeholder="例如：CoNb3S6-2025-A"
-                required
-              />
+              <select id="operation" name="operation" required>
+                <option value="" disabled selected>请选择操作类型</option>
+                <option value="长膜">长膜</option>
+                <option value="退火">退火</option>
+                <option value="开腔">开腔</option>
+              </select>
             </div>
 
-            <!-- Target Ratio -->
+            <!-- Target Selector -->
             <div class="form-group">
-              <label for="targetRatio">
-                靶材成分计量比
+              <label for="targetSelect">
+                靶材选择
                 <span class="required">*</span>
               </label>
-              <input
-                type="text"
-                id="targetRatio"
-                name="targetRatio"
-                placeholder="例如：Co:Nb:S = 1:3:6"
-                required
-              />
+              <select id="targetSelect" name="targetSelect" required>
+                <option value="" disabled selected>请选择靶材</option>
+              </select>
+              <span class="field-hint">从已保存的靶材中选择，<a href="/experiments/target/edit/" target="_blank" style="color: var(--color-primary); text-decoration: underline;">去新增靶材 →</a></span>
             </div>
+
+            <!-- Hidden fields for batch & ratio -->
+            <input type="hidden" id="targetBatch" name="targetBatch" />
+            <input type="hidden" id="targetRatio" name="targetRatio" />
 
             <!-- Pressure -->
             <div class="form-group">
@@ -268,9 +268,49 @@ const pageDesc = '创建或编辑一条实验记录。';
 
   <script>
     import { experimentStorage } from '@/lib/experiments/storage';
-    import type { ExperimentRecord } from '@/lib/experiments/types';
+    import { targetStorage } from '@/lib/targets/storage';
+    import type { TargetRecord } from '@/lib/targets/types';
 
     experimentStorage.init();
+    targetStorage.init();
+
+    const targetSelect = document.getElementById('targetSelect') as HTMLSelectElement;
+    const targetBatchInput = document.getElementById('targetBatch') as HTMLInputElement;
+    const targetRatioInput = document.getElementById('targetRatio') as HTMLInputElement;
+
+    // Load targets into dropdown
+    function loadTargetOptions(selectedBatch?: string) {
+      const targets = targetStorage.list();
+      // Keep the placeholder option
+      targetSelect.innerHTML = '<option value="" disabled>请选择靶材</option>';
+      targets.forEach((t: TargetRecord) => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = `${t.name} (${t.batch})`;
+        opt.dataset.batch = t.batch;
+        opt.dataset.ratio = t.ratio;
+        targetSelect.appendChild(opt);
+      });
+      if (selectedBatch) {
+        // Try to find matching target by batch
+        const match = targets.find((t: TargetRecord) => t.batch === selectedBatch);
+        if (match) {
+          targetSelect.value = match.id;
+          targetBatchInput.value = match.batch;
+          targetRatioInput.value = match.ratio;
+        }
+      }
+    }
+
+    targetSelect?.addEventListener('change', () => {
+      const opt = targetSelect.selectedOptions[0];
+      if (opt && opt.dataset.batch) {
+        targetBatchInput.value = opt.dataset.batch;
+        targetRatioInput.value = opt.dataset.ratio || '';
+      }
+    });
+
+    loadTargetOptions();
 
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('id');
@@ -305,8 +345,8 @@ const pageDesc = '创建或编辑一条实验记录。';
 
         (document.getElementById('dateTime') as HTMLInputElement).value = formatDateTimeLocal(record.dateTime);
         (document.getElementById('user') as HTMLInputElement).value = record.user;
-        (document.getElementById('targetBatch') as HTMLInputElement).value = record.targetBatch;
-        (document.getElementById('targetRatio') as HTMLInputElement).value = record.targetRatio;
+        (document.getElementById('operation') as HTMLSelectElement).value = record.operation;
+        loadTargetOptions(record.targetBatch);
         (document.getElementById('pressure') as HTMLInputElement).value = String(record.pressure);
         (document.getElementById('gateValve') as HTMLInputElement).value = record.gateValve;
         (document.getElementById('growthTemp') as HTMLInputElement).value = String(record.growthTemp);
@@ -332,8 +372,9 @@ const pageDesc = '创建或编辑一条实验记录。';
       return {
         dateTime: (formData.get('dateTime') as string) || new Date().toISOString(),
         user: (formData.get('user') as string).trim(),
-        targetBatch: (formData.get('targetBatch') as string).trim(),
-        targetRatio: (formData.get('targetRatio') as string).trim(),
+        operation: (formData.get('operation') as string).trim(),
+        targetBatch: targetBatchInput.value.trim(),
+        targetRatio: targetRatioInput.value.trim(),
         pressure: parseFloat(formData.get('pressure') as string),
         gateValve: (formData.get('gateValve') as string).trim(),
         growthTemp: parseInt(formData.get('growthTemp') as string, 10),
@@ -350,6 +391,11 @@ const pageDesc = '创建或编辑一条实验记录。';
     function submitData(performanceOk: boolean) {
       if (!form?.checkValidity()) {
         form?.reportValidity();
+        return;
+      }
+      if (!targetBatchInput.value || !targetRatioInput.value) {
+        showToast('请先选择靶材', 'error');
+        targetSelect.focus();
         return;
       }
       const data = { ...collectData(), performanceOk };

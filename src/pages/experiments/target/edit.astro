@@ -1,0 +1,322 @@
+---
+import Layout from '@layouts/Layout.astro';
+
+const pageTitle = '靶材记录';
+const pageDesc = '新增或编辑靶材信息。';
+---
+
+<Layout title={`${pageTitle} - MoonSun.ai`} description={pageDesc} showHeader={false} showAuthModal={false} showFooter={false}>
+  <section class="target-edit-page">
+    <div class="container edit-shell">
+      <!-- Header -->
+      <header class="edit-header">
+        <div class="edit-header__top">
+          <a href="/experiments/" class="edit-back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18l-6-6 6-6"></path>
+            </svg>
+            <span>返回记录列表</span>
+          </a>
+        </div>
+        <h1 id="page-title">新增靶材</h1>
+      </header>
+
+      <!-- Form -->
+      <div class="claude-surface edit-card">
+        <form class="edit-form" id="target-form">
+          <input type="hidden" id="record-id" />
+
+          <div class="form-grid">
+            <!-- Date & Time -->
+            <div class="form-group form-group--wide">
+              <label for="dateTime">
+                入库时间
+                <span class="required">*</span>
+              </label>
+              <input
+                type="datetime-local"
+                id="dateTime"
+                name="dateTime"
+                required
+              />
+            </div>
+
+            <!-- User -->
+            <div class="form-group">
+              <label for="user">
+                记录人
+                <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="user"
+                name="user"
+                placeholder="例如：YangHao"
+                required
+              />
+            </div>
+
+            <!-- Target Name -->
+            <div class="form-group">
+              <label for="name">
+                靶材名称
+                <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="例如：CoNb3S6"
+                required
+              />
+            </div>
+
+            <!-- Target Batch -->
+            <div class="form-group">
+              <label for="batch">
+                靶材批次
+                <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="batch"
+                name="batch"
+                placeholder="例如：CoNb3S6-2025-A"
+                required
+              />
+            </div>
+
+            <!-- Target Ratio -->
+            <div class="form-group">
+              <label for="ratio">
+                化学计量比
+                <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="ratio"
+                name="ratio"
+                placeholder="例如：Co:Nb:S = 1:3:6"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="form-actions">
+            <button type="submit" class="claude-button" id="save-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+              </svg>
+              保存靶材
+            </button>
+            <a href="/experiments/" class="claude-button-secondary">取消</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { targetStorage } from '@/lib/targets/storage';
+
+    targetStorage.init();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('id');
+
+    const form = document.getElementById('target-form') as HTMLFormElement;
+    const pageTitle = document.getElementById('page-title');
+    const recordIdInput = document.getElementById('record-id') as HTMLInputElement;
+
+    function formatDateTimeLocal(iso: string): string {
+      const d = new Date(iso);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+    function showToast(message: string, type: 'success' | 'error' = 'success') {
+      if (window.__meownoteToast) {
+        window.__meownoteToast.show(message, type);
+      } else {
+        alert(message);
+      }
+    }
+
+    if (editId) {
+      const record = targetStorage.get(editId);
+      if (record) {
+        if (pageTitle) pageTitle.textContent = '编辑靶材';
+        recordIdInput.value = record.id;
+        (document.getElementById('dateTime') as HTMLInputElement).value = formatDateTimeLocal(record.dateTime);
+        (document.getElementById('user') as HTMLInputElement).value = record.user;
+        (document.getElementById('name') as HTMLInputElement).value = record.name;
+        (document.getElementById('batch') as HTMLInputElement).value = record.batch;
+        (document.getElementById('ratio') as HTMLInputElement).value = record.ratio;
+      } else {
+        showToast('靶材未找到', 'error');
+        window.location.href = '/experiments/';
+      }
+    } else {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      (document.getElementById('dateTime') as HTMLInputElement).value = now.toISOString().slice(0, 16);
+    }
+
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = {
+        dateTime: (formData.get('dateTime') as string) || new Date().toISOString(),
+        user: (formData.get('user') as string).trim(),
+        name: (formData.get('name') as string).trim(),
+        batch: (formData.get('batch') as string).trim(),
+        ratio: (formData.get('ratio') as string).trim(),
+      };
+      const id = recordIdInput.value;
+      if (id) {
+        targetStorage.update(id, data);
+        showToast('靶材已更新');
+      } else {
+        targetStorage.create(data);
+        showToast('靶材已创建');
+      }
+      window.location.href = '/experiments/';
+    });
+  </script>
+
+  <style>
+    .target-edit-page {
+      min-height: 100vh;
+      padding: calc(var(--header-height) + 2rem) 0 4rem;
+      background: var(--bg-primary);
+    }
+
+    .edit-shell {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .edit-header {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .edit-header__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .edit-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      width: fit-content;
+      font-size: 0.84rem;
+      font-weight: var(--font-medium);
+      color: var(--text-tertiary);
+      transition: color var(--duration-fast) var(--ease-default);
+    }
+
+    .edit-back-link:hover {
+      color: var(--text-primary);
+    }
+
+    .edit-back-link svg {
+      transition: transform var(--duration-fast) var(--ease-default);
+    }
+
+    .edit-back-link:hover svg {
+      transform: translateX(-2px);
+    }
+
+    .edit-header h1 {
+      font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+      line-height: 1.1;
+      font-family: var(--font-editorial);
+      font-weight: var(--font-medium);
+    }
+
+    .edit-card {
+      padding: 1.5rem;
+      border-radius: var(--radius-xl);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group--wide {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: var(--font-medium);
+      color: var(--text-secondary);
+    }
+
+    .required {
+      color: var(--color-danger);
+      margin-left: 0.15rem;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 0.92rem;
+      transition: border-color var(--duration-fast) var(--ease-default), box-shadow var(--duration-fast) var(--ease-default);
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-light);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: var(--leading-relaxed);
+    }
+
+    .form-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border-secondary);
+    }
+  </style>
+</Layout>
