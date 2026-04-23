@@ -85,7 +85,8 @@ const pageDesc = '查看设备故障记录详情。';
         window.location.href = '/experiments/';
       } else {
         document.getElementById('detail-title')!.textContent = record.summary;
-        document.getElementById('detail-datetime')!.textContent = new Date(record.dateTime).toLocaleString('zh-CN');
+        const d = new Date(record.dateTime);
+        document.getElementById('detail-datetime')!.textContent = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
         document.getElementById('detail-user')!.textContent = record.user;
         document.getElementById('detail-summary')!.textContent = record.summary || '无概述';
         document.getElementById('detail-details')!.textContent = record.details || '无详情';
