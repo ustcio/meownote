@@ -245,28 +245,23 @@ const pageDesc = '创建或编辑一条实验记录。';
 
           <!-- Actions -->
           <div class="form-actions">
-            <button type="submit" class="claude-button" id="save-btn">
+            <button type="button" class="claude-button" id="save-ok">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                <polyline points="7 3 7 8 15 8"></polyline>
+                <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
-              保存记录
+              符合
+            </button>
+            <button type="button" class="claude-button-secondary" id="save-fail">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              不符合
             </button>
             <a href="/experiments/" class="claude-button-secondary">取消</a>
           </div>
         </form>
-      </div>
-    </div>
-    <!-- Performance Confirm Modal -->
-    <div class="modal-overlay" id="performance-modal">
-      <div class="modal-panel">
-        <h3>样品性能确认</h3>
-        <p>该样品性能是否符合预期？</p>
-        <div class="modal-actions">
-          <button class="claude-button-secondary" id="performance-no">不符合</button>
-          <button class="claude-button" id="performance-yes">符合</button>
-        </div>
       </div>
     </div>
   </section>
@@ -332,38 +327,9 @@ const pageDesc = '创建或编辑一条实验记录。';
       (document.getElementById('dateTime') as HTMLInputElement).value = now.toISOString().slice(0, 16);
     }
 
-    const performanceModal = document.getElementById('performance-modal');
-    const performanceYes = document.getElementById('performance-yes');
-    const performanceNo = document.getElementById('performance-no');
-    let pendingData: any = null;
-
-    function closePerformanceModal() {
-      performanceModal?.classList.remove('open');
-      pendingData = null;
-    }
-
-    function submitData(performanceOk: boolean) {
-      if (!pendingData) return;
-      const data = { ...pendingData, performanceOk };
-      const id = recordIdInput.value;
-      if (id) {
-        experimentStorage.update(id, data);
-        showToast('记录已更新');
-      } else {
-        experimentStorage.create(data);
-        showToast('记录已创建');
-      }
-      window.location.href = '/experiments/';
-    }
-
-    performanceYes?.addEventListener('click', () => submitData(true));
-    performanceNo?.addEventListener('click', () => submitData(false));
-
-    form?.addEventListener('submit', (e) => {
-      e.preventDefault();
-
+    function collectData(): any {
       const formData = new FormData(form);
-      pendingData = {
+      return {
         dateTime: (formData.get('dateTime') as string) || new Date().toISOString(),
         user: (formData.get('user') as string).trim(),
         targetBatch: (formData.get('targetBatch') as string).trim(),
@@ -379,9 +345,27 @@ const pageDesc = '创建或编辑一条实验记录。';
         saturationMagnetization: parseFloat(formData.get('saturationMagnetization') as string),
         notes: (formData.get('notes') as string).trim(),
       };
+    }
 
-      performanceModal?.classList.add('open');
-    });
+    function submitData(performanceOk: boolean) {
+      if (!form?.checkValidity()) {
+        form?.reportValidity();
+        return;
+      }
+      const data = { ...collectData(), performanceOk };
+      const id = recordIdInput.value;
+      if (id) {
+        experimentStorage.update(id, data);
+        showToast('记录已更新');
+      } else {
+        experimentStorage.create(data);
+        showToast('记录已创建');
+      }
+      window.location.href = '/experiments/';
+    }
+
+    document.getElementById('save-ok')?.addEventListener('click', () => submitData(true));
+    document.getElementById('save-fail')?.addEventListener('click', () => submitData(false));
   </script>
 
   <style>
