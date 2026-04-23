@@ -1,0 +1,371 @@
+---
+import Layout from '@layouts/Layout.astro';
+import ModalShell from '@components/ui/ModalShell.astro';
+
+const pageTitle = '靶材管理';
+const pageDesc = '管理实验靶材信息。';
+---
+
+<Layout title={`${pageTitle} - MoonSun.ai`} description={pageDesc} showHeader={false} showAuthModal={false} showFooter={false}>
+  <section class="targets-page">
+    <div class="container">
+      <!-- Header -->
+      <div class="targets-header">
+        <div class="targets-header__copy">
+          <h1>靶材管理</h1>
+        </div>
+        <div class="targets-header__actions">
+          <a href="/experiments/" class="claude-button-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18l-6-6 6-6"></path>
+            </svg>
+            <span>返回实验记录</span>
+          </a>
+          <a href="/experiments/target/edit/" class="claude-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>新增靶材</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="targets-table-wrapper">
+        <table class="targets-table" id="targets-table">
+          <thead>
+            <tr>
+              <th scope="col">入库时间</th>
+              <th scope="col">记录人</th>
+              <th scope="col">靶材名称</th>
+              <th scope="col">靶材批次</th>
+              <th scope="col">化学计量比</th>
+              <th scope="col" class="col-actions">操作</th>
+            </tr>
+          </thead>
+          <tbody id="targets-tbody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+        <div class="empty-state" id="empty-state" style="display: none;">
+          <div class="empty-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+          </div>
+          <h3>暂无靶材</h3>
+          <p>开始添加你的第一个靶材。</p>
+          <a href="/experiments/target/edit/" class="claude-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            添加第一个靶材
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Delete Modal -->
+  <ModalShell id="delete-modal" title="删除靶材" closeId="delete-close" backdropId="delete-backdrop" closeClass="modal-close" contentClass="modal-sm">
+    <p>此操作将永久删除该靶材记录，无法撤销。</p>
+    <div class="modal-actions">
+      <button class="claude-button-secondary" id="delete-cancel">取消</button>
+      <button class="btn-danger" id="delete-confirm">删除</button>
+    </div>
+  </ModalShell>
+
+  <script>
+    import { targetStorage } from '@/lib/targets/storage';
+    import type { TargetRecord } from '@/lib/targets/types';
+
+    targetStorage.init();
+
+    let pendingDeleteId: string | null = null;
+
+    function showToast(message: string, type: 'success' | 'error' = 'success') {
+      if (window.__meownoteToast) {
+        window.__meownoteToast.show(message, type);
+      } else {
+        alert(message);
+      }
+    }
+
+    function formatDateTime(iso: string): string {
+      const d = new Date(iso);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      return `${year}/${month}/${day} ${hours}:${minutes}`;
+    }
+
+    function escapeHtml(str: string): string {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function renderTable(targets: TargetRecord[]) {
+      const table = document.getElementById('targets-table') as HTMLTableElement;
+      const tbody = document.getElementById('targets-tbody') as HTMLTableSectionElement;
+      const emptyState = document.getElementById('empty-state') as HTMLElement;
+
+      if (targets.length === 0) {
+        table.style.display = 'none';
+        emptyState.style.display = 'flex';
+        return;
+      }
+
+      table.style.display = 'table';
+      emptyState.style.display = 'none';
+
+      tbody.innerHTML = targets.map((r) => `
+        <tr data-id="${r.id}">
+          <td class="cell-datetime">${formatDateTime(r.dateTime)}</td>
+          <td>${escapeHtml(r.user)}</td>
+          <td class="cell-name">${escapeHtml(r.name)}</td>
+          <td class="cell-batch">${escapeHtml(r.batch)}</td>
+          <td class="cell-ratio">${escapeHtml(r.ratio)}</td>
+          <td class="cell-actions">
+            <a href="/experiments/target/edit/?id=${r.id}" class="action-btn action-btn--edit" title="编辑">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </a>
+            <button class="action-btn action-btn--delete" data-id="${r.id}" title="删除">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+
+      tbody.querySelectorAll('.action-btn--delete').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const id = (e.currentTarget as HTMLElement).dataset.id;
+          if (id) {
+            pendingDeleteId = id;
+            document.getElementById('delete-modal')?.classList.add('open');
+          }
+        });
+      });
+    }
+
+    function refresh() {
+      const targets = targetStorage.list();
+      renderTable(targets);
+    }
+
+    refresh();
+
+    // Delete modal
+    document.getElementById('delete-cancel')?.addEventListener('click', () => {
+      pendingDeleteId = null;
+      document.getElementById('delete-modal')?.classList.remove('open');
+    });
+
+    document.getElementById('delete-close')?.addEventListener('click', () => {
+      pendingDeleteId = null;
+      document.getElementById('delete-modal')?.classList.remove('open');
+    });
+
+    document.getElementById('delete-backdrop')?.addEventListener('click', () => {
+      pendingDeleteId = null;
+      document.getElementById('delete-modal')?.classList.remove('open');
+    });
+
+    document.getElementById('delete-confirm')?.addEventListener('click', () => {
+      if (pendingDeleteId) {
+        targetStorage.remove(pendingDeleteId);
+        showToast('靶材已删除');
+        refresh();
+      }
+      pendingDeleteId = null;
+      document.getElementById('delete-modal')?.classList.remove('open');
+    });
+  </script>
+
+  <style>
+    .targets-page {
+      min-height: 100vh;
+      padding: calc(var(--header-height) + 2rem) 0 4rem;
+      background: var(--bg-primary);
+    }
+
+    .targets-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .targets-header__copy h1 {
+      font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+      line-height: 1.1;
+      font-family: var(--font-editorial);
+      font-weight: var(--font-medium);
+    }
+
+    .targets-header__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .targets-table-wrapper {
+      overflow-x: auto;
+    }
+
+    .targets-table {
+      width: 100%;
+      table-layout: fixed;
+      font-size: 0.85rem;
+      border-collapse: collapse;
+    }
+
+    .targets-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .targets-table th {
+      text-align: left;
+      padding: 0.75rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: var(--font-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-tertiary);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-primary);
+      white-space: nowrap;
+    }
+
+    .targets-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border-secondary);
+      vertical-align: middle;
+      color: var(--text-primary);
+    }
+
+    .targets-table tbody tr {
+      transition: background var(--duration-fast) var(--ease-default);
+    }
+
+    .targets-table tbody tr:hover {
+      background: var(--bg-hover);
+    }
+
+    .targets-table th:first-child,
+    .targets-table td:first-child {
+      border-radius: var(--radius-md) 0 0 var(--radius-md);
+    }
+
+    .targets-table th:last-child,
+    .targets-table td:last-child {
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    }
+
+    .cell-datetime {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .cell-name {
+      font-weight: var(--font-semibold);
+      color: var(--text-primary);
+    }
+
+    .cell-batch {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .cell-ratio {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--color-primary);
+    }
+
+    .col-actions {
+      width: 80px;
+      text-align: center;
+    }
+
+    .cell-actions {
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-md);
+      color: var(--text-tertiary);
+      transition: all var(--duration-fast) var(--ease-default);
+      margin: 0 0.1rem;
+    }
+
+    .action-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .action-btn--delete:hover {
+      background: var(--color-danger-light);
+      color: var(--color-danger);
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 4rem 1rem;
+      text-align: center;
+      color: var(--text-tertiary);
+    }
+
+    .empty-icon {
+      color: var(--text-tertiary);
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 1.1rem;
+      font-weight: var(--font-medium);
+      color: var(--text-secondary);
+    }
+
+    .empty-state p {
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 640px) {
+      .targets-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</Layout>
