@@ -13,6 +13,7 @@ const pageDesc = '管理实验靶材信息。';
       <div class="targets-header">
         <div class="targets-header__copy">
           <h1>靶材管理</h1>
+          <p class="targets-header__desc">统一管理实验靶材，供实验记录中快速引用。</p>
         </div>
         <div class="targets-header__actions">
           <a href="/experiments/" class="claude-button-secondary">
@@ -31,40 +32,79 @@ const pageDesc = '管理实验靶材信息。';
         </div>
       </div>
 
-      <!-- Table -->
-      <div class="targets-table-wrapper">
-        <table class="targets-table" id="targets-table">
-          <thead>
-            <tr>
-              <th scope="col">入库时间</th>
-              <th scope="col">记录人</th>
-              <th scope="col">靶材名称</th>
-              <th scope="col">靶材批次</th>
-              <th scope="col">化学计量比</th>
-              <th scope="col" class="col-actions">操作</th>
-            </tr>
-          </thead>
-          <tbody id="targets-tbody">
-            <!-- Populated by JS -->
-          </tbody>
-        </table>
-        <div class="empty-state" id="empty-state" style="display: none;">
-          <div class="empty-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="16"></line>
-              <line x1="8" y1="12" x2="16" y2="12"></line>
-            </svg>
+      <!-- Stats -->
+      <div class="targets-stats" id="targets-stats">
+        <div class="stat-card">
+          <span class="stat-label">靶材总数</span>
+          <strong id="stat-count">0</strong>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">种类数</span>
+          <strong id="stat-types">0</strong>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">最新入库</span>
+          <strong id="stat-latest">—</strong>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="targets-toolbar">
+        <div class="toolbar-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="search-input" placeholder="搜索靶材名称、批次..." />
+        </div>
+      </div>
+
+      <!-- Table Card -->
+      <div class="targets-card">
+        <div class="targets-table-wrapper">
+          <table class="targets-table" id="targets-table">
+            <thead>
+              <tr>
+                <th scope="col" class="col-name">靶材名称</th>
+                <th scope="col" class="col-batch">靶材批次</th>
+                <th scope="col" class="col-ratio">化学计量比</th>
+                <th scope="col" class="col-user">记录人</th>
+                <th scope="col" class="col-datetime">入库时间</th>
+                <th scope="col" class="col-actions">操作</th>
+              </tr>
+            </thead>
+            <tbody id="targets-tbody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+          <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+            </div>
+            <h3>暂无靶材</h3>
+            <p>开始添加你的第一个靶材。</p>
+            <a href="/experiments/target/edit/" class="claude-button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              添加第一个靶材
+            </a>
           </div>
-          <h3>暂无靶材</h3>
-          <p>开始添加你的第一个靶材。</p>
-          <a href="/experiments/target/edit/" class="claude-button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            添加第一个靶材
-          </a>
+          <div class="empty-state" id="search-empty-state" style="display: none;">
+            <div class="empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
+            <h3>未找到匹配靶材</h3>
+            <p>尝试更换搜索关键词。</p>
+          </div>
         </div>
       </div>
     </div>
@@ -85,6 +125,7 @@ const pageDesc = '管理实验靶材信息。';
 
     targetStorage.init();
 
+    let allTargets: TargetRecord[] = [];
     let pendingDeleteId: string | null = null;
 
     function showToast(message: string, type: 'success' | 'error' = 'success') {
@@ -105,51 +146,102 @@ const pageDesc = '管理实验靶材信息。';
       return `${year}/${month}/${day} ${hours}:${minutes}`;
     }
 
+    function formatDate(iso: string): string {
+      const d = new Date(iso);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}/${month}/${day}`;
+    }
+
     function escapeHtml(str: string): string {
       const div = document.createElement('div');
       div.textContent = str;
       return div.innerHTML;
     }
 
+    function updateStats(targets: TargetRecord[]) {
+      const countEl = document.getElementById('stat-count');
+      const typesEl = document.getElementById('stat-types');
+      const latestEl = document.getElementById('stat-latest');
+
+      if (countEl) countEl.textContent = String(targets.length);
+
+      if (typesEl) {
+        const uniqueNames = new Set(targets.map((t) => t.name));
+        typesEl.textContent = String(uniqueNames.size);
+      }
+
+      if (latestEl) {
+        if (targets.length === 0) {
+          latestEl.textContent = '—';
+        } else {
+          const sorted = [...targets].sort((a, b) => b.dateTime.localeCompare(a.dateTime));
+          latestEl.textContent = formatDate(sorted[0].dateTime);
+        }
+      }
+    }
+
     function renderTable(targets: TargetRecord[]) {
       const table = document.getElementById('targets-table') as HTMLTableElement;
       const tbody = document.getElementById('targets-tbody') as HTMLTableSectionElement;
       const emptyState = document.getElementById('empty-state') as HTMLElement;
+      const searchEmptyState = document.getElementById('search-empty-state') as HTMLElement;
+
+      searchEmptyState.style.display = 'none';
+
+      if (allTargets.length === 0) {
+        table.style.display = 'none';
+        emptyState.style.display = 'flex';
+        updateStats([]);
+        return;
+      }
+
+      emptyState.style.display = 'none';
 
       if (targets.length === 0) {
         table.style.display = 'none';
-        emptyState.style.display = 'flex';
+        searchEmptyState.style.display = 'flex';
         return;
       }
 
       table.style.display = 'table';
-      emptyState.style.display = 'none';
 
-      tbody.innerHTML = targets.map((r) => `
+      tbody.innerHTML = targets.map((r, i) => {
+        // Generate a stable color based on name hash
+        const hue = r.name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
+        const badgeStyle = `background: hsl(${hue}, 60%, 92%); color: hsl(${hue}, 70%, 30%); border: 1px solid hsl(${hue}, 50%, 85%);`;
+
+        return `
         <tr data-id="${r.id}">
-          <td class="cell-datetime">${formatDateTime(r.dateTime)}</td>
-          <td>${escapeHtml(r.user)}</td>
-          <td class="cell-name">${escapeHtml(r.name)}</td>
+          <td class="cell-name">
+            <span class="target-badge" style="${badgeStyle}">${escapeHtml(r.name)}</span>
+          </td>
           <td class="cell-batch">${escapeHtml(r.batch)}</td>
           <td class="cell-ratio">${escapeHtml(r.ratio)}</td>
+          <td class="cell-user">${escapeHtml(r.user)}</td>
+          <td class="cell-datetime">${formatDateTime(r.dateTime)}</td>
           <td class="cell-actions">
-            <a href="/experiments/target/edit/?id=${r.id}" class="action-btn action-btn--edit" title="编辑">
+            <a href="/experiments/target/edit/?id=${r.id}" class="action-link action-link--edit" title="编辑">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
               </svg>
+              <span>编辑</span>
             </a>
-            <button class="action-btn action-btn--delete" data-id="${r.id}" title="删除">
+            <button class="action-link action-link--delete" data-id="${r.id}" title="删除">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
               </svg>
+              <span>删除</span>
             </button>
           </td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
 
-      tbody.querySelectorAll('.action-btn--delete').forEach((btn) => {
+      tbody.querySelectorAll('.action-link--delete').forEach((btn) => {
         btn.addEventListener('click', (e) => {
           const id = (e.currentTarget as HTMLElement).dataset.id;
           if (id) {
@@ -160,12 +252,34 @@ const pageDesc = '管理实验靶材信息。';
       });
     }
 
-    function refresh() {
-      const targets = targetStorage.list();
-      renderTable(targets);
+    function refresh(searchTerm?: string) {
+      allTargets = targetStorage.list();
+      let filtered = allTargets;
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        filtered = allTargets.filter((t) =>
+          t.name.toLowerCase().includes(term) ||
+          t.batch.toLowerCase().includes(term) ||
+          t.ratio.toLowerCase().includes(term) ||
+          t.user.toLowerCase().includes(term)
+        );
+      }
+      updateStats(allTargets);
+      renderTable(filtered);
     }
 
     refresh();
+
+    // Search
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    let searchDebounce: ReturnType<typeof setTimeout>;
+    searchInput?.addEventListener('input', (e) => {
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(() => {
+        const term = (e.target as HTMLInputElement).value.trim();
+        refresh(term || undefined);
+      }, 200);
+    });
 
     // Delete modal
     document.getElementById('delete-cancel')?.addEventListener('click', () => {
@@ -187,7 +301,8 @@ const pageDesc = '管理实验靶材信息。';
       if (pendingDeleteId) {
         targetStorage.remove(pendingDeleteId);
         showToast('靶材已删除');
-        refresh();
+        const term = searchInput?.value.trim();
+        refresh(term || undefined);
       }
       pendingDeleteId = null;
       document.getElementById('delete-modal')?.classList.remove('open');
@@ -203,10 +318,10 @@ const pageDesc = '管理实验靶材信息。';
 
     .targets-header {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 1.5rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
       flex-wrap: wrap;
     }
 
@@ -217,11 +332,113 @@ const pageDesc = '管理实验靶材信息。';
       font-weight: var(--font-medium);
     }
 
+    .targets-header__desc {
+      font-size: 0.9rem;
+      color: var(--text-tertiary);
+      margin-top: 0.4rem;
+    }
+
     .targets-header__actions {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    /* Stats */
+    .targets-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .targets-stats {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .stat-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      padding: 0.75rem 1rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--card-shadow);
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      font-weight: var(--font-medium);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .stat-card strong {
+      font-size: 1.1rem;
+      font-weight: var(--font-medium);
+      color: var(--text-primary);
+    }
+
+    /* Toolbar */
+    .targets-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .toolbar-search {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-height: 2rem;
+      padding: 0 0.6rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-full);
+      transition: all var(--duration-fast) var(--ease-default);
+      width: 220px;
+      flex-shrink: 0;
+    }
+
+    .toolbar-search:focus-within {
+      width: 260px;
+      border-color: var(--color-primary);
+    }
+
+    .toolbar-search svg {
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+    }
+
+    .toolbar-search input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 0.78rem;
+      color: var(--text-primary);
+      outline: none;
+      padding: 0.35rem 0;
+      width: 100%;
+    }
+
+    .toolbar-search input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    /* Card */
+    .targets-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
     }
 
     .targets-table-wrapper {
@@ -232,7 +449,8 @@ const pageDesc = '管理实验靶材信息。';
       width: 100%;
       table-layout: fixed;
       font-size: 0.85rem;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
     }
 
     .targets-table thead {
@@ -243,11 +461,11 @@ const pageDesc = '管理实验靶材信息。';
 
     .targets-table th {
       text-align: left;
-      padding: 0.75rem 0.75rem;
-      font-size: 0.75rem;
+      padding: 0.7rem 0.9rem;
+      font-size: 0.7rem;
       font-weight: var(--font-semibold);
       text-transform: uppercase;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.04em;
       color: var(--text-tertiary);
       background: var(--bg-secondary);
       border-bottom: 1px solid var(--border-primary);
@@ -255,7 +473,7 @@ const pageDesc = '管理实验靶材信息。';
     }
 
     .targets-table td {
-      padding: 0.75rem;
+      padding: 0.65rem 0.9rem;
       border-bottom: 1px solid var(--border-secondary);
       vertical-align: middle;
       color: var(--text-primary);
@@ -269,26 +487,29 @@ const pageDesc = '管理实验靶材信息。';
       background: var(--bg-hover);
     }
 
-    .targets-table th:first-child,
-    .targets-table td:first-child {
-      border-radius: var(--radius-md) 0 0 var(--radius-md);
+    .targets-table tbody tr:last-child td {
+      border-bottom: none;
     }
 
-    .targets-table th:last-child,
-    .targets-table td:last-child {
-      border-radius: 0 var(--radius-md) var(--radius-md) 0;
-    }
-
-    .cell-datetime {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-      white-space: nowrap;
-    }
+    /* Column widths */
+    .col-name { width: 22%; }
+    .col-batch { width: 24%; }
+    .col-ratio { width: 22%; }
+    .col-user { width: 12%; }
+    .col-datetime { width: 14%; }
+    .col-actions { width: 110px; text-align: right; }
 
     .cell-name {
       font-weight: var(--font-semibold);
-      color: var(--text-primary);
+    }
+
+    .target-badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: var(--radius-md);
+      font-size: 0.82rem;
+      font-weight: var(--font-semibold);
+      white-space: nowrap;
     }
 
     .cell-batch {
@@ -303,38 +524,55 @@ const pageDesc = '管理实验靶材信息。';
       color: var(--color-primary);
     }
 
-    .col-actions {
-      width: 80px;
-      text-align: center;
+    .cell-user {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .cell-datetime {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      white-space: nowrap;
     }
 
     .cell-actions {
-      text-align: center;
+      text-align: right;
       vertical-align: middle;
     }
 
-    .action-btn {
+    .action-link {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
+      gap: 0.3rem;
+      padding: 0.35rem 0.55rem;
       border-radius: var(--radius-md);
+      font-size: 0.78rem;
+      font-weight: var(--font-medium);
       color: var(--text-tertiary);
       transition: all var(--duration-fast) var(--ease-default);
-      margin: 0 0.1rem;
+      margin: 0 0.05rem;
+      border: none;
+      background: none;
+      cursor: pointer;
     }
 
-    .action-btn:hover {
+    .action-link:hover {
       background: var(--bg-hover);
       color: var(--text-primary);
     }
 
-    .action-btn--delete:hover {
+    .action-link--edit:hover {
+      background: rgba(74, 144, 226, 0.1);
+      color: #4a90e2;
+    }
+
+    .action-link--delete:hover {
       background: var(--color-danger-light);
       color: var(--color-danger);
     }
 
+    /* Empty states */
     .empty-state {
       display: flex;
       flex-direction: column;
@@ -365,6 +603,23 @@ const pageDesc = '管理实验靶材信息。';
       .targets-header {
         flex-direction: column;
         align-items: flex-start;
+      }
+
+      .targets-stats {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .targets-table th,
+      .targets-table td {
+        padding: 0.6rem 0.5rem;
+      }
+
+      .col-actions {
+        width: 80px;
+      }
+
+      .action-link span {
+        display: none;
       }
     }
   </style>
