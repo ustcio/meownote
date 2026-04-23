@@ -42,6 +42,21 @@ const pageDesc = '创建或编辑一条实验记录。';
               />
             </div>
 
+            <!-- User -->
+            <div class="form-group">
+              <label for="user">
+                记录人
+                <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="user"
+                name="user"
+                placeholder="例如：YangHao"
+                required
+              />
+            </div>
+
             <!-- Target Batch -->
             <div class="form-group">
               <label for="targetBatch">
@@ -283,6 +298,7 @@ const pageDesc = '创建或编辑一条实验记录。';
         recordIdInput.value = record.id;
 
         (document.getElementById('dateTime') as HTMLInputElement).value = formatDateTimeLocal(record.dateTime);
+        (document.getElementById('user') as HTMLInputElement).value = record.user;
         (document.getElementById('targetBatch') as HTMLInputElement).value = record.targetBatch;
         (document.getElementById('targetRatio') as HTMLInputElement).value = record.targetRatio;
         (document.getElementById('pressure') as HTMLInputElement).value = String(record.pressure);
@@ -311,6 +327,7 @@ const pageDesc = '创建或编辑一条实验记录。';
       const formData = new FormData(form);
       const data = {
         dateTime: (formData.get('dateTime') as string) || new Date().toISOString(),
+        user: (formData.get('user') as string).trim(),
         targetBatch: (formData.get('targetBatch') as string).trim(),
         targetRatio: (formData.get('targetRatio') as string).trim(),
         pressure: parseFloat(formData.get('pressure') as string),

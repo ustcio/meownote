@@ -41,6 +41,7 @@ const DEMO_RECORDS: ExperimentRecord[] = [
   {
     id: 'demo-1',
     dateTime: '2025-04-15T09:30',
+    user: 'YangHao',
     targetBatch: 'CoNb3S6-2025-A',
     targetRatio: 'Co:Nb:S = 1:3:6',
     pressure: 2.5e-3,
@@ -59,6 +60,7 @@ const DEMO_RECORDS: ExperimentRecord[] = [
   {
     id: 'demo-2',
     dateTime: '2025-04-18T14:00',
+    user: 'YangHao',
     targetBatch: 'ZrAs2-2024-B',
     targetRatio: 'Zr:As = 1:2',
     pressure: 1.8e-3,
@@ -77,6 +79,7 @@ const DEMO_RECORDS: ExperimentRecord[] = [
   {
     id: 'demo-3',
     dateTime: '2025-04-20T10:00',
+    user: 'YangHao',
     targetBatch: 'Nb3I8-2025-C',
     targetRatio: 'Nb:I = 3:8',
     pressure: 3.0e-3,

@@ -5,6 +5,7 @@
 export interface ExperimentRecord {
   id: string;
   dateTime: string;           // 实验时间 (ISO 8601 format)
+  user: string;               // 记录人
   targetBatch: string;        // 靶材批次
   targetRatio: string;         // 靶材成分计量比
   pressure: number;           // 气压 (Pa)
@@ -23,6 +24,7 @@ export interface ExperimentRecord {
 
 export interface CreateExperimentInput {
   dateTime: string;
+  user: string;
   targetBatch: string;
   targetRatio: string;
   pressure: number;
@@ -39,6 +41,7 @@ export interface CreateExperimentInput {
 
 export interface UpdateExperimentInput {
   dateTime?: string;
+  user?: string;
   targetBatch?: string;
   targetRatio?: string;
   pressure?: number;
