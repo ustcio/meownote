@@ -11,14 +11,15 @@ const pageDesc = '新增或编辑靶材信息。';
       <!-- Header -->
       <header class="edit-header">
         <div class="edit-header__top">
-          <a href="/experiments/" class="edit-back-link">
+          <a href="/experiments/target/" class="edit-back-link">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M15 18l-6-6 6-6"></path>
             </svg>
-            <span>返回记录列表</span>
+            <span>返回靶材列表</span>
           </a>
         </div>
         <h1 id="page-title">新增靶材</h1>
+        <p class="edit-subtitle">记录靶材的基本信息，供后续实验记录中选择引用。</p>
       </header>
 
       <!-- Form -->
@@ -26,79 +27,87 @@ const pageDesc = '新增或编辑靶材信息。';
         <form class="edit-form" id="target-form">
           <input type="hidden" id="record-id" />
 
-          <div class="form-grid">
-            <!-- Date & Time -->
-            <div class="form-group form-group--wide">
-              <label for="dateTime">
-                入库时间
-                <span class="required">*</span>
-              </label>
-              <input
-                type="datetime-local"
-                id="dateTime"
-                name="dateTime"
-                required
-              />
-            </div>
+          <div class="form-section">
+            <h2 class="form-section__title">基本信息</h2>
+            <div class="form-grid">
+              <!-- Date & Time -->
+              <div class="form-group form-group--wide">
+                <label for="dateTime">
+                  入库时间
+                  <span class="required">*</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  id="dateTime"
+                  name="dateTime"
+                  required
+                />
+              </div>
 
-            <!-- User -->
-            <div class="form-group">
-              <label for="user">
-                记录人
-                <span class="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="user"
-                name="user"
-                placeholder="例如：YangHao"
-                required
-              />
-            </div>
+              <!-- User -->
+              <div class="form-group">
+                <label for="user">
+                  记录人
+                  <span class="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="user"
+                  name="user"
+                  placeholder="例如：YangHao"
+                  required
+                />
+              </div>
 
-            <!-- Target Name -->
-            <div class="form-group">
-              <label for="name">
-                靶材名称
-                <span class="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                placeholder="例如：CoNb3S6"
-                required
-              />
+              <!-- Target Name -->
+              <div class="form-group">
+                <label for="name">
+                  靶材名称
+                  <span class="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="例如：CoNb3S6"
+                  required
+                />
+              </div>
             </div>
+          </div>
 
-            <!-- Target Batch -->
-            <div class="form-group">
-              <label for="batch">
-                靶材批次
-                <span class="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="batch"
-                name="batch"
-                placeholder="例如：CoNb3S6-2025-A"
-                required
-              />
-            </div>
+          <div class="form-section">
+            <h2 class="form-section__title">成分信息</h2>
+            <div class="form-grid">
+              <!-- Target Batch -->
+              <div class="form-group">
+                <label for="batch">
+                  靶材批次
+                  <span class="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="batch"
+                  name="batch"
+                  placeholder="例如：CoNb3S6-2025-A"
+                  required
+                />
+              </div>
 
-            <!-- Target Ratio -->
-            <div class="form-group">
-              <label for="ratio">
-                化学计量比
-                <span class="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="ratio"
-                name="ratio"
-                placeholder="例如：Co:Nb:S = 1:3:6"
-                required
-              />
+              <!-- Target Ratio -->
+              <div class="form-group">
+                <label for="ratio">
+                  化学计量比
+                  <span class="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="ratio"
+                  name="ratio"
+                  placeholder="例如：Co:Nb:S = 1:3:6"
+                  required
+                />
+              </div>
             </div>
           </div>
 
@@ -112,7 +121,7 @@ const pageDesc = '新增或编辑靶材信息。';
               </svg>
               保存靶材
             </button>
-            <a href="/experiments/" class="claude-button-secondary">取消</a>
+            <a href="/experiments/target/" class="claude-button-secondary">取消</a>
           </div>
         </form>
       </div>
@@ -187,7 +196,7 @@ const pageDesc = '新增或编辑靶材信息。';
         targetStorage.create(data);
         showToast('靶材已创建');
       }
-      window.location.href = '/experiments/';
+      window.location.href = '/experiments/target/';
     });
   </script>
 
@@ -246,9 +255,30 @@ const pageDesc = '新增或编辑靶材信息。';
       font-weight: var(--font-medium);
     }
 
+    .edit-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-tertiary);
+      margin-top: 0.35rem;
+    }
+
     .edit-card {
       padding: 1.5rem;
       border-radius: var(--radius-xl);
+    }
+
+    .form-section + .form-section {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-secondary);
+    }
+
+    .form-section__title {
+      font-size: 0.8rem;
+      font-weight: var(--font-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-tertiary);
+      margin-bottom: 1rem;
     }
 
     .form-grid {

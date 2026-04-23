@@ -7,8 +7,9 @@ export interface ExperimentRecord {
   dateTime: string;           // 实验时间 (ISO 8601 format)
   user: string;               // 记录人
   operation: string;          // 实验操作
-  targetBatch: string;        // 靶材批次
-  targetRatio: string;         // 靶材成分计量比
+  targetId?: string;          // 靶材ID引用
+  targetBatch: string;         // 靶材批次（冗余，兼容旧数据/显示用）
+  targetRatio: string;          // 靶材成分计量比（冗余，兼容旧数据/显示用）
   pressure: number;           // 气压 (Pa)
   gateValve: string;          // 闸板阀状态/开度
   growthTemp: number;         // 生长温度 (°C)
@@ -28,6 +29,7 @@ export interface CreateExperimentInput {
   dateTime: string;
   user: string;
   operation: string;
+  targetId?: string;
   targetBatch: string;
   targetRatio: string;
   pressure: number;
@@ -47,6 +49,7 @@ export interface UpdateExperimentInput {
   dateTime?: string;
   user?: string;
   operation?: string;
+  targetId?: string;
   targetBatch?: string;
   targetRatio?: string;
   pressure?: number;

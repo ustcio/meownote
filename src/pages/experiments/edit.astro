@@ -83,7 +83,8 @@ const pageDesc = '创建或编辑一条实验记录。';
               <span class="field-hint">从已保存的靶材中选择，<a href="/experiments/target/edit/" target="_blank" style="color: var(--color-primary); text-decoration: underline;">去新增靶材 →</a></span>
             </div>
 
-            <!-- Hidden fields for batch & ratio -->
+            <!-- Hidden fields for target ref, batch & ratio -->
+            <input type="hidden" id="targetId" name="targetId" />
             <input type="hidden" id="targetBatch" name="targetBatch" />
             <input type="hidden" id="targetRatio" name="targetRatio" />
 
@@ -275,14 +276,14 @@ const pageDesc = '创建或编辑一条实验记录。';
     targetStorage.init();
 
     const targetSelect = document.getElementById('targetSelect') as HTMLSelectElement;
+    const targetIdInput = document.getElementById('targetId') as HTMLInputElement;
     const targetBatchInput = document.getElementById('targetBatch') as HTMLInputElement;
     const targetRatioInput = document.getElementById('targetRatio') as HTMLInputElement;
 
     // Load targets into dropdown
-    function loadTargetOptions(selectedBatch?: string) {
+    function loadTargetOptions(selectedTargetId?: string) {
       const targets = targetStorage.list();
       const currentValue = targetSelect.value;
-      // Keep the placeholder option
       targetSelect.innerHTML = '<option value="" disabled selected>请选择靶材</option>';
       targets.forEach((t: TargetRecord) => {
         const opt = document.createElement('option');
@@ -292,16 +293,15 @@ const pageDesc = '创建或编辑一条实验记录。';
         opt.dataset.ratio = t.ratio;
         targetSelect.appendChild(opt);
       });
-      if (selectedBatch) {
-        // Try to find matching target by batch
-        const match = targets.find((t: TargetRecord) => t.batch === selectedBatch);
+      if (selectedTargetId) {
+        const match = targets.find((t: TargetRecord) => t.id === selectedTargetId);
         if (match) {
           targetSelect.value = match.id;
+          targetIdInput.value = match.id;
           targetBatchInput.value = match.batch;
           targetRatioInput.value = match.ratio;
         }
       } else if (currentValue) {
-        // Restore previous selection if still valid
         const stillExists = targets.find((t: TargetRecord) => t.id === currentValue);
         if (stillExists) {
           targetSelect.value = currentValue;
@@ -312,6 +312,7 @@ const pageDesc = '创建或编辑一条实验记录。';
     targetSelect?.addEventListener('change', () => {
       const opt = targetSelect.selectedOptions[0];
       if (opt && opt.dataset.batch) {
+        targetIdInput.value = targetSelect.value;
         targetBatchInput.value = opt.dataset.batch;
         targetRatioInput.value = opt.dataset.ratio || '';
       }
@@ -319,17 +320,15 @@ const pageDesc = '创建或编辑一条实验记录。';
 
     loadTargetOptions();
 
-    // Refresh target list when page regains focus (user may have added targets in another tab)
+    // Refresh target list when page regains focus
     window.addEventListener('focus', () => {
-      const selectedBatch = targetBatchInput.value;
-      loadTargetOptions(selectedBatch || undefined);
+      loadTargetOptions(targetIdInput.value || undefined);
     });
 
     // Also listen for storage changes from other tabs
     window.addEventListener('storage', (e) => {
       if (e.key === 'meownote_targets') {
-        const selectedBatch = targetBatchInput.value;
-        loadTargetOptions(selectedBatch || undefined);
+        loadTargetOptions(targetIdInput.value || undefined);
       }
     });
 
@@ -367,7 +366,7 @@ const pageDesc = '创建或编辑一条实验记录。';
         (document.getElementById('dateTime') as HTMLInputElement).value = formatDateTimeLocal(record.dateTime);
         (document.getElementById('user') as HTMLInputElement).value = record.user;
         (document.getElementById('operation') as HTMLSelectElement).value = record.operation;
-        loadTargetOptions(record.targetBatch);
+        loadTargetOptions(record.targetId);
         (document.getElementById('pressure') as HTMLInputElement).value = String(record.pressure);
         (document.getElementById('gateValve') as HTMLInputElement).value = record.gateValve;
         (document.getElementById('growthTemp') as HTMLInputElement).value = String(record.growthTemp);
@@ -394,6 +393,7 @@ const pageDesc = '创建或编辑一条实验记录。';
         dateTime: (formData.get('dateTime') as string) || new Date().toISOString(),
         user: (formData.get('user') as string).trim(),
         operation: (formData.get('operation') as string).trim(),
+        targetId: targetIdInput.value.trim() || undefined,
         targetBatch: targetBatchInput.value.trim(),
         targetRatio: targetRatioInput.value.trim(),
         pressure: parseFloat(formData.get('pressure') as string),
