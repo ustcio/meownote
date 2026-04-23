@@ -32,22 +32,6 @@ const pageDesc = '管理实验靶材信息。';
         </div>
       </div>
 
-      <!-- Stats -->
-      <div class="targets-stats" id="targets-stats">
-        <div class="stat-card">
-          <span class="stat-label">靶材总数</span>
-          <strong id="stat-count">0</strong>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">种类数</span>
-          <strong id="stat-types">0</strong>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">最新入库</span>
-          <strong id="stat-latest">—</strong>
-        </div>
-      </div>
-
       <!-- Toolbar -->
       <div class="targets-toolbar">
         <div class="toolbar-search">
@@ -59,9 +43,8 @@ const pageDesc = '管理实验靶材信息。';
         </div>
       </div>
 
-      <!-- Table Card -->
-      <div class="targets-card">
-        <div class="targets-table-wrapper">
+      <!-- Table -->
+      <div class="targets-table-wrapper">
           <table class="targets-table" id="targets-table">
             <thead>
               <tr>
@@ -146,40 +129,10 @@ const pageDesc = '管理实验靶材信息。';
       return `${year}/${month}/${day} ${hours}:${minutes}`;
     }
 
-    function formatDate(iso: string): string {
-      const d = new Date(iso);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}/${month}/${day}`;
-    }
-
     function escapeHtml(str: string): string {
       const div = document.createElement('div');
       div.textContent = str;
       return div.innerHTML;
-    }
-
-    function updateStats(targets: TargetRecord[]) {
-      const countEl = document.getElementById('stat-count');
-      const typesEl = document.getElementById('stat-types');
-      const latestEl = document.getElementById('stat-latest');
-
-      if (countEl) countEl.textContent = String(targets.length);
-
-      if (typesEl) {
-        const uniqueNames = new Set(targets.map((t) => t.name));
-        typesEl.textContent = String(uniqueNames.size);
-      }
-
-      if (latestEl) {
-        if (targets.length === 0) {
-          latestEl.textContent = '—';
-        } else {
-          const sorted = [...targets].sort((a, b) => b.dateTime.localeCompare(a.dateTime));
-          latestEl.textContent = formatDate(sorted[0].dateTime);
-        }
-      }
     }
 
     function renderTable(targets: TargetRecord[]) {
@@ -222,26 +175,24 @@ const pageDesc = '管理实验靶材信息。';
           <td class="cell-user">${escapeHtml(r.user)}</td>
           <td class="cell-datetime">${formatDateTime(r.dateTime)}</td>
           <td class="cell-actions">
-            <a href="/experiments/target/edit/?id=${r.id}" class="action-link action-link--edit" title="编辑">
+            <a href="/experiments/target/edit/?id=${r.id}" class="action-btn action-btn--edit" title="编辑">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
               </svg>
-              <span>编辑</span>
             </a>
-            <button class="action-link action-link--delete" data-id="${r.id}" title="删除">
+            <button class="action-btn action-btn--delete" data-id="${r.id}" title="删除">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
               </svg>
-              <span>删除</span>
             </button>
           </td>
         </tr>
       `;
       }).join('');
 
-      tbody.querySelectorAll('.action-link--delete').forEach((btn) => {
+      tbody.querySelectorAll('.action-btn--delete').forEach((btn) => {
         btn.addEventListener('click', (e) => {
           const id = (e.currentTarget as HTMLElement).dataset.id;
           if (id) {
@@ -264,7 +215,6 @@ const pageDesc = '管理实验靶材信息。';
           t.user.toLowerCase().includes(term)
         );
       }
-      updateStats(allTargets);
       renderTable(filtered);
     }
 
@@ -346,45 +296,6 @@ const pageDesc = '管理实验靶材信息。';
       flex-shrink: 0;
     }
 
-    /* Stats */
-    .targets-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-    }
-
-    @media (max-width: 640px) {
-      .targets-stats {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    .stat-card {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-      padding: 0.75rem 1rem;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--card-shadow);
-    }
-
-    .stat-label {
-      font-size: 0.72rem;
-      font-weight: var(--font-medium);
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .stat-card strong {
-      font-size: 1.1rem;
-      font-weight: var(--font-medium);
-      color: var(--text-primary);
-    }
-
     /* Toolbar */
     .targets-toolbar {
       display: flex;
@@ -432,72 +343,71 @@ const pageDesc = '管理实验靶材信息。';
       color: var(--text-tertiary);
     }
 
-    /* Card */
-    .targets-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--card-shadow);
-      overflow: hidden;
-    }
-
+    /* Table — 与实验记录列表保持一致 */
     .targets-table-wrapper {
-      overflow-x: auto;
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-xl);
+      background: var(--card-bg);
+      box-shadow: var(--card-shadow);
     }
 
     .targets-table {
       width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
       table-layout: fixed;
-      font-size: 0.85rem;
-      border-collapse: separate;
-      border-spacing: 0;
     }
 
     .targets-table thead {
-      position: sticky;
-      top: 0;
-      z-index: 2;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-secondary);
     }
 
     .targets-table th {
+      padding: 0.6rem 0.5rem;
       text-align: left;
-      padding: 0.7rem 0.9rem;
       font-size: 0.7rem;
       font-weight: var(--font-semibold);
-      text-transform: uppercase;
       letter-spacing: 0.04em;
+      text-transform: uppercase;
       color: var(--text-tertiary);
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border-primary);
-      white-space: nowrap;
+      word-wrap: break-word;
+      line-height: 1.2;
     }
 
+    .targets-table th:nth-child(1) { width: 18%; }
+    .targets-table th:nth-child(2) { width: 22%; }
+    .targets-table th:nth-child(3) { width: 22%; }
+    .targets-table th:nth-child(4) { width: 10%; }
+    .targets-table th:nth-child(5) { width: 13%; }
+    .targets-table th:nth-child(6) { width: 5%; text-align: center; }
+
     .targets-table td {
-      padding: 0.65rem 0.9rem;
+      padding: 0.6rem 0.5rem;
       border-bottom: 1px solid var(--border-secondary);
-      vertical-align: middle;
       color: var(--text-primary);
+      vertical-align: middle;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     .targets-table tbody tr {
       transition: background var(--duration-fast) var(--ease-default);
+      animation: rowIn 0.35s var(--ease-out) both;
+    }
+
+    @keyframes rowIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .targets-table tbody tr:hover {
-      background: var(--bg-hover);
+      background: var(--card-bg-hover);
     }
 
     .targets-table tbody tr:last-child td {
       border-bottom: none;
     }
-
-    /* Column widths */
-    .col-name { width: 22%; }
-    .col-batch { width: 24%; }
-    .col-ratio { width: 22%; }
-    .col-user { width: 12%; }
-    .col-datetime { width: 14%; }
-    .col-actions { width: 110px; text-align: right; }
 
     .cell-name {
       font-weight: var(--font-semibold);
@@ -505,69 +415,72 @@ const pageDesc = '管理实验靶材信息。';
 
     .target-badge {
       display: inline-block;
-      padding: 0.25rem 0.6rem;
-      border-radius: var(--radius-md);
-      font-size: 0.82rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
       font-weight: var(--font-semibold);
       white-space: nowrap;
     }
 
     .cell-batch {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
       color: var(--text-secondary);
     }
 
     .cell-ratio {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
       color: var(--color-primary);
     }
 
     .cell-user {
-      font-size: 0.8rem;
       color: var(--text-secondary);
     }
 
     .cell-datetime {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text-tertiary);
+      font-variant-numeric: tabular-nums;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
       white-space: nowrap;
     }
 
+    .col-actions {
+      width: 1%;
+      white-space: nowrap;
+      text-align: center;
+    }
+
     .cell-actions {
-      text-align: right;
+      text-align: center;
       vertical-align: middle;
     }
 
-    .action-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      padding: 0.35rem 0.55rem;
-      border-radius: var(--radius-md);
-      font-size: 0.78rem;
-      font-weight: var(--font-medium);
-      color: var(--text-tertiary);
-      transition: all var(--duration-fast) var(--ease-default);
-      margin: 0 0.05rem;
+    .action-btn {
+      display: block;
+      margin: 0 auto;
+      width: 2rem;
+      height: 2rem;
       border: none;
-      background: none;
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--text-tertiary);
       cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-default);
     }
 
-    .action-link:hover {
-      background: var(--bg-hover);
+    .action-btn + .action-btn {
+      margin-top: 0.35rem;
+    }
+
+    .action-btn:hover {
+      background: var(--bg-secondary);
       color: var(--text-primary);
     }
 
-    .action-link--edit:hover {
-      background: rgba(74, 144, 226, 0.1);
-      color: #4a90e2;
+    .action-btn--edit:hover {
+      color: var(--color-primary);
     }
 
-    .action-link--delete:hover {
+    .action-btn--delete:hover {
       background: var(--color-danger-light);
       color: var(--color-danger);
     }
@@ -579,7 +492,7 @@ const pageDesc = '管理实验靶材信息。';
       align-items: center;
       justify-content: center;
       gap: 0.75rem;
-      padding: 4rem 1rem;
+      padding: 4rem 2rem;
       text-align: center;
       color: var(--text-tertiary);
     }
@@ -605,21 +518,9 @@ const pageDesc = '管理实验靶材信息。';
         align-items: flex-start;
       }
 
-      .targets-stats {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
       .targets-table th,
       .targets-table td {
-        padding: 0.6rem 0.5rem;
-      }
-
-      .col-actions {
-        width: 80px;
-      }
-
-      .action-link span {
-        display: none;
+        padding: 0.6rem 0.4rem;
       }
     }
   </style>
