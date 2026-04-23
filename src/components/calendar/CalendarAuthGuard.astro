@@ -1,0 +1,31 @@
+---
+interface Props {
+  redirectTo?: string;
+}
+
+const { redirectTo = '/calendar/login/' } = Astro.props;
+---
+
+<script is:inline define:vars={{ redirectTo }}>
+  (function() {
+    const CALENDAR_AUTH_KEY = 'calendar_auth';
+
+    function readJSON(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    const auth = readJSON(CALENDAR_AUTH_KEY);
+    const isAllowed = auth === true;
+
+    if (!isAllowed) {
+      const current = window.location.pathname + window.location.search;
+      const next = `${redirectTo}?next=${encodeURIComponent(current)}`;
+      window.location.replace(next);
+    }
+  })();
+</script>

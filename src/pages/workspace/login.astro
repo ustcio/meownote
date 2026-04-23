@@ -60,7 +60,6 @@ const slides = [
           <a href="/chatbot/">Chat</a>
           <a href="/calendar/">Calendar</a>
           <a href="/workspace/">Workspace</a>
-          <a href="/experiments/">Experiments</a>
           <a href="/kit/">Kit</a>
           <a href="/about/">About</a>
         </div>
@@ -198,7 +197,7 @@ const slides = [
 
       function isSafeReturnPath(path) {
         return Boolean(path)
-          && (path.startsWith('/workspace') || path.startsWith('/calendar'))
+          && path.startsWith('/workspace')
           && !path.startsWith('/workspace/login');
       }
 
@@ -235,7 +234,22 @@ const slides = [
         window.location.replace(isSafeReturnPath(path) ? path : '/workspace/');
       }
 
-      function hydrateIfLoggedIn() {
+      async function verifyToken(token) {
+        try {
+          const res = await fetch(`${API_BASE}/api/admin/verify`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` },
+            cache: 'no-store',
+          });
+          if (!res.ok) return false;
+          const data = await res.json().catch(() => ({}));
+          return data.success === true && isAdminUser(data.user);
+        } catch {
+          return false;
+        }
+      }
+
+      async function hydrateIfLoggedIn() {
         const redirectCount = parseInt(localStorage.getItem('meownote_redirect_count') || '0', 10);
         if (redirectCount > 3) {
           localStorage.removeItem('meownote_redirect_count');
@@ -245,11 +259,19 @@ const slides = [
         const token = window.__meownoteAuth?.getToken?.() || getStoredToken();
         const user = window.__meownoteAuth?.getUser?.() || getStoredUser();
 
-        if (token && isAdminUser(user)) {
+        if (!token || !isAdminUser(user)) {
+          localStorage.removeItem('meownote_redirect_count');
+          return;
+        }
+
+        const isValid = await verifyToken(token);
+        if (isValid) {
           localStorage.setItem('meownote_redirect_count', String(redirectCount + 1));
           redirectToWorkspace(getReturnPath());
         } else {
           localStorage.removeItem('meownote_redirect_count');
+          TOKEN_KEYS.forEach((k) => localStorage.removeItem(k));
+          USER_KEYS.forEach((k) => localStorage.removeItem(k));
         }
       }
 
@@ -261,6 +283,15 @@ const slides = [
         });
         const result = await response.json().catch(() => ({}));
         return { response, result };
+      }
+
+      function translateError(msg) {
+        if (!msg) return '用户名或密码错误';
+        const lower = String(msg).toLowerCase();
+        if (lower.includes('invalid credentials')) return '密码错误，请重试';
+        if (lower.includes('network') || lower.includes('fetch') || lower.includes('failed')) return '网络连接失败，请检查网络后重试';
+        if (lower.includes('timeout') || lower.includes('abort')) return '请求超时，请稍后重试';
+        return msg;
       }
 
       document.querySelector('.workspace-google-btn')?.addEventListener('click', () => {
@@ -305,11 +336,12 @@ const slides = [
           }
 
           persistSession(result.token, user);
-          window.__meownoteToast?.show('Workspace access granted', 'success');
+          window.__meownoteToast?.show('登录成功', 'success');
           redirectToWorkspace(getReturnPath());
         } catch (error) {
-          setError(error instanceof Error ? error.message : '登录失败，请稍后重试。');
-          window.__meownoteToast?.show('Workspace login failed', 'error');
+          const msg = error instanceof Error ? translateError(error.message) : '登录失败，请稍后重试。';
+          setError(msg);
+          window.__meownoteToast?.show(msg, 'error');
         } finally {
           setLoading(false);
         }

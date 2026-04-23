@@ -1,6 +1,7 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import ModalShell from '@components/ui/ModalShell.astro';
+import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
 import { t } from '@i18n/translate';
 ---
 
@@ -8,6 +9,7 @@ import { t } from '@i18n/translate';
   title={`${t('profile.title')} - MoonSun.ai`}
   description={t('profile.description')}
 >
+  <WorkspaceAuthGuard redirectTo="/workspace/login/" />
   <section class="profile">
     <div class="profile-container">
       <div class="profile-header">
@@ -574,7 +576,6 @@ import { t } from '@i18n/translate';
   function loadUserProfile() {
     const storedUser = authStore?.getUser?.();
     if (!storedUser) {
-      window.location.href = '/';
       return;
     }
     
@@ -647,7 +648,7 @@ import { t } from '@i18n/translate';
   
   document.getElementById('logout-btn')?.addEventListener('click', () => {
     authStore?.clearSession?.();
-    window.location.href = '/';
+    window.location.href = '/workspace/login/';
   });
   
   editForm?.addEventListener('submit', async (e) => {

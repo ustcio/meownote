@@ -696,6 +696,23 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
   const fileUpdatedCopy = document.getElementById('file-updated-copy');
   const filePreviewCopy = document.getElementById('file-preview-copy');
 
+  function clearWorkspaceSession() {
+    ['meownote_auth_token', 'auth_token', 'meownote_user_data', 'user'].forEach((k) => localStorage.removeItem(k));
+  }
+
+  function handleAuthError(error) {
+    const msg = error instanceof Error ? error.message : '';
+    if (msg.includes('请先登录') || msg.includes('401')) {
+      clearWorkspaceSession();
+      showToast('登录已过期，请重新登录', 'error');
+      setTimeout(() => {
+        window.location.href = '/workspace/login/';
+      }, 1500);
+      return true;
+    }
+    return false;
+  }
+
   async function apiRequest(path, options = {}) {
     const isFormData = options.body instanceof FormData;
     const timeoutMs = isFormData ? 60000 : 10000;
@@ -816,7 +833,8 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
       }
     } catch (error) {
       console.error('Load failed:', error);
-      showToast('Failed to load file', 'error');
+      if (handleAuthError(error)) return;
+      showToast('加载失败，请稍后重试', 'error');
     } finally {
       loadingState?.classList.remove('visible');
     }
@@ -969,8 +987,9 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
       }
     } catch (error) {
       console.error('Save failed:', error);
+      if (handleAuthError(error)) return;
       setSaveStatus('error');
-      showToast('Failed to save', 'error');
+      showToast('保存失败，请稍后重试', 'error');
     } finally {
       isSaving = false;
     }
@@ -1095,7 +1114,8 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
       }
     } catch (error) {
       console.error('Delete failed:', error);
-      showToast('Failed to delete', 'error');
+      if (handleAuthError(error)) return;
+      showToast('删除失败，请稍后重试', 'error');
     }
   }
 

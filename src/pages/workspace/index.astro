@@ -1383,6 +1383,10 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
     });
   }
 
+  function clearWorkspaceSession() {
+    ['meownote_auth_token', 'auth_token', 'meownote_user_data', 'user'].forEach((k) => localStorage.removeItem(k));
+  }
+
   async function loadFiles(options = {}) {
     const { background = false } = options;
     if (!background) showLoading();
@@ -1398,8 +1402,17 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
       renderFiles();
     } catch (error) {
       console.error('Load failed:', error);
+      const msg = error instanceof Error ? error.message : '';
+      if (msg.includes('请先登录') || msg.includes('401')) {
+        clearWorkspaceSession();
+        showToast('登录已过期，请重新登录', 'error');
+        setTimeout(() => {
+          window.location.href = '/workspace/login/';
+        }, 1500);
+        return;
+      }
       if (!background || files.length === 0) {
-        showToast('Failed to load files', 'error');
+        showToast('加载失败，请稍后重试', 'error');
       }
     } finally {
       if (!background || files.length === 0) hideLoading();

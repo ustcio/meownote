@@ -1,23 +1,24 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
 
 const pageTitle = '编辑实验';
 const pageDesc = '创建或编辑一条实验记录。';
 ---
 
 <Layout title={`${pageTitle} - MoonSun.ai`} description={pageDesc}>
-  <WorkspaceAuthGuard />
   <section class="experiment-edit-page">
     <div class="container edit-shell">
       <!-- Header -->
       <header class="edit-header">
-        <a href="/experiments/" class="edit-back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M15 18l-6-6 6-6"></path>
-          </svg>
-          <span>返回记录列表</span>
-        </a>
+        <div class="edit-header__top">
+          <a href="/experiments/" class="edit-back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18l-6-6 6-6"></path>
+            </svg>
+            <span>返回记录列表</span>
+          </a>
+
+        </div>
         <h1 id="page-title">新建实验记录</h1>
       </header>
 
@@ -41,17 +42,32 @@ const pageDesc = '创建或编辑一条实验记录。';
               />
             </div>
 
-            <!-- Target Material -->
+            <!-- Target Batch -->
             <div class="form-group">
-              <label for="target">
-                靶材材料
+              <label for="targetBatch">
+                靶材批次
                 <span class="required">*</span>
               </label>
               <input
                 type="text"
-                id="target"
-                name="target"
-                placeholder="例如：CoNb3S6"
+                id="targetBatch"
+                name="targetBatch"
+                placeholder="例如：CoNb3S6-2025-A"
+                required
+              />
+            </div>
+
+            <!-- Target Ratio -->
+            <div class="form-group">
+              <label for="targetRatio">
+                靶材成分计量比
+                <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="targetRatio"
+                name="targetRatio"
+                placeholder="例如：Co:Nb:S = 1:3:6"
                 required
               />
             </div>
@@ -135,6 +151,70 @@ const pageDesc = '创建或编辑一条实验记录。';
                 required
               />
             </div>
+
+            <!-- Sample Thickness -->
+            <div class="form-group">
+              <label for="sampleThickness">
+                样品厚度 (μm)
+                <span class="required">*</span>
+              </label>
+              <input
+                type="number"
+                id="sampleThickness"
+                name="sampleThickness"
+                step="0.01"
+                placeholder="例如：0.18"
+                required
+              />
+            </div>
+
+            <!-- Remanence -->
+            <div class="form-group">
+              <label for="remanence">
+                剩磁 (T)
+                <span class="required">*</span>
+              </label>
+              <input
+                type="number"
+                id="remanence"
+                name="remanence"
+                step="any"
+                placeholder="例如：0.85"
+                required
+              />
+            </div>
+
+            <!-- Coercivity -->
+            <div class="form-group">
+              <label for="coercivity">
+                矫顽力 (T)
+                <span class="required">*</span>
+              </label>
+              <input
+                type="number"
+                id="coercivity"
+                name="coercivity"
+                step="any"
+                placeholder="例如：0.12"
+                required
+              />
+            </div>
+
+            <!-- Saturation Magnetization -->
+            <div class="form-group">
+              <label for="saturationMagnetization">
+                饱和磁化强度 (T)
+                <span class="required">*</span>
+              </label>
+              <input
+                type="number"
+                id="saturationMagnetization"
+                name="saturationMagnetization"
+                step="any"
+                placeholder="例如：1.25"
+                required
+              />
+            </div>
           </div>
 
           <!-- Notes -->
@@ -203,12 +283,17 @@ const pageDesc = '创建或编辑一条实验记录。';
         recordIdInput.value = record.id;
 
         (document.getElementById('dateTime') as HTMLInputElement).value = formatDateTimeLocal(record.dateTime);
-        (document.getElementById('target') as HTMLInputElement).value = record.target;
+        (document.getElementById('targetBatch') as HTMLInputElement).value = record.targetBatch;
+        (document.getElementById('targetRatio') as HTMLInputElement).value = record.targetRatio;
         (document.getElementById('pressure') as HTMLInputElement).value = String(record.pressure);
         (document.getElementById('gateValve') as HTMLInputElement).value = record.gateValve;
         (document.getElementById('growthTemp') as HTMLInputElement).value = String(record.growthTemp);
         (document.getElementById('annealingTemp') as HTMLInputElement).value = String(record.annealingTemp);
         (document.getElementById('sampleHeight') as HTMLInputElement).value = String(record.sampleHeight);
+        (document.getElementById('sampleThickness') as HTMLInputElement).value = String(record.sampleThickness);
+        (document.getElementById('remanence') as HTMLInputElement).value = String(record.remanence);
+        (document.getElementById('coercivity') as HTMLInputElement).value = String(record.coercivity);
+        (document.getElementById('saturationMagnetization') as HTMLInputElement).value = String(record.saturationMagnetization);
         (document.getElementById('notes') as HTMLTextAreaElement).value = record.notes;
       } else {
         showToast('记录未找到', 'error');
@@ -226,12 +311,17 @@ const pageDesc = '创建或编辑一条实验记录。';
       const formData = new FormData(form);
       const data = {
         dateTime: (formData.get('dateTime') as string) || new Date().toISOString(),
-        target: (formData.get('target') as string).trim(),
+        targetBatch: (formData.get('targetBatch') as string).trim(),
+        targetRatio: (formData.get('targetRatio') as string).trim(),
         pressure: parseFloat(formData.get('pressure') as string),
         gateValve: (formData.get('gateValve') as string).trim(),
         growthTemp: parseInt(formData.get('growthTemp') as string, 10),
         annealingTemp: parseInt(formData.get('annealingTemp') as string, 10),
         sampleHeight: parseFloat(formData.get('sampleHeight') as string),
+        sampleThickness: parseFloat(formData.get('sampleThickness') as string),
+        remanence: parseFloat(formData.get('remanence') as string),
+        coercivity: parseFloat(formData.get('coercivity') as string),
+        saturationMagnetization: parseFloat(formData.get('saturationMagnetization') as string),
         notes: (formData.get('notes') as string).trim(),
       };
 
@@ -266,6 +356,13 @@ const pageDesc = '创建或编辑一条实验记录。';
       margin-bottom: 1.5rem;
     }
 
+    .edit-header__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
     .edit-back-link {
       display: inline-flex;
       align-items: center;
@@ -287,6 +384,27 @@ const pageDesc = '创建或编辑一条实验记录。';
 
     .edit-back-link:hover svg {
       transform: translateX(-2px);
+    }
+
+    .edit-logout-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.8rem;
+      background: transparent;
+      color: var(--text-tertiary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-full);
+      font-size: 0.84rem;
+      font-weight: var(--font-medium);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-default);
+    }
+
+    .edit-logout-btn:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border-color: var(--border-hover);
     }
 
     .edit-header h1 {
