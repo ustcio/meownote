@@ -281,8 +281,9 @@ const pageDesc = '创建或编辑一条实验记录。';
     // Load targets into dropdown
     function loadTargetOptions(selectedBatch?: string) {
       const targets = targetStorage.list();
+      const currentValue = targetSelect.value;
       // Keep the placeholder option
-      targetSelect.innerHTML = '<option value="" disabled>请选择靶材</option>';
+      targetSelect.innerHTML = '<option value="" disabled selected>请选择靶材</option>';
       targets.forEach((t: TargetRecord) => {
         const opt = document.createElement('option');
         opt.value = t.id;
@@ -299,6 +300,12 @@ const pageDesc = '创建或编辑一条实验记录。';
           targetBatchInput.value = match.batch;
           targetRatioInput.value = match.ratio;
         }
+      } else if (currentValue) {
+        // Restore previous selection if still valid
+        const stillExists = targets.find((t: TargetRecord) => t.id === currentValue);
+        if (stillExists) {
+          targetSelect.value = currentValue;
+        }
       }
     }
 
@@ -311,6 +318,20 @@ const pageDesc = '创建或编辑一条实验记录。';
     });
 
     loadTargetOptions();
+
+    // Refresh target list when page regains focus (user may have added targets in another tab)
+    window.addEventListener('focus', () => {
+      const selectedBatch = targetBatchInput.value;
+      loadTargetOptions(selectedBatch || undefined);
+    });
+
+    // Also listen for storage changes from other tabs
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'meownote_targets') {
+        const selectedBatch = targetBatchInput.value;
+        loadTargetOptions(selectedBatch || undefined);
+      }
+    });
 
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('id');

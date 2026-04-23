@@ -161,7 +161,7 @@ const pageDesc = '新增或编辑靶材信息。';
         (document.getElementById('ratio') as HTMLInputElement).value = record.ratio;
       } else {
         showToast('靶材未找到', 'error');
-        window.location.href = '/experiments/';
+        window.location.href = '/experiments/target/';
       }
     } else {
       const now = new Date();
