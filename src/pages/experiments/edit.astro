@@ -5,7 +5,7 @@ const pageTitle = '编辑实验';
 const pageDesc = '创建或编辑一条实验记录。';
 ---
 
-<Layout title={`${pageTitle} - MoonSun.ai`} description={pageDesc} showHeader={false}>
+<Layout title={`${pageTitle} - MoonSun.ai`} description={pageDesc} showHeader={false} showAuthModal={false}>
   <section class="experiment-edit-page">
     <div class="container edit-shell">
       <!-- Header -->
@@ -384,27 +384,6 @@ const pageDesc = '创建或编辑一条实验记录。';
 
     .edit-back-link:hover svg {
       transform: translateX(-2px);
-    }
-
-    .edit-logout-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.4rem 0.8rem;
-      background: transparent;
-      color: var(--text-tertiary);
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-full);
-      font-size: 0.84rem;
-      font-weight: var(--font-medium);
-      cursor: pointer;
-      transition: all var(--duration-fast) var(--ease-default);
-    }
-
-    .edit-logout-btn:hover {
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-      border-color: var(--border-hover);
     }
 
     .edit-header h1 {
