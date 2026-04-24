@@ -512,6 +512,118 @@ const pageDesc = '管理实验靶材信息。';
       font-size: 0.9rem;
     }
 
+    /* Modal */
+    :global(.modal) {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-modal);
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    :global(.modal.open) {
+      display: flex;
+    }
+
+    :global(.modal-backdrop) {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-overlay);
+      backdrop-filter: blur(4px);
+    }
+
+    :global(.modal-content) {
+      position: relative;
+      width: 100%;
+      max-width: 28rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow-xl);
+      animation: modalIn 0.2s var(--ease-out);
+    }
+
+    :global(.modal-content.modal-sm) {
+      max-width: 22rem;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    :global(.modal-header) {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+
+    :global(.modal-header h3) {
+      font-size: 1rem;
+      font-weight: var(--font-medium);
+      color: var(--text-primary);
+    }
+
+    :global(.modal-close) {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-md);
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-default);
+    }
+
+    :global(.modal-close:hover) {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    :global(.modal-body) {
+      padding: 1.25rem;
+    }
+
+    :global(.modal-body p) {
+      font-size: var(--text-sm);
+      line-height: var(--leading-relaxed);
+      color: var(--text-secondary);
+      margin-bottom: 1.25rem;
+    }
+
+    :global(.modal-actions) {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    :global(.btn-danger) {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      background: var(--color-danger);
+      color: white;
+      border: none;
+      border-radius: var(--radius-full);
+      font-size: var(--text-sm);
+      font-weight: var(--font-medium);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-default);
+    }
+
+    :global(.btn-danger:hover) {
+      background: #b93d28;
+      transform: translateY(-1px);
+    }
+
     @media (max-width: 640px) {
       .targets-header {
         flex-direction: column;
