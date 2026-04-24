@@ -33,7 +33,7 @@ const pageDesc = '管理实验靶材信息。';
       </div>
 
       <!-- Toolbar -->
-      <div class="targets-toolbar">
+      <div class="targets-toolbar experiments-toolbar">
         <div class="toolbar-search">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"></circle>
@@ -44,8 +44,8 @@ const pageDesc = '管理实验靶材信息。';
       </div>
 
       <!-- Table -->
-      <div class="targets-table-wrapper">
-          <table class="targets-table" id="targets-table">
+      <div class="targets-table-wrapper experiments-table-wrapper">
+          <table class="targets-table experiments-table" id="targets-table">
             <thead>
               <tr>
                 <th scope="col" class="col-name">靶材名称</th>
@@ -88,7 +88,6 @@ const pageDesc = '管理实验靶材信息。';
             <h3>未找到匹配靶材</h3>
             <p>尝试更换搜索关键词。</p>
           </div>
-        </div>
       </div>
     </div>
   </section>
@@ -160,18 +159,12 @@ const pageDesc = '管理实验靶材信息。';
       table.style.display = 'table';
 
       tbody.innerHTML = targets.map((r, i) => {
-        // Generate a stable color based on name hash
-        const hue = r.name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
-        const badgeStyle = `background: hsl(${hue}, 60%, 92%); color: hsl(${hue}, 70%, 30%); border: 1px solid hsl(${hue}, 50%, 85%);`;
-
         return `
-        <tr data-id="${r.id}">
-          <td class="cell-name">
-            <span class="target-badge" style="${badgeStyle}">${escapeHtml(r.name)}</span>
-          </td>
-          <td class="cell-batch">${escapeHtml(r.batch)}</td>
-          <td class="cell-ratio">${escapeHtml(r.ratio)}</td>
-          <td class="cell-user">${escapeHtml(r.user)}</td>
+        <tr data-id="${r.id}" style="animation-delay: ${Math.min(i * 0.03, 0.4)}s">
+          <td class="cell-target">${escapeHtml(r.name)}</td>
+          <td class="cell-target">${escapeHtml(r.batch)}</td>
+          <td class="cell-height">${escapeHtml(r.ratio)}</td>
+          <td class="cell-target">${escapeHtml(r.user)}</td>
           <td class="cell-datetime">${formatDateTime(r.dateTime)}</td>
           <td class="cell-actions">
             <a href="/experiments/target/edit/?id=${r.id}" class="action-btn action-btn--edit" title="编辑">
@@ -258,7 +251,7 @@ const pageDesc = '管理实验靶材信息。';
     });
   </script>
 
-  <style>
+  <style is:global>
     .targets-page {
       min-height: 100vh;
       padding: calc(var(--header-height) + 2rem) 0 4rem;
@@ -275,10 +268,10 @@ const pageDesc = '管理实验靶材信息。';
     }
 
     .targets-header__copy h1 {
-      font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+      font-size: clamp(2.25rem, 4vw, 3rem);
       line-height: 1.1;
-      font-family: var(--font-editorial);
       font-weight: var(--font-medium);
+      letter-spacing: var(--tracking-tight);
     }
 
     .targets-header__desc {
@@ -297,10 +290,24 @@ const pageDesc = '管理实验靶材信息。';
 
     /* Toolbar */
     .targets-toolbar {
-      display: flex;
-      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .experiments-toolbar {
+      display: grid;
       gap: 0.75rem;
-      margin-bottom: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-xl);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--card-shadow);
+    }
+
+    @media (min-width: 768px) {
+      .experiments-toolbar {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+      }
     }
 
     .toolbar-search {
@@ -313,12 +320,12 @@ const pageDesc = '管理实验靶材信息。';
       border: 1px solid var(--border-primary);
       border-radius: var(--radius-full);
       transition: all var(--duration-fast) var(--ease-default);
-      width: 220px;
+      width: 160px;
       flex-shrink: 0;
     }
 
     .toolbar-search:focus-within {
-      width: 260px;
+      width: 200px;
       border-color: var(--color-primary);
     }
 
@@ -342,28 +349,27 @@ const pageDesc = '管理实验靶材信息。';
       color: var(--text-tertiary);
     }
 
-    /* Table — 与实验记录列表保持一致 */
-    .targets-table-wrapper {
+    /* Table: mirrors the experiment record list */
+    .experiments-table-wrapper {
       border: 1px solid var(--border-secondary);
       border-radius: var(--radius-xl);
       background: var(--card-bg);
       box-shadow: var(--card-shadow);
-      overflow: hidden;
     }
 
-    .targets-table {
+    .experiments-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.8rem;
       table-layout: fixed;
     }
 
-    .targets-table thead {
+    .experiments-table thead {
       background: var(--bg-secondary);
       border-bottom: 1px solid var(--border-secondary);
     }
 
-    .targets-table th {
+    .experiments-table th {
       padding: 0.6rem 0.5rem;
       text-align: left;
       font-size: 0.7rem;
@@ -377,12 +383,12 @@ const pageDesc = '管理实验靶材信息。';
 
     .targets-table th:nth-child(1) { width: 18%; }
     .targets-table th:nth-child(2) { width: 22%; }
-    .targets-table th:nth-child(3) { width: 22%; }
+    .targets-table th:nth-child(3) { width: 22%; text-align: center; }
     .targets-table th:nth-child(4) { width: 10%; }
     .targets-table th:nth-child(5) { width: 13%; }
     .targets-table th:nth-child(6) { width: 5%; text-align: center; }
 
-    .targets-table td {
+    .experiments-table td {
       padding: 0.6rem 0.5rem;
       border-bottom: 1px solid var(--border-secondary);
       color: var(--text-primary);
@@ -391,7 +397,7 @@ const pageDesc = '管理实验靶材信息。';
       overflow-wrap: break-word;
     }
 
-    .targets-table tbody tr {
+    .experiments-table tbody tr {
       transition: background var(--duration-fast) var(--ease-default);
       animation: rowIn 0.35s var(--ease-out) both;
     }
@@ -401,39 +407,12 @@ const pageDesc = '管理实验靶材信息。';
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .targets-table tbody tr:hover {
+    .experiments-table tbody tr:hover {
       background: var(--card-bg-hover);
     }
 
-    .targets-table tbody tr:last-child td {
+    .experiments-table tbody tr:last-child td {
       border-bottom: none;
-    }
-
-    .cell-name {
-      font-weight: var(--font-semibold);
-    }
-
-    .target-badge {
-      display: inline-block;
-      padding: 0.2rem 0.5rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.78rem;
-      font-weight: var(--font-semibold);
-      white-space: nowrap;
-    }
-
-    .cell-batch {
-      font-variant-numeric: tabular-nums;
-      color: var(--text-secondary);
-    }
-
-    .cell-ratio {
-      font-variant-numeric: tabular-nums;
-      color: var(--color-primary);
-    }
-
-    .cell-user {
-      color: var(--text-secondary);
     }
 
     .cell-datetime {
@@ -441,6 +420,17 @@ const pageDesc = '管理实验靶材信息。';
       color: var(--text-secondary);
       font-size: 0.85rem;
       white-space: nowrap;
+    }
+
+    .cell-target {
+      font-weight: var(--font-semibold);
+      color: var(--text-primary);
+    }
+
+    .cell-height {
+      font-variant-numeric: tabular-nums;
+      color: var(--text-secondary);
+      text-align: center;
     }
 
     .col-actions {
@@ -487,29 +477,38 @@ const pageDesc = '管理实验靶材信息。';
 
     /* Empty states */
     .empty-state {
-      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0.75rem;
       padding: 4rem 2rem;
       text-align: center;
       color: var(--text-tertiary);
     }
 
     .empty-icon {
+      width: 72px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-xl);
+      margin-bottom: 1.5rem;
       color: var(--text-tertiary);
-      opacity: 0.5;
     }
 
     .empty-state h3 {
       font-size: 1.1rem;
       font-weight: var(--font-medium);
-      color: var(--text-secondary);
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
     }
 
     .empty-state p {
-      font-size: 0.9rem;
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      max-width: 26rem;
     }
 
     /* Modal */
@@ -630,9 +629,17 @@ const pageDesc = '管理实验靶材信息。';
         align-items: flex-start;
       }
 
-      .targets-table th,
-      .targets-table td {
-        padding: 0.6rem 0.4rem;
+      .experiments-toolbar {
+        padding: 0.9rem;
+      }
+
+      .experiments-table {
+        font-size: 0.85rem;
+      }
+
+      .experiments-table th,
+      .experiments-table td {
+        padding: 0.65rem 0.75rem;
       }
     }
   </style>
