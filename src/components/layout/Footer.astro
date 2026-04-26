@@ -91,14 +91,24 @@ const footerGroups = [
     display: flex;
     align-items: center;
     justify-content: center;
-    width: min(52rem, calc(100% - 3rem));
-    margin: 0 auto 2.5rem;
+    width: min(36rem, calc(100% - 3rem));
+    aspect-ratio: 3.65 / 1;
+    margin: 0 auto 3rem;
+    padding: clamp(0.45rem, 1.4vw, 0.7rem);
+    border: 1px solid rgba(217, 119, 87, 0.2);
+    border-radius: 1.35rem;
+    background: rgba(255, 253, 249, 0.72);
+    box-shadow: 0 1.25rem 3rem rgba(25, 18, 15, 0.1);
+    overflow: hidden;
   }
 
   .site-footer__brandmark img {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.95rem;
+    background: #000;
   }
 
   .site-footer__inner,
