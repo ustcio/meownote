@@ -33,7 +33,7 @@ const footerGroups = [
 
 <footer class="site-footer">
   <a class="site-footer__brandmark" href="/" aria-label="MoonSun.ai home">
-    <img src="/moonsun-ai-logo.svg" alt="MoonSun.ai" loading="lazy" />
+    <img src="/moonsun-ai-footer-logo.png" alt="MoonSun.ai" loading="lazy" />
   </a>
 
   <div class="site-footer__inner">
@@ -91,20 +91,20 @@ const footerGroups = [
     display: flex;
     align-items: center;
     justify-content: center;
-    width: min(34rem, calc(100% - 3rem));
-    min-height: 8.5rem;
+    width: min(52rem, calc(100% - 3rem));
+    aspect-ratio: 1983 / 793;
     margin: 0 auto 3rem;
-    padding: 1.5rem clamp(1.25rem, 4vw, 2.5rem);
-    border-radius: 1.5rem;
-    background: #090a0d;
-    border: 1px solid rgba(217, 119, 87, 0.24);
-    box-shadow: 0 1.5rem 4rem rgba(25, 18, 15, 0.12);
+    padding: 0;
+    border-radius: 0;
+    background: #000;
+    overflow: hidden;
   }
 
   .site-footer__brandmark img {
     display: block;
-    width: min(100%, 28rem);
-    height: auto;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 
   .site-footer__inner,
