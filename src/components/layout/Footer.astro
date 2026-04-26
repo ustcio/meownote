@@ -33,7 +33,7 @@ const footerGroups = [
 
 <footer class="site-footer">
   <a class="site-footer__brandmark" href="/" aria-label="MoonSun.ai home">
-    <img src="/moonsun-ai-footer-logo.png" alt="MoonSun.ai" loading="lazy" />
+    <img src="/moonsun-ai-footer-logo.png" alt="MoonSun.ai" width="1983" height="793" loading="lazy" />
   </a>
 
   <div class="site-footer__inner">
@@ -91,20 +91,30 @@ const footerGroups = [
     display: flex;
     align-items: center;
     justify-content: center;
-    width: min(52rem, calc(100% - 3rem));
-    aspect-ratio: 1983 / 793;
-    margin: 0 auto 3rem;
-    padding: 0;
-    border-radius: 0;
-    background: #000;
-    overflow: hidden;
+    width: min(16rem, calc(100% - 3rem));
+    margin: 0 auto 2rem;
+    padding: 1rem clamp(1rem, 3vw, 1.5rem);
+    border-radius: var(--radius-lg);
+    background: #121315;
+    border: 1px solid rgba(217, 119, 87, 0.18);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.06);
+    text-decoration: none;
+    transition: border-color var(--duration-fast) var(--ease-default),
+                box-shadow var(--duration-fast) var(--ease-default),
+                transform var(--duration-fast) var(--ease-default);
+  }
+
+  .site-footer__brandmark:hover {
+    border-color: rgba(217, 119, 87, 0.4);
+    box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.08),
+                0 0.75rem 2rem rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
   }
 
   .site-footer__brandmark img {
     display: block;
     width: 100%;
-    height: 100%;
-    object-fit: contain;
+    height: auto;
   }
 
   .site-footer__inner,
