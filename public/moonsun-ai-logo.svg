@@ -1,0 +1,64 @@
+<svg width="960" height="240" viewBox="0 0 960 240" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">moonsun.ai logo</title>
+  <desc id="desc">Transparent vector wordmark for moonsun.ai with moon, sun, star, and infinity orbit.</desc>
+  <defs>
+    <linearGradient id="silverText" x1="64" y1="58" x2="800" y2="178" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="0.34" stop-color="#D9DDD8"/>
+      <stop offset="0.62" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#C9CEC8"/>
+    </linearGradient>
+    <linearGradient id="softSilver" x1="140" y1="72" x2="330" y2="152" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="0.5" stop-color="#E6E8E3"/>
+      <stop offset="1" stop-color="#BFC5BF"/>
+    </linearGradient>
+    <linearGradient id="sunCopper" x1="266" y1="74" x2="740" y2="154" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4B37C"/>
+      <stop offset="0.52" stop-color="#D97757"/>
+      <stop offset="1" stop-color="#B9573D"/>
+    </linearGradient>
+    <linearGradient id="orbitWhite" x1="154" y1="80" x2="330" y2="150" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.36"/>
+      <stop offset="0.18" stop-color="#FFFFFF" stop-opacity="0.94"/>
+      <stop offset="0.52" stop-color="#F6F4ED" stop-opacity="0.62"/>
+      <stop offset="0.82" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.32"/>
+    </linearGradient>
+    <filter id="quietGlow" x="-20%" y="-35%" width="140%" height="170%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="1.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <g aria-label="moonsun.ai">
+    <text x="64" y="147" fill="url(#silverText)" font-family="'Anthropic Serif', Georgia, 'Times New Roman', serif" font-size="96" font-weight="500" letter-spacing="-3.8">m</text>
+
+    <g transform="translate(128 0)">
+      <path d="M31 119C53.5 82.5 89.5 80.4 119.8 117.4C150.2 154.7 184.7 154.9 208 119C184.9 83.2 150 83.3 120 120.6C89.6 157.9 53.4 155.7 31 119Z" stroke="url(#orbitWhite)" stroke-width="7.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#quietGlow)"/>
+      <path d="M31 119C52.5 83.9 88.6 83.1 119.8 117.4C150.2 151.1 183.4 152.1 208 119" stroke="#FFFFFF" stroke-width="4.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+      <path d="M208 119C184.9 85.9 151 86.7 120 120.6C89.6 154.1 54.4 154.4 31 119" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.43"/>
+      <path d="M105.8 119.2C111.7 111.8 116.7 111.5 122.4 119.2C116.5 127 111.6 126.9 105.8 119.2Z" fill="#F9F7EF" opacity="0.92"/>
+
+      <circle cx="75" cy="119" r="43.5" stroke="url(#softSilver)" stroke-width="3.2" opacity="0.9"/>
+      <path d="M82.5 94C72.1 98.4 64.8 108.5 64.8 120.3C64.8 132.2 72.2 142.2 82.5 146.5C62.8 148.1 47.7 136.8 47.7 120.3C47.7 103.8 62.8 92.4 82.5 94Z" fill="url(#softSilver)"/>
+
+      <circle cx="164" cy="119" r="43.5" stroke="url(#softSilver)" stroke-width="3.2" opacity="0.9"/>
+      <g transform="translate(164 119)" fill="url(#sunCopper)" stroke="url(#sunCopper)" stroke-linecap="round">
+        <circle r="15.3" fill="url(#sunCopper)" stroke="none"/>
+        <path d="M0 -27.5V-21.7M0 21.7V27.5M-27.5 0H-21.7M21.7 0H27.5M-19.5 -19.5L-15.3 -15.3M15.3 15.3L19.5 19.5M19.5 -19.5L15.3 -15.3M-15.3 15.3L-19.5 19.5" stroke-width="3"/>
+        <circle r="5.2" fill="#FFE2A8" stroke="none" opacity="0.8"/>
+      </g>
+
+      <path d="M124 65.5L128.2 76L139 80.2L128.2 84.4L124 95L119.8 84.4L109 80.2L119.8 76L124 65.5Z" fill="url(#sunCopper)"/>
+    </g>
+
+    <text x="356" y="147" fill="url(#silverText)" font-family="'Anthropic Serif', Georgia, 'Times New Roman', serif" font-size="96" font-weight="500" letter-spacing="-3.8">n</text>
+    <text x="421" y="147" fill="url(#sunCopper)" font-family="'Anthropic Serif', Georgia, 'Times New Roman', serif" font-size="96" font-weight="500" letter-spacing="-3.8">sun</text>
+    <text x="574" y="147" fill="url(#sunCopper)" font-family="'Anthropic Sans', Arial, sans-serif" font-size="92" font-weight="500" letter-spacing="-2">.</text>
+    <text x="610" y="147" fill="url(#silverText)" font-family="'Anthropic Serif', Georgia, 'Times New Roman', serif" font-size="96" font-weight="500" letter-spacing="-3.8">ai</text>
+  </g>
+</svg>

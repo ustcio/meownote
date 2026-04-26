@@ -1,0 +1,46 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">moonsun.ai icon</title>
+  <desc id="desc">Transparent vector icon with moon, sun, star, and infinity orbit.</desc>
+  <defs>
+    <linearGradient id="softSilver" x1="76" y1="168" x2="436" y2="344" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="0.5" stop-color="#E8EAE5"/>
+      <stop offset="1" stop-color="#BAC1BA"/>
+    </linearGradient>
+    <linearGradient id="sunCopper" x1="240" y1="172" x2="438" y2="342" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4B37C"/>
+      <stop offset="0.52" stop-color="#D97757"/>
+      <stop offset="1" stop-color="#B9573D"/>
+    </linearGradient>
+    <linearGradient id="orbitWhite" x1="72" y1="180" x2="440" y2="332" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.34"/>
+      <stop offset="0.18" stop-color="#FFFFFF" stop-opacity="0.96"/>
+      <stop offset="0.52" stop-color="#F6F4ED" stop-opacity="0.62"/>
+      <stop offset="0.82" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.32"/>
+    </linearGradient>
+    <filter id="quietGlow" x="-20%" y="-35%" width="140%" height="170%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="2.4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <path d="M80 256C126.5 180.2 201 175.8 264 252.6C327 330 398.6 330.3 447 256C399 181.7 326.6 181.8 264.4 259.4C201.4 336.7 126.4 332.2 80 256Z" stroke="url(#orbitWhite)" stroke-width="17" stroke-linecap="round" stroke-linejoin="round" filter="url(#quietGlow)"/>
+  <path d="M80 256C124.4 183.1 199.2 181.4 264 252.6C327 322.5 395.8 324.6 447 256" stroke="#FFFFFF" stroke-width="9.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+  <path d="M447 256C399 187.2 328.7 188.9 264.4 259.4C201.4 328.9 128.6 329.5 80 256" stroke="#FFFFFF" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.43"/>
+
+  <circle cx="171" cy="256" r="90" stroke="url(#softSilver)" stroke-width="6.8" opacity="0.9"/>
+  <path d="M187 204C165.4 213 150.3 234 150.3 258.5C150.3 283.2 165.6 304 187 313C146.2 316.2 115 292.8 115 258.5C115 224.3 146.2 200.5 187 204Z" fill="url(#softSilver)"/>
+
+  <circle cx="354" cy="256" r="90" stroke="url(#softSilver)" stroke-width="6.8" opacity="0.9"/>
+  <g transform="translate(354 256)" fill="url(#sunCopper)" stroke="url(#sunCopper)" stroke-linecap="round">
+    <circle r="31.7" fill="url(#sunCopper)" stroke="none"/>
+    <path d="M0 -57V-45M0 45V57M-57 0H-45M45 0H57M-40 -40L-31.7 -31.7M31.7 31.7L40 40M40 -40L31.7 -31.7M-31.7 31.7L-40 40" stroke-width="6.2"/>
+    <circle r="10.8" fill="#FFE2A8" stroke="none" opacity="0.8"/>
+  </g>
+
+  <path d="M256 145L264.7 166.8L287 175.5L264.7 184.2L256 206L247.3 184.2L225 175.5L247.3 166.8L256 145Z" fill="url(#sunCopper)"/>
+</svg>

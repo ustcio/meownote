@@ -193,8 +193,6 @@ const ROUTES = {
   '/api/proxy/models': { handler: handleProxyModelsList },
   '/api/v1': { handler: handleProxyChat },
   '/api/workspace': { handler: handleWorkspace, pattern: /^\/api\/workspace(?:\/([^/]+)(?:\/([^/]+))?)?$/ },
-  '/api/calendar/events': { handler: handleCalendarEvents },
-  '/api/calendar/verify-auth': { handler: handleCalendarVerifyAuth },
 };
 
 // ================================================================================
@@ -6765,100 +6763,6 @@ async function handleWorkspace(request, env, ctx, match) {
   }
 
   return jsonResponse({ error: 'Method not allowed' }, 405);
-}
-
-async function handleCalendarEvents(request, env) {
-  const authResult = await verifyAdminAuth(request, env);
-  if (!authResult.success) {
-    return jsonResponse({ success: false, message: authResult.message }, 401);
-  }
-
-  const userId = String(authResult.user.userId || authResult.user.id || authResult.user.username || 'admin');
-  const rowId = `calendar:${userId}`;
-
-  if (request.method === 'GET') {
-    try {
-      const row = await env.DB.prepare(
-        'SELECT events_json, updated_at FROM calendar_events WHERE id = ?'
-      ).bind(rowId).first();
-
-      let events = [];
-      if (row?.events_json) {
-        try {
-          const parsed = JSON.parse(row.events_json);
-          events = Array.isArray(parsed) ? parsed : [];
-        } catch {
-          events = [];
-        }
-      }
-
-      return jsonResponse({
-        success: true,
-        data: events,
-        updatedAt: row?.updated_at || null
-      });
-    } catch (error) {
-      console.error('[Calendar] Get events error:', error);
-      return jsonResponse({ success: false, message: 'Failed to load calendar events' }, 500);
-    }
-  }
-
-  if (request.method === 'PUT') {
-    try {
-      const body = await request.json().catch(() => null);
-      const events = Array.isArray(body?.events) ? body.events : null;
-      if (!events) {
-        return jsonResponse({ success: false, message: 'Events array is required' }, 400);
-      }
-
-      const eventsJson = JSON.stringify(events);
-      await env.DB.prepare(`
-        INSERT INTO calendar_events (id, user_id, events_json, created_at, updated_at)
-        VALUES (?, ?, ?, datetime('now'), datetime('now'))
-        ON CONFLICT(id) DO UPDATE SET
-          events_json = excluded.events_json,
-          updated_at = datetime('now')
-      `).bind(rowId, userId, eventsJson).run();
-
-      return jsonResponse({ success: true, data: events });
-    } catch (error) {
-      console.error('[Calendar] Save events error:', error);
-      return jsonResponse({ success: false, message: 'Failed to save calendar events' }, 500);
-    }
-  }
-
-  return jsonResponse({ success: false, message: 'Method not allowed' }, 405);
-}
-
-async function handleCalendarVerifyAuth(request, env) {
-  if (request.method !== 'POST') {
-    return jsonResponse({ error: 'Method not allowed' }, 405);
-  }
-
-  const calendarPassword = env.CALENDAR_PASSWORD;
-
-  if (!calendarPassword) {
-    return jsonResponse({ success: false, message: 'Calendar password not configured' }, 500);
-  }
-
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
-  }
-
-  const { password } = body || {};
-
-  if (!password || typeof password !== 'string') {
-    return jsonResponse({ success: false, message: 'Password is required' }, 400);
-  }
-
-  if (password !== calendarPassword) {
-    return jsonResponse({ success: false, message: '密码错误，请重试。' }, 401);
-  }
-
-  return jsonResponse({ success: true, message: '验证成功' });
 }
 
 async function listWorkspaceFiles(request, env) {
