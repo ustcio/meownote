@@ -13,14 +13,7 @@ const navItems: NavItem[] = [
   { label: 'Chat', href: '/chatbot/' },
 
   { label: 'Workspace', href: '/workspace/' },
-  {
-    label: 'Kit',
-    href: '/kit/',
-    children: [
-      { label: 'Kit 主页', href: '/kit/' },
-      { label: '金价追踪', href: '/kit/gold/' },
-    ],
-  },
+  { label: 'Kit', href: '/kit/' },
   { label: 'About', href: '/about/' },
 ];
 
@@ -189,9 +182,13 @@ const isActive = (href: string) =>
   }
 
   .site-nav__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--header-height);
     padding: 0;
     font-size: 0.95rem;
     font-weight: var(--font-medium);
+    line-height: 1;
     color: var(--nav-link);
     transition: color var(--duration-fast) var(--ease-default);
   }
@@ -292,8 +289,12 @@ const isActive = (href: string) =>
   }
 
   .site-utility-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--header-height);
     font-size: 0.95rem;
     font-weight: var(--font-medium);
+    line-height: 1;
     color: var(--nav-link);
   }
 
