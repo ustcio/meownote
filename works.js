@@ -28,12 +28,13 @@ function getBeijingDate(date = new Date()) {
 export default {
   async fetch(request, env, ctx) {
     if (request.method === 'OPTIONS') {
-      return handleCORS();
+      return handleCORS(request);
     }
 
     const url = new URL(request.url);
     const path = url.pathname;
 
+    let response;
     try {
       const route = ROUTES[path] || ROUTES[path.endsWith('/') ? path.slice(0, -1) : path];
       
@@ -41,76 +42,80 @@ export default {
         if (route.pattern) {
           const match = path.match(route.pattern);
           if (match) {
-            return await route.handler(request, env, ctx, match);
+            response = await route.handler(request, env, ctx, match);
           }
         } else {
-          return await route.handler(request, env, ctx);
+          response = await route.handler(request, env, ctx);
         }
       }
 
-      if (path.startsWith('/api/admin/files/')) {
-        return await handleAdminFileAction(request, env, path);
+      if (!response && path.startsWith('/api/admin/files/')) {
+        response = await handleAdminFileAction(request, env, path);
       }
       
-      if (path.startsWith('/api/admin/folders/')) {
-        return await handleAdminFolderAction(request, env, path);
+      if (!response && path.startsWith('/api/admin/folders/')) {
+        response = await handleAdminFolderAction(request, env, path);
       }
       
-      if (path.startsWith('/api/workspace')) {
+      if (!response && path.startsWith('/api/workspace')) {
         const match = path.match(/^\/api\/workspace(?:\/([^/]+)(?:\/([^/]+))?)?$/);
         if (match) {
-          return await handleWorkspace(request, env, ctx, match);
+          response = await handleWorkspace(request, env, ctx, match);
         }
       }
 
       // Proxy API routes
-      if (path.startsWith('/api/proxy/')) {
+      if (!response && path.startsWith('/api/proxy/')) {
         if (path.startsWith('/api/proxy/sources/') && path.endsWith('/channels')) {
           const match = path.match(/^\/api\/proxy\/sources\/([^/]+)\/channels$/);
-          if (match) return await handleProxyChannelsCreate(request, env, ctx, match);
+          if (match) response = await handleProxyChannelsCreate(request, env, ctx, match);
         }
-        if (path.startsWith('/api/proxy/sources/') && path.endsWith('/toggle')) {
+        if (!response && path.startsWith('/api/proxy/sources/') && path.endsWith('/toggle')) {
           const match = path.match(/^\/api\/proxy\/sources\/([^/]+)\/toggle$/);
-          if (match) return await handleProxySourcesToggle(request, env, ctx, match);
+          if (match) response = await handleProxySourcesToggle(request, env, ctx, match);
         }
-        if (path.startsWith('/api/proxy/sources/') && path.endsWith('/stats')) {
+        if (!response && path.startsWith('/api/proxy/sources/') && path.endsWith('/stats')) {
           const match = path.match(/^\/api\/proxy\/sources\/([^/]+)\/stats$/);
-          if (match) return await handleProxySourceStats(request, env, ctx, match);
+          if (match) response = await handleProxySourceStats(request, env, ctx, match);
         }
-        if (path.startsWith('/api/proxy/sources/')) {
+        if (!response && path.startsWith('/api/proxy/sources/')) {
           const match = path.match(/^\/api\/proxy\/sources\/([^/]+)$/);
           if (match) {
-            if (request.method === 'PUT') return await handleProxySourcesUpdate(request, env, ctx, match);
-            if (request.method === 'DELETE') return await handleProxySourcesDelete(request, env, ctx, match);
+            if (request.method === 'PUT') response = await handleProxySourcesUpdate(request, env, ctx, match);
+            if (!response && request.method === 'DELETE') response = await handleProxySourcesDelete(request, env, ctx, match);
           }
         }
-        if (path.startsWith('/api/proxy/channels/') && path.endsWith('/toggle')) {
+        if (!response && path.startsWith('/api/proxy/channels/') && path.endsWith('/toggle')) {
           const match = path.match(/^\/api\/proxy\/channels\/([^/]+)\/toggle$/);
-          if (match) return await handleProxyChannelsToggle(request, env, ctx, match);
+          if (match) response = await handleProxyChannelsToggle(request, env, ctx, match);
         }
-        if (path.startsWith('/api/proxy/channels/') && path.endsWith('/test')) {
+        if (!response && path.startsWith('/api/proxy/channels/') && path.endsWith('/test')) {
           const match = path.match(/^\/api\/proxy\/channels\/([^/]+)\/test$/);
-          if (match) return await handleProxyChannelsTest(request, env, ctx, match);
+          if (match) response = await handleProxyChannelsTest(request, env, ctx, match);
         }
-        if (path.startsWith('/api/proxy/channels/') && path.endsWith('/stats')) {
+        if (!response && path.startsWith('/api/proxy/channels/') && path.endsWith('/stats')) {
           const match = path.match(/^\/api\/proxy\/channels\/([^/]+)\/stats$/);
-          if (match) return await handleProxyChannelStats(request, env, ctx, match);
+          if (match) response = await handleProxyChannelStats(request, env, ctx, match);
         }
-        if (path.startsWith('/api/proxy/channels/')) {
+        if (!response && path.startsWith('/api/proxy/channels/')) {
           const match = path.match(/^\/api\/proxy\/channels\/([^/]+)$/);
           if (match) {
-            if (request.method === 'PUT') return await handleProxyChannelsUpdate(request, env, ctx, match);
-            if (request.method === 'DELETE') return await handleProxyChannelsDelete(request, env, ctx, match);
+            if (request.method === 'PUT') response = await handleProxyChannelsUpdate(request, env, ctx, match);
+            if (!response && request.method === 'DELETE') response = await handleProxyChannelsDelete(request, env, ctx, match);
           }
         }
       }
 
-      return jsonResponse({ error: 'Not Found' }, 404);
+      if (!response) {
+        response = jsonResponse({ error: 'Not Found' }, 404);
+      }
       
     } catch (error) {
       console.error('Server Error:', error);
-      return jsonResponse({ error: 'Internal Server Error', message: error.message }, 500);
+      response = jsonResponse({ error: 'Internal Server Error', message: error.message }, 500);
     }
+
+    return applyCORS(response, request);
   },
   
   // Cron Trigger - 每60秒执行一次金价爬取
@@ -189,6 +194,7 @@ const ROUTES = {
   '/api/v1': { handler: handleProxyChat },
   '/api/workspace': { handler: handleWorkspace, pattern: /^\/api\/workspace(?:\/([^/]+)(?:\/([^/]+))?)?$/ },
   '/api/calendar/events': { handler: handleCalendarEvents },
+  '/api/calendar/verify-auth': { handler: handleCalendarVerifyAuth },
 };
 
 // ================================================================================
@@ -196,6 +202,7 @@ const ROUTES = {
 // ================================================================================
 
 const ALLOWED_ORIGINS = [
+  'https://moonsun.ai',
   'https://ustc.dev',
   'https://www.ustc.dev',
   'https://meow-note.com',
@@ -205,10 +212,28 @@ const ALLOWED_ORIGINS = [
   'http://localhost:4324',
 ];
 
-function handleCORS() {
+function getCORSOrigin(request) {
+  const origin = request.headers.get('Origin');
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    return origin;
+  }
+  return ALLOWED_ORIGINS[0];
+}
+
+function applyCORS(response, request) {
+  const headers = new Headers(response.headers);
+  headers.set('Access-Control-Allow-Origin', getCORSOrigin(request));
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+function handleCORS(request) {
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': getCORSOrigin(request),
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Cache-Control',
       'Access-Control-Max-Age': '86400',
@@ -221,11 +246,42 @@ function jsonResponse(data, status = 200) {
     status,
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
       'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
       'Pragma': 'no-cache',
     }
   });
+}
+
+// ================================================================================
+// 登录限流
+// ================================================================================
+
+const rateLimiters = new Map();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const RATE_LIMIT_MAX = 5;        // max attempts per window
+
+function checkRateLimit(request, key) {
+  const ip = getClientIP(request);
+  const entry = rateLimiters.get(`${key}:${ip}`);
+  const now = Date.now();
+
+  // Inline cleanup: remove expired entries
+  if (entry && now >= entry.resetTime) {
+    rateLimiters.delete(`${key}:${ip}`);
+  }
+
+  const current = rateLimiters.get(`${key}:${ip}`);
+  if (current) {
+    if (current.count >= RATE_LIMIT_MAX) {
+      const retryAfter = Math.ceil((current.resetTime - now) / 1000);
+      return { allowed: false, retryAfter };
+    }
+    current.count++;
+    return { allowed: true };
+  }
+
+  rateLimiters.set(`${key}:${ip}`, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+  return { allowed: true };
 }
 
 // ================================================================================
@@ -2262,6 +2318,11 @@ async function handleAdminLogin(request, env, ctx) {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
+  const rateLimit = checkRateLimit(request, 'admin_login');
+  if (!rateLimit.allowed) {
+    return jsonResponse({ success: false, message: '登录尝试过于频繁，请稍后重试' }, 429);
+  }
+
   try {
     let body;
     try {
@@ -2302,7 +2363,7 @@ async function handleAdminLogin(request, env, ctx) {
 
     const token = await createAdminToken(
       { userId: user.id, username: user.username, role: user.role },
-      env.JWT_SECRET || 'agiera-default-jwt-secret-2024'
+      env.JWT_SECRET
     );
 
     console.log('Admin login success:', user.username);
@@ -4332,7 +4393,7 @@ async function verifyAdminAuth(request, env) {
   }
 
   const token = authHeader.slice(7);
-  const payload = await verifyAdminToken(token, env.JWT_SECRET || 'agiera-default-jwt-secret-2024');
+  const payload = await verifyAdminToken(token, env.JWT_SECRET);
 
   if (!payload) {
     return { success: false, message: 'Token 已过期或无效，请重新登录' };
@@ -4380,6 +4441,11 @@ async function handleTradingLogin(request, env) {
     return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
   }
 
+  const rateLimit = checkRateLimit(request, 'trading_login');
+  if (!rateLimit.allowed) {
+    return jsonResponse({ success: false, error: 'Too many login attempts. Please try again later.' }, 429);
+  }
+
   try {
     const { username, password } = await request.json();
     
@@ -4412,7 +4478,7 @@ async function handleTradingLogin(request, env) {
       }
     }
 
-    const secret = env.JWT_SECRET || 'agiera-default-jwt-secret-2024';
+    const secret = env.JWT_SECRET;
     const token = await createAdminToken({
       userId: result.id,
       username: result.username,
@@ -4442,7 +4508,7 @@ async function handleTradingVerify(request, env) {
   }
 
   const token = authHeader.substring(7);
-  const secret = env.JWT_SECRET || 'agiera-default-jwt-secret-2024';
+  const secret = env.JWT_SECRET;
   const verification = await verifyAdminToken(token, secret);
   
   if (!verification) {
@@ -4459,6 +4525,11 @@ async function handleTradingVerify(request, env) {
 async function handleSuperAdminLogin(request, env) {
   if (request.method !== 'POST') {
     return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+  }
+
+  const rateLimit = checkRateLimit(request, 'superadmin_login');
+  if (!rateLimit.allowed) {
+    return jsonResponse({ success: false, error: 'Too many login attempts. Please try again later.' }, 429);
   }
 
   try {
@@ -4493,7 +4564,7 @@ async function handleSuperAdminLogin(request, env) {
       }
     }
 
-    const secret = env.JWT_SECRET || 'agiera-default-jwt-secret-2024';
+    const secret = env.JWT_SECRET;
     const token = await createAdminToken({
       userId: result.id,
       username: result.username,
@@ -4523,7 +4594,7 @@ async function handleSuperAdminVerify(request, env) {
   }
 
   const token = authHeader.substring(7);
-  const secret = env.JWT_SECRET || 'agiera-default-jwt-secret-2024';
+  const secret = env.JWT_SECRET;
   const verification = await verifyAdminToken(token, secret);
   
   if (!verification) {
@@ -6757,6 +6828,37 @@ async function handleCalendarEvents(request, env) {
   }
 
   return jsonResponse({ success: false, message: 'Method not allowed' }, 405);
+}
+
+async function handleCalendarVerifyAuth(request, env) {
+  if (request.method !== 'POST') {
+    return jsonResponse({ error: 'Method not allowed' }, 405);
+  }
+
+  const calendarPassword = env.CALENDAR_PASSWORD;
+
+  if (!calendarPassword) {
+    return jsonResponse({ success: false, message: 'Calendar password not configured' }, 500);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+  }
+
+  const { password } = body || {};
+
+  if (!password || typeof password !== 'string') {
+    return jsonResponse({ success: false, message: 'Password is required' }, 400);
+  }
+
+  if (password !== calendarPassword) {
+    return jsonResponse({ success: false, message: '密码错误，请重试。' }, 401);
+  }
+
+  return jsonResponse({ success: true, message: '验证成功' });
 }
 
 async function listWorkspaceFiles(request, env) {

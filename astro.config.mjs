@@ -33,6 +33,15 @@ export default defineConfig({
         '@i18n': path.resolve('./src/i18n'),
         '@content': path.resolve('./src/content'),
       }
+    },
+    server: {
+      headers: {
+        'X-Frame-Options': 'DENY',
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'X-XSS-Protection': '0',
+        'X-DNS-Prefetch-Control': 'on',
+      }
     }
   },
 

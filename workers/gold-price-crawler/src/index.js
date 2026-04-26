@@ -295,8 +295,16 @@ export default {
         });
       }
       
-      // API: 手动触发爬取（用于调试）
+      // API: 手动触发爬取（需认证）
       if (path === '/api/crawl') {
+        const authHeader = request.headers.get('X-Crawl-Secret');
+        const expectedSecret = env.CRAWL_SECRET;
+        if (!expectedSecret || authHeader !== expectedSecret) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders }
+          });
+        }
         const result = await crawlAndUpdate(env);
         return new Response(JSON.stringify(result), {
           headers: {

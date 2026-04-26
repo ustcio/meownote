@@ -48,7 +48,7 @@ const description = 'Calendar 页面受密码保护。';
 
   <script is:inline>
     (function() {
-      const CORRECT_PASSWORD = 'USTC';
+      const API = 'https://api.moonsun.ai';
       const CALENDAR_AUTH_KEY = 'calendar_auth';
 
       const form = document.getElementById('calendar-login-form');
@@ -111,17 +111,29 @@ const description = 'Calendar 页面受密码保护。';
 
         setLoading(true);
 
-        // Simple client-side password check
-        if (password === CORRECT_PASSWORD) {
-          persistAuth();
-          window.__meownoteToast?.show('验证成功', 'success');
-          redirectToCalendar(getReturnPath());
-        } else {
-          setError('密码错误，请重试。');
-          window.__meownoteToast?.show('密码错误', 'error');
-        }
+        try {
+          const res = await fetch(API + '/api/calendar/verify-auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password }),
+          });
 
-        setLoading(false);
+          const data = await res.json().catch(() => ({ success: false, message: '请求失败' }));
+
+          if (res.ok && data.success) {
+            persistAuth();
+            window.__meownoteToast?.show('验证成功', 'success');
+            redirectToCalendar(getReturnPath());
+          } else {
+            setError(data.message || '密码错误，请重试。');
+            window.__meownoteToast?.show('密码错误', 'error');
+          }
+        } catch {
+          setError('网络错误，请稍后重试。');
+          window.__meownoteToast?.show('网络错误', 'error');
+        } finally {
+          setLoading(false);
+        }
       });
     })();
   </script>

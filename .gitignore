@@ -58,3 +58,7 @@ claude-icons/.playwright-cli/
 
 # Logo concepts
 public/logo-concepts/
+
+# Sensitive config files (must be rotated if leaked)
+openclaw_cleaned.json
+*.cleaned.json

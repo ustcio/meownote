@@ -30,7 +30,7 @@ function decodeData(data: string): string {
 }
 
 export const secureStorage = {
-  setItem(key: string, value: string, encrypt: boolean = false): boolean {
+  setItem(key: string, value: string, encode: boolean = false): boolean {
     if (!isStorageAvailable(localStorage)) {
       console.warn('[Storage] localStorage not available');
       return false;
@@ -38,7 +38,7 @@ export const secureStorage = {
     
     try {
       const fullKey = getFullKey(key);
-      const dataToStore = encrypt ? encodeData(value) : value;
+      const dataToStore = encode ? encodeData(value) : value;
       localStorage.setItem(fullKey, dataToStore);
       return true;
     } catch (error) {
@@ -47,7 +47,7 @@ export const secureStorage = {
     }
   },
   
-  getItem(key: string, encrypted: boolean = false): string | null {
+  getItem(key: string, encoded: boolean = false): string | null {
     if (!isStorageAvailable(localStorage)) {
       return null;
     }
@@ -56,7 +56,7 @@ export const secureStorage = {
       const fullKey = getFullKey(key);
       const data = localStorage.getItem(fullKey);
       if (data === null) return null;
-      return encrypted ? decodeData(data) : data;
+      return encoded ? decodeData(data) : data;
     } catch (error) {
       console.error('[Storage] Failed to get item:', error);
       return null;
@@ -97,17 +97,17 @@ export const secureStorage = {
     }
   },
   
-  setJSON<T>(key: string, value: T, encrypt: boolean = false): boolean {
+  setJSON<T>(key: string, value: T, encode: boolean = false): boolean {
     try {
-      return this.setItem(key, JSON.stringify(value), encrypt);
+      return this.setItem(key, JSON.stringify(value), encode);
     } catch {
       return false;
     }
   },
   
-  getJSON<T>(key: string, encrypted: boolean = false): T | null {
+  getJSON<T>(key: string, encoded: boolean = false): T | null {
     try {
-      const data = this.getItem(key, encrypted);
+      const data = this.getItem(key, encoded);
       return data ? JSON.parse(data) : null;
     } catch {
       return null;
