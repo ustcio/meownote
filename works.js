@@ -5018,11 +5018,20 @@ async function handleProxyChat(request, env, ctx) {
   let body;
   try { body = await request.json(); } catch { return jsonResponse({ error: 'Invalid JSON' }, 400); }
 
-  const { model, messages, stream = false } = body;
-  if (!Array.isArray(messages) || messages.length === 0) {
+  const { model, messages: rawMessages, stream = false } = body;
+  if (!Array.isArray(rawMessages) || rawMessages.length === 0) {
     return jsonResponse({ error: 'messages array is required' }, 400);
   }
-  if (messages.length > 50) return jsonResponse({ error: 'Too many messages (max 50)' }, 400);
+  if (rawMessages.length > 50) return jsonResponse({ error: 'Too many messages (max 50)' }, 400);
+
+  // Strip reasoning_content from messages (DeepSeek requires it to be passed back consistently)
+  const messages = rawMessages.map(msg => {
+    if (msg.role === 'assistant' && msg.reasoning_content) {
+      const { reasoning_content, ...rest } = msg;
+      return rest;
+    }
+    return msg;
+  });
   for (const msg of messages) {
     if (typeof msg.content === 'string' && msg.content.length > 16000) {
       return jsonResponse({ error: 'Message too long (max 16000 chars)' }, 400);
