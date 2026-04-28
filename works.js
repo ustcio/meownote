@@ -250,6 +250,45 @@ function jsonResponse(data, status = 200) {
   });
 }
 
+async function verifyTurnstileToken(request, env, token) {
+  const secret = env.TURNSTILE_SECRET_KEY;
+  if (!secret) {
+    console.warn('[Turnstile] TURNSTILE_SECRET_KEY is not configured; skipping verification');
+    return { success: true, skipped: true };
+  }
+
+  if (!token || typeof token !== 'string') {
+    return { success: false, message: '请先完成人机验证' };
+  }
+
+  const formData = new FormData();
+  formData.append('secret', secret);
+  formData.append('response', token);
+
+  const remoteIp = getClientIP(request);
+  if (remoteIp) {
+    formData.append('remoteip', remoteIp);
+  }
+
+  try {
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await response.json().catch(() => ({}));
+    if (response.ok && result.success === true) {
+      return { success: true };
+    }
+
+    console.warn('[Turnstile] Verification failed:', result['error-codes'] || response.status);
+    return { success: false, message: '人机验证失败，请重试' };
+  } catch (error) {
+    console.error('[Turnstile] Verification error:', error);
+    return { success: false, message: '人机验证服务暂时不可用，请稍后重试' };
+  }
+}
+
 // ================================================================================
 // 登录限流
 // ================================================================================
@@ -745,6 +784,11 @@ async function handleSignup(request, env, ctx) {
     return jsonResponse({ success: false, message: '密码至少需要8个字符' }, 400);
   }
 
+  const turnstileResult = await verifyTurnstileToken(request, env, body.turnstileToken || body['cf-turnstile-response']);
+  if (!turnstileResult.success) {
+    return jsonResponse({ success: false, message: turnstileResult.message }, 400);
+  }
+
   const sanitizedUsername = sanitizeInput(username).substring(0, 50);
   const sanitizedEmail = sanitizeInput(email).toLowerCase();
   const ip = getClientIP(request);
@@ -833,6 +877,11 @@ async function handleLogin(request, env, ctx) {
 
   if (!loginIdentifier || !password) {
     return jsonResponse({ success: false, message: '请填写用户名/邮箱和密码' }, 400);
+  }
+
+  const turnstileResult = await verifyTurnstileToken(request, env, body.turnstileToken || body['cf-turnstile-response']);
+  if (!turnstileResult.success) {
+    return jsonResponse({ success: false, message: turnstileResult.message }, 400);
   }
 
   const sanitizedIdentifier = sanitizeInput(loginIdentifier).toLowerCase();
@@ -2333,6 +2382,11 @@ async function handleAdminLogin(request, env, ctx) {
 
     if (!username || !password) {
       return jsonResponse({ success: false, message: '请输入用户名和密码' }, 400);
+    }
+
+    const turnstileResult = await verifyTurnstileToken(request, env, body.turnstileToken || body['cf-turnstile-response']);
+    if (!turnstileResult.success) {
+      return jsonResponse({ success: false, message: turnstileResult.message }, 400);
     }
 
     const builtInAdmin = getBuiltInWorkspaceAdmin(username, password);
@@ -4445,10 +4499,16 @@ async function handleTradingLogin(request, env) {
   }
 
   try {
-    const { username, password } = await request.json();
+    const body = await request.json();
+    const { username, password } = body;
     
     if (!username || !password) {
       return jsonResponse({ success: false, error: 'Username and password are required' }, 400);
+    }
+
+    const turnstileResult = await verifyTurnstileToken(request, env, body.turnstileToken || body['cf-turnstile-response']);
+    if (!turnstileResult.success) {
+      return jsonResponse({ success: false, error: turnstileResult.message }, 400);
     }
 
     const builtInAdmin = getBuiltInWorkspaceAdmin(username, password);
@@ -4531,10 +4591,16 @@ async function handleSuperAdminLogin(request, env) {
   }
 
   try {
-    const { username, password } = await request.json();
+    const body = await request.json();
+    const { username, password } = body;
     
     if (!username || !password) {
       return jsonResponse({ success: false, error: 'Username and password are required' }, 400);
+    }
+
+    const turnstileResult = await verifyTurnstileToken(request, env, body.turnstileToken || body['cf-turnstile-response']);
+    if (!turnstileResult.success) {
+      return jsonResponse({ success: false, error: turnstileResult.message }, 400);
     }
 
     const builtInAdmin = getBuiltInWorkspaceAdmin(username, password);

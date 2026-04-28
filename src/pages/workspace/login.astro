@@ -2,7 +2,7 @@
 import AppLayout from '@layouts/AppLayout.astro';
 import SiteLogo from '@components/ui/SiteLogo.astro';
 import LoginWelcomeGate from '@components/ui/LoginWelcomeGate.astro';
-import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
+import { API_BASE, AUTH_TOKEN_KEY, TURNSTILE_SITE_KEY } from '@/config';
 
 const title = 'Workspace Admin Login - MoonSun.ai';
 const description = 'Secure access for the MoonSun workspace.';
@@ -92,6 +92,15 @@ const slides = [
               <input type="password" id="workspace-admin-password" name="password" placeholder="Enter administrator password" required />
             </label>
 
+            <div class="workspace-turnstile">
+              <div
+                class="cf-turnstile"
+                data-sitekey={TURNSTILE_SITE_KEY}
+                data-theme="light"
+                data-size="flexible"
+              ></div>
+            </div>
+
             <button type="submit" class="workspace-submit-btn" id="workspace-login-submit">
               <span class="btn-label">Enter workspace</span>
               <span class="btn-spinner" aria-hidden="true"></span>
@@ -149,6 +158,8 @@ const slides = [
       </div>
     </div>
   </section>
+
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <script is:inline define:vars={{ API_BASE, TOKEN_KEY: AUTH_TOKEN_KEY }}>
     (function() {
@@ -274,11 +285,21 @@ const slides = [
         }
       }
 
-      async function attemptLogin(path, account, password) {
+      function getTurnstileToken() {
+        const tokenInput = form?.querySelector('input[name="cf-turnstile-response"]');
+        return tokenInput instanceof HTMLInputElement ? tokenInput.value : '';
+      }
+
+      function resetTurnstile() {
+        const widget = form?.querySelector('.cf-turnstile');
+        if (widget instanceof HTMLElement) window.turnstile?.reset?.(widget);
+      }
+
+      async function attemptLogin(path, account, password, turnstileToken) {
         const response = await fetch(`${API_BASE}${path}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: account, password }),
+          body: JSON.stringify({ username: account, password, turnstileToken }),
         });
         const result = await response.json().catch(() => ({}));
         return { response, result };
@@ -308,6 +329,12 @@ const slides = [
           return;
         }
 
+        const turnstileToken = getTurnstileToken();
+        if (!turnstileToken) {
+          setError('请先完成人机验证。');
+          return;
+        }
+
         setLoading(true);
 
         try {
@@ -316,7 +343,7 @@ const slides = [
           let result = {};
 
           for (const path of loginPaths) {
-            const attempt = await attemptLogin(path, ADMIN_USERNAME, password);
+            const attempt = await attemptLogin(path, ADMIN_USERNAME, password, turnstileToken);
             response = attempt.response;
             result = attempt.result;
 
@@ -341,6 +368,7 @@ const slides = [
           const msg = error instanceof Error ? translateError(error.message) : '登录失败，请稍后重试。';
           setError(msg);
           window.__meownoteToast?.show(msg, 'error');
+          resetTurnstile();
         } finally {
           setLoading(false);
         }
@@ -621,6 +649,17 @@ const slides = [
 
   .workspace-field input:focus {
     border-color: var(--color-primary);
+  }
+
+  .workspace-turnstile {
+    display: flex;
+    justify-content: center;
+    min-height: 65px;
+    overflow: hidden;
+  }
+
+  .workspace-turnstile .cf-turnstile {
+    width: 100%;
   }
 
   .workspace-submit-btn {

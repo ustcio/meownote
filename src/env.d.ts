@@ -4,6 +4,7 @@
 interface ImportMetaEnv {
   readonly SITE_URL: string;
   readonly PUBLIC_API_BASE?: string;
+  readonly PUBLIC_TURNSTILE_SITE_KEY?: string;
 }
 
 interface ImportMeta {
@@ -32,6 +33,9 @@ interface Window {
   };
   __meownoteToast?: {
     show: (message: string, type?: string, duration?: number) => void;
+  };
+  turnstile?: {
+    reset?: (widgetId?: string | HTMLElement) => void;
   };
   __meownoteWelcomeGates?: Record<string, {
     show: () => void;

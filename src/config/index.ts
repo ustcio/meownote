@@ -1,5 +1,9 @@
 const DEFAULT_API_BASE = 'https://api.moonsun.ai';
+const PRODUCTION_TURNSTILE_SITE_KEY = '0x4AAAAAADEy9wIDlGwK8Pq8';
+const DEVELOPMENT_TURNSTILE_SITE_KEY = '1x00000000000000000000AA';
 const apiBase = import.meta.env.PUBLIC_API_BASE || DEFAULT_API_BASE;
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
+  || (import.meta.env.DEV ? DEVELOPMENT_TURNSTILE_SITE_KEY : PRODUCTION_TURNSTILE_SITE_KEY);
 
 export const config = {
   api: {
@@ -24,6 +28,7 @@ export const config = {
   security: {
     csrfHeaderName: 'X-CSRF-Token',
     csrfCookieName: 'csrf_token',
+    turnstileSiteKey,
   },
   
   chatbot: {
@@ -56,5 +61,6 @@ export const config = {
 
 export const API_BASE = config.api.baseUrl;
 export const AUTH_TOKEN_KEY = config.auth.tokenKey;
+export const TURNSTILE_SITE_KEY = config.security.turnstileSiteKey;
 
 export type Config = typeof config;
