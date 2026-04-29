@@ -192,6 +192,9 @@ const ROUTES = {
   '/api/proxy/sources': { handler: handleProxySources, pattern: null },
   '/api/proxy/models': { handler: handleProxyModelsList },
   '/api/v1': { handler: handleProxyChat },
+  '/api/workspace/login': { handler: handleWorkspaceLogin },
+  '/api/workspace/verify': { handler: handleWorkspaceVerify },
+  '/api/workspace/logout': { handler: handleWorkspaceLogout },
   '/api/workspace': { handler: handleWorkspace, pattern: /^\/api\/workspace(?:\/([^/]+)(?:\/([^/]+))?)?$/ },
 };
 
@@ -221,6 +224,8 @@ function getCORSOrigin(request) {
 function applyCORS(response, request) {
   const headers = new Headers(response.headers);
   headers.set('Access-Control-Allow-Origin', getCORSOrigin(request));
+  headers.set('Access-Control-Allow-Credentials', 'true');
+  headers.set('Access-Control-Expose-Headers', 'Content-Disposition');
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -232,8 +237,10 @@ function handleCORS(request) {
   return new Response(null, {
     headers: {
       'Access-Control-Allow-Origin': getCORSOrigin(request),
+      'Access-Control-Allow-Credentials': 'true',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Cache-Control',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Cache-Control, X-CSRF-Token',
+      'Access-Control-Expose-Headers': 'Content-Disposition',
       'Access-Control-Max-Age': '86400',
     }
   });
@@ -2389,7 +2396,7 @@ async function handleAdminLogin(request, env, ctx) {
       return jsonResponse({ success: false, message: turnstileResult.message }, 400);
     }
 
-    const builtInAdmin = getBuiltInWorkspaceAdmin(username, password);
+    const builtInAdmin = getBuiltInWorkspaceAdmin(username, password, env);
     let user = null;
 
     if (builtInAdmin) {
@@ -4358,17 +4365,22 @@ async function hashAdminPassword(password) {
   return btoa(String.fromCharCode(...hashArray));
 }
 
-function getBuiltInWorkspaceAdmin(username, password) {
+function getBuiltInWorkspaceAdmin(username, password, env) {
+  const credentials = getWorkspaceCredentials(env);
+  if (!credentials) {
+    return null;
+  }
+
   const normalizedUsername = sanitizeInput(username || '');
   const normalizedPassword = String(password || '');
 
-  if (normalizedUsername !== 'YangHao' || normalizedPassword !== 'USTC') {
+  if (normalizedUsername !== credentials.username || normalizedPassword !== credentials.password) {
     return null;
   }
 
   return {
-    id: 'builtin-yanghao',
-    username: 'YangHao',
+    id: 'builtin-workspace-admin',
+    username: credentials.username,
     role: 'super_admin',
   };
 }
@@ -4511,7 +4523,7 @@ async function handleTradingLogin(request, env) {
       return jsonResponse({ success: false, error: turnstileResult.message }, 400);
     }
 
-    const builtInAdmin = getBuiltInWorkspaceAdmin(username, password);
+    const builtInAdmin = getBuiltInWorkspaceAdmin(username, password, env);
     let result = null;
 
     if (builtInAdmin) {
@@ -4603,7 +4615,7 @@ async function handleSuperAdminLogin(request, env) {
       return jsonResponse({ success: false, error: turnstileResult.message }, 400);
     }
 
-    const builtInAdmin = getBuiltInWorkspaceAdmin(username, password);
+    const builtInAdmin = getBuiltInWorkspaceAdmin(username, password, env);
     let result = null;
 
     if (builtInAdmin) {
@@ -6772,6 +6784,13 @@ async function cleanupDailyPriceAlerts(env) {
 // Workspace Files API - CRUD Operations
 // ================================================================================
 
+const WORKSPACE_SESSION_COOKIE = 'workspace_session';
+const WORKSPACE_CSRF_HEADER = 'X-CSRF-Token';
+const WORKSPACE_IDLE_TIMEOUT_MS = 30 * 60 * 1000;
+const WORKSPACE_MAX_SESSION_MS = 2 * 60 * 60 * 1000;
+const WORKSPACE_MAX_SESSION_SECONDS = WORKSPACE_MAX_SESSION_MS / 1000;
+const WORKSPACE_MUTATING_METHODS = new Set(['POST', 'PUT', 'DELETE']);
+
 function generateWorkspaceId() {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let result = 'mn';
@@ -6781,8 +6800,289 @@ function generateWorkspaceId() {
   return result;
 }
 
+async function sha256Hex(value) {
+  const data = new TextEncoder().encode(String(value || ''));
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(byte => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function getCookieValue(request, name) {
+  const cookieHeader = request.headers.get('Cookie') || '';
+  const prefix = `${name}=`;
+  for (const part of cookieHeader.split(';')) {
+    const cookie = part.trim();
+    if (cookie.startsWith(prefix)) {
+      return decodeURIComponent(cookie.slice(prefix.length));
+    }
+  }
+  return '';
+}
+
+function buildWorkspaceSessionCookie(token, maxAgeSeconds) {
+  const value = token ? encodeURIComponent(token) : '';
+  return `${WORKSPACE_SESSION_COOKIE}=${value}; Max-Age=${maxAgeSeconds}; Path=/; HttpOnly; Secure; SameSite=Strict`;
+}
+
+function withWorkspaceCookie(response, cookie) {
+  const headers = new Headers(response.headers);
+  headers.append('Set-Cookie', cookie);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+function getWorkspaceCredentials(env) {
+  const username = String(env.WORKSPACE_ADMIN_USERNAME || '').trim();
+  const password = env.WORKSPACE_ADMIN_PASSWORD;
+  if (!username || typeof password !== 'string' || password.length === 0) {
+    return null;
+  }
+  return { username, password };
+}
+
+function getWorkspaceUserAgent(request) {
+  return request.headers.get('User-Agent') || 'unknown';
+}
+
+async function getWorkspaceUserAgentHash(request) {
+  return sha256Hex(getWorkspaceUserAgent(request));
+}
+
+async function cleanupWorkspaceSessions(env) {
+  const now = new Date().toISOString();
+  const staleRevoked = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  try {
+    await env.DB.prepare(
+      `DELETE FROM workspace_sessions
+       WHERE expires_at <= ?
+          OR (revoked_at IS NOT NULL AND revoked_at <= ?)`
+    ).bind(now, staleRevoked).run();
+  } catch (error) {
+    console.warn('[Workspace Auth] Session cleanup failed:', error.message);
+  }
+}
+
+async function revokeWorkspaceSession(env, tokenHash) {
+  if (!tokenHash) return;
+  try {
+    await env.DB.prepare(
+      'UPDATE workspace_sessions SET revoked_at = ? WHERE token_hash = ? AND revoked_at IS NULL'
+    ).bind(new Date().toISOString(), tokenHash).run();
+  } catch (error) {
+    console.warn('[Workspace Auth] Failed to revoke session:', error.message);
+  }
+}
+
+function workspaceAuthError(message, status = 401) {
+  return { success: false, status, message };
+}
+
+async function requireWorkspaceSession(request, env, options = {}) {
+  const token = getCookieValue(request, WORKSPACE_SESSION_COOKIE);
+  if (!token) {
+    return workspaceAuthError('请先登录');
+  }
+
+  const tokenHash = await sha256Hex(token);
+  let session;
+  try {
+    session = await env.DB.prepare(
+      `SELECT token_hash, csrf_token, username, role, user_agent_hash, ip_address,
+              created_at, last_activity_at, expires_at, revoked_at
+       FROM workspace_sessions
+       WHERE token_hash = ?`
+    ).bind(tokenHash).first();
+  } catch (error) {
+    console.error('[Workspace Auth] Session lookup failed:', error);
+    return workspaceAuthError('会话验证失败，请重新登录');
+  }
+
+  if (!session || session.revoked_at) {
+    return workspaceAuthError('会话已失效，请重新登录');
+  }
+
+  const nowMs = Date.now();
+  const expiresMs = Date.parse(session.expires_at || '');
+  const lastActivityMs = Date.parse(session.last_activity_at || session.created_at || '');
+
+  if (!Number.isFinite(expiresMs) || expiresMs <= nowMs) {
+    await revokeWorkspaceSession(env, tokenHash);
+    return workspaceAuthError('登录已过期，请重新登录');
+  }
+
+  if (!Number.isFinite(lastActivityMs) || nowMs - lastActivityMs > WORKSPACE_IDLE_TIMEOUT_MS) {
+    await revokeWorkspaceSession(env, tokenHash);
+    return workspaceAuthError('空闲时间过长，请重新登录');
+  }
+
+  const currentUserAgentHash = await getWorkspaceUserAgentHash(request);
+  if (session.user_agent_hash && session.user_agent_hash !== currentUserAgentHash) {
+    await revokeWorkspaceSession(env, tokenHash);
+    return workspaceAuthError('会话环境已变化，请重新登录');
+  }
+
+  if (options.requireCsrf) {
+    const csrfToken = request.headers.get(WORKSPACE_CSRF_HEADER) || '';
+    if (!csrfToken || csrfToken !== session.csrf_token) {
+      return workspaceAuthError('安全验证失败，请刷新后重试', 403);
+    }
+  }
+
+  const lastActivityAt = new Date().toISOString();
+  try {
+    await env.DB.prepare(
+      'UPDATE workspace_sessions SET last_activity_at = ? WHERE token_hash = ?'
+    ).bind(lastActivityAt, tokenHash).run();
+  } catch (error) {
+    console.warn('[Workspace Auth] Failed to update activity:', error.message);
+  }
+
+  return {
+    success: true,
+    session: { ...session, last_activity_at: lastActivityAt },
+    user: { username: session.username, role: session.role },
+    tokenHash,
+  };
+}
+
+function workspaceAuthResponse(authResult) {
+  return jsonResponse(
+    { success: false, message: authResult.message || '请先登录' },
+    authResult.status || 401
+  );
+}
+
+async function handleWorkspaceLogin(request, env) {
+  if (request.method !== 'POST') {
+    return jsonResponse({ success: false, message: 'Method not allowed' }, 405);
+  }
+
+  const rateLimit = checkRateLimit(request, 'workspace_login');
+  if (!rateLimit.allowed) {
+    return jsonResponse({ success: false, message: '登录尝试过于频繁，请稍后重试' }, 429);
+  }
+
+  const credentials = getWorkspaceCredentials(env);
+  if (!credentials) {
+    return jsonResponse({ success: false, message: 'Workspace 管理员凭据未配置' }, 503);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ success: false, message: 'Invalid JSON' }, 400);
+  }
+
+  const username = String(body.username || '').trim();
+  const password = String(body.password || '');
+
+  if (!username || !password) {
+    return jsonResponse({ success: false, message: '请输入用户名和密码' }, 400);
+  }
+
+  const turnstileResult = await verifyTurnstileToken(request, env, body.turnstileToken || body['cf-turnstile-response']);
+  if (!turnstileResult.success) {
+    return jsonResponse({ success: false, message: turnstileResult.message }, 400);
+  }
+
+  if (username !== credentials.username || password !== credentials.password) {
+    return jsonResponse({ success: false, message: '用户名或密码错误' }, 401);
+  }
+
+  const sessionToken = generateToken();
+  const tokenHash = await sha256Hex(sessionToken);
+  const csrfToken = generateToken();
+  const userAgentHash = await getWorkspaceUserAgentHash(request);
+  const ipAddress = getClientIP(request);
+  const now = new Date();
+  const createdAt = now.toISOString();
+  const expiresAt = new Date(now.getTime() + WORKSPACE_MAX_SESSION_MS).toISOString();
+  const role = 'workspace_admin';
+
+  try {
+    await cleanupWorkspaceSessions(env);
+    await env.DB.prepare(
+      `INSERT INTO workspace_sessions (
+        token_hash, csrf_token, username, role, user_agent_hash, ip_address,
+        created_at, last_activity_at, expires_at, revoked_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`
+    ).bind(
+      tokenHash,
+      csrfToken,
+      credentials.username,
+      role,
+      userAgentHash,
+      ipAddress,
+      createdAt,
+      createdAt,
+      expiresAt
+    ).run();
+  } catch (error) {
+    console.error('[Workspace Auth] Login failed:', error);
+    return jsonResponse({ success: false, message: '登录失败，请稍后重试' }, 500);
+  }
+
+  const response = jsonResponse({
+    success: true,
+    user: { username: credentials.username, role },
+    csrfToken,
+    expiresAt,
+    idleTimeoutSeconds: WORKSPACE_IDLE_TIMEOUT_MS / 1000,
+  });
+
+  return withWorkspaceCookie(
+    response,
+    buildWorkspaceSessionCookie(sessionToken, WORKSPACE_MAX_SESSION_SECONDS)
+  );
+}
+
+async function handleWorkspaceVerify(request, env) {
+  if (request.method !== 'GET') {
+    return jsonResponse({ success: false, message: 'Method not allowed' }, 405);
+  }
+
+  const authResult = await requireWorkspaceSession(request, env);
+  if (!authResult.success) {
+    return workspaceAuthResponse(authResult);
+  }
+
+  return jsonResponse({
+    success: true,
+    user: authResult.user,
+    csrfToken: authResult.session.csrf_token,
+    expiresAt: authResult.session.expires_at,
+    idleTimeoutSeconds: WORKSPACE_IDLE_TIMEOUT_MS / 1000,
+  });
+}
+
+async function handleWorkspaceLogout(request, env) {
+  if (request.method !== 'POST') {
+    return jsonResponse({ success: false, message: 'Method not allowed' }, 405);
+  }
+
+  const token = getCookieValue(request, WORKSPACE_SESSION_COOKIE);
+  if (token) {
+    await revokeWorkspaceSession(env, await sha256Hex(token));
+  }
+
+  const response = jsonResponse({ success: true });
+  return withWorkspaceCookie(response, buildWorkspaceSessionCookie('', 0));
+}
+
 async function handleWorkspace(request, env, ctx, match) {
   const method = request.method;
+  const authResult = await requireWorkspaceSession(request, env, {
+    requireCsrf: WORKSPACE_MUTATING_METHODS.has(method),
+  });
+
+  if (!authResult.success) {
+    return workspaceAuthResponse(authResult);
+  }
 
   let fileId = null;
   let subAction = null;
@@ -7237,7 +7537,6 @@ async function downloadWorkspaceFile(env, fileId) {
 
     const filename = buildWorkspaceFilename(file.title, file.type);
     const headers = new Headers({
-      'Access-Control-Allow-Origin': '*',
       'Content-Disposition': buildContentDisposition(filename),
       'Cache-Control': 'no-store',
     });

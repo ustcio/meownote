@@ -1,7 +1,7 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import WorkspaceAuthGuard from '@components/workspace/WorkspaceAuthGuard.astro';
-import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
+import { API_BASE } from '@/config';
 ---
 
 <Layout 
@@ -654,31 +654,59 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
 
 </style>
 
-<script is:inline define:vars={{ API_BASE, TOKEN_KEY: AUTH_TOKEN_KEY }}>
+<script is:inline define:vars={{ API_BASE }}>
   let fileId = null;
   let currentFile = null;
   let saveTimeout = null;
   let isDirty = false;
   let isSaving = false;
   let markdownToolbarReady = false;
+  const WORKSPACE_CSRF_KEY = 'workspace_csrf_token';
+  const WORKSPACE_USER_KEY = 'workspace_user_data';
+  const WORKSPACE_EXPIRES_KEY = 'workspace_expires_at';
+  const WORKSPACE_CACHE_KEY = 'workspace_files_cache_v2';
+  let workspaceSessionVerified = false;
 
-  function getAuthToken() {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!token) return null;
+  function getWorkspaceCsrfToken() {
     try {
-      return decodeURIComponent(atob(token));
+      return sessionStorage.getItem(WORKSPACE_CSRF_KEY) || '';
     } catch {
-      return token;
+      return '';
     }
   }
 
-  function getAuthHeaders() {
-    const headers = {};
-    const token = getAuthToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+  function persistWorkspaceSession(data) {
+    try {
+      if (data.csrfToken) sessionStorage.setItem(WORKSPACE_CSRF_KEY, data.csrfToken);
+      if (data.user) sessionStorage.setItem(WORKSPACE_USER_KEY, JSON.stringify(data.user));
+      if (data.expiresAt) sessionStorage.setItem(WORKSPACE_EXPIRES_KEY, data.expiresAt);
+    } catch {}
+    workspaceSessionVerified = true;
+  }
+
+  async function verifyWorkspaceSession() {
+    const response = await fetch(`${API_BASE}/api/workspace/verify`, {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error('请先登录');
     }
-    return headers;
+
+    const data = await response.json().catch(() => ({}));
+    if (data.success !== true) {
+      throw new Error('请先登录');
+    }
+
+    persistWorkspaceSession(data);
+    return data;
+  }
+
+  async function ensureWorkspaceSession() {
+    if (workspaceSessionVerified && getWorkspaceCsrfToken()) return;
+    await verifyWorkspaceSession();
   }
 
   const loadingState = document.getElementById('loading-state');
@@ -697,7 +725,22 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
   const filePreviewCopy = document.getElementById('file-preview-copy');
 
   function clearWorkspaceSession() {
-    ['meownote_auth_token', 'auth_token', 'meownote_user_data', 'user'].forEach((k) => localStorage.removeItem(k));
+    workspaceSessionVerified = false;
+    [WORKSPACE_CSRF_KEY, WORKSPACE_USER_KEY, WORKSPACE_EXPIRES_KEY, WORKSPACE_CACHE_KEY].forEach((key) => {
+      try {
+        sessionStorage.removeItem(key);
+      } catch {}
+    });
+    ['meownote_auth_token', 'auth_token', 'meownote_user_data', 'user'].forEach((key) => {
+      try {
+        localStorage.removeItem(key);
+      } catch {}
+    });
+  }
+
+  function redirectToWorkspaceLogin() {
+    const current = window.location.pathname + window.location.search;
+    window.location.href = `/workspace/login/?next=${encodeURIComponent(current)}`;
   }
 
   function handleAuthError(error) {
@@ -706,7 +749,7 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
       clearWorkspaceSession();
       showToast('登录已过期，请重新登录', 'error');
       setTimeout(() => {
-        window.location.href = '/workspace/login/';
+        redirectToWorkspaceLogin();
       }, 1500);
       return true;
     }
@@ -715,18 +758,41 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
 
   async function apiRequest(path, options = {}) {
     const isFormData = options.body instanceof FormData;
+    const method = (options.method || 'GET').toUpperCase();
+    const isMutating = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method);
     const timeoutMs = isFormData ? 60000 : 10000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     try {
+      if (isMutating) {
+        await ensureWorkspaceSession();
+      }
+
+      const csrfToken = getWorkspaceCsrfToken();
       const headers = isFormData
-        ? { ...getAuthHeaders(), ...(options.headers || {}) }
-        : { 'Content-Type': 'application/json', ...getAuthHeaders(), ...(options.headers || {}) };
-      const response = await fetch(`${API_BASE}${path}`, { ...options, headers, signal: controller.signal });
+        ? { ...(options.headers || {}) }
+        : { 'Content-Type': 'application/json', ...(options.headers || {}) };
+
+      if (isMutating && csrfToken) {
+        headers['X-CSRF-Token'] = csrfToken;
+      }
+
+      const response = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers,
+        signal: controller.signal,
+        credentials: 'include',
+        cache: 'no-store',
+      });
       clearTimeout(timeoutId);
       if (!response.ok) {
         if (response.status === 401) {
+          clearWorkspaceSession();
+          setTimeout(() => redirectToWorkspaceLogin(), 0);
           throw new Error('请先登录');
+        }
+        if (response.status === 403) {
+          throw new Error('安全验证已失效，请刷新后重试');
         }
         const err = await response.json().catch(() => ({}));
         throw new Error(err.message || `HTTP ${response.status}`);
@@ -1063,11 +1129,14 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
     try {
       const downloadPath = currentFile?.downloadUrl || `/api/workspace/${fileId}/download`;
       const response = await fetch(`${API_BASE}${downloadPath}`, {
-        headers: getAuthHeaders(),
+        credentials: 'include',
+        cache: 'no-store',
       });
 
       if (!response.ok) {
         if (response.status === 401) {
+          clearWorkspaceSession();
+          setTimeout(() => redirectToWorkspaceLogin(), 0);
           throw new Error('请先登录');
         }
         const err = await response.json().catch(() => ({}));
@@ -1129,12 +1198,23 @@ import { API_BASE, AUTH_TOKEN_KEY } from '@/config';
     window.__meownoteToast?.show(message, type);
   }
 
+  async function logoutWorkspace() {
+    try {
+      await fetch(`${API_BASE}/api/workspace/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        cache: 'no-store',
+      });
+    } catch {}
+    clearWorkspaceSession();
+    window.location.href = '/workspace/login/';
+  }
+
   document.getElementById('copy-btn')?.addEventListener('click', copyContent);
   document.getElementById('download-btn')?.addEventListener('click', downloadCurrentFile);
   document.getElementById('delete-btn')?.addEventListener('click', deleteFile);
   document.getElementById('logout-btn')?.addEventListener('click', () => {
-    window.__meownoteAuth?.clearSession?.();
-    window.location.href = '/workspace/login';
+    logoutWorkspace();
   });
 
   init();

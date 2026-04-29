@@ -2,7 +2,7 @@
 import AppLayout from '@layouts/AppLayout.astro';
 import SiteLogo from '@components/ui/SiteLogo.astro';
 import LoginWelcomeGate from '@components/ui/LoginWelcomeGate.astro';
-import { API_BASE, AUTH_TOKEN_KEY, TURNSTILE_SITE_KEY } from '@/config';
+import { API_BASE, TURNSTILE_SITE_KEY } from '@/config';
 
 const title = 'Workspace Admin Login - MoonSun.ai';
 const description = 'Secure access for the MoonSun workspace.';
@@ -161,11 +161,20 @@ const slides = [
 
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-  <script is:inline define:vars={{ API_BASE, TOKEN_KEY: AUTH_TOKEN_KEY }}>
+  <script is:inline define:vars={{ API_BASE }}>
     (function() {
       const ADMIN_USERNAME = 'YangHao';
-      const TOKEN_KEYS = [TOKEN_KEY, 'auth_token'];
-      const USER_KEYS = ['meownote_user_data', 'user'];
+      const WORKSPACE_CSRF_KEY = 'workspace_csrf_token';
+      const WORKSPACE_USER_KEY = 'workspace_user_data';
+      const WORKSPACE_EXPIRES_KEY = 'workspace_expires_at';
+      const LEGACY_KEYS = [
+        'meownote_auth_token',
+        'auth_token',
+        'meownote_user_data',
+        'user',
+        'meownote_redirect_count',
+        'workspace_files_cache_v2',
+      ];
       let isRedirecting = false;
 
       const form = document.getElementById('workspace-login-form');
@@ -184,25 +193,19 @@ const slides = [
         if (submitBtn instanceof HTMLButtonElement) submitBtn.disabled = loading;
       }
 
-      function readJSON(key) {
+      function clearWorkspaceState() {
         try {
-          const raw = localStorage.getItem(key);
-          return raw ? JSON.parse(raw) : null;
-        } catch {
-          return null;
-        }
-      }
+          sessionStorage.removeItem(WORKSPACE_CSRF_KEY);
+          sessionStorage.removeItem(WORKSPACE_USER_KEY);
+          sessionStorage.removeItem(WORKSPACE_EXPIRES_KEY);
+          sessionStorage.removeItem('workspace_files_cache_v2');
+        } catch {}
 
-      function writeJSON(key, value) {
-        localStorage.setItem(key, JSON.stringify(value));
-      }
-
-      function getStoredToken() {
-        return TOKEN_KEYS.map((key) => localStorage.getItem(key)).find(Boolean) || null;
-      }
-
-      function getStoredUser() {
-        return USER_KEYS.map((key) => readJSON(key)).find(Boolean) || null;
+        LEGACY_KEYS.forEach((key) => {
+          try {
+            localStorage.removeItem(key);
+          } catch {}
+        });
       }
 
       function isSafeReturnPath(path) {
@@ -217,25 +220,14 @@ const slides = [
         return isSafeReturnPath(next) ? next : '/workspace/';
       }
 
-      function persistSession(token, user) {
-        if (window.__meownoteAuth?.setSession) {
-          window.__meownoteAuth.setSession(token, user);
-          return;
-        }
-
-        const nextToken = token || getStoredToken();
-        if (nextToken) {
-          localStorage.setItem(TOKEN_KEY, nextToken);
-          localStorage.setItem('auth_token', nextToken);
-        }
-        writeJSON('meownote_user_data', user);
-        writeJSON('user', user);
-        window.dispatchEvent(new CustomEvent('auth:login', { detail: user }));
-      }
-
-      function isAdminUser(user) {
-        const username = user?.username || user?.name || '';
-        return username === ADMIN_USERNAME;
+      function persistWorkspaceSession(data) {
+        try {
+          if (data.csrfToken) sessionStorage.setItem(WORKSPACE_CSRF_KEY, data.csrfToken);
+          if (data.user) sessionStorage.setItem(WORKSPACE_USER_KEY, JSON.stringify(data.user));
+          if (data.expiresAt) sessionStorage.setItem(WORKSPACE_EXPIRES_KEY, data.expiresAt);
+        } catch {}
+        clearLegacyAuthState();
+        window.dispatchEvent(new CustomEvent('auth:login', { detail: data.user }));
       }
 
       function redirectToWorkspace(path) {
@@ -244,44 +236,39 @@ const slides = [
         window.location.replace(isSafeReturnPath(path) ? path : '/workspace/');
       }
 
-      async function verifyToken(token) {
+      function clearLegacyAuthState() {
+        LEGACY_KEYS.forEach((key) => {
+          try {
+            localStorage.removeItem(key);
+          } catch {}
+        });
+      }
+
+      async function verifyWorkspaceSession() {
         try {
-          const res = await fetch(`${API_BASE}/api/admin/verify`, {
+          const res = await fetch(`${API_BASE}/api/workspace/verify`, {
             method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}` },
+            credentials: 'include',
             cache: 'no-store',
           });
           if (!res.ok) return false;
           const data = await res.json().catch(() => ({}));
-          return data.success === true && isAdminUser(data.user);
+          if (data.success === true) {
+            persistWorkspaceSession(data);
+            return true;
+          }
+          return false;
         } catch {
           return false;
         }
       }
 
       async function hydrateIfLoggedIn() {
-        const redirectCount = parseInt(localStorage.getItem('meownote_redirect_count') || '0', 10);
-        if (redirectCount > 3) {
-          localStorage.removeItem('meownote_redirect_count');
-          return;
-        }
-
-        const token = window.__meownoteAuth?.getToken?.() || getStoredToken();
-        const user = window.__meownoteAuth?.getUser?.() || getStoredUser();
-
-        if (!token || !isAdminUser(user)) {
-          localStorage.removeItem('meownote_redirect_count');
-          return;
-        }
-
-        const isValid = await verifyToken(token);
+        const isValid = await verifyWorkspaceSession();
         if (isValid) {
-          localStorage.setItem('meownote_redirect_count', String(redirectCount + 1));
           redirectToWorkspace(getReturnPath());
         } else {
-          localStorage.removeItem('meownote_redirect_count');
-          TOKEN_KEYS.forEach((k) => localStorage.removeItem(k));
-          USER_KEYS.forEach((k) => localStorage.removeItem(k));
+          clearWorkspaceState();
         }
       }
 
@@ -295,11 +282,12 @@ const slides = [
         if (widget instanceof HTMLElement) window.turnstile?.reset?.(widget);
       }
 
-      async function attemptLogin(path, account, password, turnstileToken) {
-        const response = await fetch(`${API_BASE}${path}`, {
+      async function attemptLogin(password, turnstileToken) {
+        const response = await fetch(`${API_BASE}/api/workspace/login`, {
           method: 'POST',
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: account, password, turnstileToken }),
+          body: JSON.stringify({ username: ADMIN_USERNAME, password, turnstileToken }),
         });
         const result = await response.json().catch(() => ({}));
         return { response, result };
@@ -338,30 +326,13 @@ const slides = [
         setLoading(true);
 
         try {
-          const loginPaths = ['/api/admin/login', '/api/superadmin/login', '/api/trading/login'];
-          let response = null;
-          let result = {};
-
-          for (const path of loginPaths) {
-            const attempt = await attemptLogin(path, ADMIN_USERNAME, password, turnstileToken);
-            response = attempt.response;
-            result = attempt.result;
-
-            if (response.ok && result.success) {
-              break;
-            }
-          }
+          const { response, result } = await attemptLogin(password, turnstileToken);
 
           if (!response || !response.ok || !result.success) {
             throw new Error(result.message || result.error || '用户名或密码错误');
           }
 
-          const user = result.user || {};
-          if (!isAdminUser(user)) {
-            throw new Error('当前账号没有 Workspace 超级管理员权限。');
-          }
-
-          persistSession(result.token, user);
+          persistWorkspaceSession(result);
           window.__meownoteToast?.show('登录成功', 'success');
           redirectToWorkspace(getReturnPath());
         } catch (error) {

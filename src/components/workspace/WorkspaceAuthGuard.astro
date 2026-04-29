@@ -1,4 +1,6 @@
 ---
+import { API_BASE } from '@/config';
+
 interface Props {
   redirectTo?: string;
 }
@@ -6,30 +8,72 @@ interface Props {
 const { redirectTo = '/workspace/login/' } = Astro.props;
 ---
 
-<script is:inline define:vars={{ redirectTo }}>
+<script is:inline define:vars={{ redirectTo, API_BASE }}>
   (function() {
-    const ADMIN_USERNAME = 'YangHao';
-    const TOKEN_KEYS = ['meownote_auth_token', 'auth_token'];
-    const USER_KEYS = ['meownote_user_data', 'user'];
+    const WORKSPACE_CSRF_KEY = 'workspace_csrf_token';
+    const WORKSPACE_USER_KEY = 'workspace_user_data';
+    const WORKSPACE_EXPIRES_KEY = 'workspace_expires_at';
+    const LEGACY_KEYS = [
+      'meownote_auth_token',
+      'auth_token',
+      'meownote_user_data',
+      'user',
+      'workspace_files_cache_v2',
+    ];
 
-    function readJSON(key) {
+    function clearWorkspaceState() {
       try {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : null;
-      } catch {
-        return null;
-      }
+        sessionStorage.removeItem(WORKSPACE_CSRF_KEY);
+        sessionStorage.removeItem(WORKSPACE_USER_KEY);
+        sessionStorage.removeItem(WORKSPACE_EXPIRES_KEY);
+        sessionStorage.removeItem('workspace_files_cache_v2');
+      } catch {}
+
+      LEGACY_KEYS.forEach((key) => {
+        try {
+          localStorage.removeItem(key);
+        } catch {}
+      });
     }
 
-    const token = TOKEN_KEYS.map((key) => localStorage.getItem(key)).find(Boolean);
-    const user = USER_KEYS.map((key) => readJSON(key)).find(Boolean);
-    const username = user?.username || user?.name || '';
-    const isAllowed = Boolean(token) && username === ADMIN_USERNAME;
+    function persistWorkspaceState(data) {
+      try {
+        if (data.csrfToken) sessionStorage.setItem(WORKSPACE_CSRF_KEY, data.csrfToken);
+        if (data.user) sessionStorage.setItem(WORKSPACE_USER_KEY, JSON.stringify(data.user));
+        if (data.expiresAt) sessionStorage.setItem(WORKSPACE_EXPIRES_KEY, data.expiresAt);
+      } catch {}
+    }
 
-    if (!isAllowed) {
+    function redirectToLogin() {
       const current = window.location.pathname + window.location.search;
       const next = `${redirectTo}?next=${encodeURIComponent(current)}`;
       window.location.replace(next);
     }
+
+    async function verifyWorkspaceSession() {
+      try {
+        const response = await fetch(`${API_BASE}/api/workspace/verify`, {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store',
+        });
+
+        if (!response.ok) {
+          throw new Error('Workspace session invalid');
+        }
+
+        const data = await response.json().catch(() => ({}));
+        if (data.success !== true) {
+          throw new Error('Workspace session invalid');
+        }
+
+        persistWorkspaceState(data);
+      } catch {
+        clearWorkspaceState();
+        redirectToLogin();
+      }
+    }
+
+    verifyWorkspaceSession();
   })();
 </script>
